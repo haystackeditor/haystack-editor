@@ -1,7 +1,7 @@
 parameters:
-  - name: HAYSTACK_BUILD_MACOS
+  - name: VSCODE_BUILD_MACOS
     type: boolean
-  - name: HAYSTACK_BUILD_MACOS_ARM64
+  - name: VSCODE_BUILD_MACOS_ARM64
     type: boolean
 
 steps:
@@ -48,8 +48,8 @@ steps:
 
   - template: ../cli/cli-darwin-sign.yml@self
     parameters:
-      HAYSTACK_CLI_ARTIFACTS:
-        - ${{ if eq(parameters.HAYSTACK_BUILD_MACOS, true) }}:
+      VSCODE_CLI_ARTIFACTS:
+        - ${{ if eq(parameters.VSCODE_BUILD_MACOS, true) }}:
             - unsigned_vscode_cli_darwin_x64_cli
-        - ${{ if eq(parameters.HAYSTACK_BUILD_MACOS_ARM64, true) }}:
+        - ${{ if eq(parameters.VSCODE_BUILD_MACOS_ARM64, true) }}:
             - unsigned_vscode_cli_darwin_arm64_cli

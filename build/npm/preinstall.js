@@ -15,7 +15,7 @@ const majorNodeVersion = parseInt(nodeVersion[1])
 const minorNodeVersion = parseInt(nodeVersion[2])
 const patchNodeVersion = parseInt(nodeVersion[3])
 
-if (!process.env["HAYSTACK_SKIP_NODE_VERSION_CHECK"]) {
+if (!process.env["VSCODE_SKIP_NODE_VERSION_CHECK"]) {
   if (majorNodeVersion < 20) {
     console.error(
       "\x1b[1;31m*** Please use latest Node.js v20 LTS for development.\x1b[0;0m",

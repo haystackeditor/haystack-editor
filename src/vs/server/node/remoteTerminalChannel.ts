@@ -86,10 +86,10 @@ class CustomVariableResolver extends AbstractVariableResolverService {
           return resolvedVariables[`config:${section}`]
         },
         getExecPath: (): string | undefined => {
-          return env["HAYSTACK_EXEC_PATH"]
+          return env["VSCODE_EXEC_PATH"]
         },
         getAppRoot: (): string | undefined => {
-          return env["HAYSTACK_CWD"]
+          return env["VSCODE_CWD"]
         },
         getFilePath: (): string | undefined => {
           if (activeFileResource) {
@@ -489,7 +489,7 @@ export class RemoteTerminalChannel
 
     // Setup the CLI server to support forwarding commands run from the CLI
     const ipcHandlePath = createRandomIPCHandle()
-    env.HAYSTACK_IPC_HOOK_CLI = ipcHandlePath
+    env.VSCODE_IPC_HOOK_CLI = ipcHandlePath
 
     const persistentProcessId = await this._ptyHostService.createProcess(
       shellLaunchConfig,

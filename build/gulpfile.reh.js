@@ -224,7 +224,7 @@ function nodejs(platform, arch) {
     `Downloading node.js ${nodeVersion} ${platform} ${arch} from ${product.nodejsRepository}...`,
   )
 
-  const glibcPrefix = process.env["HAYSTACK_NODE_GLIBC"] ?? ""
+  const glibcPrefix = process.env["VSCODE_NODE_GLIBC"] ?? ""
   const checksumSha256 = getNodeChecksum(
     nodeVersion,
     platform,
@@ -532,7 +532,7 @@ function packageTask(
 
     if (
       platform === "linux" &&
-      process.env["HAYSTACK_NODE_GLIBC"] === "-glibc-2.17"
+      process.env["VSCODE_NODE_GLIBC"] === "-glibc-2.17"
     ) {
       result = es.merge(
         result,

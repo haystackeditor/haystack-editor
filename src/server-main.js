@@ -50,7 +50,7 @@ async function start() {
   ;["host", "port", "accept-server-license-terms"].forEach((e) => {
     if (!parsedArgs[e]) {
       const envValue =
-        process.env[`HAYSTACK_SERVER_${e.toUpperCase().replace("-", "_")}`]
+        process.env[`VSCODE_SERVER_${e.toUpperCase().replace("-", "_")}`]
       if (envValue) {
         parsedArgs[e] = envValue
       }
@@ -317,19 +317,19 @@ function loadCode() {
     // We would normally install a SIGPIPE listener in bootstrap.js
     // But in certain situations, the console itself can be in a broken pipe state
     // so logging SIGPIPE to the console will cause an infinite async loop
-    process.env["HAYSTACK_HANDLES_SIGPIPE"] = "true"
+    process.env["VSCODE_HANDLES_SIGPIPE"] = "true"
 
-    if (process.env["HAYSTACK_DEV"]) {
+    if (process.env["VSCODE_DEV"]) {
       // When running out of sources, we need to load node modules from remote/node_modules,
       // which are compiled against nodejs, not electron
-      process.env["HAYSTACK_INJECT_NODE_MODULE_LOOKUP_PATH"] =
-        process.env["HAYSTACK_INJECT_NODE_MODULE_LOOKUP_PATH"] ||
+      process.env["VSCODE_INJECT_NODE_MODULE_LOOKUP_PATH"] =
+        process.env["VSCODE_INJECT_NODE_MODULE_LOOKUP_PATH"] ||
         path.join(__dirname, "..", "remote", "node_modules")
       require("./bootstrap-node").injectNodeModuleLookupPath(
-        process.env["HAYSTACK_INJECT_NODE_MODULE_LOOKUP_PATH"],
+        process.env["VSCODE_INJECT_NODE_MODULE_LOOKUP_PATH"],
       )
     } else {
-      delete process.env["HAYSTACK_INJECT_NODE_MODULE_LOOKUP_PATH"]
+      delete process.env["VSCODE_INJECT_NODE_MODULE_LOOKUP_PATH"]
     }
     require("./bootstrap-amd").load(
       "vs/server/node/server.main",

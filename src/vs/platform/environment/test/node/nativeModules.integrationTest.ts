@@ -96,7 +96,7 @@ flakySuite("Native Modules (all platforms)", () => {
 
   test("vsda", async () => {
     try {
-      const vsda: any = globalThis._HAYSTACK_NODE_MODULES["vsda"]
+      const vsda: any = globalThis._VSCODE_NODE_MODULES["vsda"]
       const signer = new vsda.signer()
       const signed = await signer.sign("value")
       assert.ok(typeof signed === "string", testErrorMessage("vsda"))

@@ -1010,7 +1010,7 @@ export async function createServer(
     )
     if (hasVSDA) {
       try {
-        return <typeof vsda>globalThis._HAYSTACK_NODE_MODULES["vsda"]
+        return <typeof vsda>globalThis._VSCODE_NODE_MODULES["vsda"]
       } catch (err) {
         logService.error(err)
       }

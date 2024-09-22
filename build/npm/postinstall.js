@@ -61,12 +61,12 @@ function yarnInstall(dir, opts) {
   }
 
   if (
-    process.env["HAYSTACK_REMOTE_DEPENDENCIES_CONTAINER_NAME"] &&
+    process.env["VSCODE_REMOTE_DEPENDENCIES_CONTAINER_NAME"] &&
     /^(.build\/distro\/npm\/)?remote$/.test(dir)
   ) {
     const userinfo = os.userInfo()
     console.log(
-      `Installing dependencies in ${dir} inside container ${process.env["HAYSTACK_REMOTE_DEPENDENCIES_CONTAINER_NAME"]}...`,
+      `Installing dependencies in ${dir} inside container ${process.env["VSCODE_REMOTE_DEPENDENCIES_CONTAINER_NAME"]}...`,
     )
 
     opts.cwd = root
@@ -100,10 +100,10 @@ function yarnInstall(dir, opts) {
           "-e",
           "npm_config_arch",
           "-v",
-          `${process.env["HAYSTACK_HOST_MOUNT"]}:/home/builduser`,
+          `${process.env["VSCODE_HOST_MOUNT"]}:/home/builduser`,
           "-v",
-          `${process.env["HAYSTACK_HOST_MOUNT"]}/.build/.netrc:/home/builduser/.netrc`,
-          process.env["HAYSTACK_REMOTE_DEPENDENCIES_CONTAINER_NAME"],
+          `${process.env["VSCODE_HOST_MOUNT"]}/.build/.netrc:/home/builduser/.netrc`,
+          process.env["VSCODE_REMOTE_DEPENDENCIES_CONTAINER_NAME"],
           "yarn",
           "--cwd",
           dir,
@@ -122,10 +122,10 @@ function yarnInstall(dir, opts) {
           "-e",
           "npm_config_arch",
           "-v",
-          `${process.env["HAYSTACK_HOST_MOUNT"]}:/root/vscode`,
+          `${process.env["VSCODE_HOST_MOUNT"]}:/root/vscode`,
           "-v",
-          `${process.env["HAYSTACK_HOST_MOUNT"]}/.build/.netrc:/root/.netrc`,
-          process.env["HAYSTACK_REMOTE_DEPENDENCIES_CONTAINER_NAME"],
+          `${process.env["VSCODE_HOST_MOUNT"]}/.build/.netrc:/root/.netrc`,
+          process.env["VSCODE_REMOTE_DEPENDENCIES_CONTAINER_NAME"],
           "yarn",
           "--cwd",
           dir,
@@ -194,13 +194,13 @@ for (let dir of dirs) {
   if (/^(.build\/distro\/npm\/)?remote$/.test(dir)) {
     // node modules used by vscode server
     const env = { ...process.env }
-    if (process.env["HAYSTACK_REMOTE_CC"]) {
-      env["CC"] = process.env["HAYSTACK_REMOTE_CC"]
+    if (process.env["VSCODE_REMOTE_CC"]) {
+      env["CC"] = process.env["VSCODE_REMOTE_CC"]
     } else {
       delete env["CC"]
     }
-    if (process.env["HAYSTACK_REMOTE_CXX"]) {
-      env["CXX"] = process.env["HAYSTACK_REMOTE_CXX"]
+    if (process.env["VSCODE_REMOTE_CXX"]) {
+      env["CXX"] = process.env["VSCODE_REMOTE_CXX"]
     } else {
       delete env["CXX"]
     }
@@ -213,14 +213,14 @@ for (let dir of dirs) {
     if (process.env["LDFLAGS"]) {
       delete env["LDFLAGS"]
     }
-    if (process.env["HAYSTACK_REMOTE_CXXFLAGS"]) {
-      env["CXXFLAGS"] = process.env["HAYSTACK_REMOTE_CXXFLAGS"]
+    if (process.env["VSCODE_REMOTE_CXXFLAGS"]) {
+      env["CXXFLAGS"] = process.env["VSCODE_REMOTE_CXXFLAGS"]
     }
-    if (process.env["HAYSTACK_REMOTE_LDFLAGS"]) {
-      env["LDFLAGS"] = process.env["HAYSTACK_REMOTE_LDFLAGS"]
+    if (process.env["VSCODE_REMOTE_LDFLAGS"]) {
+      env["LDFLAGS"] = process.env["VSCODE_REMOTE_LDFLAGS"]
     }
-    if (process.env["HAYSTACK_REMOTE_NODE_GYP"]) {
-      env["npm_config_node_gyp"] = process.env["HAYSTACK_REMOTE_NODE_GYP"]
+    if (process.env["VSCODE_REMOTE_NODE_GYP"]) {
+      env["npm_config_node_gyp"] = process.env["VSCODE_REMOTE_NODE_GYP"]
     }
 
     opts = { env }

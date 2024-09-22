@@ -96,9 +96,9 @@ module.exports = defineConfig(
     config.mocha ??= {}
     if (process.env.BUILD_ARTIFACTSTAGINGDIRECTORY) {
       let suite = ""
-      if (process.env.HAYSTACK_BROWSER) {
-        suite = `${process.env.HAYSTACK_BROWSER} Browser Integration ${config.label} tests`
-      } else if (process.env.REMOTE_HAYSTACK) {
+      if (process.env.VSCODE_BROWSER) {
+        suite = `${process.env.VSCODE_BROWSER} Browser Integration ${config.label} tests`
+      } else if (process.env.REMOTE_VSCODE) {
         suite = `Remote Integration ${config.label} tests`
       } else {
         suite = `Integration ${config.label} tests`
@@ -126,7 +126,7 @@ module.exports = defineConfig(
       }
       config.env = {
         ...config.env,
-        HAYSTACK_SKIP_PRELAUNCH: "1",
+        VSCODE_SKIP_PRELAUNCH: "1",
       }
     } else {
       // web configs not supported, yet

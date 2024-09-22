@@ -41,13 +41,13 @@ export class NodePtyHostStarter extends Disposable implements IPtyHostStarter {
         this._environmentService.logsHome.with({ scheme: Schemas.file }).fsPath,
       ],
       env: {
-        HAYSTACK_AMD_ENTRYPOINT: "vs/platform/terminal/node/ptyHostMain",
-        HAYSTACK_PIPE_LOGGING: "true",
-        HAYSTACK_VERBOSE_LOGGING: "true", // transmit console logs from server to client,
-        HAYSTACK_RECONNECT_GRACE_TIME: this._reconnectConstants.graceTime,
-        HAYSTACK_RECONNECT_SHORT_GRACE_TIME:
+        VSCODE_AMD_ENTRYPOINT: "vs/platform/terminal/node/ptyHostMain",
+        VSCODE_PIPE_LOGGING: "true",
+        VSCODE_VERBOSE_LOGGING: "true", // transmit console logs from server to client,
+        VSCODE_RECONNECT_GRACE_TIME: this._reconnectConstants.graceTime,
+        VSCODE_RECONNECT_SHORT_GRACE_TIME:
           this._reconnectConstants.shortGraceTime,
-        HAYSTACK_RECONNECT_SCROLLBACK: this._reconnectConstants.scrollback,
+        VSCODE_RECONNECT_SCROLLBACK: this._reconnectConstants.scrollback,
       },
     }
 

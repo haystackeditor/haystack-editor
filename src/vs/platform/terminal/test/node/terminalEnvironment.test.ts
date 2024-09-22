@@ -111,7 +111,7 @@ suite("platform - terminalEnvironment", () => {
           Object.freeze<IShellIntegrationConfigInjection>({
             newArgs: ["-noexit", "-command", expectedPs1],
             envMixin: {
-              HAYSTACK_INJECTION: "1",
+              VSCODE_INJECTION: "1",
             },
           })
         test("when undefined, []", () => {
@@ -228,7 +228,7 @@ suite("platform - terminalEnvironment", () => {
           Object.freeze<IShellIntegrationConfigInjection>({
             newArgs: ["-l", "-noexit", "-command", expectedPs1],
             envMixin: {
-              HAYSTACK_INJECTION: "1",
+              VSCODE_INJECTION: "1",
             },
           })
         test("when array contains no logo and login", () => {
@@ -341,7 +341,7 @@ suite("platform - terminalEnvironment", () => {
             strictEqual(Object.keys(result.envMixin!).length, 3)
             ok(result.envMixin!["ZDOTDIR"]?.match(expectedDir))
             strictEqual(result.envMixin!["USER_ZDOTDIR"], globalZdotdir)
-            ok(result.envMixin!["HAYSTACK_INJECTION"]?.match("1"))
+            ok(result.envMixin!["VSCODE_INJECTION"]?.match("1"))
             strictEqual(result.filesToCopy?.length, 4)
             ok(result.filesToCopy[0].dest.match(expectedDests[0]))
             ok(result.filesToCopy[1].dest.match(expectedDests[1]))
@@ -457,7 +457,7 @@ suite("platform - terminalEnvironment", () => {
                   `${repoRoot}/out/vs/workbench/contrib/terminal/browser/media/shellIntegration-bash.sh`,
                 ],
                 envMixin: {
-                  HAYSTACK_INJECTION: "1",
+                  VSCODE_INJECTION: "1",
                 },
               })
             deepStrictEqual(
@@ -499,8 +499,8 @@ suite("platform - terminalEnvironment", () => {
                   `${repoRoot}/out/vs/workbench/contrib/terminal/browser/media/shellIntegration-bash.sh`,
                 ],
                 envMixin: {
-                  HAYSTACK_INJECTION: "1",
-                  HAYSTACK_SHELL_LOGIN: "1",
+                  VSCODE_INJECTION: "1",
+                  VSCODE_SHELL_LOGIN: "1",
                 },
               })
             test("when array", () => {

@@ -14,7 +14,7 @@
 const path = require("path")
 const perf = require("@vscode/vscode-perf")
 
-const HAYSTACK_FOLDER = path.join(__dirname, "..")
+const VSCODE_FOLDER = path.join(__dirname, "..")
 
 async function main() {
   const args = process.argv
@@ -49,9 +49,9 @@ async function main() {
     }
 
     args.push("--folder")
-    args.push(HAYSTACK_FOLDER)
+    args.push(VSCODE_FOLDER)
     args.push("--file")
-    args.push(path.join(HAYSTACK_FOLDER, "package.json"))
+    args.push(path.join(VSCODE_FOLDER, "package.json"))
   }
 
   if (build) {
@@ -104,8 +104,8 @@ function getExePath(buildPath) {
  */
 function getLocalCLIPath() {
   return process.platform === "win32"
-    ? path.join(HAYSTACK_FOLDER, "scripts", "code.bat")
-    : path.join(HAYSTACK_FOLDER, "scripts", "code.sh")
+    ? path.join(VSCODE_FOLDER, "scripts", "code.bat")
+    : path.join(VSCODE_FOLDER, "scripts", "code.sh")
 }
 
 main()

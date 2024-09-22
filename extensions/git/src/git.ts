@@ -865,7 +865,7 @@ export class Git {
     }
 
     options.env = assign({}, process.env, this.env, options.env || {}, {
-      HAYSTACK_GIT_COMMAND: args[0],
+      VSCODE_GIT_COMMAND: args[0],
       LC_ALL: "en_US.UTF-8",
       LANG: "en_US.UTF-8",
       GIT_PAGER: "cat",
@@ -2275,7 +2275,7 @@ export class Repository {
     }
 
     if (options.silent) {
-      spawnOptions.env!["HAYSTACK_GIT_FETCH_SILENT"] = "true"
+      spawnOptions.env!["VSCODE_GIT_FETCH_SILENT"] = "true"
     }
 
     try {

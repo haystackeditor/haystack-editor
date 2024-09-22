@@ -50,7 +50,7 @@ else if (typeof process !== "undefined") {
       return process.env
     },
     cwd() {
-      return process.env["HAYSTACK_CWD"] || process.cwd()
+      return process.env["VSCODE_CWD"] || process.cwd()
     },
   }
 }

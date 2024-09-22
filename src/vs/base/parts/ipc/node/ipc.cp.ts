@@ -222,7 +222,7 @@ export class Client implements IChannelClient, IDisposable {
 
       forkOpts.env = {
         ...deepClone(process.env),
-        HAYSTACK_PARENT_PID: String(process.pid),
+        VSCODE_PARENT_PID: String(process.pid),
       }
 
       if (this.options && this.options.env) {

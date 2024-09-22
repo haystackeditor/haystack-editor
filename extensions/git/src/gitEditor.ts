@@ -31,9 +31,9 @@ export class GitEditor implements IIPCHandler, ITerminalEnvironmentProvider {
 
     this.env = {
       GIT_EDITOR: `"${path.join(__dirname, ipc ? "git-editor.sh" : "git-editor-empty.sh")}"`,
-      HAYSTACK_GIT_EDITOR_NODE: process.execPath,
-      HAYSTACK_GIT_EDITOR_EXTRA_ARGS: "",
-      HAYSTACK_GIT_EDITOR_MAIN: path.join(__dirname, "git-editor-main.js"),
+      VSCODE_GIT_EDITOR_NODE: process.execPath,
+      VSCODE_GIT_EDITOR_EXTRA_ARGS: "",
+      VSCODE_GIT_EDITOR_MAIN: path.join(__dirname, "git-editor-main.js"),
     }
   }
 

@@ -130,7 +130,7 @@ if (crashReporterDirectory) {
 
   crashReporter.start({
     companyName: "Microsoft",
-    productName: process.env["HAYSTACK_DEV"]
+    productName: process.env["VSCODE_DEV"]
       ? `${product.nameShort} Dev`
       : product.nameShort,
     uploadToServer: false,

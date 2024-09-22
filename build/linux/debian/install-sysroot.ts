@@ -180,7 +180,7 @@ export async function getVSCodeSysroot(
 ): Promise<string> {
   let expectedName: string
   let triple: string
-  const prefix = process.env["HAYSTACK_SYSROOT_PREFIX"] ?? "-glibc-2.28"
+  const prefix = process.env["VSCODE_SYSROOT_PREFIX"] ?? "-glibc-2.28"
   switch (arch) {
     case "amd64":
       expectedName = `x86_64-linux-gnu${prefix}.tar.gz`
@@ -201,7 +201,7 @@ export async function getVSCodeSysroot(
     throw new Error(`Could not find checksum for ${expectedName}`)
   }
   const sysroot =
-    process.env["HAYSTACK_SYSROOT_DIR"] ??
+    process.env["VSCODE_SYSROOT_DIR"] ??
     path.join(tmpdir(), `vscode-${arch}-sysroot`)
   const stamp = path.join(sysroot, ".stamp")
   const result = `${sysroot}/${triple}/${triple}/sysroot`

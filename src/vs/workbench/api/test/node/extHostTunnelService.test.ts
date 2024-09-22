@@ -167,7 +167,7 @@ const processes: { pid: number; cwd: string; cmd: string }[] = [
   {
     pid: 286,
     cwd: "/mnt/c/Users/alros/AppData/Local/Programs/Microsoft VS Code Insiders",
-    cmd: 'sh-c"$HAYSTACK_WSL_EXT_LOCATION/ scripts / wslServer.sh" bc13785d3dd99b4b0e9da9aed17bb79809a50804 insider .vscode-server-insiders 0  ',
+    cmd: 'sh-c"$VSCODE_WSL_EXT_LOCATION/ scripts / wslServer.sh" bc13785d3dd99b4b0e9da9aed17bb79809a50804 insider .vscode-server-insiders 0  ',
   },
   {
     pid: 287,

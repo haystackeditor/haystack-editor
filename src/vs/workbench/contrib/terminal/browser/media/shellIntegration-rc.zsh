@@ -5,27 +5,27 @@
 builtin autoload -Uz add-zsh-hook
 
 # Prevent the script recursing when setting up
-if [ -n "$HAYSTACK_SHELL_INTEGRATION" ]; then
+if [ -n "$VSCODE_SHELL_INTEGRATION" ]; then
 	ZDOTDIR=$USER_ZDOTDIR
 	builtin return
 fi
 
 # This variable allows the shell to both detect that VS Code's shell integration is enabled as well
 # as disable it by unsetting the variable.
-HAYSTACK_SHELL_INTEGRATION=1
+VSCODE_SHELL_INTEGRATION=1
 
 # By default, zsh will set the $HISTFILE to the $ZDOTDIR location automatically. In the case of the
 # shell integration being injected, this means that the terminal will use a different history file
 # to other terminals. To fix this issue, set $HISTFILE back to the default location before ~/.zshrc
 # is called as that may depend upon the value.
-if [[  "$HAYSTACK_INJECTION" == "1" ]]; then
+if [[  "$VSCODE_INJECTION" == "1" ]]; then
 	HISTFILE=$USER_ZDOTDIR/.zsh_history
 fi
 
 # Only fix up ZDOTDIR if shell integration was injected (not manually installed) and has not been called yet
-if [[ "$HAYSTACK_INJECTION" == "1" ]]; then
+if [[ "$VSCODE_INJECTION" == "1" ]]; then
 	if [[ $options[norcs] = off  && -f $USER_ZDOTDIR/.zshrc ]]; then
-		HAYSTACK_ZDOTDIR=$ZDOTDIR
+		VSCODE_ZDOTDIR=$ZDOTDIR
 		ZDOTDIR=$USER_ZDOTDIR
 		# A user's custom HISTFILE location might be set when their .zshrc file is sourced below
 		. $USER_ZDOTDIR/.zshrc
@@ -33,34 +33,34 @@ if [[ "$HAYSTACK_INJECTION" == "1" ]]; then
 fi
 
 # Apply EnvironmentVariableCollections if needed
-if [ -n "${HAYSTACK_ENV_REPLACE:-}" ]; then
-	IFS=':' read -rA ADDR <<< "$HAYSTACK_ENV_REPLACE"
+if [ -n "${VSCODE_ENV_REPLACE:-}" ]; then
+	IFS=':' read -rA ADDR <<< "$VSCODE_ENV_REPLACE"
 	for ITEM in "${ADDR[@]}"; do
 		VARNAME="$(echo ${ITEM%%=*})"
 		export $VARNAME="$(echo -e ${ITEM#*=})"
 	done
-	unset HAYSTACK_ENV_REPLACE
+	unset VSCODE_ENV_REPLACE
 fi
-if [ -n "${HAYSTACK_ENV_PREPEND:-}" ]; then
-	IFS=':' read -rA ADDR <<< "$HAYSTACK_ENV_PREPEND"
+if [ -n "${VSCODE_ENV_PREPEND:-}" ]; then
+	IFS=':' read -rA ADDR <<< "$VSCODE_ENV_PREPEND"
 	for ITEM in "${ADDR[@]}"; do
 		VARNAME="$(echo ${ITEM%%=*})"
 		export $VARNAME="$(echo -e ${ITEM#*=})${(P)VARNAME}"
 	done
-	unset HAYSTACK_ENV_PREPEND
+	unset VSCODE_ENV_PREPEND
 fi
-if [ -n "${HAYSTACK_ENV_APPEND:-}" ]; then
-	IFS=':' read -rA ADDR <<< "$HAYSTACK_ENV_APPEND"
+if [ -n "${VSCODE_ENV_APPEND:-}" ]; then
+	IFS=':' read -rA ADDR <<< "$VSCODE_ENV_APPEND"
 	for ITEM in "${ADDR[@]}"; do
 		VARNAME="$(echo ${ITEM%%=*})"
 		export $VARNAME="${(P)VARNAME}$(echo -e ${ITEM#*=})"
 	done
-	unset HAYSTACK_ENV_APPEND
+	unset VSCODE_ENV_APPEND
 fi
 
 # Shell integration was disabled by the shell, exit without warning assuming either the shell has
 # explicitly disabled shell integration as it's incompatible or it implements the protocol.
-if [ -z "$HAYSTACK_SHELL_INTEGRATION" ]; then
+if [ -z "$VSCODE_SHELL_INTEGRATION" ]; then
 	builtin return
 fi
 
@@ -96,8 +96,8 @@ __vsc_in_command_execution="1"
 __vsc_current_command=""
 
 # It's fine this is in the global scope as it getting at it requires access to the shell environment
-__vsc_nonce="$HAYSTACK_NONCE"
-unset HAYSTACK_NONCE
+__vsc_nonce="$VSCODE_NONCE"
+unset VSCODE_NONCE
 
 __vsc_prompt_start() {
 	builtin printf '\e]633;A\a'
@@ -188,6 +188,6 @@ __vsc_preexec() {
 add-zsh-hook precmd __vsc_precmd
 add-zsh-hook preexec __vsc_preexec
 
-if [[ $options[login] = off && $USER_ZDOTDIR != $HAYSTACK_ZDOTDIR ]]; then
+if [[ $options[login] = off && $USER_ZDOTDIR != $VSCODE_ZDOTDIR ]]; then
 	ZDOTDIR=$USER_ZDOTDIR
 fi

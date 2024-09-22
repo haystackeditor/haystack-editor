@@ -14,7 +14,7 @@ use std::{ffi::OsStr, fmt, path::Path};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-	constants::HAYSTACK_CLI_UPDATE_ENDPOINT,
+	constants::VSCODE_CLI_UPDATE_ENDPOINT,
 	debug, log, options, spanf,
 	util::{
 		errors::{AnyError, CodeError, WrappedError},
@@ -62,7 +62,7 @@ fn quality_download_segment(quality: options::Quality) -> &'static str {
 }
 
 fn get_update_endpoint() -> Result<&'static str, CodeError> {
-	HAYSTACK_CLI_UPDATE_ENDPOINT.ok_or_else(|| CodeError::UpdatesNotConfigured("no service url"))
+	VSCODE_CLI_UPDATE_ENDPOINT.ok_or_else(|| CodeError::UpdatesNotConfigured("no service url"))
 }
 
 impl UpdateService {

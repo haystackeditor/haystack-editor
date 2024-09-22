@@ -363,7 +363,7 @@ async function connectToRemoteExtensionHostAgent<T extends RemoteConnection>(
 
     if (msg.type !== "sign" || typeof msg.data !== "string") {
       const error: any = new Error("Unexpected handshake message")
-      error.code = "HAYSTACK_CONNECTION_ERROR"
+      error.code = "VSCODE_CONNECTION_ERROR"
       throw error
     }
 
@@ -377,7 +377,7 @@ async function connectToRemoteExtensionHostAgent<T extends RemoteConnection>(
     )
     if (!isValid) {
       const error: any = new Error("Refused to connect to unsupported server")
-      error.code = "HAYSTACK_CONNECTION_ERROR"
+      error.code = "VSCODE_CONNECTION_ERROR"
       throw error
     }
 
@@ -406,7 +406,7 @@ async function connectToRemoteExtensionHostAgent<T extends RemoteConnection>(
       options.logService.error(`${logPrefix} the handshake timed out. Error:`)
       options.logService.error(error)
     }
-    if (error && error.code === "HAYSTACK_CONNECTION_ERROR") {
+    if (error && error.code === "VSCODE_CONNECTION_ERROR") {
       options.logService.error(
         `${logPrefix} received error control message when negotiating connection. Error:`,
       )
@@ -975,7 +975,7 @@ export abstract class PersistentConnection extends Disposable {
 
         break
       } catch (err) {
-        if (err.code === "HAYSTACK_CONNECTION_ERROR") {
+        if (err.code === "VSCODE_CONNECTION_ERROR") {
           this._options.logService.error(
             `${logPrefix} A permanent error occurred in the reconnecting loop! Will give up now! Error:`,
           )
@@ -1183,7 +1183,7 @@ function safeDisposeProtocolAndSocket(protocol: PersistentProtocol): void {
 function getErrorFromMessage(msg: any): Error | null {
   if (msg && msg.type === "error") {
     const error = new Error(`Connection error: ${msg.reason}`)
-    ;(<any>error).code = "HAYSTACK_CONNECTION_ERROR"
+    ;(<any>error).code = "VSCODE_CONNECTION_ERROR"
     return error
   }
   return null

@@ -9,7 +9,7 @@
 			"type": "extensionHost",
 			"request": "launch",
 			"args": ["--extensionDevelopmentPath=${workspaceFolder}"],
-			"env": { "HAYSTACK_FORWARDING_IS_DEV": "1" } // load the CLI from OSS
+			"env": { "VSCODE_FORWARDING_IS_DEV": "1" } // load the CLI from OSS
 		}
 	]
 }

@@ -241,7 +241,7 @@ export function activate(context: vscode.ExtensionContext) {
             commandArgs.push("--start-server")
           }
           const serverCommand = `${serverApplicationName}${process.platform === "win32" ? ".cmd" : ""}`
-          let serverLocation = env["HAYSTACK_REMOTE_SERVER_PATH"] // support environment variable to specify location of server on disk
+          let serverLocation = env["VSCODE_REMOTE_SERVER_PATH"] // support environment variable to specify location of server on disk
           if (!serverLocation) {
             const serverBin = path.join(remoteDataDir, "bin")
             progress.report({ message: "Installing VSCode Server" })

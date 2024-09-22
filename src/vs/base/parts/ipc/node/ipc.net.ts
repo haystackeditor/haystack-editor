@@ -984,7 +984,7 @@ export function createStaticIPCHandle(
   if (
     process.platform !== "darwin" &&
     XDG_RUNTIME_DIR &&
-    !process.env["HAYSTACK_PORTABLE"]
+    !process.env["VSCODE_PORTABLE"]
   ) {
     result = join(
       XDG_RUNTIME_DIR,

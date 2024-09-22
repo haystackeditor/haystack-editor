@@ -27,7 +27,7 @@ use crate::{
 
 use super::service::{tail_log_file, ServiceContainer, ServiceManager as CliServiceManager};
 
-const DID_LAUNCH_AS_HIDDEN_PROCESS: &str = "HAYSTACK_CLI_DID_LAUNCH_AS_HIDDEN_PROCESS";
+const DID_LAUNCH_AS_HIDDEN_PROCESS: &str = "VSCODE_CLI_DID_LAUNCH_AS_HIDDEN_PROCESS";
 
 pub struct WindowsService {
 	log: log::Logger,

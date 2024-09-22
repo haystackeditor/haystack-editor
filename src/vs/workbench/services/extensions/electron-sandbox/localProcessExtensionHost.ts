@@ -253,8 +253,8 @@ export class NativeLocalProcessExtensionHost implements IExtensionHost {
     )
 
     const env = objects.mixin(processEnv, {
-      HAYSTACK_AMD_ENTRYPOINT: "vs/workbench/api/node/extensionHostProcess",
-      HAYSTACK_HANDLES_UNCAUGHT_ERRORS: true,
+      VSCODE_AMD_ENTRYPOINT: "vs/workbench/api/node/extensionHostProcess",
+      VSCODE_HANDLES_UNCAUGHT_ERRORS: true,
     })
 
     if (this._environmentService.debugExtensionHost.env) {
@@ -264,9 +264,9 @@ export class NativeLocalProcessExtensionHost implements IExtensionHost {
     removeDangerousEnvVariables(env)
 
     if (this._isExtensionDevHost) {
-      // Unset `HAYSTACK_CODE_CACHE_PATH` when developing extensions because it might
+      // Unset `VSCODE_CODE_CACHE_PATH` when developing extensions because it might
       // be that dependencies, that otherwise would be cached, get modified.
-      delete env["HAYSTACK_CODE_CACHE_PATH"]
+      delete env["VSCODE_CODE_CACHE_PATH"]
     }
 
     const opts: IExtensionHostProcessOptions = {

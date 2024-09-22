@@ -125,26 +125,26 @@ export class ElectronPtyHostStarter
     this._environmentMainService.unsetSnapExportedVariables()
     const config: { [key: string]: string } = {
       ...deepClone(process.env),
-      HAYSTACK_AMD_ENTRYPOINT: "vs/platform/terminal/node/ptyHostMain",
-      HAYSTACK_PIPE_LOGGING: "true",
-      HAYSTACK_VERBOSE_LOGGING: "true", // transmit console logs from server to client,
-      HAYSTACK_RECONNECT_GRACE_TIME: String(this._reconnectConstants.graceTime),
-      HAYSTACK_RECONNECT_SHORT_GRACE_TIME: String(
+      VSCODE_AMD_ENTRYPOINT: "vs/platform/terminal/node/ptyHostMain",
+      VSCODE_PIPE_LOGGING: "true",
+      VSCODE_VERBOSE_LOGGING: "true", // transmit console logs from server to client,
+      VSCODE_RECONNECT_GRACE_TIME: String(this._reconnectConstants.graceTime),
+      VSCODE_RECONNECT_SHORT_GRACE_TIME: String(
         this._reconnectConstants.shortGraceTime,
       ),
-      HAYSTACK_RECONNECT_SCROLLBACK: String(this._reconnectConstants.scrollback),
+      VSCODE_RECONNECT_SCROLLBACK: String(this._reconnectConstants.scrollback),
     }
     const simulatedLatency = this._configurationService.getValue(
       TerminalSettingId.DeveloperPtyHostLatency,
     )
     if (simulatedLatency && typeof simulatedLatency === "number") {
-      config.HAYSTACK_LATENCY = String(simulatedLatency)
+      config.VSCODE_LATENCY = String(simulatedLatency)
     }
     const startupDelay = this._configurationService.getValue(
       TerminalSettingId.DeveloperPtyHostStartupDelay,
     )
     if (startupDelay && typeof startupDelay === "number") {
-      config.HAYSTACK_STARTUP_DELAY = String(startupDelay)
+      config.VSCODE_STARTUP_DELAY = String(startupDelay)
     }
     this._environmentMainService.restoreSnapExportedVariables()
     return config

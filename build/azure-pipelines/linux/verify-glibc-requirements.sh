@@ -3,9 +3,9 @@
 set -e
 
 TRIPLE="x86_64-linux-gnu"
-if [ "$HAYSTACK_ARCH" == "arm64" ]; then
+if [ "$VSCODE_ARCH" == "arm64" ]; then
   TRIPLE="aarch64-linux-gnu"
-elif [ "$HAYSTACK_ARCH" == "armhf" ]; then
+elif [ "$VSCODE_ARCH" == "armhf" ]; then
   TRIPLE="arm-rpi-linux-gnueabihf"
 fi
 

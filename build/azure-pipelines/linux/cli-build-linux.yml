@@ -1,17 +1,17 @@
 parameters:
-  - name: HAYSTACK_BUILD_LINUX
+  - name: VSCODE_BUILD_LINUX
     type: boolean
     default: false
-  - name: HAYSTACK_BUILD_LINUX_ARM64
+  - name: VSCODE_BUILD_LINUX_ARM64
     type: boolean
     default: false
-  - name: HAYSTACK_BUILD_LINUX_ARMHF
+  - name: VSCODE_BUILD_LINUX_ARMHF
     type: boolean
     default: false
-  - name: HAYSTACK_CHECK_ONLY
+  - name: VSCODE_CHECK_ONLY
     type: boolean
     default: false
-  - name: HAYSTACK_QUALITY
+  - name: VSCODE_QUALITY
     type: string
 
 steps:
@@ -21,7 +21,7 @@ steps:
       versionFilePath: .nvmrc
       nodejsMirror: https://github.com/joaomoreno/node-mirror/releases/download
 
-  - ${{ if ne(parameters.HAYSTACK_QUALITY, 'oss') }}:
+  - ${{ if ne(parameters.VSCODE_QUALITY, 'oss') }}:
       - template: ../cli/cli-apply-patches.yml@self
 
   - task: Npm@1
@@ -39,7 +39,7 @@ steps:
       tar -xvzf $(Build.ArtifactStagingDirectory)/vscode-internal-openssl-prebuilt-0.0.11.tgz --strip-components=1 --directory=$(Build.ArtifactStagingDirectory)/openssl
     displayName: Extract openssl prebuilt
 
-  - ${{ if ne(parameters.HAYSTACK_QUALITY, 'oss') }}:
+  - ${{ if ne(parameters.VSCODE_QUALITY, 'oss') }}:
       - script: node build/setup-npm-registry.js $NPM_REGISTRY
         condition: and(succeeded(), ne(variables['NPM_REGISTRY'], 'none'))
         displayName: Setup NPM Registry
@@ -82,51 +82,51 @@ steps:
   - template: ../cli/install-rust-posix.yml@self
     parameters:
       targets:
-        - ${{ if eq(parameters.HAYSTACK_BUILD_LINUX_ARM64, true) }}:
+        - ${{ if eq(parameters.VSCODE_BUILD_LINUX_ARM64, true) }}:
             - aarch64-unknown-linux-gnu
-        - ${{ if eq(parameters.HAYSTACK_BUILD_LINUX, true) }}:
+        - ${{ if eq(parameters.VSCODE_BUILD_LINUX, true) }}:
             - x86_64-unknown-linux-gnu
-        - ${{ if eq(parameters.HAYSTACK_BUILD_LINUX_ARMHF, true) }}:
+        - ${{ if eq(parameters.VSCODE_BUILD_LINUX_ARMHF, true) }}:
             - armv7-unknown-linux-gnueabihf
 
-  - ${{ if eq(parameters.HAYSTACK_BUILD_LINUX_ARM64, true) }}:
+  - ${{ if eq(parameters.VSCODE_BUILD_LINUX_ARM64, true) }}:
       - template: ../cli/cli-compile.yml@self
         parameters:
-          HAYSTACK_QUALITY: ${{ parameters.HAYSTACK_QUALITY }}
-          HAYSTACK_CLI_TARGET: aarch64-unknown-linux-gnu
-          HAYSTACK_CLI_ARTIFACT: vscode_cli_linux_arm64_cli
-          HAYSTACK_CHECK_ONLY: ${{ parameters.HAYSTACK_CHECK_ONLY }}
-          HAYSTACK_CLI_ENV:
+          VSCODE_QUALITY: ${{ parameters.VSCODE_QUALITY }}
+          VSCODE_CLI_TARGET: aarch64-unknown-linux-gnu
+          VSCODE_CLI_ARTIFACT: vscode_cli_linux_arm64_cli
+          VSCODE_CHECK_ONLY: ${{ parameters.VSCODE_CHECK_ONLY }}
+          VSCODE_CLI_ENV:
             OPENSSL_LIB_DIR: $(Build.ArtifactStagingDirectory)/openssl/arm64-linux/lib
             OPENSSL_INCLUDE_DIR: $(Build.ArtifactStagingDirectory)/openssl/arm64-linux/include
             SYSROOT_ARCH: arm64
 
-  - ${{ if eq(parameters.HAYSTACK_BUILD_LINUX, true) }}:
+  - ${{ if eq(parameters.VSCODE_BUILD_LINUX, true) }}:
       - template: ../cli/cli-compile.yml@self
         parameters:
-          HAYSTACK_QUALITY: ${{ parameters.HAYSTACK_QUALITY }}
-          HAYSTACK_CLI_TARGET: x86_64-unknown-linux-gnu
-          HAYSTACK_CLI_ARTIFACT: vscode_cli_linux_x64_cli
-          HAYSTACK_CHECK_ONLY: ${{ parameters.HAYSTACK_CHECK_ONLY }}
-          HAYSTACK_CLI_ENV:
+          VSCODE_QUALITY: ${{ parameters.VSCODE_QUALITY }}
+          VSCODE_CLI_TARGET: x86_64-unknown-linux-gnu
+          VSCODE_CLI_ARTIFACT: vscode_cli_linux_x64_cli
+          VSCODE_CHECK_ONLY: ${{ parameters.VSCODE_CHECK_ONLY }}
+          VSCODE_CLI_ENV:
             OPENSSL_LIB_DIR: $(Build.ArtifactStagingDirectory)/openssl/x64-linux/lib
             OPENSSL_INCLUDE_DIR: $(Build.ArtifactStagingDirectory)/openssl/x64-linux/include
             SYSROOT_ARCH: amd64
 
-  - ${{ if eq(parameters.HAYSTACK_BUILD_LINUX_ARMHF, true) }}:
+  - ${{ if eq(parameters.VSCODE_BUILD_LINUX_ARMHF, true) }}:
       - template: ../cli/cli-compile.yml@self
         parameters:
-          HAYSTACK_QUALITY: ${{ parameters.HAYSTACK_QUALITY }}
-          HAYSTACK_CLI_TARGET: armv7-unknown-linux-gnueabihf
-          HAYSTACK_CLI_ARTIFACT: vscode_cli_linux_armhf_cli
-          HAYSTACK_CHECK_ONLY: ${{ parameters.HAYSTACK_CHECK_ONLY }}
-          HAYSTACK_CLI_ENV:
+          VSCODE_QUALITY: ${{ parameters.VSCODE_QUALITY }}
+          VSCODE_CLI_TARGET: armv7-unknown-linux-gnueabihf
+          VSCODE_CLI_ARTIFACT: vscode_cli_linux_armhf_cli
+          VSCODE_CHECK_ONLY: ${{ parameters.VSCODE_CHECK_ONLY }}
+          VSCODE_CLI_ENV:
             OPENSSL_LIB_DIR: $(Build.ArtifactStagingDirectory)/openssl/arm-linux/lib
             OPENSSL_INCLUDE_DIR: $(Build.ArtifactStagingDirectory)/openssl/arm-linux/include
             SYSROOT_ARCH: armhf
 
-  - ${{ if not(parameters.HAYSTACK_CHECK_ONLY) }}:
-      - ${{ if eq(parameters.HAYSTACK_BUILD_LINUX_ARMHF, true) }}:
+  - ${{ if not(parameters.VSCODE_CHECK_ONLY) }}:
+      - ${{ if eq(parameters.VSCODE_BUILD_LINUX_ARMHF, true) }}:
           - task: 1ES.PublishPipelineArtifact@1
             inputs:
               targetPath: $(Build.ArtifactStagingDirectory)/vscode_cli_linux_armhf_cli.tar.gz
@@ -136,7 +136,7 @@ steps:
               sbomPackageVersion: $(Build.SourceVersion)
             displayName: Publish vscode_cli_linux_armhf_cli artifact
 
-      - ${{ if eq(parameters.HAYSTACK_BUILD_LINUX, true) }}:
+      - ${{ if eq(parameters.VSCODE_BUILD_LINUX, true) }}:
           - task: 1ES.PublishPipelineArtifact@1
             inputs:
               targetPath: $(Build.ArtifactStagingDirectory)/vscode_cli_linux_x64_cli.tar.gz
@@ -146,7 +146,7 @@ steps:
               sbomPackageVersion: $(Build.SourceVersion)
             displayName: Publish vscode_cli_linux_x64_cli artifact
 
-      - ${{ if eq(parameters.HAYSTACK_BUILD_LINUX_ARM64, true) }}:
+      - ${{ if eq(parameters.VSCODE_BUILD_LINUX_ARM64, true) }}:
           - task: 1ES.PublishPipelineArtifact@1
             inputs:
               targetPath: $(Build.ArtifactStagingDirectory)/vscode_cli_linux_arm64_cli.tar.gz

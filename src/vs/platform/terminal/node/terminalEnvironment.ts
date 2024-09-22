@@ -163,11 +163,11 @@ export function getShellIntegrationInjection(
   const appRoot = path.dirname(FileAccess.asFileUri("").fsPath)
   let newArgs: string[] | undefined
   const envMixin: IProcessEnvironment = {
-    HAYSTACK_INJECTION: "1",
+    VSCODE_INJECTION: "1",
   }
 
   if (options.shellIntegration.nonce) {
-    envMixin["HAYSTACK_NONCE"] = options.shellIntegration.nonce
+    envMixin["VSCODE_NONCE"] = options.shellIntegration.nonce
   }
 
   // Windows
@@ -192,14 +192,14 @@ export function getShellIntegrationInjection(
         "",
       )
       if (options.shellIntegration.suggestEnabled) {
-        envMixin["HAYSTACK_SUGGEST"] = "1"
+        envMixin["VSCODE_SUGGEST"] = "1"
       }
       return { newArgs, envMixin }
     } else if (shell === "bash.exe") {
       if (!originalArgs || originalArgs.length === 0) {
         newArgs = shellIntegrationArgs.get(ShellIntegrationExecutable.Bash)
       } else if (areZshBashLoginArgs(originalArgs)) {
-        envMixin["HAYSTACK_SHELL_LOGIN"] = "1"
+        envMixin["VSCODE_SHELL_LOGIN"] = "1"
         addEnvMixinPathPrefix(options, envMixin)
         newArgs = shellIntegrationArgs.get(ShellIntegrationExecutable.Bash)
       }
@@ -223,7 +223,7 @@ export function getShellIntegrationInjection(
       if (!originalArgs || originalArgs.length === 0) {
         newArgs = shellIntegrationArgs.get(ShellIntegrationExecutable.Bash)
       } else if (areZshBashLoginArgs(originalArgs)) {
-        envMixin["HAYSTACK_SHELL_LOGIN"] = "1"
+        envMixin["VSCODE_SHELL_LOGIN"] = "1"
         addEnvMixinPathPrefix(options, envMixin)
         newArgs = shellIntegrationArgs.get(ShellIntegrationExecutable.Bash)
       }
@@ -256,7 +256,7 @@ export function getShellIntegrationInjection(
         return undefined
       }
       if (options.shellIntegration.suggestEnabled) {
-        envMixin["HAYSTACK_SUGGEST"] = "1"
+        envMixin["VSCODE_SUGGEST"] = "1"
       }
       newArgs = [...newArgs] // Shallow clone the array to avoid setting the default array
       newArgs[newArgs.length - 1] = format(
@@ -343,7 +343,7 @@ export function getShellIntegrationInjection(
  * On macOS the profile calls path_helper which adds a bunch of standard bin directories to the
  * beginning of the PATH. This causes significant problems for the environment variable
  * collection API as the custom paths added to the end will now be somewhere in the middle of
- * the PATH. To combat this, HAYSTACK_PATH_PREFIX is used to re-apply any prefix after the profile
+ * the PATH. To combat this, VSCODE_PATH_PREFIX is used to re-apply any prefix after the profile
  * has run. This will cause duplication in the PATH but should fix the issue.
  *
  * See #99878 for more information.
@@ -374,7 +374,7 @@ function addEnvMixinPathPrefix(
 
     // Add to the environment mixin to be applied in the shell integration script
     if (prependToPath.length > 0) {
-      envMixin["HAYSTACK_PATH_PREFIX"] = prependToPath.join("")
+      envMixin["VSCODE_PATH_PREFIX"] = prependToPath.join("")
     }
   }
 }

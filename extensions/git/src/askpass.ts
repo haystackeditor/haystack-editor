@@ -44,10 +44,10 @@ export class Askpass implements IIPCHandler, ITerminalEnvironmentProvider {
         __dirname,
         this.ipc ? "askpass.sh" : "askpass-empty.sh",
       ),
-      // HAYSTACK_GIT_ASKPASS
-      HAYSTACK_GIT_ASKPASS_NODE: process.execPath,
-      HAYSTACK_GIT_ASKPASS_EXTRA_ARGS: "",
-      HAYSTACK_GIT_ASKPASS_MAIN: path.join(__dirname, "askpass-main.js"),
+      // VSCODE_GIT_ASKPASS
+      VSCODE_GIT_ASKPASS_NODE: process.execPath,
+      VSCODE_GIT_ASKPASS_EXTRA_ARGS: "",
+      VSCODE_GIT_ASKPASS_MAIN: path.join(__dirname, "askpass-main.js"),
     }
 
     this.sshEnv = {

@@ -1,5 +1,5 @@
 parameters:
-  - name: HAYSTACK_CLI_ARTIFACTS
+  - name: VSCODE_CLI_ARTIFACTS
     type: object
     default: []
 
@@ -18,7 +18,7 @@ steps:
   - task: EsrpClientTool@1
     displayName: "Use ESRP client"
 
-  - ${{ each target in parameters.HAYSTACK_CLI_ARTIFACTS }}:
+  - ${{ each target in parameters.VSCODE_CLI_ARTIFACTS }}:
       - task: DownloadPipelineArtifact@2
         displayName: Download artifact
         inputs:
@@ -45,7 +45,7 @@ steps:
   - powershell: node build\azure-pipelines\common\sign $env:EsrpCliDllPath sign-windows $(ESRP-PKI) $(esrp-aad-username) $(esrp-aad-password) $(Build.ArtifactStagingDirectory)/sign "*.exe"
     displayName: Codesign
 
-  - ${{ each target in parameters.HAYSTACK_CLI_ARTIFACTS }}:
+  - ${{ each target in parameters.VSCODE_CLI_ARTIFACTS }}:
       - powershell: |
           $ASSET_ID = "${{ target }}".replace("unsigned_", "");
           echo "##vso[task.setvariable variable=ASSET_ID]$ASSET_ID"

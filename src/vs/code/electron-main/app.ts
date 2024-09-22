@@ -36,7 +36,7 @@ import { Event } from "vs/base/common/event"
 import { stripComments } from "vs/base/common/json"
 import { getPathLabel } from "vs/base/common/labels"
 import { Disposable, DisposableStore } from "vs/base/common/lifecycle"
-import { Schemas, HAYSTACK_AUTHORITY } from "vs/base/common/network"
+import { Schemas, VSCODE_AUTHORITY } from "vs/base/common/network"
 import { isAbsolute, join, posix } from "vs/base/common/path"
 import {
   IProcessEnvironment,
@@ -575,7 +575,7 @@ export class CodeApplication extends Disposable {
       // Auxiliary Window: delegate to `AuxiliaryWindow` class
       if (
         contents?.opener?.url.startsWith(
-          `${Schemas.vscodeFileResource}://${HAYSTACK_AUTHORITY}/`,
+          `${Schemas.vscodeFileResource}://${VSCODE_AUTHORITY}/`,
         )
       ) {
         this.logService.trace(

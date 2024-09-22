@@ -97,7 +97,7 @@ export async function main(argv: string[]): Promise<any> {
       return new Promise((resolve, reject) => {
         let tunnelProcess: ChildProcess
         const stdio: StdioOptions = ["ignore", "pipe", "pipe"]
-        if (process.env["HAYSTACK_DEV"]) {
+        if (process.env["VSCODE_DEV"]) {
           tunnelProcess = spawn(
             "cargo",
             ["run", "--", subcommand, ...tunnelArgs],
@@ -470,7 +470,7 @@ export async function main(argv: string[]): Promise<any> {
                 }
                 let suffix = ""
                 const result = await session.stop()
-                if (!process.env["HAYSTACK_DEV"]) {
+                if (!process.env["VSCODE_DEV"]) {
                   // when running from a not-development-build we remove
                   // absolute filenames because we don't want to reveal anything
                   // about users. We also append the `.txt` suffix to make it
@@ -634,7 +634,7 @@ export async function main(argv: string[]): Promise<any> {
 
       spawnArgs.push("--args", ...argv.slice(2)) // pass on our arguments
 
-      if (env["HAYSTACK_DEV"]) {
+      if (env["VSCODE_DEV"]) {
         // If we're in development mode, replace the . arg with the
         // vscode source arg. Because the OSS app isn't bundled,
         // it needs the full vscode source arg to launch properly.

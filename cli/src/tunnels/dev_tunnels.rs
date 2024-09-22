@@ -267,9 +267,9 @@ impl ActiveTunnel {
 	}
 }
 
-const HAYSTACK_CLI_TUNNEL_TAG: &str = "vscode-server-launcher";
-const HAYSTACK_CLI_FORWARDING_TAG: &str = "vscode-port-forward";
-const OWNED_TUNNEL_TAGS: &[&str] = &[HAYSTACK_CLI_TUNNEL_TAG, HAYSTACK_CLI_FORWARDING_TAG];
+const VSCODE_CLI_TUNNEL_TAG: &str = "vscode-server-launcher";
+const VSCODE_CLI_FORWARDING_TAG: &str = "vscode-port-forward";
+const OWNED_TUNNEL_TAGS: &[&str] = &[VSCODE_CLI_TUNNEL_TAG, VSCODE_CLI_FORWARDING_TAG];
 const MAX_TUNNEL_NAME_LENGTH: usize = 20;
 
 fn get_host_token_from_tunnel(tunnel: &Tunnel) -> String {
@@ -340,7 +340,7 @@ impl DevTunnels {
 			log: log.clone(),
 			client: client.into(),
 			launcher_tunnel: PersistedState::new(paths.root().join("port_forwarding_tunnel.json")),
-			tag: HAYSTACK_CLI_FORWARDING_TAG,
+			tag: VSCODE_CLI_FORWARDING_TAG,
 		}
 	}
 
@@ -358,7 +358,7 @@ impl DevTunnels {
 			log: log.clone(),
 			client: client.into(),
 			launcher_tunnel: PersistedState::new(paths.root().join("code_tunnel.json")),
-			tag: HAYSTACK_CLI_TUNNEL_TAG,
+			tag: VSCODE_CLI_TUNNEL_TAG,
 		}
 	}
 

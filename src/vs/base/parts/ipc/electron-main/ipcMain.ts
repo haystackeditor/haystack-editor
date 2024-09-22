@@ -16,7 +16,7 @@ import {
 } from "electron"
 import { onUnexpectedError } from "vs/base/common/errors"
 import { Event } from "vs/base/common/event"
-import { HAYSTACK_AUTHORITY } from "vs/base/common/network"
+import { VSCODE_AUTHORITY } from "vs/base/common/network"
 
 type ipcMainListener = (event: IpcMainEvent, ...args: any[]) => void
 
@@ -154,7 +154,7 @@ class ValidatedIpcMain implements Event.NodeEventEmitter {
       return false // unexpected URL
     }
 
-    if (host !== HAYSTACK_AUTHORITY) {
+    if (host !== VSCODE_AUTHORITY) {
       onUnexpectedError(
         `Refused to handle ipcMain event for channel '${channel}' because of a bad origin of '${host}'.`,
       )

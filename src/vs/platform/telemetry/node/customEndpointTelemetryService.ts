@@ -59,8 +59,8 @@ export class CustomEndpointTelemetryService
           args,
           env: {
             ELECTRON_RUN_AS_NODE: 1,
-            HAYSTACK_PIPE_LOGGING: "true",
-            HAYSTACK_AMD_ENTRYPOINT:
+            VSCODE_PIPE_LOGGING: "true",
+            VSCODE_AMD_ENTRYPOINT:
               "vs/workbench/contrib/debug/node/telemetryApp",
           },
         },

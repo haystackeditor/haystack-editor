@@ -87,16 +87,16 @@ if (util.inspect && util.inspect["defaultOptions"]) {
   util.inspect["defaultOptions"].customInspect = false
 }
 
-// HAYSTACK_GLOBALS: node_modules
-globalThis._HAYSTACK_NODE_MODULES = new Proxy(Object.create(null), {
+// VSCODE_GLOBALS: node_modules
+globalThis._VSCODE_NODE_MODULES = new Proxy(Object.create(null), {
   get: (_target, mod) => (require.__$__nodeRequire ?? require)(String(mod)),
 })
 
-// HAYSTACK_GLOBALS: package/product.json
-globalThis._HAYSTACK_PRODUCT_JSON = (require.__$__nodeRequire ?? require)(
+// VSCODE_GLOBALS: package/product.json
+globalThis._VSCODE_PRODUCT_JSON = (require.__$__nodeRequire ?? require)(
   "../../../product.json",
 )
-globalThis._HAYSTACK_PACKAGE_JSON = (require.__$__nodeRequire ?? require)(
+globalThis._VSCODE_PACKAGE_JSON = (require.__$__nodeRequire ?? require)(
   "../../../package.json",
 )
 

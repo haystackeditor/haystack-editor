@@ -14,7 +14,7 @@ import { NativeParsedArgs } from "vs/platform/environment/common/argv"
 /**
  * Returns the user data path to use with some rules:
  * - respect portable mode
- * - respect HAYSTACK_APPDATA environment variable
+ * - respect VSCODE_APPDATA environment variable
  * - respect --user-data-dir CLI argument
  */
 export function getUserDataPath(

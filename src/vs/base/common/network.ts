@@ -285,10 +285,10 @@ export const nodeModulesAsarPath: AppResourcePath = "vs/../../node_modules.asar"
 export const nodeModulesAsarUnpackedPath: AppResourcePath =
   "vs/../../node_modules.asar.unpacked"
 
-export const HAYSTACK_AUTHORITY = "vscode-app"
+export const VSCODE_AUTHORITY = "vscode-app"
 
 class FileAccessImpl {
-  private static readonly FALLBACK_AUTHORITY = HAYSTACK_AUTHORITY
+  private static readonly FALLBACK_AUTHORITY = VSCODE_AUTHORITY
 
   /**
    * Returns a URI to use in contexts where the browser is responsible

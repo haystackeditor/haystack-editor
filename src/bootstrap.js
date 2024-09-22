@@ -37,7 +37,7 @@
 
   if (
     typeof process !== "undefined" &&
-    !process.env["HAYSTACK_HANDLES_SIGPIPE"]
+    !process.env["VSCODE_HANDLES_SIGPIPE"]
   ) {
     // Workaround for Electron not installing a handler to ignore SIGPIPE
     // (https://github.com/electron/electron/issues/13254)
@@ -137,9 +137,9 @@
     const process = safeProcess()
     /** @type {{ availableLanguages: {}; loadBundle?: (bundle: string, language: string, cb: (err: Error | undefined, result: string | undefined) => void) => void; _resolvedLanguagePackCoreLocation?: string; _corruptedFile?: string }} */
     let nlsConfig = { availableLanguages: {} }
-    if (process && process.env["HAYSTACK_NLS_CONFIG"]) {
+    if (process && process.env["VSCODE_NLS_CONFIG"]) {
       try {
-        nlsConfig = JSON.parse(process.env["HAYSTACK_NLS_CONFIG"])
+        nlsConfig = JSON.parse(process.env["VSCODE_NLS_CONFIG"])
       } catch (e) {
         // Ignore
       }

@@ -48,11 +48,11 @@ const INTEGRATED_TEMPLATE: &str = concatcp!(
 {all-args}"
 );
 
-const COMMIT_IN_VERSION: &str = match constants::HAYSTACK_CLI_COMMIT {
+const COMMIT_IN_VERSION: &str = match constants::VSCODE_CLI_COMMIT {
 	Some(c) => "cc102f3a62bd35f39ed059b99c5cce90e50a16e2",
 	None => "unknown",
 };
-const NUMBER_IN_VERSION: &str = match constants::HAYSTACK_CLI_VERSION {
+const NUMBER_IN_VERSION: &str = match constants::VSCODE_CLI_VERSION {
 	Some(c) => c,
 	None => "dev",
 };
@@ -242,7 +242,7 @@ pub struct CommandShellArgs {
 	#[clap[long]]
 	pub on_host: Option<String>,
 	/// Require the given token string to be given in the handshake.
-	#[clap(long, env = "HAYSTACK_CLI_REQUIRE_TOKEN")]
+	#[clap(long, env = "VSCODE_CLI_REQUIRE_TOKEN")]
 	pub require_token: Option<String>,
 	/// Optional parent process id. If provided, the server will be stopped when the process of the given pid no longer exists
 	#[clap(long, hide = true)]
@@ -494,7 +494,7 @@ impl DesktopCodeOptions {
 #[derive(Args, Debug, Default, Clone)]
 pub struct GlobalOptions {
 	/// Directory where CLI metadata should be stored.
-	#[clap(long, env = "HAYSTACK_CLI_DATA_DIR", global = true)]
+	#[clap(long, env = "VSCODE_CLI_DATA_DIR", global = true)]
 	pub cli_data_dir: Option<String>,
 
 	/// Print verbose output (implies --wait).
@@ -795,11 +795,11 @@ pub enum TunnelUserSubCommands {
 #[derive(Args, Debug, Clone)]
 pub struct LoginArgs {
 	/// An access token to store for authentication.
-	#[clap(long, requires = "provider", env = "HAYSTACK_CLI_ACCESS_TOKEN")]
+	#[clap(long, requires = "provider", env = "VSCODE_CLI_ACCESS_TOKEN")]
 	pub access_token: Option<String>,
 
 	/// An access token to store for authentication.
-	#[clap(long, requires = "access_token", env = "HAYSTACK_CLI_REFRESH_TOKEN")]
+	#[clap(long, requires = "access_token", env = "VSCODE_CLI_REFRESH_TOKEN")]
 	pub refresh_token: Option<String>,
 
 	/// The auth provider to use. If not provided, a prompt will be shown.

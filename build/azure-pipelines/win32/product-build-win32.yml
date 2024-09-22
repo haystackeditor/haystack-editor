@@ -1,19 +1,19 @@
 parameters:
-  - name: HAYSTACK_QUALITY
+  - name: VSCODE_QUALITY
     type: string
-  - name: HAYSTACK_ARCH
+  - name: VSCODE_ARCH
     type: string
-  - name: HAYSTACK_CIBUILD
+  - name: VSCODE_CIBUILD
     type: boolean
-  - name: HAYSTACK_RUN_UNIT_TESTS
+  - name: VSCODE_RUN_UNIT_TESTS
     type: boolean
-  - name: HAYSTACK_RUN_INTEGRATION_TESTS
+  - name: VSCODE_RUN_INTEGRATION_TESTS
     type: boolean
-  - name: HAYSTACK_RUN_SMOKE_TESTS
+  - name: VSCODE_RUN_SMOKE_TESTS
     type: boolean
 
 steps:
-  - ${{ if eq(parameters.HAYSTACK_QUALITY, 'oss') }}:
+  - ${{ if eq(parameters.VSCODE_QUALITY, 'oss') }}:
       - checkout: self
         fetchDepth: 1
         retryCountOnTaskFailure: 3
@@ -29,7 +29,7 @@ steps:
       versionSpec: "3.x"
       addToPath: true
 
-  - ${{ if ne(parameters.HAYSTACK_QUALITY, 'oss') }}:
+  - ${{ if ne(parameters.VSCODE_QUALITY, 'oss') }}:
       - template: ../distro/download-distro.yml@self
 
       - task: AzureKeyVault@1
@@ -57,7 +57,7 @@ steps:
 
   - pwsh: |
       mkdir .build -ea 0
-      node build/azure-pipelines/common/computeNodeModulesCacheKey.js win32 $(HAYSTACK_ARCH) > .build/yarnlockhash
+      node build/azure-pipelines/common/computeNodeModulesCacheKey.js win32 $(VSCODE_ARCH) > .build/yarnlockhash
     displayName: Prepare node_modules cache key
 
   - task: Cache@2
@@ -95,7 +95,7 @@ steps:
       $ErrorActionPreference = "Stop"
       retry { exec { yarn --frozen-lockfile --check-files } }
     env:
-      npm_config_arch: $(HAYSTACK_ARCH)
+      npm_config_arch: $(VSCODE_ARCH)
       CHILD_CONCURRENCY: 1
       ELECTRON_SKIP_BINARY_DOWNLOAD: 1
       PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
@@ -103,7 +103,7 @@ steps:
     displayName: Install dependencies
     condition: and(succeeded(), ne(variables.NODE_MODULES_RESTORED, 'true'))
 
-  - ${{ if ne(parameters.HAYSTACK_QUALITY, 'oss') }}:
+  - ${{ if ne(parameters.VSCODE_QUALITY, 'oss') }}:
       - powershell: node build/azure-pipelines/distro/mixin-npm
         condition: and(succeeded(), ne(variables.NODE_MODULES_RESTORED, 'true'))
         displayName: Mixin distro node modules
@@ -117,35 +117,35 @@ steps:
     condition: and(succeeded(), ne(variables.NODE_MODULES_RESTORED, 'true'))
     displayName: Create node_modules archive
 
-  - ${{ if ne(parameters.HAYSTACK_QUALITY, 'oss') }}:
+  - ${{ if ne(parameters.VSCODE_QUALITY, 'oss') }}:
       - powershell: node build/azure-pipelines/distro/mixin-quality
         displayName: Mixin distro quality
 
   - template: ../common/install-builtin-extensions.yml@self
 
-  - ${{ if and(ne(parameters.HAYSTACK_CIBUILD, true), ne(parameters.HAYSTACK_QUALITY, 'oss')) }}:
+  - ${{ if and(ne(parameters.VSCODE_CIBUILD, true), ne(parameters.VSCODE_QUALITY, 'oss')) }}:
       - powershell: node build\lib\policies
         displayName: Generate Group Policy definitions
         retryCountOnTaskFailure: 3
 
-  - ${{ if eq(parameters.HAYSTACK_QUALITY, 'oss') }}:
+  - ${{ if eq(parameters.VSCODE_QUALITY, 'oss') }}:
       - powershell: yarn gulp "transpile-client-swc" "transpile-extensions"
         env:
           GITHUB_TOKEN: "$(github-distro-mixin-password)"
         displayName: Transpile client and extensions
 
   - ${{ else }}:
-      - ${{ if and(ne(parameters.HAYSTACK_CIBUILD, true), eq(parameters.HAYSTACK_QUALITY, 'insider')) }}:
+      - ${{ if and(ne(parameters.VSCODE_CIBUILD, true), eq(parameters.VSCODE_QUALITY, 'insider')) }}:
           - powershell: node build/win32/explorer-appx-fetcher .build/win32/appx
             displayName: Download Explorer Sparse Package
 
       - powershell: |
           . build/azure-pipelines/win32/exec.ps1
           $ErrorActionPreference = "Stop"
-          exec { yarn gulp "vscode-win32-$(HAYSTACK_ARCH)-min-ci" }
-          exec { yarn gulp "vscode-win32-$(HAYSTACK_ARCH)-inno-updater" }
+          exec { yarn gulp "vscode-win32-$(VSCODE_ARCH)-min-ci" }
+          exec { yarn gulp "vscode-win32-$(VSCODE_ARCH)-inno-updater" }
           echo "##vso[task.setvariable variable=BUILT_CLIENT]true"
-          echo "##vso[task.setvariable variable=CodeSigningFolderPath]$(agent.builddirectory)/VSCode-win32-$(HAYSTACK_ARCH)"
+          echo "##vso[task.setvariable variable=CodeSigningFolderPath]$(agent.builddirectory)/VSCode-win32-$(VSCODE_ARCH)"
         env:
           GITHUB_TOKEN: "$(github-distro-mixin-password)"
         displayName: Build client
@@ -153,42 +153,42 @@ steps:
       - powershell: |
           . build/azure-pipelines/win32/exec.ps1
           $ErrorActionPreference = "Stop"
-          exec { yarn gulp "vscode-reh-win32-$(HAYSTACK_ARCH)-min-ci" }
-          mv ..\vscode-reh-win32-$(HAYSTACK_ARCH) ..\vscode-server-win32-$(HAYSTACK_ARCH) # TODO@joaomoreno
+          exec { yarn gulp "vscode-reh-win32-$(VSCODE_ARCH)-min-ci" }
+          mv ..\vscode-reh-win32-$(VSCODE_ARCH) ..\vscode-server-win32-$(VSCODE_ARCH) # TODO@joaomoreno
           echo "##vso[task.setvariable variable=BUILT_SERVER]true"
-          echo "##vso[task.setvariable variable=CodeSigningFolderPath]$(CodeSigningFolderPath),$(agent.builddirectory)/vscode-server-win32-$(HAYSTACK_ARCH)"
+          echo "##vso[task.setvariable variable=CodeSigningFolderPath]$(CodeSigningFolderPath),$(agent.builddirectory)/vscode-server-win32-$(VSCODE_ARCH)"
         env:
           GITHUB_TOKEN: "$(github-distro-mixin-password)"
         displayName: Build server
-        condition: and(succeeded(), ne(variables['HAYSTACK_ARCH'], 'arm64'))
+        condition: and(succeeded(), ne(variables['VSCODE_ARCH'], 'arm64'))
 
       - powershell: |
           . build/azure-pipelines/win32/exec.ps1
           $ErrorActionPreference = "Stop"
-          exec { yarn gulp "vscode-reh-web-win32-$(HAYSTACK_ARCH)-min-ci" }
-          mv ..\vscode-reh-web-win32-$(HAYSTACK_ARCH) ..\vscode-server-win32-$(HAYSTACK_ARCH)-web # TODO@joaomoreno
+          exec { yarn gulp "vscode-reh-web-win32-$(VSCODE_ARCH)-min-ci" }
+          mv ..\vscode-reh-web-win32-$(VSCODE_ARCH) ..\vscode-server-win32-$(VSCODE_ARCH)-web # TODO@joaomoreno
           echo "##vso[task.setvariable variable=BUILT_WEB]true"
         env:
           GITHUB_TOKEN: "$(github-distro-mixin-password)"
         displayName: Build server (web)
-        condition: and(succeeded(), ne(variables['HAYSTACK_ARCH'], 'arm64'))
+        condition: and(succeeded(), ne(variables['VSCODE_ARCH'], 'arm64'))
 
-  - ${{ if or(eq(parameters.HAYSTACK_RUN_UNIT_TESTS, true), eq(parameters.HAYSTACK_RUN_INTEGRATION_TESTS, true), eq(parameters.HAYSTACK_RUN_SMOKE_TESTS, true)) }}:
+  - ${{ if or(eq(parameters.VSCODE_RUN_UNIT_TESTS, true), eq(parameters.VSCODE_RUN_INTEGRATION_TESTS, true), eq(parameters.VSCODE_RUN_SMOKE_TESTS, true)) }}:
       - template: product-build-win32-test.yml@self
         parameters:
-          HAYSTACK_QUALITY: ${{ parameters.HAYSTACK_QUALITY }}
-          HAYSTACK_ARCH: ${{ parameters.HAYSTACK_ARCH }}
-          HAYSTACK_RUN_UNIT_TESTS: ${{ parameters.HAYSTACK_RUN_UNIT_TESTS }}
-          HAYSTACK_RUN_INTEGRATION_TESTS: ${{ parameters.HAYSTACK_RUN_INTEGRATION_TESTS }}
-          HAYSTACK_RUN_SMOKE_TESTS: ${{ parameters.HAYSTACK_RUN_SMOKE_TESTS }}
-          ${{ if ne(parameters.HAYSTACK_QUALITY, 'oss') }}:
+          VSCODE_QUALITY: ${{ parameters.VSCODE_QUALITY }}
+          VSCODE_ARCH: ${{ parameters.VSCODE_ARCH }}
+          VSCODE_RUN_UNIT_TESTS: ${{ parameters.VSCODE_RUN_UNIT_TESTS }}
+          VSCODE_RUN_INTEGRATION_TESTS: ${{ parameters.VSCODE_RUN_INTEGRATION_TESTS }}
+          VSCODE_RUN_SMOKE_TESTS: ${{ parameters.VSCODE_RUN_SMOKE_TESTS }}
+          ${{ if ne(parameters.VSCODE_QUALITY, 'oss') }}:
             PUBLISH_TASK_NAME: 1ES.PublishPipelineArtifact@1
 
-  - ${{ if ne(parameters.HAYSTACK_CIBUILD, true) }}:
-      - ${{ if ne(parameters.HAYSTACK_QUALITY, 'oss') }}:
+  - ${{ if ne(parameters.VSCODE_CIBUILD, true) }}:
+      - ${{ if ne(parameters.VSCODE_QUALITY, 'oss') }}:
           - task: DownloadPipelineArtifact@2
             inputs:
-              artifact: unsigned_vscode_cli_win32_$(HAYSTACK_ARCH)_cli
+              artifact: unsigned_vscode_cli_win32_$(VSCODE_ARCH)_cli
               patterns: "**"
               path: $(Build.ArtifactStagingDirectory)/cli
             displayName: Download VS Code CLI
@@ -198,10 +198,10 @@ steps:
               $ErrorActionPreference = "Stop"
               $ArtifactName = (gci -Path "$(Build.ArtifactStagingDirectory)/cli" | Select-Object -last 1).FullName
               Expand-Archive -Path $ArtifactName -DestinationPath "$(Build.ArtifactStagingDirectory)/cli"
-              $AppProductJson = Get-Content -Raw -Path "$(agent.builddirectory)\VSCode-win32-$(HAYSTACK_ARCH)\resources\app\product.json" | ConvertFrom-Json
+              $AppProductJson = Get-Content -Raw -Path "$(agent.builddirectory)\VSCode-win32-$(VSCODE_ARCH)\resources\app\product.json" | ConvertFrom-Json
               $CliAppName = $AppProductJson.tunnelApplicationName
               $AppName = $AppProductJson.applicationName
-              Move-Item -Path "$(Build.ArtifactStagingDirectory)/cli/$AppName.exe" -Destination "$(agent.builddirectory)/VSCode-win32-$(HAYSTACK_ARCH)/bin/$CliAppName.exe"
+              Move-Item -Path "$(Build.ArtifactStagingDirectory)/cli/$AppName.exe" -Destination "$(agent.builddirectory)/VSCode-win32-$(VSCODE_ARCH)/bin/$CliAppName.exe"
             displayName: Move VS Code CLI
 
           - task: UseDotNet@2
@@ -225,24 +225,24 @@ steps:
           - powershell: node build\azure-pipelines\common\sign $env:EsrpCliDllPath sign-windows $(ESRP-PKI) $(esrp-aad-username) $(esrp-aad-password) $(CodeSigningFolderPath) '*.dll,*.exe,*.node'
             displayName: Codesign executables and shared libraries
 
-      - ${{ if eq(parameters.HAYSTACK_QUALITY, 'insider') }}:
+      - ${{ if eq(parameters.VSCODE_QUALITY, 'insider') }}:
           - powershell: node build\azure-pipelines\common\sign $env:EsrpCliDllPath sign-windows-appx $(ESRP-PKI) $(esrp-aad-username) $(esrp-aad-password) $(CodeSigningFolderPath) '*.appx'
             displayName: Codesign context menu appx package
 
-      - ${{ if ne(parameters.HAYSTACK_QUALITY, 'oss') }}:
+      - ${{ if ne(parameters.VSCODE_QUALITY, 'oss') }}:
           - powershell: |
-              $PackageJson = Get-Content -Raw -Path ..\VSCode-win32-$(HAYSTACK_ARCH)\resources\app\package.json | ConvertFrom-Json
+              $PackageJson = Get-Content -Raw -Path ..\VSCode-win32-$(VSCODE_ARCH)\resources\app\package.json | ConvertFrom-Json
               $Version = $PackageJson.version
-              echo "##vso[task.setvariable variable=HAYSTACK_VERSION]$Version"
+              echo "##vso[task.setvariable variable=VSCODE_VERSION]$Version"
             condition: succeededOrFailed()
             displayName: Get product version
 
           - powershell: |
               . build/azure-pipelines/win32/exec.ps1
               $ErrorActionPreference = "Stop"
-              $ArchivePath = ".build\win32-$(HAYSTACK_ARCH)\VSCode-win32-$(HAYSTACK_ARCH)-$(HAYSTACK_VERSION).zip"
-              New-Item -ItemType Directory -Path .build\win32-$(HAYSTACK_ARCH) -Force
-              exec { 7z.exe a -tzip $ArchivePath -x!CodeSignSummary*.md ..\VSCode-win32-$(HAYSTACK_ARCH)\* -r }
+              $ArchivePath = ".build\win32-$(VSCODE_ARCH)\VSCode-win32-$(VSCODE_ARCH)-$(VSCODE_VERSION).zip"
+              New-Item -ItemType Directory -Path .build\win32-$(VSCODE_ARCH) -Force
+              exec { 7z.exe a -tzip $ArchivePath -x!CodeSignSummary*.md ..\VSCode-win32-$(VSCODE_ARCH)\* -r }
               echo "##vso[task.setvariable variable=CLIENT_PATH]$ArchivePath"
             condition: and(succeededOrFailed(), eq(variables['BUILT_CLIENT'], 'true'))
             displayName: Package client
@@ -250,9 +250,9 @@ steps:
           - powershell: |
               . build/azure-pipelines/win32/exec.ps1
               $ErrorActionPreference = "Stop"
-              $ArchivePath = ".build\win32-$(HAYSTACK_ARCH)\vscode-server-win32-$(HAYSTACK_ARCH).zip"
-              New-Item -ItemType Directory -Path .build\win32-$(HAYSTACK_ARCH) -Force
-              exec { 7z.exe a -tzip $ArchivePath ..\vscode-server-win32-$(HAYSTACK_ARCH) -r }
+              $ArchivePath = ".build\win32-$(VSCODE_ARCH)\vscode-server-win32-$(VSCODE_ARCH).zip"
+              New-Item -ItemType Directory -Path .build\win32-$(VSCODE_ARCH) -Force
+              exec { 7z.exe a -tzip $ArchivePath ..\vscode-server-win32-$(VSCODE_ARCH) -r }
               echo "##vso[task.setvariable variable=SERVER_PATH]$ArchivePath"
             condition: and(succeededOrFailed(), eq(variables['BUILT_SERVER'], 'true'))
             displayName: Package server
@@ -260,9 +260,9 @@ steps:
           - powershell: |
               . build/azure-pipelines/win32/exec.ps1
               $ErrorActionPreference = "Stop"
-              $ArchivePath = ".build\win32-$(HAYSTACK_ARCH)\vscode-server-win32-$(HAYSTACK_ARCH)-web.zip"
-              New-Item -ItemType Directory -Path .build\win32-$(HAYSTACK_ARCH) -Force
-              exec { 7z.exe a -tzip $ArchivePath ..\vscode-server-win32-$(HAYSTACK_ARCH)-web -r }
+              $ArchivePath = ".build\win32-$(VSCODE_ARCH)\vscode-server-win32-$(VSCODE_ARCH)-web.zip"
+              New-Item -ItemType Directory -Path .build\win32-$(VSCODE_ARCH) -Force
+              exec { 7z.exe a -tzip $ArchivePath ..\vscode-server-win32-$(VSCODE_ARCH)-web -r }
               echo "##vso[task.setvariable variable=WEB_PATH]$ArchivePath"
             condition: and(succeededOrFailed(), eq(variables['BUILT_WEB'], 'true'))
             displayName: Package server (web)
@@ -273,9 +273,9 @@ steps:
               $env:ESRPPKI = "$(ESRP-PKI)"
               $env:ESRPAADUsername = "$(esrp-aad-username)"
               $env:ESRPAADPassword = "$(esrp-aad-password)"
-              exec { yarn gulp "vscode-win32-$(HAYSTACK_ARCH)-system-setup" --sign }
-              $SetupPath = ".build\win32-$(HAYSTACK_ARCH)\system-setup\VSCodeSetup-$(HAYSTACK_ARCH)-$(HAYSTACK_VERSION).exe"
-              mv .build\win32-$(HAYSTACK_ARCH)\system-setup\VSCodeSetup.exe $SetupPath
+              exec { yarn gulp "vscode-win32-$(VSCODE_ARCH)-system-setup" --sign }
+              $SetupPath = ".build\win32-$(VSCODE_ARCH)\system-setup\VSCodeSetup-$(VSCODE_ARCH)-$(VSCODE_VERSION).exe"
+              mv .build\win32-$(VSCODE_ARCH)\system-setup\VSCodeSetup.exe $SetupPath
               echo "##vso[task.setvariable variable=SYSTEM_SETUP_PATH]$SetupPath"
             displayName: Build system setup
 
@@ -285,9 +285,9 @@ steps:
               $env:ESRPPKI = "$(ESRP-PKI)"
               $env:ESRPAADUsername = "$(esrp-aad-username)"
               $env:ESRPAADPassword = "$(esrp-aad-password)"
-              exec { yarn gulp "vscode-win32-$(HAYSTACK_ARCH)-user-setup" --sign }
-              $SetupPath = ".build\win32-$(HAYSTACK_ARCH)\user-setup\VSCodeUserSetup-$(HAYSTACK_ARCH)-$(HAYSTACK_VERSION).exe"
-              mv .build\win32-$(HAYSTACK_ARCH)\user-setup\VSCodeSetup.exe $SetupPath
+              exec { yarn gulp "vscode-win32-$(VSCODE_ARCH)-user-setup" --sign }
+              $SetupPath = ".build\win32-$(VSCODE_ARCH)\user-setup\VSCodeUserSetup-$(VSCODE_ARCH)-$(VSCODE_VERSION).exe"
+              mv .build\win32-$(VSCODE_ARCH)\user-setup\VSCodeSetup.exe $SetupPath
               echo "##vso[task.setvariable variable=USER_SETUP_PATH]$SetupPath"
             displayName: Build user setup
 
@@ -298,9 +298,9 @@ steps:
           - task: 1ES.PublishPipelineArtifact@1
             inputs:
               targetPath: $(CLIENT_PATH)
-              artifactName: $(ARTIFACT_PREFIX)vscode_client_win32_$(HAYSTACK_ARCH)_archive
-              sbomBuildDropPath: $(Agent.BuildDirectory)/VSCode-win32-$(HAYSTACK_ARCH)
-              sbomPackageName: "VS Code Windows $(HAYSTACK_ARCH)"
+              artifactName: $(ARTIFACT_PREFIX)vscode_client_win32_$(VSCODE_ARCH)_archive
+              sbomBuildDropPath: $(Agent.BuildDirectory)/VSCode-win32-$(VSCODE_ARCH)
+              sbomPackageName: "VS Code Windows $(VSCODE_ARCH)"
               sbomPackageVersion: $(Build.SourceVersion)
             condition: and(succeededOrFailed(), ne(variables['CLIENT_PATH'], ''))
             displayName: Publish archive
@@ -308,29 +308,29 @@ steps:
           - task: 1ES.PublishPipelineArtifact@1
             inputs:
               targetPath: $(SERVER_PATH)
-              artifactName: $(ARTIFACT_PREFIX)vscode_server_win32_$(HAYSTACK_ARCH)_archive
-              sbomBuildDropPath: $(Agent.BuildDirectory)/vscode-server-win32-$(HAYSTACK_ARCH)
-              sbomPackageName: "VS Code Windows $(HAYSTACK_ARCH) Server"
+              artifactName: $(ARTIFACT_PREFIX)vscode_server_win32_$(VSCODE_ARCH)_archive
+              sbomBuildDropPath: $(Agent.BuildDirectory)/vscode-server-win32-$(VSCODE_ARCH)
+              sbomPackageName: "VS Code Windows $(VSCODE_ARCH) Server"
               sbomPackageVersion: $(Build.SourceVersion)
-            condition: and(succeededOrFailed(), ne(variables['SERVER_PATH'], ''), ne(variables['HAYSTACK_ARCH'], 'arm64'))
+            condition: and(succeededOrFailed(), ne(variables['SERVER_PATH'], ''), ne(variables['VSCODE_ARCH'], 'arm64'))
             displayName: Publish server archive
 
           - task: 1ES.PublishPipelineArtifact@1
             inputs:
               targetPath: $(WEB_PATH)
-              artifactName: $(ARTIFACT_PREFIX)vscode_web_win32_$(HAYSTACK_ARCH)_archive
-              sbomBuildDropPath: $(Agent.BuildDirectory)/vscode-server-win32-$(HAYSTACK_ARCH)-web
-              sbomPackageName: "VS Code Windows $(HAYSTACK_ARCH) Web"
+              artifactName: $(ARTIFACT_PREFIX)vscode_web_win32_$(VSCODE_ARCH)_archive
+              sbomBuildDropPath: $(Agent.BuildDirectory)/vscode-server-win32-$(VSCODE_ARCH)-web
+              sbomPackageName: "VS Code Windows $(VSCODE_ARCH) Web"
               sbomPackageVersion: $(Build.SourceVersion)
-            condition: and(succeededOrFailed(), ne(variables['WEB_PATH'], ''), ne(variables['HAYSTACK_ARCH'], 'arm64'))
+            condition: and(succeededOrFailed(), ne(variables['WEB_PATH'], ''), ne(variables['VSCODE_ARCH'], 'arm64'))
             displayName: Publish web server archive
 
           - task: 1ES.PublishPipelineArtifact@1
             inputs:
               targetPath: $(SYSTEM_SETUP_PATH)
-              artifactName: $(ARTIFACT_PREFIX)vscode_client_win32_$(HAYSTACK_ARCH)_setup
-              sbomBuildDropPath: $(Agent.BuildDirectory)/VSCode-win32-$(HAYSTACK_ARCH)
-              sbomPackageName: "VS Code Windows $(HAYSTACK_ARCH) System Setup"
+              artifactName: $(ARTIFACT_PREFIX)vscode_client_win32_$(VSCODE_ARCH)_setup
+              sbomBuildDropPath: $(Agent.BuildDirectory)/VSCode-win32-$(VSCODE_ARCH)
+              sbomPackageName: "VS Code Windows $(VSCODE_ARCH) System Setup"
               sbomPackageVersion: $(Build.SourceVersion)
             condition: and(succeededOrFailed(), ne(variables['SYSTEM_SETUP_PATH'], ''))
             displayName: Publish system setup
@@ -338,9 +338,9 @@ steps:
           - task: 1ES.PublishPipelineArtifact@1
             inputs:
               targetPath: $(USER_SETUP_PATH)
-              artifactName: $(ARTIFACT_PREFIX)vscode_client_win32_$(HAYSTACK_ARCH)_user-setup
-              sbomBuildDropPath: $(Agent.BuildDirectory)/VSCode-win32-$(HAYSTACK_ARCH)
-              sbomPackageName: "VS Code Windows $(HAYSTACK_ARCH) User Setup"
+              artifactName: $(ARTIFACT_PREFIX)vscode_client_win32_$(VSCODE_ARCH)_user-setup
+              sbomBuildDropPath: $(Agent.BuildDirectory)/VSCode-win32-$(VSCODE_ARCH)
+              sbomPackageName: "VS Code Windows $(VSCODE_ARCH) User Setup"
               sbomPackageVersion: $(Build.SourceVersion)
             condition: and(succeededOrFailed(), ne(variables['USER_SETUP_PATH'], ''))
             displayName: Publish user setup

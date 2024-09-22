@@ -439,7 +439,7 @@ export class RemoteTunnelService
           LogLevelToString(this._logger.getLevel()),
         ],
         onLoginOutput,
-        { HAYSTACK_CLI_ACCESS_TOKEN: token },
+        { VSCODE_CLI_ACCESS_TOKEN: token },
       )
       this._tunnelProcess = loginProcess
       try {

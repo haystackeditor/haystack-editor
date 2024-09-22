@@ -89,7 +89,7 @@ async function main(): Promise<void> {
   const options = (compressed: boolean) => ({
     account: process.env.AZURE_STORAGE_ACCOUNT,
     credential,
-    container: process.env.HAYSTACK_QUALITY,
+    container: process.env.VSCODE_QUALITY,
     prefix: commit + "/",
     contentSettings: {
       contentEncoding: compressed ? "gzip" : undefined,

@@ -1,5 +1,5 @@
 parameters:
-  - name: HAYSTACK_QUALITY
+  - name: VSCODE_QUALITY
     type: string
 
 steps:
@@ -9,7 +9,7 @@ steps:
       versionFilePath: .nvmrc
       nodejsMirror: https://github.com/joaomoreno/node-mirror/releases/download
 
-  - ${{ if ne(parameters.HAYSTACK_QUALITY, 'oss') }}:
+  - ${{ if ne(parameters.VSCODE_QUALITY, 'oss') }}:
       - template: ./distro/download-distro.yml@self
 
       - task: AzureKeyVault@1
@@ -77,7 +77,7 @@ steps:
     displayName: Install dependencies
     condition: and(succeeded(), ne(variables.NODE_MODULES_RESTORED, 'true'))
 
-  - ${{ if ne(parameters.HAYSTACK_QUALITY, 'oss') }}:
+  - ${{ if ne(parameters.VSCODE_QUALITY, 'oss') }}:
       - script: node build/azure-pipelines/distro/mixin-npm
         condition: and(succeeded(), ne(variables.NODE_MODULES_RESTORED, 'true'))
         displayName: Mixin distro node modules
@@ -90,17 +90,17 @@ steps:
     condition: and(succeeded(), ne(variables.NODE_MODULES_RESTORED, 'true'))
     displayName: Create node_modules archive
 
-  - ${{ if eq(parameters.HAYSTACK_QUALITY, 'oss') }}:
+  - ${{ if eq(parameters.VSCODE_QUALITY, 'oss') }}:
       - script: yarn --cwd build compile && ./.github/workflows/check-clean-git-state.sh
         displayName: Check /build/ folder
 
-  - ${{ if ne(parameters.HAYSTACK_QUALITY, 'oss') }}:
+  - ${{ if ne(parameters.VSCODE_QUALITY, 'oss') }}:
       - script: node build/azure-pipelines/distro/mixin-quality
         displayName: Mixin distro quality
 
   - template: common/install-builtin-extensions.yml@self
 
-  - ${{ if eq(parameters.HAYSTACK_QUALITY, 'oss') }}:
+  - ${{ if eq(parameters.VSCODE_QUALITY, 'oss') }}:
       - script: yarn npm-run-all -lp core-ci-pr extensions-ci-pr hygiene eslint valid-layers-check vscode-dts-compile-check tsec-compile-check
         env:
           GITHUB_TOKEN: "$(github-distro-mixin-password)"
@@ -113,13 +113,13 @@ steps:
           DISABLE_V8_COMPILE_CACHE: 1 # Disable v8 cache used by yarn v1.x, refs https://github.com/nodejs/node/issues/51555
         displayName: Compile & Hygiene (non-OSS)
 
-  - ${{ if ne(parameters.HAYSTACK_QUALITY, 'oss') }}:
+  - ${{ if ne(parameters.VSCODE_QUALITY, 'oss') }}:
       - script: |
           set -e
           yarn --cwd test/smoke compile
           yarn --cwd test/integration/browser compile
         displayName: Compile test suites (non-OSS)
-        condition: and(succeeded(), eq(variables['HAYSTACK_STEP_ON_IT'], 'false'))
+        condition: and(succeeded(), eq(variables['VSCODE_STEP_ON_IT'], 'false'))
 
       - task: AzureCLI@2
         displayName: Fetch secrets

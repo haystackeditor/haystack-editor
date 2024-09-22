@@ -1,27 +1,27 @@
 parameters:
-  - name: HAYSTACK_QUALITY
+  - name: VSCODE_QUALITY
     type: string
-  - name: HAYSTACK_RUN_UNIT_TESTS
+  - name: VSCODE_RUN_UNIT_TESTS
     type: boolean
-  - name: HAYSTACK_RUN_INTEGRATION_TESTS
+  - name: VSCODE_RUN_INTEGRATION_TESTS
     type: boolean
-  - name: HAYSTACK_RUN_SMOKE_TESTS
+  - name: VSCODE_RUN_SMOKE_TESTS
     type: boolean
   - name: PUBLISH_TASK_NAME
     type: string
     default: PublishPipelineArtifact@0
 
 steps:
-  - script: yarn npm-run-all -lp "electron $(HAYSTACK_ARCH)" "playwright-install"
+  - script: yarn npm-run-all -lp "electron $(VSCODE_ARCH)" "playwright-install"
     env:
       GITHUB_TOKEN: "$(github-distro-mixin-password)"
     displayName: Download Electron and Playwright
     retryCountOnTaskFailure: 3
 
-  - ${{ if ne(parameters.HAYSTACK_QUALITY, 'oss') }}:
+  - ${{ if ne(parameters.VSCODE_QUALITY, 'oss') }}:
       - script: |
           set -e
-          APP_ROOT=$(agent.builddirectory)/VSCode-linux-$(HAYSTACK_ARCH)
+          APP_ROOT=$(agent.builddirectory)/VSCode-linux-$(VSCODE_ARCH)
           ELECTRON_ROOT=.build/electron
           sudo chown root $APP_ROOT/chrome-sandbox
           sudo chown root $ELECTRON_ROOT/chrome-sandbox
@@ -31,8 +31,8 @@ steps:
           stat $ELECTRON_ROOT/chrome-sandbox
         displayName: Change setuid helper binary permission
 
-  - ${{ if eq(parameters.HAYSTACK_RUN_UNIT_TESTS, true) }}:
-      - ${{ if eq(parameters.HAYSTACK_QUALITY, 'oss') }}:
+  - ${{ if eq(parameters.VSCODE_RUN_UNIT_TESTS, true) }}:
+      - ${{ if eq(parameters.VSCODE_QUALITY, 'oss') }}:
           - script: ./scripts/test.sh --tfs "Unit Tests"
             env:
               DISPLAY: ":10"
@@ -49,7 +49,7 @@ steps:
             displayName: Run unit tests (Browser, Chromium)
             timeoutInMinutes: 15
 
-      - ${{ if ne(parameters.HAYSTACK_QUALITY, 'oss') }}:
+      - ${{ if ne(parameters.VSCODE_QUALITY, 'oss') }}:
           - script: ./scripts/test.sh --build --tfs "Unit Tests"
             displayName: Run unit tests (Electron)
             timeoutInMinutes: 15
@@ -64,7 +64,7 @@ steps:
             displayName: Run unit tests (Browser, Chromium)
             timeoutInMinutes: 15
 
-  - ${{ if eq(parameters.HAYSTACK_RUN_INTEGRATION_TESTS, true) }}:
+  - ${{ if eq(parameters.VSCODE_RUN_INTEGRATION_TESTS, true) }}:
       - script: |
           set -e
           yarn gulp \
@@ -87,8 +87,8 @@ steps:
             compile-extension:vscode-test-resolver
         displayName: Build integration tests
 
-  - ${{ if eq(parameters.HAYSTACK_RUN_INTEGRATION_TESTS, true) }}:
-      - ${{ if eq(parameters.HAYSTACK_QUALITY, 'oss') }}:
+  - ${{ if eq(parameters.VSCODE_RUN_INTEGRATION_TESTS, true) }}:
+      - ${{ if eq(parameters.VSCODE_QUALITY, 'oss') }}:
           - script: ./scripts/test-integration.sh --tfs "Integration Tests"
             env:
               DISPLAY: ":10"
@@ -103,41 +103,41 @@ steps:
             displayName: Run integration tests (Remote)
             timeoutInMinutes: 20
 
-      - ${{ if ne(parameters.HAYSTACK_QUALITY, 'oss') }}:
+      - ${{ if ne(parameters.VSCODE_QUALITY, 'oss') }}:
           - script: |
               # Figure out the full absolute path of the product we just built
               # including the remote server and configure the integration tests
               # to run with these builds instead of running out of sources.
               set -e
-              APP_ROOT=$(agent.builddirectory)/VSCode-linux-$(HAYSTACK_ARCH)
+              APP_ROOT=$(agent.builddirectory)/VSCode-linux-$(VSCODE_ARCH)
               APP_NAME=$(node -p "require(\"$APP_ROOT/resources/app/product.json\").applicationName")
               INTEGRATION_TEST_APP_NAME="$APP_NAME" \
               INTEGRATION_TEST_ELECTRON_PATH="$APP_ROOT/$APP_NAME" \
               ./scripts/test-integration.sh --build --tfs "Integration Tests"
             env:
-              HAYSTACK_REMOTE_SERVER_PATH: $(agent.builddirectory)/vscode-server-linux-$(HAYSTACK_ARCH)
+              VSCODE_REMOTE_SERVER_PATH: $(agent.builddirectory)/vscode-server-linux-$(VSCODE_ARCH)
             displayName: Run integration tests (Electron)
             timeoutInMinutes: 20
 
           - script: ./scripts/test-web-integration.sh --browser chromium
             env:
-              HAYSTACK_REMOTE_SERVER_PATH: $(agent.builddirectory)/vscode-server-linux-$(HAYSTACK_ARCH)-web
+              VSCODE_REMOTE_SERVER_PATH: $(agent.builddirectory)/vscode-server-linux-$(VSCODE_ARCH)-web
             displayName: Run integration tests (Browser, Chromium)
             timeoutInMinutes: 20
 
           - script: |
               set -e
-              APP_ROOT=$(agent.builddirectory)/VSCode-linux-$(HAYSTACK_ARCH)
+              APP_ROOT=$(agent.builddirectory)/VSCode-linux-$(VSCODE_ARCH)
               APP_NAME=$(node -p "require(\"$APP_ROOT/resources/app/product.json\").applicationName")
               INTEGRATION_TEST_APP_NAME="$APP_NAME" \
               INTEGRATION_TEST_ELECTRON_PATH="$APP_ROOT/$APP_NAME" \
               ./scripts/test-remote-integration.sh
             env:
-              HAYSTACK_REMOTE_SERVER_PATH: $(agent.builddirectory)/vscode-server-linux-$(HAYSTACK_ARCH)
+              VSCODE_REMOTE_SERVER_PATH: $(agent.builddirectory)/vscode-server-linux-$(VSCODE_ARCH)
             displayName: Run integration tests (Remote)
             timeoutInMinutes: 20
 
-  - ${{ if eq(parameters.HAYSTACK_RUN_SMOKE_TESTS, true) }}:
+  - ${{ if eq(parameters.VSCODE_RUN_SMOKE_TESTS, true) }}:
       - script: |
           set -e
           ps -ef
@@ -147,7 +147,7 @@ steps:
         continueOnError: true
         condition: succeededOrFailed()
 
-      - ${{ if eq(parameters.HAYSTACK_QUALITY, 'oss') }}:
+      - ${{ if eq(parameters.VSCODE_QUALITY, 'oss') }}:
           - script: yarn --cwd test/smoke compile
             displayName: Compile smoke tests
 
@@ -170,22 +170,22 @@ steps:
             timeoutInMinutes: 20
             displayName: Run smoke tests (Remote)
 
-      - ${{ if ne(parameters.HAYSTACK_QUALITY, 'oss') }}:
-          - script: yarn smoketest-no-compile --tracing --build "$(agent.builddirectory)/VSCode-linux-$(HAYSTACK_ARCH)"
+      - ${{ if ne(parameters.VSCODE_QUALITY, 'oss') }}:
+          - script: yarn smoketest-no-compile --tracing --build "$(agent.builddirectory)/VSCode-linux-$(VSCODE_ARCH)"
             timeoutInMinutes: 20
             displayName: Run smoke tests (Electron)
 
           - script: yarn smoketest-no-compile --web --tracing --headless --electronArgs="--disable-dev-shm-usage"
             env:
-              HAYSTACK_REMOTE_SERVER_PATH: $(agent.builddirectory)/vscode-server-linux-$(HAYSTACK_ARCH)-web
+              VSCODE_REMOTE_SERVER_PATH: $(agent.builddirectory)/vscode-server-linux-$(VSCODE_ARCH)-web
             timeoutInMinutes: 20
             displayName: Run smoke tests (Browser, Chromium)
 
           - script: |
               set -e
               yarn gulp compile-extension:vscode-test-resolver
-              APP_PATH=$(agent.builddirectory)/VSCode-linux-$(HAYSTACK_ARCH)
-              HAYSTACK_REMOTE_SERVER_PATH="$(agent.builddirectory)/vscode-server-linux-$(HAYSTACK_ARCH)" \
+              APP_PATH=$(agent.builddirectory)/VSCode-linux-$(VSCODE_ARCH)
+              VSCODE_REMOTE_SERVER_PATH="$(agent.builddirectory)/vscode-server-linux-$(VSCODE_ARCH)" \
               yarn smoketest-no-compile --tracing --remote --build "$APP_PATH"
             timeoutInMinutes: 20
             displayName: Run smoke tests (Remote)
@@ -199,16 +199,16 @@ steps:
         continueOnError: true
         condition: succeededOrFailed()
 
-  - ${{ if or(eq(parameters.HAYSTACK_RUN_INTEGRATION_TESTS, true), eq(parameters.HAYSTACK_RUN_SMOKE_TESTS, true)) }}:
+  - ${{ if or(eq(parameters.VSCODE_RUN_INTEGRATION_TESTS, true), eq(parameters.VSCODE_RUN_SMOKE_TESTS, true)) }}:
       - task: ${{ parameters.PUBLISH_TASK_NAME }}
         inputs:
           targetPath: .build/crashes
-          ${{ if and(eq(parameters.HAYSTACK_RUN_INTEGRATION_TESTS, true), eq(parameters.HAYSTACK_RUN_SMOKE_TESTS, false)) }}:
-            artifactName: crash-dump-linux-$(HAYSTACK_ARCH)-integration-$(System.JobAttempt)
-          ${{ elseif and(eq(parameters.HAYSTACK_RUN_INTEGRATION_TESTS, false), eq(parameters.HAYSTACK_RUN_SMOKE_TESTS, true)) }}:
-            artifactName: crash-dump-linux-$(HAYSTACK_ARCH)-smoke-$(System.JobAttempt)
+          ${{ if and(eq(parameters.VSCODE_RUN_INTEGRATION_TESTS, true), eq(parameters.VSCODE_RUN_SMOKE_TESTS, false)) }}:
+            artifactName: crash-dump-linux-$(VSCODE_ARCH)-integration-$(System.JobAttempt)
+          ${{ elseif and(eq(parameters.VSCODE_RUN_INTEGRATION_TESTS, false), eq(parameters.VSCODE_RUN_SMOKE_TESTS, true)) }}:
+            artifactName: crash-dump-linux-$(VSCODE_ARCH)-smoke-$(System.JobAttempt)
           ${{ else }}:
-            artifactName: crash-dump-linux-$(HAYSTACK_ARCH)-$(System.JobAttempt)
+            artifactName: crash-dump-linux-$(VSCODE_ARCH)-$(System.JobAttempt)
           sbomEnabled: false
         displayName: "Publish Crash Reports"
         continueOnError: true
@@ -219,12 +219,12 @@ steps:
       - task: ${{ parameters.PUBLISH_TASK_NAME }}
         inputs:
           targetPath: node_modules
-          ${{ if and(eq(parameters.HAYSTACK_RUN_INTEGRATION_TESTS, true), eq(parameters.HAYSTACK_RUN_SMOKE_TESTS, false)) }}:
-            artifactName: node-modules-linux-$(HAYSTACK_ARCH)-integration-$(System.JobAttempt)
-          ${{ elseif and(eq(parameters.HAYSTACK_RUN_INTEGRATION_TESTS, false), eq(parameters.HAYSTACK_RUN_SMOKE_TESTS, true)) }}:
-            artifactName: node-modules-linux-$(HAYSTACK_ARCH)-smoke-$(System.JobAttempt)
+          ${{ if and(eq(parameters.VSCODE_RUN_INTEGRATION_TESTS, true), eq(parameters.VSCODE_RUN_SMOKE_TESTS, false)) }}:
+            artifactName: node-modules-linux-$(VSCODE_ARCH)-integration-$(System.JobAttempt)
+          ${{ elseif and(eq(parameters.VSCODE_RUN_INTEGRATION_TESTS, false), eq(parameters.VSCODE_RUN_SMOKE_TESTS, true)) }}:
+            artifactName: node-modules-linux-$(VSCODE_ARCH)-smoke-$(System.JobAttempt)
           ${{ else }}:
-            artifactName: node-modules-linux-$(HAYSTACK_ARCH)-$(System.JobAttempt)
+            artifactName: node-modules-linux-$(VSCODE_ARCH)-$(System.JobAttempt)
           sbomEnabled: false
         displayName: "Publish Node Modules"
         continueOnError: true
@@ -233,12 +233,12 @@ steps:
       - task: ${{ parameters.PUBLISH_TASK_NAME }}
         inputs:
           targetPath: .build/logs
-          ${{ if and(eq(parameters.HAYSTACK_RUN_INTEGRATION_TESTS, true), eq(parameters.HAYSTACK_RUN_SMOKE_TESTS, false)) }}:
-            artifactName: logs-linux-$(HAYSTACK_ARCH)-integration-$(System.JobAttempt)
-          ${{ elseif and(eq(parameters.HAYSTACK_RUN_INTEGRATION_TESTS, false), eq(parameters.HAYSTACK_RUN_SMOKE_TESTS, true)) }}:
-            artifactName: logs-linux-$(HAYSTACK_ARCH)-smoke-$(System.JobAttempt)
+          ${{ if and(eq(parameters.VSCODE_RUN_INTEGRATION_TESTS, true), eq(parameters.VSCODE_RUN_SMOKE_TESTS, false)) }}:
+            artifactName: logs-linux-$(VSCODE_ARCH)-integration-$(System.JobAttempt)
+          ${{ elseif and(eq(parameters.VSCODE_RUN_INTEGRATION_TESTS, false), eq(parameters.VSCODE_RUN_SMOKE_TESTS, true)) }}:
+            artifactName: logs-linux-$(VSCODE_ARCH)-smoke-$(System.JobAttempt)
           ${{ else }}:
-            artifactName: logs-linux-$(HAYSTACK_ARCH)-$(System.JobAttempt)
+            artifactName: logs-linux-$(VSCODE_ARCH)-$(System.JobAttempt)
           sbomEnabled: false
         displayName: "Publish Log Files"
         continueOnError: true

@@ -41,9 +41,9 @@ export class UniversalWatcherClient extends AbstractUniversalWatcherClient {
         serverName: "File Watcher",
         args: ["--type=fileWatcher"],
         env: {
-          HAYSTACK_AMD_ENTRYPOINT: "vs/platform/files/node/watcher/watcherMain",
-          HAYSTACK_PIPE_LOGGING: "true",
-          HAYSTACK_VERBOSE_LOGGING: "true", // transmit console logs from server to client
+          VSCODE_AMD_ENTRYPOINT: "vs/platform/files/node/watcher/watcherMain",
+          VSCODE_PIPE_LOGGING: "true",
+          VSCODE_VERBOSE_LOGGING: "true", // transmit console logs from server to client
         },
       }),
     )

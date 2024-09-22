@@ -1,9 +1,9 @@
 parameters:
-  - name: HAYSTACK_QUALITY
+  - name: VSCODE_QUALITY
     type: string
-  - name: HAYSTACK_RUN_INTEGRATION_TESTS
+  - name: VSCODE_RUN_INTEGRATION_TESTS
     type: boolean
-  - name: HAYSTACK_ARCH
+  - name: VSCODE_ARCH
     type: string
 
 steps:
@@ -74,17 +74,17 @@ steps:
     condition: and(succeeded(), ne(variables['NPM_REGISTRY'], 'none'))
     displayName: Setup NPM Authentication
 
-  - ${{ if or(eq(parameters.HAYSTACK_ARCH, 'x64'), eq(parameters.HAYSTACK_ARCH, 'arm64')) }}:
+  - ${{ if or(eq(parameters.VSCODE_ARCH, 'x64'), eq(parameters.VSCODE_ARCH, 'arm64')) }}:
       - task: Docker@1
         displayName: "Pull Docker image"
         inputs:
           azureSubscriptionEndpoint: "vscode-builds-subscription"
           azureContainerRegistry: vscodehub.azurecr.io
           command: "Run an image"
-          imageName: vscode-linux-build-agent:centos7-devtoolset8-$(HAYSTACK_ARCH)
+          imageName: vscode-linux-build-agent:centos7-devtoolset8-$(VSCODE_ARCH)
           containerCommand: uname
 
-  - ${{ if eq(parameters.HAYSTACK_ARCH, 'armhf') }}:
+  - ${{ if eq(parameters.VSCODE_ARCH, 'armhf') }}:
       - task: Docker@1
         displayName: "Pull Docker image"
         inputs:
@@ -108,7 +108,7 @@ steps:
         echo "Yarn failed $i, trying again..."
       done
 
-      export HAYSTACK_SYSROOT_PREFIX='-glibc-2.17'
+      export VSCODE_SYSROOT_PREFIX='-glibc-2.17'
       source ./build/azure-pipelines/linux/setup-env.sh --only-remote
 
       for i in {1..5}; do # try 5 times
@@ -121,19 +121,19 @@ steps:
       done
     env:
       npm_config_arch: $(NPM_ARCH)
-      HAYSTACK_ARCH: $(HAYSTACK_ARCH)
+      VSCODE_ARCH: $(VSCODE_ARCH)
       NPM_REGISTRY: "$(NPM_REGISTRY)"
       ELECTRON_SKIP_BINARY_DOWNLOAD: 1
       PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
       GITHUB_TOKEN: "$(github-distro-mixin-password)"
-      HAYSTACK_HOST_MOUNT: "/mnt/vss/_work/1/s"
-      ${{ if or(eq(parameters.HAYSTACK_ARCH, 'x64'), eq(parameters.HAYSTACK_ARCH, 'arm64')) }}:
-        HAYSTACK_REMOTE_DEPENDENCIES_CONTAINER_NAME: vscodehub.azurecr.io/vscode-linux-build-agent:centos7-devtoolset8-$(HAYSTACK_ARCH)
-      ${{ if eq(parameters.HAYSTACK_ARCH, 'armhf') }}:
-        HAYSTACK_REMOTE_DEPENDENCIES_CONTAINER_NAME: vscodehub.azurecr.io/vscode-linux-build-agent:bionic-arm32v7
+      VSCODE_HOST_MOUNT: "/mnt/vss/_work/1/s"
+      ${{ if or(eq(parameters.VSCODE_ARCH, 'x64'), eq(parameters.VSCODE_ARCH, 'arm64')) }}:
+        VSCODE_REMOTE_DEPENDENCIES_CONTAINER_NAME: vscodehub.azurecr.io/vscode-linux-build-agent:centos7-devtoolset8-$(VSCODE_ARCH)
+      ${{ if eq(parameters.VSCODE_ARCH, 'armhf') }}:
+        VSCODE_REMOTE_DEPENDENCIES_CONTAINER_NAME: vscodehub.azurecr.io/vscode-linux-build-agent:bionic-arm32v7
     displayName: Install dependencies
 
-  - ${{ if or(eq(parameters.HAYSTACK_ARCH, 'x64'), eq(parameters.HAYSTACK_ARCH, 'arm64')) }}:
+  - ${{ if or(eq(parameters.VSCODE_ARCH, 'x64'), eq(parameters.VSCODE_ARCH, 'arm64')) }}:
       - script: |
           set -e
           EXPECTED_GLIBC_VERSION="2.17" \
@@ -151,8 +151,8 @@ steps:
 
   - script: |
       set -e
-      yarn gulp vscode-linux-$(HAYSTACK_ARCH)-min-ci
-      ARCHIVE_PATH=".build/linux/client/code-${{ parameters.HAYSTACK_QUALITY }}-$(HAYSTACK_ARCH)-$(date +%s).tar.gz"
+      yarn gulp vscode-linux-$(VSCODE_ARCH)-min-ci
+      ARCHIVE_PATH=".build/linux/client/code-${{ parameters.VSCODE_QUALITY }}-$(VSCODE_ARCH)-$(date +%s).tar.gz"
       mkdir -p $(dirname $ARCHIVE_PATH)
       echo "##vso[task.setvariable variable=CLIENT_PATH]$ARCHIVE_PATH"
     env:
@@ -161,19 +161,19 @@ steps:
 
   - script: |
       set -e
-      tar -czf $CLIENT_PATH -C .. VSCode-linux-$(HAYSTACK_ARCH)
+      tar -czf $CLIENT_PATH -C .. VSCode-linux-$(VSCODE_ARCH)
     env:
       GITHUB_TOKEN: "$(github-distro-mixin-password)"
     displayName: Archive client
 
   - script: |
       set -e
-      export HAYSTACK_NODE_GLIBC="-glibc-2.17"
-      yarn gulp vscode-reh-linux-$(HAYSTACK_ARCH)-min-ci
-      mv ../vscode-reh-linux-$(HAYSTACK_ARCH) ../vscode-server-linux-$(HAYSTACK_ARCH) # TODO@joaomoreno
-      ARCHIVE_PATH=".build/linux/server/vscode-server-linux-legacy-$(HAYSTACK_ARCH).tar.gz"
+      export VSCODE_NODE_GLIBC="-glibc-2.17"
+      yarn gulp vscode-reh-linux-$(VSCODE_ARCH)-min-ci
+      mv ../vscode-reh-linux-$(VSCODE_ARCH) ../vscode-server-linux-$(VSCODE_ARCH) # TODO@joaomoreno
+      ARCHIVE_PATH=".build/linux/server/vscode-server-linux-legacy-$(VSCODE_ARCH).tar.gz"
       mkdir -p $(dirname $ARCHIVE_PATH)
-      tar --owner=0 --group=0 -czf $ARCHIVE_PATH -C .. vscode-server-linux-$(HAYSTACK_ARCH)
+      tar --owner=0 --group=0 -czf $ARCHIVE_PATH -C .. vscode-server-linux-$(VSCODE_ARCH)
       echo "##vso[task.setvariable variable=SERVER_PATH]$ARCHIVE_PATH"
     env:
       GITHUB_TOKEN: "$(github-distro-mixin-password)"
@@ -181,33 +181,33 @@ steps:
 
   - script: |
       set -e
-      export HAYSTACK_NODE_GLIBC="-glibc-2.17"
-      yarn gulp vscode-reh-web-linux-$(HAYSTACK_ARCH)-min-ci
-      mv ../vscode-reh-web-linux-$(HAYSTACK_ARCH) ../vscode-server-linux-$(HAYSTACK_ARCH)-web # TODO@joaomoreno
-      ARCHIVE_PATH=".build/linux/web/vscode-server-linux-legacy-$(HAYSTACK_ARCH)-web.tar.gz"
+      export VSCODE_NODE_GLIBC="-glibc-2.17"
+      yarn gulp vscode-reh-web-linux-$(VSCODE_ARCH)-min-ci
+      mv ../vscode-reh-web-linux-$(VSCODE_ARCH) ../vscode-server-linux-$(VSCODE_ARCH)-web # TODO@joaomoreno
+      ARCHIVE_PATH=".build/linux/web/vscode-server-linux-legacy-$(VSCODE_ARCH)-web.tar.gz"
       mkdir -p $(dirname $ARCHIVE_PATH)
-      tar --owner=0 --group=0 -czf $ARCHIVE_PATH -C .. vscode-server-linux-$(HAYSTACK_ARCH)-web
+      tar --owner=0 --group=0 -czf $ARCHIVE_PATH -C .. vscode-server-linux-$(VSCODE_ARCH)-web
       echo "##vso[task.setvariable variable=WEB_PATH]$ARCHIVE_PATH"
     env:
       GITHUB_TOKEN: "$(github-distro-mixin-password)"
     displayName: Build server (web)
 
-  - ${{ if eq(parameters.HAYSTACK_RUN_INTEGRATION_TESTS, true) }}:
+  - ${{ if eq(parameters.VSCODE_RUN_INTEGRATION_TESTS, true) }}:
       - template: product-build-linux-test.yml
         parameters:
-          HAYSTACK_QUALITY: ${{ parameters.HAYSTACK_QUALITY }}
-          HAYSTACK_RUN_UNIT_TESTS: false
-          HAYSTACK_RUN_INTEGRATION_TESTS: ${{ parameters.HAYSTACK_RUN_INTEGRATION_TESTS }}
-          HAYSTACK_RUN_SMOKE_TESTS: false
-          ${{ if ne(parameters.HAYSTACK_QUALITY, 'oss') }}:
+          VSCODE_QUALITY: ${{ parameters.VSCODE_QUALITY }}
+          VSCODE_RUN_UNIT_TESTS: false
+          VSCODE_RUN_INTEGRATION_TESTS: ${{ parameters.VSCODE_RUN_INTEGRATION_TESTS }}
+          VSCODE_RUN_SMOKE_TESTS: false
+          ${{ if ne(parameters.VSCODE_QUALITY, 'oss') }}:
             PUBLISH_TASK_NAME: 1ES.PublishPipelineArtifact@1
 
   - task: 1ES.PublishPipelineArtifact@1
     inputs:
       targetPath: $(SERVER_PATH)
-      artifactName: $(ARTIFACT_PREFIX)vscode_server_linux_legacy_$(HAYSTACK_ARCH)_archive-unsigned
-      sbomBuildDropPath: $(Agent.BuildDirectory)/vscode-server-linux-$(HAYSTACK_ARCH)
-      sbomPackageName: "VS Code Linux $(HAYSTACK_ARCH) Legacy Server"
+      artifactName: $(ARTIFACT_PREFIX)vscode_server_linux_legacy_$(VSCODE_ARCH)_archive-unsigned
+      sbomBuildDropPath: $(Agent.BuildDirectory)/vscode-server-linux-$(VSCODE_ARCH)
+      sbomPackageName: "VS Code Linux $(VSCODE_ARCH) Legacy Server"
       sbomPackageVersion: $(Build.SourceVersion)
     condition: and(succeededOrFailed(), ne(variables['SERVER_PATH'], ''))
     displayName: Publish server archive
@@ -215,9 +215,9 @@ steps:
   - task: 1ES.PublishPipelineArtifact@1
     inputs:
       targetPath: $(WEB_PATH)
-      artifactName: $(ARTIFACT_PREFIX)vscode_web_linux_legacy_$(HAYSTACK_ARCH)_archive-unsigned
-      sbomBuildDropPath: $(Agent.BuildDirectory)/vscode-server-linux-$(HAYSTACK_ARCH)-web
-      sbomPackageName: "VS Code Linux $(HAYSTACK_ARCH) Legacy Web"
+      artifactName: $(ARTIFACT_PREFIX)vscode_web_linux_legacy_$(VSCODE_ARCH)_archive-unsigned
+      sbomBuildDropPath: $(Agent.BuildDirectory)/vscode-server-linux-$(VSCODE_ARCH)-web
+      sbomPackageName: "VS Code Linux $(VSCODE_ARCH) Legacy Web"
       sbomPackageVersion: $(Build.SourceVersion)
     condition: and(succeededOrFailed(), ne(variables['WEB_PATH'], ''))
     displayName: Publish web server archive

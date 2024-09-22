@@ -180,10 +180,10 @@ class AMDModuleImporter {
     scriptSrc: string,
   ): Promise<DefineCall | undefined> {
     try {
-      const fs = <typeof import("fs")>globalThis._HAYSTACK_NODE_MODULES["fs"]
-      const vm = <typeof import("vm")>globalThis._HAYSTACK_NODE_MODULES["vm"]
+      const fs = <typeof import("fs")>globalThis._VSCODE_NODE_MODULES["fs"]
+      const vm = <typeof import("vm")>globalThis._VSCODE_NODE_MODULES["vm"]
       const module = <typeof import("module")>(
-        globalThis._HAYSTACK_NODE_MODULES["module"]
+        globalThis._VSCODE_NODE_MODULES["module"]
       )
 
       const filePath = URI.parse(scriptSrc).fsPath
@@ -220,7 +220,7 @@ export async function importAMDNodeModule<T>(
   if (isESM) {
     if (isBuilt === undefined) {
       const product =
-        globalThis._HAYSTACK_PRODUCT_JSON as unknown as IProductConfiguration
+        globalThis._VSCODE_PRODUCT_JSON as unknown as IProductConfiguration
       isBuilt = Boolean(
         (product ?? (<any>globalThis).vscode?.context?.configuration()?.product)
           ?.commit,

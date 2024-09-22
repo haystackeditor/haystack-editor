@@ -205,8 +205,8 @@ app.once("ready", function () {
 function startup(codeCachePath, nlsConfig) {
   nlsConfig._languagePackSupport = true
 
-  process.env["HAYSTACK_NLS_CONFIG"] = JSON.stringify(nlsConfig)
-  process.env["HAYSTACK_CODE_CACHE_PATH"] = codeCachePath || ""
+  process.env["VSCODE_NLS_CONFIG"] = JSON.stringify(nlsConfig)
+  process.env["VSCODE_CODE_CACHE_PATH"] = codeCachePath || ""
 
   // Load main in AMD
   perf.mark("code/willLoadMainBundle")
@@ -408,13 +408,13 @@ function createDefaultArgvConfigSync(argvConfigPath) {
 }
 
 function getArgvConfigPath() {
-  const vscodePortable = process.env["HAYSTACK_PORTABLE"]
+  const vscodePortable = process.env["VSCODE_PORTABLE"]
   if (vscodePortable) {
     return path.join(vscodePortable, "argv.json")
   }
 
   let dataFolderName = product.dataFolderName
-  if (process.env["HAYSTACK_DEV"]) {
+  if (process.env["VSCODE_DEV"]) {
     dataFolderName = `${dataFolderName}-dev`
   }
 
@@ -527,11 +527,11 @@ function configureCrashReporter() {
     (product.crashReporter ? product.crashReporter.companyName : undefined) ||
     "Microsoft"
   const uploadToServer = Boolean(
-    !process.env["HAYSTACK_DEV"] && submitURL && !crashReporterDirectory,
+    !process.env["VSCODE_DEV"] && submitURL && !crashReporterDirectory,
   )
   crashReporter.start({
     companyName,
-    productName: process.env["HAYSTACK_DEV"] ? `${productName} Dev` : productName,
+    productName: process.env["VSCODE_DEV"] ? `${productName} Dev` : productName,
     submitURL,
     uploadToServer,
     compress: true,
@@ -625,7 +625,7 @@ function getCodeCachePath() {
   }
 
   // running out of sources
-  if (process.env["HAYSTACK_DEV"]) {
+  if (process.env["VSCODE_DEV"]) {
     return undefined
   }
 

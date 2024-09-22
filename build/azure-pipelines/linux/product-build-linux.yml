@@ -1,19 +1,19 @@
 parameters:
-  - name: HAYSTACK_QUALITY
+  - name: VSCODE_QUALITY
     type: string
-  - name: HAYSTACK_CIBUILD
+  - name: VSCODE_CIBUILD
     type: boolean
-  - name: HAYSTACK_RUN_UNIT_TESTS
+  - name: VSCODE_RUN_UNIT_TESTS
     type: boolean
-  - name: HAYSTACK_RUN_INTEGRATION_TESTS
+  - name: VSCODE_RUN_INTEGRATION_TESTS
     type: boolean
-  - name: HAYSTACK_RUN_SMOKE_TESTS
+  - name: VSCODE_RUN_SMOKE_TESTS
     type: boolean
-  - name: HAYSTACK_ARCH
+  - name: VSCODE_ARCH
     type: string
 
 steps:
-  - ${{ if eq(parameters.HAYSTACK_QUALITY, 'oss') }}:
+  - ${{ if eq(parameters.VSCODE_QUALITY, 'oss') }}:
       - checkout: self
         fetchDepth: 1
         retryCountOnTaskFailure: 3
@@ -24,7 +24,7 @@ steps:
       versionFilePath: .nvmrc
       nodejsMirror: https://github.com/joaomoreno/node-mirror/releases/download
 
-  - ${{ if ne(parameters.HAYSTACK_QUALITY, 'oss') }}:
+  - ${{ if ne(parameters.VSCODE_QUALITY, 'oss') }}:
       - template: ../distro/download-distro.yml@self
 
       - task: AzureKeyVault@1
@@ -69,7 +69,7 @@ steps:
     condition: and(succeeded(), ne(variables['NPM_REGISTRY'], 'none'))
     displayName: Setup NPM Registry
 
-  - script: mkdir -p .build && node build/azure-pipelines/common/computeNodeModulesCacheKey.js linux $HAYSTACK_ARCH > .build/yarnlockhash
+  - script: mkdir -p .build && node build/azure-pipelines/common/computeNodeModulesCacheKey.js linux $VSCODE_ARCH > .build/yarnlockhash
     displayName: Prepare node_modules cache key
 
   - task: Cache@2
@@ -124,7 +124,7 @@ steps:
       done
     env:
       npm_config_arch: $(NPM_ARCH)
-      HAYSTACK_ARCH: $(HAYSTACK_ARCH)
+      VSCODE_ARCH: $(VSCODE_ARCH)
       ELECTRON_SKIP_BINARY_DOWNLOAD: 1
       PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
       GITHUB_TOKEN: "$(github-distro-mixin-password)"
@@ -140,7 +140,7 @@ steps:
     condition: and(succeeded(), ne(variables.NODE_MODULES_RESTORED, 'true'))
     displayName: Check GLIBC and GLIBCXX dependencies in remote/node_modules
 
-  - ${{ if ne(parameters.HAYSTACK_QUALITY, 'oss') }}:
+  - ${{ if ne(parameters.VSCODE_QUALITY, 'oss') }}:
       - script: node build/azure-pipelines/distro/mixin-npm
         condition: and(succeeded(), ne(variables.NODE_MODULES_RESTORED, 'true'))
         displayName: Mixin distro node modules
@@ -167,27 +167,27 @@ steps:
     condition: and(succeeded(), ne(variables.NODE_MODULES_RESTORED, 'true'))
     displayName: Create node_modules archive
 
-  - ${{ if ne(parameters.HAYSTACK_QUALITY, 'oss') }}:
+  - ${{ if ne(parameters.VSCODE_QUALITY, 'oss') }}:
       - script: node build/azure-pipelines/distro/mixin-quality
         displayName: Mixin distro quality
 
   - template: ../common/install-builtin-extensions.yml@self
 
-  - ${{ if ne(parameters.HAYSTACK_QUALITY, 'oss') }}:
+  - ${{ if ne(parameters.VSCODE_QUALITY, 'oss') }}:
       - script: |
           set -e
-          yarn gulp vscode-linux-$(HAYSTACK_ARCH)-min-ci
-          ARCHIVE_PATH=".build/linux/client/code-${{ parameters.HAYSTACK_QUALITY }}-$(HAYSTACK_ARCH)-$(date +%s).tar.gz"
+          yarn gulp vscode-linux-$(VSCODE_ARCH)-min-ci
+          ARCHIVE_PATH=".build/linux/client/code-${{ parameters.VSCODE_QUALITY }}-$(VSCODE_ARCH)-$(date +%s).tar.gz"
           mkdir -p $(dirname $ARCHIVE_PATH)
           echo "##vso[task.setvariable variable=CLIENT_PATH]$ARCHIVE_PATH"
         env:
           GITHUB_TOKEN: "$(github-distro-mixin-password)"
         displayName: Build client
 
-      - ${{ if ne(parameters.HAYSTACK_CIBUILD, true) }}:
+      - ${{ if ne(parameters.VSCODE_CIBUILD, true) }}:
           - task: DownloadPipelineArtifact@2
             inputs:
-              artifact: $(ARTIFACT_PREFIX)vscode_cli_linux_$(HAYSTACK_ARCH)_cli
+              artifact: $(ARTIFACT_PREFIX)vscode_cli_linux_$(VSCODE_ARCH)_cli
               patterns: "**"
               path: $(Build.ArtifactStagingDirectory)/cli
             displayName: Download VS Code CLI
@@ -195,25 +195,25 @@ steps:
           - script: |
               set -e
               tar -xzvf $(Build.ArtifactStagingDirectory)/cli/*.tar.gz -C $(Build.ArtifactStagingDirectory)/cli
-              CLI_APP_NAME=$(node -p "require(\"$(agent.builddirectory)/VSCode-linux-$(HAYSTACK_ARCH)/resources/app/product.json\").tunnelApplicationName")
-              APP_NAME=$(node -p "require(\"$(agent.builddirectory)/VSCode-linux-$(HAYSTACK_ARCH)/resources/app/product.json\").applicationName")
-              mv $(Build.ArtifactStagingDirectory)/cli/$APP_NAME $(agent.builddirectory)/VSCode-linux-$(HAYSTACK_ARCH)/bin/$CLI_APP_NAME
+              CLI_APP_NAME=$(node -p "require(\"$(agent.builddirectory)/VSCode-linux-$(VSCODE_ARCH)/resources/app/product.json\").tunnelApplicationName")
+              APP_NAME=$(node -p "require(\"$(agent.builddirectory)/VSCode-linux-$(VSCODE_ARCH)/resources/app/product.json\").applicationName")
+              mv $(Build.ArtifactStagingDirectory)/cli/$APP_NAME $(agent.builddirectory)/VSCode-linux-$(VSCODE_ARCH)/bin/$CLI_APP_NAME
             displayName: Mix in CLI
 
       - script: |
           set -e
-          tar -czf $CLIENT_PATH -C .. VSCode-linux-$(HAYSTACK_ARCH)
+          tar -czf $CLIENT_PATH -C .. VSCode-linux-$(VSCODE_ARCH)
         env:
           GITHUB_TOKEN: "$(github-distro-mixin-password)"
         displayName: Archive client
 
       - script: |
           set -e
-          yarn gulp vscode-reh-linux-$(HAYSTACK_ARCH)-min-ci
-          mv ../vscode-reh-linux-$(HAYSTACK_ARCH) ../vscode-server-linux-$(HAYSTACK_ARCH) # TODO@joaomoreno
-          ARCHIVE_PATH=".build/linux/server/vscode-server-linux-$(HAYSTACK_ARCH).tar.gz"
+          yarn gulp vscode-reh-linux-$(VSCODE_ARCH)-min-ci
+          mv ../vscode-reh-linux-$(VSCODE_ARCH) ../vscode-server-linux-$(VSCODE_ARCH) # TODO@joaomoreno
+          ARCHIVE_PATH=".build/linux/server/vscode-server-linux-$(VSCODE_ARCH).tar.gz"
           mkdir -p $(dirname $ARCHIVE_PATH)
-          tar --owner=0 --group=0 -czf $ARCHIVE_PATH -C .. vscode-server-linux-$(HAYSTACK_ARCH)
+          tar --owner=0 --group=0 -czf $ARCHIVE_PATH -C .. vscode-server-linux-$(VSCODE_ARCH)
           echo "##vso[task.setvariable variable=SERVER_PATH]$ARCHIVE_PATH"
         env:
           GITHUB_TOKEN: "$(github-distro-mixin-password)"
@@ -221,11 +221,11 @@ steps:
 
       - script: |
           set -e
-          yarn gulp vscode-reh-web-linux-$(HAYSTACK_ARCH)-min-ci
-          mv ../vscode-reh-web-linux-$(HAYSTACK_ARCH) ../vscode-server-linux-$(HAYSTACK_ARCH)-web # TODO@joaomoreno
-          ARCHIVE_PATH=".build/linux/web/vscode-server-linux-$(HAYSTACK_ARCH)-web.tar.gz"
+          yarn gulp vscode-reh-web-linux-$(VSCODE_ARCH)-min-ci
+          mv ../vscode-reh-web-linux-$(VSCODE_ARCH) ../vscode-server-linux-$(VSCODE_ARCH)-web # TODO@joaomoreno
+          ARCHIVE_PATH=".build/linux/web/vscode-server-linux-$(VSCODE_ARCH)-web.tar.gz"
           mkdir -p $(dirname $ARCHIVE_PATH)
-          tar --owner=0 --group=0 -czf $ARCHIVE_PATH -C .. vscode-server-linux-$(HAYSTACK_ARCH)-web
+          tar --owner=0 --group=0 -czf $ARCHIVE_PATH -C .. vscode-server-linux-$(VSCODE_ARCH)-web
           echo "##vso[task.setvariable variable=WEB_PATH]$ARCHIVE_PATH"
         env:
           GITHUB_TOKEN: "$(github-distro-mixin-password)"
@@ -237,45 +237,45 @@ steps:
           GITHUB_TOKEN: "$(github-distro-mixin-password)"
         displayName: Transpile client and extensions
 
-  - ${{ if or(eq(parameters.HAYSTACK_RUN_UNIT_TESTS, true), eq(parameters.HAYSTACK_RUN_INTEGRATION_TESTS, true), eq(parameters.HAYSTACK_RUN_SMOKE_TESTS, true)) }}:
+  - ${{ if or(eq(parameters.VSCODE_RUN_UNIT_TESTS, true), eq(parameters.VSCODE_RUN_INTEGRATION_TESTS, true), eq(parameters.VSCODE_RUN_SMOKE_TESTS, true)) }}:
       - template: product-build-linux-test.yml@self
         parameters:
-          HAYSTACK_QUALITY: ${{ parameters.HAYSTACK_QUALITY }}
-          HAYSTACK_RUN_UNIT_TESTS: ${{ parameters.HAYSTACK_RUN_UNIT_TESTS }}
-          HAYSTACK_RUN_INTEGRATION_TESTS: ${{ parameters.HAYSTACK_RUN_INTEGRATION_TESTS }}
-          HAYSTACK_RUN_SMOKE_TESTS: ${{ parameters.HAYSTACK_RUN_SMOKE_TESTS }}
-          ${{ if ne(parameters.HAYSTACK_QUALITY, 'oss') }}:
+          VSCODE_QUALITY: ${{ parameters.VSCODE_QUALITY }}
+          VSCODE_RUN_UNIT_TESTS: ${{ parameters.VSCODE_RUN_UNIT_TESTS }}
+          VSCODE_RUN_INTEGRATION_TESTS: ${{ parameters.VSCODE_RUN_INTEGRATION_TESTS }}
+          VSCODE_RUN_SMOKE_TESTS: ${{ parameters.VSCODE_RUN_SMOKE_TESTS }}
+          ${{ if ne(parameters.VSCODE_QUALITY, 'oss') }}:
             PUBLISH_TASK_NAME: 1ES.PublishPipelineArtifact@1
 
-  - ${{ if and(ne(parameters.HAYSTACK_CIBUILD, true), ne(parameters.HAYSTACK_QUALITY, 'oss')) }}:
+  - ${{ if and(ne(parameters.VSCODE_CIBUILD, true), ne(parameters.VSCODE_QUALITY, 'oss')) }}:
       - script: |
           set -e
-          yarn gulp "vscode-linux-$(HAYSTACK_ARCH)-prepare-deb"
+          yarn gulp "vscode-linux-$(VSCODE_ARCH)-prepare-deb"
         env:
           GITHUB_TOKEN: "$(github-distro-mixin-password)"
         displayName: Prepare deb package
 
       - script: |
           set -e
-          yarn gulp "vscode-linux-$(HAYSTACK_ARCH)-build-deb"
+          yarn gulp "vscode-linux-$(VSCODE_ARCH)-build-deb"
           echo "##vso[task.setvariable variable=DEB_PATH]$(ls .build/linux/deb/*/deb/*.deb)"
         displayName: Build deb package
 
       - script: |
           set -e
-          yarn gulp "vscode-linux-$(HAYSTACK_ARCH)-prepare-rpm"
+          yarn gulp "vscode-linux-$(VSCODE_ARCH)-prepare-rpm"
         displayName: Prepare rpm package
 
       - script: |
           set -e
-          yarn gulp "vscode-linux-$(HAYSTACK_ARCH)-build-rpm"
+          yarn gulp "vscode-linux-$(VSCODE_ARCH)-build-rpm"
           echo "##vso[task.setvariable variable=RPM_PATH]$(ls .build/linux/rpm/*/*.rpm)"
         displayName: Build rpm package
 
       - script: |
           set -e
-          yarn gulp "vscode-linux-$(HAYSTACK_ARCH)-prepare-snap"
-          ARCHIVE_PATH=".build/linux/snap-tarball/snap-$(HAYSTACK_ARCH).tar.gz"
+          yarn gulp "vscode-linux-$(VSCODE_ARCH)-prepare-snap"
+          ARCHIVE_PATH=".build/linux/snap-tarball/snap-$(VSCODE_ARCH).tar.gz"
           mkdir -p $(dirname $ARCHIVE_PATH)
           tar -czf $ARCHIVE_PATH -C .build/linux snap
           echo "##vso[task.setvariable variable=SNAP_PATH]$ARCHIVE_PATH"
@@ -302,9 +302,9 @@ steps:
       - task: 1ES.PublishPipelineArtifact@1
         inputs:
           targetPath: $(CLIENT_PATH)
-          artifactName: $(ARTIFACT_PREFIX)vscode_client_linux_$(HAYSTACK_ARCH)_archive-unsigned
-          sbomBuildDropPath: $(Agent.BuildDirectory)/VSCode-linux-$(HAYSTACK_ARCH)
-          sbomPackageName: "VS Code Linux $(HAYSTACK_ARCH) (unsigned)"
+          artifactName: $(ARTIFACT_PREFIX)vscode_client_linux_$(VSCODE_ARCH)_archive-unsigned
+          sbomBuildDropPath: $(Agent.BuildDirectory)/VSCode-linux-$(VSCODE_ARCH)
+          sbomPackageName: "VS Code Linux $(VSCODE_ARCH) (unsigned)"
           sbomPackageVersion: $(Build.SourceVersion)
         condition: and(succeededOrFailed(), ne(variables['CLIENT_PATH'], ''))
         displayName: Publish client archive
@@ -312,9 +312,9 @@ steps:
       - task: 1ES.PublishPipelineArtifact@1
         inputs:
           targetPath: $(SERVER_PATH)
-          artifactName: $(ARTIFACT_PREFIX)vscode_server_linux_$(HAYSTACK_ARCH)_archive-unsigned
-          sbomBuildDropPath: $(Agent.BuildDirectory)/vscode-server-linux-$(HAYSTACK_ARCH)
-          sbomPackageName: "VS Code Linux $(HAYSTACK_ARCH) Server"
+          artifactName: $(ARTIFACT_PREFIX)vscode_server_linux_$(VSCODE_ARCH)_archive-unsigned
+          sbomBuildDropPath: $(Agent.BuildDirectory)/vscode-server-linux-$(VSCODE_ARCH)
+          sbomPackageName: "VS Code Linux $(VSCODE_ARCH) Server"
           sbomPackageVersion: $(Build.SourceVersion)
         condition: and(succeededOrFailed(), ne(variables['SERVER_PATH'], ''))
         displayName: Publish server archive
@@ -322,9 +322,9 @@ steps:
       - task: 1ES.PublishPipelineArtifact@1
         inputs:
           targetPath: $(WEB_PATH)
-          artifactName: $(ARTIFACT_PREFIX)vscode_web_linux_$(HAYSTACK_ARCH)_archive-unsigned
-          sbomBuildDropPath: $(Agent.BuildDirectory)/vscode-server-linux-$(HAYSTACK_ARCH)-web
-          sbomPackageName: "VS Code Linux $(HAYSTACK_ARCH) Web"
+          artifactName: $(ARTIFACT_PREFIX)vscode_web_linux_$(VSCODE_ARCH)_archive-unsigned
+          sbomBuildDropPath: $(Agent.BuildDirectory)/vscode-server-linux-$(VSCODE_ARCH)-web
+          sbomPackageName: "VS Code Linux $(VSCODE_ARCH) Web"
           sbomPackageVersion: $(Build.SourceVersion)
         condition: and(succeededOrFailed(), ne(variables['WEB_PATH'], ''))
         displayName: Publish web server archive
@@ -332,9 +332,9 @@ steps:
       - task: 1ES.PublishPipelineArtifact@1
         inputs:
           targetPath: $(DEB_PATH)
-          artifactName: $(ARTIFACT_PREFIX)vscode_client_linux_$(HAYSTACK_ARCH)_deb-package
+          artifactName: $(ARTIFACT_PREFIX)vscode_client_linux_$(VSCODE_ARCH)_deb-package
           sbomBuildDropPath: .build/linux/deb
-          sbomPackageName: "VS Code Linux $(HAYSTACK_ARCH) DEB"
+          sbomPackageName: "VS Code Linux $(VSCODE_ARCH) DEB"
           sbomPackageVersion: $(Build.SourceVersion)
         condition: and(succeededOrFailed(), ne(variables['DEB_PATH'], ''))
         displayName: Publish deb package
@@ -342,9 +342,9 @@ steps:
       - task: 1ES.PublishPipelineArtifact@1
         inputs:
           targetPath: $(RPM_PATH)
-          artifactName: $(ARTIFACT_PREFIX)vscode_client_linux_$(HAYSTACK_ARCH)_rpm-package
+          artifactName: $(ARTIFACT_PREFIX)vscode_client_linux_$(VSCODE_ARCH)_rpm-package
           sbomBuildDropPath: .build/linux/rpm
-          sbomPackageName: "VS Code Linux $(HAYSTACK_ARCH) RPM"
+          sbomPackageName: "VS Code Linux $(VSCODE_ARCH) RPM"
           sbomPackageVersion: $(Build.SourceVersion)
         condition: and(succeededOrFailed(), ne(variables['RPM_PATH'], ''))
         displayName: Publish rpm package
@@ -352,7 +352,7 @@ steps:
       - task: 1ES.PublishPipelineArtifact@1
         inputs:
           targetPath: $(SNAP_PATH)
-          artifactName: $(ARTIFACT_PREFIX)snap-$(HAYSTACK_ARCH)
+          artifactName: $(ARTIFACT_PREFIX)snap-$(VSCODE_ARCH)
           sbomEnabled: false
         condition: and(succeededOrFailed(), ne(variables['SNAP_PATH'], ''))
         displayName: Publish snap pre-package

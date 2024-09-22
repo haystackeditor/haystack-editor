@@ -27,7 +27,7 @@ use tokio::pin;
 use crate::async_pipe::{
 	get_socket_name, get_socket_rw_stream, listen_socket_rw_stream, AsyncPipe,
 };
-use crate::constants::HAYSTACK_CLI_QUALITY;
+use crate::constants::VSCODE_CLI_QUALITY;
 use crate::download_cache::DownloadCache;
 use crate::log;
 use crate::options::Quality;
@@ -556,7 +556,7 @@ impl ConnectionManager {
 			}
 		}
 
-		let quality = HAYSTACK_CLI_QUALITY
+		let quality = VSCODE_CLI_QUALITY
 			.ok_or_else(|| CodeError::UpdatesNotConfigured("no configured quality"))
 			.and_then(|q| {
 				Quality::try_from(q).map_err(|_| CodeError::UpdatesNotConfigured("unknown quality"))
@@ -729,7 +729,7 @@ impl ConnectionManager {
 		}
 
 		// removed, otherwise the workbench will not be usable when running the CLI from sources.
-		cmd.env_remove("HAYSTACK_DEV");
+		cmd.env_remove("VSCODE_DEV");
 
 		let mut child = match cmd.spawn() {
 			Ok(c) => c,

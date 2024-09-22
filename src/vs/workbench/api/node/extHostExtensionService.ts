@@ -28,7 +28,7 @@ import { ExtHostDiskFileSystemProvider } from "vs/workbench/api/node/extHostDisk
 class NodeModuleRequireInterceptor extends RequireInterceptor {
   protected _installInterceptor(): void {
     const that = this
-    const node_module = <any>globalThis._HAYSTACK_NODE_MODULES.module
+    const node_module = <any>globalThis._VSCODE_NODE_MODULES.module
     const originalLoad = node_module._load
     node_module._load = function load(
       request: string,
@@ -82,7 +82,7 @@ export class ExtHostExtensionService extends AbstractExtHostExtensionService {
     // Register CLI Server for ipc
     if (this._initData.remote.isRemote && this._initData.remote.authority) {
       const cliServer = this._instaService.createInstance(CLIServer)
-      process.env["HAYSTACK_IPC_HOOK_CLI"] = cliServer.ipcHandlePath
+      process.env["VSCODE_IPC_HOOK_CLI"] = cliServer.ipcHandlePath
     }
 
     // Register local file system shortcut

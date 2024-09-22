@@ -157,7 +157,7 @@
         })
       }
 
-      if (process.env["HAYSTACK_DEV"]) {
+      if (process.env["VSCODE_DEV"]) {
         return Promise.resolve({ locale, osLocale, availableLanguages: {} })
       }
 

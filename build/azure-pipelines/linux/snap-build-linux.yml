@@ -8,7 +8,7 @@ steps:
   - task: DownloadPipelineArtifact@0
     displayName: "Download Pipeline Artifact"
     inputs:
-      artifactName: snap-$(HAYSTACK_ARCH)
+      artifactName: snap-$(VSCODE_ARCH)
       targetPath: .build/linux/snap-tarball
 
   - script: |
@@ -29,28 +29,28 @@ steps:
       sudo apt-get install -y yarn
 
       # Define variables
-      SNAP_ROOT="$(pwd)/.build/linux/snap/$(HAYSTACK_ARCH)"
+      SNAP_ROOT="$(pwd)/.build/linux/snap/$(VSCODE_ARCH)"
 
       # Install build dependencies
       (cd build && yarn)
 
       # Unpack snap tarball artifact, in order to preserve file perms
-      (cd .build/linux && tar -xzf snap-tarball/snap-$(HAYSTACK_ARCH).tar.gz)
+      (cd .build/linux && tar -xzf snap-tarball/snap-$(VSCODE_ARCH).tar.gz)
 
       # Create snap package
       BUILD_VERSION="$(date +%s)"
-      SNAP_FILENAME="code-$HAYSTACK_QUALITY-$(HAYSTACK_ARCH)-$BUILD_VERSION.snap"
+      SNAP_FILENAME="code-$VSCODE_QUALITY-$(VSCODE_ARCH)-$BUILD_VERSION.snap"
       SNAP_PATH="$SNAP_ROOT/$SNAP_FILENAME"
-      case $(HAYSTACK_ARCH) in
+      case $(VSCODE_ARCH) in
         x64) SNAPCRAFT_TARGET_ARGS="" ;;
-        *) SNAPCRAFT_TARGET_ARGS="--target-arch $(HAYSTACK_ARCH)" ;;
+        *) SNAPCRAFT_TARGET_ARGS="--target-arch $(VSCODE_ARCH)" ;;
       esac
       (cd $SNAP_ROOT/code-* && sudo --preserve-env snapcraft snap $SNAPCRAFT_TARGET_ARGS --output "$SNAP_PATH")
     displayName: Prepare for publish
 
   - script: |
       set -e
-      SNAP_ROOT="$(pwd)/.build/linux/snap/$(HAYSTACK_ARCH)"
+      SNAP_ROOT="$(pwd)/.build/linux/snap/$(VSCODE_ARCH)"
       SNAP_EXTRACTED_PATH=$(find $SNAP_ROOT -maxdepth 1 -type d -name 'code-*')
       SNAP_PATH=$(find $SNAP_ROOT -maxdepth 1 -type f -name '*.snap')
 
@@ -66,8 +66,8 @@ steps:
   - task: 1ES.PublishPipelineArtifact@1
     inputs:
       targetPath: $(SNAP_PATH)
-      artifactName: vscode_client_linux_$(HAYSTACK_ARCH)_snap
+      artifactName: vscode_client_linux_$(VSCODE_ARCH)_snap
       sbomBuildDropPath: $(SNAP_EXTRACTED_PATH)
-      sbomPackageName: "VS Code Linux $(HAYSTACK_ARCH) SNAP"
+      sbomPackageName: "VS Code Linux $(VSCODE_ARCH) SNAP"
       sbomPackageVersion: $(Build.SourceVersion)
     displayName: Publish snap package

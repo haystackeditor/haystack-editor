@@ -137,7 +137,7 @@ export abstract class AbstractNativeEnvironmentService
 
   @memoize
   get argvResource(): URI {
-    const vscodePortable = env["HAYSTACK_PORTABLE"]
+    const vscodePortable = env["VSCODE_PORTABLE"]
     if (vscodePortable) {
       return URI.file(join(vscodePortable, "argv.json"))
     }
@@ -185,12 +185,12 @@ export abstract class AbstractNativeEnvironmentService
       return resolve(cliExtensionsDir)
     }
 
-    const vscodeExtensions = env["HAYSTACK_EXTENSIONS"]
+    const vscodeExtensions = env["VSCODE_EXTENSIONS"]
     if (vscodeExtensions) {
       return vscodeExtensions
     }
 
-    const vscodePortable = env["HAYSTACK_PORTABLE"]
+    const vscodePortable = env["VSCODE_PORTABLE"]
     if (vscodePortable) {
       return join(vscodePortable, "extensions")
     }
@@ -269,7 +269,7 @@ export abstract class AbstractNativeEnvironmentService
   }
 
   get isBuilt(): boolean {
-    return !env["HAYSTACK_DEV"]
+    return !env["VSCODE_DEV"]
   }
   get verbose(): boolean {
     return !!this.args.verbose
@@ -323,7 +323,7 @@ export abstract class AbstractNativeEnvironmentService
   @memoize
   get policyFile(): URI | undefined {
     if (this.args["__enable-file-policy"]) {
-      const vscodePortable = env["HAYSTACK_PORTABLE"]
+      const vscodePortable = env["VSCODE_PORTABLE"]
       if (vscodePortable) {
         return URI.file(join(vscodePortable, "policy.json"))
       }

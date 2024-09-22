@@ -17,7 +17,7 @@ import { spawn } from "@malept/cross-spawn-promise"
 const root = path.dirname(path.dirname(__dirname))
 
 async function main(buildDir?: string) {
-  const arch = process.env["HAYSTACK_ARCH"]
+  const arch = process.env["VSCODE_ARCH"]
 
   if (!buildDir) {
     throw new Error("Build dir not provided")

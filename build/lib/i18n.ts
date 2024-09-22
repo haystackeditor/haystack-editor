@@ -491,7 +491,7 @@ function processCoreBundleFormat(
   }
   const sortedLanguages = sortLanguages(languages)
   sortedLanguages.forEach((language) => {
-    if (process.env["HAYSTACK_BUILD_VERBOSE"]) {
+    if (process.env["VSCODE_BUILD_VERBOSE"]) {
       log(`Generating nls bundles for: ${language.id}`)
     }
 
@@ -516,7 +516,7 @@ function processCoreBundleFormat(
         moduleMessage = allMessages.contents[module]
       }
       if (!moduleMessage) {
-        if (process.env["HAYSTACK_BUILD_VERBOSE"]) {
+        if (process.env["VSCODE_BUILD_VERBOSE"]) {
           log(
             `No localized messages found for module ${module}. Using default messages.`,
           )
@@ -535,7 +535,7 @@ function processCoreBundleFormat(
         }
         let message: string = moduleMessage![key]
         if (!message) {
-          if (process.env["HAYSTACK_BUILD_VERBOSE"]) {
+          if (process.env["VSCODE_BUILD_VERBOSE"]) {
             log(
               `No localized message found for key ${key} in module ${module}. Using default message.`,
             )

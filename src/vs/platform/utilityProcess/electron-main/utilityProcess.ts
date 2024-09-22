@@ -296,11 +296,11 @@ export class UtilityProcess extends Disposable {
       : { ...deepClone(process.env) }
 
     // Apply supported environment variables from config
-    env["HAYSTACK_AMD_ENTRYPOINT"] = configuration.entryPoint
+    env["VSCODE_AMD_ENTRYPOINT"] = configuration.entryPoint
     if (typeof configuration.parentLifecycleBound === "number") {
-      env["HAYSTACK_PARENT_PID"] = String(configuration.parentLifecycleBound)
+      env["VSCODE_PARENT_PID"] = String(configuration.parentLifecycleBound)
     }
-    env["HAYSTACK_CRASH_REPORTER_PROCESS_TYPE"] = configuration.type
+    env["VSCODE_CRASH_REPORTER_PROCESS_TYPE"] = configuration.type
     if (isWindows) {
       if (isUNCAccessRestrictionsDisabled()) {
         env["NODE_DISABLE_UNC_ACCESS_CHECKS"] = "1"

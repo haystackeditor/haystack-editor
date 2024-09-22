@@ -16,7 +16,7 @@ import { ensureNoDisposablesAreLeakedInTestSuite } from "vs/base/test/common/uti
 import { flakySuite } from "vs/base/test/node/testUtils"
 
 flakySuite("Ports", () => {
-  ;(process.env["HAYSTACK_PID"]
+  ;(process.env["VSCODE_PID"]
     ? test.skip /* this test fails when run from within VS Code */
     : test)("Finds a free port (no timeout)", function (done) {
     // get an initial freeport >= 7000

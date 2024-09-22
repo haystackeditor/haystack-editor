@@ -77,9 +77,9 @@ export async function buildUserEnvironment(
     ...processEnv,
     ...userShellEnv,
     ...{
-      HAYSTACK_AMD_ENTRYPOINT: "vs/workbench/api/node/extensionHostProcess",
-      HAYSTACK_HANDLES_UNCAUGHT_ERRORS: "true",
-      HAYSTACK_NLS_CONFIG: JSON.stringify(nlsConfig, undefined, 0),
+      VSCODE_AMD_ENTRYPOINT: "vs/workbench/api/node/extensionHostProcess",
+      VSCODE_HANDLES_UNCAUGHT_ERRORS: "true",
+      VSCODE_NLS_CONFIG: JSON.stringify(nlsConfig, undefined, 0),
     },
     ...startParamsEnv,
   }
@@ -135,7 +135,7 @@ class ConnectionData {
     }
 
     return {
-      type: "HAYSTACK_EXTHOST_IPC_SOCKET",
+      type: "VSCODE_EXTHOST_IPC_SOCKET",
       initialDataChunk: (<Buffer>this.initialDataChunk.buffer).toString(
         "base64",
       ),
@@ -258,7 +258,7 @@ export class ExtensionHostConnection {
       return
     }
     const msg: IExtHostReduceGraceTimeMessage = {
-      type: "HAYSTACK_EXTHOST_IPC_REDUCE_GRACE_TIME",
+      type: "VSCODE_EXTHOST_IPC_REDUCE_GRACE_TIME",
     }
     this._extensionHostProcess.send(msg)
   }
@@ -392,7 +392,7 @@ export class ExtensionHostConnection {
         })
       } else {
         const messageListener = (msg: IExtHostReadyMessage) => {
-          if (msg.type === "HAYSTACK_EXTHOST_IPC_READY") {
+          if (msg.type === "VSCODE_EXTHOST_IPC_READY") {
             this._extensionHostProcess!.removeListener(
               "message",
               messageListener,

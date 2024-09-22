@@ -410,10 +410,10 @@ class CodeMain {
     environmentMainService: IEnvironmentMainService,
   ): IProcessEnvironment {
     const instanceEnvironment: IProcessEnvironment = {
-      HAYSTACK_IPC_HOOK: environmentMainService.mainIPCHandle,
+      VSCODE_IPC_HOOK: environmentMainService.mainIPCHandle,
     }
 
-    ;["HAYSTACK_NLS_CONFIG", "HAYSTACK_PORTABLE"].forEach((key) => {
+    ;["VSCODE_NLS_CONFIG", "VSCODE_PORTABLE"].forEach((key) => {
       const value = process.env[key]
       if (typeof value === "string") {
         instanceEnvironment[key] = value
@@ -670,9 +670,9 @@ class CodeMain {
       throw new ExpectedError("Terminating...")
     }
 
-    // Set the HAYSTACK_PID variable here when we are sure we are the first
+    // Set the VSCODE_PID variable here when we are sure we are the first
     // instance to startup. Otherwise we would wrongly overwrite the PID
-    process.env["HAYSTACK_PID"] = String(process.pid)
+    process.env["VSCODE_PID"] = String(process.pid)
 
     return mainProcessNodeIpcServer
   }

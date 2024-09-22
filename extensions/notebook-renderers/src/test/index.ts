@@ -22,9 +22,9 @@ const options: import("mocha").MochaOptions = {
 // so we need to set the suite name based on the environment as the suite name is used
 // for the test results file name
 let suite = ""
-if (process.env.HAYSTACK_BROWSER) {
-  suite = `${process.env.HAYSTACK_BROWSER} Browser Integration notebook output renderer Tests`
-} else if (process.env.REMOTE_HAYSTACK) {
+if (process.env.VSCODE_BROWSER) {
+  suite = `${process.env.VSCODE_BROWSER} Browser Integration notebook output renderer Tests`
+} else if (process.env.REMOTE_VSCODE) {
   suite = "Remote Integration notebook output renderer Tests"
 } else {
   suite = "Integration notebook output renderer Tests"

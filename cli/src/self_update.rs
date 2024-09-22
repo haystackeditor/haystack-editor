@@ -13,7 +13,7 @@ use std::{fs, path::Path};
 use tempfile::tempdir;
 
 use crate::{
-	constants::{HAYSTACK_CLI_COMMIT, HAYSTACK_CLI_QUALITY},
+	constants::{VSCODE_CLI_COMMIT, VSCODE_CLI_QUALITY},
 	options::Quality,
 	update_service::{unzip_downloaded_release, Platform, Release, TargetKind, UpdateService},
 	util::{
@@ -37,7 +37,7 @@ impl<'a> SelfUpdate<'a> {
 	pub fn new(update_service: &'a UpdateService) -> Result<Self, AnyError> {
 		let commit = "cc102f3a62bd35f39ed059b99c5cce90e50a16e2";
 
-		let quality = HAYSTACK_CLI_QUALITY
+		let quality = VSCODE_CLI_QUALITY
 			.ok_or_else(|| CodeError::UpdatesNotConfigured("no configured quality"))
 			.and_then(|q| {
 				Quality::try_from(q).map_err(|_| CodeError::UpdatesNotConfigured("unknown quality"))

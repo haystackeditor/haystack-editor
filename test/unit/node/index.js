@@ -88,14 +88,14 @@ if (majorRequiredNodeVersion !== currentMajorNodeVersion) {
 }
 
 function main() {
-  // HAYSTACK_GLOBALS: node_modules
-  globalThis._HAYSTACK_NODE_MODULES = new Proxy(Object.create(null), {
+  // VSCODE_GLOBALS: node_modules
+  globalThis._VSCODE_NODE_MODULES = new Proxy(Object.create(null), {
     get: (_target, mod) => require(String(mod)),
   })
 
-  // HAYSTACK_GLOBALS: package/product.json
-  globalThis._HAYSTACK_PRODUCT_JSON = require(`${REPO_ROOT}/product.json`)
-  globalThis._HAYSTACK_PACKAGE_JSON = require(`${REPO_ROOT}/package.json`)
+  // VSCODE_GLOBALS: package/product.json
+  globalThis._VSCODE_PRODUCT_JSON = require(`${REPO_ROOT}/product.json`)
+  globalThis._VSCODE_PACKAGE_JSON = require(`${REPO_ROOT}/package.json`)
 
   // Test file operations that are common across platforms. Used for test infra, namely snapshot tests
   Object.assign(globalThis, {

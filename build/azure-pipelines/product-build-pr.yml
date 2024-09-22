@@ -15,79 +15,79 @@ variables:
     value: "none"
   - name: CARGO_REGISTRY
     value: "none"
-  - name: HAYSTACK_CIBUILD
+  - name: VSCODE_CIBUILD
     value: ${{ in(variables['Build.Reason'], 'IndividualCI', 'BatchedCI') }}
-  - name: HAYSTACK_QUALITY
+  - name: VSCODE_QUALITY
     value: oss
-  - name: HAYSTACK_STEP_ON_IT
+  - name: VSCODE_STEP_ON_IT
     value: false
 
 jobs:
-  - ${{ if ne(variables['HAYSTACK_CIBUILD'], true) }}:
+  - ${{ if ne(variables['VSCODE_CIBUILD'], true) }}:
       - job: Compile
         displayName: Compile & Hygiene
         pool: 1es-oss-ubuntu-20.04-x64
         timeoutInMinutes: 30
         variables:
-          HAYSTACK_ARCH: x64
+          VSCODE_ARCH: x64
         steps:
           - template: product-compile.yml@self
             parameters:
-              HAYSTACK_QUALITY: ${{ variables.HAYSTACK_QUALITY }}
+              VSCODE_QUALITY: ${{ variables.VSCODE_QUALITY }}
 
       - job: Linuxx64UnitTest
         displayName: Linux (Unit Tests)
         pool: 1es-oss-ubuntu-20.04-x64
         timeoutInMinutes: 30
         variables:
-          HAYSTACK_ARCH: x64
+          VSCODE_ARCH: x64
           NPM_ARCH: x64
           DISPLAY: ":10"
         steps:
           - template: linux/product-build-linux.yml@self
             parameters:
-              HAYSTACK_ARCH: x64
-              HAYSTACK_QUALITY: ${{ variables.HAYSTACK_QUALITY }}
-              HAYSTACK_CIBUILD: ${{ variables.HAYSTACK_CIBUILD }}
-              HAYSTACK_RUN_UNIT_TESTS: true
-              HAYSTACK_RUN_INTEGRATION_TESTS: false
-              HAYSTACK_RUN_SMOKE_TESTS: false
+              VSCODE_ARCH: x64
+              VSCODE_QUALITY: ${{ variables.VSCODE_QUALITY }}
+              VSCODE_CIBUILD: ${{ variables.VSCODE_CIBUILD }}
+              VSCODE_RUN_UNIT_TESTS: true
+              VSCODE_RUN_INTEGRATION_TESTS: false
+              VSCODE_RUN_SMOKE_TESTS: false
 
       - job: Linuxx64IntegrationTest
         displayName: Linux (Integration Tests)
         pool: 1es-oss-ubuntu-20.04-x64
         timeoutInMinutes: 30
         variables:
-          HAYSTACK_ARCH: x64
+          VSCODE_ARCH: x64
           NPM_ARCH: x64
           DISPLAY: ":10"
         steps:
           - template: linux/product-build-linux.yml@self
             parameters:
-              HAYSTACK_ARCH: x64
-              HAYSTACK_QUALITY: ${{ variables.HAYSTACK_QUALITY }}
-              HAYSTACK_CIBUILD: ${{ variables.HAYSTACK_CIBUILD }}
-              HAYSTACK_RUN_UNIT_TESTS: false
-              HAYSTACK_RUN_INTEGRATION_TESTS: true
-              HAYSTACK_RUN_SMOKE_TESTS: false
+              VSCODE_ARCH: x64
+              VSCODE_QUALITY: ${{ variables.VSCODE_QUALITY }}
+              VSCODE_CIBUILD: ${{ variables.VSCODE_CIBUILD }}
+              VSCODE_RUN_UNIT_TESTS: false
+              VSCODE_RUN_INTEGRATION_TESTS: true
+              VSCODE_RUN_SMOKE_TESTS: false
 
       - job: Linuxx64SmokeTest
         displayName: Linux (Smoke Tests)
         pool: 1es-oss-ubuntu-20.04-x64
         timeoutInMinutes: 30
         variables:
-          HAYSTACK_ARCH: x64
+          VSCODE_ARCH: x64
           NPM_ARCH: x64
           DISPLAY: ":10"
         steps:
           - template: linux/product-build-linux.yml@self
             parameters:
-              HAYSTACK_ARCH: x64
-              HAYSTACK_QUALITY: ${{ variables.HAYSTACK_QUALITY }}
-              HAYSTACK_CIBUILD: ${{ variables.HAYSTACK_CIBUILD }}
-              HAYSTACK_RUN_UNIT_TESTS: false
-              HAYSTACK_RUN_INTEGRATION_TESTS: false
-              HAYSTACK_RUN_SMOKE_TESTS: true
+              VSCODE_ARCH: x64
+              VSCODE_QUALITY: ${{ variables.VSCODE_QUALITY }}
+              VSCODE_CIBUILD: ${{ variables.VSCODE_CIBUILD }}
+              VSCODE_RUN_UNIT_TESTS: false
+              VSCODE_RUN_INTEGRATION_TESTS: false
+              VSCODE_RUN_SMOKE_TESTS: true
 
       - job: LinuxCLI
         displayName: Linux (CLI)
@@ -101,58 +101,58 @@ jobs:
         pool: 1es-oss-windows-2019-x64
         timeoutInMinutes: 30
         variables:
-          HAYSTACK_ARCH: x64
+          VSCODE_ARCH: x64
           NPM_ARCH: x64
         steps:
           - template: win32/product-build-win32.yml@self
             parameters:
-              HAYSTACK_QUALITY: ${{ variables.HAYSTACK_QUALITY }}
-              HAYSTACK_ARCH: x64
-              HAYSTACK_CIBUILD: ${{ variables.HAYSTACK_CIBUILD }}
-              HAYSTACK_RUN_UNIT_TESTS: true
-              HAYSTACK_RUN_INTEGRATION_TESTS: false
-              HAYSTACK_RUN_SMOKE_TESTS: false
+              VSCODE_QUALITY: ${{ variables.VSCODE_QUALITY }}
+              VSCODE_ARCH: x64
+              VSCODE_CIBUILD: ${{ variables.VSCODE_CIBUILD }}
+              VSCODE_RUN_UNIT_TESTS: true
+              VSCODE_RUN_INTEGRATION_TESTS: false
+              VSCODE_RUN_SMOKE_TESTS: false
 
       - job: Windowsx64IntegrationTests
         displayName: Windows (Integration Tests)
         pool: 1es-oss-windows-2019-x64
         timeoutInMinutes: 30
         variables:
-          HAYSTACK_ARCH: x64
+          VSCODE_ARCH: x64
           NPM_ARCH: x64
         steps:
           - template: win32/product-build-win32.yml@self
             parameters:
-              HAYSTACK_QUALITY: ${{ variables.HAYSTACK_QUALITY }}
-              HAYSTACK_ARCH: x64
-              HAYSTACK_CIBUILD: ${{ variables.HAYSTACK_CIBUILD }}
-              HAYSTACK_RUN_UNIT_TESTS: false
-              HAYSTACK_RUN_INTEGRATION_TESTS: true
-              HAYSTACK_RUN_SMOKE_TESTS: false
+              VSCODE_QUALITY: ${{ variables.VSCODE_QUALITY }}
+              VSCODE_ARCH: x64
+              VSCODE_CIBUILD: ${{ variables.VSCODE_CIBUILD }}
+              VSCODE_RUN_UNIT_TESTS: false
+              VSCODE_RUN_INTEGRATION_TESTS: true
+              VSCODE_RUN_SMOKE_TESTS: false
 
     # - job: Windowsx64SmokeTests
     #   displayName: Windows (Smoke Tests)
     #   pool: 1es-oss-windows-2019-x64
     #   timeoutInMinutes: 30
     #   variables:
-    #     HAYSTACK_ARCH: x64
+    #     VSCODE_ARCH: x64
     #     NPM_ARCH: x64
     #   steps:
     #     - template: win32/product-build-win32.yml@self
     #       parameters:
-    #         HAYSTACK_QUALITY: ${{ variables.HAYSTACK_QUALITY }}
-    #         HAYSTACK_ARCH: x64
-    #         HAYSTACK_RUN_UNIT_TESTS: false
-    #         HAYSTACK_RUN_INTEGRATION_TESTS: false
-    #         HAYSTACK_RUN_SMOKE_TESTS: true
+    #         VSCODE_QUALITY: ${{ variables.VSCODE_QUALITY }}
+    #         VSCODE_ARCH: x64
+    #         VSCODE_RUN_UNIT_TESTS: false
+    #         VSCODE_RUN_INTEGRATION_TESTS: false
+    #         VSCODE_RUN_SMOKE_TESTS: true
 
-  - ${{ if eq(variables['HAYSTACK_CIBUILD'], true) }}:
+  - ${{ if eq(variables['VSCODE_CIBUILD'], true) }}:
       - job: Linuxx64MaintainNodeModulesCache
         displayName: Linux (Maintain node_modules cache)
         pool: 1es-oss-ubuntu-20.04-x64
         timeoutInMinutes: 30
         variables:
-          HAYSTACK_ARCH: x64
+          VSCODE_ARCH: x64
         steps:
           - template: oss/product-build-pr-cache-linux.yml@self
 
@@ -161,7 +161,7 @@ jobs:
         pool: 1es-oss-windows-2019-x64
         timeoutInMinutes: 30
         variables:
-          HAYSTACK_ARCH: x64
+          VSCODE_ARCH: x64
         steps:
           - template: oss/product-build-pr-cache-win32.yml@self
 
@@ -172,14 +172,14 @@ jobs:
   #   timeoutInMinutes: 60
   #   variables:
   #     BUILDSECMON_OPT_IN: true
-  #     HAYSTACK_ARCH: x64
+  #     VSCODE_ARCH: x64
   #   steps:
   #     - template: darwin/product-build-darwin.yml@self
   #       parameters:
-  #         HAYSTACK_QUALITY: ${{ variables.HAYSTACK_QUALITY }}
-  #         HAYSTACK_RUN_UNIT_TESTS: true
-  #         HAYSTACK_RUN_INTEGRATION_TESTS: false
-  #         HAYSTACK_RUN_SMOKE_TESTS: false
+  #         VSCODE_QUALITY: ${{ variables.VSCODE_QUALITY }}
+  #         VSCODE_RUN_UNIT_TESTS: true
+  #         VSCODE_RUN_INTEGRATION_TESTS: false
+  #         VSCODE_RUN_SMOKE_TESTS: false
   # - job: macOSIntegrationTest
   #   displayName: macOS (Integration Tests)
   #   pool:
@@ -187,14 +187,14 @@ jobs:
   #   timeoutInMinutes: 60
   #   variables:
   #     BUILDSECMON_OPT_IN: true
-  #     HAYSTACK_ARCH: x64
+  #     VSCODE_ARCH: x64
   #   steps:
   #     - template: darwin/product-build-darwin.yml@self
   #       parameters:
-  #         HAYSTACK_QUALITY: ${{ variables.HAYSTACK_QUALITY }}
-  #         HAYSTACK_RUN_UNIT_TESTS: false
-  #         HAYSTACK_RUN_INTEGRATION_TESTS: true
-  #         HAYSTACK_RUN_SMOKE_TESTS: false
+  #         VSCODE_QUALITY: ${{ variables.VSCODE_QUALITY }}
+  #         VSCODE_RUN_UNIT_TESTS: false
+  #         VSCODE_RUN_INTEGRATION_TESTS: true
+  #         VSCODE_RUN_SMOKE_TESTS: false
   # - job: macOSSmokeTest
   #   displayName: macOS (Smoke Tests)
   #   pool:
@@ -202,11 +202,11 @@ jobs:
   #   timeoutInMinutes: 60
   #   variables:
   #     BUILDSECMON_OPT_IN: true
-  #     HAYSTACK_ARCH: x64
+  #     VSCODE_ARCH: x64
   #   steps:
   #     - template: darwin/product-build-darwin.yml@self
   #       parameters:
-  #         HAYSTACK_QUALITY: ${{ variables.HAYSTACK_QUALITY }}
-  #         HAYSTACK_RUN_UNIT_TESTS: false
-  #         HAYSTACK_RUN_INTEGRATION_TESTS: false
-  #         HAYSTACK_RUN_SMOKE_TESTS: true
+  #         VSCODE_QUALITY: ${{ variables.VSCODE_QUALITY }}
+  #         VSCODE_RUN_UNIT_TESTS: false
+  #         VSCODE_RUN_INTEGRATION_TESTS: false
+  #         VSCODE_RUN_SMOKE_TESTS: true

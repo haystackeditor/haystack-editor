@@ -1,13 +1,13 @@
 parameters:
-  - name: HAYSTACK_QUALITY
+  - name: VSCODE_QUALITY
     type: string
-  - name: HAYSTACK_BUILD_MACOS
+  - name: VSCODE_BUILD_MACOS
     type: boolean
     default: false
-  - name: HAYSTACK_BUILD_MACOS_ARM64
+  - name: VSCODE_BUILD_MACOS_ARM64
     type: boolean
     default: false
-  - name: HAYSTACK_CHECK_ONLY
+  - name: VSCODE_CHECK_ONLY
     type: boolean
     default: false
 
@@ -18,7 +18,7 @@ steps:
       versionFilePath: .nvmrc
       nodejsMirror: https://github.com/joaomoreno/node-mirror/releases/download
 
-  - ${{ if ne(parameters.HAYSTACK_QUALITY, 'oss') }}:
+  - ${{ if ne(parameters.VSCODE_QUALITY, 'oss') }}:
       - template: ../cli/cli-apply-patches.yml@self
 
   - task: Npm@1
@@ -39,35 +39,35 @@ steps:
   - template: ../cli/install-rust-posix.yml@self
     parameters:
       targets:
-        - ${{ if eq(parameters.HAYSTACK_BUILD_MACOS, true) }}:
+        - ${{ if eq(parameters.VSCODE_BUILD_MACOS, true) }}:
             - x86_64-apple-darwin
-        - ${{ if eq(parameters.HAYSTACK_BUILD_MACOS_ARM64, true) }}:
+        - ${{ if eq(parameters.VSCODE_BUILD_MACOS_ARM64, true) }}:
             - aarch64-apple-darwin
 
-  - ${{ if eq(parameters.HAYSTACK_BUILD_MACOS, true) }}:
+  - ${{ if eq(parameters.VSCODE_BUILD_MACOS, true) }}:
       - template: ../cli/cli-compile.yml@self
         parameters:
-          HAYSTACK_QUALITY: ${{ parameters.HAYSTACK_QUALITY }}
-          HAYSTACK_CLI_TARGET: x86_64-apple-darwin
-          HAYSTACK_CLI_ARTIFACT: unsigned_vscode_cli_darwin_x64_cli
-          HAYSTACK_CHECK_ONLY: ${{ parameters.HAYSTACK_CHECK_ONLY }}
-          HAYSTACK_CLI_ENV:
+          VSCODE_QUALITY: ${{ parameters.VSCODE_QUALITY }}
+          VSCODE_CLI_TARGET: x86_64-apple-darwin
+          VSCODE_CLI_ARTIFACT: unsigned_vscode_cli_darwin_x64_cli
+          VSCODE_CHECK_ONLY: ${{ parameters.VSCODE_CHECK_ONLY }}
+          VSCODE_CLI_ENV:
             OPENSSL_LIB_DIR: $(Build.ArtifactStagingDirectory)/openssl/x64-osx/lib
             OPENSSL_INCLUDE_DIR: $(Build.ArtifactStagingDirectory)/openssl/x64-osx/include
 
-  - ${{ if eq(parameters.HAYSTACK_BUILD_MACOS_ARM64, true) }}:
+  - ${{ if eq(parameters.VSCODE_BUILD_MACOS_ARM64, true) }}:
       - template: ../cli/cli-compile.yml@self
         parameters:
-          HAYSTACK_QUALITY: ${{ parameters.HAYSTACK_QUALITY }}
-          HAYSTACK_CLI_TARGET: aarch64-apple-darwin
-          HAYSTACK_CLI_ARTIFACT: unsigned_vscode_cli_darwin_arm64_cli
-          HAYSTACK_CHECK_ONLY: ${{ parameters.HAYSTACK_CHECK_ONLY }}
-          HAYSTACK_CLI_ENV:
+          VSCODE_QUALITY: ${{ parameters.VSCODE_QUALITY }}
+          VSCODE_CLI_TARGET: aarch64-apple-darwin
+          VSCODE_CLI_ARTIFACT: unsigned_vscode_cli_darwin_arm64_cli
+          VSCODE_CHECK_ONLY: ${{ parameters.VSCODE_CHECK_ONLY }}
+          VSCODE_CLI_ENV:
             OPENSSL_LIB_DIR: $(Build.ArtifactStagingDirectory)/openssl/arm64-osx/lib
             OPENSSL_INCLUDE_DIR: $(Build.ArtifactStagingDirectory)/openssl/arm64-osx/include
 
-  - ${{ if not(parameters.HAYSTACK_CHECK_ONLY) }}:
-      - ${{ if eq(parameters.HAYSTACK_BUILD_MACOS, true) }}:
+  - ${{ if not(parameters.VSCODE_CHECK_ONLY) }}:
+      - ${{ if eq(parameters.VSCODE_BUILD_MACOS, true) }}:
           - task: 1ES.PublishPipelineArtifact@1
             inputs:
               targetPath: $(Build.ArtifactStagingDirectory)/unsigned_vscode_cli_darwin_x64_cli.zip
@@ -77,7 +77,7 @@ steps:
               sbomPackageVersion: $(Build.SourceVersion)
             displayName: Publish unsigned_vscode_cli_darwin_x64_cli artifact
 
-      - ${{ if eq(parameters.HAYSTACK_BUILD_MACOS_ARM64, true) }}:
+      - ${{ if eq(parameters.VSCODE_BUILD_MACOS_ARM64, true) }}:
           - task: 1ES.PublishPipelineArtifact@1
             inputs:
               targetPath: $(Build.ArtifactStagingDirectory)/unsigned_vscode_cli_darwin_arm64_cli.zip

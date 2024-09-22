@@ -56,7 +56,7 @@ export async function downloadExplorerAppx(
 }
 
 async function main(outputDir?: string): Promise<void> {
-  const arch = process.env["HAYSTACK_ARCH"]
+  const arch = process.env["VSCODE_ARCH"]
 
   if (!outputDir) {
     throw new Error("Required build env not set")

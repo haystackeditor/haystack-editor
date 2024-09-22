@@ -6,7 +6,7 @@ title VSCode Dev
 pushd %~dp0\..
 
 :: Get electron, compile, built-in extensions
-if "%HAYSTACK_SKIP_PRELAUNCH%"=="" node build/lib/preLaunch.js
+if "%VSCODE_SKIP_PRELAUNCH%"=="" node build/lib/preLaunch.js
 
 for /f "tokens=2 delims=:," %%a in ('findstr /R /C:"\"nameShort\":.*" product.json') do set NAMESHORT=%%~a
 set NAMESHORT=%NAMESHORT: "=%
@@ -18,8 +18,8 @@ if "%~1"=="--builtin" goto builtin
 
 :: Configuration
 set NODE_ENV=development
-set HAYSTACK_DEV=1
-set HAYSTACK_CLI=1
+set VSCODE_DEV=1
+set VSCODE_CLI=1
 set ELECTRON_ENABLE_LOGGING=1
 set ELECTRON_ENABLE_STACK_DUMPING=1
 

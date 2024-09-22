@@ -21,7 +21,7 @@ else
 	CODE=".build/electron/$NAME"
 fi
 
-HAYSTACKCRASHDIR=$ROOT/.build/crashes
+VSCODECRASHDIR=$ROOT/.build/crashes
 
 # Node modules
 test -d node_modules || yarn
@@ -34,10 +34,10 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 	cd $ROOT ; ulimit -n 4096 ; \
 		ELECTRON_ENABLE_LOGGING=1 \
 		"$CODE" \
-		test/unit/electron/index.js --crash-reporter-directory=$HAYSTACKCRASHDIR "$@"
+		test/unit/electron/index.js --crash-reporter-directory=$VSCODECRASHDIR "$@"
 else
 	cd $ROOT ; \
 		ELECTRON_ENABLE_LOGGING=1 \
 		"$CODE" \
-		test/unit/electron/index.js --crash-reporter-directory=$HAYSTACKCRASHDIR $LINUX_EXTRA_ARGS "$@"
+		test/unit/electron/index.js --crash-reporter-directory=$VSCODECRASHDIR $LINUX_EXTRA_ARGS "$@"
 fi

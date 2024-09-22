@@ -124,7 +124,7 @@ export class MergedEnvironmentVariableCollection
         }
         // Default: false
         if (mutator.options?.applyAtShellIntegration ?? false) {
-          const key = `HAYSTACK_ENV_${mutatorTypeToLabelMap.get(mutator.type)!}`
+          const key = `VSCODE_ENV_${mutatorTypeToLabelMap.get(mutator.type)!}`
           env[key] =
             (env[key] ? env[key] + ":" : "") +
             variable +

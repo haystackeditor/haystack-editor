@@ -160,7 +160,7 @@ function configureModuleLoading(
   lookup: ReturnType<typeof createPatchedModules>,
 ): Promise<void> {
   return extensionService.getExtensionPathIndex().then((extensionPaths) => {
-    const node_module = <any>globalThis._HAYSTACK_NODE_MODULES.module
+    const node_module = <any>globalThis._VSCODE_NODE_MODULES.module
     const original = node_module._load
     node_module._load = function load(
       request: string,

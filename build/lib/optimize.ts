@@ -294,7 +294,7 @@ function optimizeAMDTask(opts: IOptimizeAMDTaskOpts): NodeJS.ReadWriteStream {
     // Remove css inlined resources
     const filteredResources = resources.slice()
     result.cssInlinedResources.forEach(function (resource) {
-      if (process.env["HAYSTACK_BUILD_VERBOSE"]) {
+      if (process.env["VSCODE_BUILD_VERBOSE"]) {
         log("optimizer", "excluding inlined: " + resource)
       }
       filteredResources.push("!" + resource)

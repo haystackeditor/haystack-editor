@@ -20,7 +20,7 @@ function createClient(): Client {
   return new Client(FileAccess.asFileUri("bootstrap-fork").fsPath, {
     serverName: "TestServer",
     env: {
-      HAYSTACK_AMD_ENTRYPOINT: "vs/base/parts/ipc/test/node/testApp",
+      VSCODE_AMD_ENTRYPOINT: "vs/base/parts/ipc/test/node/testApp",
       verbose: true,
     },
   })

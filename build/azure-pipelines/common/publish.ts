@@ -778,7 +778,7 @@ async function processArtifact(
   }
 
   // getPlatform needs the unprocessedType
-  const quality = e("HAYSTACK_QUALITY")
+  const quality = e("VSCODE_QUALITY")
   const commit = e("BUILD_SOURCEVERSION")
   const { product, os, arch, unprocessedType } = match.groups!
   const isLegacy = artifact.name.includes("_legacy")
@@ -857,22 +857,22 @@ async function main() {
   }
 
   const stages = new Set<string>(["Compile", "CompileCLI"])
-  if (e("HAYSTACK_BUILD_STAGE_WINDOWS") === "True") {
+  if (e("VSCODE_BUILD_STAGE_WINDOWS") === "True") {
     stages.add("Windows")
   }
-  if (e("HAYSTACK_BUILD_STAGE_LINUX") === "True") {
+  if (e("VSCODE_BUILD_STAGE_LINUX") === "True") {
     stages.add("Linux")
   }
-  if (e("HAYSTACK_BUILD_STAGE_LINUX_LEGACY_SERVER") === "True") {
+  if (e("VSCODE_BUILD_STAGE_LINUX_LEGACY_SERVER") === "True") {
     stages.add("LinuxLegacyServer")
   }
-  if (e("HAYSTACK_BUILD_STAGE_ALPINE") === "True") {
+  if (e("VSCODE_BUILD_STAGE_ALPINE") === "True") {
     stages.add("Alpine")
   }
-  if (e("HAYSTACK_BUILD_STAGE_MACOS") === "True") {
+  if (e("VSCODE_BUILD_STAGE_MACOS") === "True") {
     stages.add("macOS")
   }
-  if (e("HAYSTACK_BUILD_STAGE_WEB") === "True") {
+  if (e("VSCODE_BUILD_STAGE_WEB") === "True") {
     stages.add("Web")
   }
 

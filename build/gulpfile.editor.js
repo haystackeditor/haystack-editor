@@ -68,7 +68,7 @@ const BUNDLED_FILE_HEADER = [
   "",
 ].join("\n")
 
-const languages = i18n.defaultLanguages.concat([]) // i18n.defaultLanguages.concat(process.env.HAYSTACK_QUALITY !== 'stable' ? i18n.extraLanguages : []);
+const languages = i18n.defaultLanguages.concat([]) // i18n.defaultLanguages.concat(process.env.VSCODE_QUALITY !== 'stable' ? i18n.extraLanguages : []);
 
 const extractEditorSrcTask = task.define("extract-editor-src", () => {
   const apiusages = monacoapi.execute().usageContent

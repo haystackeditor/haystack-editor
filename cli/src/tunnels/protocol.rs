@@ -11,7 +11,7 @@
 use std::collections::HashMap;
 
 use crate::{
-	constants::{HAYSTACK_CLI_VERSION, PROTOCOL_VERSION},
+	constants::{PROTOCOL_VERSION, VSCODE_CLI_VERSION},
 	options::Quality,
 	update_service::Platform,
 };
@@ -249,7 +249,7 @@ pub struct VersionResponse {
 impl Default for VersionResponse {
 	fn default() -> Self {
 		Self {
-			version: HAYSTACK_CLI_VERSION.unwrap_or("dev"),
+			version: VSCODE_CLI_VERSION.unwrap_or("dev"),
 			protocol_version: PROTOCOL_VERSION,
 		}
 	}

@@ -49,7 +49,7 @@ const args = parseArgs(process.argv.slice(2), serverOptions, errorReporter)
 
 const REMOTE_DATA_FOLDER =
   args["server-data-dir"] ||
-  process.env["HAYSTACK_AGENT_FOLDER"] ||
+  process.env["VSCODE_AGENT_FOLDER"] ||
   join(os.homedir(), product.serverDataFolderName || ".vscode-remote")
 const USER_DATA_PATH = join(REMOTE_DATA_FOLDER, "data")
 const APP_SETTINGS_HOME = join(USER_DATA_PATH, "User")

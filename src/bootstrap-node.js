@@ -14,17 +14,17 @@
 
 // Setup current working directory in all our node & electron processes
 // - Windows: call `process.chdir()` to always set application folder as cwd
-// -  all OS: store the `process.cwd()` inside `HAYSTACK_CWD` for consistent lookups
+// -  all OS: store the `process.cwd()` inside `VSCODE_CWD` for consistent lookups
 function setupCurrentWorkingDirectory() {
   const path = require("path")
 
   try {
-    // Store the `process.cwd()` inside `HAYSTACK_CWD`
+    // Store the `process.cwd()` inside `VSCODE_CWD`
     // for consistent lookups, but make sure to only
     // do this once unless defined already from e.g.
     // a parent process.
-    if (typeof process.env["HAYSTACK_CWD"] !== "string") {
-      process.env["HAYSTACK_CWD"] = process.cwd()
+    if (typeof process.env["VSCODE_CWD"] !== "string") {
+      process.env["VSCODE_CWD"] = process.cwd()
     }
 
     // Windows: always set application folder as current working dir
@@ -114,7 +114,7 @@ exports.configurePortable = function (product) {
    * @param {import('path')} path
    */
   function getApplicationPath(path) {
-    if (process.env["HAYSTACK_DEV"]) {
+    if (process.env["VSCODE_DEV"]) {
       return appRoot
     }
 
@@ -129,8 +129,8 @@ exports.configurePortable = function (product) {
    * @param {import('path')} path
    */
   function getPortableDataPath(path) {
-    if (process.env["HAYSTACK_PORTABLE"]) {
-      return process.env["HAYSTACK_PORTABLE"]
+    if (process.env["VSCODE_PORTABLE"]) {
+      return process.env["VSCODE_PORTABLE"]
     }
 
     if (process.platform === "win32" || process.platform === "linux") {
@@ -149,9 +149,9 @@ exports.configurePortable = function (product) {
   const isTempPortable = isPortable && fs.existsSync(portableTempPath)
 
   if (isPortable) {
-    process.env["HAYSTACK_PORTABLE"] = portableDataPath
+    process.env["VSCODE_PORTABLE"] = portableDataPath
   } else {
-    delete process.env["HAYSTACK_PORTABLE"]
+    delete process.env["VSCODE_PORTABLE"]
   }
 
   if (isTempPortable) {

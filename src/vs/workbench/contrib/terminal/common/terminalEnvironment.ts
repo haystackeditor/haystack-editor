@@ -349,22 +349,22 @@ export async function createTerminalEnvironment(
     // since this only affects integrated terminal and not the application itself.
     if (isMacintosh) {
       // Restore NODE_OPTIONS if it was set
-      if (env["HAYSTACK_NODE_OPTIONS"]) {
-        env["NODE_OPTIONS"] = env["HAYSTACK_NODE_OPTIONS"]
-        delete env["HAYSTACK_NODE_OPTIONS"]
+      if (env["VSCODE_NODE_OPTIONS"]) {
+        env["NODE_OPTIONS"] = env["VSCODE_NODE_OPTIONS"]
+        delete env["VSCODE_NODE_OPTIONS"]
       }
 
       // Restore NODE_REPL_EXTERNAL_MODULE if it was set
-      if (env["HAYSTACK_NODE_REPL_EXTERNAL_MODULE"]) {
+      if (env["VSCODE_NODE_REPL_EXTERNAL_MODULE"]) {
         env["NODE_REPL_EXTERNAL_MODULE"] =
-          env["HAYSTACK_NODE_REPL_EXTERNAL_MODULE"]
-        delete env["HAYSTACK_NODE_REPL_EXTERNAL_MODULE"]
+          env["VSCODE_NODE_REPL_EXTERNAL_MODULE"]
+        delete env["VSCODE_NODE_REPL_EXTERNAL_MODULE"]
       }
     }
 
     // Sanitize the environment, removing any undesirable VS Code and Electron environment
     // variables
-    sanitizeProcessEnvironment(env, "HAYSTACK_IPC_HOOK_CLI")
+    sanitizeProcessEnvironment(env, "VSCODE_IPC_HOOK_CLI")
 
     // Merge config (settings) and ShellLaunchConfig environments
     mergeEnvironments(env, allowedEnvFromConfig)

@@ -60,7 +60,7 @@ export async function getResolvedShellEnv(
 
   // Skip if running from CLI already
   else if (isLaunchedFromCli(env) && !args["force-user-env"]) {
-    logService.trace("resolveShellEnv(): skipped (HAYSTACK_CLI is set)")
+    logService.trace("resolveShellEnv(): skipped (VSCODE_CLI is set)")
 
     return {}
   }
@@ -153,7 +153,7 @@ async function doResolveUnixShellEnv(
     ...process.env,
     ELECTRON_RUN_AS_NODE: "1",
     ELECTRON_NO_ATTACH_CONSOLE: "1",
-    HAYSTACK_RESOLVING_ENVIRONMENT: "1",
+    VSCODE_RESOLVING_ENVIRONMENT: "1",
   }
 
   logService.trace("getUnixShellEnvironment#env", env)
@@ -264,7 +264,7 @@ async function doResolveUnixShellEnv(
           delete env["ELECTRON_NO_ATTACH_CONSOLE"]
         }
 
-        delete env["HAYSTACK_RESOLVING_ENVIRONMENT"]
+        delete env["VSCODE_RESOLVING_ENVIRONMENT"]
 
         // https://github.com/microsoft/vscode/issues/22593#issuecomment-336050758
         delete env["XDG_RUNTIME_DIR"]

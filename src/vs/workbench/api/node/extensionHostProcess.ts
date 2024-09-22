@@ -88,7 +88,7 @@ const args = minimist(process.argv.slice(2), {
 // happening we essentially blocklist this module from getting loaded in any
 // extension by patching the node require() function.
 ;(function () {
-  const Module = globalThis._HAYSTACK_NODE_MODULES.module as any
+  const Module = globalThis._VSCODE_NODE_MODULES.module as any
   const originalLoad = Module._load
 
   Module._load = function (request: string) {
@@ -190,7 +190,7 @@ function _createExtHostProtocol(): Promise<IMessagePassingProtocol> {
       let protocol: PersistentProtocol | null = null
 
       const timer = setTimeout(() => {
-        onTerminate("HAYSTACK_EXTHOST_IPC_SOCKET timeout")
+        onTerminate("VSCODE_EXTHOST_IPC_SOCKET timeout")
       }, 60000)
 
       const reconnectionGraceTime = ProtocolConstants.ReconnectionGraceTime
@@ -211,7 +211,7 @@ function _createExtHostProtocol(): Promise<IMessagePassingProtocol> {
           msg: IExtHostSocketMessage | IExtHostReduceGraceTimeMessage,
           handle: net.Socket,
         ) => {
-          if (msg && msg.type === "HAYSTACK_EXTHOST_IPC_SOCKET") {
+          if (msg && msg.type === "VSCODE_EXTHOST_IPC_SOCKET") {
             // Disable Nagle's algorithm. We also do this on the server process,
             // but nodejs doesn't document if this option is transferred with the socket
             handle.setNoDelay(true)
@@ -257,7 +257,7 @@ function _createExtHostProtocol(): Promise<IMessagePassingProtocol> {
               })
             }
           }
-          if (msg && msg.type === "HAYSTACK_EXTHOST_IPC_REDUCE_GRACE_TIME") {
+          if (msg && msg.type === "VSCODE_EXTHOST_IPC_REDUCE_GRACE_TIME") {
             if (disconnectRunner2.isScheduled()) {
               // we are disconnected and already running the short reconnection timer
               return
@@ -271,7 +271,7 @@ function _createExtHostProtocol(): Promise<IMessagePassingProtocol> {
       )
 
       // Now that we have managed to install a message listener, ask the other side to send us the socket
-      const req: IExtHostReadyMessage = { type: "HAYSTACK_EXTHOST_IPC_READY" }
+      const req: IExtHostReadyMessage = { type: "VSCODE_EXTHOST_IPC_READY" }
       process.send?.(req)
     })
   } else {
@@ -381,7 +381,7 @@ function connectToRenderer(
         // So also use the native node module to do it from a separate thread
         let watchdog: typeof nativeWatchdog
         try {
-          watchdog = globalThis._HAYSTACK_NODE_MODULES["native-watchdog"]
+          watchdog = globalThis._VSCODE_NODE_MODULES["native-watchdog"]
           watchdog.start(initData.parentPid)
         } catch (err) {
           // no problem...

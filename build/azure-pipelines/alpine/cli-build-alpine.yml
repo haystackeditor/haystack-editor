@@ -1,13 +1,13 @@
 parameters:
-  - name: HAYSTACK_BUILD_ALPINE
+  - name: VSCODE_BUILD_ALPINE
     type: boolean
     default: false
-  - name: HAYSTACK_BUILD_ALPINE_ARM64
+  - name: VSCODE_BUILD_ALPINE_ARM64
     type: boolean
     default: false
-  - name: HAYSTACK_QUALITY
+  - name: VSCODE_QUALITY
     type: string
-  - name: HAYSTACK_CHECK_ONLY
+  - name: VSCODE_CHECK_ONLY
     type: boolean
     default: false
 
@@ -18,9 +18,9 @@ steps:
       versionFilePath: .nvmrc
       nodejsMirror: https://github.com/joaomoreno/node-mirror/releases/download
 
-  - ${{ if ne(parameters.HAYSTACK_QUALITY, 'oss') }}:
+  - ${{ if ne(parameters.VSCODE_QUALITY, 'oss') }}:
       # Install yarn as the ARM64 build agent is using vanilla Ubuntu
-      - ${{ if eq(parameters.HAYSTACK_BUILD_ALPINE_ARM64, true) }}:
+      - ${{ if eq(parameters.VSCODE_BUILD_ALPINE_ARM64, true) }}:
           - task: Npm@1
             displayName: Install yarn
             inputs:
@@ -61,39 +61,39 @@ steps:
   - template: ../cli/install-rust-posix.yml@self
     parameters:
       targets:
-        - ${{ if eq(parameters.HAYSTACK_BUILD_ALPINE_ARM64, true) }}:
+        - ${{ if eq(parameters.VSCODE_BUILD_ALPINE_ARM64, true) }}:
             - aarch64-unknown-linux-musl
-        - ${{ if eq(parameters.HAYSTACK_BUILD_ALPINE, true) }}:
+        - ${{ if eq(parameters.VSCODE_BUILD_ALPINE, true) }}:
             - x86_64-unknown-linux-musl
 
-  - ${{ if eq(parameters.HAYSTACK_BUILD_ALPINE_ARM64, true) }}:
+  - ${{ if eq(parameters.VSCODE_BUILD_ALPINE_ARM64, true) }}:
       - template: ../cli/cli-compile.yml@self
         parameters:
-          HAYSTACK_CLI_TARGET: aarch64-unknown-linux-musl
-          HAYSTACK_CLI_ARTIFACT: vscode_cli_alpine_arm64_cli
-          HAYSTACK_QUALITY: ${{ parameters.HAYSTACK_QUALITY }}
-          HAYSTACK_CLI_ENV:
+          VSCODE_CLI_TARGET: aarch64-unknown-linux-musl
+          VSCODE_CLI_ARTIFACT: vscode_cli_alpine_arm64_cli
+          VSCODE_QUALITY: ${{ parameters.VSCODE_QUALITY }}
+          VSCODE_CLI_ENV:
             CXX_aarch64-unknown-linux-musl: musl-g++
             CC_aarch64-unknown-linux-musl: musl-gcc
             OPENSSL_LIB_DIR: $(Build.ArtifactStagingDirectory)/openssl/arm64-linux-musl/lib
             OPENSSL_INCLUDE_DIR: $(Build.ArtifactStagingDirectory)/openssl/arm64-linux-musl/include
             OPENSSL_STATIC: "1"
 
-  - ${{ if eq(parameters.HAYSTACK_BUILD_ALPINE, true) }}:
+  - ${{ if eq(parameters.VSCODE_BUILD_ALPINE, true) }}:
       - template: ../cli/cli-compile.yml@self
         parameters:
-          HAYSTACK_CLI_TARGET: x86_64-unknown-linux-musl
-          HAYSTACK_CLI_ARTIFACT: vscode_cli_alpine_x64_cli
-          HAYSTACK_QUALITY: ${{ parameters.HAYSTACK_QUALITY }}
-          HAYSTACK_CLI_ENV:
+          VSCODE_CLI_TARGET: x86_64-unknown-linux-musl
+          VSCODE_CLI_ARTIFACT: vscode_cli_alpine_x64_cli
+          VSCODE_QUALITY: ${{ parameters.VSCODE_QUALITY }}
+          VSCODE_CLI_ENV:
             CXX_aarch64-unknown-linux-musl: musl-g++
             CC_aarch64-unknown-linux-musl: musl-gcc
             OPENSSL_LIB_DIR: $(Build.ArtifactStagingDirectory)/openssl/x64-linux-musl/lib
             OPENSSL_INCLUDE_DIR: $(Build.ArtifactStagingDirectory)/openssl/x64-linux-musl/include
             OPENSSL_STATIC: "1"
 
-  - ${{ if not(parameters.HAYSTACK_CHECK_ONLY) }}:
-      - ${{ if eq(parameters.HAYSTACK_BUILD_ALPINE_ARM64, true) }}:
+  - ${{ if not(parameters.VSCODE_CHECK_ONLY) }}:
+      - ${{ if eq(parameters.VSCODE_BUILD_ALPINE_ARM64, true) }}:
           - task: 1ES.PublishPipelineArtifact@1
             inputs:
               targetPath: $(Build.ArtifactStagingDirectory)/vscode_cli_alpine_arm64_cli.tar.gz
@@ -103,7 +103,7 @@ steps:
               sbomPackageVersion: $(Build.SourceVersion)
             displayName: Publish vscode_cli_alpine_arm64_cli artifact
 
-      - ${{ if eq(parameters.HAYSTACK_BUILD_ALPINE, true) }}:
+      - ${{ if eq(parameters.VSCODE_BUILD_ALPINE, true) }}:
           - task: 1ES.PublishPipelineArtifact@1
             inputs:
               targetPath: $(Build.ArtifactStagingDirectory)/vscode_cli_alpine_x64_cli.tar.gz

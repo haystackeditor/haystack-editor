@@ -141,7 +141,7 @@ import {
 import { ICommandService } from "vs/platform/commands/common/commands"
 import {
   COPILOT_OPT_IN,
-  IMPORT_HAYSTACK_SETTINGS_ID,
+  IMPORT_VSCODE_SETTINGS_ID,
 } from "vs/editor/contrib/haystack/haystackCommon"
 import { TextDiffEditor } from "vs/workbench/browser/parts/editor/textDiffEditor"
 import {
@@ -2417,7 +2417,7 @@ export class HaystackService extends Disposable implements IHaystackService {
         {
           label: "Yes",
           run: () => {
-            this._commandService.executeCommand(IMPORT_HAYSTACK_SETTINGS_ID)
+            this._commandService.executeCommand(IMPORT_VSCODE_SETTINGS_ID)
             this._storageService.store(
               "haystack.importFromVsCodeDismissed",
               true,

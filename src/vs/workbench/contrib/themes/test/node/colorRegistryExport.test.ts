@@ -18,7 +18,7 @@ import {
 } from "vs/platform/theme/common/colorRegistry"
 
 suite("ColorRegistry", () => {
-  if (process.env.HAYSTACK_COLOR_REGISTRY_EXPORT) {
+  if (process.env.VSCODE_COLOR_REGISTRY_EXPORT) {
     test("exports", () => {
       const themingRegistry = Registry.as<IColorRegistry>(
         Extensions.ColorContribution,

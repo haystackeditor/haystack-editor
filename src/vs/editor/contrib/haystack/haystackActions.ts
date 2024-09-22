@@ -37,7 +37,7 @@ import {
 } from "vs/platform/progress/common/progress"
 import {
   COPILOT_OPT_IN,
-  IMPORT_HAYSTACK_SETTINGS_ID,
+  IMPORT_VSCODE_SETTINGS_ID,
 } from "vs/editor/contrib/haystack/haystackCommon"
 import { timeout } from "vs/base/common/async"
 import { KeybindingWeight } from "vs/platform/keybinding/common/keybindingsRegistry"
@@ -230,7 +230,7 @@ interface ExtensionMetadata {
 export class ImportSettingsAction extends Action2 {
   constructor() {
     super({
-      id: IMPORT_HAYSTACK_SETTINGS_ID,
+      id: IMPORT_VSCODE_SETTINGS_ID,
       title: localize(
         "importSettings.label",
         "Import VS Code Settings and Extensions",

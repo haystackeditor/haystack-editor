@@ -40,10 +40,10 @@ function log(...args: any[]): void {
 }
 
 function main() {
-  const quality = process.env["HAYSTACK_QUALITY"]
+  const quality = process.env["VSCODE_QUALITY"]
 
   if (!quality) {
-    throw new Error("Missing HAYSTACK_QUALITY, skipping mixin")
+    throw new Error("Missing VSCODE_QUALITY, skipping mixin")
   }
 
   log(`Mixing in distro quality...`)

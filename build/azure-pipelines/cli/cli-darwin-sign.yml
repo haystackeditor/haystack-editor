@@ -1,5 +1,5 @@
 parameters:
-  - name: HAYSTACK_CLI_ARTIFACTS
+  - name: VSCODE_CLI_ARTIFACTS
     type: object
     default: []
 
@@ -19,7 +19,7 @@ steps:
     continueOnError: true
     displayName: Download ESRPClient
 
-  - ${{ each target in parameters.HAYSTACK_CLI_ARTIFACTS }}:
+  - ${{ each target in parameters.VSCODE_CLI_ARTIFACTS }}:
       - task: DownloadPipelineArtifact@2
         displayName: Download ${{ target }}
         inputs:
@@ -38,7 +38,7 @@ steps:
   - script: node build/azure-pipelines/common/sign $(Agent.ToolsDirectory)/esrpclient/*/*/net6.0/esrpcli.dll notarize-darwin $(ESRP-PKI) $(esrp-aad-username) $(esrp-aad-password) $(Build.ArtifactStagingDirectory)/pkg "*.zip"
     displayName: Notarize
 
-  - ${{ each target in parameters.HAYSTACK_CLI_ARTIFACTS }}:
+  - ${{ each target in parameters.VSCODE_CLI_ARTIFACTS }}:
       - script: |
           set -e
           ASSET_ID=$(echo "${{ target }}" | sed "s/unsigned_//")

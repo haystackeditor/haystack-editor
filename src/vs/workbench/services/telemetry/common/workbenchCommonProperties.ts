@@ -68,7 +68,7 @@ export function resolveWorkbenchCommonProperties(
   // __GDPR__COMMON__ "common.remoteAuthority" : { "classification": "SystemMetaData", "purpose": "PerformanceAndHealth" }
   result["common.remoteAuthority"] = cleanRemoteAuthority(remoteAuthority)
   // __GDPR__COMMON__ "common.cli" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-  result["common.cli"] = !!process.env["HAYSTACK_CLI"]
+  result["common.cli"] = !!process.env["VSCODE_CLI"]
 
   return result
 }

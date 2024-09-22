@@ -37,7 +37,7 @@
       // sure to resolve it against the passed in
       // current working directory. We cannot use the
       // node.js `path.resolve()` logic because it will
-      // not pick up our `HAYSTACK_CWD` environment variable
+      // not pick up our `VSCODE_CWD` environment variable
       // (https://github.com/microsoft/vscode/issues/120269)
       if (!path.isAbsolute(userDataPath)) {
         pathsToResolve.unshift(cwd)
@@ -54,25 +54,25 @@
      */
     function doGetUserDataPath(cliArgs, productName) {
       // 0. Running out of sources has a fixed productName
-      if (process.env["HAYSTACK_DEV"]) {
+      if (process.env["VSCODE_DEV"]) {
         productName = "code-oss-dev"
       }
 
       // 1. Support portable mode
-      const portablePath = process.env["HAYSTACK_PORTABLE"]
+      const portablePath = process.env["VSCODE_PORTABLE"]
       if (portablePath) {
         return path.join(portablePath, "user-data")
       }
 
-      // 2. Support global HAYSTACK_APPDATA environment variable
-      let appDataPath = process.env["HAYSTACK_APPDATA"]
+      // 2. Support global VSCODE_APPDATA environment variable
+      let appDataPath = process.env["VSCODE_APPDATA"]
       if (appDataPath) {
         return path.join(appDataPath, productName)
       }
 
       // With Electron>=13 --user-data-dir switch will be propagated to
       // all processes https://github.com/electron/electron/blob/1897b14af36a02e9aa7e4d814159303441548251/shell/browser/electron_browser_client.cc#L546-L553
-      // Check HAYSTACK_PORTABLE and HAYSTACK_APPDATA before this case to get correct values.
+      // Check VSCODE_PORTABLE and VSCODE_APPDATA before this case to get correct values.
       // 3. Support explicit --user-data-dir
       const cliPath = cliArgs["user-data-dir"]
       if (cliPath) {
@@ -132,7 +132,7 @@
     module.exports = factory(
       path,
       os,
-      process.env["HAYSTACK_CWD"] || process.cwd(),
+      process.env["VSCODE_CWD"] || process.cwd(),
     ) // commonjs
   } else {
     throw new Error("Unknown context")

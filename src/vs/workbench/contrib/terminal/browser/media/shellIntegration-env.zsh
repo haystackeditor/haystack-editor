@@ -3,14 +3,14 @@
 #   Licensed under the MIT License. See code-license.txt in the project root for license information.
 # ---------------------------------------------------------------------------------------------
 if [[ -f $USER_ZDOTDIR/.zshenv ]]; then
-	HAYSTACK_ZDOTDIR=$ZDOTDIR
+	VSCODE_ZDOTDIR=$ZDOTDIR
 	ZDOTDIR=$USER_ZDOTDIR
 
 	# prevent recursion
-	if [[ $USER_ZDOTDIR != $HAYSTACK_ZDOTDIR ]]; then
+	if [[ $USER_ZDOTDIR != $VSCODE_ZDOTDIR ]]; then
 		. $USER_ZDOTDIR/.zshenv
 	fi
 
 	USER_ZDOTDIR=$ZDOTDIR
-	ZDOTDIR=$HAYSTACK_ZDOTDIR
+	ZDOTDIR=$VSCODE_ZDOTDIR
 fi

@@ -9,10 +9,10 @@ pushd %ROOT_DIR%
 
 :: Configuration
 set NODE_ENV=development
-set HAYSTACK_DEV=1
+set VSCODE_DEV=1
 
 :: Get electron, compile, built-in extensions
-if "%HAYSTACK_SKIP_PRELAUNCH%"=="" node build/lib/preLaunch.js
+if "%VSCODE_SKIP_PRELAUNCH%"=="" node build/lib/preLaunch.js
 
 :: Node executable
 FOR /F "tokens=*" %%g IN ('node build/lib/node.js') do (SET NODE=%%g)

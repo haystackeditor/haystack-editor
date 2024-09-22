@@ -1461,7 +1461,7 @@ export class CodeWindow extends BaseWindow implements ICodeWindow {
     options: ILoadOptions,
   ): void {
     // If this window was loaded before from the command line
-    // (as indicated by HAYSTACK_CLI environment), make sure to
+    // (as indicated by VSCODE_CLI environment), make sure to
     // preserve that user environment in subsequent loads,
     // unless the new configuration context was also a CLI
     // (for https://github.com/microsoft/vscode/issues/108571)

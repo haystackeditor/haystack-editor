@@ -27,29 +27,29 @@ bootstrapNode.removeGlobalNodeModuleLookupPaths()
 // Enable ASAR in our forked processes
 bootstrap.enableASARSupport()
 
-if (process.env["HAYSTACK_INJECT_NODE_MODULE_LOOKUP_PATH"]) {
+if (process.env["VSCODE_INJECT_NODE_MODULE_LOOKUP_PATH"]) {
   bootstrapNode.injectNodeModuleLookupPath(
-    process.env["HAYSTACK_INJECT_NODE_MODULE_LOOKUP_PATH"],
+    process.env["VSCODE_INJECT_NODE_MODULE_LOOKUP_PATH"],
   )
 }
 
 // Configure: pipe logging to parent process
-if (!!process.send && process.env["HAYSTACK_PIPE_LOGGING"] === "true") {
+if (!!process.send && process.env["VSCODE_PIPE_LOGGING"] === "true") {
   pipeLoggingToParent()
 }
 
 // Handle Exceptions
-if (!process.env["HAYSTACK_HANDLES_UNCAUGHT_ERRORS"]) {
+if (!process.env["VSCODE_HANDLES_UNCAUGHT_ERRORS"]) {
   handleExceptions()
 }
 
 // Terminate when parent terminates
-if (process.env["HAYSTACK_PARENT_PID"]) {
+if (process.env["VSCODE_PARENT_PID"]) {
   terminateWhenParentTerminates()
 }
 
 // Load AMD entry point
-require("./bootstrap-amd").load(process.env["HAYSTACK_AMD_ENTRYPOINT"])
+require("./bootstrap-amd").load(process.env["VSCODE_AMD_ENTRYPOINT"])
 
 //#region Helpers
 
@@ -215,7 +215,7 @@ function pipeLoggingToParent() {
   }
 
   // Pass console logging to the outside so that we have it in the main side if told so
-  if (process.env["HAYSTACK_VERBOSE_LOGGING"] === "true") {
+  if (process.env["VSCODE_VERBOSE_LOGGING"] === "true") {
     wrapConsoleMethod("info", "log")
     wrapConsoleMethod("log", "log")
     wrapConsoleMethod("warn", "warn")
@@ -250,7 +250,7 @@ function handleExceptions() {
 }
 
 function terminateWhenParentTerminates() {
-  const parentPid = Number(process.env["HAYSTACK_PARENT_PID"])
+  const parentPid = Number(process.env["VSCODE_PARENT_PID"])
 
   if (typeof parentPid === "number" && !isNaN(parentPid)) {
     setInterval(function () {
@@ -265,7 +265,7 @@ function terminateWhenParentTerminates() {
 
 function configureCrashReporter() {
   const crashReporterProcessType =
-    process.env["HAYSTACK_CRASH_REPORTER_PROCESS_TYPE"]
+    process.env["VSCODE_CRASH_REPORTER_PROCESS_TYPE"]
   if (crashReporterProcessType) {
     try {
       // @ts-ignore

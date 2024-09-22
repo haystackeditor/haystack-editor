@@ -209,7 +209,7 @@ async function launchServer(
   const userDataDir = path.join(testDataPath, "d")
 
   const env = {
-    HAYSTACK_BROWSER: browserType,
+    VSCODE_BROWSER: browserType,
     ...process.env,
   }
 
@@ -223,12 +223,12 @@ async function launchServer(
   ]
 
   let serverLocation: string
-  if (process.env.HAYSTACK_REMOTE_SERVER_PATH) {
+  if (process.env.VSCODE_REMOTE_SERVER_PATH) {
     const { serverApplicationName } = require(
-      path.join(process.env.HAYSTACK_REMOTE_SERVER_PATH, "product.json"),
+      path.join(process.env.VSCODE_REMOTE_SERVER_PATH, "product.json"),
     )
     serverLocation = path.join(
-      process.env.HAYSTACK_REMOTE_SERVER_PATH,
+      process.env.VSCODE_REMOTE_SERVER_PATH,
       "bin",
       `${serverApplicationName}${process.platform === "win32" ? ".cmd" : ""}`,
     )
@@ -241,7 +241,7 @@ async function launchServer(
       root,
       `scripts/code-server.${process.platform === "win32" ? "bat" : "sh"}`,
     )
-    process.env.HAYSTACK_DEV = "1"
+    process.env.VSCODE_DEV = "1"
 
     if (args.debug) {
       console.log(`Starting server out of sources from '${serverLocation}'`)

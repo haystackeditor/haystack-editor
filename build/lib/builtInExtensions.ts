@@ -56,7 +56,7 @@ const controlFilePath = path.join(
   "control.json",
 )
 const ENABLE_LOGGING =
-  !process.env["HAYSTACK_BUILD_BUILTIN_EXTENSIONS_SILENCE_PLEASE"]
+  !process.env["VSCODE_BUILD_BUILTIN_EXTENSIONS_SILENCE_PLEASE"]
 
 function log(...messages: string[]): void {
   if (ENABLE_LOGGING) {

@@ -50,7 +50,7 @@ export async function launch(
 async function launchServer(options: LaunchOptions) {
   const { userDataDir, codePath, extensionsPath, logger, logsPath } = options
   const serverLogsPath = join(logsPath, "server")
-  const codeServerPath = codePath ?? process.env.HAYSTACK_REMOTE_SERVER_PATH
+  const codeServerPath = codePath ?? process.env.VSCODE_REMOTE_SERVER_PATH
   const agentFolder = userDataDir
   await measureAndLog(
     () => mkdirp(agentFolder),
@@ -59,7 +59,7 @@ async function launchServer(options: LaunchOptions) {
   )
 
   const env = {
-    HAYSTACK_REMOTE_SERVER_PATH: codeServerPath,
+    VSCODE_REMOTE_SERVER_PATH: codeServerPath,
     ...process.env,
   }
 

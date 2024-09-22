@@ -81,7 +81,7 @@
             disallowReloadKeybinding: false,
             removeDeveloperKeybindingsAfterLoad: false,
           }
-    const isDev = !!safeProcess.env["HAYSTACK_DEV"]
+    const isDev = !!safeProcess.env["VSCODE_DEV"]
     const enableDeveloperKeybindings = isDev || forceEnableDeveloperKeybindings
     /**
      * @type {() => void | undefined}

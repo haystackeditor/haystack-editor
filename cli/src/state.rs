@@ -21,7 +21,7 @@ use std::{
 use serde::{de::DeserializeOwned, Serialize};
 
 use crate::{
-	constants::{DEFAULT_DATA_PARENT_DIR, HAYSTACK_CLI_QUALITY},
+	constants::{DEFAULT_DATA_PARENT_DIR, VSCODE_CLI_QUALITY},
 	download_cache::DownloadCache,
 	util::errors::{wrap, AnyError, NoHomeForLauncherError, WrappedError},
 };
@@ -216,7 +216,7 @@ impl LauncherPaths {
 	pub fn tunnel_lockfile(&self) -> PathBuf {
 		self.root.join(format!(
 			"tunnel-{}.lock",
-			HAYSTACK_CLI_QUALITY.unwrap_or("oss")
+			VSCODE_CLI_QUALITY.unwrap_or("oss")
 		))
 	}
 
@@ -224,7 +224,7 @@ impl LauncherPaths {
 	pub fn forwarding_lockfile(&self) -> PathBuf {
 		self.root.join(format!(
 			"forwarding-{}.lock",
-			HAYSTACK_CLI_QUALITY.unwrap_or("oss")
+			VSCODE_CLI_QUALITY.unwrap_or("oss")
 		))
 	}
 

@@ -172,11 +172,11 @@ function parseVersion(version: string): {
 }
 
 function parseQuality(): Quality {
-  if (process.env.HAYSTACK_DEV === "1") {
+  if (process.env.VSCODE_DEV === "1") {
     return Quality.Dev
   }
 
-  const quality = process.env.HAYSTACK_QUALITY ?? ""
+  const quality = process.env.VSCODE_QUALITY ?? ""
 
   switch (quality) {
     case "stable":
@@ -205,9 +205,9 @@ if (!opts.web) {
   } else {
     testCodePath = getDevElectronPath()
     electronPath = testCodePath
-    process.env.HAYSTACK_REPOSITORY = rootPath
-    process.env.HAYSTACK_DEV = "1"
-    process.env.HAYSTACK_CLI = "1"
+    process.env.VSCODE_REPOSITORY = rootPath
+    process.env.VSCODE_DEV = "1"
+    process.env.VSCODE_CLI = "1"
   }
 
   if (!fs.existsSync(electronPath || "")) {
@@ -229,7 +229,7 @@ if (!opts.web) {
 // #### Web Smoke Tests ####
 //
 else {
-  const testCodeServerPath = opts.build || process.env.HAYSTACK_REMOTE_SERVER_PATH
+  const testCodeServerPath = opts.build || process.env.VSCODE_REMOTE_SERVER_PATH
 
   if (typeof testCodeServerPath === "string") {
     if (!fs.existsSync(testCodeServerPath)) {
@@ -240,9 +240,9 @@ else {
   }
 
   if (!testCodeServerPath) {
-    process.env.HAYSTACK_REPOSITORY = rootPath
-    process.env.HAYSTACK_DEV = "1"
-    process.env.HAYSTACK_CLI = "1"
+    process.env.VSCODE_REPOSITORY = rootPath
+    process.env.VSCODE_DEV = "1"
+    process.env.VSCODE_CLI = "1"
 
     logger.log(`Running web smoke out of sources`)
   }

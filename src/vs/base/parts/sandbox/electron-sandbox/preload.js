@@ -280,7 +280,7 @@
        */
       cwd() {
         return (
-          process.env["HAYSTACK_CWD"] ||
+          process.env["VSCODE_CWD"] ||
           process.execPath.substr(
             0,
             process.execPath.lastIndexOf(

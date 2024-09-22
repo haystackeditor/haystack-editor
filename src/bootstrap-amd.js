@@ -17,28 +17,28 @@
 // when this file is bundled with other files.
 const nodeRequire = require
 
-// HAYSTACK_GLOBALS: node_modules
-globalThis._HAYSTACK_NODE_MODULES = new Proxy(Object.create(null), {
+// VSCODE_GLOBALS: node_modules
+globalThis._VSCODE_NODE_MODULES = new Proxy(Object.create(null), {
   get: (_target, mod) => nodeRequire(String(mod)),
 })
 
-// HAYSTACK_GLOBALS: package/product.json
+// VSCODE_GLOBALS: package/product.json
 /** @type Record<string, any> */
-globalThis._HAYSTACK_PRODUCT_JSON = require("../product.json")
-if (process.env["HAYSTACK_DEV"]) {
+globalThis._VSCODE_PRODUCT_JSON = require("../product.json")
+if (process.env["VSCODE_DEV"]) {
   // Patch product overrides when running out of sources
   try {
     // @ts-ignore
     const overrides = require("../product.overrides.json")
-    globalThis._HAYSTACK_PRODUCT_JSON = Object.assign(
-      globalThis._HAYSTACK_PRODUCT_JSON,
+    globalThis._VSCODE_PRODUCT_JSON = Object.assign(
+      globalThis._VSCODE_PRODUCT_JSON,
       overrides,
     )
   } catch (error) {
     /* ignore */
   }
 }
-globalThis._HAYSTACK_PACKAGE_JSON = require("../package.json")
+globalThis._VSCODE_PACKAGE_JSON = require("../package.json")
 
 // @ts-ignore
 const loader = require("./vs/loader")
@@ -89,10 +89,10 @@ exports.load = function (entrypoint, onLoad, onError) {
   }
 
   // code cache config
-  if (process.env["HAYSTACK_CODE_CACHE_PATH"]) {
+  if (process.env["VSCODE_CODE_CACHE_PATH"]) {
     loader.config({
       nodeCachedData: {
-        path: process.env["HAYSTACK_CODE_CACHE_PATH"],
+        path: process.env["VSCODE_CODE_CACHE_PATH"],
         seed: entrypoint,
       },
     })

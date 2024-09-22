@@ -28,7 +28,7 @@ export async function sign(buildDir: string): Promise<void> {
 
 async function main(buildDir?: string): Promise<void> {
   const tempDir = process.env["AGENT_TEMPDIRECTORY"]
-  const arch = process.env["HAYSTACK_ARCH"]
+  const arch = process.env["VSCODE_ARCH"]
   const identity = process.env["CODESIGN_IDENTITY"]
 
   if (!buildDir) {

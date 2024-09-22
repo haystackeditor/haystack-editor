@@ -19,9 +19,9 @@ import * as processes from "vs/base/node/processes"
 function fork(id: string): cp.ChildProcess {
   const opts: any = {
     env: objects.mixin(objects.deepClone(process.env), {
-      HAYSTACK_AMD_ENTRYPOINT: id,
-      HAYSTACK_PIPE_LOGGING: "true",
-      HAYSTACK_VERBOSE_LOGGING: true,
+      VSCODE_AMD_ENTRYPOINT: id,
+      VSCODE_PIPE_LOGGING: "true",
+      VSCODE_VERBOSE_LOGGING: true,
     }),
   }
 
@@ -34,7 +34,7 @@ function fork(id: string): cp.ChildProcess {
 
 suite("Processes", () => {
   test("buffered sending - simple data", function (done: () => void) {
-    if (process.env["HAYSTACK_PID"]) {
+    if (process.env["VSCODE_PID"]) {
       return done() // this test fails when run from within VS Code
     }
 
@@ -68,7 +68,7 @@ suite("Processes", () => {
       }
     })
   })
-  ;(!platform.isWindows || process.env["HAYSTACK_PID"] ? test.skip : test)(
+  ;(!platform.isWindows || process.env["VSCODE_PID"] ? test.skip : test)(
     "buffered sending - lots of data (potential deadlock on win32)",
     function (done: () => void) {
       // test is only relevant for Windows and seems to crash randomly on some Linux builds

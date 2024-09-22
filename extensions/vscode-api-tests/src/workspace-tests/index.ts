@@ -22,9 +22,9 @@ const options: any = {
 // so we need to set the suite name based on the environment as the suite name is used
 // for the test results file name
 let suite = ""
-if (process.env.HAYSTACK_BROWSER) {
-  suite = `${process.env.HAYSTACK_BROWSER} Browser Integration Workspace Tests`
-} else if (process.env.REMOTE_HAYSTACK) {
+if (process.env.VSCODE_BROWSER) {
+  suite = `${process.env.VSCODE_BROWSER} Browser Integration Workspace Tests`
+} else if (process.env.REMOTE_VSCODE) {
   suite = "Remote Integration Workspace Tests"
 } else {
   suite = "Integration Workspace Tests"

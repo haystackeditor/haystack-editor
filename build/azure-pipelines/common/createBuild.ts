@@ -30,7 +30,7 @@ function getEnv(name: string): string {
 
 async function main(): Promise<void> {
   const [, , _version] = process.argv
-  const quality = getEnv("HAYSTACK_QUALITY")
+  const quality = getEnv("VSCODE_QUALITY")
   const commit = getEnv("BUILD_SOURCEVERSION")
   const queuedBy = getEnv("BUILD_QUEUEDBY")
   const sourceBranch = getEnv("BUILD_SOURCEBRANCH")
@@ -46,7 +46,7 @@ async function main(): Promise<void> {
     timestamp: new Date().getTime(),
     version,
     isReleased: false,
-    private: process.env["HAYSTACK_PRIVATE_BUILD"]?.toLowerCase() === "true",
+    private: process.env["VSCODE_PRIVATE_BUILD"]?.toLowerCase() === "true",
     sourceBranch,
     queuedBy,
     assets: [],

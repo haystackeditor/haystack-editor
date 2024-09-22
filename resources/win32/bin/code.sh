@@ -2,7 +2,7 @@
 #
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT License. See code-license.txt in the project root for license information.
-if [ "$HAYSTACK_WSL_DEBUG_INFO" = true ]; then
+if [ "$VSCODE_WSL_DEBUG_INFO" = true ]; then
 	set -x
 fi
 
@@ -11,8 +11,8 @@ APP_NAME="@@APPNAME@@"
 QUALITY="@@QUALITY@@"
 NAME="@@NAME@@"
 SERVERDATAFOLDER="@@SERVERDATAFOLDER@@"
-HAYSTACK_PATH="$(dirname "$(dirname "$(realpath "$0")")")"
-ELECTRON="$HAYSTACK_PATH/$NAME.exe"
+VSCODE_PATH="$(dirname "$(dirname "$(realpath "$0")")")"
+ELECTRON="$VSCODE_PATH/$NAME.exe"
 
 IN_WSL=false
 if [ -n "$WSL_DISTRO_NAME" ]; then
@@ -38,7 +38,7 @@ fi
 if [ $IN_WSL = true ]; then
 
 	export WSLENV="ELECTRON_RUN_AS_NODE/w:$WSLENV"
-	CLI=$(wslpath -m "$HAYSTACK_PATH/resources/app/out/cli.js")
+	CLI=$(wslpath -m "$VSCODE_PATH/resources/app/out/cli.js")
 
 	# use the Remote WSL extension if installed
 	WSL_EXT_ID="ms-vscode-remote.remote-wsl"
@@ -54,9 +54,9 @@ if [ $IN_WSL = true ]; then
 	fi
 
 elif [ -x "$(command -v cygpath)" ]; then
-	CLI=$(cygpath -m "$HAYSTACK_PATH/resources/app/out/cli.js")
+	CLI=$(cygpath -m "$VSCODE_PATH/resources/app/out/cli.js")
 else
-	CLI="$HAYSTACK_PATH/resources/app/out/cli.js"
+	CLI="$VSCODE_PATH/resources/app/out/cli.js"
 fi
 ELECTRON_RUN_AS_NODE=1 "$ELECTRON" "$CLI" "$@"
 exit $?

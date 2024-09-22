@@ -19,30 +19,30 @@ function fatal(err: any): void {
 }
 
 function main(argv: string[]): void {
-  if (!process.env["HAYSTACK_GIT_ASKPASS_PIPE"]) {
+  if (!process.env["VSCODE_GIT_ASKPASS_PIPE"]) {
     return fatal("Missing pipe")
   }
 
-  if (!process.env["HAYSTACK_GIT_ASKPASS_TYPE"]) {
+  if (!process.env["VSCODE_GIT_ASKPASS_TYPE"]) {
     return fatal("Missing type")
   }
 
   if (
-    process.env["HAYSTACK_GIT_ASKPASS_TYPE"] !== "https" &&
-    process.env["HAYSTACK_GIT_ASKPASS_TYPE"] !== "ssh"
+    process.env["VSCODE_GIT_ASKPASS_TYPE"] !== "https" &&
+    process.env["VSCODE_GIT_ASKPASS_TYPE"] !== "ssh"
   ) {
-    return fatal(`Invalid type: ${process.env["HAYSTACK_GIT_ASKPASS_TYPE"]}`)
+    return fatal(`Invalid type: ${process.env["VSCODE_GIT_ASKPASS_TYPE"]}`)
   }
 
   if (
-    process.env["HAYSTACK_GIT_COMMAND"] === "fetch" &&
-    !!process.env["HAYSTACK_GIT_FETCH_SILENT"]
+    process.env["VSCODE_GIT_COMMAND"] === "fetch" &&
+    !!process.env["VSCODE_GIT_FETCH_SILENT"]
   ) {
     return fatal("Skip silent fetch commands")
   }
 
-  const output = process.env["HAYSTACK_GIT_ASKPASS_PIPE"] as string
-  const askpassType = process.env["HAYSTACK_GIT_ASKPASS_TYPE"] as "https" | "ssh"
+  const output = process.env["VSCODE_GIT_ASKPASS_PIPE"] as string
+  const askpassType = process.env["VSCODE_GIT_ASKPASS_TYPE"] as "https" | "ssh"
 
   // HTTPS (username | password), SSH (passphrase | authenticity)
   const request = askpassType === "https" ? argv[2] : argv[3]

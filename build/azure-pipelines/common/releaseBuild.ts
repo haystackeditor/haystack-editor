@@ -56,7 +56,7 @@ async function getConfig(
 
 async function main(force: boolean): Promise<void> {
   const commit = getEnv("BUILD_SOURCEVERSION")
-  const quality = getEnv("HAYSTACK_QUALITY")
+  const quality = getEnv("VSCODE_QUALITY")
 
   const aadCredentials = new ClientSecretCredential(
     process.env["AZURE_TENANT_ID"]!,

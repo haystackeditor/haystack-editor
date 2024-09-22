@@ -11,7 +11,7 @@ Make sure to run the following commands to compile and install dependencies:
 
     scripts/test-integration.[sh|bat]
 
-All integration tests run in an Electron instance. You can specify to run the tests against a real build by setting the environment variables `INTEGRATION_TEST_ELECTRON_PATH` and `HAYSTACK_REMOTE_SERVER_PATH` (if you want to include remote tests).
+All integration tests run in an Electron instance. You can specify to run the tests against a real build by setting the environment variables `INTEGRATION_TEST_ELECTRON_PATH` and `VSCODE_REMOTE_SERVER_PATH` (if you want to include remote tests).
 
 ## Run (inside browser)
 

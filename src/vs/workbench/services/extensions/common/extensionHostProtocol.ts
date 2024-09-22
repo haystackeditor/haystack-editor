@@ -113,11 +113,11 @@ export const enum ExtensionHostExitCode {
 }
 
 export interface IExtHostReadyMessage {
-  type: "HAYSTACK_EXTHOST_IPC_READY"
+  type: "VSCODE_EXTHOST_IPC_READY"
 }
 
 export interface IExtHostSocketMessage {
-  type: "HAYSTACK_EXTHOST_IPC_SOCKET"
+  type: "VSCODE_EXTHOST_IPC_SOCKET"
   initialDataChunk: string
   skipWebSocketFrames: boolean
   permessageDeflate: boolean
@@ -125,7 +125,7 @@ export interface IExtHostSocketMessage {
 }
 
 export interface IExtHostReduceGraceTimeMessage {
-  type: "HAYSTACK_EXTHOST_IPC_REDUCE_GRACE_TIME"
+  type: "VSCODE_EXTHOST_IPC_REDUCE_GRACE_TIME"
 }
 
 export const enum MessageType {

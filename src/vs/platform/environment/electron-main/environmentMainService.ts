@@ -93,7 +93,7 @@ export class EnvironmentMainService
 
   @memoize
   get codeCachePath(): string | undefined {
-    return process.env["HAYSTACK_CODE_CACHE_PATH"] || undefined
+    return process.env["VSCODE_CODE_CACHE_PATH"] || undefined
   }
 
   @memoize
@@ -106,8 +106,8 @@ export class EnvironmentMainService
       return
     }
     for (const key in process.env) {
-      if (key.endsWith("_HAYSTACK_SNAP_ORIG")) {
-        const originalKey = key.slice(0, -17) // Remove the _HAYSTACK_SNAP_ORIG suffix
+      if (key.endsWith("_VSCODE_SNAP_ORIG")) {
+        const originalKey = key.slice(0, -17) // Remove the _VSCODE_SNAP_ORIG suffix
         if (this._snapEnv[originalKey]) {
           continue
         }

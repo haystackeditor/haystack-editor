@@ -18,8 +18,8 @@ suite("vscode server cli", () => {
     const extension = process.env.TESTRESOLVER_INSTALL_BUILTIN_EXTENSION
     if (
       !process.env.BUILD_SOURCEVERSION || // Skip it when running out of sources
-      process.env.HAYSTACK_QUALITY === "oss" || // Skip it when running an OSS build
-      !process.env.REMOTE_HAYSTACK || // Skip it when not a remote integration test
+      process.env.VSCODE_QUALITY === "oss" || // Skip it when running an OSS build
+      !process.env.REMOTE_VSCODE || // Skip it when not a remote integration test
       !extension // Skip it when extension is not provided to server
     ) {
       this.skip()

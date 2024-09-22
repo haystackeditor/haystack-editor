@@ -17,5 +17,5 @@ jobs:
       - name: Run Bad Tag
         uses: ./actions/tag-alert
         with:
-          token: ${{secrets.HAYSTACK_ISSUE_TRIAGE_BOT_PAT}}
+          token: ${{secrets.VSCODE_ISSUE_TRIAGE_BOT_PAT}}
           tag-name: "1.999.0"

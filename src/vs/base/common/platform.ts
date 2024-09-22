@@ -101,7 +101,7 @@ if (typeof nodeProcess === "object") {
     !!nodeProcess.env["BUILD_ARTIFACTSTAGINGDIRECTORY"]
   _locale = LANGUAGE_DEFAULT
   _language = LANGUAGE_DEFAULT
-  const rawNlsConfig = nodeProcess.env["HAYSTACK_NLS_CONFIG"]
+  const rawNlsConfig = nodeProcess.env["VSCODE_NLS_CONFIG"]
   if (rawNlsConfig) {
     try {
       const nlsConfig: NLSConfig = JSON.parse(rawNlsConfig)

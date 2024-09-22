@@ -173,7 +173,7 @@ export class AzureActiveDirectoryService {
         scopes,
         scopeStr: session.scope,
         // filter our special scopes
-        scopesToSend: scopes.filter((s) => !s.startsWith("HAYSTACK_")).join(" "),
+        scopesToSend: scopes.filter((s) => !s.startsWith("VSCODE_")).join(" "),
         clientId: this.getClientId(scopes),
         tenant: this.getTenantId(scopes),
       }
@@ -288,7 +288,7 @@ export class AzureActiveDirectoryService {
       scopeStr: modifiedScopesStr,
       // filter our special scopes
       scopesToSend: modifiedScopes
-        .filter((s) => !s.startsWith("HAYSTACK_"))
+        .filter((s) => !s.startsWith("VSCODE_"))
         .join(" "),
       tenant: this.getTenantId(scopes),
     }
@@ -316,12 +316,12 @@ export class AzureActiveDirectoryService {
       const token =
         scopeData.clientId === DEFAULT_CLIENT_ID
           ? this._tokens.find(
-              (t) => t.refreshToken && !t.scope.includes("HAYSTACK_CLIENT_ID"),
+              (t) => t.refreshToken && !t.scope.includes("VSCODE_CLIENT_ID"),
             )
           : this._tokens.find(
               (t) =>
                 t.refreshToken &&
-                t.scope.includes(`HAYSTACK_CLIENT_ID:${scopeData.clientId}`),
+                t.scope.includes(`VSCODE_CLIENT_ID:${scopeData.clientId}`),
             )
 
       if (token) {
@@ -385,7 +385,7 @@ export class AzureActiveDirectoryService {
       scopeStr: modifiedScopes.join(" "),
       // filter our special scopes
       scopesToSend: modifiedScopes
-        .filter((s) => !s.startsWith("HAYSTACK_"))
+        .filter((s) => !s.startsWith("VSCODE_"))
         .join(" "),
       clientId: this.getClientId(scopes),
       tenant: this.getTenantId(scopes),
@@ -912,8 +912,8 @@ export class AzureActiveDirectoryService {
   private getClientId(scopes: string[]) {
     return (
       scopes.reduce<string | undefined>((prev, current) => {
-        if (current.startsWith("HAYSTACK_CLIENT_ID:")) {
-          return current.split("HAYSTACK_CLIENT_ID:")[1]
+        if (current.startsWith("VSCODE_CLIENT_ID:")) {
+          return current.split("VSCODE_CLIENT_ID:")[1]
         }
         return prev
       }, undefined) ?? DEFAULT_CLIENT_ID
@@ -923,8 +923,8 @@ export class AzureActiveDirectoryService {
   private getTenantId(scopes: string[]) {
     return (
       scopes.reduce<string | undefined>((prev, current) => {
-        if (current.startsWith("HAYSTACK_TENANT:")) {
-          return current.split("HAYSTACK_TENANT:")[1]
+        if (current.startsWith("VSCODE_TENANT:")) {
+          return current.split("VSCODE_TENANT:")[1]
         }
         return prev
       }, undefined) ?? DEFAULT_TENANT
@@ -1277,7 +1277,7 @@ export class AzureActiveDirectoryService {
             scopeStr: session.scope,
             // filter our special scopes
             scopesToSend: scopes
-              .filter((s) => !s.startsWith("HAYSTACK_"))
+              .filter((s) => !s.startsWith("VSCODE_"))
               .join(" "),
             clientId: this.getClientId(scopes),
             tenant: this.getTenantId(scopes),
