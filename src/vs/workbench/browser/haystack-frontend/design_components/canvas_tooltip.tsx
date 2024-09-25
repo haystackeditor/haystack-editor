@@ -32,11 +32,24 @@ export function CanvasTooltip({
 }: TooltipProps) {
   const [show, setShow] = React.useState(false)
   const timeoutRef = React.useRef<NodeJS.Timeout | null>(null)
+  const [appBoundingRect, setAppBoundingRect] = React.useState<DOMRect | null>(
+    null,
+  )
 
   const showTooltip = React.useCallback(() => {
     if (timeoutRef.current != null) {
       clearTimeout(timeoutRef.current)
     }
+
+    if (appBoundingRect == null) {
+      // Tries to set the bounding rect if it never got set.
+      // This can happen if the tooltip is the child of an element 
+      // high up in the DOM.
+      setAppBoundingRect(
+        appContainerRef.current?.getBoundingClientRect() ?? null,
+      )
+    }
+
     timeoutRef.current = setTimeout(() => {
       setShow(true)
     }, 250)
@@ -62,9 +75,9 @@ export function CanvasTooltip({
     }
   }, [parentElement])
 
-  const appBoundingRect = React.useMemo(() => {
+  React.useEffect(() => {
     if (appContainerRef.current == null) return null
-    return appContainerRef.current.getBoundingClientRect()
+    setAppBoundingRect(appContainerRef.current.getBoundingClientRect())
   }, [parentElement])
 
   const [tooltipStateRef, setTooltipStateRef] =
