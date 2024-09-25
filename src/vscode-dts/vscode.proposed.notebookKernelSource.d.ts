@@ -1,46 +1,59 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-declare module 'vscode' {
-	export interface NotebookControllerDetectionTask {
-		/**
-		 * Dispose and remove the detection task.
-		 */
-		dispose(): void;
-	}
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
-	export class NotebookKernelSourceAction {
-		readonly label: string;
-		readonly description?: string;
-		readonly detail?: string;
-		readonly command: string | Command;
-		readonly documentation?: Uri;
+declare module "vscode" {
+  export interface NotebookControllerDetectionTask {
+    /**
+     * Dispose and remove the detection task.
+     */
+    dispose(): void
+  }
 
-		constructor(label: string);
-	}
+  export class NotebookKernelSourceAction {
+    readonly label: string
+    readonly description?: string
+    readonly detail?: string
+    readonly command: string | Command
+    readonly documentation?: Uri
 
-	export interface NotebookKernelSourceActionProvider {
-		/**
-		 * An optional event to signal that the kernel source actions have changed.
-		 */
-		onDidChangeNotebookKernelSourceActions?: Event<void>;
-		/**
-		 * Provide kernel source actions
-		 */
-		provideNotebookKernelSourceActions(token: CancellationToken): ProviderResult<NotebookKernelSourceAction[]>;
-	}
+    constructor(label: string)
+  }
 
-	export namespace notebooks {
-		/**
-		 * Create notebook controller detection task
-		 */
-		export function createNotebookControllerDetectionTask(notebookType: string): NotebookControllerDetectionTask;
+  export interface NotebookKernelSourceActionProvider {
+    /**
+     * An optional event to signal that the kernel source actions have changed.
+     */
+    onDidChangeNotebookKernelSourceActions?: Event<void>
+    /**
+     * Provide kernel source actions
+     */
+    provideNotebookKernelSourceActions(
+      token: CancellationToken,
+    ): ProviderResult<NotebookKernelSourceAction[]>
+  }
 
-		/**
-		 * Register a notebook kernel source action provider
-		 */
-		export function registerKernelSourceActionProvider(notebookType: string, provider: NotebookKernelSourceActionProvider): Disposable;
-	}
+  export namespace notebooks {
+    /**
+     * Create notebook controller detection task
+     */
+    export function createNotebookControllerDetectionTask(
+      notebookType: string,
+    ): NotebookControllerDetectionTask
+
+    /**
+     * Register a notebook kernel source action provider
+     */
+    export function registerKernelSourceActionProvider(
+      notebookType: string,
+      provider: NotebookKernelSourceActionProvider,
+    ): Disposable
+  }
 }

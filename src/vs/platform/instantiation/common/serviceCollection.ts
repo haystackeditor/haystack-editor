@@ -1,32 +1,40 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ServiceIdentifier } from 'vs/platform/instantiation/common/instantiation';
-import { SyncDescriptor } from './descriptors';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+import { ServiceIdentifier } from "vs/platform/instantiation/common/instantiation"
+import { SyncDescriptor } from "./descriptors"
 
 export class ServiceCollection {
+  private _entries = new Map<ServiceIdentifier<any>, any>()
 
-	private _entries = new Map<ServiceIdentifier<any>, any>();
+  constructor(...entries: [ServiceIdentifier<any>, any][]) {
+    for (const [id, service] of entries) {
+      this.set(id, service)
+    }
+  }
 
-	constructor(...entries: [ServiceIdentifier<any>, any][]) {
-		for (const [id, service] of entries) {
-			this.set(id, service);
-		}
-	}
+  set<T>(
+    id: ServiceIdentifier<T>,
+    instanceOrDescriptor: T | SyncDescriptor<T>,
+  ): T | SyncDescriptor<T> {
+    const result = this._entries.get(id)
+    this._entries.set(id, instanceOrDescriptor)
+    return result
+  }
 
-	set<T>(id: ServiceIdentifier<T>, instanceOrDescriptor: T | SyncDescriptor<T>): T | SyncDescriptor<T> {
-		const result = this._entries.get(id);
-		this._entries.set(id, instanceOrDescriptor);
-		return result;
-	}
+  has(id: ServiceIdentifier<any>): boolean {
+    return this._entries.has(id)
+  }
 
-	has(id: ServiceIdentifier<any>): boolean {
-		return this._entries.has(id);
-	}
-
-	get<T>(id: ServiceIdentifier<T>): T | SyncDescriptor<T> {
-		return this._entries.get(id);
-	}
+  get<T>(id: ServiceIdentifier<T>): T | SyncDescriptor<T> {
+    return this._entries.get(id)
+  }
 }

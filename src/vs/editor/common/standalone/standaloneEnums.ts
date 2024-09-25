@@ -1,6 +1,6 @@
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
 // THIS IS A GENERATED FILE. DO NOT EDIT DIRECTLY.
@@ -315,14 +315,15 @@ export enum EditorOption {
 	wrappingStrategy = 139,
 	showDeprecated = 140,
 	inlayHints = 141,
-	editorClassName = 142,
-	pixelRatio = 143,
-	tabFocusMode = 144,
-	layoutInfo = 145,
-	wrappingInfo = 146,
-	defaultColorDecorators = 147,
-	colorDecoratorsActivatedOn = 148,
-	inlineCompletionsAccessibilityVerbose = 149
+	haystackEditor = 142,
+	editorClassName = 143,
+	pixelRatio = 144,
+	tabFocusMode = 145,
+	layoutInfo = 146,
+	wrappingInfo = 147,
+	defaultColorDecorators = 148,
+	colorDecoratorsActivatedOn = 149,
+	inlineCompletionsAccessibilityVerbose = 150
 }
 
 /**
@@ -631,11 +632,15 @@ export enum KeyCode {
 	 * VK_CLEAR, 0x0C, CLEAR key
 	 */
 	Clear = 131,
+	MouseWheel = 132,
+	LeftMouseButton = 133,
+	MiddleMouseButton = 134,
+	MouseMove = 135,
 	/**
 	 * Placed last to cover the length of the enum.
 	 * Please do not depend on this value!
 	 */
-	MAX_VALUE = 132
+	MAX_VALUE = 136
 }
 
 export enum MarkerSeverity {
@@ -777,23 +782,23 @@ export enum PartialAcceptTriggerKind {
 export enum PositionAffinity {
 	/**
 	 * Prefers the left most position.
-	*/
+	 */
 	Left = 0,
 	/**
 	 * Prefers the right most position.
-	*/
+	 */
 	Right = 1,
 	/**
 	 * No preference.
-	*/
+	 */
 	None = 2,
 	/**
 	 * If the given position is on injected text, prefers the position left of it.
-	*/
+	 */
 	LeftOfInjectedText = 3,
 	/**
 	 * If the given position is on injected text, prefers the position right of it.
-	*/
+	 */
 	RightOfInjectedText = 4
 }
 

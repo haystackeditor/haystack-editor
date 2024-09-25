@@ -1,109 +1,143 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as dom from 'vs/base/browser/dom';
-import { Delayer } from 'vs/base/common/async';
-import { onUnexpectedError } from 'vs/base/common/errors';
-import { Disposable } from 'vs/base/common/lifecycle';
-import { OperatingSystem } from 'vs/base/common/platform';
-import { MicrotaskDelay } from 'vs/base/common/symbols';
-import { IInstantiationService } from 'vs/platform/instantiation/common/instantiation';
-import { TerminalCapabilityStore } from 'vs/platform/terminal/common/capabilities/terminalCapabilityStore';
-import { IMergedEnvironmentVariableCollection } from 'vs/platform/terminal/common/environmentVariable';
-import { ITerminalBackend } from 'vs/platform/terminal/common/terminal';
-import { IDetachedTerminalInstance, IDetachedXTermOptions, IDetachedXtermTerminal, ITerminalContribution, IXtermAttachToElementOptions } from 'vs/workbench/contrib/terminal/browser/terminal';
-import { TerminalExtensionsRegistry } from 'vs/workbench/contrib/terminal/browser/terminalExtensions';
-import { TerminalWidgetManager } from 'vs/workbench/contrib/terminal/browser/widgets/widgetManager';
-import { XtermTerminal } from 'vs/workbench/contrib/terminal/browser/xterm/xtermTerminal';
-import { IEnvironmentVariableInfo } from 'vs/workbench/contrib/terminal/common/environmentVariable';
-import { ITerminalProcessInfo, ProcessState } from 'vs/workbench/contrib/terminal/common/terminal';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
-export class DetachedTerminal extends Disposable implements IDetachedTerminalInstance {
-	private readonly _widgets = this._register(new TerminalWidgetManager());
-	public readonly capabilities = new TerminalCapabilityStore();
-	private readonly _contributions: Map<string, ITerminalContribution> = new Map();
+import * as dom from "vs/base/browser/dom"
+import { Delayer } from "vs/base/common/async"
+import { onUnexpectedError } from "vs/base/common/errors"
+import { Disposable } from "vs/base/common/lifecycle"
+import { OperatingSystem } from "vs/base/common/platform"
+import { MicrotaskDelay } from "vs/base/common/symbols"
+import { IInstantiationService } from "vs/platform/instantiation/common/instantiation"
+import { TerminalCapabilityStore } from "vs/platform/terminal/common/capabilities/terminalCapabilityStore"
+import { IMergedEnvironmentVariableCollection } from "vs/platform/terminal/common/environmentVariable"
+import { ITerminalBackend } from "vs/platform/terminal/common/terminal"
+import {
+  IDetachedTerminalInstance,
+  IDetachedXTermOptions,
+  IDetachedXtermTerminal,
+  ITerminalContribution,
+  IXtermAttachToElementOptions,
+} from "vs/workbench/contrib/terminal/browser/terminal"
+import { TerminalExtensionsRegistry } from "vs/workbench/contrib/terminal/browser/terminalExtensions"
+import { TerminalWidgetManager } from "vs/workbench/contrib/terminal/browser/widgets/widgetManager"
+import { XtermTerminal } from "vs/workbench/contrib/terminal/browser/xterm/xtermTerminal"
+import { IEnvironmentVariableInfo } from "vs/workbench/contrib/terminal/common/environmentVariable"
+import {
+  ITerminalProcessInfo,
+  ProcessState,
+} from "vs/workbench/contrib/terminal/common/terminal"
 
-	public domElement?: HTMLElement;
+export class DetachedTerminal
+  extends Disposable
+  implements IDetachedTerminalInstance
+{
+  private readonly _widgets = this._register(new TerminalWidgetManager())
+  public readonly capabilities = new TerminalCapabilityStore()
+  private readonly _contributions: Map<string, ITerminalContribution> =
+    new Map()
 
-	public get xterm(): IDetachedXtermTerminal {
-		return this._xterm;
-	}
+  public domElement?: HTMLElement
 
-	constructor(
-		private readonly _xterm: XtermTerminal,
-		options: IDetachedXTermOptions,
-		@IInstantiationService instantiationService: IInstantiationService,
-	) {
-		super();
-		this._register(_xterm);
+  public get xterm(): IDetachedXtermTerminal {
+    return this._xterm
+  }
 
-		// Initialize contributions
-		const contributionDescs = TerminalExtensionsRegistry.getTerminalContributions();
-		for (const desc of contributionDescs) {
-			if (this._contributions.has(desc.id)) {
-				onUnexpectedError(new Error(`Cannot have two terminal contributions with the same id ${desc.id}`));
-				continue;
-			}
-			if (desc.canRunInDetachedTerminals === false) {
-				continue;
-			}
+  constructor(
+    private readonly _xterm: XtermTerminal,
+    options: IDetachedXTermOptions,
+    @IInstantiationService instantiationService: IInstantiationService,
+  ) {
+    super()
+    this._register(_xterm)
 
-			let contribution: ITerminalContribution;
-			try {
-				contribution = instantiationService.createInstance(desc.ctor, this, options.processInfo, this._widgets);
-				this._contributions.set(desc.id, contribution);
-				this._register(contribution);
-			} catch (err) {
-				onUnexpectedError(err);
-			}
-		}
+    // Initialize contributions
+    const contributionDescs =
+      TerminalExtensionsRegistry.getTerminalContributions()
+    for (const desc of contributionDescs) {
+      if (this._contributions.has(desc.id)) {
+        onUnexpectedError(
+          new Error(
+            `Cannot have two terminal contributions with the same id ${desc.id}`,
+          ),
+        )
+        continue
+      }
+      if (desc.canRunInDetachedTerminals === false) {
+        continue
+      }
 
-		// xterm is already by the time DetachedTerminal is created, so trigger everything
-		// on the next microtask, allowing the caller to do any extra initialization
-		this._register(new Delayer(MicrotaskDelay)).trigger(() => {
-			for (const contr of this._contributions.values()) {
-				contr.xtermReady?.(this._xterm);
-			}
-		});
-	}
+      let contribution: ITerminalContribution
+      try {
+        contribution = instantiationService.createInstance(
+          desc.ctor,
+          this,
+          options.processInfo,
+          this._widgets,
+        )
+        this._contributions.set(desc.id, contribution)
+        this._register(contribution)
+      } catch (err) {
+        onUnexpectedError(err)
+      }
+    }
 
-	get selection(): string | undefined {
-		return this._xterm && this.hasSelection() ? this._xterm.raw.getSelection() : undefined;
-	}
+    // xterm is already by the time DetachedTerminal is created, so trigger everything
+    // on the next microtask, allowing the caller to do any extra initialization
+    this._register(new Delayer(MicrotaskDelay)).trigger(() => {
+      for (const contr of this._contributions.values()) {
+        contr.xtermReady?.(this._xterm)
+      }
+    })
+  }
 
-	hasSelection(): boolean {
-		return this._xterm.hasSelection();
-	}
+  get selection(): string | undefined {
+    return this._xterm && this.hasSelection()
+      ? this._xterm.raw.getSelection()
+      : undefined
+  }
 
-	clearSelection(): void {
-		this._xterm.clearSelection();
-	}
+  hasSelection(): boolean {
+    return this._xterm.hasSelection()
+  }
 
-	focus(force?: boolean): void {
-		if (force || !dom.getActiveWindow().getSelection()?.toString()) {
-			this.xterm.focus();
-		}
-	}
+  clearSelection(): void {
+    this._xterm.clearSelection()
+  }
 
-	attachToElement(container: HTMLElement, options?: Partial<IXtermAttachToElementOptions> | undefined): void {
-		this.domElement = container;
-		const screenElement = this._xterm.attachToElement(container, options);
-		this._widgets.attachToElement(screenElement);
-	}
+  focus(force?: boolean): void {
+    if (force || !dom.getActiveWindow().getSelection()?.toString()) {
+      this.xterm.focus()
+    }
+  }
 
-	forceScrollbarVisibility(): void {
-		this.domElement?.classList.add('force-scrollbar');
-	}
+  attachToElement(
+    container: HTMLElement,
+    options?: Partial<IXtermAttachToElementOptions> | undefined,
+  ): void {
+    this.domElement = container
+    const screenElement = this._xterm.attachToElement(container, options)
+    this._widgets.attachToElement(screenElement)
+  }
 
-	resetScrollbarVisibility(): void {
-		this.domElement?.classList.remove('force-scrollbar');
-	}
+  forceScrollbarVisibility(): void {
+    this.domElement?.classList.add("force-scrollbar")
+  }
 
-	getContribution<T extends ITerminalContribution>(id: string): T | null {
-		return this._contributions.get(id) as T | null;
-	}
+  resetScrollbarVisibility(): void {
+    this.domElement?.classList.remove("force-scrollbar")
+  }
+
+  getContribution<T extends ITerminalContribution>(id: string): T | null {
+    return this._contributions.get(id) as T | null
+  }
 }
 
 /**
@@ -112,24 +146,26 @@ export class DetachedTerminal extends Disposable implements IDetachedTerminalIns
  * the instantiator.
  */
 export class DetachedProcessInfo implements ITerminalProcessInfo {
-	processState = ProcessState.Running;
-	ptyProcessReady = Promise.resolve();
-	shellProcessId: number | undefined;
-	remoteAuthority: string | undefined;
-	os: OperatingSystem | undefined;
-	userHome: string | undefined;
-	initialCwd = '';
-	environmentVariableInfo: IEnvironmentVariableInfo | undefined;
-	persistentProcessId: number | undefined;
-	shouldPersist = false;
-	hasWrittenData = false;
-	hasChildProcesses = false;
-	backend: ITerminalBackend | undefined;
-	capabilities = new TerminalCapabilityStore();
-	shellIntegrationNonce = '';
-	extEnvironmentVariableCollection: IMergedEnvironmentVariableCollection | undefined;
+  processState = ProcessState.Running
+  ptyProcessReady = Promise.resolve()
+  shellProcessId: number | undefined
+  remoteAuthority: string | undefined
+  os: OperatingSystem | undefined
+  userHome: string | undefined
+  initialCwd = ""
+  environmentVariableInfo: IEnvironmentVariableInfo | undefined
+  persistentProcessId: number | undefined
+  shouldPersist = false
+  hasWrittenData = false
+  hasChildProcesses = false
+  backend: ITerminalBackend | undefined
+  capabilities = new TerminalCapabilityStore()
+  shellIntegrationNonce = ""
+  extEnvironmentVariableCollection:
+    | IMergedEnvironmentVariableCollection
+    | undefined
 
-	constructor(initialValues: Partial<ITerminalProcessInfo>) {
-		Object.assign(this, initialValues);
-	}
+  constructor(initialValues: Partial<ITerminalProcessInfo>) {
+    Object.assign(this, initialValues)
+  }
 }

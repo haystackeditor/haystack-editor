@@ -1,11 +1,11 @@
 <!-- Copyright (C) Microsoft Corporation. All rights reserved. -->
-<!DOCTYPE html>
+<!doctype html>
 <html>
-	<head>
-		<meta charset="utf-8" />
-		<meta
-			http-equiv="Content-Security-Policy"
-			content="
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="
 				default-src
 					'none'
 				;
@@ -60,16 +60,18 @@
 					notebookRenderer
 					stickyScrollViewLayer
 					tokenizeToString
+					standaloneColorizer
+					pixi
 				;
-		"/>
-	</head>
+		"
+    />
+  </head>
 
-	<body aria-label="">
-	</body>
+  <body aria-label=""></body>
 
-	<!-- Startup (do not modify order of script tags!) -->
-	<script src="../../../../bootstrap.js"></script>
-	<script src="../../../../vs/loader.js"></script>
-	<script src="../../../../bootstrap-window.js"></script>
-	<script src="workbench.js"></script>
+  <!-- Startup (do not modify order of script tags!) -->
+  <script src="../../../../bootstrap.js"></script>
+  <script src="../../../../vs/loader.js"></script>
+  <script src="../../../../bootstrap-window.js"></script>
+  <script src="workbench.js"></script>
 </html>

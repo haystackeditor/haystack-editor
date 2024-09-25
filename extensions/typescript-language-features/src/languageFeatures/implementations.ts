@@ -1,28 +1,50 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
-import { DocumentSelector } from '../configuration/documentSelector';
-import { ClientCapability, ITypeScriptServiceClient } from '../typescriptService';
-import DefinitionProviderBase from './definitionProviderBase';
-import { conditionalRegistration, requireSomeCapability } from './util/dependentRegistration';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
-class TypeScriptImplementationProvider extends DefinitionProviderBase implements vscode.ImplementationProvider {
-	public provideImplementation(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): Promise<vscode.Definition | undefined> {
-		return this.getSymbolLocations('implementation', document, position, token);
-	}
+import * as vscode from "vscode"
+import { DocumentSelector } from "../configuration/documentSelector"
+import {
+  ClientCapability,
+  ITypeScriptServiceClient,
+} from "../typescriptService"
+import DefinitionProviderBase from "./definitionProviderBase"
+import {
+  conditionalRegistration,
+  requireSomeCapability,
+} from "./util/dependentRegistration"
+
+class TypeScriptImplementationProvider
+  extends DefinitionProviderBase
+  implements vscode.ImplementationProvider
+{
+  public provideImplementation(
+    document: vscode.TextDocument,
+    position: vscode.Position,
+    token: vscode.CancellationToken,
+  ): Promise<vscode.Definition | undefined> {
+    return this.getSymbolLocations("implementation", document, position, token)
+  }
 }
 
 export function register(
-	selector: DocumentSelector,
-	client: ITypeScriptServiceClient,
+  selector: DocumentSelector,
+  client: ITypeScriptServiceClient,
 ) {
-	return conditionalRegistration([
-		requireSomeCapability(client, ClientCapability.Semantic),
-	], () => {
-		return vscode.languages.registerImplementationProvider(selector.semantic,
-			new TypeScriptImplementationProvider(client));
-	});
+  return conditionalRegistration(
+    [requireSomeCapability(client, ClientCapability.Semantic)],
+    () => {
+      return vscode.languages.registerImplementationProvider(
+        selector.semantic,
+        new TypeScriptImplementationProvider(client),
+      )
+    },
+  )
 }

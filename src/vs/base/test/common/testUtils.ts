@@ -1,19 +1,24 @@
 /*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
+ *--------------------------------------------------------------------------------------------*/
+
+/*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
 export function flakySuite(title: string, fn: () => void) /* Suite */ {
-	return suite(title, function () {
+  return suite(title, function () {
+    // Flaky suites need retries and timeout to complete
+    // e.g. because they access browser features which can
+    // be unreliable depending on the environment.
+    this.retries(3)
+    this.timeout(1000 * 20)
 
-		// Flaky suites need retries and timeout to complete
-		// e.g. because they access browser features which can
-		// be unreliable depending on the environment.
-		this.retries(3);
-		this.timeout(1000 * 20);
-
-		// Invoke suite ensuring that `this` is
-		// properly wired in.
-		fn.call(this);
-	});
+    // Invoke suite ensuring that `this` is
+    // properly wired in.
+    fn.call(this)
+  })
 }

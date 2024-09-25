@@ -1,66 +1,105 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { structuralEquals } from 'vs/base/common/equals';
-import { Disposable } from 'vs/base/common/lifecycle';
-import { derived, derivedOpts, observableValue } from 'vs/base/common/observable';
-import 'vs/css!./placeholderText';
-import { ICodeEditor } from 'vs/editor/browser/editorBrowser';
-import { EditorContributionInstantiation, registerEditorContribution } from 'vs/editor/browser/editorExtensions';
-import { obsCodeEditor } from 'vs/editor/browser/observableUtilities';
-import { Range } from 'vs/editor/common/core/range';
-import { IEditorContribution } from 'vs/editor/common/editorCommon';
-import { IModelDeltaDecoration, InjectedTextCursorStops } from 'vs/editor/common/model';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
-export class PlaceholderTextContribution extends Disposable implements IEditorContribution {
-	public static get(editor: ICodeEditor): PlaceholderTextContribution {
-		return editor.getContribution<PlaceholderTextContribution>(PlaceholderTextContribution.ID)!;
-	}
+import { structuralEquals } from "vs/base/common/equals"
+import { Disposable } from "vs/base/common/lifecycle"
+import {
+  derived,
+  derivedOpts,
+  observableValue,
+} from "vs/base/common/observable"
+import "vs/css!./placeholderText"
+import { ICodeEditor } from "vs/editor/browser/editorBrowser"
+import {
+  EditorContributionInstantiation,
+  registerEditorContribution,
+} from "vs/editor/browser/editorExtensions"
+import { obsCodeEditor } from "vs/editor/browser/observableUtilities"
+import { Range } from "vs/editor/common/core/range"
+import { IEditorContribution } from "vs/editor/common/editorCommon"
+import {
+  IModelDeltaDecoration,
+  InjectedTextCursorStops,
+} from "vs/editor/common/model"
 
-	public static readonly ID = 'editor.contrib.placeholderText';
-	private readonly _editorObs = obsCodeEditor(this._editor);
+export class PlaceholderTextContribution
+  extends Disposable
+  implements IEditorContribution
+{
+  public static get(editor: ICodeEditor): PlaceholderTextContribution {
+    return editor.getContribution<PlaceholderTextContribution>(
+      PlaceholderTextContribution.ID,
+    )!
+  }
 
-	private readonly _placeholderText = observableValue<string | undefined>(this, undefined);
+  public static readonly ID = "editor.contrib.placeholderText"
+  private readonly _editorObs = obsCodeEditor(this._editor)
 
-	private readonly _decorationOptions = derivedOpts<{ placeholder: string } | undefined>({ owner: this, equalsFn: structuralEquals }, reader => {
-		const p = this._placeholderText.read(reader);
-		if (!p) { return undefined; }
-		if (!this._editorObs.valueIsEmpty.read(reader)) { return undefined; }
+  private readonly _placeholderText = observableValue<string | undefined>(
+    this,
+    undefined,
+  )
 
-		return { placeholder: p };
-	});
+  private readonly _decorationOptions = derivedOpts<
+    { placeholder: string } | undefined
+  >({ owner: this, equalsFn: structuralEquals }, (reader) => {
+    const p = this._placeholderText.read(reader)
+    if (!p) {
+      return undefined
+    }
+    if (!this._editorObs.valueIsEmpty.read(reader)) {
+      return undefined
+    }
 
-	private readonly _decorations = derived<IModelDeltaDecoration[]>(this, (reader) => {
-		const options = this._decorationOptions.read(reader);
-		if (!options) { return []; }
+    return { placeholder: p }
+  })
 
-		return [{
-			range: new Range(1, 1, 1, 1),
-			options: {
-				description: 'placeholder',
-				showIfCollapsed: true,
-				after: {
-					content: options.placeholder,
-					cursorStops: InjectedTextCursorStops.None,
-					inlineClassName: 'placeholder-text'
-				}
-			}
-		}];
-	});
+  private readonly _decorations = derived<IModelDeltaDecoration[]>(
+    this,
+    (reader) => {
+      const options = this._decorationOptions.read(reader)
+      if (!options) {
+        return []
+      }
 
-	constructor(
-		private readonly _editor: ICodeEditor,
-	) {
-		super();
+      return [
+        {
+          range: new Range(1, 1, 1, 1),
+          options: {
+            description: "placeholder",
+            showIfCollapsed: true,
+            after: {
+              content: options.placeholder,
+              cursorStops: InjectedTextCursorStops.None,
+              inlineClassName: "placeholder-text",
+            },
+          },
+        },
+      ]
+    },
+  )
 
-		this._register(this._editorObs.setDecorations(this._decorations));
-	}
+  constructor(private readonly _editor: ICodeEditor) {
+    super()
 
-	public setPlaceholderText(placeholder: string): void {
-		this._placeholderText.set(placeholder, undefined);
-	}
+    this._register(this._editorObs.setDecorations(this._decorations))
+  }
+
+  public setPlaceholderText(placeholder: string): void {
+    this._placeholderText.set(placeholder, undefined)
+  }
 }
 
-registerEditorContribution(PlaceholderTextContribution.ID, PlaceholderTextContribution, EditorContributionInstantiation.Lazy);
+registerEditorContribution(
+  PlaceholderTextContribution.ID,
+  PlaceholderTextContribution,
+  EditorContributionInstantiation.Lazy,
+)

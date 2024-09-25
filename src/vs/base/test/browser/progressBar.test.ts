@@ -1,36 +1,42 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as assert from 'assert';
-import { ProgressBar } from 'vs/base/browser/ui/progressbar/progressbar';
-import { mainWindow } from 'vs/base/browser/window';
-import { ensureNoDisposablesAreLeakedInTestSuite } from 'vs/base/test/common/utils';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
-suite('ProgressBar', () => {
-	let fixture: HTMLElement;
+import * as assert from "assert"
+import { ProgressBar } from "vs/base/browser/ui/progressbar/progressbar"
+import { mainWindow } from "vs/base/browser/window"
+import { ensureNoDisposablesAreLeakedInTestSuite } from "vs/base/test/common/utils"
 
-	setup(() => {
-		fixture = document.createElement('div');
-		mainWindow.document.body.appendChild(fixture);
-	});
+suite("ProgressBar", () => {
+  let fixture: HTMLElement
 
-	teardown(() => {
-		mainWindow.document.body.removeChild(fixture);
-	});
+  setup(() => {
+    fixture = document.createElement("div")
+    mainWindow.document.body.appendChild(fixture)
+  })
 
-	test('Progress Bar', function () {
-		const bar = new ProgressBar(fixture);
-		assert(bar.infinite());
-		assert(bar.total(100));
-		assert(bar.worked(50));
-		assert(bar.setWorked(70));
-		assert(bar.worked(30));
-		assert(bar.done());
+  teardown(() => {
+    mainWindow.document.body.removeChild(fixture)
+  })
 
-		bar.dispose();
-	});
+  test("Progress Bar", function () {
+    const bar = new ProgressBar(fixture)
+    assert(bar.infinite())
+    assert(bar.total(100))
+    assert(bar.worked(50))
+    assert(bar.setWorked(70))
+    assert(bar.worked(30))
+    assert(bar.done())
 
-	ensureNoDisposablesAreLeakedInTestSuite();
-});
+    bar.dispose()
+  })
+
+  ensureNoDisposablesAreLeakedInTestSuite()
+})

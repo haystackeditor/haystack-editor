@@ -10,7 +10,7 @@ call .\scripts\test.bat --runGlob **\*.releaseTest.js %*
 if %errorlevel% neq 0 exit /b %errorlevel%
 
 
-rmdir /s /q %VSCODEUSERDATADIR%
+rmdir /s /q %HAYSTACKUSERDATADIR%
 
 popd
 

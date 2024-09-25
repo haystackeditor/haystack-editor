@@ -26,7 +26,7 @@ properties:
         description: Install Yarn
         allowPrerelease: true
       settings:
-        Name: 'yarn'
+        Name: "yarn"
         Global: true
         PackageDirectory: '${WinGetConfigRoot}\..\'
     - resource: Microsoft.WinGet.DSC/WinGetPackage

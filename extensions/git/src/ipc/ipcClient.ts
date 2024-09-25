@@ -1,45 +1,52 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as http from 'http';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+import * as http from "http"
 
 export class IPCClient {
+  private ipcHandlePath: string
 
-	private ipcHandlePath: string;
+  constructor(private handlerName: string) {
+    const ipcHandlePath = process.env["HAYSTACK_GIT_IPC_HANDLE"]
 
-	constructor(private handlerName: string) {
-		const ipcHandlePath = process.env['VSCODE_GIT_IPC_HANDLE'];
+    if (!ipcHandlePath) {
+      throw new Error("Missing HAYSTACK_GIT_IPC_HANDLE")
+    }
 
-		if (!ipcHandlePath) {
-			throw new Error('Missing VSCODE_GIT_IPC_HANDLE');
-		}
+    this.ipcHandlePath = ipcHandlePath
+  }
 
-		this.ipcHandlePath = ipcHandlePath;
-	}
+  call(request: any): Promise<any> {
+    const opts: http.RequestOptions = {
+      socketPath: this.ipcHandlePath,
+      path: `/${this.handlerName}`,
+      method: "POST",
+    }
 
-	call(request: any): Promise<any> {
-		const opts: http.RequestOptions = {
-			socketPath: this.ipcHandlePath,
-			path: `/${this.handlerName}`,
-			method: 'POST'
-		};
+    return new Promise((c, e) => {
+      const req = http.request(opts, (res) => {
+        if (res.statusCode !== 200) {
+          return e(new Error(`Bad status code: ${res.statusCode}`))
+        }
 
-		return new Promise((c, e) => {
-			const req = http.request(opts, res => {
-				if (res.statusCode !== 200) {
-					return e(new Error(`Bad status code: ${res.statusCode}`));
-				}
+        const chunks: Buffer[] = []
+        res.on("data", (d) => chunks.push(d))
+        res.on("end", () =>
+          c(JSON.parse(Buffer.concat(chunks).toString("utf8"))),
+        )
+      })
 
-				const chunks: Buffer[] = [];
-				res.on('data', d => chunks.push(d));
-				res.on('end', () => c(JSON.parse(Buffer.concat(chunks).toString('utf8'))));
-			});
-
-			req.on('error', err => e(err));
-			req.write(JSON.stringify(request));
-			req.end();
-		});
-	}
+      req.on("error", (err) => e(err))
+      req.write(JSON.stringify(request))
+      req.end()
+    })
+  }
 }

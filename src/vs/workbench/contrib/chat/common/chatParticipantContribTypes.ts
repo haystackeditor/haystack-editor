@@ -1,31 +1,37 @@
 /*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
+ *--------------------------------------------------------------------------------------------*/
+
+/*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
 export interface IRawChatCommandContribution {
-	name: string;
-	description: string;
-	sampleRequest?: string;
-	isSticky?: boolean;
-	when?: string;
-	defaultImplicitVariables?: string[];
+  name: string
+  description: string
+  sampleRequest?: string
+  isSticky?: boolean
+  when?: string
+  defaultImplicitVariables?: string[]
 }
 
-export type RawChatParticipantLocation = 'panel' | 'terminal' | 'notebook';
+export type RawChatParticipantLocation = "panel" | "terminal" | "notebook"
 
 export interface IRawChatParticipantContribution {
-	id: string;
-	name: string;
-	fullName: string;
-	when?: string;
-	description?: string;
-	isDefault?: boolean;
-	isSticky?: boolean;
-	sampleRequest?: string;
-	commands?: IRawChatCommandContribution[];
-	defaultImplicitVariables?: string[];
-	locations?: RawChatParticipantLocation[];
+  id: string
+  name: string
+  fullName: string
+  when?: string
+  description?: string
+  isDefault?: boolean
+  isSticky?: boolean
+  sampleRequest?: string
+  commands?: IRawChatCommandContribution[]
+  defaultImplicitVariables?: string[]
+  locations?: RawChatParticipantLocation[]
 }
 
 /**
@@ -33,4 +39,4 @@ export interface IRawChatParticipantContribution {
  * DON'T use this for any new data, only for old persisted data.
  * @deprecated
  */
-export const CHAT_PROVIDER_ID = 'copilot';
+export const CHAT_PROVIDER_ID = "copilot"

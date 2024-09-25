@@ -1,51 +1,53 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as assert from 'assert';
-import { isFunction } from 'vs/base/common/types';
-import { Registry } from 'vs/platform/registry/common/platform';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
-suite('Platform / Registry', () => {
+import * as assert from "assert"
+import { isFunction } from "vs/base/common/types"
+import { Registry } from "vs/platform/registry/common/platform"
 
-	test('registry - api', function () {
-		assert.ok(isFunction(Registry.add));
-		assert.ok(isFunction(Registry.as));
-		assert.ok(isFunction(Registry.knows));
-	});
+suite("Platform / Registry", () => {
+  test("registry - api", function () {
+    assert.ok(isFunction(Registry.add))
+    assert.ok(isFunction(Registry.as))
+    assert.ok(isFunction(Registry.knows))
+  })
 
-	test('registry - mixin', function () {
+  test("registry - mixin", function () {
+    Registry.add("foo", { bar: true })
 
-		Registry.add('foo', { bar: true });
+    assert.ok(Registry.knows("foo"))
+    assert.ok(Registry.as<any>("foo").bar)
+    assert.strictEqual(Registry.as<any>("foo").bar, true)
+  })
 
-		assert.ok(Registry.knows('foo'));
-		assert.ok(Registry.as<any>('foo').bar);
-		assert.strictEqual(Registry.as<any>('foo').bar, true);
-	});
+  test("registry - knows, as", function () {
+    const ext = {}
 
-	test('registry - knows, as', function () {
+    Registry.add("knows,as", ext)
 
-		const ext = {};
+    assert.ok(Registry.knows("knows,as"))
+    assert.ok(!Registry.knows("knows,as1234"))
 
-		Registry.add('knows,as', ext);
+    assert.ok(Registry.as("knows,as") === ext)
+    assert.ok(Registry.as("knows,as1234") === null)
+  })
 
-		assert.ok(Registry.knows('knows,as'));
-		assert.ok(!Registry.knows('knows,as1234'));
+  test("registry - mixin, fails on duplicate ids", function () {
+    Registry.add("foo-dup", { bar: true })
 
-		assert.ok(Registry.as('knows,as') === ext);
-		assert.ok(Registry.as('knows,as1234') === null);
-	});
-
-	test('registry - mixin, fails on duplicate ids', function () {
-
-		Registry.add('foo-dup', { bar: true });
-
-		try {
-			Registry.add('foo-dup', { bar: false });
-			assert.ok(false);
-		} catch (e) {
-			assert.ok(true);
-		}
-	});
-});
+    try {
+      Registry.add("foo-dup", { bar: false })
+      assert.ok(false)
+    } catch (e) {
+      assert.ok(true)
+    }
+  })
+})

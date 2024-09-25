@@ -1,6 +1,6 @@
 # ---------------------------------------------------------------------------------------------
 #   Copyright (c) Microsoft Corporation. All rights reserved.
-#   Licensed under the MIT License. See License.txt in the project root for license information.
+#   Licensed under the MIT License. See code-license.txt in the project root for license information.
 # ---------------------------------------------------------------------------------------------
 #
 # Visual Studio Code terminal integration for fish
@@ -17,16 +17,16 @@
 # Don't run in scripts, other terminals, or more than once per session.
 status is-interactive
 and string match --quiet "$TERM_PROGRAM" "vscode"
-and ! set --query VSCODE_SHELL_INTEGRATION
+and ! set --query HAYSTACK_SHELL_INTEGRATION
 or exit
 
-set --global VSCODE_SHELL_INTEGRATION 1
+set --global HAYSTACK_SHELL_INTEGRATION 1
 
 # Apply any explicit path prefix (see #99878)
-if status --is-login; and set -q VSCODE_PATH_PREFIX
-	fish_add_path -p $VSCODE_PATH_PREFIX
+if status --is-login; and set -q HAYSTACK_PATH_PREFIX
+	fish_add_path -p $HAYSTACK_PATH_PREFIX
 end
-set -e VSCODE_PATH_PREFIX
+set -e HAYSTACK_PATH_PREFIX
 
 set -g __vsc_applied_env_vars 0
 function __vsc_apply_env_vars
@@ -35,36 +35,36 @@ function __vsc_apply_env_vars
 	end
 	set -l __vsc_applied_env_vars 1
 	# Apply EnvironmentVariableCollections if needed
-	if test -n "$VSCODE_ENV_REPLACE"
-		set ITEMS (string split : $VSCODE_ENV_REPLACE)
+	if test -n "$HAYSTACK_ENV_REPLACE"
+		set ITEMS (string split : $HAYSTACK_ENV_REPLACE)
 		for B in $ITEMS
 			set split (string split = $B)
 			set -gx "$split[1]" (echo -e "$split[2]")
 		end
-		set -e VSCODE_ENV_REPLACE
+		set -e HAYSTACK_ENV_REPLACE
 	end
-	if test -n "$VSCODE_ENV_PREPEND"
-		set ITEMS (string split : $VSCODE_ENV_PREPEND)
+	if test -n "$HAYSTACK_ENV_PREPEND"
+		set ITEMS (string split : $HAYSTACK_ENV_PREPEND)
 		for B in $ITEMS
 			set split (string split = $B)
 			set -gx "$split[1]" (echo -e "$split[2]")"$$split[1]" # avoid -p as it adds a space
 		end
-		set -e VSCODE_ENV_PREPEND
+		set -e HAYSTACK_ENV_PREPEND
 	end
-	if test -n "$VSCODE_ENV_APPEND"
-		set ITEMS (string split : $VSCODE_ENV_APPEND)
+	if test -n "$HAYSTACK_ENV_APPEND"
+		set ITEMS (string split : $HAYSTACK_ENV_APPEND)
 		for B in $ITEMS
 			set split (string split = $B)
 			set -gx "$split[1]" "$$split[1]"(echo -e "$split[2]") # avoid -a as it adds a space
 		end
-		set -e VSCODE_ENV_APPEND
+		set -e HAYSTACK_ENV_APPEND
 	end
 end
 
 # Handle the shell integration nonce
-if set -q VSCODE_NONCE
-	set -l __vsc_nonce $VSCODE_NONCE
-	set -e VSCODE_NONCE
+if set -q HAYSTACK_NONCE
+	set -l __vsc_nonce $HAYSTACK_NONCE
+	set -e HAYSTACK_NONCE
 end
 
 # Helper function

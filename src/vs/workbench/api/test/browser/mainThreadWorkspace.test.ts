@@ -1,125 +1,212 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as assert from 'assert';
-import { CancellationToken } from 'vs/base/common/cancellation';
-import { ensureNoDisposablesAreLeakedInTestSuite } from 'vs/base/test/common/utils';
-import { IConfigurationService } from 'vs/platform/configuration/common/configuration';
-import { TestConfigurationService } from 'vs/platform/configuration/test/common/testConfigurationService';
-import { TestInstantiationService } from 'vs/platform/instantiation/test/common/instantiationServiceMock';
-import { MainThreadWorkspace } from 'vs/workbench/api/browser/mainThreadWorkspace';
-import { SingleProxyRPCProtocol } from 'vs/workbench/api/test/common/testRPCProtocol';
-import { IFileQuery, ISearchService } from 'vs/workbench/services/search/common/search';
-import { workbenchInstantiationService } from 'vs/workbench/test/browser/workbenchTestServices';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
-suite('MainThreadWorkspace', () => {
-	const disposables = ensureNoDisposablesAreLeakedInTestSuite();
+import * as assert from "assert"
+import { CancellationToken } from "vs/base/common/cancellation"
+import { ensureNoDisposablesAreLeakedInTestSuite } from "vs/base/test/common/utils"
+import { IConfigurationService } from "vs/platform/configuration/common/configuration"
+import { TestConfigurationService } from "vs/platform/configuration/test/common/testConfigurationService"
+import { TestInstantiationService } from "vs/platform/instantiation/test/common/instantiationServiceMock"
+import { MainThreadWorkspace } from "vs/workbench/api/browser/mainThreadWorkspace"
+import { SingleProxyRPCProtocol } from "vs/workbench/api/test/common/testRPCProtocol"
+import {
+  IFileQuery,
+  ISearchService,
+} from "vs/workbench/services/search/common/search"
+import { workbenchInstantiationService } from "vs/workbench/test/browser/workbenchTestServices"
 
-	let configService: TestConfigurationService;
-	let instantiationService: TestInstantiationService;
+suite("MainThreadWorkspace", () => {
+  const disposables = ensureNoDisposablesAreLeakedInTestSuite()
 
-	setup(() => {
-		instantiationService = workbenchInstantiationService(undefined, disposables) as TestInstantiationService;
+  let configService: TestConfigurationService
+  let instantiationService: TestInstantiationService
 
-		configService = instantiationService.get(IConfigurationService) as TestConfigurationService;
-		configService.setUserConfiguration('search', {});
-	});
+  setup(() => {
+    instantiationService = workbenchInstantiationService(
+      undefined,
+      disposables,
+    ) as TestInstantiationService
 
-	test('simple', () => {
-		instantiationService.stub(ISearchService, {
-			fileSearch(query: IFileQuery) {
-				assert.strictEqual(query.folderQueries.length, 1);
-				assert.strictEqual(query.folderQueries[0].disregardIgnoreFiles, true);
+    configService = instantiationService.get(
+      IConfigurationService,
+    ) as TestConfigurationService
+    configService.setUserConfiguration("search", {})
+  })
 
-				assert.deepStrictEqual({ ...query.includePattern }, { 'foo': true });
-				assert.strictEqual(query.maxResults, 10);
+  test("simple", () => {
+    instantiationService.stub(ISearchService, {
+      fileSearch(query: IFileQuery) {
+        assert.strictEqual(query.folderQueries.length, 1)
+        assert.strictEqual(query.folderQueries[0].disregardIgnoreFiles, true)
 
-				return Promise.resolve({ results: [], messages: [] });
-			}
-		});
+        assert.deepStrictEqual({ ...query.includePattern }, { foo: true })
+        assert.strictEqual(query.maxResults, 10)
 
-		const mtw = disposables.add(instantiationService.createInstance(MainThreadWorkspace, SingleProxyRPCProtocol({ $initializeWorkspace: () => { } })));
-		return mtw.$startFileSearch(null, { maxResults: 10, includePattern: 'foo', disregardSearchExcludeSettings: true }, CancellationToken.None);
-	});
+        return Promise.resolve({ results: [], messages: [] })
+      },
+    })
 
-	test('exclude defaults', () => {
-		configService.setUserConfiguration('search', {
-			'exclude': { 'searchExclude': true }
-		});
-		configService.setUserConfiguration('files', {
-			'exclude': { 'filesExclude': true }
-		});
+    const mtw = disposables.add(
+      instantiationService.createInstance(
+        MainThreadWorkspace,
+        SingleProxyRPCProtocol({ $initializeWorkspace: () => {} }),
+      ),
+    )
+    return mtw.$startFileSearch(
+      null,
+      {
+        maxResults: 10,
+        includePattern: "foo",
+        disregardSearchExcludeSettings: true,
+      },
+      CancellationToken.None,
+    )
+  })
 
-		instantiationService.stub(ISearchService, {
-			fileSearch(query: IFileQuery) {
-				assert.strictEqual(query.folderQueries.length, 1);
-				assert.strictEqual(query.folderQueries[0].disregardIgnoreFiles, true);
-				assert.deepStrictEqual(query.folderQueries[0].excludePattern, { 'filesExclude': true });
+  test("exclude defaults", () => {
+    configService.setUserConfiguration("search", {
+      exclude: { searchExclude: true },
+    })
+    configService.setUserConfiguration("files", {
+      exclude: { filesExclude: true },
+    })
 
-				return Promise.resolve({ results: [], messages: [] });
-			}
-		});
+    instantiationService.stub(ISearchService, {
+      fileSearch(query: IFileQuery) {
+        assert.strictEqual(query.folderQueries.length, 1)
+        assert.strictEqual(query.folderQueries[0].disregardIgnoreFiles, true)
+        assert.deepStrictEqual(query.folderQueries[0].excludePattern, {
+          filesExclude: true,
+        })
 
-		const mtw = disposables.add(instantiationService.createInstance(MainThreadWorkspace, SingleProxyRPCProtocol({ $initializeWorkspace: () => { } })));
-		return mtw.$startFileSearch(null, { maxResults: 10, includePattern: '', disregardSearchExcludeSettings: true }, CancellationToken.None);
-	});
+        return Promise.resolve({ results: [], messages: [] })
+      },
+    })
 
-	test('disregard excludes', () => {
-		configService.setUserConfiguration('search', {
-			'exclude': { 'searchExclude': true }
-		});
-		configService.setUserConfiguration('files', {
-			'exclude': { 'filesExclude': true }
-		});
+    const mtw = disposables.add(
+      instantiationService.createInstance(
+        MainThreadWorkspace,
+        SingleProxyRPCProtocol({ $initializeWorkspace: () => {} }),
+      ),
+    )
+    return mtw.$startFileSearch(
+      null,
+      {
+        maxResults: 10,
+        includePattern: "",
+        disregardSearchExcludeSettings: true,
+      },
+      CancellationToken.None,
+    )
+  })
 
-		instantiationService.stub(ISearchService, {
-			fileSearch(query: IFileQuery) {
-				assert.deepStrictEqual(query.folderQueries[0].excludePattern, undefined);
-				assert.deepStrictEqual(query.excludePattern, undefined);
+  test("disregard excludes", () => {
+    configService.setUserConfiguration("search", {
+      exclude: { searchExclude: true },
+    })
+    configService.setUserConfiguration("files", {
+      exclude: { filesExclude: true },
+    })
 
-				return Promise.resolve({ results: [], messages: [] });
-			}
-		});
+    instantiationService.stub(ISearchService, {
+      fileSearch(query: IFileQuery) {
+        assert.deepStrictEqual(query.folderQueries[0].excludePattern, undefined)
+        assert.deepStrictEqual(query.excludePattern, undefined)
 
-		const mtw = disposables.add(instantiationService.createInstance(MainThreadWorkspace, SingleProxyRPCProtocol({ $initializeWorkspace: () => { } })));
-		return mtw.$startFileSearch(null, { maxResults: 10, includePattern: '', disregardSearchExcludeSettings: true, disregardExcludeSettings: true }, CancellationToken.None);
-	});
+        return Promise.resolve({ results: [], messages: [] })
+      },
+    })
 
-	test('do not disregard anything if disregardExcludeSettings is true', () => {
-		configService.setUserConfiguration('search', {
-			'exclude': { 'searchExclude': true }
-		});
-		configService.setUserConfiguration('files', {
-			'exclude': { 'filesExclude': true }
-		});
+    const mtw = disposables.add(
+      instantiationService.createInstance(
+        MainThreadWorkspace,
+        SingleProxyRPCProtocol({ $initializeWorkspace: () => {} }),
+      ),
+    )
+    return mtw.$startFileSearch(
+      null,
+      {
+        maxResults: 10,
+        includePattern: "",
+        disregardSearchExcludeSettings: true,
+        disregardExcludeSettings: true,
+      },
+      CancellationToken.None,
+    )
+  })
 
-		instantiationService.stub(ISearchService, {
-			fileSearch(query: IFileQuery) {
-				assert.strictEqual(query.folderQueries.length, 1);
-				assert.strictEqual(query.folderQueries[0].disregardIgnoreFiles, true);
-				assert.deepStrictEqual(query.folderQueries[0].excludePattern, undefined);
+  test("do not disregard anything if disregardExcludeSettings is true", () => {
+    configService.setUserConfiguration("search", {
+      exclude: { searchExclude: true },
+    })
+    configService.setUserConfiguration("files", {
+      exclude: { filesExclude: true },
+    })
 
-				return Promise.resolve({ results: [], messages: [] });
-			}
-		});
+    instantiationService.stub(ISearchService, {
+      fileSearch(query: IFileQuery) {
+        assert.strictEqual(query.folderQueries.length, 1)
+        assert.strictEqual(query.folderQueries[0].disregardIgnoreFiles, true)
+        assert.deepStrictEqual(query.folderQueries[0].excludePattern, undefined)
 
-		const mtw = disposables.add(instantiationService.createInstance(MainThreadWorkspace, SingleProxyRPCProtocol({ $initializeWorkspace: () => { } })));
-		return mtw.$startFileSearch(null, { maxResults: 10, includePattern: '', disregardExcludeSettings: true, disregardSearchExcludeSettings: false }, CancellationToken.None);
-	});
+        return Promise.resolve({ results: [], messages: [] })
+      },
+    })
 
-	test('exclude string', () => {
-		instantiationService.stub(ISearchService, {
-			fileSearch(query: IFileQuery) {
-				assert.strictEqual(query.folderQueries[0].excludePattern, undefined);
-				assert.deepStrictEqual({ ...query.excludePattern }, { 'exclude/**': true });
+    const mtw = disposables.add(
+      instantiationService.createInstance(
+        MainThreadWorkspace,
+        SingleProxyRPCProtocol({ $initializeWorkspace: () => {} }),
+      ),
+    )
+    return mtw.$startFileSearch(
+      null,
+      {
+        maxResults: 10,
+        includePattern: "",
+        disregardExcludeSettings: true,
+        disregardSearchExcludeSettings: false,
+      },
+      CancellationToken.None,
+    )
+  })
 
-				return Promise.resolve({ results: [], messages: [] });
-			}
-		});
+  test("exclude string", () => {
+    instantiationService.stub(ISearchService, {
+      fileSearch(query: IFileQuery) {
+        assert.strictEqual(query.folderQueries[0].excludePattern, undefined)
+        assert.deepStrictEqual(
+          { ...query.excludePattern },
+          { "exclude/**": true },
+        )
 
-		const mtw = disposables.add(instantiationService.createInstance(MainThreadWorkspace, SingleProxyRPCProtocol({ $initializeWorkspace: () => { } })));
-		return mtw.$startFileSearch(null, { maxResults: 10, includePattern: '', excludePattern: 'exclude/**', disregardSearchExcludeSettings: true }, CancellationToken.None);
-	});
-});
+        return Promise.resolve({ results: [], messages: [] })
+      },
+    })
+
+    const mtw = disposables.add(
+      instantiationService.createInstance(
+        MainThreadWorkspace,
+        SingleProxyRPCProtocol({ $initializeWorkspace: () => {} }),
+      ),
+    )
+    return mtw.$startFileSearch(
+      null,
+      {
+        maxResults: 10,
+        includePattern: "",
+        excludePattern: "exclude/**",
+        disregardSearchExcludeSettings: true,
+      },
+      CancellationToken.None,
+    )
+  })
+})

@@ -1,62 +1,87 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import 'mocha';
-import * as vscode from 'vscode';
-import { disposeAll } from '../../utils/dispose';
-import { acceptFirstSuggestion } from '../suggestTestHelpers';
-import { assertEditorContents, Config, createTestEditor, CURSOR, enumerateConfig, insertModesValues, joinLines, updateConfig, VsCodeConfiguration } from '../testUtils';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
-const testDocumentUri = vscode.Uri.parse('untitled:test.ts');
+import "mocha"
+import * as vscode from "vscode"
+import { disposeAll } from "../../utils/dispose"
+import { acceptFirstSuggestion } from "../suggestTestHelpers"
+import {
+  assertEditorContents,
+  Config,
+  createTestEditor,
+  CURSOR,
+  enumerateConfig,
+  insertModesValues,
+  joinLines,
+  updateConfig,
+  VsCodeConfiguration,
+} from "../testUtils"
 
-suite('JSDoc Completions', () => {
-	const _disposables: vscode.Disposable[] = [];
+const testDocumentUri = vscode.Uri.parse("untitled:test.ts")
 
-	const configDefaults = Object.freeze<VsCodeConfiguration>({
-		[Config.snippetSuggestions]: 'inline',
-	});
+suite("JSDoc Completions", () => {
+  const _disposables: vscode.Disposable[] = []
 
-	let oldConfig: { [key: string]: any } = {};
+  const configDefaults = Object.freeze<VsCodeConfiguration>({
+    [Config.snippetSuggestions]: "inline",
+  })
 
-	setup(async () => {
-		// the tests assume that typescript features are registered
-		await vscode.extensions.getExtension('vscode.typescript-language-features')!.activate();
+  let oldConfig: { [key: string]: any } = {}
 
-		// Save off config and apply defaults
-		oldConfig = await updateConfig(testDocumentUri, configDefaults);
-	});
+  setup(async () => {
+    // the tests assume that typescript features are registered
+    await vscode.extensions
+      .getExtension("vscode.typescript-language-features")!
+      .activate()
 
-	teardown(async () => {
-		disposeAll(_disposables);
+    // Save off config and apply defaults
+    oldConfig = await updateConfig(testDocumentUri, configDefaults)
+  })
 
-		// Restore config
-		await updateConfig(testDocumentUri, oldConfig);
+  teardown(async () => {
+    disposeAll(_disposables)
 
-		return vscode.commands.executeCommand('workbench.action.closeAllEditors');
-	});
+    // Restore config
+    await updateConfig(testDocumentUri, oldConfig)
 
-	test('Should complete jsdoc inside single line comment', async () => {
-		await enumerateConfig(testDocumentUri, Config.insertMode, insertModesValues, async config => {
+    return vscode.commands.executeCommand("workbench.action.closeAllEditors")
+  })
 
-			const editor = await createTestEditor(testDocumentUri,
-				`/**$0 */`,
-				`function abcdef(x, y) { }`,
-			);
+  test("Should complete jsdoc inside single line comment", async () => {
+    await enumerateConfig(
+      testDocumentUri,
+      Config.insertMode,
+      insertModesValues,
+      async (config) => {
+        const editor = await createTestEditor(
+          testDocumentUri,
+          `/**$0 */`,
+          `function abcdef(x, y) { }`,
+        )
 
-			await acceptFirstSuggestion(testDocumentUri, _disposables);
+        await acceptFirstSuggestion(testDocumentUri, _disposables)
 
-			assertEditorContents(editor,
-				joinLines(
-					`/**`,
-					` * `,
-					` * @param x ${CURSOR}`,
-					` * @param y `,
-					` */`,
-					`function abcdef(x, y) { }`,
-				),
-				`Config: ${config}`);
-		});
-	});
-});
+        assertEditorContents(
+          editor,
+          joinLines(
+            `/**`,
+            ` * `,
+            ` * @param x ${CURSOR}`,
+            ` * @param y `,
+            ` */`,
+            `function abcdef(x, y) { }`,
+          ),
+          `Config: ${config}`,
+        )
+      },
+    )
+  })
+})

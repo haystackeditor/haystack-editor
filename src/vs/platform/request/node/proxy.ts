@@ -1,50 +1,71 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { parse as parseUrl, Url } from 'url';
-import { isBoolean } from 'vs/base/common/types';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
-export type Agent = any;
+import { parse as parseUrl, Url } from "url"
+import { isBoolean } from "vs/base/common/types"
 
-function getSystemProxyURI(requestURL: Url, env: typeof process.env): string | null {
-	if (requestURL.protocol === 'http:') {
-		return env.HTTP_PROXY || env.http_proxy || null;
-	} else if (requestURL.protocol === 'https:') {
-		return env.HTTPS_PROXY || env.https_proxy || env.HTTP_PROXY || env.http_proxy || null;
-	}
+export type Agent = any
 
-	return null;
+function getSystemProxyURI(
+  requestURL: Url,
+  env: typeof process.env,
+): string | null {
+  if (requestURL.protocol === "http:") {
+    return env.HTTP_PROXY || env.http_proxy || null
+  } else if (requestURL.protocol === "https:") {
+    return (
+      env.HTTPS_PROXY ||
+      env.https_proxy ||
+      env.HTTP_PROXY ||
+      env.http_proxy ||
+      null
+    )
+  }
+
+  return null
 }
 
 export interface IOptions {
-	proxyUrl?: string;
-	strictSSL?: boolean;
+  proxyUrl?: string
+  strictSSL?: boolean
 }
 
-export async function getProxyAgent(rawRequestURL: string, env: typeof process.env, options: IOptions = {}): Promise<Agent> {
-	const requestURL = parseUrl(rawRequestURL);
-	const proxyURL = options.proxyUrl || getSystemProxyURI(requestURL, env);
+export async function getProxyAgent(
+  rawRequestURL: string,
+  env: typeof process.env,
+  options: IOptions = {},
+): Promise<Agent> {
+  const requestURL = parseUrl(rawRequestURL)
+  const proxyURL = options.proxyUrl || getSystemProxyURI(requestURL, env)
 
-	if (!proxyURL) {
-		return null;
-	}
+  if (!proxyURL) {
+    return null
+  }
 
-	const proxyEndpoint = parseUrl(proxyURL);
+  const proxyEndpoint = parseUrl(proxyURL)
 
-	if (!/^https?:$/.test(proxyEndpoint.protocol || '')) {
-		return null;
-	}
+  if (!/^https?:$/.test(proxyEndpoint.protocol || "")) {
+    return null
+  }
 
-	const opts = {
-		host: proxyEndpoint.hostname || '',
-		port: (proxyEndpoint.port ? +proxyEndpoint.port : 0) || (proxyEndpoint.protocol === 'https' ? 443 : 80),
-		auth: proxyEndpoint.auth,
-		rejectUnauthorized: isBoolean(options.strictSSL) ? options.strictSSL : true,
-	};
+  const opts = {
+    host: proxyEndpoint.hostname || "",
+    port:
+      (proxyEndpoint.port ? +proxyEndpoint.port : 0) ||
+      (proxyEndpoint.protocol === "https" ? 443 : 80),
+    auth: proxyEndpoint.auth,
+    rejectUnauthorized: isBoolean(options.strictSSL) ? options.strictSSL : true,
+  }
 
-	return requestURL.protocol === 'http:'
-		? new (await import('http-proxy-agent')).HttpProxyAgent(proxyURL, opts)
-		: new (await import('https-proxy-agent')).HttpsProxyAgent(proxyURL, opts);
+  return requestURL.protocol === "http:"
+    ? new (await import("http-proxy-agent")).HttpProxyAgent(proxyURL, opts)
+    : new (await import("https-proxy-agent")).HttpsProxyAgent(proxyURL, opts)
 }

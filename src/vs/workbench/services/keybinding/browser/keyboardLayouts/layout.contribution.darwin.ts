@@ -1,23 +1,29 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import 'vs/workbench/services/keybinding/browser/keyboardLayouts/en.darwin'; // 15%
-import 'vs/workbench/services/keybinding/browser/keyboardLayouts/zh-hans.darwin';
-import 'vs/workbench/services/keybinding/browser/keyboardLayouts/en-uk.darwin';
-import 'vs/workbench/services/keybinding/browser/keyboardLayouts/es.darwin';
-import 'vs/workbench/services/keybinding/browser/keyboardLayouts/jp-roman.darwin';
-import 'vs/workbench/services/keybinding/browser/keyboardLayouts/de.darwin';
-import 'vs/workbench/services/keybinding/browser/keyboardLayouts/en-intl.darwin';
-import 'vs/workbench/services/keybinding/browser/keyboardLayouts/en-ext.darwin';
-import 'vs/workbench/services/keybinding/browser/keyboardLayouts/fr.darwin';
-import 'vs/workbench/services/keybinding/browser/keyboardLayouts/jp.darwin';
-import 'vs/workbench/services/keybinding/browser/keyboardLayouts/pl.darwin';
-import 'vs/workbench/services/keybinding/browser/keyboardLayouts/it.darwin';
-import 'vs/workbench/services/keybinding/browser/keyboardLayouts/ru.darwin';
-import 'vs/workbench/services/keybinding/browser/keyboardLayouts/pt.darwin';
-import 'vs/workbench/services/keybinding/browser/keyboardLayouts/ko.darwin';
-import 'vs/workbench/services/keybinding/browser/keyboardLayouts/dvorak.darwin';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
-export { KeyboardLayoutContribution } from 'vs/workbench/services/keybinding/browser/keyboardLayouts/_.contribution';
+import "vs/workbench/services/keybinding/browser/keyboardLayouts/en.darwin" // 15%
+import "vs/workbench/services/keybinding/browser/keyboardLayouts/zh-hans.darwin"
+import "vs/workbench/services/keybinding/browser/keyboardLayouts/en-uk.darwin"
+import "vs/workbench/services/keybinding/browser/keyboardLayouts/es.darwin"
+import "vs/workbench/services/keybinding/browser/keyboardLayouts/jp-roman.darwin"
+import "vs/workbench/services/keybinding/browser/keyboardLayouts/de.darwin"
+import "vs/workbench/services/keybinding/browser/keyboardLayouts/en-intl.darwin"
+import "vs/workbench/services/keybinding/browser/keyboardLayouts/en-ext.darwin"
+import "vs/workbench/services/keybinding/browser/keyboardLayouts/fr.darwin"
+import "vs/workbench/services/keybinding/browser/keyboardLayouts/jp.darwin"
+import "vs/workbench/services/keybinding/browser/keyboardLayouts/pl.darwin"
+import "vs/workbench/services/keybinding/browser/keyboardLayouts/it.darwin"
+import "vs/workbench/services/keybinding/browser/keyboardLayouts/ru.darwin"
+import "vs/workbench/services/keybinding/browser/keyboardLayouts/pt.darwin"
+import "vs/workbench/services/keybinding/browser/keyboardLayouts/ko.darwin"
+import "vs/workbench/services/keybinding/browser/keyboardLayouts/dvorak.darwin"
+
+export { KeyboardLayoutContribution } from "vs/workbench/services/keybinding/browser/keyboardLayouts/_.contribution"

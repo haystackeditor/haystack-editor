@@ -1,37 +1,47 @@
 /*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
+ *--------------------------------------------------------------------------------------------*/
+
+/*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
 export function getSpaceCnt(str: string, tabSize: number) {
-	let spacesCnt = 0;
+  let spacesCnt = 0
 
-	for (let i = 0; i < str.length; i++) {
-		if (str.charAt(i) === '\t') {
-			spacesCnt += tabSize;
-		} else {
-			spacesCnt++;
-		}
-	}
+  for (let i = 0; i < str.length; i++) {
+    if (str.charAt(i) === "\t") {
+      spacesCnt += tabSize
+    } else {
+      spacesCnt++
+    }
+  }
 
-	return spacesCnt;
+  return spacesCnt
 }
 
-export function generateIndent(spacesCnt: number, tabSize: number, insertSpaces: boolean) {
-	spacesCnt = spacesCnt < 0 ? 0 : spacesCnt;
+export function generateIndent(
+  spacesCnt: number,
+  tabSize: number,
+  insertSpaces: boolean,
+) {
+  spacesCnt = spacesCnt < 0 ? 0 : spacesCnt
 
-	let result = '';
-	if (!insertSpaces) {
-		const tabsCnt = Math.floor(spacesCnt / tabSize);
-		spacesCnt = spacesCnt % tabSize;
-		for (let i = 0; i < tabsCnt; i++) {
-			result += '\t';
-		}
-	}
+  let result = ""
+  if (!insertSpaces) {
+    const tabsCnt = Math.floor(spacesCnt / tabSize)
+    spacesCnt = spacesCnt % tabSize
+    for (let i = 0; i < tabsCnt; i++) {
+      result += "\t"
+    }
+  }
 
-	for (let i = 0; i < spacesCnt; i++) {
-		result += ' ';
-	}
+  for (let i = 0; i < spacesCnt; i++) {
+    result += " "
+  }
 
-	return result;
+  return result
 }

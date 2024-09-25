@@ -1,21 +1,34 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { AsyncDataTree } from 'vs/base/browser/ui/tree/asyncDataTree';
-import { Action } from 'vs/base/common/actions';
-import * as nls from 'vs/nls';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+import { AsyncDataTree } from "vs/base/browser/ui/tree/asyncDataTree"
+import { Action } from "vs/base/common/actions"
+import * as nls from "vs/nls"
 
 export class CollapseAllAction<TInput, T, TFilterData = void> extends Action {
+  constructor(
+    private viewer: AsyncDataTree<TInput, T, TFilterData>,
+    enabled: boolean,
+  ) {
+    super(
+      "vs.tree.collapse",
+      nls.localize("collapse all", "Collapse All"),
+      "collapse-all",
+      enabled,
+    )
+  }
 
-	constructor(private viewer: AsyncDataTree<TInput, T, TFilterData>, enabled: boolean) {
-		super('vs.tree.collapse', nls.localize('collapse all', "Collapse All"), 'collapse-all', enabled);
-	}
-
-	override async run(): Promise<any> {
-		this.viewer.collapseAll();
-		this.viewer.setSelection([]);
-		this.viewer.setFocus([]);
-	}
+  override async run(): Promise<any> {
+    this.viewer.collapseAll()
+    this.viewer.setSelection([])
+    this.viewer.setFocus([])
+  }
 }

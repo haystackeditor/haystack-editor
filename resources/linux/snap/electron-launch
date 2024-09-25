@@ -50,9 +50,9 @@ function append_dir() {
 function copy_env_variable() {
   local -n var="$1"
   if [[ "+$var" ]]; then
-    export "${!var}_VSCODE_SNAP_ORIG=${var}"
+    export "${!var}_HAYSTACK_SNAP_ORIG=${var}"
   else
-    export "${!var}_VSCODE_SNAP_ORIG=''"
+    export "${!var}_HAYSTACK_SNAP_ORIG=''"
   fi
 }
 

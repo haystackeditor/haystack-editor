@@ -1,0 +1,253 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.button {
+  background-color: transparent;
+  border-color: transparent;
+}
+
+.shortcut {
+  font-weight: 700;
+}
+
+.tooltip {
+  max-width: 200px;
+  background: var(--vscode-editorHoverWidget-background);
+  border: 1px solid var(--vscode-editorHoverWidget-border);
+  border-radius: 3px;
+  color: var(--vscode-editorHoverWidget-foreground);
+  position: fixed;
+  z-index: 100;
+  font-size: 12px;
+  padding: 2px 3px;
+}
+
+.uiTooltip {
+  max-width: 200px;
+  background: var(--vscode-editorHoverWidget-background);
+  border: 1px solid var(--vscode-editorHoverWidget-border);
+  border-radius: 3px;
+  color: var(--vscode-editorHoverWidget-foreground);
+  box-shadow: 0 2px 8px var(--vscode-widget-shadow);
+  position: fixed;
+  z-index: 100;
+  font-size: 12px;
+  padding: 2px 3px;
+}
+
+.contextMenu {
+  display: flex;
+  flex-direction: column;
+  background-color: rgb(148, 97, 97);
+  z-index: 100;
+  width: 100px;
+  position: absolute;
+  border: 1px darkgrey solid;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.contextMenuActionGroup {
+  width: 100%;
+}
+
+.contextMenuAction {
+  height: 20px;
+  width: 100%;
+  background-color: transparent;
+  border: none;
+  font-size: 10px;
+  text-align: left;
+  padding: 0;
+  padding-left: 6px;
+}
+
+.contextMenuAction:hover {
+  height: 20px;
+  width: 100%;
+  border: none;
+  font-size: 10px;
+  text-align: left;
+  padding: 0;
+  padding-left: 6px;
+  background-color: skyblue;
+}
+
+.miniFuzzySearchContainer {
+  display: flex;
+  flex-direction: column;
+  border-radius: 5px;
+  border: 1px transparent solid;
+  padding: 0 5px;
+}
+
+.miniFuzzySearchInput {
+  color: black;
+}
+
+.fuzzySearchContainer {
+  position: fixed;
+  width: 400px;
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+  border-radius: 5px;
+  border: 1px transparent solid;
+  background-color: white;
+  padding: 5px;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.5);
+}
+
+.fuzzySearchInput {
+  color: black;
+}
+
+.fuzzySearchResults {
+  width: 100%;
+  min-height: 0px;
+  max-height: 300px;
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+
+.fuzzyMatchButton {
+  background: none;
+  background-color: white;
+  border: none;
+  text-align: left;
+}
+
+.fuzzyMatchButton.active {
+  background: none;
+  border: none;
+  text-align: left;
+  background-color: lightskyblue;
+}
+
+.fuzzyMatchButton:hover {
+  background: none;
+  border: none;
+  text-align: left;
+  background-color: lightgray;
+}
+
+.naturalLanguageMatchButton {
+  background: none;
+  background-color: white;
+  border: none;
+  text-align: left;
+}
+
+.naturalLanguageMatchButton.active {
+  background: none;
+  border: none;
+  text-align: left;
+  background-color: lightskyblue;
+}
+
+.fuzzySearchButtonText {
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fuzzySearchButtonContext {
+  margin-left: 5px;
+  color: gray;
+  font-size: 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.quickCommandButton {
+  background: none;
+  background-color: white;
+  border: none;
+  text-align: left;
+  width: 100%;
+}
+
+.quickCommandButton.active {
+  background-color: lightskyblue;
+  background: none;
+  border: none;
+  text-align: left;
+  width: 100%;
+}
+
+.quickCommandButton:hover {
+  background-color: lightgray;
+  background: none;
+  border: none;
+  text-align: left;
+  width: 100%;
+}
+
+.horizontalDivider {
+  position: relative;
+  width: 100%;
+  min-height: 1px;
+  max-height: 1px;
+  border-bottom: 1px solid black;
+}
+
+.floatingToolbar {
+  position: absolute;
+  max-width: 400px;
+  height: 22.5px;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: row;
+  z-index: 100;
+  background-color: lightgray;
+  border: 1px solid black;
+  align-items: center;
+  transform-origin: top left;
+}
+
+.floatingToolbarCommandButton {
+  width: 30px;
+  height: 20px;
+  background: transparent;
+  border: 1px transparent;
+  border-radius: 3px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.floatingToolbarCommandButton:hover {
+  width: 30px;
+  height: 20px;
+  background: transparent;
+  border: 1px transparent;
+  border-radius: 3px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: white;
+}
+
+.floatingToolbarCommandButton.active {
+  width: 30px;
+  height: 20px;
+  background: transparent;
+  border: 1px transparent;
+  border-radius: 3px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: white;
+  opacity: 0.5;
+}
+
+.floatingToolbarIcon {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

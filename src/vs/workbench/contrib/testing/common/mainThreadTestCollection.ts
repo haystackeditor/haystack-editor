@@ -1,196 +1,234 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Emitter } from 'vs/base/common/event';
-import { Iterable } from 'vs/base/common/iterator';
-import { ResourceMap } from 'vs/base/common/map';
-import { URI } from 'vs/base/common/uri';
-import { IMainThreadTestCollection } from 'vs/workbench/contrib/testing/common/testService';
-import { AbstractIncrementalTestCollection, ITestUriCanonicalizer, IncrementalChangeCollector, IncrementalTestCollectionItem, InternalTestItem, TestDiffOpType, TestsDiff } from 'vs/workbench/contrib/testing/common/testTypes';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
-export class MainThreadTestCollection extends AbstractIncrementalTestCollection<IncrementalTestCollectionItem> implements IMainThreadTestCollection {
-	private testsByUrl = new ResourceMap<Set<IncrementalTestCollectionItem>>();
+import { Emitter } from "vs/base/common/event"
+import { Iterable } from "vs/base/common/iterator"
+import { ResourceMap } from "vs/base/common/map"
+import { URI } from "vs/base/common/uri"
+import { IMainThreadTestCollection } from "vs/workbench/contrib/testing/common/testService"
+import {
+  AbstractIncrementalTestCollection,
+  ITestUriCanonicalizer,
+  IncrementalChangeCollector,
+  IncrementalTestCollectionItem,
+  InternalTestItem,
+  TestDiffOpType,
+  TestsDiff,
+} from "vs/workbench/contrib/testing/common/testTypes"
 
-	private busyProvidersChangeEmitter = new Emitter<number>();
-	private expandPromises = new WeakMap<IncrementalTestCollectionItem, {
-		pendingLvl: number;
-		doneLvl: number;
-		prom: Promise<void>;
-	}>();
+export class MainThreadTestCollection
+  extends AbstractIncrementalTestCollection<IncrementalTestCollectionItem>
+  implements IMainThreadTestCollection
+{
+  private testsByUrl = new ResourceMap<Set<IncrementalTestCollectionItem>>()
 
-	/**
-	 * @inheritdoc
-	 */
-	public get busyProviders() {
-		return this.busyControllerCount;
-	}
+  private busyProvidersChangeEmitter = new Emitter<number>()
+  private expandPromises = new WeakMap<
+    IncrementalTestCollectionItem,
+    {
+      pendingLvl: number
+      doneLvl: number
+      prom: Promise<void>
+    }
+  >()
 
-	/**
-	 * @inheritdoc
-	 */
-	public get rootItems() {
-		return this.roots;
-	}
+  /**
+   * @inheritdoc
+   */
+  public get busyProviders() {
+    return this.busyControllerCount
+  }
 
-	/**
-	 * @inheritdoc
-	 */
-	public get all() {
-		return this.getIterator();
-	}
+  /**
+   * @inheritdoc
+   */
+  public get rootItems() {
+    return this.roots
+  }
 
-	public get rootIds() {
-		return Iterable.map(this.roots.values(), r => r.item.extId);
-	}
+  /**
+   * @inheritdoc
+   */
+  public get all() {
+    return this.getIterator()
+  }
 
-	public readonly onBusyProvidersChange = this.busyProvidersChangeEmitter.event;
+  public get rootIds() {
+    return Iterable.map(this.roots.values(), (r) => r.item.extId)
+  }
 
-	constructor(uriIdentityService: ITestUriCanonicalizer, private readonly expandActual: (id: string, levels: number) => Promise<void>) {
-		super(uriIdentityService);
-	}
+  public readonly onBusyProvidersChange = this.busyProvidersChangeEmitter.event
 
-	/**
-	 * @inheritdoc
-	 */
-	public expand(testId: string, levels: number): Promise<void> {
-		const test = this.items.get(testId);
-		if (!test) {
-			return Promise.resolve();
-		}
+  constructor(
+    uriIdentityService: ITestUriCanonicalizer,
+    private readonly expandActual: (
+      id: string,
+      levels: number,
+    ) => Promise<void>,
+  ) {
+    super(uriIdentityService)
+  }
 
-		// simple cache to avoid duplicate/unnecessary expansion calls
-		const existing = this.expandPromises.get(test);
-		if (existing && existing.pendingLvl >= levels) {
-			return existing.prom;
-		}
+  /**
+   * @inheritdoc
+   */
+  public expand(testId: string, levels: number): Promise<void> {
+    const test = this.items.get(testId)
+    if (!test) {
+      return Promise.resolve()
+    }
 
-		const prom = this.expandActual(test.item.extId, levels);
-		const record = { doneLvl: existing ? existing.doneLvl : -1, pendingLvl: levels, prom };
-		this.expandPromises.set(test, record);
+    // simple cache to avoid duplicate/unnecessary expansion calls
+    const existing = this.expandPromises.get(test)
+    if (existing && existing.pendingLvl >= levels) {
+      return existing.prom
+    }
 
-		return prom.then(() => {
-			record.doneLvl = levels;
-		});
-	}
+    const prom = this.expandActual(test.item.extId, levels)
+    const record = {
+      doneLvl: existing ? existing.doneLvl : -1,
+      pendingLvl: levels,
+      prom,
+    }
+    this.expandPromises.set(test, record)
 
-	/**
-	 * @inheritdoc
-	 */
-	public getNodeById(id: string) {
-		return this.items.get(id);
-	}
+    return prom.then(() => {
+      record.doneLvl = levels
+    })
+  }
 
-	/**
-	 * @inheritdoc
-	 */
-	public getNodeByUrl(uri: URI): Iterable<IncrementalTestCollectionItem> {
-		return this.testsByUrl.get(uri) || Iterable.empty();
-	}
+  /**
+   * @inheritdoc
+   */
+  public getNodeById(id: string) {
+    return this.items.get(id)
+  }
 
-	/**
-	 * @inheritdoc
-	 */
-	public getReviverDiff() {
-		const ops: TestsDiff = [{ op: TestDiffOpType.IncrementPendingExtHosts, amount: this.pendingRootCount }];
+  /**
+   * @inheritdoc
+   */
+  public getNodeByUrl(uri: URI): Iterable<IncrementalTestCollectionItem> {
+    return this.testsByUrl.get(uri) || Iterable.empty()
+  }
 
-		const queue = [this.rootIds];
-		while (queue.length) {
-			for (const child of queue.pop()!) {
-				const item = this.items.get(child)!;
-				ops.push({
-					op: TestDiffOpType.Add,
-					item: {
-						controllerId: item.controllerId,
-						expand: item.expand,
-						item: item.item,
-					}
-				});
-				queue.push(item.children);
-			}
-		}
+  /**
+   * @inheritdoc
+   */
+  public getReviverDiff() {
+    const ops: TestsDiff = [
+      {
+        op: TestDiffOpType.IncrementPendingExtHosts,
+        amount: this.pendingRootCount,
+      },
+    ]
 
-		return ops;
-	}
+    const queue = [this.rootIds]
+    while (queue.length) {
+      for (const child of queue.pop()!) {
+        const item = this.items.get(child)!
+        ops.push({
+          op: TestDiffOpType.Add,
+          item: {
+            controllerId: item.controllerId,
+            expand: item.expand,
+            item: item.item,
+          },
+        })
+        queue.push(item.children)
+      }
+    }
 
-	/**
-	 * Applies the diff to the collection.
-	 */
-	public override apply(diff: TestsDiff) {
-		const prevBusy = this.busyControllerCount;
-		super.apply(diff);
+    return ops
+  }
 
-		if (prevBusy !== this.busyControllerCount) {
-			this.busyProvidersChangeEmitter.fire(this.busyControllerCount);
-		}
-	}
+  /**
+   * Applies the diff to the collection.
+   */
+  public override apply(diff: TestsDiff) {
+    const prevBusy = this.busyControllerCount
+    super.apply(diff)
 
-	/**
-	 * Clears everything from the collection, and returns a diff that applies
-	 * that action.
-	 */
-	public clear() {
-		const ops: TestsDiff = [];
-		for (const root of this.roots) {
-			ops.push({ op: TestDiffOpType.Remove, itemId: root.item.extId });
-		}
+    if (prevBusy !== this.busyControllerCount) {
+      this.busyProvidersChangeEmitter.fire(this.busyControllerCount)
+    }
+  }
 
-		this.roots.clear();
-		this.items.clear();
+  /**
+   * Clears everything from the collection, and returns a diff that applies
+   * that action.
+   */
+  public clear() {
+    const ops: TestsDiff = []
+    for (const root of this.roots) {
+      ops.push({ op: TestDiffOpType.Remove, itemId: root.item.extId })
+    }
 
-		return ops;
-	}
+    this.roots.clear()
+    this.items.clear()
 
-	/**
-	 * @override
-	 */
-	protected createItem(internal: InternalTestItem): IncrementalTestCollectionItem {
-		return { ...internal, children: new Set() };
-	}
+    return ops
+  }
 
-	private readonly changeCollector: IncrementalChangeCollector<IncrementalTestCollectionItem> = {
-		add: node => {
-			if (!node.item.uri) {
-				return;
-			}
+  /**
+   * @override
+   */
+  protected createItem(
+    internal: InternalTestItem,
+  ): IncrementalTestCollectionItem {
+    return { ...internal, children: new Set() }
+  }
 
-			const s = this.testsByUrl.get(node.item.uri);
-			if (!s) {
-				this.testsByUrl.set(node.item.uri, new Set([node]));
-			} else {
-				s.add(node);
-			}
-		},
-		remove: node => {
-			if (!node.item.uri) {
-				return;
-			}
+  private readonly changeCollector: IncrementalChangeCollector<IncrementalTestCollectionItem> =
+    {
+      add: (node) => {
+        if (!node.item.uri) {
+          return
+        }
 
-			const s = this.testsByUrl.get(node.item.uri);
-			if (!s) {
-				return;
-			}
+        const s = this.testsByUrl.get(node.item.uri)
+        if (!s) {
+          this.testsByUrl.set(node.item.uri, new Set([node]))
+        } else {
+          s.add(node)
+        }
+      },
+      remove: (node) => {
+        if (!node.item.uri) {
+          return
+        }
 
-			s.delete(node);
-			if (s.size === 0) {
-				this.testsByUrl.delete(node.item.uri);
-			}
-		},
-	};
+        const s = this.testsByUrl.get(node.item.uri)
+        if (!s) {
+          return
+        }
 
-	protected override createChangeCollector(): IncrementalChangeCollector<IncrementalTestCollectionItem> {
-		return this.changeCollector;
-	}
+        s.delete(node)
+        if (s.size === 0) {
+          this.testsByUrl.delete(node.item.uri)
+        }
+      },
+    }
 
-	private *getIterator() {
-		const queue = [this.rootIds];
-		while (queue.length) {
-			for (const id of queue.pop()!) {
-				const node = this.getNodeById(id)!;
-				yield node;
-				queue.push(node.children);
-			}
-		}
-	}
+  protected override createChangeCollector(): IncrementalChangeCollector<IncrementalTestCollectionItem> {
+    return this.changeCollector
+  }
+
+  private *getIterator() {
+    const queue = [this.rootIds]
+    while (queue.length) {
+      for (const id of queue.pop()!) {
+        const node = this.getNodeById(id)!
+        yield node
+        queue.push(node.children)
+      }
+    }
+  }
 }

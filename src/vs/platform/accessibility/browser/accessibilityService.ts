@@ -1,117 +1,159 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { addDisposableListener } from 'vs/base/browser/dom';
-import { alert, status } from 'vs/base/browser/ui/aria/aria';
-import { mainWindow } from 'vs/base/browser/window';
-import { Emitter, Event } from 'vs/base/common/event';
-import { Disposable } from 'vs/base/common/lifecycle';
-import { AccessibilitySupport, CONTEXT_ACCESSIBILITY_MODE_ENABLED, IAccessibilityService } from 'vs/platform/accessibility/common/accessibility';
-import { IConfigurationService } from 'vs/platform/configuration/common/configuration';
-import { IContextKey, IContextKeyService } from 'vs/platform/contextkey/common/contextkey';
-import { ILayoutService } from 'vs/platform/layout/browser/layoutService';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
-export class AccessibilityService extends Disposable implements IAccessibilityService {
-	declare readonly _serviceBrand: undefined;
+import { addDisposableListener } from "vs/base/browser/dom"
+import { alert, status } from "vs/base/browser/ui/aria/aria"
+import { mainWindow } from "vs/base/browser/window"
+import { Emitter, Event } from "vs/base/common/event"
+import { Disposable } from "vs/base/common/lifecycle"
+import {
+  AccessibilitySupport,
+  CONTEXT_ACCESSIBILITY_MODE_ENABLED,
+  IAccessibilityService,
+} from "vs/platform/accessibility/common/accessibility"
+import { IConfigurationService } from "vs/platform/configuration/common/configuration"
+import {
+  IContextKey,
+  IContextKeyService,
+} from "vs/platform/contextkey/common/contextkey"
+import { ILayoutService } from "vs/platform/layout/browser/layoutService"
 
-	private _accessibilityModeEnabledContext: IContextKey<boolean>;
-	protected _accessibilitySupport = AccessibilitySupport.Unknown;
-	protected readonly _onDidChangeScreenReaderOptimized = new Emitter<void>();
+export class AccessibilityService
+  extends Disposable
+  implements IAccessibilityService
+{
+  declare readonly _serviceBrand: undefined
 
-	protected _configMotionReduced: 'auto' | 'on' | 'off';
-	protected _systemMotionReduced: boolean;
-	protected readonly _onDidChangeReducedMotion = new Emitter<void>();
+  private _accessibilityModeEnabledContext: IContextKey<boolean>
+  protected _accessibilitySupport = AccessibilitySupport.Unknown
+  protected readonly _onDidChangeScreenReaderOptimized = new Emitter<void>()
 
-	constructor(
-		@IContextKeyService private readonly _contextKeyService: IContextKeyService,
-		@ILayoutService private readonly _layoutService: ILayoutService,
-		@IConfigurationService protected readonly _configurationService: IConfigurationService
-	) {
-		super();
-		this._accessibilityModeEnabledContext = CONTEXT_ACCESSIBILITY_MODE_ENABLED.bindTo(this._contextKeyService);
+  protected _configMotionReduced: "auto" | "on" | "off"
+  protected _systemMotionReduced: boolean
+  protected readonly _onDidChangeReducedMotion = new Emitter<void>()
 
-		const updateContextKey = () => this._accessibilityModeEnabledContext.set(this.isScreenReaderOptimized());
-		this._register(this._configurationService.onDidChangeConfiguration(e => {
-			if (e.affectsConfiguration('editor.accessibilitySupport')) {
-				updateContextKey();
-				this._onDidChangeScreenReaderOptimized.fire();
-			}
-			if (e.affectsConfiguration('workbench.reduceMotion')) {
-				this._configMotionReduced = this._configurationService.getValue('workbench.reduceMotion');
-				this._onDidChangeReducedMotion.fire();
-			}
-		}));
-		updateContextKey();
-		this._register(this.onDidChangeScreenReaderOptimized(() => updateContextKey()));
+  constructor(
+    @IContextKeyService private readonly _contextKeyService: IContextKeyService,
+    @ILayoutService private readonly _layoutService: ILayoutService,
+    @IConfigurationService
+    protected readonly _configurationService: IConfigurationService,
+  ) {
+    super()
+    this._accessibilityModeEnabledContext =
+      CONTEXT_ACCESSIBILITY_MODE_ENABLED.bindTo(this._contextKeyService)
 
-		const reduceMotionMatcher = mainWindow.matchMedia(`(prefers-reduced-motion: reduce)`);
-		this._systemMotionReduced = reduceMotionMatcher.matches;
-		this._configMotionReduced = this._configurationService.getValue<'auto' | 'on' | 'off'>('workbench.reduceMotion');
+    const updateContextKey = () =>
+      this._accessibilityModeEnabledContext.set(this.isScreenReaderOptimized())
+    this._register(
+      this._configurationService.onDidChangeConfiguration((e) => {
+        if (e.affectsConfiguration("editor.accessibilitySupport")) {
+          updateContextKey()
+          this._onDidChangeScreenReaderOptimized.fire()
+        }
+        if (e.affectsConfiguration("workbench.reduceMotion")) {
+          this._configMotionReduced = this._configurationService.getValue(
+            "workbench.reduceMotion",
+          )
+          this._onDidChangeReducedMotion.fire()
+        }
+      }),
+    )
+    updateContextKey()
+    this._register(
+      this.onDidChangeScreenReaderOptimized(() => updateContextKey()),
+    )
 
-		this.initReducedMotionListeners(reduceMotionMatcher);
-	}
+    const reduceMotionMatcher = mainWindow.matchMedia(
+      `(prefers-reduced-motion: reduce)`,
+    )
+    this._systemMotionReduced = reduceMotionMatcher.matches
+    this._configMotionReduced = this._configurationService.getValue<
+      "auto" | "on" | "off"
+    >("workbench.reduceMotion")
 
-	private initReducedMotionListeners(reduceMotionMatcher: MediaQueryList) {
+    this.initReducedMotionListeners(reduceMotionMatcher)
+  }
 
-		this._register(addDisposableListener(reduceMotionMatcher, 'change', () => {
-			this._systemMotionReduced = reduceMotionMatcher.matches;
-			if (this._configMotionReduced === 'auto') {
-				this._onDidChangeReducedMotion.fire();
-			}
-		}));
+  private initReducedMotionListeners(reduceMotionMatcher: MediaQueryList) {
+    this._register(
+      addDisposableListener(reduceMotionMatcher, "change", () => {
+        this._systemMotionReduced = reduceMotionMatcher.matches
+        if (this._configMotionReduced === "auto") {
+          this._onDidChangeReducedMotion.fire()
+        }
+      }),
+    )
 
-		const updateRootClasses = () => {
-			const reduce = this.isMotionReduced();
-			this._layoutService.mainContainer.classList.toggle('reduce-motion', reduce);
-			this._layoutService.mainContainer.classList.toggle('enable-motion', !reduce);
-		};
+    const updateRootClasses = () => {
+      const reduce = this.isMotionReduced()
+      this._layoutService.mainContainer.classList.toggle(
+        "reduce-motion",
+        reduce,
+      )
+      this._layoutService.mainContainer.classList.toggle(
+        "enable-motion",
+        !reduce,
+      )
+    }
 
-		updateRootClasses();
-		this._register(this.onDidChangeReducedMotion(() => updateRootClasses()));
-	}
+    updateRootClasses()
+    this._register(this.onDidChangeReducedMotion(() => updateRootClasses()))
+  }
 
-	get onDidChangeScreenReaderOptimized(): Event<void> {
-		return this._onDidChangeScreenReaderOptimized.event;
-	}
+  get onDidChangeScreenReaderOptimized(): Event<void> {
+    return this._onDidChangeScreenReaderOptimized.event
+  }
 
-	isScreenReaderOptimized(): boolean {
-		const config = this._configurationService.getValue('editor.accessibilitySupport');
-		return config === 'on' || (config === 'auto' && this._accessibilitySupport === AccessibilitySupport.Enabled);
-	}
+  isScreenReaderOptimized(): boolean {
+    const config = this._configurationService.getValue(
+      "editor.accessibilitySupport",
+    )
+    return (
+      config === "on" ||
+      (config === "auto" &&
+        this._accessibilitySupport === AccessibilitySupport.Enabled)
+    )
+  }
 
-	get onDidChangeReducedMotion(): Event<void> {
-		return this._onDidChangeReducedMotion.event;
-	}
+  get onDidChangeReducedMotion(): Event<void> {
+    return this._onDidChangeReducedMotion.event
+  }
 
-	isMotionReduced(): boolean {
-		const config = this._configMotionReduced;
-		return config === 'on' || (config === 'auto' && this._systemMotionReduced);
-	}
+  isMotionReduced(): boolean {
+    const config = this._configMotionReduced
+    return config === "on" || (config === "auto" && this._systemMotionReduced)
+  }
 
-	alwaysUnderlineAccessKeys(): Promise<boolean> {
-		return Promise.resolve(false);
-	}
+  alwaysUnderlineAccessKeys(): Promise<boolean> {
+    return Promise.resolve(false)
+  }
 
-	getAccessibilitySupport(): AccessibilitySupport {
-		return this._accessibilitySupport;
-	}
+  getAccessibilitySupport(): AccessibilitySupport {
+    return this._accessibilitySupport
+  }
 
-	setAccessibilitySupport(accessibilitySupport: AccessibilitySupport): void {
-		if (this._accessibilitySupport === accessibilitySupport) {
-			return;
-		}
+  setAccessibilitySupport(accessibilitySupport: AccessibilitySupport): void {
+    if (this._accessibilitySupport === accessibilitySupport) {
+      return
+    }
 
-		this._accessibilitySupport = accessibilitySupport;
-		this._onDidChangeScreenReaderOptimized.fire();
-	}
+    this._accessibilitySupport = accessibilitySupport
+    this._onDidChangeScreenReaderOptimized.fire()
+  }
 
-	alert(message: string): void {
-		alert(message);
-	}
+  alert(message: string): void {
+    alert(message)
+  }
 
-	status(message: string): void {
-		status(message);
-	}
+  status(message: string): void {
+    status(message)
+  }
 }

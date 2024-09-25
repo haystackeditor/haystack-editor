@@ -1,38 +1,47 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as crypto from 'crypto';
-import * as fs from 'fs';
-import { createSingleCallFunction } from 'vs/base/common/functional';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
-export async function checksum(path: string, sha256hash: string | undefined): Promise<void> {
-	const checksumPromise = new Promise<string | undefined>((resolve, reject) => {
-		const input = fs.createReadStream(path);
-		const hash = crypto.createHash('sha256');
-		input.pipe(hash);
+import * as crypto from "crypto"
+import * as fs from "fs"
+import { createSingleCallFunction } from "vs/base/common/functional"
 
-		const done = createSingleCallFunction((err?: Error, result?: string) => {
-			input.removeAllListeners();
-			hash.removeAllListeners();
+export async function checksum(
+  path: string,
+  sha256hash: string | undefined,
+): Promise<void> {
+  const checksumPromise = new Promise<string | undefined>((resolve, reject) => {
+    const input = fs.createReadStream(path)
+    const hash = crypto.createHash("sha256")
+    input.pipe(hash)
 
-			if (err) {
-				reject(err);
-			} else {
-				resolve(result);
-			}
-		});
+    const done = createSingleCallFunction((err?: Error, result?: string) => {
+      input.removeAllListeners()
+      hash.removeAllListeners()
 
-		input.once('error', done);
-		input.once('end', done);
-		hash.once('error', done);
-		hash.once('data', (data: Buffer) => done(undefined, data.toString('hex')));
-	});
+      if (err) {
+        reject(err)
+      } else {
+        resolve(result)
+      }
+    })
 
-	const hash = await checksumPromise;
+    input.once("error", done)
+    input.once("end", done)
+    hash.once("error", done)
+    hash.once("data", (data: Buffer) => done(undefined, data.toString("hex")))
+  })
 
-	if (hash !== sha256hash) {
-		throw new Error('Hash mismatch');
-	}
+  const hash = await checksumPromise
+
+  if (hash !== sha256hash) {
+    throw new Error("Hash mismatch")
+  }
 }

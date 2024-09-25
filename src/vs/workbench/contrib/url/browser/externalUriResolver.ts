@@ -1,34 +1,48 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Disposable } from 'vs/base/common/lifecycle';
-import { IOpenerService } from 'vs/platform/opener/common/opener';
-import { IWorkbenchContribution } from 'vs/workbench/common/contributions';
-import { IBrowserWorkbenchEnvironmentService } from 'vs/workbench/services/environment/browser/environmentService';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
-export class ExternalUriResolverContribution extends Disposable implements IWorkbenchContribution {
+import { Disposable } from "vs/base/common/lifecycle"
+import { IOpenerService } from "vs/platform/opener/common/opener"
+import { IWorkbenchContribution } from "vs/workbench/common/contributions"
+import { IBrowserWorkbenchEnvironmentService } from "vs/workbench/services/environment/browser/environmentService"
 
-	static readonly ID = 'workbench.contrib.externalUriResolver';
+export class ExternalUriResolverContribution
+  extends Disposable
+  implements IWorkbenchContribution
+{
+  static readonly ID = "workbench.contrib.externalUriResolver"
 
-	constructor(
-		@IOpenerService _openerService: IOpenerService,
-		@IBrowserWorkbenchEnvironmentService _workbenchEnvironmentService: IBrowserWorkbenchEnvironmentService,
-	) {
-		super();
+  constructor(
+    @IOpenerService _openerService: IOpenerService,
+    @IBrowserWorkbenchEnvironmentService
+    _workbenchEnvironmentService: IBrowserWorkbenchEnvironmentService,
+  ) {
+    super()
 
-		if (_workbenchEnvironmentService.options?.resolveExternalUri) {
-			this._register(_openerService.registerExternalUriResolver({
-				resolveExternalUri: async (resource) => {
-					return {
-						resolved: await _workbenchEnvironmentService.options!.resolveExternalUri!(resource),
-						dispose: () => {
-							// TODO@mjbvz - do we need to do anything here?
-						}
-					};
-				}
-			}));
-		}
-	}
+    if (_workbenchEnvironmentService.options?.resolveExternalUri) {
+      this._register(
+        _openerService.registerExternalUriResolver({
+          resolveExternalUri: async (resource) => {
+            return {
+              resolved:
+                await _workbenchEnvironmentService.options!.resolveExternalUri!(
+                  resource,
+                ),
+              dispose: () => {
+                // TODO@mjbvz - do we need to do anything here?
+              },
+            }
+          },
+        }),
+      )
+    }
+  }
 }

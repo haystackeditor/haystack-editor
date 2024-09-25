@@ -1,199 +1,226 @@
 /*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
+ *--------------------------------------------------------------------------------------------*/
+
+/*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
 .monaco-editor .diff-hidden-lines-widget {
-	width: 100%;
+  width: 100%;
 }
 
 .monaco-editor .diff-hidden-lines {
-	height: 0px; /* The children each have a fixed height, the transform confuses the browser */
-	transform: translate(0px, -10px);
-	font-size: 13px;
-	line-height: 14px;
+  height: 0px; /* The children each have a fixed height, the transform confuses the browser */
+  transform: translate(0px, -10px);
+  font-size: 13px;
+  line-height: 14px;
 }
 
 .monaco-editor .diff-hidden-lines:not(.dragging) .top:hover,
 .monaco-editor .diff-hidden-lines:not(.dragging) .bottom:hover,
 .monaco-editor .diff-hidden-lines .top.dragging,
 .monaco-editor .diff-hidden-lines .bottom.dragging {
-	background-color: var(--vscode-focusBorder);
+  background-color: var(--vscode-focusBorder);
 }
 
 .monaco-editor .diff-hidden-lines .top,
 .monaco-editor .diff-hidden-lines .bottom {
-	transition: background-color 0.1s ease-out;
-	height: 4px;
-	background-color: transparent;
-	background-clip: padding-box;
-	border-bottom: 2px solid transparent;
-	border-top: 4px solid transparent;
-	/*cursor: n-resize;*/
+  transition: background-color 0.1s ease-out;
+  height: 4px;
+  background-color: transparent;
+  background-clip: padding-box;
+  border-bottom: 2px solid transparent;
+  border-top: 4px solid transparent;
+  /*cursor: n-resize;*/
 }
 
 .monaco-editor.draggingUnchangedRegion.canMoveTop:not(.canMoveBottom) *,
 .monaco-editor .diff-hidden-lines .top.canMoveTop:not(.canMoveBottom),
 .monaco-editor .diff-hidden-lines .bottom.canMoveTop:not(.canMoveBottom) {
-	cursor: n-resize !important;
+  cursor: n-resize !important;
 }
 
 .monaco-editor.draggingUnchangedRegion:not(.canMoveTop).canMoveBottom *,
 .monaco-editor .diff-hidden-lines .top:not(.canMoveTop).canMoveBottom,
 .monaco-editor .diff-hidden-lines .bottom:not(.canMoveTop).canMoveBottom {
-	cursor: s-resize !important;
+  cursor: s-resize !important;
 }
 
 .monaco-editor.draggingUnchangedRegion.canMoveTop.canMoveBottom *,
 .monaco-editor .diff-hidden-lines .top.canMoveTop.canMoveBottom,
 .monaco-editor .diff-hidden-lines .bottom.canMoveTop.canMoveBottom {
-	cursor: ns-resize !important;
+  cursor: ns-resize !important;
 }
 
 .monaco-editor .diff-hidden-lines .top {
-	transform: translate(0px, 4px);
+  transform: translate(0px, 4px);
 }
 
 .monaco-editor .diff-hidden-lines .bottom {
-	transform: translate(0px, -6px);
+  transform: translate(0px, -6px);
 }
 
 .monaco-editor .diff-unchanged-lines {
-	background: var(--vscode-diffEditor-unchangedCodeBackground);
+  background: var(--vscode-diffEditor-unchangedCodeBackground);
 }
 
 .monaco-editor .noModificationsOverlay {
-	z-index: 1;
-	background: var(--vscode-editor-background);
+  z-index: 1;
+  background: var(--vscode-editor-background);
 
-	display: flex;
-	justify-content: center;
-	align-items: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-
 .monaco-editor .diff-hidden-lines .center {
-	background: var(--vscode-diffEditor-unchangedRegionBackground);
-	color: var(--vscode-diffEditor-unchangedRegionForeground);
-	overflow: hidden;
-	display: block;
-	text-overflow: ellipsis;
-	white-space: nowrap;
+  background: var(--vscode-diffEditor-unchangedRegionBackground);
+  color: var(--vscode-diffEditor-unchangedRegionForeground);
+  overflow: hidden;
+  display: block;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 
-	height: 24px;
-	box-shadow: inset 0 -5px 5px -7px var(--vscode-diffEditor-unchangedRegionShadow), inset 0 5px 5px -7px var(--vscode-diffEditor-unchangedRegionShadow);
+  height: 24px;
+  box-shadow:
+    inset 0 -5px 5px -7px var(--vscode-diffEditor-unchangedRegionShadow),
+    inset 0 5px 5px -7px var(--vscode-diffEditor-unchangedRegionShadow);
 }
 
 .monaco-editor .diff-hidden-lines .center span.codicon {
-	vertical-align: middle;
+  vertical-align: middle;
 }
 
 .monaco-editor .diff-hidden-lines .center a:hover .codicon {
-	cursor: pointer;
-	color: var(--vscode-editorLink-activeForeground) !important;
+  cursor: pointer;
+  color: var(--vscode-editorLink-activeForeground) !important;
 }
 
 .monaco-editor .diff-hidden-lines div.breadcrumb-item {
-	cursor: pointer;
+  cursor: pointer;
 }
 
 .monaco-editor .diff-hidden-lines div.breadcrumb-item:hover {
-	color: var(--vscode-editorLink-activeForeground);
+  color: var(--vscode-editorLink-activeForeground);
 }
 
 .monaco-editor .movedOriginal {
-	border: 2px solid var(--vscode-diffEditor-move-border);
+  border: 2px solid var(--vscode-diffEditor-move-border);
 }
 
 .monaco-editor .movedModified {
-	border: 2px solid var(--vscode-diffEditor-move-border);
+  border: 2px solid var(--vscode-diffEditor-move-border);
 }
 
-.monaco-editor .movedOriginal.currentMove, .monaco-editor .movedModified.currentMove {
-	border: 2px solid var(--vscode-diffEditor-moveActive-border);
+.monaco-editor .movedOriginal.currentMove,
+.monaco-editor .movedModified.currentMove {
+  border: 2px solid var(--vscode-diffEditor-moveActive-border);
 }
 
 .monaco-diff-editor .moved-blocks-lines path.currentMove {
-	stroke: var(--vscode-diffEditor-moveActive-border);
+  stroke: var(--vscode-diffEditor-moveActive-border);
 }
 
 .monaco-diff-editor .moved-blocks-lines path {
-	pointer-events: visiblestroke;
+  pointer-events: visiblestroke;
 }
 
 .monaco-diff-editor .moved-blocks-lines .arrow {
-	fill: var(--vscode-diffEditor-move-border);
+  fill: var(--vscode-diffEditor-move-border);
 }
 
 .monaco-diff-editor .moved-blocks-lines .arrow.currentMove {
-	fill: var(--vscode-diffEditor-moveActive-border);
+  fill: var(--vscode-diffEditor-moveActive-border);
 }
 
 .monaco-diff-editor .moved-blocks-lines .arrow-rectangle {
-	fill: var(--vscode-editor-background);
+  fill: var(--vscode-editor-background);
 }
 
 .monaco-diff-editor .moved-blocks-lines {
-	position: absolute;
-	pointer-events: none;
+  position: absolute;
+  pointer-events: none;
 }
 
 .monaco-diff-editor .moved-blocks-lines path {
-	fill: none;
-	stroke: var(--vscode-diffEditor-move-border);
-	stroke-width: 2;
+  fill: none;
+  stroke: var(--vscode-diffEditor-move-border);
+  stroke-width: 2;
 }
 
 .monaco-editor .char-delete.diff-range-empty {
-	margin-left: -1px;
-	border-left: solid var(--vscode-diffEditor-removedTextBackground) 3px;
+  margin-left: -1px;
+  border-left: solid var(--vscode-diffEditor-removedTextBackground) 3px;
 }
 
 .monaco-editor .char-insert.diff-range-empty {
-	border-left: solid var(--vscode-diffEditor-insertedTextBackground) 3px;
+  border-left: solid var(--vscode-diffEditor-insertedTextBackground) 3px;
 }
 
 .monaco-editor .fold-unchanged {
-	cursor: pointer;
+  cursor: pointer;
 }
 
 .monaco-diff-editor .diff-moved-code-block {
-	display: flex;
-	justify-content: flex-end;
-	margin-top: -4px;
+  display: flex;
+  justify-content: flex-end;
+  margin-top: -4px;
 }
 
 .monaco-diff-editor .diff-moved-code-block .action-bar .action-label.codicon {
-	width: 12px;
-	height: 12px;
-	font-size: 12px;
+  width: 12px;
+  height: 12px;
+  font-size: 12px;
 }
 
 /* ---------- DiffEditor ---------- */
 
 .monaco-diff-editor .diffOverview {
-	z-index: 9;
+  z-index: 9;
+  background-color: var(--vscode-editor-background);
 }
 
 .monaco-diff-editor .diffOverview .diffViewport {
-	z-index: 10;
+  z-index: 10;
 }
 
 /* colors not externalized: using transparancy on background */
-.monaco-diff-editor.vs			.diffOverview { background: rgba(0, 0, 0, 0.03); }
-.monaco-diff-editor.vs-dark		.diffOverview { background: rgba(255, 255, 255, 0.01); }
+.monaco-diff-editor.vs .diffOverview {
+  background: rgba(0, 0, 0, 0.03);
+}
+.monaco-diff-editor.vs-dark .diffOverview {
+  background: rgba(255, 255, 255, 0.01);
+}
 
-.monaco-scrollable-element.modified-in-monaco-diff-editor.vs		.scrollbar { background: rgba(0,0,0,0); }
-.monaco-scrollable-element.modified-in-monaco-diff-editor.vs-dark	.scrollbar { background: rgba(0,0,0,0); }
-.monaco-scrollable-element.modified-in-monaco-diff-editor.hc-black	.scrollbar { background: none; }
-.monaco-scrollable-element.modified-in-monaco-diff-editor.hc-light	.scrollbar { background: none; }
+.monaco-scrollable-element.modified-in-monaco-diff-editor.vs .scrollbar {
+  background: rgba(0, 0, 0, 0);
+}
+.monaco-scrollable-element.modified-in-monaco-diff-editor.vs-dark .scrollbar {
+  background: rgba(0, 0, 0, 0);
+}
+.monaco-scrollable-element.modified-in-monaco-diff-editor.hc-black .scrollbar {
+  background: none;
+}
+.monaco-scrollable-element.modified-in-monaco-diff-editor.hc-light .scrollbar {
+  background: none;
+}
 
 .monaco-scrollable-element.modified-in-monaco-diff-editor .slider {
-	z-index: 10;
+  z-index: 10;
 }
-.modified-in-monaco-diff-editor				.slider.active { background: rgba(171, 171, 171, .4); }
-.modified-in-monaco-diff-editor.hc-black	.slider.active { background: none; }
-.modified-in-monaco-diff-editor.hc-light	.slider.active { background: none; }
+.modified-in-monaco-diff-editor .slider.active {
+  background: rgba(171, 171, 171, 0.4);
+}
+.modified-in-monaco-diff-editor.hc-black .slider.active {
+  background: none;
+}
+.modified-in-monaco-diff-editor.hc-light .slider.active {
+  background: none;
+}
 
 /* ---------- Diff ---------- */
 
@@ -201,10 +228,10 @@
 .monaco-diff-editor .insert-sign,
 .monaco-editor .delete-sign,
 .monaco-diff-editor .delete-sign {
-	font-size: 11px !important;
-	opacity: 0.7 !important;
-	display: flex !important;
-	align-items: center;
+  font-size: 11px !important;
+  opacity: 0.7 !important;
+  display: flex !important;
+  align-items: center;
 }
 .monaco-editor.hc-black .insert-sign,
 .monaco-diff-editor.hc-black .insert-sign,
@@ -214,184 +241,467 @@
 .monaco-diff-editor.hc-light .insert-sign,
 .monaco-editor.hc-light .delete-sign,
 .monaco-diff-editor.hc-light .delete-sign {
-	opacity: 1;
+  opacity: 1;
 }
 
 .monaco-editor .inline-deleted-margin-view-zone {
-	text-align: right;
+  text-align: right;
 }
 .monaco-editor .inline-added-margin-view-zone {
-	text-align: right;
+  text-align: right;
 }
 
 .monaco-editor .arrow-revert-change {
-	z-index: 10;
-	position: absolute;
+  z-index: 10;
+  position: absolute;
 }
 
 .monaco-editor .arrow-revert-change:hover {
-	cursor: pointer;
+  cursor: pointer;
 }
 
 /* ---------- Inline Diff ---------- */
 
 .monaco-editor .view-zones .view-lines .view-line span {
-	display: inline-block;
+  display: inline-block;
 }
 
 .monaco-editor .margin-view-zones .lightbulb-glyph:hover {
-	cursor: pointer;
+  cursor: pointer;
 }
 
-.monaco-editor .char-insert, .monaco-diff-editor .char-insert {
-	background-color: var(--vscode-diffEditor-insertedTextBackground);
+.monaco-editor .char-insert,
+.monaco-diff-editor .char-insert {
+  background-color: var(--vscode-diffEditor-insertedTextBackground);
 }
 
-.monaco-editor .line-insert, .monaco-diff-editor .line-insert {
-	background-color: var(--vscode-diffEditor-insertedLineBackground, var(--vscode-diffEditor-insertedTextBackground));
+.monaco-editor .line-insert,
+.monaco-diff-editor .line-insert {
+  background-color: var(
+    --vscode-diffEditor-insertedLineBackground,
+    var(--vscode-diffEditor-insertedTextBackground)
+  );
+}
+
+/* Light Mode Colors */
+.monaco-editor .relationship-highlight-a280cc {
+  border: 1px rgba(162, 128, 204, 1) solid;
+}
+.monaco-editor .relationship-highlight-375fc2 {
+  border: 1px rgba(55, 95, 194, 1) solid;
+}
+.monaco-editor .relationship-highlight-ca7137 {
+  border: 1px rgba(202, 113, 55, 1) solid;
+}
+.monaco-editor .relationship-highlight-c27498 {
+  border: 1px rgba(194, 116, 152, 1) solid;
+}
+.monaco-editor .relationship-highlight-9ec2a4 {
+  border: 1px rgba(158, 194, 164, 1) solid;
+}
+.monaco-editor .relationship-highlight-bcb1c8 {
+  border: 1px rgba(188, 177, 200, 1) solid;
+}
+.monaco-editor .relationship-highlight-b47d65 {
+  border: 1px rgba(180, 125, 101, 1) solid;
+}
+.monaco-editor .relationship-highlight-782525 {
+  border: 1px rgba(120, 37, 37, 1) solid;
+}
+.monaco-editor .relationship-highlight-111e1e {
+  border: 1px rgba(17, 30, 30, 1) solid;
+}
+.monaco-editor .relationship-highlight-be87a0 {
+  border: 1px rgba(190, 135, 160, 1) solid;
+}
+.monaco-editor .relationship-highlight-a793ae {
+  border: 1px rgba(167, 147, 174, 1) solid;
+}
+.monaco-editor .relationship-highlight-c8c9c6 {
+  border: 1px rgba(200, 201, 198, 1) solid;
+}
+.monaco-editor .relationship-highlight-91abbe {
+  border: 1px rgba(145, 171, 190, 1) solid;
+}
+.monaco-editor .relationship-highlight-acbac4 {
+  border: 1px rgba(172, 186, 196, 1) solid;
+}
+.monaco-editor .relationship-highlight-cc9d9d {
+  border: 1px rgba(204, 157, 157, 1) solid;
+}
+.monaco-editor .relationship-highlight-c78e8e {
+  border: 1px rgba(199, 142, 142, 1) solid;
+}
+.monaco-editor .relationship-highlight-be909c {
+  border: 1px rgba(190, 144, 156, 1) solid;
+}
+.monaco-editor .relationship-highlight-66b10f {
+  border: 1px rgba(102, 177, 15, 1) solid;
+}
+.monaco-editor .relationship-highlight-99ba68 {
+  border: 1px rgba(153, 186, 104, 1) solid;
+}
+.monaco-editor .relationship-highlight-00cc00 {
+  border: 1px rgba(0, 204, 0, 1) solid;
+}
+.monaco-editor .relationship-highlight-a9a2b6 {
+  border: 1px rgba(169, 162, 182, 1) solid;
+}
+.monaco-editor .relationship-highlight-a790a5 {
+  border: 1px rgba(167, 144, 165, 1) solid;
+}
+.monaco-editor .relationship-highlight-a698a3 {
+  border: 1px rgba(166, 152, 163, 1) solid;
+}
+.monaco-editor .relationship-highlight-aca3b3 {
+  border: 1px rgba(172, 163, 179, 1) solid;
+}
+.monaco-editor .relationship-highlight-bcb1b9 {
+  border: 1px rgba(188, 177, 185, 1) solid;
+}
+.monaco-editor .relationship-highlight-c7c9cc {
+  border: 1px rgba(199, 201, 204, 1) solid;
+}
+.monaco-editor .relationship-highlight-c0c4cc {
+  border: 1px rgba(192, 196, 204, 1) solid;
+}
+.monaco-editor .relationship-highlight-83ab4b {
+  border: 1px rgba(131, 171, 75, 1) solid;
+}
+.monaco-editor .relationship-highlight-86b680 {
+  border: 1px rgba(134, 182, 128, 1) solid;
+}
+.monaco-editor .relationship-highlight-897b86 {
+  border: 1px rgba(137, 123, 134, 1) solid;
+}
+.monaco-editor .relationship-highlight-786774 {
+  border: 1px rgba(120, 103, 116, 1) solid;
+}
+.monaco-editor .relationship-highlight-99becb {
+  border: 1px rgba(153, 190, 203, 1) solid;
+}
+.monaco-editor .relationship-highlight-cc9e80 {
+  border: 1px rgba(204, 158, 128, 1) solid;
+}
+.monaco-editor .relationship-highlight-002a49 {
+  border: 1px rgba(0, 42, 73, 1) solid;
+}
+.monaco-editor .relationship-highlight-cccb8a {
+  border: 1px rgba(204, 203, 138, 1) solid;
+}
+.monaco-editor .relationship-highlight-ccc572 {
+  border: 1px rgba(204, 197, 114, 1) solid;
+}
+.monaco-editor .relationship-highlight-6c6c5f {
+  border: 1px rgba(108, 108, 95, 1) solid;
+}
+.monaco-editor .relationship-highlight-9a8e80 {
+  border: 1px rgba(154, 142, 128, 1) solid;
+}
+.monaco-editor .relationship-highlight-cc6640 {
+  border: 1px rgba(204, 102, 64, 1) solid;
+}
+.monaco-editor .relationship-highlight-c29657 {
+  border: 1px rgba(194, 150, 87, 1) solid;
+}
+.monaco-editor .relationship-highlight-769e5b {
+  border: 1px rgba(118, 158, 91, 1) solid;
+}
+.monaco-editor .relationship-highlight-0066b5 {
+  border: 1px rgba(0, 102, 181, 1) solid;
+}
+
+/* Dark Mode Colors */
+.monaco-editor .relationship-highlight-d9b3ff {
+  border: 1px rgba(217, 179, 255, 1) solid;
+}
+.monaco-editor .relationship-highlight-6b93ff {
+  border: 1px rgba(107, 147, 255, 1) solid;
+}
+.monaco-editor .relationship-highlight-ffa96c {
+  border: 1px rgba(255, 169, 108, 1) solid;
+}
+.monaco-editor .relationship-highlight-ffacd2 {
+  border: 1px rgba(255, 172, 210, 1) solid;
+}
+.monaco-editor .relationship-highlight-dcffe4 {
+  border: 1px rgba(220, 255, 228, 1) solid;
+}
+.monaco-editor .relationship-highlight-eadbf6 {
+  border: 1px rgba(234, 219, 246, 1) solid;
+}
+.monaco-editor .relationship-highlight-ffb695 {
+  border: 1px rgba(255, 182, 149, 1) solid;
+}
+.monaco-editor .relationship-highlight-b93939 {
+  border: 1px rgba(185, 57, 57, 1) solid;
+}
+.monaco-editor .relationship-highlight-1d3939 {
+  border: 1px rgba(29, 57, 57, 1) solid;
+}
+.monaco-editor .relationship-highlight-eea9c6 {
+  border: 1px rgba(238, 169, 198, 1) solid;
+}
+.monaco-editor .relationship-highlight-e7d0f1 {
+  border: 1px rgba(231, 208, 241, 1) solid;
+}
+.monaco-editor .relationship-highlight-fafbf8 {
+  border: 1px rgba(250, 251, 248, 1) solid;
+}
+.monaco-editor .relationship-highlight-cde8ff {
+  border: 1px rgba(205, 232, 255, 1) solid;
+}
+.monaco-editor .relationship-highlight-d7e9f5 {
+  border: 1px rgba(215, 233, 245, 1) solid;
+}
+.monaco-editor .relationship-highlight-ffc4c4 {
+  border: 1px rgba(255, 196, 196, 1) solid;
+}
+.monaco-editor .relationship-highlight-f9b1b1 {
+  border: 1px rgba(249, 177, 177, 1) solid;
+}
+.monaco-editor .relationship-highlight-ffcbd9 {
+  border: 1px rgba(255, 203, 217, 1) solid;
+}
+.monaco-editor .relationship-highlight-9fff18 {
+  border: 1px rgba(159, 255, 24, 1) solid;
+}
+.monaco-editor .relationship-highlight-d8ff9a {
+  border: 1px rgba(216, 255, 154, 1) solid;
+}
+.monaco-editor .relationship-highlight-00ff00 {
+  border: 1px rgba(0, 255, 0, 1) solid;
+}
+.monaco-editor .relationship-highlight-ece4fc {
+  border: 1px rgba(236, 228, 252, 1) solid;
+}
+.monaco-editor .relationship-highlight-e9cce6 {
+  border: 1px rgba(233, 204, 230, 1) solid;
+}
+.monaco-editor .relationship-highlight-e8d6e4 {
+  border: 1px rgba(232, 214, 228, 1) solid;
+}
+.monaco-editor .relationship-highlight-f0e3f8 {
+  border: 1px rgba(240, 227, 248, 1) solid;
+}
+.monaco-editor .relationship-highlight-ecdde7 {
+  border: 1px rgba(236, 221, 231, 1) solid;
+}
+.monaco-editor .relationship-highlight-f9fbff {
+  border: 1px rgba(249, 251, 255, 1) solid;
+}
+.monaco-editor .relationship-highlight-f0f5ff {
+  border: 1px rgba(240, 245, 255, 1) solid;
+}
+.monaco-editor .relationship-highlight-bcee76 {
+  border: 1px rgba(188, 238, 118, 1) solid;
+}
+.monaco-editor .relationship-highlight-c0ffb8 {
+  border: 1px rgba(192, 255, 184, 1) solid;
+}
+.monaco-editor .relationship-highlight-c3b2c0 {
+  border: 1px rgba(195, 178, 192, 1) solid;
+}
+.monaco-editor .relationship-highlight-ae98aa {
+  border: 1px rgba(174, 152, 170, 1) solid;
+}
+.monaco-editor .relationship-highlight-c0eeff {
+  border: 1px rgba(192, 238, 255, 1) solid;
+}
+.monaco-editor .relationship-highlight-ffd1c0 {
+  border: 1px rgba(255, 209, 192, 1) solid;
+}
+.monaco-editor .relationship-highlight-004872 {
+  border: 1px rgba(0, 72, 114, 1) solid;
+}
+.monaco-editor .relationship-highlight-fffdad {
+  border: 1px rgba(255, 253, 173, 1) solid;
+}
+.monaco-editor .relationship-highlight-fff68f {
+  border: 1px rgba(255, 246, 143, 1) solid;
+}
+.monaco-editor .relationship-highlight-9e9e8e {
+  border: 1px rgba(158, 158, 142, 1) solid;
+}
+.monaco-editor .relationship-highlight-d8c8b7 {
+  border: 1px rgba(216, 200, 183, 1) solid;
+}
+.monaco-editor .relationship-highlight-ff7f50 {
+  border: 1px rgba(255, 127, 80, 1) solid;
+}
+.monaco-editor .relationship-highlight-f3bb6c {
+  border: 1px rgba(243, 187, 108, 1) solid;
+}
+.monaco-editor .relationship-highlight-aadc89 {
+  border: 1px rgba(170, 220, 137, 1) solid;
+}
+.monaco-editor .relationship-highlight-009aff {
+  border: 1px rgba(0, 154, 255, 1) solid;
 }
 
 .monaco-editor .line-insert,
 .monaco-editor .char-insert {
-	box-sizing: border-box;
-	border: 1px solid var(--vscode-diffEditor-insertedTextBorder);
+  box-sizing: border-box;
+  border: 1px solid var(--vscode-diffEditor-insertedTextBorder);
 }
-.monaco-editor.hc-black .line-insert, .monaco-editor.hc-light .line-insert,
-.monaco-editor.hc-black .char-insert, .monaco-editor.hc-light .char-insert {
-	border-style: dashed;
+.monaco-editor.hc-black .line-insert,
+.monaco-editor.hc-light .line-insert,
+.monaco-editor.hc-black .char-insert,
+.monaco-editor.hc-light .char-insert {
+  border-style: dashed;
 }
 
 .monaco-editor .line-delete,
 .monaco-editor .char-delete {
-	box-sizing: border-box;
-	border: 1px solid var(--vscode-diffEditor-removedTextBorder);
+  box-sizing: border-box;
+  border: 1px solid var(--vscode-diffEditor-removedTextBorder);
 }
-.monaco-editor.hc-black .line-delete, .monaco-editor.hc-light .line-delete,
-.monaco-editor.hc-black .char-delete, .monaco-editor.hc-light .char-delete {
-	border-style: dashed;
+.monaco-editor.hc-black .line-delete,
+.monaco-editor.hc-light .line-delete,
+.monaco-editor.hc-black .char-delete,
+.monaco-editor.hc-light .char-delete {
+  border-style: dashed;
 }
 
 .monaco-editor .inline-added-margin-view-zone,
-.monaco-editor .gutter-insert, .monaco-diff-editor .gutter-insert {
-	background-color: var(--vscode-diffEditorGutter-insertedLineBackground, var(--vscode-diffEditor-insertedLineBackground), var(--vscode-diffEditor-insertedTextBackground));
+.monaco-editor .gutter-insert,
+.monaco-diff-editor .gutter-insert {
+  background-color: var(
+    --vscode-diffEditorGutter-insertedLineBackground,
+    var(--vscode-diffEditor-insertedLineBackground),
+    var(--vscode-diffEditor-insertedTextBackground)
+  );
 }
 
-.monaco-editor .char-delete, .monaco-diff-editor .char-delete {
-	background-color: var(--vscode-diffEditor-removedTextBackground);
+.monaco-editor .char-delete,
+.monaco-diff-editor .char-delete {
+  background-color: var(--vscode-diffEditor-removedTextBackground);
 }
 
-.monaco-editor .line-delete, .monaco-diff-editor .line-delete {
-	background-color: var(--vscode-diffEditor-removedLineBackground, var(--vscode-diffEditor-removedTextBackground));
+.monaco-editor .line-delete,
+.monaco-diff-editor .line-delete {
+  background-color: var(
+    --vscode-diffEditor-removedLineBackground,
+    var(--vscode-diffEditor-removedTextBackground)
+  );
 }
 
 .monaco-editor .inline-deleted-margin-view-zone,
-.monaco-editor .gutter-delete, .monaco-diff-editor .gutter-delete {
-	background-color: var(--vscode-diffEditorGutter-removedLineBackground, var(--vscode-diffEditor-removedLineBackground), var(--vscode-diffEditor-removedTextBackground));
+.monaco-editor .gutter-delete,
+.monaco-diff-editor .gutter-delete {
+  background-color: var(
+    --vscode-diffEditorGutter-removedLineBackground,
+    var(--vscode-diffEditor-removedLineBackground),
+    var(--vscode-diffEditor-removedTextBackground)
+  );
 }
 
 .monaco-diff-editor.side-by-side .editor.modified {
-	box-shadow: -6px 0 5px -5px var(--vscode-scrollbar-shadow);
-	border-left: 1px solid var(--vscode-diffEditor-border);
+  box-shadow: -6px 0 5px -5px var(--vscode-scrollbar-shadow);
+  border-left: 1px solid var(--vscode-diffEditor-border);
 }
 
 .monaco-diff-editor.side-by-side .editor.original {
-	box-shadow: 6px 0 5px -5px var(--vscode-scrollbar-shadow);
-	border-right: 1px solid var(--vscode-diffEditor-border);
+  box-shadow: 6px 0 5px -5px var(--vscode-scrollbar-shadow);
+  border-right: 1px solid var(--vscode-diffEditor-border);
 }
 
 .monaco-diff-editor .diffViewport {
-	background: var(--vscode-scrollbarSlider-background);
+  background: var(--vscode-scrollbarSlider-background);
 }
 
 .monaco-diff-editor .diffViewport:hover {
-	background: var(--vscode-scrollbarSlider-hoverBackground);
+  background: var(--vscode-scrollbarSlider-hoverBackground);
 }
 
 .monaco-diff-editor .diffViewport:active {
-	background: var(--vscode-scrollbarSlider-activeBackground);
+  background: var(--vscode-scrollbarSlider-activeBackground);
 }
 
 .monaco-editor .diagonal-fill {
-	background-image: linear-gradient(
-		-45deg,
-		var(--vscode-diffEditor-diagonalFill) 12.5%,
-		#0000 12.5%, #0000 50%,
-		var(--vscode-diffEditor-diagonalFill) 50%, var(--vscode-diffEditor-diagonalFill) 62.5%,
-		#0000 62.5%, #0000 100%
-	);
-	background-size: 8px 8px;
+  background-image: linear-gradient(
+    -45deg,
+    var(--vscode-diffEditor-diagonalFill) 12.5%,
+    #0000 12.5%,
+    #0000 50%,
+    var(--vscode-diffEditor-diagonalFill) 50%,
+    var(--vscode-diffEditor-diagonalFill) 62.5%,
+    #0000 62.5%,
+    #0000 100%
+  );
+  background-size: 8px 8px;
 }
 
 .monaco-diff-editor .gutter {
-	position: relative;
-	overflow: hidden;
-	flex-shrink: 0;
-	flex-grow: 0;
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+  flex-grow: 0;
 
-	& > div {
-		position: absolute;
-	}
+  & > div {
+    position: absolute;
+  }
 
-	.gutterItem {
-		opacity: 0;
-		transition: opacity 0.7s;
+  .gutterItem {
+    opacity: 0;
+    transition: opacity 0.7s;
 
-		&.showAlways {
-			opacity: 1;
-			transition: none;
-		}
+    &.showAlways {
+      opacity: 1;
+      transition: none;
+    }
 
-		&.noTransition {
-			transition: none;
-		}
-	}
+    &.noTransition {
+      transition: none;
+    }
+  }
 
-	&:hover .gutterItem {
-		opacity: 1;
-		transition: opacity 0.1s ease-in-out;
-	}
+  &:hover .gutterItem {
+    opacity: 1;
+    transition: opacity 0.1s ease-in-out;
+  }
 
-	.gutterItem {
-		.background {
-			position: absolute;
-			height: 100%;
-			left: 50%;
-			width: 1px;
+  .gutterItem {
+    .background {
+      position: absolute;
+      height: 100%;
+      left: 50%;
+      width: 1px;
 
-			border-left: 2px var(--vscode-menu-border) solid;
-		}
+      border-left: 2px var(--vscode-menu-border) solid;
+    }
 
-		.buttons {
-			position: absolute;
-			/*height: 100%;*/
-			width: 100%;
+    .buttons {
+      position: absolute;
+      /*height: 100%;*/
+      width: 100%;
 
-			display: flex;
-			justify-content: center;
-			align-items: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
 
-			.monaco-toolbar {
-				height: fit-content;
-				.monaco-action-bar  {
-					line-height: 1;
+      .monaco-toolbar {
+        height: fit-content;
+        .monaco-action-bar {
+          line-height: 1;
 
-					.actions-container {
-						width: fit-content;
-						border-radius: 4px;
-						background: var(--vscode-editorGutter-commentRangeForeground);
+          .actions-container {
+            width: fit-content;
+            border-radius: 4px;
+            background: var(--vscode-editorGutter-commentRangeForeground);
 
-						.action-item {
-							&:hover {
-								background: var(--vscode-toolbar-hoverBackground);
-							}
+            .action-item {
+              &:hover {
+                background: var(--vscode-toolbar-hoverBackground);
+              }
 
-							.action-label {
-								padding: 1px 2px;
-							}
-						}
-					}
-				}
-			}
-		}
-	}
+              .action-label {
+                padding: 1px 2px;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 }

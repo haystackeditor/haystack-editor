@@ -1,24 +1,52 @@
 "use strict";
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the Functional Source License. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const fs = require("fs");
-const path = require("path");
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+const fs = __importStar(require("fs"));
+const path = __importStar(require("path"));
 const stream_1 = require("stream");
 const promises_1 = require("node:stream/promises");
-const yauzl = require("yauzl");
-const crypto = require("crypto");
+const yauzl = __importStar(require("yauzl"));
+const crypto = __importStar(require("crypto"));
 const retry_1 = require("./retry");
 const cosmos_1 = require("@azure/cosmos");
 const identity_1 = require("@azure/identity");
-const cp = require("child_process");
-const os = require("os");
+const cp = __importStar(require("child_process"));
+const os = __importStar(require("os"));
 const node_worker_threads_1 = require("node:worker_threads");
 function e(name) {
     const result = process.env[name];
-    if (typeof result !== 'string') {
+    if (typeof result !== "string") {
         throw new Error(`Missing env: ${name}`);
     }
     return result;
@@ -26,7 +54,7 @@ function e(name) {
 class Temp {
     _files = [];
     tmpNameSync() {
-        const file = path.join(os.tmpdir(), crypto.randomBytes(20).toString('hex'));
+        const file = path.join(os.tmpdir(), crypto.randomBytes(20).toString("hex"));
         this._files.push(file);
         return file;
     }
@@ -42,7 +70,8 @@ class Temp {
     }
 }
 function isCreateProvisionedFilesErrorResponse(response) {
-    return response?.ErrorDetails?.Code !== undefined;
+    return (response?.ErrorDetails?.Code !==
+        undefined);
 }
 class ProvisionService {
     log;
@@ -54,19 +83,22 @@ class ProvisionService {
     async provision(releaseId, fileId, fileName) {
         const body = JSON.stringify({
             ReleaseId: releaseId,
-            PortalName: 'VSCode',
-            PublisherCode: 'VSCode',
-            ProvisionedFilesCollection: [{
+            PortalName: "VSCode",
+            PublisherCode: "VSCode",
+            ProvisionedFilesCollection: [
+                {
                     PublisherKey: fileId,
                     IsStaticFriendlyFileName: true,
                     FriendlyFileName: fileName,
-                    MaxTTL: '1440',
-                    CdnMappings: ['ECN']
-                }]
+                    MaxTTL: "1440",
+                    CdnMappings: ["ECN"],
+                },
+            ],
         });
         this.log(`Provisioning ${fileName} (releaseId: ${releaseId}, fileId: ${fileId})...`);
-        const res = await (0, retry_1.retry)(() => this.request('POST', '/api/v2/ProvisionedFiles/CreateProvisionedFiles', { body }));
-        if (isCreateProvisionedFilesErrorResponse(res) && res.ErrorDetails.Code === 'FriendlyFileNameAlreadyProvisioned') {
+        const res = await (0, retry_1.retry)(() => this.request("POST", "/api/v2/ProvisionedFiles/CreateProvisionedFiles", { body }));
+        if (isCreateProvisionedFilesErrorResponse(res) &&
+            res.ErrorDetails.Code === "FriendlyFileNameAlreadyProvisioned") {
             this.log(`File already provisioned (most likley due to a re-run), skipping: ${fileName}`);
             return;
         }
@@ -81,13 +113,14 @@ class ProvisionService {
             body: options?.body,
             headers: {
                 Authorization: `Bearer ${this.accessToken}`,
-                'Content-Type': 'application/json'
-            }
+                "Content-Type": "application/json",
+            },
         };
         const res = await fetch(`https://dsprovisionapi.microsoft.com${url}`, opts);
         // 400 normally means the request is bad or something is already provisioned, so we will return as retries are useless
         // Otherwise log the text body and headers. We do text because some responses are not JSON.
-        if ((!res.ok || res.status < 200 || res.status >= 500) && res.status !== 400) {
+        if ((!res.ok || res.status < 200 || res.status >= 500) &&
+            res.status !== 400) {
             throw new Error(`Unexpected status code: ${res.status}\nResponse Headers: ${JSON.stringify(res.headers)}\nBody Text: ${await res.text()}`);
         }
         return await res.json();
@@ -97,9 +130,9 @@ function hashStream(hashName, stream) {
     return new Promise((c, e) => {
         const shasum = crypto.createHash(hashName);
         stream
-            .on('data', shasum.update.bind(shasum))
-            .on('error', e)
-            .on('close', () => c(shasum.digest('hex')));
+            .on("data", shasum.update.bind(shasum))
+            .on("error", e)
+            .on("close", () => c(shasum.digest("hex")));
     });
 }
 class ESRPClient {
@@ -111,27 +144,27 @@ class ESRPClient {
         this.tmp = tmp;
         this.authPath = this.tmp.tmpNameSync();
         fs.writeFileSync(this.authPath, JSON.stringify({
-            Version: '1.0.0',
-            AuthenticationType: 'AAD_CERT',
+            Version: "1.0.0",
+            AuthenticationType: "AAD_CERT",
             TenantId: tenantId,
             ClientId: clientId,
             AuthCert: {
                 SubjectName: authCertSubjectName,
-                StoreLocation: 'LocalMachine',
-                StoreName: 'My',
-                SendX5c: 'true'
+                StoreLocation: "LocalMachine",
+                StoreName: "My",
+                SendX5c: "true",
             },
             RequestSigningCert: {
                 SubjectName: requestSigningCertSubjectName,
-                StoreLocation: 'LocalMachine',
-                StoreName: 'My'
-            }
+                StoreLocation: "LocalMachine",
+                StoreName: "My",
+            },
         }));
     }
     async release(version, filePath) {
         this.log(`Submitting release for ${version}: ${filePath}`);
         const submitReleaseResult = await this.SubmitRelease(version, filePath);
-        if (submitReleaseResult.submissionResponse.statusCode !== 'pass') {
+        if (submitReleaseResult.submissionResponse.statusCode !== "pass") {
             throw new Error(`Unexpected status code: ${submitReleaseResult.submissionResponse.statusCode}`);
         }
         const releaseId = submitReleaseResult.submissionResponse.operationId;
@@ -140,73 +173,73 @@ class ESRPClient {
         // Poll every 5 seconds, wait 60 minutes max -> poll 60/5*60=720 times
         for (let i = 0; i < 720; i++) {
             details = await this.ReleaseDetails(releaseId);
-            if (details.releaseDetails[0].statusCode === 'pass') {
+            if (details.releaseDetails[0].statusCode === "pass") {
                 break;
             }
-            else if (details.releaseDetails[0].statusCode !== 'inprogress') {
+            else if (details.releaseDetails[0].statusCode !== "inprogress") {
                 throw new Error(`Failed to submit release: ${JSON.stringify(details)}`);
             }
-            await new Promise(c => setTimeout(c, 5000));
+            await new Promise((c) => setTimeout(c, 5000));
         }
-        if (details.releaseDetails[0].statusCode !== 'pass') {
+        if (details.releaseDetails[0].statusCode !== "pass") {
             throw new Error(`Timed out waiting for release ${releaseId}: ${JSON.stringify(details)}`);
         }
         const fileId = details.releaseDetails[0].fileDetails[0].publisherKey;
-        this.log('Release completed successfully with fileId: ', fileId);
+        this.log("Release completed successfully with fileId: ", fileId);
         return { releaseId, fileId };
     }
     async SubmitRelease(version, filePath) {
         const policyPath = this.tmp.tmpNameSync();
         fs.writeFileSync(policyPath, JSON.stringify({
-            Version: '1.0.0',
-            Audience: 'InternalLimited',
-            Intent: 'distribution',
-            ContentType: 'InstallPackage'
+            Version: "1.0.0",
+            Audience: "InternalLimited",
+            Intent: "distribution",
+            ContentType: "InstallPackage",
         }));
         const inputPath = this.tmp.tmpNameSync();
         const size = fs.statSync(filePath).size;
         const istream = fs.createReadStream(filePath);
-        const sha256 = await hashStream('sha256', istream);
+        const sha256 = await hashStream("sha256", istream);
         fs.writeFileSync(inputPath, JSON.stringify({
-            Version: '1.0.0',
+            Version: "1.0.0",
             ReleaseInfo: {
                 ReleaseMetadata: {
-                    Title: 'VS Code',
+                    Title: "VS Code",
                     Properties: {
-                        ReleaseContentType: 'InstallPackage'
+                        ReleaseContentType: "InstallPackage",
                     },
-                    MinimumNumberOfApprovers: 1
+                    MinimumNumberOfApprovers: 1,
                 },
                 ProductInfo: {
-                    Name: 'VS Code',
+                    Name: "VS Code",
                     Version: version,
                     Description: path.basename(filePath, path.extname(filePath)),
                 },
                 Owners: [
                     {
                         Owner: {
-                            UserPrincipalName: 'jomo@microsoft.com'
-                        }
-                    }
+                            UserPrincipalName: "jomo@microsoft.com",
+                        },
+                    },
                 ],
                 Approvers: [
                     {
                         Approver: {
-                            UserPrincipalName: 'jomo@microsoft.com'
+                            UserPrincipalName: "jomo@microsoft.com",
                         },
                         IsAutoApproved: true,
-                        IsMandatory: false
-                    }
+                        IsMandatory: false,
+                    },
                 ],
                 AccessPermissions: {
-                    MainPublisher: 'VSCode',
+                    MainPublisher: "VSCode",
                     ChannelDownloadEntityDetails: {
-                        Consumer: ['VSCode']
-                    }
+                        Consumer: ["VSCode"],
+                    },
                 },
                 CreatedBy: {
-                    UserPrincipalName: 'jomo@microsoft.com'
-                }
+                    UserPrincipalName: "jomo@microsoft.com",
+                },
             },
             ReleaseBatches: [
                 {
@@ -214,47 +247,49 @@ class ESRPClient {
                         {
                             SizeInBytes: size,
                             SourceHash: sha256,
-                            HashType: 'SHA256',
-                            SourceLocation: path.basename(filePath)
-                        }
+                            HashType: "SHA256",
+                            SourceLocation: path.basename(filePath),
+                        },
                     ],
-                    SourceLocationType: 'UNC',
+                    SourceLocationType: "UNC",
                     SourceRootDirectory: path.dirname(filePath),
-                    DestinationLocationType: 'AzureBlob'
-                }
-            ]
+                    DestinationLocationType: "AzureBlob",
+                },
+            ],
         }));
         const outputPath = this.tmp.tmpNameSync();
-        cp.execSync(`ESRPClient SubmitRelease -a ${this.authPath} -p ${policyPath} -i ${inputPath} -o ${outputPath}`, { stdio: 'inherit' });
-        const output = fs.readFileSync(outputPath, 'utf8');
+        cp.execSync(`ESRPClient SubmitRelease -a ${this.authPath} -p ${policyPath} -i ${inputPath} -o ${outputPath}`, { stdio: "inherit" });
+        const output = fs.readFileSync(outputPath, "utf8");
         return JSON.parse(output);
     }
     async ReleaseDetails(releaseId) {
         const inputPath = this.tmp.tmpNameSync();
         fs.writeFileSync(inputPath, JSON.stringify({
-            Version: '1.0.0',
-            OperationIds: [releaseId]
+            Version: "1.0.0",
+            OperationIds: [releaseId],
         }));
         const outputPath = this.tmp.tmpNameSync();
-        cp.execSync(`ESRPClient ReleaseDetails -a ${this.authPath} -i ${inputPath} -o ${outputPath}`, { stdio: 'inherit' });
-        const output = fs.readFileSync(outputPath, 'utf8');
+        cp.execSync(`ESRPClient ReleaseDetails -a ${this.authPath} -i ${inputPath} -o ${outputPath}`, { stdio: "inherit" });
+        const output = fs.readFileSync(outputPath, "utf8");
         return JSON.parse(output);
     }
 }
 async function releaseAndProvision(log, releaseTenantId, releaseClientId, releaseAuthCertSubjectName, releaseRequestSigningCertSubjectName, provisionTenantId, provisionAADUsername, provisionAADPassword, version, quality, filePath) {
     const fileName = `${quality}/${version}/${path.basename(filePath)}`;
-    const result = `${e('PRSS_CDN_URL')}/${fileName}`;
+    const result = `${e("PRSS_CDN_URL")}/${fileName}`;
     const res = await (0, retry_1.retry)(() => fetch(result));
     if (res.status === 200) {
         log(`Already released and provisioned: ${result}`);
         return result;
     }
     const tmp = new Temp();
-    process.on('exit', () => tmp.dispose());
+    process.on("exit", () => tmp.dispose());
     const esrpclient = new ESRPClient(log, tmp, releaseTenantId, releaseClientId, releaseAuthCertSubjectName, releaseRequestSigningCertSubjectName);
     const release = await esrpclient.release(version, filePath);
     const credential = new identity_1.ClientSecretCredential(provisionTenantId, provisionAADUsername, provisionAADPassword);
-    const accessToken = await credential.getToken(['https://microsoft.onmicrosoft.com/DS.Provisioning.WebApi/.default']);
+    const accessToken = await credential.getToken([
+        "https://microsoft.onmicrosoft.com/DS.Provisioning.WebApi/.default",
+    ]);
     const service = new ProvisionService(log, accessToken.token);
     await service.provision(release.releaseId, release.fileId, fileName);
     return result;
@@ -263,20 +298,24 @@ class State {
     statePath;
     set = new Set();
     constructor() {
-        const pipelineWorkspacePath = e('PIPELINE_WORKSPACE');
-        const previousState = fs.readdirSync(pipelineWorkspacePath)
-            .map(name => /^artifacts_processed_(\d+)$/.exec(name))
+        const pipelineWorkspacePath = e("PIPELINE_WORKSPACE");
+        const previousState = fs
+            .readdirSync(pipelineWorkspacePath)
+            .map((name) => /^artifacts_processed_(\d+)$/.exec(name))
             .filter((match) => !!match)
-            .map(match => ({ name: match[0], attempt: Number(match[1]) }))
+            .map((match) => ({ name: match[0], attempt: Number(match[1]) }))
             .sort((a, b) => b.attempt - a.attempt)[0];
         if (previousState) {
-            const previousStatePath = path.join(pipelineWorkspacePath, previousState.name, previousState.name + '.txt');
-            fs.readFileSync(previousStatePath, 'utf8').split(/\n/).filter(name => !!name).forEach(name => this.set.add(name));
+            const previousStatePath = path.join(pipelineWorkspacePath, previousState.name, previousState.name + ".txt");
+            fs.readFileSync(previousStatePath, "utf8")
+                .split(/\n/)
+                .filter((name) => !!name)
+                .forEach((name) => this.set.add(name));
         }
-        const stageAttempt = e('SYSTEM_STAGEATTEMPT');
+        const stageAttempt = e("SYSTEM_STAGEATTEMPT");
         this.statePath = path.join(pipelineWorkspacePath, `artifacts_processed_${stageAttempt}`, `artifacts_processed_${stageAttempt}.txt`);
         fs.mkdirSync(path.dirname(this.statePath), { recursive: true });
-        fs.writeFileSync(this.statePath, [...this.set.values()].map(name => `${name}\n`).join(''));
+        fs.writeFileSync(this.statePath, [...this.set.values()].map((name) => `${name}\n`).join(""));
     }
     get size() {
         return this.set.size;
@@ -295,19 +334,22 @@ class State {
 const azdoFetchOptions = {
     headers: {
         // Pretend we're a web browser to avoid download rate limits
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Referer': 'https://dev.azure.com',
-        Authorization: `Bearer ${e('SYSTEM_ACCESSTOKEN')}`
-    }
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36 Edg/119.0.0.0",
+        Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Accept-Language": "en-US,en;q=0.9",
+        Referer: "https://dev.azure.com",
+        Authorization: `Bearer ${e("SYSTEM_ACCESSTOKEN")}`,
+    },
 };
 async function requestAZDOAPI(path) {
     const abortController = new AbortController();
     const timeout = setTimeout(() => abortController.abort(), 2 * 60 * 1000);
     try {
-        const res = await fetch(`${e('BUILDS_API_URL')}${path}?api-version=6.0`, { ...azdoFetchOptions, signal: abortController.signal });
+        const res = await fetch(`${e("BUILDS_API_URL")}${path}?api-version=6.0`, {
+            ...azdoFetchOptions,
+            signal: abortController.signal,
+        });
         if (!res.ok) {
             throw new Error(`Unexpected status code: ${res.status}`);
         }
@@ -318,17 +360,20 @@ async function requestAZDOAPI(path) {
     }
 }
 async function getPipelineArtifacts() {
-    const result = await requestAZDOAPI('artifacts');
-    return result.value.filter(a => /^vscode_/.test(a.name) && !/sbom$/.test(a.name));
+    const result = await requestAZDOAPI("artifacts");
+    return result.value.filter((a) => /^vscode_/.test(a.name) && !/sbom$/.test(a.name));
 }
 async function getPipelineTimeline() {
-    return await requestAZDOAPI('timeline');
+    return await requestAZDOAPI("timeline");
 }
 async function downloadArtifact(artifact, downloadPath) {
     const abortController = new AbortController();
     const timeout = setTimeout(() => abortController.abort(), 4 * 60 * 1000);
     try {
-        const res = await fetch(artifact.resource.downloadUrl, { ...azdoFetchOptions, signal: abortController.signal });
+        const res = await fetch(artifact.resource.downloadUrl, {
+            ...azdoFetchOptions,
+            signal: abortController.signal,
+        });
         if (!res.ok) {
             throw new Error(`Unexpected status code: ${res.status}`);
         }
@@ -345,7 +390,7 @@ async function unzip(packagePath, outputPath) {
                 return reject(err);
             }
             const result = [];
-            zipfile.on('entry', entry => {
+            zipfile.on("entry", (entry) => {
                 if (/\/$/.test(entry.fileName)) {
                     zipfile.readEntry();
                 }
@@ -357,16 +402,16 @@ async function unzip(packagePath, outputPath) {
                         const filePath = path.join(outputPath, entry.fileName);
                         fs.mkdirSync(path.dirname(filePath), { recursive: true });
                         const ostream = fs.createWriteStream(filePath);
-                        ostream.on('finish', () => {
+                        ostream.on("finish", () => {
                             result.push(filePath);
                             zipfile.readEntry();
                         });
-                        istream?.on('error', err => reject(err));
+                        istream?.on("error", (err) => reject(err));
                         istream.pipe(ostream);
                     });
                 }
             });
-            zipfile.on('close', () => resolve(result));
+            zipfile.on("close", () => resolve(result));
             zipfile.readEntry();
         });
     });
@@ -374,91 +419,95 @@ async function unzip(packagePath, outputPath) {
 // Contains all of the logic for mapping details to our actual product names in CosmosDB
 function getPlatform(product, os, arch, type, isLegacy) {
     switch (os) {
-        case 'win32':
+        case "win32":
             switch (product) {
-                case 'client': {
+                case "client": {
                     switch (type) {
-                        case 'archive':
+                        case "archive":
                             return `win32-${arch}-archive`;
-                        case 'setup':
+                        case "setup":
                             return `win32-${arch}`;
-                        case 'user-setup':
+                        case "user-setup":
                             return `win32-${arch}-user`;
                         default:
                             throw new Error(`Unrecognized: ${product} ${os} ${arch} ${type}`);
                     }
                 }
-                case 'server':
-                    if (arch === 'arm64') {
+                case "server":
+                    if (arch === "arm64") {
                         throw new Error(`Unrecognized: ${product} ${os} ${arch} ${type}`);
                     }
                     return `server-win32-${arch}`;
-                case 'web':
-                    if (arch === 'arm64') {
+                case "web":
+                    if (arch === "arm64") {
                         throw new Error(`Unrecognized: ${product} ${os} ${arch} ${type}`);
                     }
                     return `server-win32-${arch}-web`;
-                case 'cli':
+                case "cli":
                     return `cli-win32-${arch}`;
                 default:
                     throw new Error(`Unrecognized: ${product} ${os} ${arch} ${type}`);
             }
-        case 'alpine':
+        case "alpine":
             switch (product) {
-                case 'server':
+                case "server":
                     return `server-alpine-${arch}`;
-                case 'web':
+                case "web":
                     return `server-alpine-${arch}-web`;
-                case 'cli':
+                case "cli":
                     return `cli-alpine-${arch}`;
                 default:
                     throw new Error(`Unrecognized: ${product} ${os} ${arch} ${type}`);
             }
-        case 'linux':
+        case "linux":
             switch (type) {
-                case 'snap':
+                case "snap":
                     return `linux-snap-${arch}`;
-                case 'archive-unsigned':
+                case "archive-unsigned":
                     switch (product) {
-                        case 'client':
+                        case "client":
                             return `linux-${arch}`;
-                        case 'server':
-                            return isLegacy ? `server-linux-legacy-${arch}` : `server-linux-${arch}`;
-                        case 'web':
-                            if (arch === 'standalone') {
-                                return 'web-standalone';
+                        case "server":
+                            return isLegacy
+                                ? `server-linux-legacy-${arch}`
+                                : `server-linux-${arch}`;
+                        case "web":
+                            if (arch === "standalone") {
+                                return "web-standalone";
                             }
-                            return isLegacy ? `server-linux-legacy-${arch}-web` : `server-linux-${arch}-web`;
+                            return isLegacy
+                                ? `server-linux-legacy-${arch}-web`
+                                : `server-linux-${arch}-web`;
                         default:
                             throw new Error(`Unrecognized: ${product} ${os} ${arch} ${type}`);
                     }
-                case 'deb-package':
+                case "deb-package":
                     return `linux-deb-${arch}`;
-                case 'rpm-package':
+                case "rpm-package":
                     return `linux-rpm-${arch}`;
-                case 'cli':
+                case "cli":
                     return `cli-linux-${arch}`;
                 default:
                     throw new Error(`Unrecognized: ${product} ${os} ${arch} ${type}`);
             }
-        case 'darwin':
+        case "darwin":
             switch (product) {
-                case 'client':
-                    if (arch === 'x64') {
-                        return 'darwin';
+                case "client":
+                    if (arch === "x64") {
+                        return "darwin";
                     }
                     return `darwin-${arch}`;
-                case 'server':
-                    if (arch === 'x64') {
-                        return 'server-darwin';
+                case "server":
+                    if (arch === "x64") {
+                        return "server-darwin";
                     }
                     return `server-darwin-${arch}`;
-                case 'web':
-                    if (arch === 'x64') {
-                        return 'server-darwin-web';
+                case "web":
+                    if (arch === "x64") {
+                        return "server-darwin-web";
                     }
                     return `server-darwin-${arch}-web`;
-                case 'cli':
+                case "cli":
                     return `cli-darwin-${arch}`;
                 default:
                     throw new Error(`Unrecognized: ${product} ${os} ${arch} ${type}`);
@@ -470,11 +519,11 @@ function getPlatform(product, os, arch, type, isLegacy) {
 // Contains all of the logic for mapping types to our actual types in CosmosDB
 function getRealType(type) {
     switch (type) {
-        case 'user-setup':
-            return 'setup';
-        case 'deb-package':
-        case 'rpm-package':
-            return 'package';
+        case "user-setup":
+            return "setup";
+        case "deb-package":
+        case "rpm-package":
+            return "package";
         default:
             return type;
     }
@@ -486,26 +535,42 @@ async function processArtifact(artifact, artifactFilePath) {
         throw new Error(`Invalid artifact name: ${artifact.name}`);
     }
     // getPlatform needs the unprocessedType
-    const quality = e('VSCODE_QUALITY');
-    const commit = e('BUILD_SOURCEVERSION');
+    const quality = e("VSCODE_QUALITY");
+    const commit = e("BUILD_SOURCEVERSION");
     const { product, os, arch, unprocessedType } = match.groups;
-    const isLegacy = artifact.name.includes('_legacy');
+    const isLegacy = artifact.name.includes("_legacy");
     const platform = getPlatform(product, os, arch, unprocessedType, isLegacy);
     const type = getRealType(unprocessedType);
     const size = fs.statSync(artifactFilePath).size;
     const stream = fs.createReadStream(artifactFilePath);
-    const [hash, sha256hash] = await Promise.all([hashStream('sha1', stream), hashStream('sha256', stream)]); // CodeQL [SM04514] Using SHA1 only for legacy reasons, we are actually only respecting SHA256
-    const url = await releaseAndProvision(log, e('RELEASE_TENANT_ID'), e('RELEASE_CLIENT_ID'), e('RELEASE_AUTH_CERT_SUBJECT_NAME'), e('RELEASE_REQUEST_SIGNING_CERT_SUBJECT_NAME'), e('PROVISION_TENANT_ID'), e('PROVISION_AAD_USERNAME'), e('PROVISION_AAD_PASSWORD'), commit, quality, artifactFilePath);
-    const asset = { platform, type, url, hash, sha256hash, size, supportsFastUpdate: true };
-    log('Creating asset...', JSON.stringify(asset, undefined, 2));
+    const [hash, sha256hash] = await Promise.all([
+        hashStream("sha1", stream),
+        hashStream("sha256", stream),
+    ]); // CodeQL [SM04514] Using SHA1 only for legacy reasons, we are actually only respecting SHA256
+    const url = await releaseAndProvision(log, e("RELEASE_TENANT_ID"), e("RELEASE_CLIENT_ID"), e("RELEASE_AUTH_CERT_SUBJECT_NAME"), e("RELEASE_REQUEST_SIGNING_CERT_SUBJECT_NAME"), e("PROVISION_TENANT_ID"), e("PROVISION_AAD_USERNAME"), e("PROVISION_AAD_PASSWORD"), commit, quality, artifactFilePath);
+    const asset = {
+        platform,
+        type,
+        url,
+        hash,
+        sha256hash,
+        size,
+        supportsFastUpdate: true,
+    };
+    log("Creating asset...", JSON.stringify(asset, undefined, 2));
     await (0, retry_1.retry)(async (attempt) => {
         log(`Creating asset in Cosmos DB (attempt ${attempt})...`);
-        const aadCredentials = new identity_1.ClientSecretCredential(e('AZURE_TENANT_ID'), e('AZURE_CLIENT_ID'), e('AZURE_CLIENT_SECRET'));
-        const client = new cosmos_1.CosmosClient({ endpoint: e('AZURE_DOCUMENTDB_ENDPOINT'), aadCredentials });
-        const scripts = client.database('builds').container(quality).scripts;
-        await scripts.storedProcedure('createAsset').execute('', [commit, asset, true]);
+        const aadCredentials = new identity_1.ClientSecretCredential(e("AZURE_TENANT_ID"), e("AZURE_CLIENT_ID"), e("AZURE_CLIENT_SECRET"));
+        const client = new cosmos_1.CosmosClient({
+            endpoint: e("AZURE_DOCUMENTDB_ENDPOINT"),
+            aadCredentials,
+        });
+        const scripts = client.database("builds").container(quality).scripts;
+        await scripts
+            .storedProcedure("createAsset")
+            .execute("", [commit, asset, true]);
     });
-    log('Asset successfully created');
+    log("Asset successfully created");
 }
 // It is VERY important that we don't download artifacts too much too fast from AZDO.
 // AZDO throttles us SEVERELY if we do. Not just that, but they also close open
@@ -524,40 +589,46 @@ async function main() {
     for (const name of done) {
         console.log(`\u2705 ${name}`);
     }
-    const stages = new Set(['Compile', 'CompileCLI']);
-    if (e('VSCODE_BUILD_STAGE_WINDOWS') === 'True') {
-        stages.add('Windows');
+    const stages = new Set(["Compile", "CompileCLI"]);
+    if (e("VSCODE_BUILD_STAGE_WINDOWS") === "True") {
+        stages.add("Windows");
     }
-    if (e('VSCODE_BUILD_STAGE_LINUX') === 'True') {
-        stages.add('Linux');
+    if (e("VSCODE_BUILD_STAGE_LINUX") === "True") {
+        stages.add("Linux");
     }
-    if (e('VSCODE_BUILD_STAGE_LINUX_LEGACY_SERVER') === 'True') {
-        stages.add('LinuxLegacyServer');
+    if (e("VSCODE_BUILD_STAGE_LINUX_LEGACY_SERVER") === "True") {
+        stages.add("LinuxLegacyServer");
     }
-    if (e('VSCODE_BUILD_STAGE_ALPINE') === 'True') {
-        stages.add('Alpine');
+    if (e("VSCODE_BUILD_STAGE_ALPINE") === "True") {
+        stages.add("Alpine");
     }
-    if (e('VSCODE_BUILD_STAGE_MACOS') === 'True') {
-        stages.add('macOS');
+    if (e("VSCODE_BUILD_STAGE_MACOS") === "True") {
+        stages.add("macOS");
     }
-    if (e('VSCODE_BUILD_STAGE_WEB') === 'True') {
-        stages.add('Web');
+    if (e("VSCODE_BUILD_STAGE_WEB") === "True") {
+        stages.add("Web");
     }
     let resultPromise = Promise.resolve([]);
     const operations = [];
     while (true) {
-        const [timeline, artifacts] = await Promise.all([(0, retry_1.retry)(() => getPipelineTimeline()), (0, retry_1.retry)(() => getPipelineArtifacts())]);
-        const stagesCompleted = new Set(timeline.records.filter(r => r.type === 'Stage' && r.state === 'completed' && stages.has(r.name)).map(r => r.name));
-        const stagesInProgress = [...stages].filter(s => !stagesCompleted.has(s));
-        const artifactsInProgress = artifacts.filter(a => processing.has(a.name));
-        if (stagesInProgress.length === 0 && artifacts.length === done.size + processing.size) {
+        const [timeline, artifacts] = await Promise.all([
+            (0, retry_1.retry)(() => getPipelineTimeline()),
+            (0, retry_1.retry)(() => getPipelineArtifacts()),
+        ]);
+        const stagesCompleted = new Set(timeline.records
+            .filter((r) => r.type === "Stage" && r.state === "completed" && stages.has(r.name))
+            .map((r) => r.name));
+        const stagesInProgress = [...stages].filter((s) => !stagesCompleted.has(s));
+        const artifactsInProgress = artifacts.filter((a) => processing.has(a.name));
+        if (stagesInProgress.length === 0 &&
+            artifacts.length === done.size + processing.size) {
             break;
         }
         else if (stagesInProgress.length > 0) {
-            console.log('Stages in progress:', stagesInProgress.join(', '));
+            console.log("Stages in progress:", stagesInProgress.join(", "));
         }
         else if (artifactsInProgress.length > 0) {
-            console.log('Artifacts in progress:', artifactsInProgress.map(a => a.name).join(', '));
+            console.log("Artifacts in progress:", artifactsInProgress.map((a) => a.name).join(", "));
         }
         else {
             console.log(`Waiting for a total of ${artifacts.length}, ${done.size} done, ${processing.size} in progress...`);
@@ -567,23 +638,25 @@ async function main() {
                 continue;
             }
             console.log(`[${artifact.name}] Found new artifact`);
-            const artifactZipPath = path.join(e('AGENT_TEMPDIRECTORY'), `${artifact.name}.zip`);
+            const artifactZipPath = path.join(e("AGENT_TEMPDIRECTORY"), `${artifact.name}.zip`);
             await (0, retry_1.retry)(async (attempt) => {
                 const start = Date.now();
                 console.log(`[${artifact.name}] Downloading (attempt ${attempt})...`);
                 await downloadArtifact(artifact, artifactZipPath);
                 const archiveSize = fs.statSync(artifactZipPath).size;
                 const downloadDurationS = (Date.now() - start) / 1000;
-                const downloadSpeedKBS = Math.round((archiveSize / 1024) / downloadDurationS);
+                const downloadSpeedKBS = Math.round(archiveSize / 1024 / downloadDurationS);
                 console.log(`[${artifact.name}] Successfully downloaded after ${Math.floor(downloadDurationS)} seconds(${downloadSpeedKBS} KB/s).`);
             });
-            const artifactFilePaths = await unzip(artifactZipPath, e('AGENT_TEMPDIRECTORY'));
-            const artifactFilePath = artifactFilePaths.filter(p => !/_manifest/.test(p))[0];
+            const artifactFilePaths = await unzip(artifactZipPath, e("AGENT_TEMPDIRECTORY"));
+            const artifactFilePath = artifactFilePaths.filter((p) => !/_manifest/.test(p))[0];
             processing.add(artifact.name);
             const promise = new Promise((resolve, reject) => {
-                const worker = new node_worker_threads_1.Worker(__filename, { workerData: { artifact, artifactFilePath } });
-                worker.on('error', reject);
-                worker.on('exit', code => {
+                const worker = new node_worker_threads_1.Worker(__filename, {
+                    workerData: { artifact, artifactFilePath },
+                });
+                worker.on("error", reject);
+                worker.on("exit", (code) => {
                     if (code === 0) {
                         resolve();
                     }
@@ -598,31 +671,31 @@ async function main() {
                 console.log(`\u2705 ${artifact.name} `);
             });
             operations.push({ name: artifact.name, operation });
-            resultPromise = Promise.allSettled(operations.map(o => o.operation));
+            resultPromise = Promise.allSettled(operations.map((o) => o.operation));
         }
-        await new Promise(c => setTimeout(c, 10_000));
+        await new Promise((c) => setTimeout(c, 10_000));
     }
     console.log(`Found all ${done.size + processing.size} artifacts, waiting for ${processing.size} artifacts to finish publishing...`);
-    const artifactsInProgress = operations.filter(o => processing.has(o.name));
+    const artifactsInProgress = operations.filter((o) => processing.has(o.name));
     if (artifactsInProgress.length > 0) {
-        console.log('Artifacts in progress:', artifactsInProgress.map(a => a.name).join(', '));
+        console.log("Artifacts in progress:", artifactsInProgress.map((a) => a.name).join(", "));
     }
     const results = await resultPromise;
     for (let i = 0; i < operations.length; i++) {
         const result = results[i];
-        if (result.status === 'rejected') {
+        if (result.status === "rejected") {
             console.error(`[${operations[i].name}]`, result.reason);
         }
     }
-    if (results.some(r => r.status === 'rejected')) {
-        throw new Error('Some artifacts failed to publish');
+    if (results.some((r) => r.status === "rejected")) {
+        throw new Error("Some artifacts failed to publish");
     }
     console.log(`All ${done.size} artifacts published!`);
 }
 if (require.main === module) {
     main().then(() => {
         process.exit(0);
-    }, err => {
+    }, (err) => {
         console.error(err);
         process.exit(1);
     });

@@ -1,11 +1,11 @@
-# VS Code Smoke Test
+# Haystack Smoke Test
 
 Make sure you are on **Node v12.x**.
 
 ## Quick Overview
 
 ```bash
-# Build extensions in the VS Code repo (if needed)
+# Build extensions in the Haystack repo (if needed)
 yarn && yarn compile
 
 # Dev (Electron)
@@ -78,7 +78,7 @@ On Windows, check for the folder `C:\Users\<username>\AppData\Local\Temp\t`. If 
 
 - Beware of **singletons**. This evil can, and will, manifest itself under the form of FS paths, TCP ports, IPC handles. Whenever writing a test, or setting up more smoke test architecture, make sure it can run simultaneously with any other tests and even itself. All test suites should be able to run many times in parallel.
 
-- Beware of **focus**. **Never** depend on DOM elements having focus using `.focused` classes or `:focus` pseudo-classes, since they will lose that state as soon as another window appears on top of the running VS Code window. A safe approach which avoids this problem is to use the `waitForActiveElement` API. Many tests use this whenever they need to wait for a specific element to _have focus_.
+- Beware of **focus**. **Never** depend on DOM elements having focus using `.focused` classes or `:focus` pseudo-classes, since they will lose that state as soon as another window appears on top of the running Haystack window. A safe approach which avoids this problem is to use the `waitForActiveElement` API. Many tests use this whenever they need to wait for a specific element to _have focus_.
 
 - Beware of **timing**. You need to read from or write to the DOM... but is it the right time to do that? Can you 100% guarantee that `input` box will be visible at that point in time? Or are you just hoping that it will be so? Hope is your worst enemy in UI tests. Example: just because you triggered Quick Access with `F1`, it doesn't mean that it's open and you can just start typing; you must first wait for the input element to be in the DOM as well as be the current active element.
 

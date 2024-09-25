@@ -1,11 +1,17 @@
 /*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
+ *--------------------------------------------------------------------------------------------*/
+
+/*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 use std::collections::HashMap;
 
 use crate::{
-	constants::{PROTOCOL_VERSION, VSCODE_CLI_VERSION},
+	constants::{HAYSTACK_CLI_VERSION, PROTOCOL_VERSION},
 	options::Quality,
 	update_service::Platform,
 };
@@ -243,7 +249,7 @@ pub struct VersionResponse {
 impl Default for VersionResponse {
 	fn default() -> Self {
 		Self {
-			version: VSCODE_CLI_VERSION.unwrap_or("dev"),
+			version: HAYSTACK_CLI_VERSION.unwrap_or("dev"),
 			protocol_version: PROTOCOL_VERSION,
 		}
 	}

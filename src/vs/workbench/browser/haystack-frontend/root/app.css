@@ -1,0 +1,515 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.appContainer {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.page {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  z-index: 0;
+  position: relative;
+}
+
+.resizer {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+}
+
+.rootCanvas {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  left: 0;
+}
+
+.toolbar {
+  width: 100%;
+  height: 40px;
+  background-color: rgb(195, 195, 195);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  row-gap: 15px;
+  z-index: 3;
+}
+
+.toolbar.darkMode {
+  background-color: rgb(49, 49, 49);
+}
+
+.mainToolbarButton {
+  color: var(--vscode-button-foreground);
+  background: transparent;
+  border: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 30px;
+  height: 30px;
+
+  &:hover {
+    background-color: var(--vscode-list-hoverBackground);
+  }
+
+  &:focus {
+    background-color: var(--vscode-list-focusBackground);
+  }
+
+  &.selected {
+    background-color: var(--vscode-list-activeSelectionBackground);
+  }
+}
+
+.reactOverlay {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  overflow: hidden;
+  clip: rect(0, auto, auto, 0);
+}
+
+.zoomControlsContainer {
+  position: absolute;
+  width: fit-content;
+  height: fit-content;
+  z-index: 100;
+  background: var(--vscode-menu-background);
+  border: 1px solid var(--vscode-menu-border);
+  display: flex;
+  flex-direction: column;
+  border-radius: 5px;
+  row-gap: 5px;
+  padding: 5px 5px;
+}
+
+.zoomValueButton {
+  color: var(--vscode-menu-foreground);
+  background: var(--vscode-menu-background);
+  border: none;
+  padding: 5px 0;
+
+  &:hover {
+    background-color: var(--vscode-list-hoverBackground);
+  }
+
+  &:focus {
+    background-color: var(--vscode-list-focusBackground);
+  }
+
+  &.selected {
+    background-color: var(--vscode-list-activeSelectionBackground);
+  }
+
+  text-align: center;
+  width: 35px;
+}
+
+.zoomInButton {
+  background: none;
+  color: inherit;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 0;
+
+  &:hover {
+    background-color: var(--vscode-list-hoverBackground);
+  }
+
+  &:focus {
+    background-color: var(--vscode-list-focusBackground);
+  }
+
+  &.selected {
+    background-color: var(--vscode-list-activeSelectionBackground);
+  }
+}
+
+.zoomOutButton {
+  background: none;
+  color: inherit;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 0;
+
+  &:hover {
+    background-color: var(--vscode-list-hoverBackground);
+  }
+
+  &:focus {
+    background-color: var(--vscode-list-focusBackground);
+  }
+
+  &.selected {
+    background-color: var(--vscode-list-activeSelectionBackground);
+  }
+}
+
+.feedbackButtonContainer {
+  position: absolute;
+  width: fit-content;
+  height: fit-content;
+  z-index: 2;
+  background-color: var(--vscode-list-background);
+
+  &.open {
+    z-index: 101;
+  }
+}
+
+.keybindingsButtonContainer {
+  position: absolute;
+  width: fit-content;
+  height: fit-content;
+  z-index: 2;
+  background-color: var(--vscode-list-background);
+}
+
+.feedbackList {
+  position: absolute;
+  width: fit-content;
+  display: flex;
+  flex-direction: column;
+  border-radius: 5px;
+  bottom: 20px;
+  right: 0;
+  height: fit-content;
+  padding: 2px 5px;
+  row-gap: 5px;
+
+  color: var(--vscode-list-foreground);
+  background-color: var(--vscode-editor-background);
+  border: 1px solid --vscode-button-border;
+}
+
+.feedbackListButton {
+  border: none;
+  background: none;
+  color: var(--vscode-list-foreground);
+  height: fit-content;
+  padding: 5px 2px;
+
+  &:hover {
+    background-color: var(--vscode-list-hoverBackground);
+  }
+}
+
+.feedbackButton {
+  border: 1px solid --vscode-button-border;
+  border-radius: 10px;
+  width: fit-content;
+  height: fit-content;
+  font-size: 12px;
+  padding: 5px;
+  color: var(--vscode-editor-foreground);
+  background-color: var(--vscode-editor-background);
+
+  &:hover {
+    background-color: var(--vscode-list-hoverBackground);
+  }
+
+  &:active {
+    background-color: var(--vscode-list-activeSelectionBackground);
+  }
+
+  &.open {
+    outline-width: 1px;
+    outline-style: solid;
+    outline-offset: -1px;
+    outline-color: var(--vscode-focusBorder);
+  }
+}
+
+.keybindingsButton {
+  border: 1px solid --vscode-button-border;
+  border-radius: 10px;
+  width: fit-content;
+  height: fit-content;
+  font-size: 12px;
+  padding: 5px;
+  color: var(--vscode-editor-foreground);
+  background-color: var(--vscode-editor-background);
+
+  &:hover {
+    background-color: var(--vscode-list-hoverBackground);
+  }
+
+  &:active {
+    background-color: var(--vscode-list-activeSelectionBackground);
+  }
+}
+
+.navigatorView {
+  width: 100%;
+  height: 100%;
+}
+
+.navigatorNode {
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  overflow: hidden;
+  background-color: transparent;
+  border: none;
+  color: inherit;
+  padding-bottom: 5px;
+  cursor: pointer;
+  height: 25px;
+
+  &:hover {
+    background-color: var(--vscode-list-hoverBackground);
+  }
+
+  &:focus {
+    background-color: var(--vscode-list-focusBackground);
+  }
+
+  &.selected {
+    background-color: var(--vscode-list-activeSelectionBackground);
+  }
+}
+
+.navigatorNodeIcon {
+  height: 100%;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin-left: 10px;
+  width: 15px;
+  height: 15px;
+}
+
+.navigatorNodeMainLabel {
+  margin-left: 5px;
+  overflow: hidden;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+  line-height: 12px;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: fit-content;
+  min-width: fit-content;
+}
+
+.navigatorNodeSupportingLabel {
+  margin-left: 5px;
+  overflow: hidden;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 10px;
+  line-height: 10px;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: fit-content;
+}
+
+body.handModeIdle * {
+  cursor: move !important;
+  /* fallback if grab cursor is unsupported */
+  cursor: grab !important;
+  cursor: -moz-grab !important;
+  cursor: -webkit-grab !important;
+}
+
+body.handModeDrag * {
+  cursor: grabbing !important;
+  cursor: -moz-grabbing !important;
+  cursor: -webkit-grabbing !important;
+}
+
+body.resizeHorizontal * {
+  cursor: ew-resize !important;
+}
+
+body.resizeVertical * {
+  cursor: ns-resize !important;
+}
+
+body.resizeDiagonalRight * {
+  cursor: nesw-resize !important;
+}
+
+body.resizeDiagonalLeft * {
+  cursor: nwse-resize !important;
+}
+
+body.move * {
+  cursor: move !important;
+}
+
+.addCanvasWorkspaceButtonContainer {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 20px;
+}
+
+.addCanvasWorkspaceInput {
+  color: var(--vscode-input-foreground);
+  background-color: var(--vscode-input-background);
+  border: var(--vscode-input-border);
+  height: 24px;
+  padding-left: 10px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+
+  margin-left: 20px;
+  margin-right: 20px;
+  margin-bottom: 10px;
+
+  &:focus-visible {
+    outline: none;
+  }
+
+  &:focus {
+    outline: 1px solid var(--vscode-focusBorder);
+  }
+}
+
+.addCanvasWorkspaceButton {
+  border: var(--vscode-button-border);
+  color: var(--vscode-button-foreground);
+  background-color: var(--vscode-button-background);
+  height: 28px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+
+  margin-left: 20px;
+  margin-right: 20px;
+
+  &:focus {
+    outline-offset: 2px !important;
+  }
+
+  &:hover {
+    background-color: var(--vscode-button-hoverBackground);
+    text-decoration: none !important;
+  }
+}
+
+.emptySavedWorkspacesText {
+  margin-left: 20px;
+}
+
+.canvasWorkspaceList {
+  display: flex;
+  flex-direction: column;
+}
+
+.canvasWorkspaceButtonContainer {
+  display: flex;
+  flex-direction: row;
+  height: 25px;
+  width: 100%;
+  align-items: center;
+  margin-bottom: 5px;
+
+  color: inherit;
+  background-color: inherit;
+  border: none;
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--vscode-list-hoverBackground);
+  }
+
+  &:focus {
+    background-color: var(--vscode-list-focusBackground);
+  }
+}
+
+.canvasWorkspaceButtonContainer.current {
+  background-color: var(--vscode-list-activeSelectionBackground);
+
+  &:hover {
+    background-color: var(--vscode-list-activeSelectionBackground);
+  }
+}
+
+.canvasWorkspaceButton {
+  color: inherit;
+  background-color: inherit;
+  border: none;
+  flex: 1;
+  margin-left: 25px;
+  margin-right: 10px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.workspaceLabel {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.saveCanvasWorkspaceButton {
+  background-color: transparent;
+  border: none;
+  width: 16px;
+  height: 16px;
+  margin-right: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--vscode-toolbar-hoverBackground);
+  }
+
+  &:focus {
+    background-color: var(--vscode-list-focusBackground);
+  }
+
+  &.selected {
+    background-color: var(--vscode-list-activeSelectionBackground);
+  }
+}
+
+.removeCanvasWorkspaceButton {
+  background-color: transparent;
+  border: none;
+  width: 16px;
+  height: 16px;
+  margin-right: 25px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--vscode-toolbar-hoverBackground);
+  }
+
+  &:focus {
+    background-color: var(--vscode-list-focusBackground);
+  }
+
+  &.selected {
+    background-color: var(--vscode-list-activeSelectionBackground);
+  }
+}

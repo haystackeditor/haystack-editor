@@ -1,96 +1,141 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as assert from 'assert';
-import { IListRenderer, IListVirtualDelegate } from 'vs/base/browser/ui/list/list';
-import { List } from 'vs/base/browser/ui/list/listWidget';
-import { range } from 'vs/base/common/arrays';
-import { timeout } from 'vs/base/common/async';
-import { ensureNoDisposablesAreLeakedInTestSuite } from 'vs/base/test/common/utils';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
-suite('ListWidget', function () {
-	const store = ensureNoDisposablesAreLeakedInTestSuite();
+import * as assert from "assert"
+import {
+  IListRenderer,
+  IListVirtualDelegate,
+} from "vs/base/browser/ui/list/list"
+import { List } from "vs/base/browser/ui/list/listWidget"
+import { range } from "vs/base/common/arrays"
+import { timeout } from "vs/base/common/async"
+import { ensureNoDisposablesAreLeakedInTestSuite } from "vs/base/test/common/utils"
 
-	test('Page up and down', async function () {
-		const element = document.createElement('div');
-		element.style.height = '200px';
-		element.style.width = '200px';
+suite("ListWidget", function () {
+  const store = ensureNoDisposablesAreLeakedInTestSuite()
 
-		const delegate: IListVirtualDelegate<number> = {
-			getHeight() { return 20; },
-			getTemplateId() { return 'template'; }
-		};
+  test("Page up and down", async function () {
+    const element = document.createElement("div")
+    element.style.height = "200px"
+    element.style.width = "200px"
 
-		let templatesCount = 0;
+    const delegate: IListVirtualDelegate<number> = {
+      getHeight() {
+        return 20
+      },
+      getTemplateId() {
+        return "template"
+      },
+    }
 
-		const renderer: IListRenderer<number, void> = {
-			templateId: 'template',
-			renderTemplate() { templatesCount++; },
-			renderElement() { },
-			disposeTemplate() { templatesCount--; }
-		};
+    let templatesCount = 0
 
-		const listWidget = store.add(new List<number>('test', element, delegate, [renderer]));
+    const renderer: IListRenderer<number, void> = {
+      templateId: "template",
+      renderTemplate() {
+        templatesCount++
+      },
+      renderElement() {},
+      disposeTemplate() {
+        templatesCount--
+      },
+    }
 
-		listWidget.layout(200);
-		assert.strictEqual(templatesCount, 0, 'no templates have been allocated');
-		listWidget.splice(0, 0, range(100));
-		listWidget.focusFirst();
+    const listWidget = store.add(
+      new List<number>("test", element, delegate, [renderer]),
+    )
 
-		listWidget.focusNextPage();
-		assert.strictEqual(listWidget.getFocus()[0], 9, 'first page down moves focus to element at bottom');
+    listWidget.layout(200)
+    assert.strictEqual(templatesCount, 0, "no templates have been allocated")
+    listWidget.splice(0, 0, range(100))
+    listWidget.focusFirst()
 
-		// scroll to next page is async
-		listWidget.focusNextPage();
-		await timeout(0);
-		assert.strictEqual(listWidget.getFocus()[0], 19, 'page down to next page');
+    listWidget.focusNextPage()
+    assert.strictEqual(
+      listWidget.getFocus()[0],
+      9,
+      "first page down moves focus to element at bottom",
+    )
 
-		listWidget.focusPreviousPage();
-		assert.strictEqual(listWidget.getFocus()[0], 10, 'first page up moves focus to element at top');
+    // scroll to next page is async
+    listWidget.focusNextPage()
+    await timeout(0)
+    assert.strictEqual(listWidget.getFocus()[0], 19, "page down to next page")
 
-		// scroll to previous page is async
-		listWidget.focusPreviousPage();
-		await timeout(0);
-		assert.strictEqual(listWidget.getFocus()[0], 0, 'page down to previous page');
-	});
+    listWidget.focusPreviousPage()
+    assert.strictEqual(
+      listWidget.getFocus()[0],
+      10,
+      "first page up moves focus to element at top",
+    )
 
-	test('Page up and down with item taller than viewport #149502', async function () {
-		const element = document.createElement('div');
-		element.style.height = '200px';
-		element.style.width = '200px';
+    // scroll to previous page is async
+    listWidget.focusPreviousPage()
+    await timeout(0)
+    assert.strictEqual(
+      listWidget.getFocus()[0],
+      0,
+      "page down to previous page",
+    )
+  })
 
-		const delegate: IListVirtualDelegate<number> = {
-			getHeight() { return 200; },
-			getTemplateId() { return 'template'; }
-		};
+  test("Page up and down with item taller than viewport #149502", async function () {
+    const element = document.createElement("div")
+    element.style.height = "200px"
+    element.style.width = "200px"
 
-		let templatesCount = 0;
+    const delegate: IListVirtualDelegate<number> = {
+      getHeight() {
+        return 200
+      },
+      getTemplateId() {
+        return "template"
+      },
+    }
 
-		const renderer: IListRenderer<number, void> = {
-			templateId: 'template',
-			renderTemplate() { templatesCount++; },
-			renderElement() { },
-			disposeTemplate() { templatesCount--; }
-		};
+    let templatesCount = 0
 
-		const listWidget = store.add(new List<number>('test', element, delegate, [renderer]));
+    const renderer: IListRenderer<number, void> = {
+      templateId: "template",
+      renderTemplate() {
+        templatesCount++
+      },
+      renderElement() {},
+      disposeTemplate() {
+        templatesCount--
+      },
+    }
 
-		listWidget.layout(200);
-		assert.strictEqual(templatesCount, 0, 'no templates have been allocated');
-		listWidget.splice(0, 0, range(100));
-		listWidget.focusFirst();
-		assert.strictEqual(listWidget.getFocus()[0], 0, 'initial focus is first element');
+    const listWidget = store.add(
+      new List<number>("test", element, delegate, [renderer]),
+    )
 
-		// scroll to next page is async
-		listWidget.focusNextPage();
-		await timeout(0);
-		assert.strictEqual(listWidget.getFocus()[0], 1, 'page down to next page');
+    listWidget.layout(200)
+    assert.strictEqual(templatesCount, 0, "no templates have been allocated")
+    listWidget.splice(0, 0, range(100))
+    listWidget.focusFirst()
+    assert.strictEqual(
+      listWidget.getFocus()[0],
+      0,
+      "initial focus is first element",
+    )
 
-		// scroll to previous page is async
-		listWidget.focusPreviousPage();
-		await timeout(0);
-		assert.strictEqual(listWidget.getFocus()[0], 0, 'page up to next page');
-	});
-});
+    // scroll to next page is async
+    listWidget.focusNextPage()
+    await timeout(0)
+    assert.strictEqual(listWidget.getFocus()[0], 1, "page down to next page")
+
+    // scroll to previous page is async
+    listWidget.focusPreviousPage()
+    await timeout(0)
+    assert.strictEqual(listWidget.getFocus()[0], 0, "page up to next page")
+  })
+})

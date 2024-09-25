@@ -1,97 +1,126 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as assert from 'assert';
-import { decodeBase64, encodeBase64, VSBuffer } from 'vs/base/common/buffer';
-import { Emitter } from 'vs/base/common/event';
-import { mockObject, MockObject } from 'vs/base/test/common/mock';
-import { ensureNoDisposablesAreLeakedInTestSuite } from 'vs/base/test/common/utils';
-import { MemoryRangeType } from 'vs/workbench/contrib/debug/common/debug';
-import { MemoryRegion } from 'vs/workbench/contrib/debug/common/debugModel';
-import { MockSession } from 'vs/workbench/contrib/debug/test/common/mockDebug';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
-suite('Debug - Memory', () => {
-	const dapResponseCommon = {
-		command: 'someCommand',
-		type: 'response',
-		seq: 1,
-		request_seq: 1,
-		success: true,
-	};
+import * as assert from "assert"
+import { decodeBase64, encodeBase64, VSBuffer } from "vs/base/common/buffer"
+import { Emitter } from "vs/base/common/event"
+import { mockObject, MockObject } from "vs/base/test/common/mock"
+import { ensureNoDisposablesAreLeakedInTestSuite } from "vs/base/test/common/utils"
+import { MemoryRangeType } from "vs/workbench/contrib/debug/common/debug"
+import { MemoryRegion } from "vs/workbench/contrib/debug/common/debugModel"
+import { MockSession } from "vs/workbench/contrib/debug/test/common/mockDebug"
 
-	ensureNoDisposablesAreLeakedInTestSuite();
+suite("Debug - Memory", () => {
+  const dapResponseCommon = {
+    command: "someCommand",
+    type: "response",
+    seq: 1,
+    request_seq: 1,
+    success: true,
+  }
 
-	suite('MemoryRegion', () => {
-		let memory: VSBuffer;
-		let unreadable: number;
-		let invalidateMemoryEmitter: Emitter<DebugProtocol.MemoryEvent>;
-		let session: MockObject<MockSession, 'onDidInvalidateMemory'>;
-		let region: MemoryRegion;
+  ensureNoDisposablesAreLeakedInTestSuite()
 
-		setup(() => {
-			const memoryBuf = new Uint8Array(1024);
-			for (let i = 0; i < memoryBuf.length; i++) {
-				memoryBuf[i] = i; // will be 0-255
-			}
-			memory = VSBuffer.wrap(memoryBuf);
-			invalidateMemoryEmitter = new Emitter();
-			unreadable = 0;
+  suite("MemoryRegion", () => {
+    let memory: VSBuffer
+    let unreadable: number
+    let invalidateMemoryEmitter: Emitter<DebugProtocol.MemoryEvent>
+    let session: MockObject<MockSession, "onDidInvalidateMemory">
+    let region: MemoryRegion
 
-			session = mockObject<MockSession>()({
-				onDidInvalidateMemory: invalidateMemoryEmitter.event
-			});
+    setup(() => {
+      const memoryBuf = new Uint8Array(1024)
+      for (let i = 0; i < memoryBuf.length; i++) {
+        memoryBuf[i] = i // will be 0-255
+      }
+      memory = VSBuffer.wrap(memoryBuf)
+      invalidateMemoryEmitter = new Emitter()
+      unreadable = 0
 
-			session.readMemory.callsFake((ref: string, fromOffset: number, count: number) => {
-				const res: DebugProtocol.ReadMemoryResponse = ({
-					...dapResponseCommon,
-					body: {
-						address: '0',
-						data: encodeBase64(memory.slice(fromOffset, fromOffset + Math.max(0, count - unreadable))),
-						unreadableBytes: unreadable
-					}
-				});
+      session = mockObject<MockSession>()({
+        onDidInvalidateMemory: invalidateMemoryEmitter.event,
+      })
 
-				unreadable = 0;
+      session.readMemory.callsFake(
+        (ref: string, fromOffset: number, count: number) => {
+          const res: DebugProtocol.ReadMemoryResponse = {
+            ...dapResponseCommon,
+            body: {
+              address: "0",
+              data: encodeBase64(
+                memory.slice(
+                  fromOffset,
+                  fromOffset + Math.max(0, count - unreadable),
+                ),
+              ),
+              unreadableBytes: unreadable,
+            },
+          }
 
-				return Promise.resolve(res);
-			});
+          unreadable = 0
 
-			session.writeMemory.callsFake((ref: string, fromOffset: number, data: string): DebugProtocol.WriteMemoryResponse => {
-				const decoded = decodeBase64(data);
-				for (let i = 0; i < decoded.byteLength; i++) {
-					memory.buffer[fromOffset + i] = decoded.buffer[i];
-				}
+          return Promise.resolve(res)
+        },
+      )
 
-				return ({
-					...dapResponseCommon,
-					body: {
-						bytesWritten: decoded.byteLength,
-						offset: fromOffset,
-					}
-				});
-			});
+      session.writeMemory.callsFake(
+        (
+          ref: string,
+          fromOffset: number,
+          data: string,
+        ): DebugProtocol.WriteMemoryResponse => {
+          const decoded = decodeBase64(data)
+          for (let i = 0; i < decoded.byteLength; i++) {
+            memory.buffer[fromOffset + i] = decoded.buffer[i]
+          }
 
-			region = new MemoryRegion('ref', session as any);
-		});
+          return {
+            ...dapResponseCommon,
+            body: {
+              bytesWritten: decoded.byteLength,
+              offset: fromOffset,
+            },
+          }
+        },
+      )
 
-		teardown(() => {
-			region.dispose();
-		});
+      region = new MemoryRegion("ref", session as any)
+    })
 
-		test('reads a simple range', async () => {
-			assert.deepStrictEqual(await region.read(10, 14), [
-				{ type: MemoryRangeType.Valid, offset: 10, length: 4, data: VSBuffer.wrap(new Uint8Array([10, 11, 12, 13])) }
-			]);
-		});
+    teardown(() => {
+      region.dispose()
+    })
 
-		test('reads a non-contiguous range', async () => {
-			unreadable = 3;
-			assert.deepStrictEqual(await region.read(10, 14), [
-				{ type: MemoryRangeType.Valid, offset: 10, length: 1, data: VSBuffer.wrap(new Uint8Array([10])) },
-				{ type: MemoryRangeType.Unreadable, offset: 11, length: 3 },
-			]);
-		});
-	});
-});
+    test("reads a simple range", async () => {
+      assert.deepStrictEqual(await region.read(10, 14), [
+        {
+          type: MemoryRangeType.Valid,
+          offset: 10,
+          length: 4,
+          data: VSBuffer.wrap(new Uint8Array([10, 11, 12, 13])),
+        },
+      ])
+    })
+
+    test("reads a non-contiguous range", async () => {
+      unreadable = 3
+      assert.deepStrictEqual(await region.read(10, 14), [
+        {
+          type: MemoryRangeType.Valid,
+          offset: 10,
+          length: 1,
+          data: VSBuffer.wrap(new Uint8Array([10])),
+        },
+        { type: MemoryRangeType.Unreadable, offset: 11, length: 3 },
+      ])
+    })
+  })
+})

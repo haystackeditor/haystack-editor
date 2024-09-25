@@ -1,9 +1,15 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IMenubarService } from 'vs/platform/menubar/electron-sandbox/menubar';
-import { registerMainProcessRemoteService } from 'vs/platform/ipc/electron-sandbox/services';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
-registerMainProcessRemoteService(IMenubarService, 'menubar');
+import { IMenubarService } from "vs/platform/menubar/electron-sandbox/menubar"
+import { registerMainProcessRemoteService } from "vs/platform/ipc/electron-sandbox/services"
+
+registerMainProcessRemoteService(IMenubarService, "menubar")

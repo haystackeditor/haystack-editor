@@ -11,7 +11,9 @@
   "scripts": {
     "update-grammar": "node ./build/update-grammars.js"
   },
-  "categories": ["Programming Languages"],
+  "categories": [
+    "Programming Languages"
+  ],
   "contributes": {
     "languages": [
       {
@@ -82,7 +84,7 @@
       {
         "id": "snippets",
         "aliases": [
-            "Code Snippets"
+          "Code Snippets"
         ],
         "extensions": [
           ".code-snippets"

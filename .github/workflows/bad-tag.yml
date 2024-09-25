@@ -1,6 +1,5 @@
 name: Bad Tag
-on:
-  create
+on: create
 
 jobs:
   main:
@@ -18,5 +17,5 @@ jobs:
       - name: Run Bad Tag
         uses: ./actions/tag-alert
         with:
-          token: ${{secrets.VSCODE_ISSUE_TRIAGE_BOT_PAT}}
-          tag-name: '1.999.0'
+          token: ${{secrets.HAYSTACK_ISSUE_TRIAGE_BOT_PAT}}
+          tag-name: "1.999.0"

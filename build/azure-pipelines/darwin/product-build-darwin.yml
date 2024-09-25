@@ -1,20 +1,20 @@
 parameters:
-  - name: VSCODE_QUALITY
+  - name: HAYSTACK_QUALITY
     type: string
-  - name: VSCODE_CIBUILD
+  - name: HAYSTACK_CIBUILD
     type: boolean
-  - name: VSCODE_RUN_UNIT_TESTS
+  - name: HAYSTACK_RUN_UNIT_TESTS
     type: boolean
-  - name: VSCODE_RUN_INTEGRATION_TESTS
+  - name: HAYSTACK_RUN_INTEGRATION_TESTS
     type: boolean
-  - name: VSCODE_RUN_SMOKE_TESTS
+  - name: HAYSTACK_RUN_SMOKE_TESTS
     type: boolean
 
 steps:
-  - ${{ if eq(parameters.VSCODE_QUALITY, 'oss') }}:
-    - checkout: self
-      fetchDepth: 1
-      retryCountOnTaskFailure: 3
+  - ${{ if eq(parameters.HAYSTACK_QUALITY, 'oss') }}:
+      - checkout: self
+        fetchDepth: 1
+        retryCountOnTaskFailure: 3
 
   - task: NodeTool@0
     inputs:
@@ -22,30 +22,30 @@ steps:
       versionFilePath: .nvmrc
       nodejsMirror: https://github.com/joaomoreno/node-mirror/releases/download
 
-  - ${{ if ne(parameters.VSCODE_QUALITY, 'oss') }}:
-    - template: ../distro/download-distro.yml@self
+  - ${{ if ne(parameters.HAYSTACK_QUALITY, 'oss') }}:
+      - template: ../distro/download-distro.yml@self
 
-    - task: AzureKeyVault@1
-      displayName: "Azure Key Vault: Get Secrets"
-      inputs:
-        azureSubscription: "vscode-builds-subscription"
-        KeyVaultName: vscode-build-secrets
-        SecretsFilter: "github-distro-mixin-password,macos-developer-certificate,macos-developer-certificate-key"
+      - task: AzureKeyVault@1
+        displayName: "Azure Key Vault: Get Secrets"
+        inputs:
+          azureSubscription: "vscode-builds-subscription"
+          KeyVaultName: vscode-build-secrets
+          SecretsFilter: "github-distro-mixin-password,macos-developer-certificate,macos-developer-certificate-key"
 
-    - task: DownloadPipelineArtifact@2
-      inputs:
-        artifact: Compilation
-        path: $(Build.ArtifactStagingDirectory)
-      displayName: Download compilation output
+      - task: DownloadPipelineArtifact@2
+        inputs:
+          artifact: Compilation
+          path: $(Build.ArtifactStagingDirectory)
+        displayName: Download compilation output
 
-    - script: tar -xzf $(Build.ArtifactStagingDirectory)/compilation.tar.gz
-      displayName: Extract compilation output
+      - script: tar -xzf $(Build.ArtifactStagingDirectory)/compilation.tar.gz
+        displayName: Extract compilation output
 
   - script: node build/setup-npm-registry.js $NPM_REGISTRY
     condition: and(succeeded(), ne(variables['NPM_REGISTRY'], 'none'))
     displayName: Setup NPM Registry
 
-  - script: mkdir -p .build && node build/azure-pipelines/common/computeNodeModulesCacheKey.js darwin $VSCODE_ARCH > .build/yarnlockhash
+  - script: mkdir -p .build && node build/azure-pipelines/common/computeNodeModulesCacheKey.js darwin $HAYSTACK_ARCH > .build/yarnlockhash
     displayName: Prepare node_modules cache key
 
   - task: Cache@2
@@ -89,17 +89,17 @@ steps:
         echo "Yarn failed $i, trying again..."
       done
     env:
-      npm_config_arch: $(VSCODE_ARCH)
+      npm_config_arch: $(HAYSTACK_ARCH)
       ELECTRON_SKIP_BINARY_DOWNLOAD: 1
       PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
       GITHUB_TOKEN: "$(github-distro-mixin-password)"
     displayName: Install dependencies
     condition: and(succeeded(), ne(variables.NODE_MODULES_RESTORED, 'true'))
 
-  - ${{ if ne(parameters.VSCODE_QUALITY, 'oss') }}:
-    - script: node build/azure-pipelines/distro/mixin-npm
-      condition: and(succeeded(), ne(variables.NODE_MODULES_RESTORED, 'true'))
-      displayName: Mixin distro node modules
+  - ${{ if ne(parameters.HAYSTACK_QUALITY, 'oss') }}:
+      - script: node build/azure-pipelines/distro/mixin-npm
+        condition: and(succeeded(), ne(variables.NODE_MODULES_RESTORED, 'true'))
+        displayName: Mixin distro node modules
 
   - script: |
       set -e
@@ -109,44 +109,44 @@ steps:
     condition: and(succeeded(), ne(variables.NODE_MODULES_RESTORED, 'true'))
     displayName: Create node_modules archive
 
-  - ${{ if ne(parameters.VSCODE_QUALITY, 'oss') }}:
-    - script: node build/azure-pipelines/distro/mixin-quality
-      displayName: Mixin distro quality
+  - ${{ if ne(parameters.HAYSTACK_QUALITY, 'oss') }}:
+      - script: node build/azure-pipelines/distro/mixin-quality
+        displayName: Mixin distro quality
 
   - template: ../common/install-builtin-extensions.yml@self
 
-  - ${{ if ne(parameters.VSCODE_QUALITY, 'oss') }}:
-    - script: |
-        set -e
-        yarn gulp vscode-darwin-$(VSCODE_ARCH)-min-ci
-        echo "##vso[task.setvariable variable=BUILT_CLIENT]true"
-      env:
-        GITHUB_TOKEN: "$(github-distro-mixin-password)"
-      displayName: Build client
+  - ${{ if ne(parameters.HAYSTACK_QUALITY, 'oss') }}:
+      - script: |
+          set -e
+          yarn gulp vscode-darwin-$(HAYSTACK_ARCH)-min-ci
+          echo "##vso[task.setvariable variable=BUILT_CLIENT]true"
+        env:
+          GITHUB_TOKEN: "$(github-distro-mixin-password)"
+        displayName: Build client
 
-    - script: |
-        set -e
-        yarn gulp vscode-reh-darwin-$(VSCODE_ARCH)-min-ci
-        mv ../vscode-reh-darwin-$(VSCODE_ARCH) ../vscode-server-darwin-$(VSCODE_ARCH) # TODO@joaomoreno
-        ARCHIVE_PATH=".build/darwin/server/vscode-server-darwin-$(VSCODE_ARCH).zip"
-        mkdir -p $(dirname $ARCHIVE_PATH)
-        (cd .. && zip -Xry $(Build.SourcesDirectory)/$ARCHIVE_PATH vscode-server-darwin-$(VSCODE_ARCH))
-        echo "##vso[task.setvariable variable=SERVER_PATH]$ARCHIVE_PATH"
-      env:
-        GITHUB_TOKEN: "$(github-distro-mixin-password)"
-      displayName: Build server
+      - script: |
+          set -e
+          yarn gulp vscode-reh-darwin-$(HAYSTACK_ARCH)-min-ci
+          mv ../vscode-reh-darwin-$(HAYSTACK_ARCH) ../vscode-server-darwin-$(HAYSTACK_ARCH) # TODO@joaomoreno
+          ARCHIVE_PATH=".build/darwin/server/vscode-server-darwin-$(HAYSTACK_ARCH).zip"
+          mkdir -p $(dirname $ARCHIVE_PATH)
+          (cd .. && zip -Xry $(Build.SourcesDirectory)/$ARCHIVE_PATH vscode-server-darwin-$(HAYSTACK_ARCH))
+          echo "##vso[task.setvariable variable=SERVER_PATH]$ARCHIVE_PATH"
+        env:
+          GITHUB_TOKEN: "$(github-distro-mixin-password)"
+        displayName: Build server
 
-    - script: |
-        set -e
-        yarn gulp vscode-reh-web-darwin-$(VSCODE_ARCH)-min-ci
-        mv ../vscode-reh-web-darwin-$(VSCODE_ARCH) ../vscode-server-darwin-$(VSCODE_ARCH)-web # TODO@joaomoreno
-        ARCHIVE_PATH=".build/darwin/server/vscode-server-darwin-$(VSCODE_ARCH)-web.zip"
-        mkdir -p $(dirname $ARCHIVE_PATH)
-        (cd .. && zip -Xry $(Build.SourcesDirectory)/$ARCHIVE_PATH vscode-server-darwin-$(VSCODE_ARCH)-web)
-        echo "##vso[task.setvariable variable=WEB_PATH]$ARCHIVE_PATH"
-      env:
-        GITHUB_TOKEN: "$(github-distro-mixin-password)"
-      displayName: Build server (web)
+      - script: |
+          set -e
+          yarn gulp vscode-reh-web-darwin-$(HAYSTACK_ARCH)-min-ci
+          mv ../vscode-reh-web-darwin-$(HAYSTACK_ARCH) ../vscode-server-darwin-$(HAYSTACK_ARCH)-web # TODO@joaomoreno
+          ARCHIVE_PATH=".build/darwin/server/vscode-server-darwin-$(HAYSTACK_ARCH)-web.zip"
+          mkdir -p $(dirname $ARCHIVE_PATH)
+          (cd .. && zip -Xry $(Build.SourcesDirectory)/$ARCHIVE_PATH vscode-server-darwin-$(HAYSTACK_ARCH)-web)
+          echo "##vso[task.setvariable variable=WEB_PATH]$ARCHIVE_PATH"
+        env:
+          GITHUB_TOKEN: "$(github-distro-mixin-password)"
+        displayName: Build server (web)
 
   - ${{ else }}:
       - script: yarn gulp transpile-client-swc transpile-extensions
@@ -154,87 +154,87 @@ steps:
           GITHUB_TOKEN: "$(github-distro-mixin-password)"
         displayName: Transpile
 
-  - ${{ if or(eq(parameters.VSCODE_RUN_UNIT_TESTS, true), eq(parameters.VSCODE_RUN_INTEGRATION_TESTS, true), eq(parameters.VSCODE_RUN_SMOKE_TESTS, true)) }}:
-    - template: product-build-darwin-test.yml@self
-      parameters:
-        VSCODE_QUALITY: ${{ parameters.VSCODE_QUALITY }}
-        VSCODE_RUN_UNIT_TESTS: ${{ parameters.VSCODE_RUN_UNIT_TESTS }}
-        VSCODE_RUN_INTEGRATION_TESTS: ${{ parameters.VSCODE_RUN_INTEGRATION_TESTS }}
-        VSCODE_RUN_SMOKE_TESTS: ${{ parameters.VSCODE_RUN_SMOKE_TESTS }}
+  - ${{ if or(eq(parameters.HAYSTACK_RUN_UNIT_TESTS, true), eq(parameters.HAYSTACK_RUN_INTEGRATION_TESTS, true), eq(parameters.HAYSTACK_RUN_SMOKE_TESTS, true)) }}:
+      - template: product-build-darwin-test.yml@self
+        parameters:
+          HAYSTACK_QUALITY: ${{ parameters.HAYSTACK_QUALITY }}
+          HAYSTACK_RUN_UNIT_TESTS: ${{ parameters.HAYSTACK_RUN_UNIT_TESTS }}
+          HAYSTACK_RUN_INTEGRATION_TESTS: ${{ parameters.HAYSTACK_RUN_INTEGRATION_TESTS }}
+          HAYSTACK_RUN_SMOKE_TESTS: ${{ parameters.HAYSTACK_RUN_SMOKE_TESTS }}
 
-  - ${{ elseif and(ne(parameters.VSCODE_CIBUILD, true), ne(parameters.VSCODE_QUALITY, 'oss')) }}:
-    - task: DownloadPipelineArtifact@2
-      inputs:
-        artifact: unsigned_vscode_cli_darwin_$(VSCODE_ARCH)_cli
-        patterns: "**"
-        path: $(Build.ArtifactStagingDirectory)/cli
-      displayName: Download VS Code CLI
+  - ${{ elseif and(ne(parameters.HAYSTACK_CIBUILD, true), ne(parameters.HAYSTACK_QUALITY, 'oss')) }}:
+      - task: DownloadPipelineArtifact@2
+        inputs:
+          artifact: unsigned_vscode_cli_darwin_$(HAYSTACK_ARCH)_cli
+          patterns: "**"
+          path: $(Build.ArtifactStagingDirectory)/cli
+        displayName: Download VS Code CLI
 
-    - script: |
-        set -e
-        APP_ROOT="$(Agent.BuildDirectory)/VSCode-darwin-$(VSCODE_ARCH)"
-        APP_NAME="`ls $APP_ROOT | head -n 1`"
-        APP_PATH="$APP_ROOT/$APP_NAME"
-        unzip $(Build.ArtifactStagingDirectory)/cli/*.zip -d $(Build.ArtifactStagingDirectory)/cli
-        CLI_APP_NAME=$(node -p "require(\"$APP_PATH/Contents/Resources/app/product.json\").tunnelApplicationName")
-        APP_NAME=$(node -p "require(\"$APP_PATH/Contents/Resources/app/product.json\").applicationName")
-        mv "$(Build.ArtifactStagingDirectory)/cli/$APP_NAME" "$APP_PATH/Contents/Resources/app/bin/$CLI_APP_NAME"
-        chmod +x "$APP_PATH/Contents/Resources/app/bin/$CLI_APP_NAME"
-      displayName: Make CLI executable
+      - script: |
+          set -e
+          APP_ROOT="$(Agent.BuildDirectory)/VSCode-darwin-$(HAYSTACK_ARCH)"
+          APP_NAME="`ls $APP_ROOT | head -n 1`"
+          APP_PATH="$APP_ROOT/$APP_NAME"
+          unzip $(Build.ArtifactStagingDirectory)/cli/*.zip -d $(Build.ArtifactStagingDirectory)/cli
+          CLI_APP_NAME=$(node -p "require(\"$APP_PATH/Contents/Resources/app/product.json\").tunnelApplicationName")
+          APP_NAME=$(node -p "require(\"$APP_PATH/Contents/Resources/app/product.json\").applicationName")
+          mv "$(Build.ArtifactStagingDirectory)/cli/$APP_NAME" "$APP_PATH/Contents/Resources/app/bin/$CLI_APP_NAME"
+          chmod +x "$APP_PATH/Contents/Resources/app/bin/$CLI_APP_NAME"
+        displayName: Make CLI executable
 
-    # Setting hardened entitlements is a requirement for:
-    # * Apple notarization
-    # * Running tests on Big Sur (because Big Sur has additional security precautions)
-    - script: |
-        set -e
-        security create-keychain -p pwd $(agent.tempdirectory)/buildagent.keychain
-        security default-keychain -s $(agent.tempdirectory)/buildagent.keychain
-        security unlock-keychain -p pwd $(agent.tempdirectory)/buildagent.keychain
-        echo "$(macos-developer-certificate)" | base64 -D > $(agent.tempdirectory)/cert.p12
-        security import $(agent.tempdirectory)/cert.p12 -k $(agent.tempdirectory)/buildagent.keychain -P "$(macos-developer-certificate-key)" -T /usr/bin/codesign
-        export CODESIGN_IDENTITY=$(security find-identity -v -p codesigning $(agent.tempdirectory)/buildagent.keychain | grep -oEi "([0-9A-F]{40})" | head -n 1)
-        security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k pwd $(agent.tempdirectory)/buildagent.keychain
-        DEBUG=electron-osx-sign* node build/darwin/sign.js $(agent.builddirectory)
-      displayName: Set Hardened Entitlements
+      # Setting hardened entitlements is a requirement for:
+      # * Apple notarization
+      # * Running tests on Big Sur (because Big Sur has additional security precautions)
+      - script: |
+          set -e
+          security create-keychain -p pwd $(agent.tempdirectory)/buildagent.keychain
+          security default-keychain -s $(agent.tempdirectory)/buildagent.keychain
+          security unlock-keychain -p pwd $(agent.tempdirectory)/buildagent.keychain
+          echo "$(macos-developer-certificate)" | base64 -D > $(agent.tempdirectory)/cert.p12
+          security import $(agent.tempdirectory)/cert.p12 -k $(agent.tempdirectory)/buildagent.keychain -P "$(macos-developer-certificate-key)" -T /usr/bin/codesign
+          export CODESIGN_IDENTITY=$(security find-identity -v -p codesigning $(agent.tempdirectory)/buildagent.keychain | grep -oEi "([0-9A-F]{40})" | head -n 1)
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k pwd $(agent.tempdirectory)/buildagent.keychain
+          DEBUG=electron-osx-sign* node build/darwin/sign.js $(agent.builddirectory)
+        displayName: Set Hardened Entitlements
 
-    - script: |
-        set -e
-        ARCHIVE_PATH=".build/darwin/client/VSCode-darwin-$(VSCODE_ARCH).zip"
-        mkdir -p $(dirname $ARCHIVE_PATH)
-        (cd ../VSCode-darwin-$(VSCODE_ARCH) && zip -Xry $(Build.SourcesDirectory)/$ARCHIVE_PATH *)
-        echo "##vso[task.setvariable variable=CLIENT_PATH]$ARCHIVE_PATH"
-      condition: and(succeededOrFailed(), eq(variables['BUILT_CLIENT'], 'true'))
-      displayName: Package client
+      - script: |
+          set -e
+          ARCHIVE_PATH=".build/darwin/client/VSCode-darwin-$(HAYSTACK_ARCH).zip"
+          mkdir -p $(dirname $ARCHIVE_PATH)
+          (cd ../VSCode-darwin-$(HAYSTACK_ARCH) && zip -Xry $(Build.SourcesDirectory)/$ARCHIVE_PATH *)
+          echo "##vso[task.setvariable variable=CLIENT_PATH]$ARCHIVE_PATH"
+        condition: and(succeededOrFailed(), eq(variables['BUILT_CLIENT'], 'true'))
+        displayName: Package client
 
-    - script: echo "##vso[task.setvariable variable=ARTIFACT_PREFIX]attempt$(System.JobAttempt)_"
-      condition: and(succeededOrFailed(), notIn(variables['Agent.JobStatus'], 'Succeeded', 'SucceededWithIssues'))
-      displayName: Generate artifact prefix
+      - script: echo "##vso[task.setvariable variable=ARTIFACT_PREFIX]attempt$(System.JobAttempt)_"
+        condition: and(succeededOrFailed(), notIn(variables['Agent.JobStatus'], 'Succeeded', 'SucceededWithIssues'))
+        displayName: Generate artifact prefix
 
-    - task: 1ES.PublishPipelineArtifact@1
-      inputs:
-        targetPath: $(CLIENT_PATH)
-        artifactName: $(ARTIFACT_PREFIX)unsigned_vscode_client_darwin_$(VSCODE_ARCH)_archive
-        sbomBuildDropPath: $(Agent.BuildDirectory)/VSCode-darwin-$(VSCODE_ARCH)
-        sbomPackageName: "VS Code macOS $(VSCODE_ARCH) (unsigned)"
-        sbomPackageVersion: $(Build.SourceVersion)
-      displayName: Publish client archive
+      - task: 1ES.PublishPipelineArtifact@1
+        inputs:
+          targetPath: $(CLIENT_PATH)
+          artifactName: $(ARTIFACT_PREFIX)unsigned_vscode_client_darwin_$(HAYSTACK_ARCH)_archive
+          sbomBuildDropPath: $(Agent.BuildDirectory)/VSCode-darwin-$(HAYSTACK_ARCH)
+          sbomPackageName: "VS Code macOS $(HAYSTACK_ARCH) (unsigned)"
+          sbomPackageVersion: $(Build.SourceVersion)
+        displayName: Publish client archive
 
-    - task: 1ES.PublishPipelineArtifact@1
-      inputs:
-        targetPath: $(SERVER_PATH)
-        artifactName: $(ARTIFACT_PREFIX)vscode_server_darwin_$(VSCODE_ARCH)_archive-unsigned
-        sbomBuildDropPath: $(Agent.BuildDirectory)/vscode-server-darwin-$(VSCODE_ARCH)
-        sbomPackageName: "VS Code macOS $(VSCODE_ARCH) Server"
-        sbomPackageVersion: $(Build.SourceVersion)
-      condition: and(succeededOrFailed(), ne(variables['SERVER_PATH'], ''))
-      displayName: Publish server archive
+      - task: 1ES.PublishPipelineArtifact@1
+        inputs:
+          targetPath: $(SERVER_PATH)
+          artifactName: $(ARTIFACT_PREFIX)vscode_server_darwin_$(HAYSTACK_ARCH)_archive-unsigned
+          sbomBuildDropPath: $(Agent.BuildDirectory)/vscode-server-darwin-$(HAYSTACK_ARCH)
+          sbomPackageName: "VS Code macOS $(HAYSTACK_ARCH) Server"
+          sbomPackageVersion: $(Build.SourceVersion)
+        condition: and(succeededOrFailed(), ne(variables['SERVER_PATH'], ''))
+        displayName: Publish server archive
 
-    - task: 1ES.PublishPipelineArtifact@1
-      inputs:
-        targetPath: $(WEB_PATH)
-        artifactName: $(ARTIFACT_PREFIX)vscode_web_darwin_$(VSCODE_ARCH)_archive-unsigned
-        sbomBuildDropPath: $(Agent.BuildDirectory)/vscode-server-darwin-$(VSCODE_ARCH)-web
-        sbomPackageName: "VS Code macOS $(VSCODE_ARCH) Web"
-        sbomPackageVersion: $(Build.SourceVersion)
-      condition: and(succeededOrFailed(), ne(variables['WEB_PATH'], ''))
-      displayName: Publish web server archive
+      - task: 1ES.PublishPipelineArtifact@1
+        inputs:
+          targetPath: $(WEB_PATH)
+          artifactName: $(ARTIFACT_PREFIX)vscode_web_darwin_$(HAYSTACK_ARCH)_archive-unsigned
+          sbomBuildDropPath: $(Agent.BuildDirectory)/vscode-server-darwin-$(HAYSTACK_ARCH)-web
+          sbomPackageName: "VS Code macOS $(HAYSTACK_ARCH) Web"
+          sbomPackageVersion: $(Build.SourceVersion)
+        condition: and(succeededOrFailed(), ne(variables['WEB_PATH'], ''))
+        displayName: Publish web server archive

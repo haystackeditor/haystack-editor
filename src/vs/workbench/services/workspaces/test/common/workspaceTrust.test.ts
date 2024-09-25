@@ -1,144 +1,213 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as assert from 'assert';
-import { URI } from 'vs/base/common/uri';
-import { mock } from 'vs/base/test/common/mock';
-import { IConfigurationService } from 'vs/platform/configuration/common/configuration';
-import { TestConfigurationService } from 'vs/platform/configuration/test/common/testConfigurationService';
-import { FileService } from 'vs/platform/files/common/fileService';
-import { TestInstantiationService } from 'vs/platform/instantiation/test/common/instantiationServiceMock';
-import { NullLogService } from 'vs/platform/log/common/log';
-import { IRemoteAuthorityResolverService } from 'vs/platform/remote/common/remoteAuthorityResolver';
-import { IStorageService, StorageScope, StorageTarget } from 'vs/platform/storage/common/storage';
-import { IWorkspaceContextService } from 'vs/platform/workspace/common/workspace';
-import { IWorkspaceTrustEnablementService, IWorkspaceTrustInfo } from 'vs/platform/workspace/common/workspaceTrust';
-import { Workspace } from 'vs/platform/workspace/test/common/testWorkspace';
-import { Memento } from 'vs/workbench/common/memento';
-import { IWorkbenchEnvironmentService } from 'vs/workbench/services/environment/common/environmentService';
-import { IUriIdentityService } from 'vs/platform/uriIdentity/common/uriIdentity';
-import { UriIdentityService } from 'vs/platform/uriIdentity/common/uriIdentityService';
-import { WorkspaceTrustEnablementService, WorkspaceTrustManagementService, WORKSPACE_TRUST_STORAGE_KEY } from 'vs/workbench/services/workspaces/common/workspaceTrust';
-import { TestContextService, TestStorageService, TestWorkspaceTrustEnablementService } from 'vs/workbench/test/common/workbenchTestServices';
-import { ensureNoDisposablesAreLeakedInTestSuite } from 'vs/base/test/common/utils';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
-suite('Workspace Trust', () => {
-	const store = ensureNoDisposablesAreLeakedInTestSuite();
+import * as assert from "assert"
+import { URI } from "vs/base/common/uri"
+import { mock } from "vs/base/test/common/mock"
+import { IConfigurationService } from "vs/platform/configuration/common/configuration"
+import { TestConfigurationService } from "vs/platform/configuration/test/common/testConfigurationService"
+import { FileService } from "vs/platform/files/common/fileService"
+import { TestInstantiationService } from "vs/platform/instantiation/test/common/instantiationServiceMock"
+import { NullLogService } from "vs/platform/log/common/log"
+import { IRemoteAuthorityResolverService } from "vs/platform/remote/common/remoteAuthorityResolver"
+import {
+  IStorageService,
+  StorageScope,
+  StorageTarget,
+} from "vs/platform/storage/common/storage"
+import { IWorkspaceContextService } from "vs/platform/workspace/common/workspace"
+import {
+  IWorkspaceTrustEnablementService,
+  IWorkspaceTrustInfo,
+} from "vs/platform/workspace/common/workspaceTrust"
+import { Workspace } from "vs/platform/workspace/test/common/testWorkspace"
+import { Memento } from "vs/workbench/common/memento"
+import { IWorkbenchEnvironmentService } from "vs/workbench/services/environment/common/environmentService"
+import { IUriIdentityService } from "vs/platform/uriIdentity/common/uriIdentity"
+import { UriIdentityService } from "vs/platform/uriIdentity/common/uriIdentityService"
+import {
+  WorkspaceTrustEnablementService,
+  WorkspaceTrustManagementService,
+  WORKSPACE_TRUST_STORAGE_KEY,
+} from "vs/workbench/services/workspaces/common/workspaceTrust"
+import {
+  TestContextService,
+  TestStorageService,
+  TestWorkspaceTrustEnablementService,
+} from "vs/workbench/test/common/workbenchTestServices"
+import { ensureNoDisposablesAreLeakedInTestSuite } from "vs/base/test/common/utils"
 
-	let instantiationService: TestInstantiationService;
-	let configurationService: TestConfigurationService;
-	let environmentService: IWorkbenchEnvironmentService;
+suite("Workspace Trust", () => {
+  const store = ensureNoDisposablesAreLeakedInTestSuite()
 
-	setup(async () => {
-		instantiationService = store.add(new TestInstantiationService());
+  let instantiationService: TestInstantiationService
+  let configurationService: TestConfigurationService
+  let environmentService: IWorkbenchEnvironmentService
 
-		configurationService = new TestConfigurationService();
-		instantiationService.stub(IConfigurationService, configurationService);
+  setup(async () => {
+    instantiationService = store.add(new TestInstantiationService())
 
-		environmentService = {} as IWorkbenchEnvironmentService;
-		instantiationService.stub(IWorkbenchEnvironmentService, environmentService);
+    configurationService = new TestConfigurationService()
+    instantiationService.stub(IConfigurationService, configurationService)
 
-		const fileService = store.add(new FileService(new NullLogService()));
-		const uriIdentityService = store.add(new UriIdentityService(fileService));
+    environmentService = {} as IWorkbenchEnvironmentService
+    instantiationService.stub(IWorkbenchEnvironmentService, environmentService)
 
-		instantiationService.stub(IUriIdentityService, uriIdentityService);
-		instantiationService.stub(IRemoteAuthorityResolverService, new class extends mock<IRemoteAuthorityResolverService>() { });
-	});
+    const fileService = store.add(new FileService(new NullLogService()))
+    const uriIdentityService = store.add(new UriIdentityService(fileService))
 
-	suite('Enablement', () => {
-		test('workspace trust enabled', async () => {
-			await configurationService.setUserConfiguration('security', getUserSettings(true, true));
-			const testObject = store.add(instantiationService.createInstance(WorkspaceTrustEnablementService));
+    instantiationService.stub(IUriIdentityService, uriIdentityService)
+    instantiationService.stub(
+      IRemoteAuthorityResolverService,
+      new (class extends mock<IRemoteAuthorityResolverService>() {})(),
+    )
+  })
 
-			assert.strictEqual(testObject.isWorkspaceTrustEnabled(), true);
-		});
+  suite("Enablement", () => {
+    test("workspace trust enabled", async () => {
+      await configurationService.setUserConfiguration(
+        "security",
+        getUserSettings(true, true),
+      )
+      const testObject = store.add(
+        instantiationService.createInstance(WorkspaceTrustEnablementService),
+      )
 
-		test('workspace trust disabled (user setting)', async () => {
-			await configurationService.setUserConfiguration('security', getUserSettings(false, true));
-			const testObject = store.add(instantiationService.createInstance(WorkspaceTrustEnablementService));
+      assert.strictEqual(testObject.isWorkspaceTrustEnabled(), true)
+    })
 
-			assert.strictEqual(testObject.isWorkspaceTrustEnabled(), false);
-		});
+    test("workspace trust disabled (user setting)", async () => {
+      await configurationService.setUserConfiguration(
+        "security",
+        getUserSettings(false, true),
+      )
+      const testObject = store.add(
+        instantiationService.createInstance(WorkspaceTrustEnablementService),
+      )
 
-		test('workspace trust disabled (--disable-workspace-trust)', () => {
-			instantiationService.stub(IWorkbenchEnvironmentService, { ...environmentService, disableWorkspaceTrust: true });
-			const testObject = store.add(instantiationService.createInstance(WorkspaceTrustEnablementService));
+      assert.strictEqual(testObject.isWorkspaceTrustEnabled(), false)
+    })
 
-			assert.strictEqual(testObject.isWorkspaceTrustEnabled(), false);
-		});
-	});
+    test("workspace trust disabled (--disable-workspace-trust)", () => {
+      instantiationService.stub(IWorkbenchEnvironmentService, {
+        ...environmentService,
+        disableWorkspaceTrust: true,
+      })
+      const testObject = store.add(
+        instantiationService.createInstance(WorkspaceTrustEnablementService),
+      )
 
-	suite('Management', () => {
-		let storageService: TestStorageService;
-		let workspaceService: TestContextService;
+      assert.strictEqual(testObject.isWorkspaceTrustEnabled(), false)
+    })
+  })
 
-		teardown(() => {
-			Memento.clear(StorageScope.WORKSPACE);
-		});
+  suite("Management", () => {
+    let storageService: TestStorageService
+    let workspaceService: TestContextService
 
-		setup(() => {
-			storageService = store.add(new TestStorageService());
-			instantiationService.stub(IStorageService, storageService);
+    teardown(() => {
+      Memento.clear(StorageScope.WORKSPACE)
+    })
 
-			workspaceService = new TestContextService();
-			instantiationService.stub(IWorkspaceContextService, workspaceService);
+    setup(() => {
+      storageService = store.add(new TestStorageService())
+      instantiationService.stub(IStorageService, storageService)
 
-			instantiationService.stub(IWorkspaceTrustEnablementService, new TestWorkspaceTrustEnablementService());
-		});
+      workspaceService = new TestContextService()
+      instantiationService.stub(IWorkspaceContextService, workspaceService)
 
-		test('empty workspace - trusted', async () => {
-			await configurationService.setUserConfiguration('security', getUserSettings(true, true));
-			workspaceService.setWorkspace(new Workspace('empty-workspace'));
-			const testObject = await initializeTestObject();
+      instantiationService.stub(
+        IWorkspaceTrustEnablementService,
+        new TestWorkspaceTrustEnablementService(),
+      )
+    })
 
-			assert.strictEqual(true, testObject.isWorkspaceTrusted());
-		});
+    test("empty workspace - trusted", async () => {
+      await configurationService.setUserConfiguration(
+        "security",
+        getUserSettings(true, true),
+      )
+      workspaceService.setWorkspace(new Workspace("empty-workspace"))
+      const testObject = await initializeTestObject()
 
-		test('empty workspace - untrusted', async () => {
-			await configurationService.setUserConfiguration('security', getUserSettings(true, false));
-			workspaceService.setWorkspace(new Workspace('empty-workspace'));
-			const testObject = await initializeTestObject();
+      assert.strictEqual(true, testObject.isWorkspaceTrusted())
+    })
 
-			assert.strictEqual(false, testObject.isWorkspaceTrusted());
-		});
+    test("empty workspace - untrusted", async () => {
+      await configurationService.setUserConfiguration(
+        "security",
+        getUserSettings(true, false),
+      )
+      workspaceService.setWorkspace(new Workspace("empty-workspace"))
+      const testObject = await initializeTestObject()
 
-		test('empty workspace - trusted, open trusted file', async () => {
-			await configurationService.setUserConfiguration('security', getUserSettings(true, true));
-			const trustInfo: IWorkspaceTrustInfo = { uriTrustInfo: [{ uri: URI.parse('file:///Folder'), trusted: true }] };
-			storageService.store(WORKSPACE_TRUST_STORAGE_KEY, JSON.stringify(trustInfo), StorageScope.APPLICATION, StorageTarget.MACHINE);
+      assert.strictEqual(false, testObject.isWorkspaceTrusted())
+    })
 
-			(environmentService as any).filesToOpenOrCreate = [{ fileUri: URI.parse('file:///Folder/file.txt') }];
-			instantiationService.stub(IWorkbenchEnvironmentService, { ...environmentService });
+    test("empty workspace - trusted, open trusted file", async () => {
+      await configurationService.setUserConfiguration(
+        "security",
+        getUserSettings(true, true),
+      )
+      const trustInfo: IWorkspaceTrustInfo = {
+        uriTrustInfo: [{ uri: URI.parse("file:///Folder"), trusted: true }],
+      }
+      storageService.store(
+        WORKSPACE_TRUST_STORAGE_KEY,
+        JSON.stringify(trustInfo),
+        StorageScope.APPLICATION,
+        StorageTarget.MACHINE,
+      )
+      ;(environmentService as any).filesToOpenOrCreate = [
+        { fileUri: URI.parse("file:///Folder/file.txt") },
+      ]
+      instantiationService.stub(IWorkbenchEnvironmentService, {
+        ...environmentService,
+      })
 
-			workspaceService.setWorkspace(new Workspace('empty-workspace'));
-			const testObject = await initializeTestObject();
+      workspaceService.setWorkspace(new Workspace("empty-workspace"))
+      const testObject = await initializeTestObject()
 
-			assert.strictEqual(true, testObject.isWorkspaceTrusted());
-		});
+      assert.strictEqual(true, testObject.isWorkspaceTrusted())
+    })
 
-		test('empty workspace - trusted, open untrusted file', async () => {
-			await configurationService.setUserConfiguration('security', getUserSettings(true, true));
+    test("empty workspace - trusted, open untrusted file", async () => {
+      await configurationService.setUserConfiguration(
+        "security",
+        getUserSettings(true, true),
+      )
+      ;(environmentService as any).filesToOpenOrCreate = [
+        { fileUri: URI.parse("file:///Folder/foo.txt") },
+      ]
+      instantiationService.stub(IWorkbenchEnvironmentService, {
+        ...environmentService,
+      })
 
-			(environmentService as any).filesToOpenOrCreate = [{ fileUri: URI.parse('file:///Folder/foo.txt') }];
-			instantiationService.stub(IWorkbenchEnvironmentService, { ...environmentService });
+      workspaceService.setWorkspace(new Workspace("empty-workspace"))
+      const testObject = await initializeTestObject()
 
-			workspaceService.setWorkspace(new Workspace('empty-workspace'));
-			const testObject = await initializeTestObject();
+      assert.strictEqual(false, testObject.isWorkspaceTrusted())
+    })
 
-			assert.strictEqual(false, testObject.isWorkspaceTrusted());
-		});
+    async function initializeTestObject(): Promise<WorkspaceTrustManagementService> {
+      const workspaceTrustManagementService = store.add(
+        instantiationService.createInstance(WorkspaceTrustManagementService),
+      )
+      await workspaceTrustManagementService.workspaceTrustInitialized
 
-		async function initializeTestObject(): Promise<WorkspaceTrustManagementService> {
-			const workspaceTrustManagementService = store.add(instantiationService.createInstance(WorkspaceTrustManagementService));
-			await workspaceTrustManagementService.workspaceTrustInitialized;
+      return workspaceTrustManagementService
+    }
+  })
 
-			return workspaceTrustManagementService;
-		}
-	});
-
-	function getUserSettings(enabled: boolean, emptyWindow: boolean) {
-		return { workspace: { trust: { emptyWindow, enabled } } };
-	}
-});
+  function getUserSettings(enabled: boolean, emptyWindow: boolean) {
+    return { workspace: { trust: { emptyWindow, enabled } } }
+  }
+})

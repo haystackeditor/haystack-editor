@@ -15,14 +15,14 @@ IF "%~1" == "" (
 	set EXT_PATH=%2
 )
 
-set REMOTE_VSCODE=%AUTHORITY%%EXT_PATH%
+set REMOTE_HAYSTACK=%AUTHORITY%%EXT_PATH%
 
-if "%VSCODE_REMOTE_SERVER_PATH%"=="" (
+if "%HAYSTACK_REMOTE_SERVER_PATH%"=="" (
 	chcp 65001
 
 	echo Using remote server out of sources for integration web tests
 ) else (
-	echo Using '%VSCODE_REMOTE_SERVER_PATH%' as server path for web integration tests
+	echo Using '%HAYSTACK_REMOTE_SERVER_PATH%' as server path for web integration tests
 )
 
 if not exist ".\test\integration\browser\out\index.js" (

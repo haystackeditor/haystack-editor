@@ -1,300 +1,429 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import 'vs/css!./media/editorplaceholder';
-import { localize } from 'vs/nls';
-import { truncate, truncateMiddle } from 'vs/base/common/strings';
-import Severity from 'vs/base/common/severity';
-import { IEditorOpenContext, isEditorOpenError } from 'vs/workbench/common/editor';
-import { EditorInput } from 'vs/workbench/common/editor/editorInput';
-import { EditorPane } from 'vs/workbench/browser/parts/editor/editorPane';
-import { ITelemetryService } from 'vs/platform/telemetry/common/telemetry';
-import { DomScrollableElement } from 'vs/base/browser/ui/scrollbar/scrollableElement';
-import { ScrollbarVisibility } from 'vs/base/common/scrollable';
-import { IThemeService } from 'vs/platform/theme/common/themeService';
-import { Dimension, size, clearNode, $, EventHelper } from 'vs/base/browser/dom';
-import { CancellationToken } from 'vs/base/common/cancellation';
-import { DisposableStore, IDisposable, MutableDisposable } from 'vs/base/common/lifecycle';
-import { IStorageService } from 'vs/platform/storage/common/storage';
-import { assertAllDefined } from 'vs/base/common/types';
-import { ICommandService } from 'vs/platform/commands/common/commands';
-import { IWorkspaceContextService, isSingleFolderWorkspaceIdentifier, toWorkspaceIdentifier } from 'vs/platform/workspace/common/workspace';
-import { EditorOpenSource, IEditorOptions } from 'vs/platform/editor/common/editor';
-import { computeEditorAriaLabel, EditorPaneDescriptor } from 'vs/workbench/browser/editor';
-import { ButtonBar } from 'vs/base/browser/ui/button/button';
-import { defaultButtonStyles } from 'vs/platform/theme/browser/defaultStyles';
-import { SimpleIconLabel } from 'vs/base/browser/ui/iconLabel/simpleIconLabel';
-import { FileChangeType, FileOperationError, FileOperationResult, IFileService } from 'vs/platform/files/common/files';
-import { toErrorMessage } from 'vs/base/common/errorMessage';
-import { IDialogService } from 'vs/platform/dialogs/common/dialogs';
-import { IEditorGroup } from 'vs/workbench/services/editor/common/editorGroupsService';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+import "vs/css!./media/editorplaceholder"
+import { localize } from "vs/nls"
+import { truncate, truncateMiddle } from "vs/base/common/strings"
+import Severity from "vs/base/common/severity"
+import {
+  IEditorOpenContext,
+  isEditorOpenError,
+} from "vs/workbench/common/editor"
+import { EditorInput } from "vs/workbench/common/editor/editorInput"
+import { EditorPane } from "vs/workbench/browser/parts/editor/editorPane"
+import { ITelemetryService } from "vs/platform/telemetry/common/telemetry"
+import { DomScrollableElement } from "vs/base/browser/ui/scrollbar/scrollableElement"
+import { ScrollbarVisibility } from "vs/base/common/scrollable"
+import { IThemeService } from "vs/platform/theme/common/themeService"
+import { Dimension, size, clearNode, $, EventHelper } from "vs/base/browser/dom"
+import { CancellationToken } from "vs/base/common/cancellation"
+import {
+  DisposableStore,
+  IDisposable,
+  MutableDisposable,
+} from "vs/base/common/lifecycle"
+import { IStorageService } from "vs/platform/storage/common/storage"
+import { assertAllDefined } from "vs/base/common/types"
+import { ICommandService } from "vs/platform/commands/common/commands"
+import {
+  IWorkspaceContextService,
+  isSingleFolderWorkspaceIdentifier,
+  toWorkspaceIdentifier,
+} from "vs/platform/workspace/common/workspace"
+import {
+  EditorOpenSource,
+  IEditorOptions,
+} from "vs/platform/editor/common/editor"
+import {
+  computeEditorAriaLabel,
+  EditorPaneDescriptor,
+} from "vs/workbench/browser/editor"
+import { ButtonBar } from "vs/base/browser/ui/button/button"
+import { defaultButtonStyles } from "vs/platform/theme/browser/defaultStyles"
+import { SimpleIconLabel } from "vs/base/browser/ui/iconLabel/simpleIconLabel"
+import {
+  FileChangeType,
+  FileOperationError,
+  FileOperationResult,
+  IFileService,
+} from "vs/platform/files/common/files"
+import { toErrorMessage } from "vs/base/common/errorMessage"
+import { IDialogService } from "vs/platform/dialogs/common/dialogs"
+import { IEditorGroup } from "vs/workbench/services/editor/common/editorGroupsService"
 
 export interface IEditorPlaceholderContents {
-	icon: string;
-	label: string;
-	actions: IEditorPlaceholderContentsAction[];
+  icon: string
+  label: string
+  actions: IEditorPlaceholderContentsAction[]
 }
 
 export interface IEditorPlaceholderContentsAction {
-	label: string;
-	run: () => unknown;
+  label: string
+  run: () => unknown
 }
 
 export interface IErrorEditorPlaceholderOptions extends IEditorOptions {
-	error?: Error;
+  error?: Error
 }
 
 export abstract class EditorPlaceholder extends EditorPane {
+  protected static readonly PLACEHOLDER_LABEL_MAX_LENGTH = 1024
 
-	protected static readonly PLACEHOLDER_LABEL_MAX_LENGTH = 1024;
+  private container: HTMLElement | undefined
+  private scrollbar: DomScrollableElement | undefined
+  private readonly inputDisposable = this._register(new MutableDisposable())
 
-	private container: HTMLElement | undefined;
-	private scrollbar: DomScrollableElement | undefined;
-	private readonly inputDisposable = this._register(new MutableDisposable());
+  constructor(
+    id: string,
+    group: IEditorGroup,
+    @ITelemetryService telemetryService: ITelemetryService,
+    @IThemeService themeService: IThemeService,
+    @IStorageService storageService: IStorageService,
+  ) {
+    super(id, group, telemetryService, themeService, storageService)
+  }
 
-	constructor(
-		id: string,
-		group: IEditorGroup,
-		@ITelemetryService telemetryService: ITelemetryService,
-		@IThemeService themeService: IThemeService,
-		@IStorageService storageService: IStorageService
-	) {
-		super(id, group, telemetryService, themeService, storageService);
-	}
+  protected createEditor(parent: HTMLElement): void {
+    // Container
+    this.container = document.createElement("div")
+    this.container.className = "monaco-editor-pane-placeholder"
+    this.container.style.outline = "none"
+    this.container.tabIndex = 0 // enable focus support from the editor part (do not remove)
 
-	protected createEditor(parent: HTMLElement): void {
+    // Custom Scrollbars
+    this.scrollbar = this._register(
+      new DomScrollableElement(this.container, {
+        horizontal: ScrollbarVisibility.Auto,
+        vertical: ScrollbarVisibility.Auto,
+      }),
+    )
+    parent.appendChild(this.scrollbar.getDomNode())
+  }
 
-		// Container
-		this.container = document.createElement('div');
-		this.container.className = 'monaco-editor-pane-placeholder';
-		this.container.style.outline = 'none';
-		this.container.tabIndex = 0; // enable focus support from the editor part (do not remove)
+  override async setInput(
+    input: EditorInput,
+    options: IEditorOptions | undefined,
+    context: IEditorOpenContext,
+    token: CancellationToken,
+  ): Promise<void> {
+    await super.setInput(input, options, context, token)
 
-		// Custom Scrollbars
-		this.scrollbar = this._register(new DomScrollableElement(this.container, { horizontal: ScrollbarVisibility.Auto, vertical: ScrollbarVisibility.Auto }));
-		parent.appendChild(this.scrollbar.getDomNode());
-	}
+    // Check for cancellation
+    if (token.isCancellationRequested) {
+      return
+    }
 
-	override async setInput(input: EditorInput, options: IEditorOptions | undefined, context: IEditorOpenContext, token: CancellationToken): Promise<void> {
-		await super.setInput(input, options, context, token);
+    // Render Input
+    this.inputDisposable.value = await this.renderInput(input, options)
+  }
 
-		// Check for cancellation
-		if (token.isCancellationRequested) {
-			return;
-		}
+  private async renderInput(
+    input: EditorInput,
+    options: IEditorOptions | undefined,
+  ): Promise<IDisposable> {
+    const [container, scrollbar] = assertAllDefined(
+      this.container,
+      this.scrollbar,
+    )
 
-		// Render Input
-		this.inputDisposable.value = await this.renderInput(input, options);
-	}
+    // Reset any previous contents
+    clearNode(container)
 
-	private async renderInput(input: EditorInput, options: IEditorOptions | undefined): Promise<IDisposable> {
-		const [container, scrollbar] = assertAllDefined(this.container, this.scrollbar);
+    // Delegate to implementation for contents
+    const disposables = new DisposableStore()
+    const { icon, label, actions } = await this.getContents(
+      input,
+      options,
+      disposables,
+    )
+    const truncatedLabel = truncate(
+      label,
+      EditorPlaceholder.PLACEHOLDER_LABEL_MAX_LENGTH,
+    )
 
-		// Reset any previous contents
-		clearNode(container);
+    // Icon
+    const iconContainer = container.appendChild(
+      $(".editor-placeholder-icon-container"),
+    )
+    const iconWidget = disposables.add(new SimpleIconLabel(iconContainer))
+    iconWidget.text = icon
 
-		// Delegate to implementation for contents
-		const disposables = new DisposableStore();
-		const { icon, label, actions } = await this.getContents(input, options, disposables);
-		const truncatedLabel = truncate(label, EditorPlaceholder.PLACEHOLDER_LABEL_MAX_LENGTH);
+    // Label
+    const labelContainer = container.appendChild(
+      $(".editor-placeholder-label-container"),
+    )
+    const labelWidget = document.createElement("span")
+    labelWidget.textContent = truncatedLabel
+    labelContainer.appendChild(labelWidget)
 
-		// Icon
-		const iconContainer = container.appendChild($('.editor-placeholder-icon-container'));
-		const iconWidget = disposables.add(new SimpleIconLabel(iconContainer));
-		iconWidget.text = icon;
+    // ARIA label
+    container.setAttribute(
+      "aria-label",
+      `${computeEditorAriaLabel(input, undefined, this.group, undefined)}, ${truncatedLabel}`,
+    )
 
-		// Label
-		const labelContainer = container.appendChild($('.editor-placeholder-label-container'));
-		const labelWidget = document.createElement('span');
-		labelWidget.textContent = truncatedLabel;
-		labelContainer.appendChild(labelWidget);
+    // Buttons
+    if (actions.length) {
+      const actionsContainer = container.appendChild(
+        $(".editor-placeholder-buttons-container"),
+      )
+      const buttons = disposables.add(new ButtonBar(actionsContainer))
 
-		// ARIA label
-		container.setAttribute('aria-label', `${computeEditorAriaLabel(input, undefined, this.group, undefined)}, ${truncatedLabel}`);
+      for (let i = 0; i < actions.length; i++) {
+        const button = disposables.add(
+          buttons.addButton({
+            ...defaultButtonStyles,
+            secondary: i !== 0,
+          }),
+        )
 
-		// Buttons
-		if (actions.length) {
-			const actionsContainer = container.appendChild($('.editor-placeholder-buttons-container'));
-			const buttons = disposables.add(new ButtonBar(actionsContainer));
+        button.label = actions[i].label
+        disposables.add(
+          button.onDidClick((e) => {
+            if (e) {
+              EventHelper.stop(e, true)
+            }
 
-			for (let i = 0; i < actions.length; i++) {
-				const button = disposables.add(buttons.addButton({
-					...defaultButtonStyles,
-					secondary: i !== 0
-				}));
+            actions[i].run()
+          }),
+        )
+      }
+    }
 
-				button.label = actions[i].label;
-				disposables.add(button.onDidClick(e => {
-					if (e) {
-						EventHelper.stop(e, true);
-					}
+    // Adjust scrollbar
+    scrollbar.scanDomNode()
 
-					actions[i].run();
-				}));
-			}
-		}
+    return disposables
+  }
 
-		// Adjust scrollbar
-		scrollbar.scanDomNode();
+  protected abstract getContents(
+    input: EditorInput,
+    options: IEditorOptions | undefined,
+    disposables: DisposableStore,
+  ): Promise<IEditorPlaceholderContents>
 
-		return disposables;
-	}
+  override clearInput(): void {
+    if (this.container) {
+      clearNode(this.container)
+    }
 
-	protected abstract getContents(input: EditorInput, options: IEditorOptions | undefined, disposables: DisposableStore): Promise<IEditorPlaceholderContents>;
+    this.inputDisposable.clear()
 
-	override clearInput(): void {
-		if (this.container) {
-			clearNode(this.container);
-		}
+    super.clearInput()
+  }
 
-		this.inputDisposable.clear();
+  layout(dimension: Dimension): void {
+    const [container, scrollbar] = assertAllDefined(
+      this.container,
+      this.scrollbar,
+    )
 
-		super.clearInput();
-	}
+    // Pass on to Container
+    size(container, dimension.width, dimension.height)
 
-	layout(dimension: Dimension): void {
-		const [container, scrollbar] = assertAllDefined(this.container, this.scrollbar);
+    // Adjust scrollbar
+    scrollbar.scanDomNode()
 
-		// Pass on to Container
-		size(container, dimension.width, dimension.height);
+    // Toggle responsive class
+    container.classList.toggle("max-height-200px", dimension.height <= 200)
+  }
 
-		// Adjust scrollbar
-		scrollbar.scanDomNode();
+  override focus(): void {
+    super.focus()
 
-		// Toggle responsive class
-		container.classList.toggle('max-height-200px', dimension.height <= 200);
-	}
+    this.container?.focus()
+  }
 
-	override focus(): void {
-		super.focus();
+  override dispose(): void {
+    this.container?.remove()
 
-		this.container?.focus();
-	}
-
-	override dispose(): void {
-		this.container?.remove();
-
-		super.dispose();
-	}
+    super.dispose()
+  }
 }
 
 export class WorkspaceTrustRequiredPlaceholderEditor extends EditorPlaceholder {
+  static readonly ID = "workbench.editors.workspaceTrustRequiredEditor"
+  private static readonly LABEL = localize(
+    "trustRequiredEditor",
+    "Workspace Trust Required",
+  )
 
-	static readonly ID = 'workbench.editors.workspaceTrustRequiredEditor';
-	private static readonly LABEL = localize('trustRequiredEditor', "Workspace Trust Required");
+  static readonly DESCRIPTOR = EditorPaneDescriptor.create(
+    WorkspaceTrustRequiredPlaceholderEditor,
+    WorkspaceTrustRequiredPlaceholderEditor.ID,
+    WorkspaceTrustRequiredPlaceholderEditor.LABEL,
+  )
 
-	static readonly DESCRIPTOR = EditorPaneDescriptor.create(WorkspaceTrustRequiredPlaceholderEditor, WorkspaceTrustRequiredPlaceholderEditor.ID, WorkspaceTrustRequiredPlaceholderEditor.LABEL);
+  constructor(
+    group: IEditorGroup,
+    @ITelemetryService telemetryService: ITelemetryService,
+    @IThemeService themeService: IThemeService,
+    @ICommandService private readonly commandService: ICommandService,
+    @IWorkspaceContextService
+    private readonly workspaceService: IWorkspaceContextService,
+    @IStorageService storageService: IStorageService,
+  ) {
+    super(
+      WorkspaceTrustRequiredPlaceholderEditor.ID,
+      group,
+      telemetryService,
+      themeService,
+      storageService,
+    )
+  }
 
-	constructor(
-		group: IEditorGroup,
-		@ITelemetryService telemetryService: ITelemetryService,
-		@IThemeService themeService: IThemeService,
-		@ICommandService private readonly commandService: ICommandService,
-		@IWorkspaceContextService private readonly workspaceService: IWorkspaceContextService,
-		@IStorageService storageService: IStorageService
-	) {
-		super(WorkspaceTrustRequiredPlaceholderEditor.ID, group, telemetryService, themeService, storageService);
-	}
+  override getTitle(): string {
+    return WorkspaceTrustRequiredPlaceholderEditor.LABEL
+  }
 
-	override getTitle(): string {
-		return WorkspaceTrustRequiredPlaceholderEditor.LABEL;
-	}
-
-	protected async getContents(): Promise<IEditorPlaceholderContents> {
-		return {
-			icon: '$(workspace-untrusted)',
-			label: isSingleFolderWorkspaceIdentifier(toWorkspaceIdentifier(this.workspaceService.getWorkspace())) ?
-				localize('requiresFolderTrustText', "The file is not displayed in the editor because trust has not been granted to the folder.") :
-				localize('requiresWorkspaceTrustText', "The file is not displayed in the editor because trust has not been granted to the workspace."),
-			actions: [
-				{
-					label: localize('manageTrust', "Manage Workspace Trust"),
-					run: () => this.commandService.executeCommand('workbench.trust.manage')
-				}
-			]
-		};
-	}
+  protected async getContents(): Promise<IEditorPlaceholderContents> {
+    return {
+      icon: "$(workspace-untrusted)",
+      label: isSingleFolderWorkspaceIdentifier(
+        toWorkspaceIdentifier(this.workspaceService.getWorkspace()),
+      )
+        ? localize(
+            "requiresFolderTrustText",
+            "The file is not displayed in the editor because trust has not been granted to the folder.",
+          )
+        : localize(
+            "requiresWorkspaceTrustText",
+            "The file is not displayed in the editor because trust has not been granted to the workspace.",
+          ),
+      actions: [
+        {
+          label: localize("manageTrust", "Manage Workspace Trust"),
+          run: () =>
+            this.commandService.executeCommand("workbench.trust.manage"),
+        },
+      ],
+    }
+  }
 }
 
 export class ErrorPlaceholderEditor extends EditorPlaceholder {
+  private static readonly ID = "workbench.editors.errorEditor"
+  private static readonly LABEL = localize("errorEditor", "Error Editor")
 
-	private static readonly ID = 'workbench.editors.errorEditor';
-	private static readonly LABEL = localize('errorEditor', "Error Editor");
+  static readonly DESCRIPTOR = EditorPaneDescriptor.create(
+    ErrorPlaceholderEditor,
+    ErrorPlaceholderEditor.ID,
+    ErrorPlaceholderEditor.LABEL,
+  )
 
-	static readonly DESCRIPTOR = EditorPaneDescriptor.create(ErrorPlaceholderEditor, ErrorPlaceholderEditor.ID, ErrorPlaceholderEditor.LABEL);
+  constructor(
+    group: IEditorGroup,
+    @ITelemetryService telemetryService: ITelemetryService,
+    @IThemeService themeService: IThemeService,
+    @IStorageService storageService: IStorageService,
+    @IFileService private readonly fileService: IFileService,
+    @IDialogService private readonly dialogService: IDialogService,
+  ) {
+    super(
+      ErrorPlaceholderEditor.ID,
+      group,
+      telemetryService,
+      themeService,
+      storageService,
+    )
+  }
 
-	constructor(
-		group: IEditorGroup,
-		@ITelemetryService telemetryService: ITelemetryService,
-		@IThemeService themeService: IThemeService,
-		@IStorageService storageService: IStorageService,
-		@IFileService private readonly fileService: IFileService,
-		@IDialogService private readonly dialogService: IDialogService
-	) {
-		super(ErrorPlaceholderEditor.ID, group, telemetryService, themeService, storageService);
-	}
+  protected async getContents(
+    input: EditorInput,
+    options: IErrorEditorPlaceholderOptions,
+    disposables: DisposableStore,
+  ): Promise<IEditorPlaceholderContents> {
+    const resource = input.resource
+    const error = options.error
+    const isFileNotFound =
+      (<FileOperationError | undefined>error)?.fileOperationResult ===
+      FileOperationResult.FILE_NOT_FOUND
 
-	protected async getContents(input: EditorInput, options: IErrorEditorPlaceholderOptions, disposables: DisposableStore): Promise<IEditorPlaceholderContents> {
-		const resource = input.resource;
-		const error = options.error;
-		const isFileNotFound = (<FileOperationError | undefined>error)?.fileOperationResult === FileOperationResult.FILE_NOT_FOUND;
+    // Error Label
+    let label: string
+    if (isFileNotFound) {
+      label = localize(
+        "unavailableResourceErrorEditorText",
+        "The editor could not be opened because the file was not found.",
+      )
+    } else if (isEditorOpenError(error) && error.forceMessage) {
+      label = error.message
+    } else if (error) {
+      label = localize(
+        "unknownErrorEditorTextWithError",
+        "The editor could not be opened due to an unexpected error: {0}",
+        truncateMiddle(
+          toErrorMessage(error),
+          EditorPlaceholder.PLACEHOLDER_LABEL_MAX_LENGTH / 2,
+        ),
+      )
+    } else {
+      label = localize(
+        "unknownErrorEditorTextWithoutError",
+        "The editor could not be opened due to an unexpected error.",
+      )
+    }
 
-		// Error Label
-		let label: string;
-		if (isFileNotFound) {
-			label = localize('unavailableResourceErrorEditorText', "The editor could not be opened because the file was not found.");
-		} else if (isEditorOpenError(error) && error.forceMessage) {
-			label = error.message;
-		} else if (error) {
-			label = localize('unknownErrorEditorTextWithError', "The editor could not be opened due to an unexpected error: {0}", truncateMiddle(toErrorMessage(error), EditorPlaceholder.PLACEHOLDER_LABEL_MAX_LENGTH / 2));
-		} else {
-			label = localize('unknownErrorEditorTextWithoutError', "The editor could not be opened due to an unexpected error.");
-		}
+    // Error Icon
+    let icon = "$(error)"
+    if (isEditorOpenError(error)) {
+      if (error.forceSeverity === Severity.Info) {
+        icon = "$(info)"
+      } else if (error.forceSeverity === Severity.Warning) {
+        icon = "$(warning)"
+      }
+    }
 
-		// Error Icon
-		let icon = '$(error)';
-		if (isEditorOpenError(error)) {
-			if (error.forceSeverity === Severity.Info) {
-				icon = '$(info)';
-			} else if (error.forceSeverity === Severity.Warning) {
-				icon = '$(warning)';
-			}
-		}
+    // Actions
+    let actions: IEditorPlaceholderContentsAction[] | undefined = undefined
+    if (isEditorOpenError(error) && error.actions.length > 0) {
+      actions = error.actions.map((action) => {
+        return {
+          label: action.label,
+          run: () => {
+            const result = action.run()
+            if (result instanceof Promise) {
+              result.catch((error) =>
+                this.dialogService.error(toErrorMessage(error)),
+              )
+            }
+          },
+        }
+      })
+    } else {
+      actions = [
+        {
+          label: localize("retry", "Try Again"),
+          run: () =>
+            this.group.openEditor(input, {
+              ...options,
+              source: EditorOpenSource.USER /* explicit user gesture */,
+            }),
+        },
+      ]
+    }
 
-		// Actions
-		let actions: IEditorPlaceholderContentsAction[] | undefined = undefined;
-		if (isEditorOpenError(error) && error.actions.length > 0) {
-			actions = error.actions.map(action => {
-				return {
-					label: action.label,
-					run: () => {
-						const result = action.run();
-						if (result instanceof Promise) {
-							result.catch(error => this.dialogService.error(toErrorMessage(error)));
-						}
-					}
-				};
-			});
-		} else {
-			actions = [
-				{
-					label: localize('retry', "Try Again"),
-					run: () => this.group.openEditor(input, { ...options, source: EditorOpenSource.USER /* explicit user gesture */ })
-				}
-			];
-		}
+    // Auto-reload when file is added
+    if (isFileNotFound && resource && this.fileService.hasProvider(resource)) {
+      disposables.add(
+        this.fileService.onDidFilesChange((e) => {
+          if (
+            e.contains(resource, FileChangeType.ADDED, FileChangeType.UPDATED)
+          ) {
+            this.group.openEditor(input, options)
+          }
+        }),
+      )
+    }
 
-		// Auto-reload when file is added
-		if (isFileNotFound && resource && this.fileService.hasProvider(resource)) {
-			disposables.add(this.fileService.onDidFilesChange(e => {
-				if (e.contains(resource, FileChangeType.ADDED, FileChangeType.UPDATED)) {
-					this.group.openEditor(input, options);
-				}
-			}));
-		}
-
-		return { icon, label, actions: actions ?? [] };
-	}
+    return { icon, label, actions: actions ?? [] }
+  }
 }

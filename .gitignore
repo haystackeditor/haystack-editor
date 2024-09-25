@@ -1,5 +1,6 @@
 .DS_Store
 .cache
+.vscode
 npm-debug.log
 Thumbs.db
 node_modules/
@@ -19,5 +20,8 @@ vscode.db
 /cli/target
 /cli/openssl
 product.overrides.json
+*target*
+haystack/**/dist/
+src/haystack-node/node_modules/
 *.snap.actual
 .vscode-test

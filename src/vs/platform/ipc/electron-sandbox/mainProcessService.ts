@@ -1,35 +1,43 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Disposable } from 'vs/base/common/lifecycle';
-import { IChannel, IServerChannel } from 'vs/base/parts/ipc/common/ipc';
-import { Client as IPCElectronClient } from 'vs/base/parts/ipc/electron-sandbox/ipc.electron';
-import { IMainProcessService } from 'vs/platform/ipc/common/mainProcessService';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+import { Disposable } from "vs/base/common/lifecycle"
+import { IChannel, IServerChannel } from "vs/base/parts/ipc/common/ipc"
+import { Client as IPCElectronClient } from "vs/base/parts/ipc/electron-sandbox/ipc.electron"
+import { IMainProcessService } from "vs/platform/ipc/common/mainProcessService"
 
 /**
  * An implementation of `IMainProcessService` that leverages Electron's IPC.
  */
-export class ElectronIPCMainProcessService extends Disposable implements IMainProcessService {
+export class ElectronIPCMainProcessService
+  extends Disposable
+  implements IMainProcessService
+{
+  declare readonly _serviceBrand: undefined
 
-	declare readonly _serviceBrand: undefined;
+  private mainProcessConnection: IPCElectronClient
 
-	private mainProcessConnection: IPCElectronClient;
+  constructor(windowId: number) {
+    super()
 
-	constructor(
-		windowId: number
-	) {
-		super();
+    this.mainProcessConnection = this._register(
+      new IPCElectronClient(`window:${windowId}`),
+    )
+  }
 
-		this.mainProcessConnection = this._register(new IPCElectronClient(`window:${windowId}`));
-	}
+  getChannel(channelName: string): IChannel {
+    return this.mainProcessConnection.getChannel(channelName)
+  }
 
-	getChannel(channelName: string): IChannel {
-		return this.mainProcessConnection.getChannel(channelName);
-	}
-
-	registerChannel(channelName: string, channel: IServerChannel<string>): void {
-		this.mainProcessConnection.registerChannel(channelName, channel);
-	}
+  registerChannel(channelName: string, channel: IServerChannel<string>): void {
+    this.mainProcessConnection.registerChannel(channelName, channel)
+  }
 }

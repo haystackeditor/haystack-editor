@@ -1,26 +1,39 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { DisposableStore } from 'vs/base/common/lifecycle';
-import { IFileChange } from 'vs/platform/files/common/files';
-import { ILogMessage, AbstractNonRecursiveWatcherClient, INonRecursiveWatcher } from 'vs/platform/files/common/watcher';
-import { NodeJSWatcher } from 'vs/platform/files/node/watcher/nodejs/nodejsWatcher';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+import { DisposableStore } from "vs/base/common/lifecycle"
+import { IFileChange } from "vs/platform/files/common/files"
+import {
+  ILogMessage,
+  AbstractNonRecursiveWatcherClient,
+  INonRecursiveWatcher,
+} from "vs/platform/files/common/watcher"
+import { NodeJSWatcher } from "vs/platform/files/node/watcher/nodejs/nodejsWatcher"
 
 export class NodeJSWatcherClient extends AbstractNonRecursiveWatcherClient {
+  constructor(
+    onFileChanges: (changes: IFileChange[]) => void,
+    onLogMessage: (msg: ILogMessage) => void,
+    verboseLogging: boolean,
+  ) {
+    super(onFileChanges, onLogMessage, verboseLogging)
 
-	constructor(
-		onFileChanges: (changes: IFileChange[]) => void,
-		onLogMessage: (msg: ILogMessage) => void,
-		verboseLogging: boolean
-	) {
-		super(onFileChanges, onLogMessage, verboseLogging);
+    this.init()
+  }
 
-		this.init();
-	}
-
-	protected override createWatcher(disposables: DisposableStore): INonRecursiveWatcher {
-		return disposables.add(new NodeJSWatcher(undefined /* no recursive watching support here */)) satisfies INonRecursiveWatcher;
-	}
+  protected override createWatcher(
+    disposables: DisposableStore,
+  ): INonRecursiveWatcher {
+    return disposables.add(
+      new NodeJSWatcher(undefined /* no recursive watching support here */),
+    ) satisfies INonRecursiveWatcher
+  }
 }

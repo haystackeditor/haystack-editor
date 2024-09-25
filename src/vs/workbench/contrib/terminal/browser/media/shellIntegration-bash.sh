@@ -1,18 +1,18 @@
 # ---------------------------------------------------------------------------------------------
 #   Copyright (c) Microsoft Corporation. All rights reserved.
-#   Licensed under the MIT License. See License.txt in the project root for license information.
+#   Licensed under the MIT License. See code-license.txt in the project root for license information.
 # ---------------------------------------------------------------------------------------------
 
 # Prevent the script recursing when setting up
-if [[ -n "${VSCODE_SHELL_INTEGRATION:-}" ]]; then
+if [[ -n "${HAYSTACK_SHELL_INTEGRATION:-}" ]]; then
 	builtin return
 fi
 
-VSCODE_SHELL_INTEGRATION=1
+HAYSTACK_SHELL_INTEGRATION=1
 
 # Run relevant rc/profile only if shell integration has been injected, not when run manually
-if [ "$VSCODE_INJECTION" == "1" ]; then
-	if [ -z "$VSCODE_SHELL_LOGIN" ]; then
+if [ "$HAYSTACK_INJECTION" == "1" ]; then
+	if [ -z "$HAYSTACK_SHELL_LOGIN" ]; then
 		if [ -r ~/.bashrc ]; then
 			. ~/.bashrc
 		fi
@@ -30,48 +30,48 @@ if [ "$VSCODE_INJECTION" == "1" ]; then
 		elif [ -r ~/.profile ]; then
 			. ~/.profile
 		fi
-		builtin unset VSCODE_SHELL_LOGIN
+		builtin unset HAYSTACK_SHELL_LOGIN
 
 		# Apply any explicit path prefix (see #99878)
-		if [ -n "${VSCODE_PATH_PREFIX:-}" ]; then
-			export PATH=$VSCODE_PATH_PREFIX$PATH
-			builtin unset VSCODE_PATH_PREFIX
+		if [ -n "${HAYSTACK_PATH_PREFIX:-}" ]; then
+			export PATH=$HAYSTACK_PATH_PREFIX$PATH
+			builtin unset HAYSTACK_PATH_PREFIX
 		fi
 	fi
-	builtin unset VSCODE_INJECTION
+	builtin unset HAYSTACK_INJECTION
 fi
 
-if [ -z "$VSCODE_SHELL_INTEGRATION" ]; then
+if [ -z "$HAYSTACK_SHELL_INTEGRATION" ]; then
 	builtin return
 fi
 
 # Apply EnvironmentVariableCollections if needed
-if [ -n "${VSCODE_ENV_REPLACE:-}" ]; then
-	IFS=':' read -ra ADDR <<< "$VSCODE_ENV_REPLACE"
+if [ -n "${HAYSTACK_ENV_REPLACE:-}" ]; then
+	IFS=':' read -ra ADDR <<< "$HAYSTACK_ENV_REPLACE"
 	for ITEM in "${ADDR[@]}"; do
 		VARNAME="$(echo $ITEM | cut -d "=" -f 1)"
 		VALUE="$(echo -e "$ITEM" | cut -d "=" -f 2-)"
 		export $VARNAME="$VALUE"
 	done
-	builtin unset VSCODE_ENV_REPLACE
+	builtin unset HAYSTACK_ENV_REPLACE
 fi
-if [ -n "${VSCODE_ENV_PREPEND:-}" ]; then
-	IFS=':' read -ra ADDR <<< "$VSCODE_ENV_PREPEND"
+if [ -n "${HAYSTACK_ENV_PREPEND:-}" ]; then
+	IFS=':' read -ra ADDR <<< "$HAYSTACK_ENV_PREPEND"
 	for ITEM in "${ADDR[@]}"; do
 		VARNAME="$(echo $ITEM | cut -d "=" -f 1)"
 		VALUE="$(echo -e "$ITEM" | cut -d "=" -f 2-)"
 		export $VARNAME="$VALUE${!VARNAME}"
 	done
-	builtin unset VSCODE_ENV_PREPEND
+	builtin unset HAYSTACK_ENV_PREPEND
 fi
-if [ -n "${VSCODE_ENV_APPEND:-}" ]; then
-	IFS=':' read -ra ADDR <<< "$VSCODE_ENV_APPEND"
+if [ -n "${HAYSTACK_ENV_APPEND:-}" ]; then
+	IFS=':' read -ra ADDR <<< "$HAYSTACK_ENV_APPEND"
 	for ITEM in "${ADDR[@]}"; do
 		VARNAME="$(echo $ITEM | cut -d "=" -f 1)"
 		VALUE="$(echo -e "$ITEM" | cut -d "=" -f 2-)"
 		export $VARNAME="${!VARNAME}$VALUE"
 	done
-	builtin unset VSCODE_ENV_APPEND
+	builtin unset HAYSTACK_ENV_APPEND
 fi
 
 __vsc_get_trap() {
@@ -159,8 +159,8 @@ __vsc_in_command_execution="1"
 __vsc_current_command=""
 
 # It's fine this is in the global scope as it getting at it requires access to the shell environment
-__vsc_nonce="$VSCODE_NONCE"
-unset VSCODE_NONCE
+__vsc_nonce="$HAYSTACK_NONCE"
+unset HAYSTACK_NONCE
 
 # Report continuation prompt
 builtin printf "\e]633;P;ContinuationPrompt=$(echo "$PS2" | sed 's/\x1b/\\\\x1b/g')\a"

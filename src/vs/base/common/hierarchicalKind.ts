@@ -1,31 +1,41 @@
 /*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
+ *--------------------------------------------------------------------------------------------*/
+
+/*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
 export class HierarchicalKind {
-	public static readonly sep = '.';
+  public static readonly sep = "."
 
-	public static readonly None = new HierarchicalKind('@@none@@'); // Special kind that matches nothing
-	public static readonly Empty = new HierarchicalKind('');
+  public static readonly None = new HierarchicalKind("@@none@@") // Special kind that matches nothing
+  public static readonly Empty = new HierarchicalKind("")
 
-	constructor(
-		public readonly value: string
-	) { }
+  constructor(public readonly value: string) {}
 
-	public equals(other: HierarchicalKind): boolean {
-		return this.value === other.value;
-	}
+  public equals(other: HierarchicalKind): boolean {
+    return this.value === other.value
+  }
 
-	public contains(other: HierarchicalKind): boolean {
-		return this.equals(other) || this.value === '' || other.value.startsWith(this.value + HierarchicalKind.sep);
-	}
+  public contains(other: HierarchicalKind): boolean {
+    return (
+      this.equals(other) ||
+      this.value === "" ||
+      other.value.startsWith(this.value + HierarchicalKind.sep)
+    )
+  }
 
-	public intersects(other: HierarchicalKind): boolean {
-		return this.contains(other) || other.contains(this);
-	}
+  public intersects(other: HierarchicalKind): boolean {
+    return this.contains(other) || other.contains(this)
+  }
 
-	public append(...parts: string[]): HierarchicalKind {
-		return new HierarchicalKind((this.value ? [this.value, ...parts] : parts).join(HierarchicalKind.sep));
-	}
+  public append(...parts: string[]): HierarchicalKind {
+    return new HierarchicalKind(
+      (this.value ? [this.value, ...parts] : parts).join(HierarchicalKind.sep),
+    )
+  }
 }

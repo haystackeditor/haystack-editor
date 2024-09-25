@@ -1,0 +1,463 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.editorDummyContainer {
+  position: fixed;
+  transform-origin: top left;
+  border: 2px solid transparent;
+  border-radius: 10px;
+
+  &.selected {
+    z-index: 9999;
+    border: 2px solid #8affff;
+  }
+}
+
+.fileEditorContainer {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  transform-origin: top left;
+  box-sizing: border-box;
+  border-radius: 10px;
+}
+
+.fileEditorContainer.modal {
+  overflow: hidden;
+}
+
+.fileEditorContainer.ghost {
+  opacity: 0.5;
+}
+
+.fileEditorContainer.pinned {
+  box-shadow: 0px 0px 10px 10px rgb(0 0 0 / 20%);
+}
+
+.fileEditor,
+.fileEditorLoading {
+  width: 100%;
+  background-color: var(--vscode-editor-background);
+  border-radius: 0 0 10px 10px;
+}
+
+.fileEditor > div {
+  width: 100%;
+  height: 100%;
+  border-right: 1px solid black;
+  border-bottom: 1px solid black;
+  border-left: 1px solid black;
+  padding: 0 1px 1px 0;
+  border-radius: 0 0 10px 10px;
+  box-sizing: border-box;
+}
+
+.fileEditor > div > div {
+  border-radius: 0 0 10px 10px;
+}
+
+.fileEditor > div > div > div {
+  border-radius: 0 0 10px 10px;
+}
+
+.fileEditor.modal {
+  background-color: var(--vscode-editor-background);
+}
+
+.fileEditor.settingsEditor {
+  height: 100%;
+}
+
+.referencesEditorContainer {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  border: 1px black solid;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.fileEditorLoading {
+  background-color: white;
+  border-right: 1px black solid;
+  border-radius: 0 0 10px 10px;
+}
+
+.fileEditorHeader {
+  width: 100%;
+  min-height: 25px;
+  max-height: 25px;
+  background-color: gray;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  overflow: hidden;
+  border-radius: 10px 10px 0 0;
+  border-top: 1px solid black;
+  border-left: 1px solid black;
+  border-right: 1px solid black;
+  box-sizing: border-box;
+
+  -moz-user-select: none;
+  /* firefox */
+  -webkit-user-select: none;
+  /* Safari */
+  -ms-user-select: none;
+  /* IE*/
+  user-select: none;
+  /* Standard syntax */
+}
+
+.filePathTextContainer {
+  min-height: 25px;
+  max-height: 25px;
+  padding-left: 10px;
+  flex: 1;
+  overflow: hidden;
+  display: inherit;
+  align-items: center;
+  user-select: none;
+}
+
+.fileNameAndIconContainer {
+  min-height: 25px;
+  max-height: 25px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.filePathText {
+  overflow: hidden;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  width: fit-content;
+  max-width: 100%;
+  user-select: none;
+  color: black;
+}
+
+.fileNameText {
+  margin-left: 5px;
+  margin-right: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+  width: fit-content;
+  color: black;
+  user-select: none;
+}
+
+.closeButton {
+  background-color: transparent;
+  border: none;
+  width: 15px;
+  height: 15px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 5px;
+  margin-bottom: 1px;
+
+  &:hover {
+    background-color: lightgray;
+  }
+
+  &:active {
+    background-color: lightgray;
+    opacity: 0.5;
+  }
+}
+
+.referencesContainer {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  transform-origin: top left;
+  display: flex;
+  flex-direction: column;
+}
+
+.referencesFileEditorContainer {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+}
+
+.referencesInnerContainer {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  min-height: 0px;
+}
+
+.viewportNumberDisplay {
+  position: absolute;
+  width: 25px;
+  height: 25px;
+  background: lightgray;
+  border: 1px gray solid;
+  color: black;
+  border-radius: 5px;
+  transform-origin: top left;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  &:hover {
+    background-color: white;
+  }
+
+  &:active {
+    background-color: white;
+    opacity: 0.5;
+  }
+}
+
+.symbolDepsButton {
+  position: absolute;
+  width: 25px;
+  height: 20px;
+  background: lightgray;
+  border: 1px gray solid;
+  border-radius: 5px;
+  transform-origin: top left;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  &:hover {
+    background-color: white;
+  }
+
+  &:active {
+    background-color: white;
+    opacity: 0.5;
+  }
+}
+
+.editorCloseCancellationModalOverlay {
+  background-color: lightgray;
+  opacity: 0.5;
+  width: 100%;
+  height: 100%;
+  tab-size: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.editorCloseCancellationModal {
+  position: absolute;
+  width: 200px;
+  height: 250px;
+  display: flex;
+  flex-direction: column;
+  transform-origin: top left;
+  background-color: lightgray;
+  border-radius: 5px;
+  border: 1px solid black;
+  top: calc(50% - 125px);
+  left: calc(50% - 100px);
+  align-items: center;
+}
+
+.editorCloseCancellationModalTitle {
+  font-size: 16px;
+  width: 150px;
+  margin-top: 10px;
+}
+
+.editorCloseCancellationModalButton {
+  background-color: transparent;
+  border: 1px solid black;
+  height: 20px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 5px;
+
+  &:hover {
+    background-color: white;
+  }
+
+  &:active {
+    background-color: white;
+    opacity: 0.5;
+  }
+}
+
+.settingsEditorContainer.settingsEditorContainer {
+  display: flex;
+  flex-direction: column;
+  padding: 15px;
+  box-sizing: border-box;
+  overflow: auto;
+}
+
+.settingsEditorTitle {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+.settingsEditorSection {
+  font-size: 18px;
+  margin-top: 15px;
+  margin-bottom: 10px;
+  font-weight: 700;
+}
+
+.settingsEditorSectionTable {
+  display: flex;
+  flex-direction: column;
+}
+
+.haystackKeybindingsRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  align-content: center;
+  height: 40px;
+}
+
+.haystackKeybindingsHeader {
+  font-weight: 700;
+}
+
+.haystackKeybindingsName {
+  width: 150px;
+  margin-right: 10px;
+}
+
+.haystackKeybindingsBindings {
+  width: 500px;
+  margin-right: 20px;
+}
+
+.haystackKeybindingsEditable {
+  width: 50px;
+}
+
+.settingsEditorInput.settingsEditorInput.settingsEditorInput {
+  width: 100%;
+  margin-bottom: 10px;
+  color: black;
+}
+
+.symbolDepListContainer {
+  position: absolute;
+  transform-origin: top left;
+  border-radius: 5px;
+}
+
+.symbolDepList {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+  align-items: center;
+  border: 1px solid black;
+  border-radius: 5px;
+  box-sizing: border-box;
+  transform-origin: top left;
+  max-width: 300px;
+  max-height: 300px;
+  background-color: var(--vscode-editor-background);
+  color: var(--vscode-editor-foreground);
+}
+
+.symbolDepContainer {
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+}
+
+.symbolDepRow {
+  width: 100%;
+  height: 20px;
+  background-color: transparent;
+  border: none;
+  text-align: left;
+  align-items: center;
+  display: flex;
+  position: relative;
+  white-space: nowrap;
+  color: inherit;
+  overflow: hidden;
+
+  &:hover,
+  &.hovered {
+    background-color: var(--vscode-editor-selectionBackground);
+  }
+
+  &:active {
+    background-color: lightskyblue;
+  }
+
+  &.selected {
+    background-color: var(--vscode-editor-selectionBackground);
+  }
+}
+
+.symbolDepSnippet {
+  margin-left: 5px;
+  width: 90%;
+  border: none;
+  background-color: transparent;
+  text-align: left;
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.symbolDepHeaderTextContainer {
+  display: flex;
+  align-items: baseline;
+  color: inherit;
+  overflow: hidden;
+}
+
+.symbolDepHeaderLineNumber {
+  margin-left: 5px;
+  color: gray;
+  font-size: 8px;
+  white-space: nowrap;
+}
+
+.symbolDepHeaderTextPath {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+
+  margin-left: 5px;
+  color: gray;
+  font-size: 10px;
+  white-space: nowrap;
+}
+
+.symbolDepHeaderIconContainer {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.symbolDepHeaderText {
+  color: inherit;
+  flex-grow: 1;
+}

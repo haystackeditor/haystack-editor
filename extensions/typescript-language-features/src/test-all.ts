@@ -1,6 +1,12 @@
 /*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
+ *--------------------------------------------------------------------------------------------*/
+
+/*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
 //
@@ -15,14 +21,14 @@
 // to report the results back to the caller. When the tests are finished, return
 // a possible error to the callback or null if none.
 
-const testRunner = require('../../../test/integration/electron/testrunner');
+const testRunner = require("../../../test/integration/electron/testrunner")
 
 // You can directly control Mocha options by uncommenting the following lines
 // See https://github.com/mochajs/mocha/wiki/Using-mocha-programmatically#set-options for more info
 testRunner.configure({
-	ui: 'tdd', 		// the TDD UI is being used in extension.test.ts (suite, test, etc.)
-	color: true,
-	timeout: 60000,
-});
+  ui: "tdd", // the TDD UI is being used in extension.test.ts (suite, test, etc.)
+  color: true,
+  timeout: 60000,
+})
 
-export = testRunner;
+export = testRunner

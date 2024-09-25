@@ -1,25 +1,36 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { createDecorator } from 'vs/platform/instantiation/common/instantiation';
-import { IAuxiliaryTitlebarPart, ITitlebarPart } from 'vs/workbench/browser/parts/titlebar/titlebarPart';
-import { IEditorGroupsContainer } from 'vs/workbench/services/editor/common/editorGroupsService';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
-export const ITitleService = createDecorator<ITitleService>('titleService');
+import { createDecorator } from "vs/platform/instantiation/common/instantiation"
+import {
+  IAuxiliaryTitlebarPart,
+  ITitlebarPart,
+} from "vs/workbench/browser/parts/titlebar/titlebarPart"
+import { IEditorGroupsContainer } from "vs/workbench/services/editor/common/editorGroupsService"
+
+export const ITitleService = createDecorator<ITitleService>("titleService")
 
 export interface ITitleService extends ITitlebarPart {
+  readonly _serviceBrand: undefined
 
-	readonly _serviceBrand: undefined;
+  /**
+   * Get the status bar part that is rooted in the provided container.
+   */
+  getPart(container: HTMLElement): ITitlebarPart
 
-	/**
-	 * Get the status bar part that is rooted in the provided container.
-	 */
-	getPart(container: HTMLElement): ITitlebarPart;
-
-	/**
-	 * Creates a new auxililary title bar part in the provided container.
-	 */
-	createAuxiliaryTitlebarPart(container: HTMLElement, editorGroupsContainer: IEditorGroupsContainer): IAuxiliaryTitlebarPart;
+  /**
+   * Creates a new auxililary title bar part in the provided container.
+   */
+  createAuxiliaryTitlebarPart(
+    container: HTMLElement,
+    editorGroupsContainer: IEditorGroupsContainer,
+  ): IAuxiliaryTitlebarPart
 }

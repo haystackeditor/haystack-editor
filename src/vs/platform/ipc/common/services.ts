@@ -1,14 +1,19 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IChannel, IServerChannel } from 'vs/base/parts/ipc/common/ipc';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+import { IChannel, IServerChannel } from "vs/base/parts/ipc/common/ipc"
 
 export interface IRemoteService {
+  readonly _serviceBrand: undefined
 
-	readonly _serviceBrand: undefined;
-
-	getChannel(channelName: string): IChannel;
-	registerChannel(channelName: string, channel: IServerChannel<string>): void;
+  getChannel(channelName: string): IChannel
+  registerChannel(channelName: string, channel: IServerChannel<string>): void
 }

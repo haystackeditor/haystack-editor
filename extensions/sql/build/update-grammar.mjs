@@ -1,8 +1,20 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscodeGrammarUpdater from 'vscode-grammar-updater';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
-vscodeGrammarUpdater.update('microsoft/vscode-mssql', 'syntaxes/SQL.plist', './syntaxes/sql.tmLanguage.json', undefined, 'main');
+import * as vscodeGrammarUpdater from "vscode-grammar-updater"
+
+vscodeGrammarUpdater.update(
+  "microsoft/vscode-mssql",
+  "syntaxes/SQL.plist",
+  "./syntaxes/sql.tmLanguage.json",
+  undefined,
+  "main",
+)

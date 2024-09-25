@@ -1,5 +1,5 @@
 parameters:
-  - name: VSCODE_RELEASE
+  - name: HAYSTACK_RELEASE
     type: boolean
 
 steps:
@@ -27,5 +27,5 @@ steps:
       AZURE_TENANT_ID="$(AZURE_TENANT_ID)" \
       AZURE_CLIENT_ID="$(AZURE_CLIENT_ID)" \
       AZURE_CLIENT_SECRET="$(AZURE_CLIENT_SECRET)" \
-      node build/azure-pipelines/common/releaseBuild.js ${{ parameters.VSCODE_RELEASE }}
+      node build/azure-pipelines/common/releaseBuild.js ${{ parameters.HAYSTACK_RELEASE }}
     displayName: Release build

@@ -13,23 +13,23 @@ IF "%~1" == "" (
 ) else (
 	set AUTHORITY=%1
 	set EXT_PATH=%2
-	set VSCODEUSERDATADIR=%3
+	set HAYSTACKUSERDATADIR=%3
 )
-IF "%VSCODEUSERDATADIR%" == "" (
-	set VSCODEUSERDATADIR=%TMP%\vscodeuserfolder-%RANDOM%-%TIME:~6,5%
+IF "%HAYSTACKUSERDATADIR%" == "" (
+	set HAYSTACKUSERDATADIR=%TMP%\vscodeuserfolder-%RANDOM%-%TIME:~6,5%
 )
 
 set REMOTE_EXT_PATH=%AUTHORITY%%EXT_PATH%
-set VSCODECRASHDIR=%~dp0\..\.build\crashes
-set VSCODELOGSDIR=%~dp0\..\.build\logs\integration-tests-remote
+set HAYSTACKCRASHDIR=%~dp0\..\.build\crashes
+set HAYSTACKLOGSDIR=%~dp0\..\.build\logs\integration-tests-remote
 set TESTRESOLVER_DATA_FOLDER=%TMP%\testresolverdatafolder-%RANDOM%-%TIME:~6,5%
-set TESTRESOLVER_LOGS_FOLDER=%VSCODELOGSDIR%\server
+set TESTRESOLVER_LOGS_FOLDER=%HAYSTACKLOGSDIR%\server
 
-if "%VSCODE_REMOTE_SERVER_PATH%"=="" (
+if "%HAYSTACK_REMOTE_SERVER_PATH%"=="" (
 	echo Using remote server out of sources for integration tests
 ) else (
 	set TESTRESOLVER_INSTALL_BUILTIN_EXTENSION=ms-vscode.vscode-smoketest-check
-	echo Using '%VSCODE_REMOTE_SERVER_PATH%' as server path
+	echo Using '%HAYSTACK_REMOTE_SERVER_PATH%' as server path
 )
 
 :: Figure out which Electron to use for running tests
@@ -40,7 +40,7 @@ if "%INTEGRATION_TEST_ELECTRON_PATH%"=="" (
 
 	echo Running integration tests out of sources.
 ) else (
-	set VSCODE_CLI=1
+	set HAYSTACK_CLI=1
 	set ELECTRON_ENABLE_LOGGING=1
 
 	:: Extra arguments only when running against a built version
@@ -49,13 +49,13 @@ if "%INTEGRATION_TEST_ELECTRON_PATH%"=="" (
  	echo Using %INTEGRATION_TEST_ELECTRON_PATH% as Electron path
 )
 
-echo Storing crash reports into '%VSCODECRASHDIR%'
-echo Storing log files into '%VSCODELOGSDIR%'
+echo Storing crash reports into '%HAYSTACKCRASHDIR%'
+echo Storing log files into '%HAYSTACKLOGSDIR%'
 
 
 :: Tests in the extension host
 
-set API_TESTS_EXTRA_ARGS=--disable-telemetry --skip-welcome --skip-release-notes --crash-reporter-directory=%VSCODECRASHDIR% --logsPath=%VSCODELOGSDIR% --no-cached-data --disable-updates --use-inmemory-secretstorage --disable-inspect --disable-workspace-trust --user-data-dir=%VSCODEUSERDATADIR%
+set API_TESTS_EXTRA_ARGS=--disable-telemetry --skip-welcome --skip-release-notes --crash-reporter-directory=%HAYSTACKCRASHDIR% --logsPath=%HAYSTACKLOGSDIR% --no-cached-data --disable-updates --use-inmemory-secretstorage --disable-inspect --disable-workspace-trust --user-data-dir=%HAYSTACKUSERDATADIR%
 
 echo.
 echo ### API tests (folder)
@@ -107,7 +107,7 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 :: Cleanup
 
 IF "%3" == "" (
-	rmdir /s /q %VSCODEUSERDATADIR%
+	rmdir /s /q %HAYSTACKUSERDATADIR%
 )
 
 rmdir /s /q %TESTRESOLVER_DATA_FOLDER%

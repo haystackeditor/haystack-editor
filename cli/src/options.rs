@@ -1,6 +1,12 @@
 /*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
+ *--------------------------------------------------------------------------------------------*/
+
+/*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
 use std::fmt;
@@ -40,12 +46,13 @@ impl Quality {
 
 	/// Server application name
 	pub fn server_entrypoint(&self) -> String {
-		let mut server_name = SERVER_NAME_MAP
-			.as_ref()
-			.and_then(|m| m.get(self))
-			.map(|s| s.server_application_name.as_str())
-			.unwrap_or("code-server-oss")
-			.to_string();
+		// let mut server_name = SERVER_NAME_MAP
+		// 	.as_ref()
+		// 	.and_then(|m| m.get(self))
+		// 	.map(|s| s.server_application_name.as_str())
+		// 	.unwrap_or("code-server-oss")
+		// 	.to_string();
+		let mut server_name = "haystack-server".to_string();
 
 		if cfg!(windows) {
 			server_name.push_str(".cmd");

@@ -1,6 +1,12 @@
 /*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
+ *--------------------------------------------------------------------------------------------*/
+
+/*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
 /**
@@ -8,59 +14,60 @@
  */
 
 table {
-	width: 100%;
-	max-width: 100%;
-	background-color: transparent;
-	border-collapse: collapse;
+  width: 100%;
+  max-width: 100%;
+  background-color: transparent;
+  border-collapse: collapse;
 }
 th {
-	vertical-align: bottom;
-	border-bottom: 1px solid;
-	padding: 5px;
-	text-align: inherit;
+  vertical-align: bottom;
+  border-bottom: 1px solid;
+  padding: 5px;
+  text-align: inherit;
 }
 td {
-	padding: 5px;
-	vertical-align: top;
+  padding: 5px;
+  vertical-align: top;
 }
 
 tr td:first-child {
-	width: 30%;
+  width: 30%;
 }
 
 label {
-	user-select: none;
+  user-select: none;
 }
 
 .block-settingsSearchResults-details {
-	padding-bottom: .5rem;
+  padding-bottom: 0.5rem;
 }
 
 .block-settingsSearchResults-details > div {
-	padding: .5rem .75rem;
+  padding: 0.5rem 0.75rem;
 }
 
 .section {
-	margin-bottom: .5em;
+  margin-bottom: 0.5em;
 }
 
 /**
  * Forms
  */
-input[type="text"], textarea {
-	display: block;
-	width: 100%;
-	padding: .375rem .75rem;
-	font-size: 1rem;
-	line-height: 1.5;
-	color: #495057;
-	background-color: #fff;
-	border: 1px solid #ced4da;
+input[type="text"],
+textarea {
+  display: block;
+  width: 100%;
+  padding: 0.375rem 0.75rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: #495057;
+  background-color: #fff;
+  border: 1px solid #ced4da;
 }
 
 textarea {
-	overflow: auto;
-	resize: vertical;
+  overflow: auto;
+  resize: vertical;
 }
 
 /**
@@ -68,324 +75,372 @@ textarea {
  */
 
 .monaco-text-button {
-	display: block;
-	width: auto;
-	padding: 4px 10px;
-	align-self: flex-end;
-	margin-bottom: 1em;
-	font-size: 13px;
+  display: block;
+  width: auto;
+  padding: 4px 10px;
+  align-self: flex-end;
+  margin-bottom: 1em;
+  font-size: 13px;
 }
 
 select {
-	height: calc(2.25rem + 2px);
-	display: inline-block;
-	padding: 3px 3px;
-	font-size: 14px;
-	line-height: 1.5;
-	color: #495057;
-	background-color: #fff;
-	border: none;
+  height: calc(2.25rem + 2px);
+  display: inline-block;
+  padding: 3px 3px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #495057;
+  background-color: #fff;
+  border: none;
 }
 
 * {
-	box-sizing: border-box;
+  box-sizing: border-box;
 }
 
-textarea, input, select {
-	font-family: inherit;
+textarea,
+input,
+select {
+  font-family: inherit;
 }
 
 html {
-	color: #CCCCCC;
-	height: 100%;
+  color: #cccccc;
+  height: 100%;
 }
 
 .extension-caption .codicon-modifier-spin {
-	padding-bottom: 3px;
-	margin-left: 2px;
+  padding-bottom: 3px;
+  margin-left: 2px;
 }
 
 /* Font Families (with CJK support) */
 
-.mac { font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
-.mac:lang(zh-Hans) { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", sans-serif; }
-.mac:lang(zh-Hant) { font-family: -apple-system, BlinkMacSystemFont, "PingFang TC", sans-serif; }
-.mac:lang(ja) { font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic Pro", sans-serif; }
-.mac:lang(ko) { font-family: -apple-system, BlinkMacSystemFont, "Nanum Gothic", "Apple SD Gothic Neo", "AppleGothic", sans-serif; }
+.mac {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+}
+.mac:lang(zh-Hans) {
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC",
+    "Hiragino Sans GB", sans-serif;
+}
+.mac:lang(zh-Hant) {
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang TC", sans-serif;
+}
+.mac:lang(ja) {
+  font-family: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic Pro",
+    sans-serif;
+}
+.mac:lang(ko) {
+  font-family: -apple-system, BlinkMacSystemFont, "Nanum Gothic",
+    "Apple SD Gothic Neo", "AppleGothic", sans-serif;
+}
 
-.windows { font-family: "Segoe WPC", "Segoe UI", sans-serif; }
-.windows:lang(zh-Hans) { font-family: "Segoe WPC", "Segoe UI", "Microsoft YaHei", sans-serif; }
-.windows:lang(zh-Hant) { font-family: "Segoe WPC", "Segoe UI", "Microsoft Jhenghei", sans-serif; }
-.windows:lang(ja) { font-family: "Segoe WPC", "Segoe UI", "Yu Gothic UI", "Meiryo UI", sans-serif; }
-.windows:lang(ko) { font-family: "Segoe WPC", "Segoe UI", "Malgun Gothic", "Dotom", sans-serif; }
+.windows {
+  font-family: "Segoe WPC", "Segoe UI", sans-serif;
+}
+.windows:lang(zh-Hans) {
+  font-family: "Segoe WPC", "Segoe UI", "Microsoft YaHei", sans-serif;
+}
+.windows:lang(zh-Hant) {
+  font-family: "Segoe WPC", "Segoe UI", "Microsoft Jhenghei", sans-serif;
+}
+.windows:lang(ja) {
+  font-family: "Segoe WPC", "Segoe UI", "Yu Gothic UI", "Meiryo UI", sans-serif;
+}
+.windows:lang(ko) {
+  font-family: "Segoe WPC", "Segoe UI", "Malgun Gothic", "Dotom", sans-serif;
+}
 
 /* Linux: add `system-ui` as first font and not `Ubuntu` to allow other distribution pick their standard OS font */
-.linux { font-family: system-ui, "Ubuntu", "Droid Sans", sans-serif; }
-.linux:lang(zh-Hans) { font-family: system-ui, "Ubuntu", "Droid Sans", "Source Han Sans SC", "Source Han Sans CN", "Source Han Sans", sans-serif; }
-.linux:lang(zh-Hant) { font-family: system-ui, "Ubuntu", "Droid Sans", "Source Han Sans TC", "Source Han Sans TW", "Source Han Sans", sans-serif; }
-.linux:lang(ja) { font-family: system-ui, "Ubuntu", "Droid Sans", "Source Han Sans J", "Source Han Sans JP", "Source Han Sans", sans-serif; }
-.linux:lang(ko) { font-family: system-ui, "Ubuntu", "Droid Sans", "Source Han Sans K", "Source Han Sans JR", "Source Han Sans", "UnDotum", "FBaekmuk Gulim", sans-serif; }
+.linux {
+  font-family: system-ui, "Ubuntu", "Droid Sans", sans-serif;
+}
+.linux:lang(zh-Hans) {
+  font-family: system-ui, "Ubuntu", "Droid Sans", "Source Han Sans SC",
+    "Source Han Sans CN", "Source Han Sans", sans-serif;
+}
+.linux:lang(zh-Hant) {
+  font-family: system-ui, "Ubuntu", "Droid Sans", "Source Han Sans TC",
+    "Source Han Sans TW", "Source Han Sans", sans-serif;
+}
+.linux:lang(ja) {
+  font-family: system-ui, "Ubuntu", "Droid Sans", "Source Han Sans J",
+    "Source Han Sans JP", "Source Han Sans", sans-serif;
+}
+.linux:lang(ko) {
+  font-family: system-ui, "Ubuntu", "Droid Sans", "Source Han Sans K",
+    "Source Han Sans JR", "Source Han Sans", "UnDotum", "FBaekmuk Gulim",
+    sans-serif;
+}
 
 body {
-	margin: 0;
-	overflow-y: scroll;
-	height: 100%;
+  margin: 0;
+  overflow-y: scroll;
+  height: 100%;
 }
 
 .hidden {
-	display: none;
+  display: none;
 }
 
 .block {
-	font-size: 12px;
+  font-size: 12px;
 }
 
 .block .block-info {
-	width: 100%;
-	font-size: 12px;
-	overflow: auto;
-	overflow-wrap: break-word;
-	margin: 5px;
-	padding: 10px;
+  width: 100%;
+  font-size: 12px;
+  overflow: auto;
+  overflow-wrap: break-word;
+  margin: 5px;
+  padding: 10px;
 }
 
 #issue-reporter {
-	max-width: 85vw;
-	margin-left: auto;
-	margin-right: auto;
-	padding-top: 2em;
-	padding-bottom: 2em;
-	display: flex;
-	flex-direction: column;
-	min-height: 100%;
-	overflow: visible;
+  max-width: 85vw;
+  margin-left: auto;
+  margin-right: auto;
+  padding-top: 2em;
+  padding-bottom: 2em;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  overflow: visible;
 }
 
 .description-section {
-	flex-grow: 1;
-	display: flex;
-	flex-direction: column;
-	flex-shrink: 0;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
 }
 
 textarea {
-	flex-grow: 1;
-	min-height: 150px;
+  flex-grow: 1;
+  min-height: 150px;
 }
 
 .block-info-text {
-	display: flex;
-	flex-grow: 1;
+  display: flex;
+  flex-grow: 1;
 }
 
 #github-submit-btn {
-	flex-shrink: 0;
-	margin-left: auto;
-	margin-top: 10px;
-	margin-bottom: 10px;
+  flex-shrink: 0;
+  margin-left: auto;
+  margin-top: 10px;
+  margin-bottom: 10px;
 }
 
 .two-col {
-	display: inline-block;
-	width: 49%;
+  display: inline-block;
+  width: 49%;
 }
 
 #vscode-version {
-	width: 90%;
+  width: 90%;
 }
 
 .input-group {
-	margin-bottom: 1em;
+  margin-bottom: 1em;
 }
 
 #extension-selection {
-	margin-top: 1em;
+  margin-top: 1em;
 }
 
-select, input, textarea {
-	border: 1px solid transparent;
-	margin-top: 10px;
+select,
+input,
+textarea {
+  border: 1px solid transparent;
+  margin-top: 10px;
 }
-
 
 #issue-reporter .validation-error {
-	font-size: 12px;
-	padding: 10px;
-	border-top: 0px !important;
+  font-size: 12px;
+  padding: 10px;
+  border-top: 0px !important;
 }
 
 #issue-reporter .system-info {
-	margin-bottom: 10px;
+  margin-bottom: 10px;
 }
 
-
 input[type="checkbox"] {
-	width: auto;
-	display: inline-block;
-	margin-top: 0;
-	vertical-align: middle;
-	cursor: pointer;
+  width: auto;
+  display: inline-block;
+  margin-top: 0;
+  vertical-align: middle;
+  cursor: pointer;
 }
 
 input:disabled {
-	opacity: 0.6;
+  opacity: 0.6;
 }
 
 .list-title {
-	margin-top: 1em;
-	margin-left: 1em;
+  margin-top: 1em;
+  margin-left: 1em;
 }
 
 .instructions {
-	font-size: 12px;
-	margin-top: .5em;
+  font-size: 12px;
+  margin-top: 0.5em;
 }
 
-a, .workbenchCommand {
-	cursor: pointer;
-	border: 1px solid transparent;
+a,
+.workbenchCommand {
+  cursor: pointer;
+  border: 1px solid transparent;
 }
 
 .workbenchCommand:disabled {
-	color: #868e96;
-	cursor: default
+  color: #868e96;
+  cursor: default;
 }
 
 .block-extensions .block-info {
-	margin-bottom: 1.5em;
+  margin-bottom: 1.5em;
 }
 
 /* Default styles, overwritten if a theme is provided */
-input, select, textarea {
-	background-color: #3c3c3c;
-	border: none;
-	color: #cccccc;
+input,
+select,
+textarea {
+  background-color: #3c3c3c;
+  border: none;
+  color: #cccccc;
 }
 
 a {
-	color: #CCCCCC;
-	text-decoration: none;
+  color: #cccccc;
+  text-decoration: none;
 }
 
 .section .input-group .validation-error {
-	margin-left: 100px;
+  margin-left: 100px;
 }
 
-.section .inline-form-control, .section .inline-label {
-	display: inline-block;
+.section .inline-form-control,
+.section .inline-label {
+  display: inline-block;
 }
 
 .section .inline-label {
-	width: 95px;
+  width: 95px;
 }
 
-.section .inline-form-control, .section .input-group .validation-error  {
-	width: calc(100% - 100px);
+.section .inline-form-control,
+.section .input-group .validation-error {
+  width: calc(100% - 100px);
 }
 
 #issue-type {
-	cursor: pointer;
+  cursor: pointer;
 }
 
 #similar-issues {
-	margin-left: 15%;
-	display: block;
+  margin-left: 15%;
+  display: block;
 }
 
 #problem-source-help-text {
-	margin-left: calc(15% + 1em);
+  margin-left: calc(15% + 1em);
 }
 
 @media (max-width: 950px) {
-	.section .inline-label {
-		width: 15%;
-	}
+  .section .inline-label {
+    width: 15%;
+  }
 
-	#problem-source-help-text {
-		margin-left: calc(15% + 1em);
-	}
+  #problem-source-help-text {
+    margin-left: calc(15% + 1em);
+  }
 
-	.section .inline-form-control, .section .input-group .validation-error  {
-		width: calc(85% - 5px);
-	}
+  .section .inline-form-control,
+  .section .input-group .validation-error {
+    width: calc(85% - 5px);
+  }
 
-	.section .input-group .validation-error {
-		margin-left: calc(15% + 4px);
-	}
+  .section .input-group .validation-error {
+    margin-left: calc(15% + 4px);
+  }
 }
 
 @media (max-width: 620px) {
-	.section .inline-label {
-		display: none !important;
-	}
+  .section .inline-label {
+    display: none !important;
+  }
 
-	#problem-source-help-text {
-		margin-left: 1em;
-	}
+  #problem-source-help-text {
+    margin-left: 1em;
+  }
 
-	.section .inline-form-control, .section .input-group .validation-error  {
-		width: 100%;
-	}
+  .section .inline-form-control,
+  .section .input-group .validation-error {
+    width: 100%;
+  }
 
-	#similar-issues, .section .input-group .validation-error {
-		margin-left: 0;
-	}
+  #similar-issues,
+  .section .input-group .validation-error {
+    margin-left: 0;
+  }
 }
 
 ::-webkit-scrollbar {
-	width: 14px;
+  width: 14px;
 }
 
 ::-webkit-scrollbar-thumb {
-	min-height: 20px;
+  min-height: 20px;
 }
 
 ::-webkit-scrollbar-corner {
-	display: none;
+  display: none;
 }
 
 .issues-container {
-	margin-left: 1.5em;
-	margin-top: .5em;
-	max-height: 92px;
-	overflow-y: auto;
+  margin-left: 1.5em;
+  margin-top: 0.5em;
+  max-height: 92px;
+  overflow-y: auto;
 }
 
 .issues-container > .issue {
-	padding: 4px 0;
-	display: flex;
+  padding: 4px 0;
+  display: flex;
 }
 
 .issues-container > .issue > .issue-link {
-	width: calc(100% - 82px);
-	overflow: hidden;
-	padding-top: 3px;
-	white-space: nowrap;
-	text-overflow: ellipsis;
+  width: calc(100% - 82px);
+  overflow: hidden;
+  padding-top: 3px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
 
 .issues-container > .issue > .issue-state .codicon {
-	width: 16px;
+  width: 16px;
 }
 
 .issues-container > .issue > .issue-state {
-	display: flex;
-	width: 77px;
-	padding: 3px 6px;
-	margin-right: 5px;
-	color: #CCCCCC;
-	background-color: #3c3c3c;
-	border-radius: .25rem;
+  display: flex;
+  width: 77px;
+  padding: 3px 6px;
+  margin-right: 5px;
+  color: #cccccc;
+  background-color: #3c3c3c;
+  border-radius: 0.25rem;
 }
 
 .issues-container > .issue .label {
-	padding-top: 2px;
-	margin-left: 5px;
-	width: 44px;
-	text-overflow: ellipsis;
-	overflow: hidden;
+  padding-top: 2px;
+  margin-left: 5px;
+  width: 44px;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
-.issues-container > .issue .issue-icon{
-	padding-top: 2px;
+.issues-container > .issue .issue-icon {
+  padding-top: 2px;
 }

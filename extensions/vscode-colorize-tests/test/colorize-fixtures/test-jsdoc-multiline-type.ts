@@ -6,8 +6,7 @@
  * }}
  * @private
  */
-goog.dom.animationFrame.Task_;
-
+goog.dom.animationFrame.Task_
 
 /**
  * @typedef {{
@@ -19,4 +18,4 @@ goog.dom.animationFrame.Task_;
  * }}
  * @private
  */
-goog.dom.animationFrame.TaskSet_;
+goog.dom.animationFrame.TaskSet_

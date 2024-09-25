@@ -1,10 +1,10 @@
 #!/usr/bin/env sh
 #
 # Copyright (c) Microsoft Corporation. All rights reserved.
-# Licensed under the MIT License. See License.txt in the project root for license information.
+# Licensed under the MIT License. See code-license.txt in the project root for license information.
 
 # when run in remote terminal, use the remote cli
-if [ -n "$VSCODE_IPC_HOOK_CLI" ]; then
+if [ -n "$HAYSTACK_IPC_HOOK_CLI" ]; then
 	REMOTE_CLI="$(which -a '@@APPNAME@@' | grep /remote-cli/)"
 	if [ -n "$REMOTE_CLI" ]; then
 		"$REMOTE_CLI" "$@"
@@ -46,18 +46,18 @@ fi
 
 if [ ! -L "$0" ]; then
 	# if path is not a symlink, find relatively
-	VSCODE_PATH="$(dirname "$0")/.."
+	HAYSTACK_PATH="$(dirname "$0")/.."
 else
 	if command -v readlink >/dev/null; then
 		# if readlink exists, follow the symlink and find relatively
-		VSCODE_PATH="$(dirname "$(readlink -f "$0")")/.."
+		HAYSTACK_PATH="$(dirname "$(readlink -f "$0")")/.."
 	else
 		# else use the standard install location
-		VSCODE_PATH="/usr/share/@@APPNAME@@"
+		HAYSTACK_PATH="/usr/share/@@APPNAME@@"
 	fi
 fi
 
-ELECTRON="$VSCODE_PATH/@@APPNAME@@"
-CLI="$VSCODE_PATH/resources/app/out/cli.js"
+ELECTRON="$HAYSTACK_PATH/@@APPNAME@@"
+CLI="$HAYSTACK_PATH/resources/app/out/cli.js"
 ELECTRON_RUN_AS_NODE=1 "$ELECTRON" "$CLI" "$@"
 exit $?

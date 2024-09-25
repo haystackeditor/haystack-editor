@@ -1,6 +1,12 @@
 /*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
+ *--------------------------------------------------------------------------------------------*/
+
+/*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
 declare let MonacoEnvironment: monaco.Environment | undefined;
@@ -149,29 +155,29 @@ declare namespace monaco {
 		 */
 		readonly fragment: string;
 		/**
-		 * Returns a string representing the corresponding file system path of this Uri.
-		 * Will handle UNC paths, normalizes windows drive letters to lower-case, and uses the
-		 * platform specific path separator.
-		 *
-		 * * Will *not* validate the path for invalid characters and semantics.
-		 * * Will *not* look at the scheme of this Uri.
-		 * * The result shall *not* be used for display purposes but for accessing a file on disk.
-		 *
-		 *
-		 * The *difference* to `Uri#path` is the use of the platform specific separator and the handling
-		 * of UNC paths. See the below sample of a file-uri with an authority (UNC path).
-		 *
-		 * ```ts
-			const u = Uri.parse('file://server/c$/folder/file.txt')
-			u.authority === 'server'
-			u.path === '/shares/c$/file.txt'
-			u.fsPath === '\\server\c$\folder\file.txt'
-		```
-		 *
-		 * Using `Uri#path` to read a file (using fs-apis) would not be enough because parts of the path,
-		 * namely the server name, would be missing. Therefore `Uri#fsPath` exists - it's sugar to ease working
-		 * with URIs that represent files on disk (`file` scheme).
-		 */
+		   * Returns a string representing the corresponding file system path of this Uri.
+		   * Will handle UNC paths, normalizes windows drive letters to lower-case, and uses the
+		   * platform specific path separator.
+		   *
+		   * * Will *not* validate the path for invalid characters and semantics.
+		   * * Will *not* look at the scheme of this Uri.
+		   * * The result shall *not* be used for display purposes but for accessing a file on disk.
+		   *
+		   *
+		   * The *difference* to `Uri#path` is the use of the platform specific separator and the handling
+		   * of UNC paths. See the below sample of a file-uri with an authority (UNC path).
+		   *
+		   * ```ts
+			  const u = Uri.parse('file://server/c$/folder/file.txt')
+			  u.authority === 'server'
+			  u.path === '/shares/c$/file.txt'
+			  u.fsPath === '\\server\c$\folder\file.txt'
+		  ```
+		   *
+		   * Using `Uri#path` to read a file (using fs-apis) would not be enough because parts of the path,
+		   * namely the server name, would be missing. Therefore `Uri#fsPath` exists - it's sugar to ease working
+		   * with URIs that represent files on disk (`file` scheme).
+		   */
 		get fsPath(): string;
 		with(change: {
 			scheme?: string;
@@ -188,26 +194,26 @@ declare namespace monaco {
 		 */
 		static parse(value: string, _strict?: boolean): Uri;
 		/**
-		 * Creates a new Uri from a file system path, e.g. `c:\my\files`,
-		 * `/usr/home`, or `\\server\share\some\path`.
-		 *
-		 * The *difference* between `Uri#parse` and `Uri#file` is that the latter treats the argument
-		 * as path, not as stringified-uri. E.g. `Uri.file(path)` is **not the same as**
-		 * `Uri.parse('file://' + path)` because the path might contain characters that are
-		 * interpreted (# and ?). See the following sample:
-		 * ```ts
-		const good = Uri.file('/coding/c#/project1');
-		good.scheme === 'file';
-		good.path === '/coding/c#/project1';
-		good.fragment === '';
-		const bad = Uri.parse('file://' + '/coding/c#/project1');
-		bad.scheme === 'file';
-		bad.path === '/coding/c'; // path is now broken
-		bad.fragment === '/project1';
-		```
-		 *
-		 * @param path A file system path (see `Uri#fsPath`)
-		 */
+		   * Creates a new Uri from a file system path, e.g. `c:\my\files`,
+		   * `/usr/home`, or `\\server\share\some\path`.
+		   *
+		   * The *difference* between `Uri#parse` and `Uri#file` is that the latter treats the argument
+		   * as path, not as stringified-uri. E.g. `Uri.file(path)` is **not the same as**
+		   * `Uri.parse('file://' + path)` because the path might contain characters that are
+		   * interpreted (# and ?). See the following sample:
+		   * ```ts
+		  const good = Uri.file('/coding/c#/project1');
+		  good.scheme === 'file';
+		  good.path === '/coding/c#/project1';
+		  good.fragment === '';
+		  const bad = Uri.parse('file://' + '/coding/c#/project1');
+		  bad.scheme === 'file';
+		  bad.path === '/coding/c'; // path is now broken
+		  bad.fragment === '/project1';
+		  ```
+		   *
+		   * @param path A file system path (see `Uri#fsPath`)
+		   */
 		static file(path: string): Uri;
 		/**
 		 * Creates new Uri from uri components.
@@ -459,11 +465,15 @@ declare namespace monaco {
 		 * VK_CLEAR, 0x0C, CLEAR key
 		 */
 		Clear = 131,
+		MouseWheel = 132,
+		LeftMouseButton = 133,
+		MiddleMouseButton = 134,
+		MouseMove = 135,
 		/**
 		 * Placed last to cover the length of the enum.
 		 * Please do not depend on this value!
 		 */
-		MAX_VALUE = 132
+		MAX_VALUE = 136
 	}
 	export class KeyMod {
 		static readonly CtrlCmd: number;
@@ -631,19 +641,19 @@ declare namespace monaco {
 		/**
 		 * Line number on which the range starts (starts at 1).
 		 */
-		readonly startLineNumber: number;
+		startLineNumber: number;
 		/**
 		 * Column on which the range starts in line `startLineNumber` (starts at 1).
 		 */
-		readonly startColumn: number;
+		startColumn: number;
 		/**
 		 * Line number on which the range ends.
 		 */
-		readonly endLineNumber: number;
+		endLineNumber: number;
 		/**
 		 * Column on which the range ends in line `endLineNumber`.
 		 */
-		readonly endColumn: number;
+		endColumn: number;
 	}
 
 	/**
@@ -653,19 +663,19 @@ declare namespace monaco {
 		/**
 		 * Line number on which the range starts (starts at 1).
 		 */
-		readonly startLineNumber: number;
+		startLineNumber: number;
 		/**
 		 * Column on which the range starts in line `startLineNumber` (starts at 1).
 		 */
-		readonly startColumn: number;
+		startColumn: number;
 		/**
 		 * Line number on which the range ends.
 		 */
-		readonly endLineNumber: number;
+		endLineNumber: number;
 		/**
 		 * Column on which the range ends in line `endLineNumber`.
 		 */
-		readonly endColumn: number;
+		endColumn: number;
 		constructor(startLineNumber: number, startColumn: number, endLineNumber: number, endColumn: number);
 		/**
 		 * Test if this range is empty.
@@ -806,7 +816,9 @@ declare namespace monaco {
 		 * Test if the range spans multiple lines.
 		 */
 		static spansMultipleLines(range: IRange): boolean;
+		static fromIRange(range: IRange): Range;
 		toJSON(): IRange;
+		static toIRange(range: Range): IRange;
 	}
 
 	/**
@@ -880,7 +892,7 @@ declare namespace monaco {
 		getPosition(): Position;
 		/**
 		 * Get the position at the start of the selection.
-		*/
+		 */
 		getSelectionStart(): Position;
 		/**
 		 * Create a new selection with a different `selectionStartLineNumber` and `selectionStartColumn`.
@@ -1792,7 +1804,7 @@ declare namespace monaco.editor {
 
 	/**
 	 * Configures text that is injected into the view without changing the underlying document.
-	*/
+	 */
 	export interface InjectedTextOptions {
 		/**
 		 * Sets the text to inject. Must be a single line.
@@ -1814,7 +1826,7 @@ declare namespace monaco.editor {
 		/**
 		 * Configures cursor stops around injected text.
 		 * Defaults to {@link InjectedTextCursorStops.Both}.
-		*/
+		 */
 		readonly cursorStops?: InjectedTextCursorStops | null;
 	}
 
@@ -2370,23 +2382,23 @@ declare namespace monaco.editor {
 	export enum PositionAffinity {
 		/**
 		 * Prefers the left most position.
-		*/
+		 */
 		Left = 0,
 		/**
 		 * Prefers the right most position.
-		*/
+		 */
 		Right = 1,
 		/**
 		 * No preference.
-		*/
+		 */
 		None = 2,
 		/**
 		 * If the given position is on injected text, prefers the position left of it.
-		*/
+		 */
 		LeftOfInjectedText = 3,
 		/**
 		 * If the given position is on injected text, prefers the position right of it.
-		*/
+		 */
 		RightOfInjectedText = 4
 	}
 
@@ -3146,18 +3158,18 @@ declare namespace monaco.editor {
 		/**
 		 * Controls the minimal number of visible leading and trailing lines surrounding the cursor.
 		 * Defaults to 0.
-		*/
+		 */
 		cursorSurroundingLines?: number;
 		/**
 		 * Controls when `cursorSurroundingLines` should be enforced
 		 * Defaults to `default`, `cursorSurroundingLines` is not enforced when cursor position is changed
 		 * by mouse.
-		*/
+		 */
 		cursorSurroundingLinesStyle?: 'default' | 'all';
 		/**
 		 * Render last line number when the file ends with a newline.
 		 * Defaults to 'on' for Windows and macOS and 'dimmed' for Linux.
-		*/
+		 */
 		renderFinalNewline?: 'on' | 'off' | 'dimmed';
 		/**
 		 * Remove unusual line terminators like LINE SEPARATOR (LS), PARAGRAPH SEPARATOR (PS).
@@ -3758,7 +3770,7 @@ declare namespace monaco.editor {
 		useShadowDOM?: boolean;
 		/**
 		 * Controls the behavior of editor guides.
-		*/
+		 */
 		guides?: IGuidesOptions;
 		/**
 		 * Controls the behavior of the unicode highlight feature
@@ -3767,7 +3779,7 @@ declare namespace monaco.editor {
 		unicodeHighlight?: IUnicodeHighlightOptions;
 		/**
 		 * Configures bracket pair colorization (disabled by default).
-		*/
+		 */
 		bracketPairColorization?: IBracketPairColorizationOptions;
 		/**
 		 * Controls dropping into the editor from an external source.
@@ -3787,6 +3799,11 @@ declare namespace monaco.editor {
 		 * Controls whether the accessibility hint should be provided to screen reader users when an inline completion is shown.
 		 */
 		inlineCompletionsAccessibilityVerbose?: boolean;
+		/**
+		 * Controls the range for which the code editor handles source code.
+		 */
+		sourceRange?: IRange;
+		haystackEditor?: IHaystackEditorOptions;
 	}
 
 	export interface IDiffEditorBaseOptions {
@@ -3843,7 +3860,7 @@ declare namespace monaco.editor {
 		renderMarginRevertIcon?: boolean;
 		/**
 		 * Indicates if the gutter menu should be rendered.
-		*/
+		 */
 		renderGutterMenu?: boolean;
 		/**
 		 * Original model should be editable?
@@ -3866,7 +3883,7 @@ declare namespace monaco.editor {
 		diffWordWrap?: 'off' | 'on' | 'inherit';
 		/**
 		 * Diff Algorithm
-		*/
+		 */
 		diffAlgorithm?: 'legacy' | 'advanced';
 		/**
 		 * Whether the diff editor aria label should be verbose.
@@ -3922,7 +3939,7 @@ declare namespace monaco.editor {
 		defaultValue: V;
 		/**
 		 * Might modify `value`.
-		*/
+		 */
 		applyUpdate(value: V | undefined, update: V): ApplyUpdateResult<V>;
 	}
 
@@ -4013,8 +4030,8 @@ declare namespace monaco.editor {
 	 */
 	export interface IEditorFindOptions {
 		/**
-		* Controls whether the cursor should move to find matches while typing.
-		*/
+		 * Controls whether the cursor should move to find matches while typing.
+		 */
 		cursorMoveOnType?: boolean;
 		/**
 		 * Controls if we seed search string in the Find Widget with editor selection.
@@ -4236,6 +4253,29 @@ declare namespace monaco.editor {
 		 * Define whether to scroll sticky scroll with editor horizontal scrollbae
 		 */
 		scrollWithEditor?: boolean;
+	}
+
+	export interface IHaystackEditorOptions {
+		/**
+		 * How much width should an editor begin with.
+		 */
+		initialWidth?: number;
+		/**
+		 * Whether we should be sending data for the navigational copilot.
+		 */
+		copilotOptOut?: boolean;
+		/**
+		 * Whether we should be showing dots on the canvas to show distance/scale.
+		 */
+		hideCanvasDots?: boolean;
+		/**
+		 * Whether the middle mouse click should close editors on editor headers.
+		 */
+		middleMouseClickToCloseEditors?: boolean;
+		/**
+		 * Whether the symbol at file selection will have arrows drawn to/from it.
+		 */
+		enableSymbolAtFileSelection?: boolean;
 	}
 
 	/**
@@ -4530,7 +4570,7 @@ declare namespace monaco.editor {
 	export interface IInlineSuggestOptions {
 		/**
 		 * Enable or disable the rendering of automatic inline completions.
-		*/
+		 */
 		enabled?: boolean;
 		/**
 		 * Configures the mode.
@@ -4538,7 +4578,7 @@ declare namespace monaco.editor {
 		 * Use `subword` to only show ghost text if the replace text is a subword of the suggestion text.
 		 * Use `subwordSmart` to only show ghost text if the replace text is a subword of the suggestion text, but the subword must start after the cursor position.
 		 * Defaults to `prefix`.
-		*/
+		 */
 		mode?: 'prefix' | 'subword' | 'subwordSmart';
 		showToolbar?: 'always' | 'onHover' | 'never';
 		suppressSuggestions?: boolean;
@@ -4555,7 +4595,7 @@ declare namespace monaco.editor {
 	export interface IInlineEditOptions {
 		/**
 		 * Enable or disable the rendering of automatic inline edit.
-		*/
+		 */
 		enabled?: boolean;
 		showToolbar?: 'always' | 'onHover' | 'never';
 		/**
@@ -4572,11 +4612,11 @@ declare namespace monaco.editor {
 	export interface IBracketPairColorizationOptions {
 		/**
 		 * Enable or disable bracket pair colorization.
-		*/
+		 */
 		enabled?: boolean;
 		/**
 		 * Use independent color pool per bracket type.
-		*/
+		 */
 		independentColorPoolPerBracketType?: boolean;
 	}
 
@@ -4584,7 +4624,7 @@ declare namespace monaco.editor {
 		/**
 		 * Enable rendering of bracket pair guides.
 		 * Defaults to false.
-		*/
+		 */
 		bracketPairs?: boolean | 'active';
 		/**
 		 * Enable rendering of vertical bracket pair guides.
@@ -4594,7 +4634,7 @@ declare namespace monaco.editor {
 		/**
 		 * Enable highlighting of the active bracket pair.
 		 * Defaults to true.
-		*/
+		 */
 		highlightActiveBracketPair?: boolean;
 		/**
 		 * Enable rendering of indent guides.
@@ -4650,7 +4690,7 @@ declare namespace monaco.editor {
 		preview?: boolean;
 		/**
 		 * Configures the mode of the preview.
-		*/
+		 */
 		previewMode?: 'prefix' | 'subword' | 'subwordSmart';
 		/**
 		 * Show details inline with the label. Defaults to true.
@@ -4983,14 +5023,15 @@ declare namespace monaco.editor {
 		wrappingStrategy = 139,
 		showDeprecated = 140,
 		inlayHints = 141,
-		editorClassName = 142,
-		pixelRatio = 143,
-		tabFocusMode = 144,
-		layoutInfo = 145,
-		wrappingInfo = 146,
-		defaultColorDecorators = 147,
-		colorDecoratorsActivatedOn = 148,
-		inlineCompletionsAccessibilityVerbose = 149
+		haystackEditor = 142,
+		editorClassName = 143,
+		pixelRatio = 144,
+		tabFocusMode = 145,
+		layoutInfo = 146,
+		wrappingInfo = 147,
+		defaultColorDecorators = 148,
+		colorDecoratorsActivatedOn = 149,
+		inlineCompletionsAccessibilityVerbose = 150
 	}
 
 	export const EditorOptions: {
@@ -5003,8 +5044,8 @@ declare namespace monaco.editor {
 		screenReaderAnnounceInlineSuggestion: IEditorOption<EditorOption.screenReaderAnnounceInlineSuggestion, boolean>;
 		autoClosingBrackets: IEditorOption<EditorOption.autoClosingBrackets, 'always' | 'languageDefined' | 'beforeWhitespace' | 'never'>;
 		autoClosingComments: IEditorOption<EditorOption.autoClosingComments, 'always' | 'languageDefined' | 'beforeWhitespace' | 'never'>;
-		autoClosingDelete: IEditorOption<EditorOption.autoClosingDelete, 'always' | 'never' | 'auto'>;
-		autoClosingOvertype: IEditorOption<EditorOption.autoClosingOvertype, 'always' | 'never' | 'auto'>;
+		autoClosingDelete: IEditorOption<EditorOption.autoClosingDelete, 'auto' | 'always' | 'never'>;
+		autoClosingOvertype: IEditorOption<EditorOption.autoClosingOvertype, 'auto' | 'always' | 'never'>;
 		autoClosingQuotes: IEditorOption<EditorOption.autoClosingQuotes, 'always' | 'languageDefined' | 'beforeWhitespace' | 'never'>;
 		autoIndent: IEditorOption<EditorOption.autoIndent, EditorAutoIndentStrategy>;
 		automaticLayout: IEditorOption<EditorOption.automaticLayout, boolean>;
@@ -5016,7 +5057,7 @@ declare namespace monaco.editor {
 		codeLensFontFamily: IEditorOption<EditorOption.codeLensFontFamily, string>;
 		codeLensFontSize: IEditorOption<EditorOption.codeLensFontSize, number>;
 		colorDecorators: IEditorOption<EditorOption.colorDecorators, boolean>;
-		colorDecoratorActivatedOn: IEditorOption<EditorOption.colorDecoratorsActivatedOn, 'clickAndHover' | 'click' | 'hover'>;
+		colorDecoratorActivatedOn: IEditorOption<EditorOption.colorDecoratorsActivatedOn, 'hover' | 'clickAndHover' | 'click'>;
 		colorDecoratorsLimit: IEditorOption<EditorOption.colorDecoratorsLimit, number>;
 		columnSelection: IEditorOption<EditorOption.columnSelection, boolean>;
 		comments: IEditorOption<EditorOption.comments, Readonly<Required<IEditorCommentsOptions>>>;
@@ -5035,6 +5076,7 @@ declare namespace monaco.editor {
 		emptySelectionClipboard: IEditorOption<EditorOption.emptySelectionClipboard, boolean>;
 		dropIntoEditor: IEditorOption<EditorOption.dropIntoEditor, Readonly<Required<IDropIntoEditorOptions>>>;
 		stickyScroll: IEditorOption<EditorOption.stickyScroll, Readonly<Required<IEditorStickyScrollOptions>>>;
+		haystackEditor: IEditorOption<EditorOption.haystackEditor, Readonly<Required<IHaystackEditorOptions>>>;
 		experimentalWhitespaceRendering: IEditorOption<EditorOption.experimentalWhitespaceRendering, 'off' | 'svg' | 'font'>;
 		extraEditorClassName: IEditorOption<EditorOption.extraEditorClassName, string>;
 		fastScrollSensitivity: IEditorOption<EditorOption.fastScrollSensitivity, number>;
@@ -5124,13 +5166,13 @@ declare namespace monaco.editor {
 		tabCompletion: IEditorOption<EditorOption.tabCompletion, 'on' | 'off' | 'onlySnippets'>;
 		tabIndex: IEditorOption<EditorOption.tabIndex, number>;
 		unicodeHighlight: IEditorOption<EditorOption.unicodeHighlighting, any>;
-		unusualLineTerminators: IEditorOption<EditorOption.unusualLineTerminators, 'auto' | 'off' | 'prompt'>;
+		unusualLineTerminators: IEditorOption<EditorOption.unusualLineTerminators, 'off' | 'auto' | 'prompt'>;
 		useShadowDOM: IEditorOption<EditorOption.useShadowDOM, boolean>;
 		useTabStops: IEditorOption<EditorOption.useTabStops, boolean>;
 		wordBreak: IEditorOption<EditorOption.wordBreak, 'normal' | 'keepAll'>;
 		wordSegmenterLocales: IEditorOption<EditorOption.wordSegmenterLocales, {}>;
 		wordSeparators: IEditorOption<EditorOption.wordSeparators, string>;
-		wordWrap: IEditorOption<EditorOption.wordWrap, 'on' | 'off' | 'wordWrapColumn' | 'bounded'>;
+		wordWrap: IEditorOption<EditorOption.wordWrap, 'wordWrapColumn' | 'on' | 'off' | 'bounded'>;
 		wordWrapBreakAfterCharacters: IEditorOption<EditorOption.wordWrapBreakAfterCharacters, string>;
 		wordWrapBreakBeforeCharacters: IEditorOption<EditorOption.wordWrapBreakBeforeCharacters, string>;
 		wordWrapColumn: IEditorOption<EditorOption.wordWrapColumn, number>;
@@ -5186,7 +5228,7 @@ declare namespace monaco.editor {
 		afterColumn?: number;
 		/**
 		 * If the `afterColumn` has multiple view columns, the affinity specifies which one to use. Defaults to `none`.
-		*/
+		 */
 		afterColumnAffinity?: PositionAffinity;
 		/**
 		 * Render the zone even when its line is hidden.
@@ -5308,7 +5350,7 @@ declare namespace monaco.editor {
 		/**
 		 * Placement preference when multiple view positions refer to the same (model) position.
 		 * This plays a role when injected text is involved.
-		*/
+		 */
 		positionAffinity?: PositionAffinity;
 	}
 
@@ -5644,7 +5686,7 @@ declare namespace monaco.editor {
 	/**
 	 * Target hit with the mouse in the editor.
 	 */
-	export type IMouseTarget = (IMouseTargetUnknown | IMouseTargetTextarea | IMouseTargetMargin | IMouseTargetViewZone | IMouseTargetContentText | IMouseTargetContentEmpty | IMouseTargetContentWidget | IMouseTargetOverlayWidget | IMouseTargetScrollbar | IMouseTargetOverviewRuler | IMouseTargetOutsideEditor);
+	export type IMouseTarget = IMouseTargetUnknown | IMouseTargetTextarea | IMouseTargetMargin | IMouseTargetViewZone | IMouseTargetContentText | IMouseTargetContentEmpty | IMouseTargetContentWidget | IMouseTargetOverlayWidget | IMouseTargetScrollbar | IMouseTargetOverviewRuler | IMouseTargetOutsideEditor;
 
 	/**
 	 * A mouse event originating from the editor.
@@ -5837,11 +5879,11 @@ declare namespace monaco.editor {
 		 * the editor fires a begin update before the operation and an end update after the operation.
 		 * Whenever the editor fires `onBeginUpdate`, it will also fire `onEndUpdate` once the operation finishes.
 		 * Note that not all operations are bracketed by `onBeginUpdate` and `onEndUpdate`.
-		*/
+		 */
 		readonly onBeginUpdate: IEvent<void>;
 		/**
 		 * Fires after the editor completes the operation it fired `onBeginUpdate` for.
-		*/
+		 */
 		readonly onEndUpdate: IEvent<void>;
 		/**
 		 * Saves current view state of the editor in a serializable object.
@@ -5873,7 +5915,7 @@ declare namespace monaco.editor {
 		 * will not be destroyed.
 		 * It is safe to call setModel(null) to simply detach the current model from the editor.
 		 */
-		setModel(model: ITextModel | null): void;
+		setModel(model: ITextModel | null, editRange?: IRange, lineNumberOffset?: number): void;
 		/**
 		 * Gets all the editor computed options.
 		 */
@@ -6109,6 +6151,19 @@ declare namespace monaco.editor {
 		 * This is the best place to compute data for the viewport (such as tokens).
 		 */
 		handleInitialized?(): void;
+		/**
+		 * Gets the range of the file buffer for which the editor is responsible.
+		 * If the editor is responsible for the entire file buffer, returns null.
+		 */
+		getEditRange(): IRange | null;
+		/**
+		 * Sets the range of the file buffer for which the editor is responsible.
+		 */
+		setEditRange(editRange: IRange | null): void;
+		/**
+		 * Hacky way to guarantee the scroll top is set without disruption. Should be used sparingly.
+		 */
+		forceScrollTopForFiveFrames(visiblePosition: number): void;
 	}
 
 	/**
@@ -6150,7 +6205,7 @@ declare namespace monaco.editor {
 		 * will not be destroyed.
 		 * It is safe to call setModel(null) to simply detach the current model from the editor.
 		 */
-		setModel(model: IDiffEditorModel | IDiffEditorViewModel | null): void;
+		setModel(model: IDiffEditorModel | IDiffEditorViewModel | null, editRange?: IRange): void;
 		/**
 		 * Get the `original` editor.
 		 */
@@ -6659,7 +6714,7 @@ declare namespace monaco.languages {
 		/**
 		 * Defines a list of bracket pairs that are colorized depending on their nesting level.
 		 * If not set, the configured brackets will be used.
-		*/
+		 */
 		colorizedBracketPairs?: CharacterPair[];
 		/**
 		 * Defines what characters must be after the cursor for bracket or quote autoclosing to occur when using the \'languageDefined\' autoclosing setting.
@@ -7169,7 +7224,7 @@ declare namespace monaco.languages {
 		 *
 		 * The text can also be a snippet. In that case, a preview with default parameters is shown.
 		 * When accepting the suggestion, the full snippet is inserted.
-		*/
+		 */
 		readonly insertText: string | {
 			snippet: string;
 		};
@@ -7187,13 +7242,13 @@ declare namespace monaco.languages {
 		/**
 		 * The range to replace.
 		 * Must begin and end on the same line.
-		*/
+		 */
 		readonly range?: IRange;
 		readonly command?: Command;
 		/**
 		 * If set to `true`, unopened closing brackets are removed and unclosed opening brackets are closed.
 		 * Defaults to `false`.
-		*/
+		 */
 		readonly completeBracketPairs?: boolean;
 	}
 
@@ -7217,7 +7272,7 @@ declare namespace monaco.languages {
 		/**
 		 * Will be called when an item is shown.
 		 * @param updatedInsertText Is useful to understand bracket completion.
-		*/
+		 */
 		handleItemDidShow?(completions: T, item: T['items'][number], updatedInsertText: string): void;
 		/**
 		 * Will be called when an item is partially accepted.
@@ -7225,7 +7280,7 @@ declare namespace monaco.languages {
 		handlePartialAccept?(completions: T, item: T['items'][number], acceptedCharacters: number, info: PartialAcceptInfo): void;
 		/**
 		 * Will be called when a completions list is no longer in use and can be garbage-collected.
-		*/
+		 */
 		freeInlineCompletions(completions: T): void;
 		/**
 		 * Only used for {@link yieldsToGroupIds}.
@@ -7626,6 +7681,10 @@ declare namespace monaco.languages {
 		 * Provide symbol information for the given document.
 		 */
 		provideDocumentSymbols(model: editor.ITextModel, token: CancellationToken): ProviderResult<DocumentSymbol[]>;
+		/**
+		 * Provide symbol information for the given document.
+		 */
+		provideDocumentSymbolsWithoutModel(uri: Uri, token: CancellationToken): ProviderResult<DocumentSymbol[]>;
 	}
 
 	export interface TextEdit {
@@ -8142,9 +8201,16 @@ declare namespace monaco.languages {
 	 * 		shorthands: [reg,act] == { regex: reg, action: act}
 	 *		and       : [reg,act,nxt] == { regex: reg, action: act{ next: nxt }}
 	 */
-	export type IShortMonarchLanguageRule1 = [string | RegExp, IMonarchLanguageAction];
+	export type IShortMonarchLanguageRule1 = [
+	string | RegExp,
+	IMonarchLanguageAction
+	];
 
-	export type IShortMonarchLanguageRule2 = [string | RegExp, IMonarchLanguageAction, string];
+	export type IShortMonarchLanguageRule2 = [
+	string | RegExp,
+	IMonarchLanguageAction,
+	string
+	];
 
 	export interface IExpandedMonarchLanguageRule {
 		/**

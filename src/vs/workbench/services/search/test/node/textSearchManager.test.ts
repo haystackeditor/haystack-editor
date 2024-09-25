@@ -1,44 +1,67 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as assert from 'assert';
-import { CancellationToken } from 'vs/base/common/cancellation';
-import { URI } from 'vs/base/common/uri';
-import { ensureNoDisposablesAreLeakedInTestSuite } from 'vs/base/test/common/utils';
-import { Progress } from 'vs/platform/progress/common/progress';
-import { ITextQuery, QueryType } from 'vs/workbench/services/search/common/search';
-import { ProviderResult, TextSearchComplete, TextSearchOptions, TextSearchProvider, TextSearchQuery, TextSearchResult } from 'vs/workbench/services/search/common/searchExtTypes';
-import { NativeTextSearchManager } from 'vs/workbench/services/search/node/textSearchManager';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
-suite('NativeTextSearchManager', () => {
-	test('fixes encoding', async () => {
-		let correctEncoding = false;
-		const provider: TextSearchProvider = {
-			provideTextSearchResults(query: TextSearchQuery, options: TextSearchOptions, progress: Progress<TextSearchResult>, token: CancellationToken): ProviderResult<TextSearchComplete> {
-				correctEncoding = options.encoding === 'windows-1252';
+import * as assert from "assert"
+import { CancellationToken } from "vs/base/common/cancellation"
+import { URI } from "vs/base/common/uri"
+import { ensureNoDisposablesAreLeakedInTestSuite } from "vs/base/test/common/utils"
+import { Progress } from "vs/platform/progress/common/progress"
+import {
+  ITextQuery,
+  QueryType,
+} from "vs/workbench/services/search/common/search"
+import {
+  ProviderResult,
+  TextSearchComplete,
+  TextSearchOptions,
+  TextSearchProvider,
+  TextSearchQuery,
+  TextSearchResult,
+} from "vs/workbench/services/search/common/searchExtTypes"
+import { NativeTextSearchManager } from "vs/workbench/services/search/node/textSearchManager"
 
-				return null;
-			}
-		};
+suite("NativeTextSearchManager", () => {
+  test("fixes encoding", async () => {
+    let correctEncoding = false
+    const provider: TextSearchProvider = {
+      provideTextSearchResults(
+        query: TextSearchQuery,
+        options: TextSearchOptions,
+        progress: Progress<TextSearchResult>,
+        token: CancellationToken,
+      ): ProviderResult<TextSearchComplete> {
+        correctEncoding = options.encoding === "windows-1252"
 
-		const query: ITextQuery = {
-			type: QueryType.Text,
-			contentPattern: {
-				pattern: 'a'
-			},
-			folderQueries: [{
-				folder: URI.file('/some/folder'),
-				fileEncoding: 'windows1252'
-			}]
-		};
+        return null
+      },
+    }
 
-		const m = new NativeTextSearchManager(query, provider);
-		await m.search(() => { }, CancellationToken.None);
+    const query: ITextQuery = {
+      type: QueryType.Text,
+      contentPattern: {
+        pattern: "a",
+      },
+      folderQueries: [
+        {
+          folder: URI.file("/some/folder"),
+          fileEncoding: "windows1252",
+        },
+      ],
+    }
 
-		assert.ok(correctEncoding);
-	});
+    const m = new NativeTextSearchManager(query, provider)
+    await m.search(() => {}, CancellationToken.None)
 
-	ensureNoDisposablesAreLeakedInTestSuite();
-});
+    assert.ok(correctEncoding)
+  })
+
+  ensureNoDisposablesAreLeakedInTestSuite()
+})
