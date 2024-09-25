@@ -653,7 +653,7 @@ class Widget {
         this._cachedDomNodeOffsetWidth / canvasScale,
       )
       this._cachedDomNodeOffsetHeight = Math.round(
-        this._cachedDomNodeOffsetHeight / canvasScale,
+        this._cachedDomNodeOffsetHeight,
       )
     }
 
