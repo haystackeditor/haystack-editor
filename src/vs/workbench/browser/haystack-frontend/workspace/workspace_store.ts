@@ -3361,11 +3361,17 @@ export function getWorkspaceStore() {
           const viewportSize =
             getViewportDimensionsWithPadding().sub(viewportPosition)
 
-          // Make the pinned editor size as large as possible.
-          const pinnedSize = new Vector(
-            viewportSize.x - combinedPinnedWidth,
-            viewportSize.y,
-          )
+          let pinnedSize: Vector = Vector.new()
+
+          if (editor.vWidth === 0 || editor.vHeight === 0) {
+            // Make the pinned editor size as large as possible.
+            pinnedSize = new Vector(
+              viewportSize.x - combinedPinnedWidth,
+              viewportSize.y,
+            )
+          } else {
+            pinnedSize = new Vector(editor.vWidth, editor.vHeight)
+          }
 
           const pinnedPosition = get().getViewportPositionForPinnedEditor(
             viewportPosition,
