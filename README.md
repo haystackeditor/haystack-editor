@@ -2,7 +2,7 @@
 
 ## The Repository
 
-This repository ("`Haystack Editor`") is where we (Haystack Software) develop the [Haystack Editor](https://haystackeditor.com/) product together with the community. Not only do we work on code and issues here, we also publish our [roadmap](https://github.com/haystackeditor/haystack-editor/wiki/Roadmap). This source code is available under the [PolyForm Strict License 1.0.0] (https://polyformproject.org/licenses/strict/1.0.0).
+This repository ("`Haystack Editor`") is where we (Haystack Software) develop the [Haystack Editor](https://haystackeditor.com/) product together with the community. Not only do we work on code and issues here, we also publish our [roadmap](https://github.com/haystackeditor/haystack-editor/wiki/Roadmap). This source code is available under the [PolyForm Strict License 1.0.0](https://polyformproject.org/licenses/strict/1.0.0).
 
 ## Haystack Editor
 
