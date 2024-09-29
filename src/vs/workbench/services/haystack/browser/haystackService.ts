@@ -1769,10 +1769,39 @@ export class HaystackService extends Disposable implements IHaystackService {
             adjustedRange.startColumn,
           ),
         )
+
         if (element == null) continue
 
-        const references = await this.getReferencesForeditor(
+        const adjustedSelectionRange = adjustRangeForComments(
           element.symbol.selectionRange,
+          model,
+        )
+
+        let position = new Position(
+          adjustedSelectionRange.startLineNumber,
+          adjustedSelectionRange.startColumn,
+        )
+
+        let wordAtPosition = model.getWordAtPosition(position)
+
+        while (
+          wordAtPosition == null ||
+          wordAtPosition.word === " " ||
+          wordAtPosition.word === "async" ||
+          wordAtPosition.word === "public" ||
+          wordAtPosition.word === "private" ||
+          wordAtPosition.word === "protected" ||
+          wordAtPosition.word === "function"
+        ) {
+          position = new Position(
+            position.lineNumber,
+            (wordAtPosition?.endColumn ?? position.column) + 1,
+          )
+          wordAtPosition = model.getWordAtPosition(position)
+        }
+
+        const references = await this.getReferencesForeditor(
+          Range.fromPositions(position),
           toSymbolDatum.uri,
         )
 

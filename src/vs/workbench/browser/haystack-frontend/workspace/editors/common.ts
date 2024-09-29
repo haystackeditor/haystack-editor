@@ -78,7 +78,8 @@ export function lineIsComment(line: string) {
     line.startsWith("<!--") ||
     line.startsWith("-->") ||
     line.startsWith("<!---") ||
-    line.startsWith("--->")
+    line.startsWith("--->") ||
+    line.startsWith("\n")
   )
 }
 
