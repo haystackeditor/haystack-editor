@@ -2658,6 +2658,10 @@ export class NotebookEditorWidget
     }
   }
 
+  focusWebview() {
+    this._webview?.focusWebview()
+  }
+
   onShow() {
     this._isVisible = true
   }

@@ -137,13 +137,20 @@ export const DiffEditor = React.memo(function DiffEditor({
     state.idToEditorMap.get(editorId),
   )
 
+  const editorHeight = React.useMemo(() => {
+    if (editor == null) return 0
+    return editor.isPinned
+      ? editor.vHeight - HEADER_HEIGHT
+      : editor.height - HEADER_HEIGHT
+  }, [editor])
+
   return (
     <div
       className={classNames({
         fileEditor: true,
       })}
       style={{
-        height: `${editor?.height ? editor.height - HEADER_HEIGHT : 0}px`,
+        height: `${editorHeight}px`,
       }}
       ref={editorContainerRef}
     />

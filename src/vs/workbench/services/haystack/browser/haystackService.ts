@@ -911,6 +911,14 @@ export class HaystackService extends Disposable implements IHaystackService {
 
       this._store.add(
         editorPane.onDidBlur(() => {
+          if (
+            WorkspaceStoreWrapper.getWorkspaceState().floatingToolbarElement?.contains(
+              document.activeElement,
+            )
+          ) {
+            return
+          }
+
           this.blurNotebookEditor(editorPane)
         }),
       )

@@ -51,6 +51,7 @@ import { useHandleBoundsKeyDown } from "vs/workbench/browser/haystack-frontend/w
 import { SymbolDependencyList } from "vs/workbench/browser/haystack-frontend/workspace/editors/dependency_list"
 import { SmallFileSvg } from "vs/workbench/browser/haystack-frontend/workspace/editors/svgs"
 import { getSymbolIcon } from "vs/workbench/browser/haystack-frontend/workspace/editors/utils/get_symbol_icon"
+import { usePrevious } from "../../react_utils/use_previous"
 
 interface CodeEditorContainerProps {
   editorId: string
@@ -85,8 +86,19 @@ export function CodeEditorContainer({ editorId }: CodeEditorContainerProps) {
     state.selection.has(editorId),
   )
 
+  const previousNotebookEditor = usePrevious(
+    notebookEditor,
+    /* defaultToNull */ true,
+  )
+
   React.useEffect(() => {
     if (notebookEditor == null) return
+
+    // If the notebook editor is becoming visible for the first time,
+    // focus it.
+    if (previousNotebookEditor == null) {
+      notebookEditor.focusWebview()
+    }
 
     if (boundingBox == null) {
       notebookEditor.setVisible(false)
@@ -95,14 +107,30 @@ export function CodeEditorContainer({ editorId }: CodeEditorContainerProps) {
       notebookEditor.setVisible(true)
     }
 
-    notebookEditor.layout(
-      new Dimension((width - 2) * scale, (height - HEADER_HEIGHT - 2) * scale),
-      {
-        left: editorPosition.x + boundingBox.x + 2 * scale,
-        top: editorPosition.y + boundingBox.y + (HEADER_HEIGHT + 2) * scale,
-      },
-    )
-  }, [notebookEditor, width, height, boundingBox, editorPosition, scale])
+    const layoutWidth = isPinned ? vWidth : width * scale
+    const layoutHeight = isPinned
+      ? vHeight - HEADER_HEIGHT - 2
+      : (height - HEADER_HEIGHT - 2) * scale
+    const layoutScaleFactor = isPinned ? 1 : scale
+
+    notebookEditor.layout(new Dimension(layoutWidth, layoutHeight), {
+      left: editorPosition.x + boundingBox.x + 2 * layoutScaleFactor,
+      top:
+        editorPosition.y +
+        boundingBox.y +
+        (HEADER_HEIGHT + 2) * layoutScaleFactor,
+    })
+  }, [
+    notebookEditor,
+    width,
+    height,
+    vWidth,
+    vHeight,
+    isPinned,
+    boundingBox,
+    editorPosition,
+    scale,
+  ])
 
   React.useEffect(() => {
     if (webviewEditor == null) return

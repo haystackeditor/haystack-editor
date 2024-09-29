@@ -1202,6 +1202,10 @@ export class ExtensionEditor extends EditorPane {
         }),
       )
 
+      if (this.input != null) {
+        ;(this.input as ExtensionsInput).webviewOrigin = webview.origin
+      }
+
       webview.initialScrollProgress =
         this.initialScrollProgress.get(webviewIndex) || 0
 

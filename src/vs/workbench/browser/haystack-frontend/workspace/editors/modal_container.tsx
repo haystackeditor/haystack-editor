@@ -51,15 +51,28 @@ export function ModalEditorContainer({ editorId }: ModalEditorContainerProps) {
     WorkspaceStoreWrapper.useWorkspaceState(
       (state) => state.idToEditorMap.get(editorId) as CanvasModalEditor,
     )
+
   const isSelected = WorkspaceStoreWrapper.useWorkspaceState((state) =>
     state.selection.has(editorId),
   )
 
   React.useEffect(() => {
-    editorPane?.layout(
-      new Dimension(width * scale, (height - HEADER_HEIGHT - 2) * scale),
-    )
-  }, [editorPane, width, height, editorPosition, scale])
+    const layoutWidth = isPinned ? vWidth : width * scale
+    const layoutHeight = isPinned
+      ? vHeight - HEADER_HEIGHT - 2
+      : (height - HEADER_HEIGHT - 2) * scale
+
+    editorPane?.layout(new Dimension(layoutWidth, layoutHeight))
+  }, [
+    editorPane,
+    width,
+    height,
+    vWidth,
+    vHeight,
+    isPinned,
+    editorPosition,
+    scale,
+  ])
 
   return (
     boundingBox != null && (
@@ -255,7 +268,17 @@ export const ModalEditorContainerImpl = React.memo(
           }
           onKeyDown(e)
         }}
-        onFocusCapture={() => {
+        onFocusCapture={(e) => {
+          WorkspaceStoreWrapper.getWorkspaceState().setFocusedEditor(editorId)
+
+          const editorContainsTarget = !!containerElement?.contains(e.target)
+          if (editorContainsTarget) {
+            // We pan to the editor if the user clicked inside the editor.
+            WorkspaceStoreWrapper.getWorkspaceState().panToFocusedEditor(
+              editorId,
+            )
+          }
+
           selectEditor(editorId, /* clearSelection */ true)
         }}
         onKeyDownCapture={onKeyDownCapture}

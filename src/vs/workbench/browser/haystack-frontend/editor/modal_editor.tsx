@@ -72,6 +72,13 @@ export const ModalEditor = React.memo(function ModalEditor({
     state.idToEditorMap.get(editorId),
   )
 
+  const editorHeight = React.useMemo(() => {
+    if (canvasEditor == null) return 0
+    return canvasEditor.isPinned
+      ? canvasEditor.vHeight - HEADER_HEIGHT - 2
+      : canvasEditor.height - HEADER_HEIGHT - 2
+  }, [canvasEditor])
+
   return (
     <div
       className={classNames({
@@ -80,7 +87,7 @@ export const ModalEditor = React.memo(function ModalEditor({
       })}
       ref={containerRef}
       style={{
-        height: `${canvasEditor?.height ? canvasEditor.height - HEADER_HEIGHT : 0}px`,
+        height: `${editorHeight}px`,
       }}
     />
   )

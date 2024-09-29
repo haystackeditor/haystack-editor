@@ -81,6 +81,8 @@ import { HaystackTelemetryService } from "vs/workbench/services/haystackTelemetr
 import { convertStateToEvent } from "vs/workbench/browser/haystack-frontend/middleware/state_event"
 import { MiddlewareType } from "vs/workbench/browser/haystack-frontend/middleware/middleware_common"
 import { SpatialSortMiddleware } from "vs/workbench/browser/haystack-frontend/middleware/spatial_sort_middleware"
+import { ExtensionsInput } from "vs/workbench/contrib/extensions/common/extensionsInput"
+import { NotebookEditorInput } from "vs/workbench/contrib/notebook/common/notebookEditorInput"
 
 // This exists here because otherwise it causes weird reference errors.
 type Middleware = <
@@ -1204,6 +1206,10 @@ export function getWorkspaceStore() {
         ) => {
           // Checks if editor already exists. If so, pan to it.
           for (const editor of get().idToEditorMap.values()) {
+            if (editor.type !== CanvasEditorType.CODE_EDITOR) {
+              continue
+            }
+
             const codeEditorArgs = editorArgs as CodeEditorArgs
             const codeEditor = editor as CanvasCodeEditor
             if (
@@ -3478,11 +3484,22 @@ export function getWorkspaceStore() {
         },
         focusOnEditorWithWebview(origin) {
           for (const editor of get().idToEditorMap.values()) {
-            if (
+            const modalWebviewMatch =
               editor.type === CanvasEditorType.MODAL_EDITOR &&
-              editor.input instanceof WebviewInput &&
-              editor.input.webview.origin === origin
-            ) {
+              ((editor.input instanceof WebviewInput &&
+                editor.input.webview.origin === origin) ||
+                (editor.input instanceof ExtensionsInput &&
+                  editor.input.webviewOrigin === origin))
+
+            const codeWebviewMatch =
+              editor.type === CanvasEditorType.CODE_EDITOR &&
+              ((editor.webviewEditor != null &&
+                (editor.webviewEditor.input as WebviewInput).webview.origin ===
+                  origin) ||
+                (editor.notebookEditor != null &&
+                  editor.notebookEditor.getInnerWebview()?.origin === origin))
+
+            if (modalWebviewMatch || codeWebviewMatch) {
               const selection = new Set<string>()
               selection.add(editor.uuid)
               set({ selection, focusedEditorId: editor.uuid })

@@ -185,6 +185,13 @@ export const CodeEditor = React.memo(function CodeEditor({
     state.idToEditorMap.get(editorId),
   )
 
+  const editorHeight = React.useMemo(() => {
+    if (canvasEditor == null) return 0
+    return canvasEditor.isPinned
+      ? canvasEditor.vHeight - HEADER_HEIGHT
+      : canvasEditor.height - HEADER_HEIGHT
+  }, [canvasEditor])
+
   return (
     <div
       className={classNames({
@@ -192,13 +199,7 @@ export const CodeEditor = React.memo(function CodeEditor({
         modal: uri.scheme === "walkThrough",
       })}
       style={{
-        height: `${
-          canvasEditor?.isPinned
-            ? canvasEditor.vHeight - HEADER_HEIGHT
-            : canvasEditor?.height
-              ? canvasEditor.height - HEADER_HEIGHT
-              : 0
-        }px`,
+        height: `${editorHeight}px`,
       }}
       ref={editorContainerRef}
       onKeyDownCapture={async (e) => {

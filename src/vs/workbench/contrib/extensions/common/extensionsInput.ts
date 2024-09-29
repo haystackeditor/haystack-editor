@@ -44,6 +44,8 @@ export interface IExtensionEditorOptions extends IEditorOptions {
 export class ExtensionsInput extends EditorInput {
   static readonly ID = "workbench.extensions.input2"
 
+  public webviewOrigin: string | null = null
+
   override get typeId(): string {
     return ExtensionsInput.ID
   }

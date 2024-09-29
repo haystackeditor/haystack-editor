@@ -31,6 +31,7 @@ import {
   CanvasEditor,
   CanvasEditorType,
   CanvasGhostEditor,
+  CanvasModalEditor,
 } from "vs/workbench/browser/haystack-frontend/editor/editor"
 
 const FLOATING_TOOLBAR_TOP_MARGIN = 10
@@ -186,6 +187,7 @@ export function FloatingToolbar({}: FloatingToolbarProps) {
   if (
     editorSingleton == null ||
     (editorSingleton.type !== CanvasEditorType.CODE_EDITOR &&
+      editorSingleton.type !== CanvasEditorType.MODAL_EDITOR &&
       (editorSingleton.type !== CanvasEditorType.GHOST_EDITOR ||
         editorSingleton.isGhost))
   ) {
@@ -338,6 +340,10 @@ function FloatingToolbarButton({
   return (
     <button
       className="floatingToolbarCommandButton"
+      onMouseDown={(e) => {
+        // Prevent the floating toolbar from stealing focus.
+        e.preventDefault()
+      }}
       onClick={() => {
         executeCommand(selectedEditor, command.commandData.commandType)
       }}
@@ -396,6 +402,7 @@ async function executeCommand(
 ) {
   if (
     selectedEditor.type !== CanvasEditorType.CODE_EDITOR &&
+    selectedEditor.type !== CanvasEditorType.MODAL_EDITOR &&
     selectedEditor.type !== CanvasEditorType.GHOST_EDITOR
   ) {
     return
@@ -421,7 +428,12 @@ async function executeCommand(
       break
     }
     case FloatingToolbarCommandType.GO_UP_ONE_LEVEL: {
-      if (selectedEditor.editRange == null) return
+      if (
+        selectedEditor.editRange == null ||
+        selectedEditor.type === CanvasEditorType.MODAL_EDITOR
+      ) {
+        return
+      }
       WorkspaceStoreWrapper.getWorkspaceState().editorGoUpOneLevel(
         selectedEditor,
       )
@@ -431,6 +443,10 @@ async function executeCommand(
       break
     }
     case FloatingToolbarCommandType.GO_DOWN_ONE_LEVEL: {
+      if (selectedEditor.type === CanvasEditorType.MODAL_EDITOR) {
+        return
+      }
+
       WorkspaceStoreWrapper.getWorkspaceState().editorGoDownOneLevel(
         selectedEditor,
       )
@@ -440,6 +456,10 @@ async function executeCommand(
       break
     }
     case FloatingToolbarCommandType.GO_TO_FILE: {
+      if (selectedEditor.type === CanvasEditorType.MODAL_EDITOR) {
+        return
+      }
+
       WorkspaceStoreWrapper.getWorkspaceState().editorGoToFile(selectedEditor)
       WorkspaceStoreWrapper.getWorkspaceState().sendTelemetry(
         "floating toolbar used to go to file",
@@ -447,6 +467,10 @@ async function executeCommand(
       break
     }
     case FloatingToolbarCommandType.GO_TO_DEEPEST_SYMBOL: {
+      if (selectedEditor.type === CanvasEditorType.MODAL_EDITOR) {
+        return
+      }
+
       WorkspaceStoreWrapper.getWorkspaceState().editorGoToDeepestSymbol(
         selectedEditor,
       )
@@ -504,7 +528,11 @@ async function executeCommand(
 
 function shouldDisplayCommand(
   command: FloatingToolbarCommand,
-  editor: CanvasCodeEditor | CanvasDiffEditor | CanvasGhostEditor,
+  editor:
+    | CanvasCodeEditor
+    | CanvasDiffEditor
+    | CanvasGhostEditor
+    | CanvasModalEditor,
   symbolStack: DocumentSymbol[],
   previousEditorSelectionStack: IRange[],
   nextEditorSelectionStack: IRange[],

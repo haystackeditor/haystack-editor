@@ -89,6 +89,7 @@ export class NotebookEditorInput extends AbstractResourceEditorInput {
     null
   private _sideLoadedListener: IDisposable
   private _defaultDirtyState: boolean = false
+  public webviewOrigin: string | null = null
 
   constructor(
     resource: URI,

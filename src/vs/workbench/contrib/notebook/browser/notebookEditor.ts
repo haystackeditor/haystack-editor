@@ -90,6 +90,7 @@ import { INotebookEditorWorkerService } from "vs/workbench/contrib/notebook/comm
 import { IPreferencesService } from "vs/workbench/services/preferences/common/preferences"
 import { IActionViewItemOptions } from "vs/base/browser/ui/actionbar/actionViewItems"
 import { StopWatch } from "vs/base/common/stopwatch"
+import { IWebviewElement } from "../../webview/browser/webview"
 
 const NOTEBOOK_EDITOR_VIEW_STATE_PREFERENCE_KEY = "NotebookEditorViewState"
 
@@ -290,6 +291,10 @@ export class NotebookEditor
   override focus() {
     super.focus()
     this._widget.value?.focus()
+  }
+
+  public focusWebview() {
+    this._widget.value?.focusWebview()
   }
 
   override hasFocus(): boolean {
@@ -994,6 +999,10 @@ export class NotebookEditor
     if (this.isVisible()) {
       this._widget.value.layout(dimension, this._rootElement, position)
     }
+  }
+
+  public getInnerWebview(): IWebviewElement | undefined {
+    return this._widget.value?.getInnerWebview()
   }
 
   //#endregion
