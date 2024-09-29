@@ -89,6 +89,7 @@ import { IModelService } from "vs/editor/common/services/model"
 import { ITextFileService } from "vs/workbench/services/textfile/common/textfiles"
 import { WorkspaceStoreWrapper } from "vs/workbench/browser/haystack-frontend/workspace/workspace_store_wrapper"
 import { isValidSymbol } from "vs/base/haystack/is_valid_symbol"
+import { isContainerSymbol } from "vs/base/haystack/is_container_symbol"
 
 MenuRegistry.appendMenuItem(MenuId.EditorContext, {
   submenu: MenuId.EditorContextPeek,
@@ -458,6 +459,11 @@ export abstract class SymbolNavigationAction extends EditorAction2 {
       if (Range.equalsRange(documentSymbol.selectionRange, range)) {
         symbol = documentSymbol
         break
+      } else if (
+        Range.containsRange(documentSymbol.range, range) &&
+        isContainerSymbol(documentSymbol)
+      ) {
+        symbol = documentSymbol
       }
 
       // Recurse further into the symbol subtree.
