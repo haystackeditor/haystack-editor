@@ -1,0 +1,220 @@
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
+ *--------------------------------------------------------------------------------------------*/
+
+.depthIndicatorContainer {
+  position: absolute;
+  top: 0px;
+}
+
+.monaco-editor .ghost-range {
+  background-color: var(
+    --vscode-diffEditor-insertedLineBackground,
+    var(--vscode-diffEditor-insertedTextBackground)
+  );
+  box-sizing: border-box;
+  border: 1px solid var(--vscode-diffEditor-insertedTextBorder);
+  border-style: dashed;
+}
+
+.editedRangeDecorationOne {
+  background-color: rgb(120, 183, 255) !important;
+  font-weight: bold;
+}
+
+.editedRangeDecorationTwo {
+  background-color: rgba(120, 183, 255, 0.9) !important;
+  font-weight: bold;
+}
+
+.editedRangeDecorationThree {
+  background-color: rgba(120, 183, 255, 0.8) !important;
+  font-weight: bold;
+}
+
+.editedRangeDecorationFour {
+  background-color: rgba(120, 183, 255, 0.7) !important;
+  font-weight: bold;
+}
+
+.editedRangeDecorationFive {
+  background-color: rgba(120, 183, 255, 0.6) !important;
+  font-weight: bold;
+}
+
+.editedRangeDecorationSix {
+  background-color: rgba(120, 183, 255, 0.5) !important;
+  font-weight: bold;
+}
+
+.editedRangeDecorationSeven {
+  background-color: rgba(120, 183, 255, 0.4) !important;
+  font-weight: bold;
+}
+
+.editedRangeDecorationEight {
+  background-color: rgba(120, 183, 255, 0.3) !important;
+  font-weight: bold;
+}
+
+.editedRangeDecorationNine {
+  background-color: rgba(120, 183, 255, 0.2) !important;
+  font-weight: bold;
+}
+
+.editedRangeDecorationTen {
+  background-color: rgba(120, 183, 255, 0.1) !important;
+  font-weight: bold;
+}
+
+.functionSymbol.fileEditorHeader {
+  background-color: goldenrod;
+}
+
+.classSymbol.fileEditorHeader {
+  background-color: cornflowerblue;
+}
+
+.variableSymbol.fileEditorHeader {
+  background-color: mediumseagreen;
+}
+
+.fileSymbol.fileEditorHeader {
+  background-color: gray;
+}
+
+.functionSymbol .fileNameAndIconContainer {
+  background-color: lightgoldenrodyellow;
+}
+
+.classSymbol .fileNameAndIconContainer {
+  background-color: lightskyblue;
+}
+
+.variableSymbol .fileNameAndIconContainer {
+  background-color: lightgreen;
+}
+
+.fileSymbol .fileNameAndIconContainer {
+  background-color: lightgray;
+}
+
+.iconContainer {
+  display: inherit;
+  margin-left: 10px;
+  margin-bottom: 2px;
+
+  & > * {
+    display: inherit;
+  }
+}
+
+.closeButton {
+  background-color: transparent;
+  border: none;
+  width: 15px;
+  height: 15px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 5px;
+
+  &:hover {
+    background-color: white;
+  }
+
+  &:active {
+    background-color: white;
+    opacity: 0.5;
+  }
+}
+
+.referencesContainer {
+  position: fixed;
+  width: 500px;
+  height: 400px;
+  z-index: 1;
+  transform-origin: top left;
+  display: flex;
+  flex-direction: column;
+}
+
+.referencesFileEditorContainer {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+}
+
+.referencesInnerContainer {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+}
+
+.referencesList {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: white;
+  border-left: 1px gray solid;
+  border-bottom: 1px black solid;
+  border-right: 1px black solid;
+  border-radius: 0 0 10px 0;
+  box-sizing: border-box;
+  overflow-y: scroll;
+  position: relative;
+}
+
+.referencesList::after {
+  content: "";
+  background-color: transparent;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  cursor: ew-resize;
+}
+
+.referenceRow {
+  width: 100%;
+  height: 20px;
+  background-color: transparent;
+  border: none;
+  text-align: left;
+  align-items: center;
+  display: flex;
+  position: relative;
+  flex-direction: row;
+  margin-right: 5px;
+
+  &:hover,
+  &.hovered {
+    background-color: lightblue;
+  }
+
+  &:active,
+  &.selected {
+    background-color: lightskyblue;
+  }
+}
+
+.referenceDepthIndicator {
+  width: 10%;
+  margin-right: 8px;
+}
+
+.referenceText {
+  width: 90%;
+  border: none;
+  background-color: transparent;
+  text-align: left;
+  margin-left: 5px;
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
