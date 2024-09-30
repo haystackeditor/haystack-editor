@@ -1,34 +1,44 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-const path = require('path');
-const Mocha = require('mocha');
-const glob = require('glob');
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
-const suite = 'Integration CSS Extension Tests';
+const path = require("path")
+const Mocha = require("mocha")
+const glob = require("glob")
+
+const suite = "Integration CSS Extension Tests"
 
 const options = {
-	ui: 'tdd',
-	color: true,
-	timeout: 60000
-};
-
-if (process.env.BUILD_ARTIFACTSTAGINGDIRECTORY) {
-	options.reporter = 'mocha-multi-reporters';
-	options.reporterOptions = {
-		reporterEnabled: 'spec, mocha-junit-reporter',
-		mochaJunitReporterReporterOptions: {
-			testsuitesTitle: `${suite} ${process.platform}`,
-			mochaFile: path.join(process.env.BUILD_ARTIFACTSTAGINGDIRECTORY, `test-results/${process.platform}-${process.arch}-${suite.toLowerCase().replace(/[^\w]/g, '-')}-results.xml`)
-		}
-	};
+  ui: "tdd",
+  color: true,
+  timeout: 60000,
 }
 
-const mocha = new Mocha(options);
+if (process.env.BUILD_ARTIFACTSTAGINGDIRECTORY) {
+  options.reporter = "mocha-multi-reporters"
+  options.reporterOptions = {
+    reporterEnabled: "spec, mocha-junit-reporter",
+    mochaJunitReporterReporterOptions: {
+      testsuitesTitle: `${suite} ${process.platform}`,
+      mochaFile: path.join(
+        process.env.BUILD_ARTIFACTSTAGINGDIRECTORY,
+        `test-results/${process.platform}-${process.arch}-${suite.toLowerCase().replace(/[^\w]/g, "-")}-results.xml`,
+      ),
+    },
+  }
+}
 
-glob.sync(__dirname + '/../out/test/**/*.test.js')
-	.forEach(file => mocha.addFile(file));
+const mocha = new Mocha(options)
 
-mocha.run(failures => process.exit(failures ? -1 : 0));
+glob
+  .sync(__dirname + "/../out/test/**/*.test.js")
+  .forEach((file) => mocha.addFile(file))
+
+mocha.run((failures) => process.exit(failures ? -1 : 0))

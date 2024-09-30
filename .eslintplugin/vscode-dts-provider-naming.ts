@@ -1,45 +1,54 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as eslint from 'eslint';
-import { TSESTree } from '@typescript-eslint/experimental-utils';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
-export = new class ApiProviderNaming implements eslint.Rule.RuleModule {
+import * as eslint from "eslint"
+import { TSESTree } from "@typescript-eslint/experimental-utils"
 
-	readonly meta: eslint.Rule.RuleMetaData = {
-		messages: {
-			naming: 'A provider should only have functions like provideXYZ or resolveXYZ',
-		}
-	};
+export = new (class ApiProviderNaming implements eslint.Rule.RuleModule {
+  readonly meta: eslint.Rule.RuleMetaData = {
+    messages: {
+      naming:
+        "A provider should only have functions like provideXYZ or resolveXYZ",
+    },
+  }
 
-	private static _providerFunctionNames = /^(provide|resolve|prepare).+/;
+  private static _providerFunctionNames = /^(provide|resolve|prepare).+/
 
-	create(context: eslint.Rule.RuleContext): eslint.Rule.RuleListener {
+  create(context: eslint.Rule.RuleContext): eslint.Rule.RuleListener {
+    const config = <{ allowed: string[] }>context.options[0]
+    const allowed = new Set(config.allowed)
 
-		const config = <{ allowed: string[] }>context.options[0];
-		const allowed = new Set(config.allowed);
+    return {
+      ["TSInterfaceDeclaration[id.name=/.+Provider/] TSMethodSignature"]: (
+        node: any,
+      ) => {
+        const interfaceName = (<TSESTree.TSInterfaceDeclaration>(
+          (<TSESTree.Identifier>node).parent?.parent
+        )).id.name
+        if (allowed.has(interfaceName)) {
+          // allowed
+          return
+        }
 
-		return {
-			['TSInterfaceDeclaration[id.name=/.+Provider/] TSMethodSignature']: (node: any) => {
+        const methodName = (<any>(
+          (<TSESTree.TSMethodSignatureNonComputedName>node).key
+        )).name
 
-
-				const interfaceName = (<TSESTree.TSInterfaceDeclaration>(<TSESTree.Identifier>node).parent?.parent).id.name;
-				if (allowed.has(interfaceName)) {
-					// allowed
-					return;
-				}
-
-				const methodName = (<any>(<TSESTree.TSMethodSignatureNonComputedName>node).key).name;
-
-				if (!ApiProviderNaming._providerFunctionNames.test(methodName)) {
-					context.report({
-						node,
-						messageId: 'naming'
-					});
-				}
-			}
-		};
-	}
-};
+        if (!ApiProviderNaming._providerFunctionNames.test(methodName)) {
+          context.report({
+            node,
+            messageId: "naming",
+          })
+        }
+      },
+    }
+  }
+})()

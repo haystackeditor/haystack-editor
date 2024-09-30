@@ -1,6 +1,6 @@
 # ---------------------------------------------------------------------------------------------
 #   Copyright (c) Microsoft Corporation. All rights reserved.
-#   Licensed under the MIT License. See License.txt in the project root for license information.
+#   Licensed under the MIT License. See code-license.txt in the project root for license information.
 # ---------------------------------------------------------------------------------------------
 
 # Prevent installing more than once per session
@@ -18,35 +18,35 @@ $Global:__VSCodeOriginalPrompt = $function:Prompt
 $Global:__LastHistoryId = -1
 
 # Store the nonce in script scope and unset the global
-$Nonce = $env:VSCODE_NONCE
-$env:VSCODE_NONCE = $null
+$Nonce = $env:HAYSTACK_NONCE
+$env:HAYSTACK_NONCE = $null
 
 $osVersion = [System.Environment]::OSVersion.Version
 $isWindows10 = $IsWindows -and $osVersion.Major -eq 10 -and $osVersion.Minor -eq 0 -and $osVersion.Build -lt 22000
 
-if ($env:VSCODE_ENV_REPLACE) {
-	$Split = $env:VSCODE_ENV_REPLACE.Split(":")
+if ($env:HAYSTACK_ENV_REPLACE) {
+	$Split = $env:HAYSTACK_ENV_REPLACE.Split(":")
 	foreach ($Item in $Split) {
 		$Inner = $Item.Split('=', 2)
 		[Environment]::SetEnvironmentVariable($Inner[0], $Inner[1].Replace('\x3a', ':'))
 	}
-	$env:VSCODE_ENV_REPLACE = $null
+	$env:HAYSTACK_ENV_REPLACE = $null
 }
-if ($env:VSCODE_ENV_PREPEND) {
-	$Split = $env:VSCODE_ENV_PREPEND.Split(":")
+if ($env:HAYSTACK_ENV_PREPEND) {
+	$Split = $env:HAYSTACK_ENV_PREPEND.Split(":")
 	foreach ($Item in $Split) {
 		$Inner = $Item.Split('=', 2)
 		[Environment]::SetEnvironmentVariable($Inner[0], $Inner[1].Replace('\x3a', ':') + [Environment]::GetEnvironmentVariable($Inner[0]))
 	}
-	$env:VSCODE_ENV_PREPEND = $null
+	$env:HAYSTACK_ENV_PREPEND = $null
 }
-if ($env:VSCODE_ENV_APPEND) {
-	$Split = $env:VSCODE_ENV_APPEND.Split(":")
+if ($env:HAYSTACK_ENV_APPEND) {
+	$Split = $env:HAYSTACK_ENV_APPEND.Split(":")
 	foreach ($Item in $Split) {
 		$Inner = $Item.Split('=', 2)
 		[Environment]::SetEnvironmentVariable($Inner[0], [Environment]::GetEnvironmentVariable($Inner[0]) + $Inner[1].Replace('\x3a', ':'))
 	}
-	$env:VSCODE_ENV_APPEND = $null
+	$env:HAYSTACK_ENV_APPEND = $null
 }
 
 function Global:__VSCode-Escape-Value([string]$value) {
@@ -170,8 +170,8 @@ function Set-MappedKeyHandlers {
 	Set-MappedKeyHandler -Chord Shift+End -Sequence 'F12,d'
 
 	# Conditionally enable suggestions
-	if ($env:VSCODE_SUGGEST -eq '1') {
-		Remove-Item Env:VSCODE_SUGGEST
+	if ($env:HAYSTACK_SUGGEST -eq '1') {
+		Remove-Item Env:HAYSTACK_SUGGEST
 
 		# VS Code send completions request (may override Ctrl+Spacebar)
 		Set-PSReadLineKeyHandler -Chord 'F12,e' -ScriptBlock {

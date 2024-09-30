@@ -1,10 +1,15 @@
 "use strict";
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the Functional Source License. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.retry = retry;
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 async function retry(fn) {
     let lastError;
     for (let run = 1; run <= 10; run++) {
@@ -17,8 +22,8 @@ async function retry(fn) {
             }
             lastError = err;
             // maximum delay is 10th retry: ~3 seconds
-            const millis = Math.floor((Math.random() * 200) + (50 * Math.pow(1.5, run)));
-            await new Promise(c => setTimeout(c, millis));
+            const millis = Math.floor(Math.random() * 200 + 50 * Math.pow(1.5, run));
+            await new Promise((c) => setTimeout(c, millis));
         }
     }
     console.error(`Too many retries, aborting.`);

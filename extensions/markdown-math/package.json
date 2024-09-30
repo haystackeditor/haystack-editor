@@ -84,7 +84,9 @@
           },
           "markdown.math.macros": {
             "type": "object",
-            "additionalProperties": { "type": "string" },
+            "additionalProperties": {
+              "type": "string"
+            },
             "default": {},
             "description": "%config.markdown.math.macros%",
             "scope": "resource"

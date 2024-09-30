@@ -1,16 +1,44 @@
 "use strict";
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the Functional Source License. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.extractEditor = extractEditor;
 exports.createESMSourcesAndResources2 = createESMSourcesAndResources2;
-const fs = require("fs");
-const path = require("path");
-const tss = require("./treeshaking");
-const REPO_ROOT = path.join(__dirname, '../../');
-const SRC_DIR = path.join(REPO_ROOT, 'src');
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+const fs = __importStar(require("fs"));
+const path = __importStar(require("path"));
+const tss = __importStar(require("./treeshaking"));
+const REPO_ROOT = path.join(__dirname, "../../");
+const SRC_DIR = path.join(REPO_ROOT, "src");
 const dirCache = {};
 function writeFile(filePath, contents) {
     function ensureDirs(dirPath) {
@@ -28,8 +56,10 @@ function writeFile(filePath, contents) {
     fs.writeFileSync(filePath, contents);
 }
 function extractEditor(options) {
-    const ts = require('typescript');
-    const tsConfig = JSON.parse(fs.readFileSync(path.join(options.sourcesRoot, 'tsconfig.monaco.json')).toString());
+    const ts = require("typescript");
+    const tsConfig = JSON.parse(fs
+        .readFileSync(path.join(options.sourcesRoot, "tsconfig.monaco.json"))
+        .toString());
     let compilerOptions;
     if (tsConfig.extends) {
         compilerOptions = Object.assign({}, require(path.join(options.sourcesRoot, tsConfig.extends)).compilerOptions, tsConfig.compilerOptions);
@@ -43,11 +73,10 @@ function extractEditor(options) {
     compilerOptions.noUnusedLocals = false;
     compilerOptions.preserveConstEnums = false;
     compilerOptions.declaration = false;
-    compilerOptions.moduleResolution = ts.ModuleResolutionKind.Classic;
     options.compilerOptions = compilerOptions;
     console.log(`Running tree shaker with shakeLevel ${tss.toStringShakeLevel(options.shakeLevel)}`);
     // Take the extra included .d.ts files from `tsconfig.monaco.json`
-    options.typings = tsConfig.include.filter(includedFile => /\.d\.ts$/.test(includedFile));
+    options.typings = tsConfig.include.filter((includedFile) => /\.d\.ts$/.test(includedFile));
     // Add extra .d.ts files from `node_modules/@types/`
     if (Array.isArray(options.compilerOptions?.types)) {
         options.compilerOptions.types.forEach((type) => {
@@ -81,7 +110,7 @@ function extractEditor(options) {
                 const importedFileName = info.importedFiles[i].fileName;
                 let importedFilePath;
                 if (/^vs\/css!/.test(importedFileName)) {
-                    importedFilePath = importedFileName.substr('vs/css!'.length) + '.css';
+                    importedFilePath = importedFileName.substr("vs/css!".length) + ".css";
                 }
                 else {
                     importedFilePath = importedFileName;
@@ -93,33 +122,33 @@ function extractEditor(options) {
                     transportCSS(importedFilePath, copyFile, writeOutputFile);
                 }
                 else {
-                    if (fs.existsSync(path.join(options.sourcesRoot, importedFilePath + '.js'))) {
-                        copyFile(importedFilePath + '.js');
+                    if (fs.existsSync(path.join(options.sourcesRoot, importedFilePath + ".js"))) {
+                        copyFile(importedFilePath + ".js");
                     }
                 }
             }
         }
     }
     delete tsConfig.compilerOptions.moduleResolution;
-    writeOutputFile('tsconfig.json', JSON.stringify(tsConfig, null, '\t'));
+    writeOutputFile("tsconfig.json", JSON.stringify(tsConfig, null, "\t"));
     [
-        'vs/css.build.ts',
-        'vs/css.ts',
-        'vs/loader.js',
-        'vs/loader.d.ts',
-        'vs/nls.build.ts',
-        'vs/nls.ts',
-        'vs/nls.mock.ts',
+        "vs/css.build.ts",
+        "vs/css.ts",
+        "vs/loader.js",
+        "vs/loader.d.ts",
+        "vs/nls.build.ts",
+        "vs/nls.ts",
+        "vs/nls.mock.ts",
     ].forEach(copyFile);
 }
 function createESMSourcesAndResources2(options) {
-    const ts = require('typescript');
+    const ts = require("typescript");
     const SRC_FOLDER = path.join(REPO_ROOT, options.srcFolder);
     const OUT_FOLDER = path.join(REPO_ROOT, options.outFolder);
     const OUT_RESOURCES_FOLDER = path.join(REPO_ROOT, options.outResourcesFolder);
     const getDestAbsoluteFilePath = (file) => {
-        const dest = options.renames[file.replace(/\\/g, '/')] || file;
-        if (dest === 'tsconfig.json') {
+        const dest = options.renames[file.replace(/\\/g, "/")] || file;
+        if (dest === "tsconfig.json") {
             return path.join(OUT_FOLDER, `tsconfig.json`);
         }
         if (/\.ts$/.test(dest)) {
@@ -129,17 +158,22 @@ function createESMSourcesAndResources2(options) {
     };
     const allFiles = walkDirRecursive(SRC_FOLDER);
     for (const file of allFiles) {
-        if (options.ignores.indexOf(file.replace(/\\/g, '/')) >= 0) {
+        if (options.ignores.indexOf(file.replace(/\\/g, "/")) >= 0) {
             continue;
         }
-        if (file === 'tsconfig.json') {
+        if (file === "tsconfig.json") {
             const tsConfig = JSON.parse(fs.readFileSync(path.join(SRC_FOLDER, file)).toString());
-            tsConfig.compilerOptions.module = 'es6';
-            tsConfig.compilerOptions.outDir = path.join(path.relative(OUT_FOLDER, OUT_RESOURCES_FOLDER), 'vs').replace(/\\/g, '/');
-            write(getDestAbsoluteFilePath(file), JSON.stringify(tsConfig, null, '\t'));
+            tsConfig.compilerOptions.module = "es6";
+            tsConfig.compilerOptions.outDir = path
+                .join(path.relative(OUT_FOLDER, OUT_RESOURCES_FOLDER), "vs")
+                .replace(/\\/g, "/");
+            write(getDestAbsoluteFilePath(file), JSON.stringify(tsConfig, null, "\t"));
             continue;
         }
-        if (/\.d\.ts$/.test(file) || /\.css$/.test(file) || /\.js$/.test(file) || /\.ttf$/.test(file)) {
+        if (/\.d\.ts$/.test(file) ||
+            /\.css$/.test(file) ||
+            /\.js$/.test(file) ||
+            /\.ttf$/.test(file)) {
             // Transport the files directly
             write(getDestAbsoluteFilePath(file), fs.readFileSync(path.join(SRC_FOLDER, file)));
             continue;
@@ -154,7 +188,7 @@ function createESMSourcesAndResources2(options) {
                 const end = info.importedFiles[i].end;
                 let importedFilepath;
                 if (/^vs\/css!/.test(importedFilename)) {
-                    importedFilepath = importedFilename.substr('vs/css!'.length) + '.css';
+                    importedFilepath = importedFilename.substr("vs/css!".length) + ".css";
                 }
                 else {
                     importedFilepath = importedFilename;
@@ -163,22 +197,25 @@ function createESMSourcesAndResources2(options) {
                     importedFilepath = path.join(path.dirname(file), importedFilepath);
                 }
                 let relativePath;
-                if (importedFilepath === path.dirname(file).replace(/\\/g, '/')) {
-                    relativePath = '../' + path.basename(path.dirname(file));
+                if (importedFilepath === path.dirname(file).replace(/\\/g, "/")) {
+                    relativePath = "../" + path.basename(path.dirname(file));
                 }
-                else if (importedFilepath === path.dirname(path.dirname(file)).replace(/\\/g, '/')) {
-                    relativePath = '../../' + path.basename(path.dirname(path.dirname(file)));
+                else if (importedFilepath ===
+                    path.dirname(path.dirname(file)).replace(/\\/g, "/")) {
+                    relativePath =
+                        "../../" + path.basename(path.dirname(path.dirname(file)));
                 }
                 else {
                     relativePath = path.relative(path.dirname(file), importedFilepath);
                 }
-                relativePath = relativePath.replace(/\\/g, '/');
+                relativePath = relativePath.replace(/\\/g, "/");
                 if (!/(^\.\/)|(^\.\.\/)/.test(relativePath)) {
-                    relativePath = './' + relativePath;
+                    relativePath = "./" + relativePath;
                 }
-                fileContents = (fileContents.substring(0, pos + 1)
-                    + relativePath
-                    + fileContents.substring(end + 1));
+                fileContents =
+                    fileContents.substring(0, pos + 1) +
+                        relativePath +
+                        fileContents.substring(end + 1);
             }
             fileContents = fileContents.replace(/import ([a-zA-Z0-9]+) = require\(('[^']+')\);/g, function (_, m1, m2) {
                 return `import * as ${m1} from ${m2};`;
@@ -189,8 +226,9 @@ function createESMSourcesAndResources2(options) {
         console.log(`UNKNOWN FILE: ${file}`);
     }
     function walkDirRecursive(dir) {
-        if (dir.charAt(dir.length - 1) !== '/' || dir.charAt(dir.length - 1) !== '\\') {
-            dir += '/';
+        if (dir.charAt(dir.length - 1) !== "/" ||
+            dir.charAt(dir.length - 1) !== "\\") {
+            dir += "/";
         }
         const result = [];
         _walkDirRecursive(dir, result, dir.length);
@@ -234,7 +272,7 @@ function createESMSourcesAndResources2(options) {
                         mode = 0;
                         continue;
                     }
-                    lines[i] = '// ' + line;
+                    lines[i] = "// " + line;
                     continue;
                 }
                 if (mode === 2) {
@@ -247,7 +285,7 @@ function createESMSourcesAndResources2(options) {
                     });
                 }
             }
-            return lines.join('\n');
+            return lines.join("\n");
         }
     }
 }
@@ -257,8 +295,8 @@ function transportCSS(module, enqueue, write) {
     }
     const filename = path.join(SRC_DIR, module);
     const fileContents = fs.readFileSync(filename).toString();
-    const inlineResources = 'base64'; // see https://github.com/microsoft/monaco-editor/issues/148
-    const newContents = _rewriteOrInlineUrls(fileContents, inlineResources === 'base64');
+    const inlineResources = "base64"; // see https://github.com/microsoft/monaco-editor/issues/148
+    const newContents = _rewriteOrInlineUrls(fileContents, inlineResources === "base64");
     write(module, newContents);
     return true;
     function _rewriteOrInlineUrls(contents, forceBase64) {
@@ -272,18 +310,19 @@ function transportCSS(module, enqueue, write) {
             }
             const imagePath = path.join(path.dirname(module), url);
             const fileContents = fs.readFileSync(path.join(SRC_DIR, imagePath));
-            const MIME = /\.svg$/.test(url) ? 'image/svg+xml' : 'image/png';
-            let DATA = ';base64,' + fileContents.toString('base64');
+            const MIME = /\.svg$/.test(url) ? "image/svg+xml" : "image/png";
+            let DATA = ";base64," + fileContents.toString("base64");
             if (!forceBase64 && /\.svg$/.test(url)) {
                 // .svg => url encode as explained at https://codepen.io/tigt/post/optimizing-svgs-in-data-uris
-                const newText = fileContents.toString()
-                    .replace(/"/g, '\'')
-                    .replace(/</g, '%3C')
-                    .replace(/>/g, '%3E')
-                    .replace(/&/g, '%26')
-                    .replace(/#/g, '%23')
-                    .replace(/\s+/g, ' ');
-                const encodedData = ',' + newText;
+                const newText = fileContents
+                    .toString()
+                    .replace(/"/g, "'")
+                    .replace(/</g, "%3C")
+                    .replace(/>/g, "%3E")
+                    .replace(/&/g, "%26")
+                    .replace(/#/g, "%23")
+                    .replace(/\s+/g, " ");
+                const encodedData = "," + newText;
                 if (encodedData.length < DATA.length) {
                     DATA = encodedData;
                 }
@@ -296,25 +335,31 @@ function transportCSS(module, enqueue, write) {
         return contents.replace(/url\(\s*([^\)]+)\s*\)?/g, (_, ...matches) => {
             let url = matches[0];
             // Eliminate starting quotes (the initial whitespace is not captured)
-            if (url.charAt(0) === '"' || url.charAt(0) === '\'') {
+            if (url.charAt(0) === '"' || url.charAt(0) === "'") {
                 url = url.substring(1);
             }
             // The ending whitespace is captured
-            while (url.length > 0 && (url.charAt(url.length - 1) === ' ' || url.charAt(url.length - 1) === '\t')) {
+            while (url.length > 0 &&
+                (url.charAt(url.length - 1) === " " ||
+                    url.charAt(url.length - 1) === "\t")) {
                 url = url.substring(0, url.length - 1);
             }
             // Eliminate ending quotes
-            if (url.charAt(url.length - 1) === '"' || url.charAt(url.length - 1) === '\'') {
+            if (url.charAt(url.length - 1) === '"' ||
+                url.charAt(url.length - 1) === "'") {
                 url = url.substring(0, url.length - 1);
             }
-            if (!_startsWith(url, 'data:') && !_startsWith(url, 'http://') && !_startsWith(url, 'https://')) {
+            if (!_startsWith(url, "data:") &&
+                !_startsWith(url, "http://") &&
+                !_startsWith(url, "https://")) {
                 url = replacer(url);
             }
-            return 'url(' + url + ')';
+            return "url(" + url + ")";
         });
     }
     function _startsWith(haystack, needle) {
-        return haystack.length >= needle.length && haystack.substr(0, needle.length) === needle;
+        return (haystack.length >= needle.length &&
+            haystack.substr(0, needle.length) === needle);
     }
 }
 //# sourceMappingURL=standalone.js.map

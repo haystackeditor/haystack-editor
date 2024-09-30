@@ -1,11 +1,16 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IProcessEnvironment } from 'vs/base/common/platform';
-import { IProductConfiguration } from 'vs/base/common/product';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
+import { IProcessEnvironment } from "vs/base/common/platform"
+import { IProductConfiguration } from "vs/base/common/product"
 
 // #######################################################################
 // ###                                                                 ###
@@ -13,44 +18,42 @@ import { IProductConfiguration } from 'vs/base/common/product';
 // ###                                                                 ###
 // #######################################################################
 
-
 /**
  * The common properties required for any sandboxed
  * renderer to function.
  */
 export interface ISandboxConfiguration {
+  /**
+   * Identifier of the sandboxed renderer.
+   */
+  windowId: number
 
-	/**
-	 * Identifier of the sandboxed renderer.
-	 */
-	windowId: number;
+  /**
+   * Root path of the JavaScript sources.
+   *
+   * Note: This is NOT the installation root
+   * directory itself but contained in it at
+   * a level that is platform dependent.
+   */
+  appRoot: string
 
-	/**
-	 * Root path of the JavaScript sources.
-	 *
-	 * Note: This is NOT the installation root
-	 * directory itself but contained in it at
-	 * a level that is platform dependent.
-	 */
-	appRoot: string;
+  /**
+   * Per window process environment.
+   */
+  userEnv: IProcessEnvironment
 
-	/**
-	 * Per window process environment.
-	 */
-	userEnv: IProcessEnvironment;
+  /**
+   * Product configuration.
+   */
+  product: IProductConfiguration
 
-	/**
-	 * Product configuration.
-	 */
-	product: IProductConfiguration;
+  /**
+   * Configured zoom level.
+   */
+  zoomLevel?: number
 
-	/**
-	 * Configured zoom level.
-	 */
-	zoomLevel?: number;
-
-	/**
-	 * Location of V8 code cache.
-	 */
-	codeCachePath?: string;
+  /**
+   * Location of V8 code cache.
+   */
+  codeCachePath?: string
 }

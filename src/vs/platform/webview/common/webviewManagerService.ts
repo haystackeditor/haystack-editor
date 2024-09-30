@@ -1,43 +1,63 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Event } from 'vs/base/common/event';
-import { createDecorator } from 'vs/platform/instantiation/common/instantiation';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
-export const IWebviewManagerService = createDecorator<IWebviewManagerService>('webviewManagerService');
+import { Event } from "vs/base/common/event"
+import { createDecorator } from "vs/platform/instantiation/common/instantiation"
+
+export const IWebviewManagerService = createDecorator<IWebviewManagerService>(
+  "webviewManagerService",
+)
 
 export interface WebviewWebContentsId {
-	readonly webContentsId: number;
+  readonly webContentsId: number
 }
 
 export interface WebviewWindowId {
-	readonly windowId: number;
+  readonly windowId: number
 }
 
 export interface FindInFrameOptions {
-	readonly forward?: boolean;
-	readonly findNext?: boolean;
-	readonly matchCase?: boolean;
+  readonly forward?: boolean
+  readonly findNext?: boolean
+  readonly matchCase?: boolean
 }
 
 export interface FoundInFrameResult {
-	readonly requestId: number;
-	readonly activeMatchOrdinal: number;
-	readonly matches: number;
-	readonly selectionArea: any;
-	readonly finalUpdate: boolean;
+  readonly requestId: number
+  readonly activeMatchOrdinal: number
+  readonly matches: number
+  readonly selectionArea: any
+  readonly finalUpdate: boolean
 }
 
 export interface IWebviewManagerService {
-	_serviceBrand: unknown;
+  _serviceBrand: unknown
 
-	onFoundInFrame: Event<FoundInFrameResult>;
+  onFoundInFrame: Event<FoundInFrameResult>
 
-	setIgnoreMenuShortcuts(id: WebviewWebContentsId | WebviewWindowId, enabled: boolean): Promise<void>;
+  setIgnoreMenuShortcuts(
+    id: WebviewWebContentsId | WebviewWindowId,
+    enabled: boolean,
+  ): Promise<void>
 
-	findInFrame(windowId: WebviewWindowId, frameName: string, text: string, options: FindInFrameOptions): Promise<void>;
+  findInFrame(
+    windowId: WebviewWindowId,
+    frameName: string,
+    text: string,
+    options: FindInFrameOptions,
+  ): Promise<void>
 
-	stopFindInFrame(windowId: WebviewWindowId, frameName: string, options: { keepSelection?: boolean }): Promise<void>;
+  stopFindInFrame(
+    windowId: WebviewWindowId,
+    frameName: string,
+    options: { keepSelection?: boolean },
+  ): Promise<void>
 }

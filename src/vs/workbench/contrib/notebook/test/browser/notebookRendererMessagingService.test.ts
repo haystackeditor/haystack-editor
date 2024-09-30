@@ -1,60 +1,68 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { NullExtensionService } from 'vs/workbench/services/extensions/common/extensions';
-import { stub } from 'sinon';
-import { NotebookRendererMessagingService } from 'vs/workbench/contrib/notebook/browser/services/notebookRendererMessagingServiceImpl';
-import * as assert from 'assert';
-import { timeout } from 'vs/base/common/async';
-import { ensureNoDisposablesAreLeakedInTestSuite } from 'vs/base/test/common/utils';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
-suite('NotebookRendererMessaging', () => {
-	let extService: NullExtensionService;
-	let m: NotebookRendererMessagingService;
-	let sent: unknown[] = [];
+import { NullExtensionService } from "vs/workbench/services/extensions/common/extensions"
+import { stub } from "sinon"
+import { NotebookRendererMessagingService } from "vs/workbench/contrib/notebook/browser/services/notebookRendererMessagingServiceImpl"
+import * as assert from "assert"
+import { timeout } from "vs/base/common/async"
+import { ensureNoDisposablesAreLeakedInTestSuite } from "vs/base/test/common/utils"
 
-	const ds = ensureNoDisposablesAreLeakedInTestSuite();
+suite("NotebookRendererMessaging", () => {
+  let extService: NullExtensionService
+  let m: NotebookRendererMessagingService
+  let sent: unknown[] = []
 
-	setup(() => {
-		sent = [];
-		extService = new NullExtensionService();
-		m = ds.add(new NotebookRendererMessagingService(extService));
-		ds.add(m.onShouldPostMessage(e => sent.push(e)));
-	});
+  const ds = ensureNoDisposablesAreLeakedInTestSuite()
 
-	test('activates on prepare', () => {
-		const activate = stub(extService, 'activateByEvent').returns(Promise.resolve());
-		m.prepare('foo');
-		m.prepare('foo');
-		m.prepare('foo');
+  setup(() => {
+    sent = []
+    extService = new NullExtensionService()
+    m = ds.add(new NotebookRendererMessagingService(extService))
+    ds.add(m.onShouldPostMessage((e) => sent.push(e)))
+  })
 
-		assert.deepStrictEqual(activate.args, [['onRenderer:foo']]);
-	});
+  test("activates on prepare", () => {
+    const activate = stub(extService, "activateByEvent").returns(
+      Promise.resolve(),
+    )
+    m.prepare("foo")
+    m.prepare("foo")
+    m.prepare("foo")
 
-	test('buffers and then plays events', async () => {
-		stub(extService, 'activateByEvent').returns(Promise.resolve());
+    assert.deepStrictEqual(activate.args, [["onRenderer:foo"]])
+  })
 
-		const scoped = m.getScoped('some-editor');
-		scoped.postMessage('foo', 1);
-		scoped.postMessage('foo', 2);
-		assert.deepStrictEqual(sent, []);
+  test("buffers and then plays events", async () => {
+    stub(extService, "activateByEvent").returns(Promise.resolve())
 
-		await timeout(0);
+    const scoped = m.getScoped("some-editor")
+    scoped.postMessage("foo", 1)
+    scoped.postMessage("foo", 2)
+    assert.deepStrictEqual(sent, [])
 
-		const expected = [
-			{ editorId: 'some-editor', rendererId: 'foo', message: 1 },
-			{ editorId: 'some-editor', rendererId: 'foo', message: 2 }
-		];
+    await timeout(0)
 
-		assert.deepStrictEqual(sent, expected);
+    const expected = [
+      { editorId: "some-editor", rendererId: "foo", message: 1 },
+      { editorId: "some-editor", rendererId: "foo", message: 2 },
+    ]
 
-		scoped.postMessage('foo', 3);
+    assert.deepStrictEqual(sent, expected)
 
-		assert.deepStrictEqual(sent, [
-			...expected,
-			{ editorId: 'some-editor', rendererId: 'foo', message: 3 }
-		]);
-	});
-});
+    scoped.postMessage("foo", 3)
+
+    assert.deepStrictEqual(sent, [
+      ...expected,
+      { editorId: "some-editor", rendererId: "foo", message: 3 },
+    ])
+  })
+})

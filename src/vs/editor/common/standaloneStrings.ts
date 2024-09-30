@@ -1,64 +1,163 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as nls from 'vs/nls';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+import * as nls from "vs/nls"
 
 export namespace AccessibilityHelpNLS {
-	export const accessibilityHelpTitle = nls.localize('accessibilityHelpTitle', "Accessibility Help");
-	export const openingDocs = nls.localize("openingDocs", "Opening the Accessibility documentation page.");
-	export const readonlyDiffEditor = nls.localize("readonlyDiffEditor", "You are in a read-only pane of a diff editor.");
-	export const editableDiffEditor = nls.localize("editableDiffEditor", "You are in a pane of a diff editor.");
-	export const readonlyEditor = nls.localize("readonlyEditor", "You are in a read-only code editor.");
-	export const editableEditor = nls.localize("editableEditor", "You are in a code editor.");
-	export const changeConfigToOnMac = nls.localize("changeConfigToOnMac", "Configure the application to be optimized for usage with a Screen Reader (Command+E).");
-	export const changeConfigToOnWinLinux = nls.localize("changeConfigToOnWinLinux", "Configure the application to be optimized for usage with a Screen Reader (Control+E).");
-	export const auto_on = nls.localize("auto_on", "The application is configured to be optimized for usage with a Screen Reader.");
-	export const auto_off = nls.localize("auto_off", "The application is configured to never be optimized for usage with a Screen Reader.");
-	export const screenReaderModeEnabled = nls.localize("screenReaderModeEnabled", "Screen Reader Optimized Mode enabled.");
-	export const screenReaderModeDisabled = nls.localize("screenReaderModeDisabled", "Screen Reader Optimized Mode disabled.");
-	export const tabFocusModeOnMsg = nls.localize("tabFocusModeOnMsg", "Pressing Tab in the current editor will move focus to the next focusable element. Toggle this behavior<keybinding:editor.action.toggleTabFocusMode>");
-	export const tabFocusModeOffMsg = nls.localize("tabFocusModeOffMsg", "Pressing Tab in the current editor will insert the tab character. Toggle this behavior<keybinding:editor.action.toggleTabFocusMode>");
-	export const stickScroll = nls.localize("stickScrollKb", "Focus Sticky Scroll<keybinding:editor.action.focusStickyScroll> to focus the currently nested scopes.");
-	export const showAccessibilityHelpAction = nls.localize("showAccessibilityHelpAction", "Show Accessibility Help");
-	export const listSignalSounds = nls.localize("listSignalSoundsCommand", "Run the command: List Signal Sounds for an overview of all sounds and their current status.");
-	export const listAlerts = nls.localize("listAnnouncementsCommand", "Run the command: List Signal Announcements for an overview of announcements and their current status.");
-	export const quickChat = nls.localize("quickChatCommand", "Toggle quick chat<keybinding:workbench.action.quickchat.toggle> to open or close a chat session.",);
-	export const startInlineChat = nls.localize("startInlineChatCommand", "Start inline chat<keybinding:inlineChat.start> to create an in editor chat session.");
+  export const accessibilityHelpTitle = nls.localize(
+    "accessibilityHelpTitle",
+    "Accessibility Help",
+  )
+  export const openingDocs = nls.localize(
+    "openingDocs",
+    "Opening the Accessibility documentation page.",
+  )
+  export const readonlyDiffEditor = nls.localize(
+    "readonlyDiffEditor",
+    "You are in a read-only pane of a diff editor.",
+  )
+  export const editableDiffEditor = nls.localize(
+    "editableDiffEditor",
+    "You are in a pane of a diff editor.",
+  )
+  export const readonlyEditor = nls.localize(
+    "readonlyEditor",
+    "You are in a read-only code editor.",
+  )
+  export const editableEditor = nls.localize(
+    "editableEditor",
+    "You are in a code editor.",
+  )
+  export const changeConfigToOnMac = nls.localize(
+    "changeConfigToOnMac",
+    "Configure the application to be optimized for usage with a Screen Reader (Command+E).",
+  )
+  export const changeConfigToOnWinLinux = nls.localize(
+    "changeConfigToOnWinLinux",
+    "Configure the application to be optimized for usage with a Screen Reader (Control+E).",
+  )
+  export const auto_on = nls.localize(
+    "auto_on",
+    "The application is configured to be optimized for usage with a Screen Reader.",
+  )
+  export const auto_off = nls.localize(
+    "auto_off",
+    "The application is configured to never be optimized for usage with a Screen Reader.",
+  )
+  export const screenReaderModeEnabled = nls.localize(
+    "screenReaderModeEnabled",
+    "Screen Reader Optimized Mode enabled.",
+  )
+  export const screenReaderModeDisabled = nls.localize(
+    "screenReaderModeDisabled",
+    "Screen Reader Optimized Mode disabled.",
+  )
+  export const tabFocusModeOnMsg = nls.localize(
+    "tabFocusModeOnMsg",
+    "Pressing Tab in the current editor will move focus to the next focusable element. Toggle this behavior<keybinding:editor.action.toggleTabFocusMode>",
+  )
+  export const tabFocusModeOffMsg = nls.localize(
+    "tabFocusModeOffMsg",
+    "Pressing Tab in the current editor will insert the tab character. Toggle this behavior<keybinding:editor.action.toggleTabFocusMode>",
+  )
+  export const stickScroll = nls.localize(
+    "stickScrollKb",
+    "Focus Sticky Scroll<keybinding:editor.action.focusStickyScroll> to focus the currently nested scopes.",
+  )
+  export const showAccessibilityHelpAction = nls.localize(
+    "showAccessibilityHelpAction",
+    "Show Accessibility Help",
+  )
+  export const listSignalSounds = nls.localize(
+    "listSignalSoundsCommand",
+    "Run the command: List Signal Sounds for an overview of all sounds and their current status.",
+  )
+  export const listAlerts = nls.localize(
+    "listAnnouncementsCommand",
+    "Run the command: List Signal Announcements for an overview of announcements and their current status.",
+  )
+  export const quickChat = nls.localize(
+    "quickChatCommand",
+    "Toggle quick chat<keybinding:workbench.action.quickchat.toggle> to open or close a chat session.",
+  )
+  export const startInlineChat = nls.localize(
+    "startInlineChatCommand",
+    "Start inline chat<keybinding:inlineChat.start> to create an in editor chat session.",
+  )
 }
 
 export namespace InspectTokensNLS {
-	export const inspectTokensAction = nls.localize('inspectTokens', "Developer: Inspect Tokens");
+  export const inspectTokensAction = nls.localize(
+    "inspectTokens",
+    "Developer: Inspect Tokens",
+  )
 }
 
 export namespace GoToLineNLS {
-	export const gotoLineActionLabel = nls.localize('gotoLineActionLabel', "Go to Line/Column...");
+  export const gotoLineActionLabel = nls.localize(
+    "gotoLineActionLabel",
+    "Go to Line/Column...",
+  )
 }
 
 export namespace QuickHelpNLS {
-	export const helpQuickAccessActionLabel = nls.localize('helpQuickAccess', "Show all Quick Access Providers");
+  export const helpQuickAccessActionLabel = nls.localize(
+    "helpQuickAccess",
+    "Show all Quick Access Providers",
+  )
 }
 
 export namespace QuickCommandNLS {
-	export const quickCommandActionLabel = nls.localize('quickCommandActionLabel', "Command Palette");
-	export const quickCommandHelp = nls.localize('quickCommandActionHelp', "Show And Run Commands");
+  export const quickCommandActionLabel = nls.localize(
+    "quickCommandActionLabel",
+    "Command Palette",
+  )
+  export const quickCommandHelp = nls.localize(
+    "quickCommandActionHelp",
+    "Show And Run Commands",
+  )
 }
 
 export namespace QuickOutlineNLS {
-	export const quickOutlineActionLabel = nls.localize('quickOutlineActionLabel', "Go to Symbol...");
-	export const quickOutlineByCategoryActionLabel = nls.localize('quickOutlineByCategoryActionLabel', "Go to Symbol by Category...");
+  export const quickOutlineActionLabel = nls.localize(
+    "quickOutlineActionLabel",
+    "Go to Symbol...",
+  )
+  export const quickOutlineByCategoryActionLabel = nls.localize(
+    "quickOutlineByCategoryActionLabel",
+    "Go to Symbol by Category...",
+  )
 }
 
 export namespace StandaloneCodeEditorNLS {
-	export const editorViewAccessibleLabel = nls.localize('editorViewAccessibleLabel', "Editor content");
-	export const accessibilityHelpMessage = nls.localize('accessibilityHelpMessage', "Press Alt+F1 for Accessibility Options.");
+  export const editorViewAccessibleLabel = nls.localize(
+    "editorViewAccessibleLabel",
+    "Editor content",
+  )
+  export const accessibilityHelpMessage = nls.localize(
+    "accessibilityHelpMessage",
+    "Press Alt+F1 for Accessibility Options.",
+  )
 }
 
 export namespace ToggleHighContrastNLS {
-	export const toggleHighContrast = nls.localize('toggleHighContrast', "Toggle High Contrast Theme");
+  export const toggleHighContrast = nls.localize(
+    "toggleHighContrast",
+    "Toggle High Contrast Theme",
+  )
 }
 
 export namespace StandaloneServicesNLS {
-	export const bulkEditServiceSummary = nls.localize('bulkEditServiceSummary', "Made {0} edits in {1} files");
+  export const bulkEditServiceSummary = nls.localize(
+    "bulkEditServiceSummary",
+    "Made {0} edits in {1} files",
+  )
 }

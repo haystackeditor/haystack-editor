@@ -1,23 +1,31 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import type { IHoverDelegate2 } from 'vs/base/browser/ui/hover/hover';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+import type { IHoverDelegate2 } from "vs/base/browser/ui/hover/hover"
 
 let baseHoverDelegate: IHoverDelegate2 = {
-	showHover: () => undefined,
-	hideHover: () => undefined,
-	showAndFocusLastHover: () => undefined,
-	setupUpdatableHover: () => null!,
-	triggerUpdatableHover: () => undefined
-};
+  showHover: () => undefined,
+  hideHover: () => undefined,
+  showAndFocusLastHover: () => undefined,
+  setupUpdatableHover: () => null!,
+  triggerUpdatableHover: () => undefined,
+}
 
 /**
  * Sets the hover delegate for use **only in the `base/` layer**.
  */
-export function setBaseLayerHoverDelegate(hoverDelegate: IHoverDelegate2): void {
-	baseHoverDelegate = hoverDelegate;
+export function setBaseLayerHoverDelegate(
+  hoverDelegate: IHoverDelegate2,
+): void {
+  baseHoverDelegate = hoverDelegate
 }
 
 /**
@@ -28,5 +36,5 @@ export function setBaseLayerHoverDelegate(hoverDelegate: IHoverDelegate2): void 
  * only reason this should be used is if `IHoverService` is not available.
  */
 export function getBaseLayerHoverDelegate(): IHoverDelegate2 {
-	return baseHoverDelegate;
+  return baseHoverDelegate
 }

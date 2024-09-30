@@ -1,30 +1,39 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as path from 'path';
-import * as testRunner from '../../../test/integration/electron/testrunner';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
-const suite = 'Integration Colorize Tests';
+import * as path from "path"
+import * as testRunner from "../../../test/integration/electron/testrunner"
 
-const options: import('mocha').MochaOptions = {
-	ui: 'tdd',
-	color: true,
-	timeout: 60000
-};
+const suite = "Integration Colorize Tests"
 
-if (process.env.BUILD_ARTIFACTSTAGINGDIRECTORY) {
-	options.reporter = 'mocha-multi-reporters';
-	options.reporterOptions = {
-		reporterEnabled: 'spec, mocha-junit-reporter',
-		mochaJunitReporterReporterOptions: {
-			testsuitesTitle: `${suite} ${process.platform}`,
-			mochaFile: path.join(process.env.BUILD_ARTIFACTSTAGINGDIRECTORY, `test-results/${process.platform}-${process.arch}-${suite.toLowerCase().replace(/[^\w]/g, '-')}-results.xml`)
-		}
-	};
+const options: import("mocha").MochaOptions = {
+  ui: "tdd",
+  color: true,
+  timeout: 60000,
 }
 
-testRunner.configure(options);
+if (process.env.BUILD_ARTIFACTSTAGINGDIRECTORY) {
+  options.reporter = "mocha-multi-reporters"
+  options.reporterOptions = {
+    reporterEnabled: "spec, mocha-junit-reporter",
+    mochaJunitReporterReporterOptions: {
+      testsuitesTitle: `${suite} ${process.platform}`,
+      mochaFile: path.join(
+        process.env.BUILD_ARTIFACTSTAGINGDIRECTORY,
+        `test-results/${process.platform}-${process.arch}-${suite.toLowerCase().replace(/[^\w]/g, "-")}-results.xml`,
+      ),
+    },
+  }
+}
 
-export = testRunner;
+testRunner.configure(options)
+
+export = testRunner

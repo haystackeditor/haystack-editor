@@ -1,9 +1,15 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-const FILE_HEADER: &str = "/*---------------------------------------------------------------------------------------------\n *  Copyright (c) Microsoft Corporation. All rights reserved.\n *  Licensed under the MIT License. See License.txt in the project root for license information.\n *--------------------------------------------------------------------------------------------*/";
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+const FILE_HEADER: &str = "/*---------------------------------------------------------------------------------------------\n *  Copyright (c) Microsoft Corporation. All rights reserved.\n *  Licensed under the MIT License. See code-license.txt in the project root for license information.\n *--------------------------------------------------------------------------------------------*/";
 
 use std::{
 	collections::HashMap,
@@ -59,7 +65,7 @@ fn set_env_vars_from_map_keys(prefix: &str, map: impl IntoIterator<Item = (Strin
 				if let Value::String(s) = &value {
 					let idx = s.find(" - ");
 					println!(
-						"cargo:rustc-env=VSCODE_CLI_QUALITYLESS_PRODUCT_NAME={}",
+						"cargo:rustc-env=HAYSTACK_CLI_QUALITYLESS_PRODUCT_NAME={}",
 						idx.map(|i| &s[..i]).unwrap_or(s)
 					);
 				}
@@ -94,7 +100,7 @@ fn set_env_vars_from_map_keys(prefix: &str, map: impl IntoIterator<Item = (Strin
 
 	if !win32_app_ids.is_empty() {
 		println!(
-			"cargo:rustc-env=VSCODE_CLI_WIN32_APP_IDS={}",
+			"cargo:rustc-env=HAYSTACK_CLI_WIN32_APP_IDS={}",
 			win32_app_ids.join(",")
 		);
 	}
@@ -110,7 +116,7 @@ where
 
 fn apply_build_from_product_json(path: &Path) {
 	let json: HashMap<String, Value> = read_json_from_path(path);
-	set_env_vars_from_map_keys("VSCODE_CLI", json);
+	set_env_vars_from_map_keys("HAYSTACK_CLI", json);
 }
 
 #[derive(Deserialize)]
@@ -122,11 +128,11 @@ fn apply_build_environment_variables() {
 	let repo_dir = env::current_dir().unwrap().join("..");
 	let package_json = read_json_from_path::<PackageJson>(&repo_dir.join("package.json"));
 	println!(
-		"cargo:rustc-env=VSCODE_CLI_VERSION={}",
+		"cargo:rustc-env=HAYSTACK_CLI_VERSION={}",
 		package_json.version
 	);
 
-	match env::var("VSCODE_CLI_PRODUCT_JSON") {
+	match env::var("HAYSTACK_CLI_PRODUCT_JSON") {
 		Ok(v) => {
 			let path = if cfg!(windows) {
 				PathBuf::from_str(&v.replace('/', "\\")).unwrap()

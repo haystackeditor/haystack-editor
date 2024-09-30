@@ -1,95 +1,107 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as assert from 'assert';
-import { MainThreadCommands } from 'vs/workbench/api/browser/mainThreadCommands';
-import { CommandsRegistry, ICommandService } from 'vs/platform/commands/common/commands';
-import { SingleProxyRPCProtocol } from 'vs/workbench/api/test/common/testRPCProtocol';
-import { IExtensionService } from 'vs/workbench/services/extensions/common/extensions';
-import { mock } from 'vs/base/test/common/mock';
-import { ensureNoDisposablesAreLeakedInTestSuite } from 'vs/base/test/common/utils';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
-suite('MainThreadCommands', function () {
+import * as assert from "assert"
+import { MainThreadCommands } from "vs/workbench/api/browser/mainThreadCommands"
+import {
+  CommandsRegistry,
+  ICommandService,
+} from "vs/platform/commands/common/commands"
+import { SingleProxyRPCProtocol } from "vs/workbench/api/test/common/testRPCProtocol"
+import { IExtensionService } from "vs/workbench/services/extensions/common/extensions"
+import { mock } from "vs/base/test/common/mock"
+import { ensureNoDisposablesAreLeakedInTestSuite } from "vs/base/test/common/utils"
 
-	ensureNoDisposablesAreLeakedInTestSuite();
+suite("MainThreadCommands", function () {
+  ensureNoDisposablesAreLeakedInTestSuite()
 
-	test('dispose on unregister', function () {
+  test("dispose on unregister", function () {
+    const commands = new MainThreadCommands(
+      SingleProxyRPCProtocol(null),
+      undefined!,
+      new (class extends mock<IExtensionService>() {})(),
+    )
+    assert.strictEqual(CommandsRegistry.getCommand("foo"), undefined)
 
-		const commands = new MainThreadCommands(SingleProxyRPCProtocol(null), undefined!, new class extends mock<IExtensionService>() { });
-		assert.strictEqual(CommandsRegistry.getCommand('foo'), undefined);
+    // register
+    commands.$registerCommand("foo")
+    assert.ok(CommandsRegistry.getCommand("foo"))
 
-		// register
-		commands.$registerCommand('foo');
-		assert.ok(CommandsRegistry.getCommand('foo'));
+    // unregister
+    commands.$unregisterCommand("foo")
+    assert.strictEqual(CommandsRegistry.getCommand("foo"), undefined)
 
-		// unregister
-		commands.$unregisterCommand('foo');
-		assert.strictEqual(CommandsRegistry.getCommand('foo'), undefined);
+    commands.dispose()
+  })
 
-		commands.dispose();
+  test("unregister all on dispose", function () {
+    const commands = new MainThreadCommands(
+      SingleProxyRPCProtocol(null),
+      undefined!,
+      new (class extends mock<IExtensionService>() {})(),
+    )
+    assert.strictEqual(CommandsRegistry.getCommand("foo"), undefined)
 
-	});
+    commands.$registerCommand("foo")
+    commands.$registerCommand("bar")
 
-	test('unregister all on dispose', function () {
+    assert.ok(CommandsRegistry.getCommand("foo"))
+    assert.ok(CommandsRegistry.getCommand("bar"))
 
-		const commands = new MainThreadCommands(SingleProxyRPCProtocol(null), undefined!, new class extends mock<IExtensionService>() { });
-		assert.strictEqual(CommandsRegistry.getCommand('foo'), undefined);
+    commands.dispose()
 
-		commands.$registerCommand('foo');
-		commands.$registerCommand('bar');
+    assert.strictEqual(CommandsRegistry.getCommand("foo"), undefined)
+    assert.strictEqual(CommandsRegistry.getCommand("bar"), undefined)
+  })
 
-		assert.ok(CommandsRegistry.getCommand('foo'));
-		assert.ok(CommandsRegistry.getCommand('bar'));
+  test("activate and throw when needed", async function () {
+    const activations: string[] = []
+    const runs: string[] = []
 
-		commands.dispose();
+    const commands = new MainThreadCommands(
+      SingleProxyRPCProtocol(null),
+      new (class extends mock<ICommandService>() {
+        override executeCommand<T>(id: string): Promise<T | undefined> {
+          runs.push(id)
+          return Promise.resolve(undefined)
+        }
+      })(),
+      new (class extends mock<IExtensionService>() {
+        override activateByEvent(id: string) {
+          activations.push(id)
+          return Promise.resolve()
+        }
+      })(),
+    )
 
-		assert.strictEqual(CommandsRegistry.getCommand('foo'), undefined);
-		assert.strictEqual(CommandsRegistry.getCommand('bar'), undefined);
-	});
+    // case 1: arguments and retry
+    try {
+      activations.length = 0
+      await commands.$executeCommand("bazz", [1, 2, { n: 3 }], true)
+      assert.ok(false)
+    } catch (e) {
+      assert.deepStrictEqual(activations, ["onCommand:bazz"])
+      assert.strictEqual((<Error>e).message, "$executeCommand:retry")
+    }
 
-	test('activate and throw when needed', async function () {
+    // case 2: no arguments and retry
+    runs.length = 0
+    await commands.$executeCommand("bazz", [], true)
+    assert.deepStrictEqual(runs, ["bazz"])
 
-		const activations: string[] = [];
-		const runs: string[] = [];
+    // case 3: arguments and no retry
+    runs.length = 0
+    await commands.$executeCommand("bazz", [1, 2, true], false)
+    assert.deepStrictEqual(runs, ["bazz"])
 
-		const commands = new MainThreadCommands(
-			SingleProxyRPCProtocol(null),
-			new class extends mock<ICommandService>() {
-				override executeCommand<T>(id: string): Promise<T | undefined> {
-					runs.push(id);
-					return Promise.resolve(undefined);
-				}
-			},
-			new class extends mock<IExtensionService>() {
-				override activateByEvent(id: string) {
-					activations.push(id);
-					return Promise.resolve();
-				}
-			}
-		);
-
-		// case 1: arguments and retry
-		try {
-			activations.length = 0;
-			await commands.$executeCommand('bazz', [1, 2, { n: 3 }], true);
-			assert.ok(false);
-		} catch (e) {
-			assert.deepStrictEqual(activations, ['onCommand:bazz']);
-			assert.strictEqual((<Error>e).message, '$executeCommand:retry');
-		}
-
-		// case 2: no arguments and retry
-		runs.length = 0;
-		await commands.$executeCommand('bazz', [], true);
-		assert.deepStrictEqual(runs, ['bazz']);
-
-		// case 3: arguments and no retry
-		runs.length = 0;
-		await commands.$executeCommand('bazz', [1, 2, true], false);
-		assert.deepStrictEqual(runs, ['bazz']);
-
-		commands.dispose();
-	});
-});
+    commands.dispose()
+  })
+})

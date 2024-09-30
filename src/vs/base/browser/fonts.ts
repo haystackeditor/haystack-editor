@@ -1,9 +1,15 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { isMacintosh, isWindows } from 'vs/base/common/platform';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+import { isMacintosh, isWindows } from "vs/base/common/platform"
 
 /**
  * The best font-family to be used in CSS based on the platform:
@@ -13,4 +19,8 @@ import { isMacintosh, isWindows } from 'vs/base/common/platform';
  *
  * Note: this currently does not adjust for different locales.
  */
-export const DEFAULT_FONT_FAMILY = isWindows ? '"Segoe WPC", "Segoe UI", sans-serif' : isMacintosh ? '-apple-system, BlinkMacSystemFont, sans-serif' : 'system-ui, "Ubuntu", "Droid Sans", sans-serif';
+export const DEFAULT_FONT_FAMILY = isWindows
+  ? '"Segoe WPC", "Segoe UI", sans-serif'
+  : isMacintosh
+    ? "-apple-system, BlinkMacSystemFont, sans-serif"
+    : 'system-ui, "Ubuntu", "Droid Sans", sans-serif'

@@ -1,215 +1,288 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Emitter, Event } from 'vs/base/common/event';
-import { KeyCode } from 'vs/base/common/keyCodes';
-import { combinedDisposable, DisposableStore, dispose, IDisposable } from 'vs/base/common/lifecycle';
-import { isEqual } from 'vs/base/common/resources';
-import { ICodeEditor } from 'vs/editor/browser/editorBrowser';
-import { EditorCommand, registerEditorCommand } from 'vs/editor/browser/editorExtensions';
-import { ICodeEditorService } from 'vs/editor/browser/services/codeEditorService';
-import { Range } from 'vs/editor/common/core/range';
-import { OneReference, ReferencesModel } from 'vs/editor/contrib/gotoSymbol/browser/referencesModel';
-import { localize } from 'vs/nls';
-import { IContextKey, IContextKeyService, RawContextKey } from 'vs/platform/contextkey/common/contextkey';
-import { TextEditorSelectionRevealType } from 'vs/platform/editor/common/editor';
-import { InstantiationType, registerSingleton } from 'vs/platform/instantiation/common/extensions';
-import { createDecorator, ServicesAccessor } from 'vs/platform/instantiation/common/instantiation';
-import { IKeybindingService } from 'vs/platform/keybinding/common/keybinding';
-import { KeybindingsRegistry, KeybindingWeight } from 'vs/platform/keybinding/common/keybindingsRegistry';
-import { INotificationService } from 'vs/platform/notification/common/notification';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
-export const ctxHasSymbols = new RawContextKey('hasSymbols', false, localize('hasSymbols', "Whether there are symbol locations that can be navigated via keyboard-only."));
+import { Emitter, Event } from "vs/base/common/event"
+import { KeyCode } from "vs/base/common/keyCodes"
+import {
+  combinedDisposable,
+  DisposableStore,
+  dispose,
+  IDisposable,
+} from "vs/base/common/lifecycle"
+import { isEqual } from "vs/base/common/resources"
+import { ICodeEditor } from "vs/editor/browser/editorBrowser"
+import {
+  EditorCommand,
+  registerEditorCommand,
+} from "vs/editor/browser/editorExtensions"
+import { ICodeEditorService } from "vs/editor/browser/services/codeEditorService"
+import { Range } from "vs/editor/common/core/range"
+import {
+  OneReference,
+  ReferencesModel,
+} from "vs/editor/contrib/gotoSymbol/browser/referencesModel"
+import { localize } from "vs/nls"
+import {
+  IContextKey,
+  IContextKeyService,
+  RawContextKey,
+} from "vs/platform/contextkey/common/contextkey"
+import { TextEditorSelectionRevealType } from "vs/platform/editor/common/editor"
+import {
+  InstantiationType,
+  registerSingleton,
+} from "vs/platform/instantiation/common/extensions"
+import {
+  createDecorator,
+  ServicesAccessor,
+} from "vs/platform/instantiation/common/instantiation"
+import { IKeybindingService } from "vs/platform/keybinding/common/keybinding"
+import {
+  KeybindingsRegistry,
+  KeybindingWeight,
+} from "vs/platform/keybinding/common/keybindingsRegistry"
+import { INotificationService } from "vs/platform/notification/common/notification"
 
-export const ISymbolNavigationService = createDecorator<ISymbolNavigationService>('ISymbolNavigationService');
+export const ctxHasSymbols = new RawContextKey(
+  "hasSymbols",
+  false,
+  localize(
+    "hasSymbols",
+    "Whether there are symbol locations that can be navigated via keyboard-only.",
+  ),
+)
+
+export const ISymbolNavigationService =
+  createDecorator<ISymbolNavigationService>("ISymbolNavigationService")
 
 export interface ISymbolNavigationService {
-	readonly _serviceBrand: undefined;
-	reset(): void;
-	put(anchor: OneReference): void;
-	revealNext(source: ICodeEditor): Promise<any>;
+  readonly _serviceBrand: undefined
+  reset(): void
+  put(anchor: OneReference): void
+  revealNext(source: ICodeEditor): Promise<any>
 }
 
 class SymbolNavigationService implements ISymbolNavigationService {
+  declare readonly _serviceBrand: undefined
 
-	declare readonly _serviceBrand: undefined;
+  private readonly _ctxHasSymbols: IContextKey<boolean>
 
-	private readonly _ctxHasSymbols: IContextKey<boolean>;
+  private _currentModel?: ReferencesModel = undefined
+  private _currentIdx: number = -1
+  private _currentState?: IDisposable
+  private _currentMessage?: IDisposable
+  private _ignoreEditorChange: boolean = false
 
-	private _currentModel?: ReferencesModel = undefined;
-	private _currentIdx: number = -1;
-	private _currentState?: IDisposable;
-	private _currentMessage?: IDisposable;
-	private _ignoreEditorChange: boolean = false;
+  constructor(
+    @IContextKeyService contextKeyService: IContextKeyService,
+    @ICodeEditorService private readonly _editorService: ICodeEditorService,
+    @INotificationService
+    private readonly _notificationService: INotificationService,
+    @IKeybindingService private readonly _keybindingService: IKeybindingService,
+  ) {
+    this._ctxHasSymbols = ctxHasSymbols.bindTo(contextKeyService)
+  }
 
-	constructor(
-		@IContextKeyService contextKeyService: IContextKeyService,
-		@ICodeEditorService private readonly _editorService: ICodeEditorService,
-		@INotificationService private readonly _notificationService: INotificationService,
-		@IKeybindingService private readonly _keybindingService: IKeybindingService,
-	) {
-		this._ctxHasSymbols = ctxHasSymbols.bindTo(contextKeyService);
-	}
+  reset(): void {
+    this._ctxHasSymbols.reset()
+    this._currentState?.dispose()
+    this._currentMessage?.dispose()
+    this._currentModel = undefined
+    this._currentIdx = -1
+  }
 
-	reset(): void {
-		this._ctxHasSymbols.reset();
-		this._currentState?.dispose();
-		this._currentMessage?.dispose();
-		this._currentModel = undefined;
-		this._currentIdx = -1;
-	}
+  put(anchor: OneReference): void {
+    const refModel = anchor.parent.parent
 
-	put(anchor: OneReference): void {
-		const refModel = anchor.parent.parent;
+    if (refModel.references.length <= 1) {
+      this.reset()
+      return
+    }
 
-		if (refModel.references.length <= 1) {
-			this.reset();
-			return;
-		}
+    this._currentModel = refModel
+    this._currentIdx = refModel.references.indexOf(anchor)
+    this._ctxHasSymbols.set(true)
+    this._showMessage()
 
-		this._currentModel = refModel;
-		this._currentIdx = refModel.references.indexOf(anchor);
-		this._ctxHasSymbols.set(true);
-		this._showMessage();
+    const editorState = new EditorState(this._editorService)
+    const listener = editorState.onDidChange((_) => {
+      if (this._ignoreEditorChange) {
+        return
+      }
 
-		const editorState = new EditorState(this._editorService);
-		const listener = editorState.onDidChange(_ => {
+      const editor = this._editorService.getActiveCodeEditor()
+      if (!editor) {
+        return
+      }
+      const model = editor.getModel()
+      const position = editor.getPosition()
+      if (!model || !position) {
+        return
+      }
 
-			if (this._ignoreEditorChange) {
-				return;
-			}
+      let seenUri: boolean = false
+      let seenPosition: boolean = false
+      for (const reference of refModel.references) {
+        if (isEqual(reference.uri, model.uri)) {
+          seenUri = true
+          seenPosition =
+            seenPosition || Range.containsPosition(reference.range, position)
+        } else if (seenUri) {
+          break
+        }
+      }
+      if (!seenUri || !seenPosition) {
+        this.reset()
+      }
+    })
 
-			const editor = this._editorService.getActiveCodeEditor();
-			if (!editor) {
-				return;
-			}
-			const model = editor.getModel();
-			const position = editor.getPosition();
-			if (!model || !position) {
-				return;
-			}
+    this._currentState = combinedDisposable(editorState, listener)
+  }
 
-			let seenUri: boolean = false;
-			let seenPosition: boolean = false;
-			for (const reference of refModel.references) {
-				if (isEqual(reference.uri, model.uri)) {
-					seenUri = true;
-					seenPosition = seenPosition || Range.containsPosition(reference.range, position);
-				} else if (seenUri) {
-					break;
-				}
-			}
-			if (!seenUri || !seenPosition) {
-				this.reset();
-			}
-		});
+  revealNext(source: ICodeEditor): Promise<any> {
+    if (!this._currentModel) {
+      return Promise.resolve()
+    }
 
-		this._currentState = combinedDisposable(editorState, listener);
-	}
+    // get next result and advance
+    this._currentIdx += 1
+    this._currentIdx %= this._currentModel.references.length
+    const reference = this._currentModel.references[this._currentIdx]
 
-	revealNext(source: ICodeEditor): Promise<any> {
-		if (!this._currentModel) {
-			return Promise.resolve();
-		}
+    // status
+    this._showMessage()
 
-		// get next result and advance
-		this._currentIdx += 1;
-		this._currentIdx %= this._currentModel.references.length;
-		const reference = this._currentModel.references[this._currentIdx];
+    // open editor, ignore events while that happens
+    this._ignoreEditorChange = true
+    return this._editorService
+      .openCodeEditor(
+        {
+          resource: reference.uri,
+          options: {
+            selection: Range.collapseToStart(reference.range),
+            selectionRevealType:
+              TextEditorSelectionRevealType.NearTopIfOutsideViewport,
+          },
+        },
+        source,
+      )
+      .finally(() => {
+        this._ignoreEditorChange = false
+      })
+  }
 
-		// status
-		this._showMessage();
+  private _showMessage(): void {
+    this._currentMessage?.dispose()
 
-		// open editor, ignore events while that happens
-		this._ignoreEditorChange = true;
-		return this._editorService.openCodeEditor({
-			resource: reference.uri,
-			options: {
-				selection: Range.collapseToStart(reference.range),
-				selectionRevealType: TextEditorSelectionRevealType.NearTopIfOutsideViewport
-			}
-		}, source).finally(() => {
-			this._ignoreEditorChange = false;
-		});
+    const kb = this._keybindingService.lookupKeybinding(
+      "editor.gotoNextSymbolFromResult",
+    )
+    const message = kb
+      ? localize(
+          "location.kb",
+          "Symbol {0} of {1}, {2} for next",
+          this._currentIdx + 1,
+          this._currentModel!.references.length,
+          kb.getLabel(),
+        )
+      : localize(
+          "location",
+          "Symbol {0} of {1}",
+          this._currentIdx + 1,
+          this._currentModel!.references.length,
+        )
 
-	}
-
-	private _showMessage(): void {
-
-		this._currentMessage?.dispose();
-
-		const kb = this._keybindingService.lookupKeybinding('editor.gotoNextSymbolFromResult');
-		const message = kb
-			? localize('location.kb', "Symbol {0} of {1}, {2} for next", this._currentIdx + 1, this._currentModel!.references.length, kb.getLabel())
-			: localize('location', "Symbol {0} of {1}", this._currentIdx + 1, this._currentModel!.references.length);
-
-		this._currentMessage = this._notificationService.status(message);
-	}
+    this._currentMessage = this._notificationService.status(message)
+  }
 }
 
-registerSingleton(ISymbolNavigationService, SymbolNavigationService, InstantiationType.Delayed);
+registerSingleton(
+  ISymbolNavigationService,
+  SymbolNavigationService,
+  InstantiationType.Delayed,
+)
 
-registerEditorCommand(new class extends EditorCommand {
+registerEditorCommand(
+  new (class extends EditorCommand {
+    constructor() {
+      super({
+        id: "editor.gotoNextSymbolFromResult",
+        precondition: ctxHasSymbols,
+        kbOpts: {
+          weight: KeybindingWeight.EditorContrib,
+          primary: KeyCode.F12,
+        },
+      })
+    }
 
-	constructor() {
-		super({
-			id: 'editor.gotoNextSymbolFromResult',
-			precondition: ctxHasSymbols,
-			kbOpts: {
-				weight: KeybindingWeight.EditorContrib,
-				primary: KeyCode.F12
-			}
-		});
-	}
-
-	runEditorCommand(accessor: ServicesAccessor, editor: ICodeEditor): void | Promise<void> {
-		return accessor.get(ISymbolNavigationService).revealNext(editor);
-	}
-});
+    runEditorCommand(
+      accessor: ServicesAccessor,
+      editor: ICodeEditor,
+    ): void | Promise<void> {
+      return accessor.get(ISymbolNavigationService).revealNext(editor)
+    }
+  })(),
+)
 
 KeybindingsRegistry.registerCommandAndKeybindingRule({
-	id: 'editor.gotoNextSymbolFromResult.cancel',
-	weight: KeybindingWeight.EditorContrib,
-	when: ctxHasSymbols,
-	primary: KeyCode.Escape,
-	handler(accessor) {
-		accessor.get(ISymbolNavigationService).reset();
-	}
-});
+  id: "editor.gotoNextSymbolFromResult.cancel",
+  weight: KeybindingWeight.EditorContrib,
+  when: ctxHasSymbols,
+  primary: KeyCode.Escape,
+  handler(accessor) {
+    accessor.get(ISymbolNavigationService).reset()
+  },
+})
 
 //
 
 class EditorState {
+  private readonly _listener = new Map<ICodeEditor, IDisposable>()
+  private readonly _disposables = new DisposableStore()
 
-	private readonly _listener = new Map<ICodeEditor, IDisposable>();
-	private readonly _disposables = new DisposableStore();
+  private readonly _onDidChange = new Emitter<{ editor: ICodeEditor }>()
+  readonly onDidChange: Event<{ editor: ICodeEditor }> = this._onDidChange.event
 
-	private readonly _onDidChange = new Emitter<{ editor: ICodeEditor }>();
-	readonly onDidChange: Event<{ editor: ICodeEditor }> = this._onDidChange.event;
+  constructor(@ICodeEditorService editorService: ICodeEditorService) {
+    this._disposables.add(
+      editorService.onCodeEditorRemove(this._onDidRemoveEditor, this),
+    )
+    this._disposables.add(
+      editorService.onCodeEditorAdd(this._onDidAddEditor, this),
+    )
+    editorService.listCodeEditors().forEach(this._onDidAddEditor, this)
+  }
 
-	constructor(@ICodeEditorService editorService: ICodeEditorService) {
-		this._disposables.add(editorService.onCodeEditorRemove(this._onDidRemoveEditor, this));
-		this._disposables.add(editorService.onCodeEditorAdd(this._onDidAddEditor, this));
-		editorService.listCodeEditors().forEach(this._onDidAddEditor, this);
-	}
+  dispose(): void {
+    this._disposables.dispose()
+    this._onDidChange.dispose()
+    dispose(this._listener.values())
+  }
 
-	dispose(): void {
-		this._disposables.dispose();
-		this._onDidChange.dispose();
-		dispose(this._listener.values());
-	}
+  private _onDidAddEditor(editor: ICodeEditor): void {
+    this._listener.set(
+      editor,
+      combinedDisposable(
+        editor.onDidChangeCursorPosition((_) =>
+          this._onDidChange.fire({ editor }),
+        ),
+        editor.onDidChangeModelContent((_) =>
+          this._onDidChange.fire({ editor }),
+        ),
+      ),
+    )
+  }
 
-	private _onDidAddEditor(editor: ICodeEditor): void {
-		this._listener.set(editor, combinedDisposable(
-			editor.onDidChangeCursorPosition(_ => this._onDidChange.fire({ editor })),
-			editor.onDidChangeModelContent(_ => this._onDidChange.fire({ editor })),
-		));
-	}
-
-	private _onDidRemoveEditor(editor: ICodeEditor): void {
-		this._listener.get(editor)?.dispose();
-		this._listener.delete(editor);
-	}
+  private _onDidRemoveEditor(editor: ICodeEditor): void {
+    this._listener.get(editor)?.dispose()
+    this._listener.delete(editor)
+  }
 }

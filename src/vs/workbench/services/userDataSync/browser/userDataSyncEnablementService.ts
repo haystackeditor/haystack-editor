@@ -1,21 +1,45 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { InstantiationType, registerSingleton } from 'vs/platform/instantiation/common/extensions';
-import { IUserDataSyncEnablementService, SyncResource } from 'vs/platform/userDataSync/common/userDataSync';
-import { UserDataSyncEnablementService as BaseUserDataSyncEnablementService } from 'vs/platform/userDataSync/common/userDataSyncEnablementService';
-import { IBrowserWorkbenchEnvironmentService } from 'vs/workbench/services/environment/browser/environmentService';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
-export class UserDataSyncEnablementService extends BaseUserDataSyncEnablementService implements IUserDataSyncEnablementService {
+import {
+  InstantiationType,
+  registerSingleton,
+} from "vs/platform/instantiation/common/extensions"
+import {
+  IUserDataSyncEnablementService,
+  SyncResource,
+} from "vs/platform/userDataSync/common/userDataSync"
+import { UserDataSyncEnablementService as BaseUserDataSyncEnablementService } from "vs/platform/userDataSync/common/userDataSyncEnablementService"
+import { IBrowserWorkbenchEnvironmentService } from "vs/workbench/services/environment/browser/environmentService"
 
-	protected get workbenchEnvironmentService(): IBrowserWorkbenchEnvironmentService { return <IBrowserWorkbenchEnvironmentService>this.environmentService; }
+export class UserDataSyncEnablementService
+  extends BaseUserDataSyncEnablementService
+  implements IUserDataSyncEnablementService
+{
+  protected get workbenchEnvironmentService(): IBrowserWorkbenchEnvironmentService {
+    return <IBrowserWorkbenchEnvironmentService>this.environmentService
+  }
 
-	override getResourceSyncStateVersion(resource: SyncResource): string | undefined {
-		return resource === SyncResource.Extensions ? this.workbenchEnvironmentService.options?.settingsSyncOptions?.extensionsSyncStateVersion : undefined;
-	}
-
+  override getResourceSyncStateVersion(
+    resource: SyncResource,
+  ): string | undefined {
+    return resource === SyncResource.Extensions
+      ? this.workbenchEnvironmentService.options?.settingsSyncOptions
+          ?.extensionsSyncStateVersion
+      : undefined
+  }
 }
 
-registerSingleton(IUserDataSyncEnablementService, UserDataSyncEnablementService, InstantiationType.Delayed);
+registerSingleton(
+  IUserDataSyncEnablementService,
+  UserDataSyncEnablementService,
+  InstantiationType.Delayed,
+)

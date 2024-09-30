@@ -1,33 +1,45 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { createDecorator } from 'vs/platform/instantiation/common/instantiation';
-import { SnippetFile, Snippet } from 'vs/workbench/contrib/snippets/browser/snippetsFile';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
-export const ISnippetsService = createDecorator<ISnippetsService>('snippetService');
+import { createDecorator } from "vs/platform/instantiation/common/instantiation"
+import {
+  SnippetFile,
+  Snippet,
+} from "vs/workbench/contrib/snippets/browser/snippetsFile"
+
+export const ISnippetsService =
+  createDecorator<ISnippetsService>("snippetService")
 
 export interface ISnippetGetOptions {
-	includeDisabledSnippets?: boolean;
-	includeNoPrefixSnippets?: boolean;
-	noRecencySort?: boolean;
-	fileTemplateSnippets?: boolean;
+  includeDisabledSnippets?: boolean
+  includeNoPrefixSnippets?: boolean
+  noRecencySort?: boolean
+  fileTemplateSnippets?: boolean
 }
 
 export interface ISnippetsService {
+  readonly _serviceBrand: undefined
 
-	readonly _serviceBrand: undefined;
+  getSnippetFiles(): Promise<Iterable<SnippetFile>>
 
-	getSnippetFiles(): Promise<Iterable<SnippetFile>>;
+  isEnabled(snippet: Snippet): boolean
 
-	isEnabled(snippet: Snippet): boolean;
+  updateEnablement(snippet: Snippet, enabled: boolean): void
 
-	updateEnablement(snippet: Snippet, enabled: boolean): void;
+  updateUsageTimestamp(snippet: Snippet): void
 
-	updateUsageTimestamp(snippet: Snippet): void;
+  getSnippets(
+    languageId: string | undefined,
+    opt?: ISnippetGetOptions,
+  ): Promise<Snippet[]>
 
-	getSnippets(languageId: string | undefined, opt?: ISnippetGetOptions): Promise<Snippet[]>;
-
-	getSnippetsSync(languageId: string, opt?: ISnippetGetOptions): Snippet[];
+  getSnippetsSync(languageId: string, opt?: ISnippetGetOptions): Snippet[]
 }

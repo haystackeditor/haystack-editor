@@ -1,30 +1,38 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { extensions } from 'vscode';
-import { API as GitBaseAPI, GitBaseExtension } from './api/git-base';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+import { extensions } from "vscode"
+import { API as GitBaseAPI, GitBaseExtension } from "./api/git-base"
 
 export class GitBaseApi {
+  private static _gitBaseApi: GitBaseAPI | undefined
 
-	private static _gitBaseApi: GitBaseAPI | undefined;
+  static getAPI(): GitBaseAPI {
+    if (!this._gitBaseApi) {
+      const gitBaseExtension =
+        extensions.getExtension<GitBaseExtension>("vscode.git-base")!.exports
+      const onDidChangeGitBaseExtensionEnablement = (enabled: boolean) => {
+        this._gitBaseApi = enabled ? gitBaseExtension.getAPI(1) : undefined
+      }
 
-	static getAPI(): GitBaseAPI {
-		if (!this._gitBaseApi) {
-			const gitBaseExtension = extensions.getExtension<GitBaseExtension>('vscode.git-base')!.exports;
-			const onDidChangeGitBaseExtensionEnablement = (enabled: boolean) => {
-				this._gitBaseApi = enabled ? gitBaseExtension.getAPI(1) : undefined;
-			};
+      gitBaseExtension.onDidChangeEnablement(
+        onDidChangeGitBaseExtensionEnablement,
+      )
+      onDidChangeGitBaseExtensionEnablement(gitBaseExtension.enabled)
 
-			gitBaseExtension.onDidChangeEnablement(onDidChangeGitBaseExtensionEnablement);
-			onDidChangeGitBaseExtensionEnablement(gitBaseExtension.enabled);
+      if (!this._gitBaseApi) {
+        throw new Error("vscode.git-base extension is not enabled.")
+      }
+    }
 
-			if (!this._gitBaseApi) {
-				throw new Error('vscode.git-base extension is not enabled.');
-			}
-		}
-
-		return this._gitBaseApi;
-	}
+    return this._gitBaseApi
+  }
 }

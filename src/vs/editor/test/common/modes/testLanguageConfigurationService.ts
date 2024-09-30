@@ -1,31 +1,61 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
-import { Emitter } from 'vs/base/common/event';
-import { Disposable, IDisposable } from 'vs/base/common/lifecycle';
-import { LanguageConfiguration } from 'vs/editor/common/languages/languageConfiguration';
-import { ILanguageConfigurationService, LanguageConfigurationRegistry, LanguageConfigurationServiceChangeEvent, ResolvedLanguageConfiguration } from 'vs/editor/common/languages/languageConfigurationRegistry';
 
-export class TestLanguageConfigurationService extends Disposable implements ILanguageConfigurationService {
-	_serviceBrand: undefined;
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+import { Emitter } from "vs/base/common/event"
+import { Disposable, IDisposable } from "vs/base/common/lifecycle"
+import { LanguageConfiguration } from "vs/editor/common/languages/languageConfiguration"
+import {
+  ILanguageConfigurationService,
+  LanguageConfigurationRegistry,
+  LanguageConfigurationServiceChangeEvent,
+  ResolvedLanguageConfiguration,
+} from "vs/editor/common/languages/languageConfigurationRegistry"
 
-	private readonly _registry = this._register(new LanguageConfigurationRegistry());
+export class TestLanguageConfigurationService
+  extends Disposable
+  implements ILanguageConfigurationService
+{
+  _serviceBrand: undefined
 
-	private readonly _onDidChange = this._register(new Emitter<LanguageConfigurationServiceChangeEvent>());
-	public readonly onDidChange = this._onDidChange.event;
+  private readonly _registry = this._register(
+    new LanguageConfigurationRegistry(),
+  )
 
-	constructor() {
-		super();
-		this._register(this._registry.onDidChange((e) => this._onDidChange.fire(new LanguageConfigurationServiceChangeEvent(e.languageId))));
-	}
+  private readonly _onDidChange = this._register(
+    new Emitter<LanguageConfigurationServiceChangeEvent>(),
+  )
+  public readonly onDidChange = this._onDidChange.event
 
-	register(languageId: string, configuration: LanguageConfiguration, priority?: number): IDisposable {
-		return this._registry.register(languageId, configuration, priority);
-	}
+  constructor() {
+    super()
+    this._register(
+      this._registry.onDidChange((e) =>
+        this._onDidChange.fire(
+          new LanguageConfigurationServiceChangeEvent(e.languageId),
+        ),
+      ),
+    )
+  }
 
-	getLanguageConfiguration(languageId: string): ResolvedLanguageConfiguration {
-		return this._registry.getLanguageConfiguration(languageId) ??
-			new ResolvedLanguageConfiguration('unknown', {});
-	}
+  register(
+    languageId: string,
+    configuration: LanguageConfiguration,
+    priority?: number,
+  ): IDisposable {
+    return this._registry.register(languageId, configuration, priority)
+  }
+
+  getLanguageConfiguration(languageId: string): ResolvedLanguageConfiguration {
+    return (
+      this._registry.getLanguageConfiguration(languageId) ??
+      new ResolvedLanguageConfiguration("unknown", {})
+    )
+  }
 }

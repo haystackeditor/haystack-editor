@@ -1,87 +1,124 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Emitter } from 'vs/base/common/event';
-import { Disposable } from 'vs/base/common/lifecycle';
-import { INotebookRendererMessagingService, IScopedRendererMessaging } from 'vs/workbench/contrib/notebook/common/notebookRendererMessagingService';
-import { IExtensionService } from 'vs/workbench/services/extensions/common/extensions';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
-type MessageToSend = { editorId: string; rendererId: string; message: unknown };
+import { Emitter } from "vs/base/common/event"
+import { Disposable } from "vs/base/common/lifecycle"
+import {
+  INotebookRendererMessagingService,
+  IScopedRendererMessaging,
+} from "vs/workbench/contrib/notebook/common/notebookRendererMessagingService"
+import { IExtensionService } from "vs/workbench/services/extensions/common/extensions"
 
-export class NotebookRendererMessagingService extends Disposable implements INotebookRendererMessagingService {
-	declare _serviceBrand: undefined;
-	/**
-	 * Activation promises. Maps renderer IDs to a queue of messages that should
-	 * be sent once activation finishes, or undefined if activation is complete.
-	 */
-	private readonly activations = new Map<string /* rendererId */, undefined | MessageToSend[]>();
-	private readonly scopedMessaging = new Map</* editorId */ string, IScopedRendererMessaging>();
-	private readonly postMessageEmitter = this._register(new Emitter<MessageToSend>());
-	public readonly onShouldPostMessage = this.postMessageEmitter.event;
+type MessageToSend = { editorId: string; rendererId: string; message: unknown }
 
-	constructor(
-		@IExtensionService private readonly extensionService: IExtensionService
-	) {
-		super();
-	}
+export class NotebookRendererMessagingService
+  extends Disposable
+  implements INotebookRendererMessagingService
+{
+  declare _serviceBrand: undefined
+  /**
+   * Activation promises. Maps renderer IDs to a queue of messages that should
+   * be sent once activation finishes, or undefined if activation is complete.
+   */
+  private readonly activations = new Map<
+    string /* rendererId */,
+    undefined | MessageToSend[]
+  >()
+  private readonly scopedMessaging = new Map<
+    /* editorId */ string,
+    IScopedRendererMessaging
+  >()
+  private readonly postMessageEmitter = this._register(
+    new Emitter<MessageToSend>(),
+  )
+  public readonly onShouldPostMessage = this.postMessageEmitter.event
 
-	/** @inheritdoc */
-	public receiveMessage(editorId: string | undefined, rendererId: string, message: unknown): Promise<boolean> {
-		if (editorId === undefined) {
-			const sends = [...this.scopedMessaging.values()].map(e => e.receiveMessageHandler?.(rendererId, message));
-			return Promise.all(sends).then(s => s.some(s => !!s));
-		}
+  constructor(
+    @IExtensionService private readonly extensionService: IExtensionService,
+  ) {
+    super()
+  }
 
-		return this.scopedMessaging.get(editorId)?.receiveMessageHandler?.(rendererId, message) ?? Promise.resolve(false);
-	}
+  /** @inheritdoc */
+  public receiveMessage(
+    editorId: string | undefined,
+    rendererId: string,
+    message: unknown,
+  ): Promise<boolean> {
+    if (editorId === undefined) {
+      const sends = [...this.scopedMessaging.values()].map((e) =>
+        e.receiveMessageHandler?.(rendererId, message),
+      )
+      return Promise.all(sends).then((s) => s.some((s) => !!s))
+    }
 
-	/** @inheritdoc */
-	public prepare(rendererId: string) {
-		if (this.activations.has(rendererId)) {
-			return;
-		}
+    return (
+      this.scopedMessaging
+        .get(editorId)
+        ?.receiveMessageHandler?.(rendererId, message) ?? Promise.resolve(false)
+    )
+  }
 
-		const queue: MessageToSend[] = [];
-		this.activations.set(rendererId, queue);
+  /** @inheritdoc */
+  public prepare(rendererId: string) {
+    if (this.activations.has(rendererId)) {
+      return
+    }
 
-		this.extensionService.activateByEvent(`onRenderer:${rendererId}`).then(() => {
-			for (const message of queue) {
-				this.postMessageEmitter.fire(message);
-			}
+    const queue: MessageToSend[] = []
+    this.activations.set(rendererId, queue)
 
-			this.activations.set(rendererId, undefined);
-		});
-	}
+    this.extensionService
+      .activateByEvent(`onRenderer:${rendererId}`)
+      .then(() => {
+        for (const message of queue) {
+          this.postMessageEmitter.fire(message)
+        }
 
-	/** @inheritdoc */
-	public getScoped(editorId: string): IScopedRendererMessaging {
-		const existing = this.scopedMessaging.get(editorId);
-		if (existing) {
-			return existing;
-		}
+        this.activations.set(rendererId, undefined)
+      })
+  }
 
-		const messaging: IScopedRendererMessaging = {
-			postMessage: (rendererId, message) => this.postMessage(editorId, rendererId, message),
-			dispose: () => this.scopedMessaging.delete(editorId),
-		};
+  /** @inheritdoc */
+  public getScoped(editorId: string): IScopedRendererMessaging {
+    const existing = this.scopedMessaging.get(editorId)
+    if (existing) {
+      return existing
+    }
 
-		this.scopedMessaging.set(editorId, messaging);
-		return messaging;
-	}
+    const messaging: IScopedRendererMessaging = {
+      postMessage: (rendererId, message) =>
+        this.postMessage(editorId, rendererId, message),
+      dispose: () => this.scopedMessaging.delete(editorId),
+    }
 
-	private postMessage(editorId: string, rendererId: string, message: unknown): void {
-		if (!this.activations.has(rendererId)) {
-			this.prepare(rendererId);
-		}
+    this.scopedMessaging.set(editorId, messaging)
+    return messaging
+  }
 
-		const activation = this.activations.get(rendererId);
-		const toSend = { rendererId, editorId, message };
-		if (activation === undefined) {
-			this.postMessageEmitter.fire(toSend);
-		} else {
-			activation.push(toSend);
-		}
-	}
+  private postMessage(
+    editorId: string,
+    rendererId: string,
+    message: unknown,
+  ): void {
+    if (!this.activations.has(rendererId)) {
+      this.prepare(rendererId)
+    }
+
+    const activation = this.activations.get(rendererId)
+    const toSend = { rendererId, editorId, message }
+    if (activation === undefined) {
+      this.postMessageEmitter.fire(toSend)
+    } else {
+      activation.push(toSend)
+    }
+  }
 }

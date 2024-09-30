@@ -1,167 +1,248 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { localize } from 'vs/nls';
-import { Event } from 'vs/base/common/event';
-import { isLinux } from 'vs/base/common/platform';
-import { FileSystemProviderCapabilities, IFileDeleteOptions, IStat, FileType, IFileReadStreamOptions, IFileWriteOptions, IFileOpenOptions, IFileOverwriteOptions, IFileSystemProviderWithFileReadWriteCapability, IFileSystemProviderWithOpenReadWriteCloseCapability, IFileSystemProviderWithFileReadStreamCapability, IFileSystemProviderWithFileFolderCopyCapability, IFileSystemProviderWithFileAtomicReadCapability, IFileAtomicReadOptions, IFileSystemProviderWithFileCloneCapability, IFileChange } from 'vs/platform/files/common/files';
-import { AbstractDiskFileSystemProvider } from 'vs/platform/files/common/diskFileSystemProvider';
-import { IMainProcessService } from 'vs/platform/ipc/common/mainProcessService';
-import { CancellationToken } from 'vs/base/common/cancellation';
-import { ReadableStreamEvents } from 'vs/base/common/stream';
-import { URI } from 'vs/base/common/uri';
-import { DiskFileSystemProviderClient, LOCAL_FILE_SYSTEM_CHANNEL_NAME } from 'vs/platform/files/common/diskFileSystemProviderClient';
-import { ILogMessage, AbstractUniversalWatcherClient } from 'vs/platform/files/common/watcher';
-import { UniversalWatcherClient } from 'vs/workbench/services/files/electron-sandbox/watcherClient';
-import { ILoggerService, ILogService } from 'vs/platform/log/common/log';
-import { IUtilityProcessWorkerWorkbenchService } from 'vs/workbench/services/utilityProcess/electron-sandbox/utilityProcessWorkerWorkbenchService';
-import { LogService } from 'vs/platform/log/common/logService';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+import { localize } from "vs/nls"
+import { Event } from "vs/base/common/event"
+import { isLinux } from "vs/base/common/platform"
+import {
+  FileSystemProviderCapabilities,
+  IFileDeleteOptions,
+  IStat,
+  FileType,
+  IFileReadStreamOptions,
+  IFileWriteOptions,
+  IFileOpenOptions,
+  IFileOverwriteOptions,
+  IFileSystemProviderWithFileReadWriteCapability,
+  IFileSystemProviderWithOpenReadWriteCloseCapability,
+  IFileSystemProviderWithFileReadStreamCapability,
+  IFileSystemProviderWithFileFolderCopyCapability,
+  IFileSystemProviderWithFileAtomicReadCapability,
+  IFileAtomicReadOptions,
+  IFileSystemProviderWithFileCloneCapability,
+  IFileChange,
+} from "vs/platform/files/common/files"
+import { AbstractDiskFileSystemProvider } from "vs/platform/files/common/diskFileSystemProvider"
+import { IMainProcessService } from "vs/platform/ipc/common/mainProcessService"
+import { CancellationToken } from "vs/base/common/cancellation"
+import { ReadableStreamEvents } from "vs/base/common/stream"
+import { URI } from "vs/base/common/uri"
+import {
+  DiskFileSystemProviderClient,
+  LOCAL_FILE_SYSTEM_CHANNEL_NAME,
+} from "vs/platform/files/common/diskFileSystemProviderClient"
+import {
+  ILogMessage,
+  AbstractUniversalWatcherClient,
+} from "vs/platform/files/common/watcher"
+import { UniversalWatcherClient } from "vs/workbench/services/files/electron-sandbox/watcherClient"
+import { ILoggerService, ILogService } from "vs/platform/log/common/log"
+import { IUtilityProcessWorkerWorkbenchService } from "vs/workbench/services/utilityProcess/electron-sandbox/utilityProcessWorkerWorkbenchService"
+import { LogService } from "vs/platform/log/common/logService"
 
 /**
  * A sandbox ready disk file system provider that delegates almost all calls
  * to the main process via `DiskFileSystemProviderServer` except for recursive
  * file watching that is done via shared process workers due to CPU intensity.
  */
-export class DiskFileSystemProvider extends AbstractDiskFileSystemProvider implements
-	IFileSystemProviderWithFileReadWriteCapability,
-	IFileSystemProviderWithOpenReadWriteCloseCapability,
-	IFileSystemProviderWithFileReadStreamCapability,
-	IFileSystemProviderWithFileFolderCopyCapability,
-	IFileSystemProviderWithFileAtomicReadCapability,
-	IFileSystemProviderWithFileCloneCapability {
+export class DiskFileSystemProvider
+  extends AbstractDiskFileSystemProvider
+  implements
+    IFileSystemProviderWithFileReadWriteCapability,
+    IFileSystemProviderWithOpenReadWriteCloseCapability,
+    IFileSystemProviderWithFileReadStreamCapability,
+    IFileSystemProviderWithFileFolderCopyCapability,
+    IFileSystemProviderWithFileAtomicReadCapability,
+    IFileSystemProviderWithFileCloneCapability
+{
+  private readonly provider = this._register(
+    new DiskFileSystemProviderClient(
+      this.mainProcessService.getChannel(LOCAL_FILE_SYSTEM_CHANNEL_NAME),
+      { pathCaseSensitive: isLinux, trash: true },
+    ),
+  )
 
-	private readonly provider = this._register(new DiskFileSystemProviderClient(this.mainProcessService.getChannel(LOCAL_FILE_SYSTEM_CHANNEL_NAME), { pathCaseSensitive: isLinux, trash: true }));
+  constructor(
+    private readonly mainProcessService: IMainProcessService,
+    private readonly utilityProcessWorkerWorkbenchService: IUtilityProcessWorkerWorkbenchService,
+    logService: ILogService,
+    private readonly loggerService: ILoggerService,
+  ) {
+    super(logService, {
+      watcher: {
+        forceUniversal:
+          true /* send all requests to universal watcher process */,
+      },
+    })
 
-	constructor(
-		private readonly mainProcessService: IMainProcessService,
-		private readonly utilityProcessWorkerWorkbenchService: IUtilityProcessWorkerWorkbenchService,
-		logService: ILogService,
-		private readonly loggerService: ILoggerService
-	) {
-		super(logService, { watcher: { forceUniversal: true /* send all requests to universal watcher process */ } });
+    this.registerListeners()
+  }
 
-		this.registerListeners();
-	}
+  private registerListeners(): void {
+    // Forward events from the embedded provider
+    this._register(
+      this.provider.onDidChangeFile((changes) =>
+        this._onDidChangeFile.fire(changes),
+      ),
+    )
+    this._register(
+      this.provider.onDidWatchError((error) =>
+        this._onDidWatchError.fire(error),
+      ),
+    )
+  }
 
-	private registerListeners(): void {
+  //#region File Capabilities
 
-		// Forward events from the embedded provider
-		this._register(this.provider.onDidChangeFile(changes => this._onDidChangeFile.fire(changes)));
-		this._register(this.provider.onDidWatchError(error => this._onDidWatchError.fire(error)));
-	}
+  get onDidChangeCapabilities(): Event<void> {
+    return this.provider.onDidChangeCapabilities
+  }
 
-	//#region File Capabilities
+  get capabilities(): FileSystemProviderCapabilities {
+    return this.provider.capabilities
+  }
 
-	get onDidChangeCapabilities(): Event<void> { return this.provider.onDidChangeCapabilities; }
+  //#endregion
 
-	get capabilities(): FileSystemProviderCapabilities { return this.provider.capabilities; }
+  //#region File Metadata Resolving
 
-	//#endregion
+  stat(resource: URI): Promise<IStat> {
+    return this.provider.stat(resource)
+  }
 
-	//#region File Metadata Resolving
+  readdir(resource: URI): Promise<[string, FileType][]> {
+    return this.provider.readdir(resource)
+  }
 
-	stat(resource: URI): Promise<IStat> {
-		return this.provider.stat(resource);
-	}
+  //#endregion
 
-	readdir(resource: URI): Promise<[string, FileType][]> {
-		return this.provider.readdir(resource);
-	}
+  //#region File Reading/Writing
 
-	//#endregion
+  readFile(resource: URI, opts?: IFileAtomicReadOptions): Promise<Uint8Array> {
+    return this.provider.readFile(resource, opts)
+  }
 
-	//#region File Reading/Writing
+  readFileStream(
+    resource: URI,
+    opts: IFileReadStreamOptions,
+    token: CancellationToken,
+  ): ReadableStreamEvents<Uint8Array> {
+    return this.provider.readFileStream(resource, opts, token)
+  }
 
-	readFile(resource: URI, opts?: IFileAtomicReadOptions): Promise<Uint8Array> {
-		return this.provider.readFile(resource, opts);
-	}
+  writeFile(
+    resource: URI,
+    content: Uint8Array,
+    opts: IFileWriteOptions,
+  ): Promise<void> {
+    return this.provider.writeFile(resource, content, opts)
+  }
 
-	readFileStream(resource: URI, opts: IFileReadStreamOptions, token: CancellationToken): ReadableStreamEvents<Uint8Array> {
-		return this.provider.readFileStream(resource, opts, token);
-	}
+  open(resource: URI, opts: IFileOpenOptions): Promise<number> {
+    return this.provider.open(resource, opts)
+  }
 
-	writeFile(resource: URI, content: Uint8Array, opts: IFileWriteOptions): Promise<void> {
-		return this.provider.writeFile(resource, content, opts);
-	}
+  close(fd: number): Promise<void> {
+    return this.provider.close(fd)
+  }
 
-	open(resource: URI, opts: IFileOpenOptions): Promise<number> {
-		return this.provider.open(resource, opts);
-	}
+  read(
+    fd: number,
+    pos: number,
+    data: Uint8Array,
+    offset: number,
+    length: number,
+  ): Promise<number> {
+    return this.provider.read(fd, pos, data, offset, length)
+  }
 
-	close(fd: number): Promise<void> {
-		return this.provider.close(fd);
-	}
+  write(
+    fd: number,
+    pos: number,
+    data: Uint8Array,
+    offset: number,
+    length: number,
+  ): Promise<number> {
+    return this.provider.write(fd, pos, data, offset, length)
+  }
 
-	read(fd: number, pos: number, data: Uint8Array, offset: number, length: number): Promise<number> {
-		return this.provider.read(fd, pos, data, offset, length);
-	}
+  //#endregion
 
-	write(fd: number, pos: number, data: Uint8Array, offset: number, length: number): Promise<number> {
-		return this.provider.write(fd, pos, data, offset, length);
-	}
+  //#region Move/Copy/Delete/Create Folder
 
-	//#endregion
+  mkdir(resource: URI): Promise<void> {
+    return this.provider.mkdir(resource)
+  }
 
-	//#region Move/Copy/Delete/Create Folder
+  delete(resource: URI, opts: IFileDeleteOptions): Promise<void> {
+    return this.provider.delete(resource, opts)
+  }
 
-	mkdir(resource: URI): Promise<void> {
-		return this.provider.mkdir(resource);
-	}
+  rename(from: URI, to: URI, opts: IFileOverwriteOptions): Promise<void> {
+    return this.provider.rename(from, to, opts)
+  }
 
-	delete(resource: URI, opts: IFileDeleteOptions): Promise<void> {
-		return this.provider.delete(resource, opts);
-	}
+  copy(from: URI, to: URI, opts: IFileOverwriteOptions): Promise<void> {
+    return this.provider.copy(from, to, opts)
+  }
 
-	rename(from: URI, to: URI, opts: IFileOverwriteOptions): Promise<void> {
-		return this.provider.rename(from, to, opts);
-	}
+  //#endregion
 
-	copy(from: URI, to: URI, opts: IFileOverwriteOptions): Promise<void> {
-		return this.provider.copy(from, to, opts);
-	}
+  //#region Clone File
 
-	//#endregion
+  cloneFile(from: URI, to: URI): Promise<void> {
+    return this.provider.cloneFile(from, to)
+  }
 
-	//#region Clone File
+  //#endregion
 
-	cloneFile(from: URI, to: URI): Promise<void> {
-		return this.provider.cloneFile(from, to);
-	}
+  //#region File Watching
 
-	//#endregion
+  protected createUniversalWatcher(
+    onChange: (changes: IFileChange[]) => void,
+    onLogMessage: (msg: ILogMessage) => void,
+    verboseLogging: boolean,
+  ): AbstractUniversalWatcherClient {
+    return new UniversalWatcherClient(
+      (changes) => onChange(changes),
+      (msg) => onLogMessage(msg),
+      verboseLogging,
+      this.utilityProcessWorkerWorkbenchService,
+    )
+  }
 
-	//#region File Watching
+  protected createNonRecursiveWatcher(): never {
+    throw new Error("Method not implemented in sandbox.") // we never expect this to be called given we set `forceUniversal: true`
+  }
 
-	protected createUniversalWatcher(
-		onChange: (changes: IFileChange[]) => void,
-		onLogMessage: (msg: ILogMessage) => void,
-		verboseLogging: boolean
-	): AbstractUniversalWatcherClient {
-		return new UniversalWatcherClient(changes => onChange(changes), msg => onLogMessage(msg), verboseLogging, this.utilityProcessWorkerWorkbenchService);
-	}
+  private _watcherLogService: ILogService | undefined = undefined
+  private get watcherLogService(): ILogService {
+    if (!this._watcherLogService) {
+      this._watcherLogService = new LogService(
+        this.loggerService.createLogger("fileWatcher", {
+          name: localize("fileWatcher", "File Watcher"),
+        }),
+      )
+    }
 
-	protected createNonRecursiveWatcher(): never {
-		throw new Error('Method not implemented in sandbox.'); // we never expect this to be called given we set `forceUniversal: true`
-	}
+    return this._watcherLogService
+  }
 
-	private _watcherLogService: ILogService | undefined = undefined;
-	private get watcherLogService(): ILogService {
-		if (!this._watcherLogService) {
-			this._watcherLogService = new LogService(this.loggerService.createLogger('fileWatcher', { name: localize('fileWatcher', "File Watcher") }));
-		}
+  protected override logWatcherMessage(msg: ILogMessage): void {
+    this.watcherLogService[msg.type](msg.message)
 
-		return this._watcherLogService;
-	}
+    if (msg.type !== "trace" && msg.type !== "debug") {
+      super.logWatcherMessage(msg) // allow non-verbose log messages in window log
+    }
+  }
 
-	protected override logWatcherMessage(msg: ILogMessage): void {
-		this.watcherLogService[msg.type](msg.message);
-
-		if (msg.type !== 'trace' && msg.type !== 'debug') {
-			super.logWatcherMessage(msg); // allow non-verbose log messages in window log
-		}
-	}
-
-	//#endregion
+  //#endregion
 }

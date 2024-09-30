@@ -1,10 +1,15 @@
 "use strict";
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the Functional Source License. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.graph = exports.strings = exports.collections = void 0;
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 var collections;
 (function (collections) {
     const hasOwnProperty = Object.prototype.hasOwnProperty;
@@ -34,7 +39,7 @@ var collections;
             if (hasOwnProperty.call(collection, key)) {
                 callback({
                     key: key,
-                    value: collection[key]
+                    value: collection[key],
                 });
             }
         }
@@ -50,8 +55,8 @@ var strings;
     /**
      * The empty string. The one and only.
      */
-    strings.empty = '';
-    strings.eolUnix = '\r\n';
+    strings.empty = "";
+    strings.eolUnix = "\r\n";
     function format(value, ...rest) {
         return value.replace(/({\d+})/g, function (match) {
             const index = Number(match.substring(1, match.length - 1));
@@ -66,7 +71,7 @@ var graph;
         return {
             data: data,
             incoming: {},
-            outgoing: {}
+            outgoing: {},
         };
     }
     graph.newNode = newNode;

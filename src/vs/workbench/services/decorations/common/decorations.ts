@@ -1,52 +1,62 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { createDecorator } from 'vs/platform/instantiation/common/instantiation';
-import { URI } from 'vs/base/common/uri';
-import { Event } from 'vs/base/common/event';
-import { ColorIdentifier } from 'vs/platform/theme/common/colorRegistry';
-import { IDisposable } from 'vs/base/common/lifecycle';
-import { CancellationToken } from 'vs/base/common/cancellation';
-import { ThemeIcon } from 'vs/base/common/themables';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
-export const IDecorationsService = createDecorator<IDecorationsService>('IFileDecorationsService');
+import { createDecorator } from "vs/platform/instantiation/common/instantiation"
+import { URI } from "vs/base/common/uri"
+import { Event } from "vs/base/common/event"
+import { ColorIdentifier } from "vs/platform/theme/common/colorRegistry"
+import { IDisposable } from "vs/base/common/lifecycle"
+import { CancellationToken } from "vs/base/common/cancellation"
+import { ThemeIcon } from "vs/base/common/themables"
+
+export const IDecorationsService = createDecorator<IDecorationsService>(
+  "IFileDecorationsService",
+)
 
 export interface IDecorationData {
-	readonly weight?: number;
-	readonly color?: ColorIdentifier;
-	readonly letter?: string | ThemeIcon;
-	readonly tooltip?: string;
-	readonly strikethrough?: boolean;
-	readonly bubble?: boolean;
+  readonly weight?: number
+  readonly color?: ColorIdentifier
+  readonly letter?: string | ThemeIcon
+  readonly tooltip?: string
+  readonly strikethrough?: boolean
+  readonly bubble?: boolean
 }
 
 export interface IDecoration extends IDisposable {
-	readonly tooltip: string;
-	readonly strikethrough: boolean;
-	readonly labelClassName: string;
-	readonly badgeClassName: string;
-	readonly iconClassName: string;
+  readonly tooltip: string
+  readonly strikethrough: boolean
+  readonly labelClassName: string
+  readonly badgeClassName: string
+  readonly iconClassName: string
 }
 
 export interface IDecorationsProvider {
-	readonly label: string;
-	readonly onDidChange: Event<readonly URI[]>;
-	provideDecorations(uri: URI, token: CancellationToken): IDecorationData | Promise<IDecorationData | undefined> | undefined;
+  readonly label: string
+  readonly onDidChange: Event<readonly URI[]>
+  provideDecorations(
+    uri: URI,
+    token: CancellationToken,
+  ): IDecorationData | Promise<IDecorationData | undefined> | undefined
 }
 
 export interface IResourceDecorationChangeEvent {
-	affectsResource(uri: URI): boolean;
+  affectsResource(uri: URI): boolean
 }
 
 export interface IDecorationsService {
+  readonly _serviceBrand: undefined
 
-	readonly _serviceBrand: undefined;
+  readonly onDidChangeDecorations: Event<IResourceDecorationChangeEvent>
 
-	readonly onDidChangeDecorations: Event<IResourceDecorationChangeEvent>;
+  registerDecorationsProvider(provider: IDecorationsProvider): IDisposable
 
-	registerDecorationsProvider(provider: IDecorationsProvider): IDisposable;
-
-	getDecoration(uri: URI, includeChildren: boolean): IDecoration | undefined;
+  getDecoration(uri: URI, includeChildren: boolean): IDecoration | undefined
 }

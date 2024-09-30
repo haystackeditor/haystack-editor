@@ -1,27 +1,92 @@
 "use strict";
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the Functional Source License. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Mangler = void 0;
-const v8 = require("node:v8");
-const fs = require("fs");
-const path = require("path");
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+const v8 = __importStar(require("node:v8"));
+const fs = __importStar(require("fs"));
+const path = __importStar(require("path"));
 const process_1 = require("process");
 const source_map_1 = require("source-map");
-const ts = require("typescript");
+const ts = __importStar(require("typescript"));
 const url_1 = require("url");
-const workerpool = require("workerpool");
+const workerpool = __importStar(require("workerpool"));
 const staticLanguageServiceHost_1 = require("./staticLanguageServiceHost");
-const buildfile = require('../../../src/buildfile');
+const buildfile = require("../../../src/buildfile");
 class ShortIdent {
     prefix;
-    static _keywords = new Set(['await', 'break', 'case', 'catch', 'class', 'const', 'continue', 'debugger',
-        'default', 'delete', 'do', 'else', 'export', 'extends', 'false', 'finally', 'for', 'function', 'if',
-        'import', 'in', 'instanceof', 'let', 'new', 'null', 'return', 'static', 'super', 'switch', 'this', 'throw',
-        'true', 'try', 'typeof', 'var', 'void', 'while', 'with', 'yield']);
-    static _alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890$_'.split('');
+    static _keywords = new Set([
+        "await",
+        "break",
+        "case",
+        "catch",
+        "class",
+        "const",
+        "continue",
+        "debugger",
+        "default",
+        "delete",
+        "do",
+        "else",
+        "export",
+        "extends",
+        "false",
+        "finally",
+        "for",
+        "function",
+        "if",
+        "import",
+        "in",
+        "instanceof",
+        "let",
+        "new",
+        "null",
+        "return",
+        "static",
+        "super",
+        "switch",
+        "this",
+        "throw",
+        "true",
+        "try",
+        "typeof",
+        "var",
+        "void",
+        "while",
+        "with",
+        "yield",
+    ]);
+    static _alphabet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890$_".split("");
     _value = 0;
     constructor(prefix) {
         this.prefix = prefix;
@@ -29,7 +94,9 @@ class ShortIdent {
     next(isNameTaken) {
         const candidate = this.prefix + ShortIdent.convert(this._value);
         this._value++;
-        if (ShortIdent._keywords.has(candidate) || /^[_0-9]/.test(candidate) || isNameTaken?.(candidate)) {
+        if (ShortIdent._keywords.has(candidate) ||
+            /^[_0-9]/.test(candidate) ||
+            isNameTaken?.(candidate)) {
             // try again
             return this.next(isNameTaken);
         }
@@ -37,7 +104,7 @@ class ShortIdent {
     }
     static convert(n) {
         const base = this._alphabet.length;
-        let result = '';
+        let result = "";
         do {
             const rest = n % base;
             result += this._alphabet[rest];
@@ -85,10 +152,10 @@ class ClassData {
             else if (ts.isConstructorDeclaration(member)) {
                 // constructor-prop:`constructor(private foo) {}`
                 for (const param of member.parameters) {
-                    if (hasModifier(param, ts.SyntaxKind.PrivateKeyword)
-                        || hasModifier(param, ts.SyntaxKind.ProtectedKeyword)
-                        || hasModifier(param, ts.SyntaxKind.PublicKeyword)
-                        || hasModifier(param, ts.SyntaxKind.ReadonlyKeyword)) {
+                    if (hasModifier(param, ts.SyntaxKind.PrivateKeyword) ||
+                        hasModifier(param, ts.SyntaxKind.ProtectedKeyword) ||
+                        hasModifier(param, ts.SyntaxKind.PublicKeyword) ||
+                        hasModifier(param, ts.SyntaxKind.ReadonlyKeyword)) {
                         candidates.push(param);
                     }
                 }
@@ -131,8 +198,7 @@ class ClassData {
         }
     }
     static _shouldMangle(type) {
-        return type === 2 /* FieldType.Private */
-            || type === 1 /* FieldType.Protected */;
+        return type === 2 /* FieldType.Private */ || type === 1 /* FieldType.Protected */;
     }
     static makeImplicitPublicActuallyPublic(data, reportViolation) {
         // TS-HACK
@@ -145,8 +211,12 @@ class ClassData {
             let parent = data.parent;
             while (parent) {
                 if (parent.fields.get(name)?.type === 1 /* FieldType.Protected */) {
-                    const parentPos = parent.node.getSourceFile().getLineAndCharacterOfPosition(parent.fields.get(name).pos);
-                    const infoPos = data.node.getSourceFile().getLineAndCharacterOfPosition(info.pos);
+                    const parentPos = parent.node
+                        .getSourceFile()
+                        .getLineAndCharacterOfPosition(parent.fields.get(name).pos);
+                    const infoPos = data.node
+                        .getSourceFile()
+                        .getLineAndCharacterOfPosition(info.pos);
                     reportViolation(name, `'${name}' from ${parent.fileName}:${parentPos.line + 1}`, `${data.fileName}:${infoPos.line + 1}`);
                     parent.fields.get(name).type = 0 /* FieldType.Public */;
                 }
@@ -192,7 +262,7 @@ class ClassData {
             }
             return false;
         };
-        const identPool = new ShortIdent('');
+        const identPool = new ShortIdent("");
         for (const [name, info] of data.fields) {
             if (ClassData._shouldMangle(info.type)) {
                 const shortName = identPool.next(isNameTaken);
@@ -203,7 +273,8 @@ class ClassData {
     // a name is taken when a field that doesn't get mangled exists or
     // when the name is already in use for replacement
     _isNameTaken(name) {
-        if (this.fields.has(name) && !ClassData._shouldMangle(this.fields.get(name).type)) {
+        if (this.fields.has(name) &&
+            !ClassData._shouldMangle(this.fields.get(name).type)) {
             // public field
             return true;
         }
@@ -224,7 +295,8 @@ class ClassData {
         let value = this.replacements.get(name);
         let parent = this.parent;
         while (parent) {
-            if (parent.replacements.has(name) && parent.fields.get(name)?.type === 1 /* FieldType.Protected */) {
+            if (parent.replacements.has(name) &&
+                parent.fields.get(name)?.type === 1 /* FieldType.Protected */) {
                 value = parent.replacements.get(name) ?? value;
             }
             parent = parent.parent;
@@ -249,23 +321,23 @@ function isNameTakenInFile(node, name) {
 }
 const skippedExportMangledFiles = [
     // Build
-    'css.build',
-    'nls.build',
+    "css.build",
+    "nls.build",
     // Monaco
-    'editorCommon',
-    'editorOptions',
-    'editorZoom',
-    'standaloneEditor',
-    'standaloneEnums',
-    'standaloneLanguages',
+    "editorCommon",
+    "editorOptions",
+    "editorZoom",
+    "standaloneEditor",
+    "standaloneEnums",
+    "standaloneLanguages",
     // Generated
-    'extensionsApiProposals',
+    "extensionsApiProposals",
     // Module passed around as type
-    'pfs',
+    "pfs",
     // entry points
     ...[
-        buildfile.entrypoint('vs/server/node/server.main', []),
-        buildfile.entrypoint('vs/workbench/workbench.desktop.main', []),
+        buildfile.entrypoint("vs/server/node/server.main", []),
+        buildfile.entrypoint("vs/workbench/workbench.desktop.main", []),
         buildfile.base,
         buildfile.workerExtensionHost,
         buildfile.workerNotebook,
@@ -274,22 +346,24 @@ const skippedExportMangledFiles = [
         buildfile.workerProfileAnalysis,
         buildfile.workbenchDesktop,
         buildfile.workbenchWeb,
-        buildfile.code
-    ].flat().map(x => x.name),
+        buildfile.code,
+    ]
+        .flat()
+        .map((x) => x.name),
 ];
 const skippedExportMangledProjects = [
     // Test projects
-    'vscode-api-tests',
+    "vscode-api-tests",
     // These projects use webpack to dynamically rewrite imports, which messes up our mangling
-    'configuration-editing',
-    'microsoft-authentication',
-    'github-authentication',
-    'html-language-features/server',
+    "configuration-editing",
+    "microsoft-authentication",
+    "github-authentication",
+    "html-language-features/server",
 ];
 const skippedExportMangledSymbols = [
     // Don't mangle extension entry points
-    'activate',
-    'deactivate',
+    "activate",
+    "deactivate",
 ];
 class DeclarationData {
     fileName;
@@ -305,18 +379,25 @@ class DeclarationData {
         if (ts.isVariableDeclaration(this.node)) {
             // If the const aliases any types, we need to rename those too
             const definitionResult = service.getDefinitionAndBoundSpan(this.fileName, this.node.name.getStart());
-            if (definitionResult?.definitions && definitionResult.definitions.length > 1) {
-                return definitionResult.definitions.map(x => ({ fileName: x.fileName, offset: x.textSpan.start }));
+            if (definitionResult?.definitions &&
+                definitionResult.definitions.length > 1) {
+                return definitionResult.definitions.map((x) => ({
+                    fileName: x.fileName,
+                    offset: x.textSpan.start,
+                }));
             }
         }
-        return [{
+        return [
+            {
                 fileName: this.fileName,
-                offset: this.node.name.getStart()
-            }];
+                offset: this.node.name.getStart(),
+            },
+        ];
     }
     shouldMangle(newName) {
         const currentName = this.node.name.getText();
-        if (currentName.startsWith('$') || skippedExportMangledSymbols.includes(currentName)) {
+        if (currentName.startsWith("$") ||
+            skippedExportMangledSymbols.includes(currentName)) {
             return false;
         }
         // New name is longer the existing one :'(
@@ -324,7 +405,7 @@ class DeclarationData {
             return false;
         }
         // Don't mangle functions we've explicitly opted out
-        if (this.node.getFullText().includes('@skipMangle')) {
+        if (this.node.getFullText().includes("@skipMangle")) {
             return false;
         }
         return true;
@@ -350,9 +431,9 @@ class Mangler {
         this.projectPath = projectPath;
         this.log = log;
         this.config = config;
-        this.renameWorkerPool = workerpool.pool(path.join(__dirname, 'renameWorker.js'), {
+        this.renameWorkerPool = workerpool.pool(path.join(__dirname, "renameWorker.js"), {
             maxWorkers: 1,
-            minWorkers: 'max'
+            minWorkers: "max",
         });
     }
     async computeNewFileContents(strictImplicitPublicHandling) {
@@ -360,45 +441,45 @@ class Mangler {
         // STEP:
         // - Find all classes and their field info.
         // - Find exported symbols.
-        const fileIdents = new ShortIdent('$');
+        const fileIdents = new ShortIdent("$");
         const visit = (node) => {
             if (this.config.manglePrivateFields) {
                 if (ts.isClassDeclaration(node) || ts.isClassExpression(node)) {
                     const anchor = node.name ?? node;
                     const key = `${node.getSourceFile().fileName}|${anchor.getStart()}`;
                     if (this.allClassDataByKey.has(key)) {
-                        throw new Error('DUPE?');
+                        throw new Error("DUPE?");
                     }
                     this.allClassDataByKey.set(key, new ClassData(node.getSourceFile().fileName, node));
                 }
             }
             if (this.config.mangleExports) {
                 // Find exported classes, functions, and vars
-                if ((
+                if (
                 // Exported class
-                ts.isClassDeclaration(node)
-                    && hasModifier(node, ts.SyntaxKind.ExportKeyword)
-                    && node.name) || (
-                // Exported function
-                ts.isFunctionDeclaration(node)
-                    && ts.isSourceFile(node.parent)
-                    && hasModifier(node, ts.SyntaxKind.ExportKeyword)
-                    && node.name && node.body // On named function and not on the overload
-                ) || (
-                // Exported variable
-                ts.isVariableDeclaration(node)
-                    && hasModifier(node.parent.parent, ts.SyntaxKind.ExportKeyword) // Variable statement is exported
-                    && ts.isSourceFile(node.parent.parent.parent))
+                (ts.isClassDeclaration(node) &&
+                    hasModifier(node, ts.SyntaxKind.ExportKeyword) &&
+                    node.name) ||
+                    // Exported function
+                    (ts.isFunctionDeclaration(node) &&
+                        ts.isSourceFile(node.parent) &&
+                        hasModifier(node, ts.SyntaxKind.ExportKeyword) &&
+                        node.name &&
+                        node.body) || // On named function and not on the overload
+                    // Exported variable
+                    (ts.isVariableDeclaration(node) &&
+                        hasModifier(node.parent.parent, ts.SyntaxKind.ExportKeyword) && // Variable statement is exported
+                        ts.isSourceFile(node.parent.parent.parent))
                 // Disabled for now because we need to figure out how to handle
                 // enums that are used in monaco or extHost interfaces.
                 /* || (
-                    // Exported enum
-                    ts.isEnumDeclaration(node)
-                    && ts.isSourceFile(node.parent)
-                    && hasModifier(node, ts.SyntaxKind.ExportKeyword)
-                    && !hasModifier(node, ts.SyntaxKind.ConstKeyword) // Don't bother mangling const enums because these are inlined
-                    && node.name
-                */
+                              // Exported enum
+                              ts.isEnumDeclaration(node)
+                              && ts.isSourceFile(node.parent)
+                              && hasModifier(node, ts.SyntaxKind.ExportKeyword)
+                              && !hasModifier(node, ts.SyntaxKind.ConstKeyword) // Don't bother mangling const enums because these are inlined
+                              && node.name
+                          */
                 ) {
                     if (isInAmbientContext(node)) {
                         return;
@@ -416,7 +497,7 @@ class Mangler {
         this.log(`Done collecting. Classes: ${this.allClassDataByKey.size}. Exported symbols: ${this.allExportedSymbols.size}`);
         //  STEP: connect sub and super-types
         const setupParents = (data) => {
-            const extendsClause = data.node.heritageClauses?.find(h => h.token === ts.SyntaxKind.ExtendsKeyword);
+            const extendsClause = data.node.heritageClauses?.find((h) => h.token === ts.SyntaxKind.ExtendsKeyword);
             if (!extendsClause) {
                 // no EXTENDS-clause
                 return;
@@ -454,16 +535,17 @@ class Mangler {
                 else {
                     violations.set(what, [why]);
                 }
-                if (strictImplicitPublicHandling && !strictImplicitPublicHandling.has(name)) {
+                if (strictImplicitPublicHandling &&
+                    !strictImplicitPublicHandling.has(name)) {
                     violationsCauseFailure = true;
                 }
             });
         }
         for (const [why, whys] of violations) {
-            this.log(`WARN: ${why} became PUBLIC because of: ${whys.join(' , ')}`);
+            this.log(`WARN: ${why} became PUBLIC because of: ${whys.join(" , ")}`);
         }
         if (violationsCauseFailure) {
-            const message = 'Protected fields have been made PUBLIC. This hurts minification and is therefore not allowed. Review the WARN messages further above';
+            const message = "Protected fields have been made PUBLIC. This hurts minification and is therefore not allowed. Review the WARN messages further above";
             this.log(`ERROR: ${message}`);
             throw new Error(message);
         }
@@ -486,15 +568,18 @@ class Mangler {
         };
         const appendRename = (newText, loc) => {
             appendEdit(loc.fileName, {
-                newText: (loc.prefixText || '') + newText + (loc.suffixText || ''),
+                newText: (loc.prefixText || "") + newText + (loc.suffixText || ""),
                 offset: loc.textSpan.start,
-                length: loc.textSpan.length
+                length: loc.textSpan.length,
             });
         };
         const renameResults = [];
         const queueRename = (fileName, pos, newName) => {
-            renameResults.push(Promise.resolve(this.renameWorkerPool.exec('findRenameLocations', [this.projectPath, fileName, pos]))
-                .then((locations) => ({ newName, locations })));
+            renameResults.push(Promise.resolve(this.renameWorkerPool.exec("findRenameLocations", [
+                this.projectPath,
+                fileName,
+                pos,
+            ])).then((locations) => ({ newName, locations })));
         };
         for (const data of this.allClassDataByKey.values()) {
             if (hasModifier(data.node, ts.SyntaxKind.DeclareKeyword)) {
@@ -518,9 +603,10 @@ class Mangler {
             }
         }
         for (const data of this.allExportedSymbols.values()) {
-            if (data.fileName.endsWith('.d.ts')
-                || skippedExportMangledProjects.some(proj => data.fileName.includes(proj))
-                || skippedExportMangledFiles.some(file => data.fileName.endsWith(file + '.ts'))) {
+            if (data.fileName.endsWith(".d.ts") ||
+                skippedExportMangledProjects.some((proj) => data.fileName.includes(proj)) ||
+                skippedExportMangledFiles.some((file) => data.fileName.endsWith(file + ".ts")) ||
+                skippedExportMangledFiles.some((file) => data.fileName.endsWith(file + ".tsx"))) {
                 continue;
             }
             if (!data.shouldMangle(data.replacementName)) {
@@ -561,21 +647,24 @@ class Mangler {
                 const mappingsByLine = new Map();
                 // apply renames
                 edits.sort((a, b) => b.offset - a.offset);
-                const characters = item.getFullText().split('');
+                const characters = item.getFullText().split("");
                 let lastEdit;
                 for (const edit of edits) {
                     if (lastEdit && lastEdit.offset === edit.offset) {
                         //
-                        if (lastEdit.length !== edit.length || lastEdit.newText !== edit.newText) {
-                            this.log('ERROR: Overlapping edit', item.fileName, edit.offset, edits);
-                            throw new Error('OVERLAPPING edit');
+                        if (lastEdit.length !== edit.length ||
+                            lastEdit.newText !== edit.newText) {
+                            this.log("ERROR: Overlapping edit", item.fileName, edit.offset, edits);
+                            throw new Error("OVERLAPPING edit");
                         }
                         else {
                             continue;
                         }
                     }
                     lastEdit = edit;
-                    const mangledName = characters.splice(edit.offset, edit.length, edit.newText).join('');
+                    const mangledName = characters
+                        .splice(edit.offset, edit.length, edit.newText)
+                        .join("");
                     savedBytes += mangledName.length - edit.newText.length;
                     // source maps
                     const pos = item.getLineAndCharacterOfPosition(edit.offset);
@@ -588,29 +677,44 @@ class Mangler {
                         source: relativeFileName,
                         original: { line: pos.line + 1, column: pos.character },
                         generated: { line: pos.line + 1, column: pos.character },
-                        name: mangledName
+                        name: mangledName,
                     }, {
                         source: relativeFileName,
-                        original: { line: pos.line + 1, column: pos.character + edit.length },
-                        generated: { line: pos.line + 1, column: pos.character + edit.newText.length },
+                        original: {
+                            line: pos.line + 1,
+                            column: pos.character + edit.length,
+                        },
+                        generated: {
+                            line: pos.line + 1,
+                            column: pos.character + edit.newText.length,
+                        },
                     });
                 }
                 // source map generation, make sure to get mappings per line correct
-                generator = new source_map_1.SourceMapGenerator({ file: path.basename(item.fileName), sourceRoot: sourceMapRoot });
+                generator = new source_map_1.SourceMapGenerator({
+                    file: path.basename(item.fileName),
+                    sourceRoot: sourceMapRoot,
+                });
                 generator.setSourceContent(relativeFileName, item.getFullText());
                 for (const [, mappings] of mappingsByLine) {
                     let lineDelta = 0;
                     for (const mapping of mappings) {
                         generator.addMapping({
                             ...mapping,
-                            generated: { line: mapping.generated.line, column: mapping.generated.column - lineDelta }
+                            generated: {
+                                line: mapping.generated.line,
+                                column: mapping.generated.column - lineDelta,
+                            },
                         });
                         lineDelta += mapping.original.column - mapping.generated.column;
                     }
                 }
-                newFullText = characters.join('');
+                newFullText = characters.join("");
             }
-            result.set(item.fileName, { out: newFullText, sourceMap: generator?.toString() });
+            result.set(item.fileName, {
+                out: newFullText,
+                sourceMap: generator?.toString(),
+            });
         }
         service.dispose();
         this.renameWorkerPool.terminate();
@@ -621,8 +725,10 @@ class Mangler {
 exports.Mangler = Mangler;
 // --- ast utils
 function hasModifier(node, kind) {
-    const modifiers = ts.canHaveModifiers(node) ? ts.getModifiers(node) : undefined;
-    return Boolean(modifiers?.find(mode => mode.kind === kind));
+    const modifiers = ts.canHaveModifiers(node)
+        ? ts.getModifiers(node)
+        : undefined;
+    return Boolean(modifiers?.find((mode) => mode.kind === kind));
 }
 function isInAmbientContext(node) {
     for (let p = node.parent; p; p = p.parent) {
@@ -633,24 +739,24 @@ function isInAmbientContext(node) {
     return false;
 }
 function normalize(path) {
-    return path.replace(/\\/g, '/');
+    return path.replace(/\\/g, "/");
 }
 async function _run() {
-    const root = path.join(__dirname, '..', '..', '..');
-    const projectBase = path.join(root, 'src');
-    const projectPath = path.join(projectBase, 'tsconfig.json');
-    const newProjectBase = path.join(path.dirname(projectBase), path.basename(projectBase) + '2');
+    const root = path.join(__dirname, "..", "..", "..");
+    const projectBase = path.join(root, "src");
+    const projectPath = path.join(projectBase, "tsconfig.json");
+    const newProjectBase = path.join(path.dirname(projectBase), path.basename(projectBase) + "2");
     fs.cpSync(projectBase, newProjectBase, { recursive: true });
     const mangler = new Mangler(projectPath, console.log, {
         mangleExports: true,
         manglePrivateFields: true,
     });
-    for (const [fileName, contents] of await mangler.computeNewFileContents(new Set(['saveState']))) {
+    for (const [fileName, contents] of await mangler.computeNewFileContents(new Set(["saveState"]))) {
         const newFilePath = path.join(newProjectBase, path.relative(projectBase, fileName));
         await fs.promises.mkdir(path.dirname(newFilePath), { recursive: true });
         await fs.promises.writeFile(newFilePath, contents.out);
         if (contents.sourceMap) {
-            await fs.promises.writeFile(newFilePath + '.map', contents.sourceMap);
+            await fs.promises.writeFile(newFilePath + ".map", contents.sourceMap);
         }
     }
 }

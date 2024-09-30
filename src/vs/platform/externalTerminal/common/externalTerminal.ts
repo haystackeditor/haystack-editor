@@ -1,37 +1,53 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { createDecorator } from 'vs/platform/instantiation/common/instantiation';
-import { ITerminalEnvironment } from 'vs/platform/terminal/common/terminal';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
-export const IExternalTerminalService = createDecorator<IExternalTerminalService>('externalTerminal');
+import { createDecorator } from "vs/platform/instantiation/common/instantiation"
+import { ITerminalEnvironment } from "vs/platform/terminal/common/terminal"
+
+export const IExternalTerminalService =
+  createDecorator<IExternalTerminalService>("externalTerminal")
 
 export interface IExternalTerminalSettings {
-	linuxExec?: string;
-	osxExec?: string;
-	windowsExec?: string;
+  linuxExec?: string
+  osxExec?: string
+  windowsExec?: string
 }
 
 export interface ITerminalForPlatform {
-	windows: string;
-	linux: string;
-	osx: string;
+  windows: string
+  linux: string
+  osx: string
 }
 
 export interface IExternalTerminalService {
-	readonly _serviceBrand: undefined;
-	openTerminal(configuration: IExternalTerminalSettings, cwd: string | undefined): Promise<void>;
-	runInTerminal(title: string, cwd: string, args: string[], env: ITerminalEnvironment, settings: IExternalTerminalSettings): Promise<number | undefined>;
-	getDefaultTerminalForPlatforms(): Promise<ITerminalForPlatform>;
+  readonly _serviceBrand: undefined
+  openTerminal(
+    configuration: IExternalTerminalSettings,
+    cwd: string | undefined,
+  ): Promise<void>
+  runInTerminal(
+    title: string,
+    cwd: string,
+    args: string[],
+    env: ITerminalEnvironment,
+    settings: IExternalTerminalSettings,
+  ): Promise<number | undefined>
+  getDefaultTerminalForPlatforms(): Promise<ITerminalForPlatform>
 }
 
 export interface IExternalTerminalConfiguration {
-	terminal: {
-		explorerKind: 'integrated' | 'external' | 'both';
-		external: IExternalTerminalSettings;
-	};
+  terminal: {
+    explorerKind: "integrated" | "external" | "both"
+    external: IExternalTerminalSettings
+  }
 }
 
-export const DEFAULT_TERMINAL_OSX = 'Terminal.app';
+export const DEFAULT_TERMINAL_OSX = "Terminal.app"

@@ -1,79 +1,101 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ipcRenderer } from 'vs/base/parts/sandbox/electron-sandbox/globals';
-import { INativeOpenFileRequest } from 'vs/platform/window/common/window';
-import { URI } from 'vs/base/common/uri';
-import { IFileService } from 'vs/platform/files/common/files';
-import { registerRemoteContributions } from 'vs/workbench/contrib/terminal/electron-sandbox/terminalRemote';
-import { IRemoteAgentService } from 'vs/workbench/services/remote/common/remoteAgentService';
-import { INativeHostService } from 'vs/platform/native/common/native';
-import { Disposable } from 'vs/base/common/lifecycle';
-import { ITerminalService } from 'vs/workbench/contrib/terminal/browser/terminal';
-import { IWorkbenchContribution } from 'vs/workbench/common/contributions';
-import { disposableWindowInterval, getActiveWindow } from 'vs/base/browser/dom';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
-export class TerminalNativeContribution extends Disposable implements IWorkbenchContribution {
-	declare _serviceBrand: undefined;
+import { ipcRenderer } from "vs/base/parts/sandbox/electron-sandbox/globals"
+import { INativeOpenFileRequest } from "vs/platform/window/common/window"
+import { URI } from "vs/base/common/uri"
+import { IFileService } from "vs/platform/files/common/files"
+import { registerRemoteContributions } from "vs/workbench/contrib/terminal/electron-sandbox/terminalRemote"
+import { IRemoteAgentService } from "vs/workbench/services/remote/common/remoteAgentService"
+import { INativeHostService } from "vs/platform/native/common/native"
+import { Disposable } from "vs/base/common/lifecycle"
+import { ITerminalService } from "vs/workbench/contrib/terminal/browser/terminal"
+import { IWorkbenchContribution } from "vs/workbench/common/contributions"
+import { disposableWindowInterval, getActiveWindow } from "vs/base/browser/dom"
 
-	constructor(
-		@IFileService private readonly _fileService: IFileService,
-		@ITerminalService private readonly _terminalService: ITerminalService,
-		@IRemoteAgentService remoteAgentService: IRemoteAgentService,
-		@INativeHostService nativeHostService: INativeHostService
-	) {
-		super();
+export class TerminalNativeContribution
+  extends Disposable
+  implements IWorkbenchContribution
+{
+  declare _serviceBrand: undefined
 
-		ipcRenderer.on('vscode:openFiles', (_: unknown, request: INativeOpenFileRequest) => { this._onOpenFileRequest(request); });
-		this._register(nativeHostService.onDidResumeOS(() => this._onOsResume()));
+  constructor(
+    @IFileService private readonly _fileService: IFileService,
+    @ITerminalService private readonly _terminalService: ITerminalService,
+    @IRemoteAgentService remoteAgentService: IRemoteAgentService,
+    @INativeHostService nativeHostService: INativeHostService,
+  ) {
+    super()
 
-		this._terminalService.setNativeDelegate({
-			getWindowCount: () => nativeHostService.getWindowCount()
-		});
+    ipcRenderer.on(
+      "vscode:openFiles",
+      (_: unknown, request: INativeOpenFileRequest) => {
+        this._onOpenFileRequest(request)
+      },
+    )
+    this._register(nativeHostService.onDidResumeOS(() => this._onOsResume()))
 
-		const connection = remoteAgentService.getConnection();
-		if (connection && connection.remoteAuthority) {
-			registerRemoteContributions();
-		}
-	}
+    this._terminalService.setNativeDelegate({
+      getWindowCount: () => nativeHostService.getWindowCount(),
+    })
 
-	private _onOsResume(): void {
-		for (const instance of this._terminalService.instances) {
-			instance.xterm?.forceRedraw();
-		}
-	}
+    const connection = remoteAgentService.getConnection()
+    if (connection && connection.remoteAuthority) {
+      registerRemoteContributions()
+    }
+  }
 
-	private async _onOpenFileRequest(request: INativeOpenFileRequest): Promise<void> {
-		// if the request to open files is coming in from the integrated terminal (identified though
-		// the termProgram variable) and we are instructed to wait for editors close, wait for the
-		// marker file to get deleted and then focus back to the integrated terminal.
-		if (request.termProgram === 'vscode' && request.filesToWait) {
-			const waitMarkerFileUri = URI.revive(request.filesToWait.waitMarkerFileUri);
-			await this._whenFileDeleted(waitMarkerFileUri);
+  private _onOsResume(): void {
+    for (const instance of this._terminalService.instances) {
+      instance.xterm?.forceRedraw()
+    }
+  }
 
-			// Focus active terminal
-			this._terminalService.activeInstance?.focus();
-		}
-	}
+  private async _onOpenFileRequest(
+    request: INativeOpenFileRequest,
+  ): Promise<void> {
+    // if the request to open files is coming in from the integrated terminal (identified though
+    // the termProgram variable) and we are instructed to wait for editors close, wait for the
+    // marker file to get deleted and then focus back to the integrated terminal.
+    if (request.termProgram === "vscode" && request.filesToWait) {
+      const waitMarkerFileUri = URI.revive(
+        request.filesToWait.waitMarkerFileUri,
+      )
+      await this._whenFileDeleted(waitMarkerFileUri)
 
-	private _whenFileDeleted(path: URI): Promise<void> {
-		// Complete when wait marker file is deleted
-		return new Promise<void>(resolve => {
-			let running = false;
-			const interval = disposableWindowInterval(getActiveWindow(), async () => {
-				if (!running) {
-					running = true;
-					const exists = await this._fileService.exists(path);
-					running = false;
+      // Focus active terminal
+      this._terminalService.activeInstance?.focus()
+    }
+  }
 
-					if (!exists) {
-						interval.dispose();
-						resolve(undefined);
-					}
-				}
-			}, 1000);
-		});
-	}
+  private _whenFileDeleted(path: URI): Promise<void> {
+    // Complete when wait marker file is deleted
+    return new Promise<void>((resolve) => {
+      let running = false
+      const interval = disposableWindowInterval(
+        getActiveWindow(),
+        async () => {
+          if (!running) {
+            running = true
+            const exists = await this._fileService.exists(path)
+            running = false
+
+            if (!exists) {
+              interval.dispose()
+              resolve(undefined)
+            }
+          }
+        },
+        1000,
+      )
+    })
+  }
 }

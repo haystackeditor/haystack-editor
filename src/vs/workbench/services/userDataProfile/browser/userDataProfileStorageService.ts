@@ -1,50 +1,103 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Emitter, Event } from 'vs/base/common/event';
-import { IStorageDatabase } from 'vs/base/parts/storage/common/storage';
-import { InstantiationType, registerSingleton } from 'vs/platform/instantiation/common/extensions';
-import { ILogService } from 'vs/platform/log/common/log';
-import { AbstractUserDataProfileStorageService, IProfileStorageChanges, IUserDataProfileStorageService } from 'vs/platform/userDataProfile/common/userDataProfileStorageService';
-import { IProfileStorageValueChangeEvent, isProfileUsingDefaultStorage, IStorageService, StorageScope } from 'vs/platform/storage/common/storage';
-import { IUserDataProfile } from 'vs/platform/userDataProfile/common/userDataProfile';
-import { IndexedDBStorageDatabase } from 'vs/workbench/services/storage/browser/storageService';
-import { IUserDataProfileService } from 'vs/workbench/services/userDataProfile/common/userDataProfile';
-import { DisposableStore } from 'vs/base/common/lifecycle';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
-export class UserDataProfileStorageService extends AbstractUserDataProfileStorageService implements IUserDataProfileStorageService {
+import { Emitter, Event } from "vs/base/common/event"
+import { IStorageDatabase } from "vs/base/parts/storage/common/storage"
+import {
+  InstantiationType,
+  registerSingleton,
+} from "vs/platform/instantiation/common/extensions"
+import { ILogService } from "vs/platform/log/common/log"
+import {
+  AbstractUserDataProfileStorageService,
+  IProfileStorageChanges,
+  IUserDataProfileStorageService,
+} from "vs/platform/userDataProfile/common/userDataProfileStorageService"
+import {
+  IProfileStorageValueChangeEvent,
+  isProfileUsingDefaultStorage,
+  IStorageService,
+  StorageScope,
+} from "vs/platform/storage/common/storage"
+import { IUserDataProfile } from "vs/platform/userDataProfile/common/userDataProfile"
+import { IndexedDBStorageDatabase } from "vs/workbench/services/storage/browser/storageService"
+import { IUserDataProfileService } from "vs/workbench/services/userDataProfile/common/userDataProfile"
+import { DisposableStore } from "vs/base/common/lifecycle"
 
-	private readonly _onDidChange = this._register(new Emitter<IProfileStorageChanges>());
-	readonly onDidChange: Event<IProfileStorageChanges> = this._onDidChange.event;
+export class UserDataProfileStorageService
+  extends AbstractUserDataProfileStorageService
+  implements IUserDataProfileStorageService
+{
+  private readonly _onDidChange = this._register(
+    new Emitter<IProfileStorageChanges>(),
+  )
+  readonly onDidChange: Event<IProfileStorageChanges> = this._onDidChange.event
 
-	constructor(
-		@IStorageService storageService: IStorageService,
-		@IUserDataProfileService private readonly userDataProfileService: IUserDataProfileService,
-		@ILogService private readonly logService: ILogService,
-	) {
-		super(storageService);
-		const disposables = this._register(new DisposableStore());
-		this._register(Event.filter(storageService.onDidChangeTarget, e => e.scope === StorageScope.PROFILE, disposables)(() => this.onDidChangeStorageTargetInCurrentProfile()));
-		this._register(storageService.onDidChangeValue(StorageScope.PROFILE, undefined, disposables)(e => this.onDidChangeStorageValueInCurrentProfile(e)));
-	}
+  constructor(
+    @IStorageService storageService: IStorageService,
+    @IUserDataProfileService
+    private readonly userDataProfileService: IUserDataProfileService,
+    @ILogService private readonly logService: ILogService,
+  ) {
+    super(storageService)
+    const disposables = this._register(new DisposableStore())
+    this._register(
+      Event.filter(
+        storageService.onDidChangeTarget,
+        (e) => e.scope === StorageScope.PROFILE,
+        disposables,
+      )(() => this.onDidChangeStorageTargetInCurrentProfile()),
+    )
+    this._register(
+      storageService.onDidChangeValue(
+        StorageScope.PROFILE,
+        undefined,
+        disposables,
+      )((e) => this.onDidChangeStorageValueInCurrentProfile(e)),
+    )
+  }
 
-	private onDidChangeStorageTargetInCurrentProfile(): void {
-		// Not broadcasting changes to other windows/tabs as it is not required in web.
-		// Revisit if needed in future.
-		this._onDidChange.fire({ targetChanges: [this.userDataProfileService.currentProfile], valueChanges: [] });
-	}
+  private onDidChangeStorageTargetInCurrentProfile(): void {
+    // Not broadcasting changes to other windows/tabs as it is not required in web.
+    // Revisit if needed in future.
+    this._onDidChange.fire({
+      targetChanges: [this.userDataProfileService.currentProfile],
+      valueChanges: [],
+    })
+  }
 
-	private onDidChangeStorageValueInCurrentProfile(e: IProfileStorageValueChangeEvent): void {
-		// Not broadcasting changes to other windows/tabs as it is not required in web
-		// Revisit if needed in future.
-		this._onDidChange.fire({ targetChanges: [], valueChanges: [{ profile: this.userDataProfileService.currentProfile, changes: [e] }] });
-	}
+  private onDidChangeStorageValueInCurrentProfile(
+    e: IProfileStorageValueChangeEvent,
+  ): void {
+    // Not broadcasting changes to other windows/tabs as it is not required in web
+    // Revisit if needed in future.
+    this._onDidChange.fire({
+      targetChanges: [],
+      valueChanges: [
+        { profile: this.userDataProfileService.currentProfile, changes: [e] },
+      ],
+    })
+  }
 
-	protected createStorageDatabase(profile: IUserDataProfile): Promise<IStorageDatabase> {
-		return isProfileUsingDefaultStorage(profile) ? IndexedDBStorageDatabase.createApplicationStorage(this.logService) : IndexedDBStorageDatabase.createProfileStorage(profile, this.logService);
-	}
+  protected createStorageDatabase(
+    profile: IUserDataProfile,
+  ): Promise<IStorageDatabase> {
+    return isProfileUsingDefaultStorage(profile)
+      ? IndexedDBStorageDatabase.createApplicationStorage(this.logService)
+      : IndexedDBStorageDatabase.createProfileStorage(profile, this.logService)
+  }
 }
 
-registerSingleton(IUserDataProfileStorageService, UserDataProfileStorageService, InstantiationType.Delayed);
+registerSingleton(
+  IUserDataProfileStorageService,
+  UserDataProfileStorageService,
+  InstantiationType.Delayed,
+)

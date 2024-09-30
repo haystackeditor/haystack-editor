@@ -1,38 +1,48 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from 'vscode';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+import * as vscode from "vscode"
 
 export interface Command {
-	readonly id: string;
+  readonly id: string
 
-	execute(...args: any[]): void;
+  execute(...args: any[]): void
 }
 
 export class CommandManager {
-	private readonly _commands = new Map<string, vscode.Disposable>();
+  private readonly _commands = new Map<string, vscode.Disposable>()
 
-	public dispose() {
-		for (const registration of this._commands.values()) {
-			registration.dispose();
-		}
-		this._commands.clear();
-	}
+  public dispose() {
+    for (const registration of this._commands.values()) {
+      registration.dispose()
+    }
+    this._commands.clear()
+  }
 
-	public register<T extends Command>(command: T): vscode.Disposable {
-		this._registerCommand(command.id, command.execute, command);
-		return new vscode.Disposable(() => {
-			this._commands.delete(command.id);
-		});
-	}
+  public register<T extends Command>(command: T): vscode.Disposable {
+    this._registerCommand(command.id, command.execute, command)
+    return new vscode.Disposable(() => {
+      this._commands.delete(command.id)
+    })
+  }
 
-	private _registerCommand(id: string, impl: (...args: any[]) => void, thisArg?: any) {
-		if (this._commands.has(id)) {
-			return;
-		}
+  private _registerCommand(
+    id: string,
+    impl: (...args: any[]) => void,
+    thisArg?: any,
+  ) {
+    if (this._commands.has(id)) {
+      return
+    }
 
-		this._commands.set(id, vscode.commands.registerCommand(id, impl, thisArg));
-	}
+    this._commands.set(id, vscode.commands.registerCommand(id, impl, thisArg))
+  }
 }

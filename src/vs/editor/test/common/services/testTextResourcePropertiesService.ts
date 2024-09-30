@@ -1,27 +1,37 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as platform from 'vs/base/common/platform';
-import { URI } from 'vs/base/common/uri';
-import { ITextResourcePropertiesService } from 'vs/editor/common/services/textResourceConfiguration';
-import { IConfigurationService } from 'vs/platform/configuration/common/configuration';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
-export class TestTextResourcePropertiesService implements ITextResourcePropertiesService {
+import * as platform from "vs/base/common/platform"
+import { URI } from "vs/base/common/uri"
+import { ITextResourcePropertiesService } from "vs/editor/common/services/textResourceConfiguration"
+import { IConfigurationService } from "vs/platform/configuration/common/configuration"
 
-	declare readonly _serviceBrand: undefined;
+export class TestTextResourcePropertiesService
+  implements ITextResourcePropertiesService
+{
+  declare readonly _serviceBrand: undefined
 
-	constructor(
-		@IConfigurationService private readonly configurationService: IConfigurationService,
-	) {
-	}
+  constructor(
+    @IConfigurationService
+    private readonly configurationService: IConfigurationService,
+  ) {}
 
-	getEOL(resource: URI, language?: string): string {
-		const eol = this.configurationService.getValue('files.eol', { overrideIdentifier: language, resource });
-		if (eol && typeof eol === 'string' && eol !== 'auto') {
-			return eol;
-		}
-		return (platform.isLinux || platform.isMacintosh) ? '\n' : '\r\n';
-	}
+  getEOL(resource: URI, language?: string): string {
+    const eol = this.configurationService.getValue("files.eol", {
+      overrideIdentifier: language,
+      resource,
+    })
+    if (eol && typeof eol === "string" && eol !== "auto") {
+      return eol
+    }
+    return platform.isLinux || platform.isMacintosh ? "\n" : "\r\n"
+  }
 }

@@ -10,11 +10,11 @@ fi
 
 cd $ROOT
 
-if [ -z "$VSCODE_REMOTE_SERVER_PATH" ]
+if [ -z "$HAYSTACK_REMOTE_SERVER_PATH" ]
 then
 	echo "Using remote server out of sources for integration web tests"
 else
-	echo "Using $VSCODE_REMOTE_SERVER_PATH as server path for web integration tests"
+	echo "Using $HAYSTACK_REMOTE_SERVER_PATH as server path for web integration tests"
 fi
 
 if [ ! -e 'test/integration/browser/out/index.js' ];then

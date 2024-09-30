@@ -1,41 +1,44 @@
 {
-	"extends": "./tsconfig.base.json",
-	"compilerOptions": {
-		"removeComments": false,
-		"preserveConstEnums": true,
-		"sourceMap": false,
-		"allowJs": true,
-		"resolveJsonModule": true,
-		"isolatedModules": true,
-		"outDir": "../out/vs",
-		"types": [
-			"mocha",
-			"semver",
-			"sinon",
-			"winreg",
-			"trusted-types",
-			"wicg-file-system-access"
-		],
-		"plugins": [
-			{
-				"name": "tsec",
-				"exemptionConfig": "./tsec.exemptions.json"
-			}
-		]
-	},
-	"include": [
-		"./bootstrap.js",
-		"./bootstrap-amd.js",
-		"./bootstrap-fork.js",
-		"./bootstrap-node.js",
-		"./bootstrap-window.js",
-		"./cli.js",
-		"./main.js",
-		"./server-main.js",
-		"./server-cli.js",
-		"./typings",
-		"./vs/**/*.ts",
-		"vscode-dts/vscode.proposed.*.d.ts",
-		"vscode-dts/vscode.d.ts"
-	]
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "preserveConstEnums": true,
+    "sourceMap": false,
+    "allowJs": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "jsx": "react",
+    "outDir": "../out/vs",
+    "types": [
+      "mocha",
+      "semver",
+      "sinon",
+      "winreg",
+      "trusted-types",
+      "wicg-file-system-access"
+    ],
+    "plugins": [
+      {
+        "name": "tsec",
+        "exemptionConfig": "./tsec.exemptions.json"
+      }
+    ]
+  },
+  "include": [
+    "./bootstrap.js",
+    "./bootstrap-amd.js",
+    "./bootstrap-fork.js",
+    "./bootstrap-node.js",
+    "./bootstrap-window.js",
+    "./cli.js",
+    "./main.js",
+    "./server-main.js",
+    "./server-cli.js",
+    "./typings",
+    "./vs/**/*.ts",
+    "vs/workbench/browser/haystack-frontend/**/*.ts",
+    "./haystack-node/**/*.ts",
+    "vs/workbench/browser/haystack-frontend/**/*.tsx",
+    "vscode-dts/vscode.proposed.*.d.ts",
+    "vscode-dts/vscode.d.ts"
+  ]
 }

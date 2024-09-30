@@ -1,13 +1,25 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-declare module 'vscode' {
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
-	// https://github.com/microsoft/vscode/issues/61313 @alexr00
+declare module "vscode" {
+  // https://github.com/microsoft/vscode/issues/61313 @alexr00
 
-	export interface TreeView<T> extends Disposable {
-		reveal(element: T | undefined, options?: { select?: boolean; focus?: boolean; expand?: boolean | number }): Thenable<void>;
-	}
+  export interface TreeView<T> extends Disposable {
+    reveal(
+      element: T | undefined,
+      options?: {
+        select?: boolean
+        focus?: boolean
+        expand?: boolean | number
+      },
+    ): Thenable<void>
+  }
 }

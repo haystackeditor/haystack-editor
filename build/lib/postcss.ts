@@ -1,36 +1,45 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
-import * as postcss from 'postcss';
-import * as File from 'vinyl';
-import * as es from 'event-stream';
 
-export function gulpPostcss(plugins: postcss.AcceptedPlugin[], handleError?: (err: Error) => void) {
-	const instance = postcss(plugins);
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+import postcss from "postcss"
+import * as File from "vinyl"
+import * as es from "event-stream"
 
-	return es.map((file: File, callback: (error?: any, file?: any) => void) => {
-		if (file.isNull()) {
-			return callback(null, file);
-		}
+export function gulpPostcss(
+  plugins: postcss.AcceptedPlugin[],
+  handleError?: (err: Error) => void,
+) {
+  const instance = postcss(plugins)
 
-		if (file.isStream()) {
-			return callback(new Error('Streaming not supported'));
-		}
+  return es.map((file: File, callback: (error?: any, file?: any) => void) => {
+    if (file.isNull()) {
+      return callback(null, file)
+    }
 
-		instance
-			.process(file.contents.toString(), { from: file.path })
-			.then((result) => {
-				file.contents = Buffer.from(result.css);
-				callback(null, file);
-			})
-			.catch((error) => {
-				if (handleError) {
-					handleError(error);
-					callback();
-				} else {
-					callback(error);
-				}
-			});
-	});
+    if (file.isStream()) {
+      return callback(new Error("Streaming not supported"))
+    }
+
+    instance
+      .process(file.contents.toString(), { from: file.path })
+      .then((result) => {
+        file.contents = Buffer.from(result.css)
+        callback(null, file)
+      })
+      .catch((error) => {
+        if (handleError) {
+          handleError(error)
+          callback()
+        } else {
+          callback(error)
+        }
+      })
+  })
 }

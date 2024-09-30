@@ -22,13 +22,13 @@ variables:
     value: ${{ eq(parameters.SCAN_WINDOWS, true) }}
   - name: SCAN_LINUX
     value: ${{ eq(parameters.SCAN_LINUX, true) }}
-  - name: VSCODE_MIXIN_REPO
+  - name: HAYSTACK_MIXIN_REPO
     value: microsoft/vscode-distro
   - name: skipComponentGovernanceDetection
     value: true
   - name: NPM_ARCH
     value: x64
-  - name: VSCODE_ARCH
+  - name: HAYSTACK_ARCH
     value: x64
   - name: Codeql.enabled
     value: true
@@ -119,7 +119,7 @@ stages:
           - script: node build/azure-pipelines/distro/mixin-quality
             displayName: Mixin distro quality
             env:
-              VSCODE_QUALITY: stable
+              HAYSTACK_QUALITY: stable
 
           - powershell: yarn compile
             displayName: Compile
@@ -128,14 +128,14 @@ stages:
             displayName: CodeQL Finalize
             condition: eq(variables['Codeql.enabled'], 'True')
 
-          - powershell: yarn gulp "vscode-symbols-win32-$(VSCODE_ARCH)"
+          - powershell: yarn gulp "vscode-symbols-win32-$(HAYSTACK_ARCH)"
             env:
               GITHUB_TOKEN: "$(github-distro-mixin-password)"
             displayName: Download Symbols
 
           - task: PSScriptAnalyzer@1
             inputs:
-              Path: '$(Build.SourcesDirectory)'
+              Path: "$(Build.SourcesDirectory)"
               Settings: required
               Recurse: true
 
@@ -146,18 +146,18 @@ stages:
               TargetPattern: "guardianGlob"
               AnalyzeIgnorePdbLoadError: true
               AnalyzeTargetGlob: '$(agent.builddirectory)\scanbin\**.dll;$(agent.builddirectory)\scanbin\**.exe;$(agent.builddirectory)\scanbin\**.node'
-              AnalyzeLocalSymbolDirectories: '$(agent.builddirectory)\scanbin\VSCode-win32-$(VSCODE_ARCH)\pdb'
+              AnalyzeLocalSymbolDirectories: '$(agent.builddirectory)\scanbin\VSCode-win32-$(HAYSTACK_ARCH)\pdb'
 
           - task: AntiMalware@4
             inputs:
               InputType: Basic
               ScanType: CustomScan
-              FileDirPath: '$(Build.SourcesDirectory)'
+              FileDirPath: "$(Build.SourcesDirectory)"
               EnableServices: true
               SupportLogOnError: false
-              TreatSignatureUpdateFailureAs: 'Warning'
-              SignatureFreshness: 'OneDay'
-              TreatStaleSignatureAs: 'Error'
+              TreatSignatureUpdateFailureAs: "Warning"
+              SignatureFreshness: "OneDay"
+              TreatStaleSignatureAs: "Error"
 
           - task: PublishSecurityAnalysisLogs@3
             inputs:
@@ -239,18 +239,18 @@ stages:
                 curl -s https://raw.githubusercontent.com/chromium/chromium/96.0.4664.110/tools/clang/scripts/update.py | python - --output-dir=$PWD/.build/CR_Clang --host-os=linux
                 # Download libcxx headers and objects from upstream electron releases
                 DEBUG=libcxx-fetcher \
-                VSCODE_LIBCXX_OBJECTS_DIR=$PWD/.build/libcxx-objects \
-                VSCODE_LIBCXX_HEADERS_DIR=$PWD/.build/libcxx_headers  \
-                VSCODE_LIBCXXABI_HEADERS_DIR=$PWD/.build/libcxxabi_headers \
-                VSCODE_ARCH="$(NPM_ARCH)" \
+                HAYSTACK_LIBCXX_OBJECTS_DIR=$PWD/.build/libcxx-objects \
+                HAYSTACK_LIBCXX_HEADERS_DIR=$PWD/.build/libcxx_headers  \
+                HAYSTACK_LIBCXXABI_HEADERS_DIR=$PWD/.build/libcxxabi_headers \
+                HAYSTACK_ARCH="$(NPM_ARCH)" \
                 node build/linux/libcxx-fetcher.js
                 # Set compiler toolchain
                 export CC=$PWD/.build/CR_Clang/bin/clang
                 export CXX=$PWD/.build/CR_Clang/bin/clang++
                 export CXXFLAGS="-std=c++17 -nostdinc++ -D__NO_INLINE__ -I$PWD/.build/libcxx_headers -isystem$PWD/.build/libcxx_headers/include -isystem$PWD/.build/libcxxabi_headers/include -fPIC -flto=thin -fsplit-lto-unit -D_LIBCPP_ABI_NAMESPACE=Cr"
                 export LDFLAGS="-stdlib=libc++ -fuse-ld=lld -flto=thin -fsplit-lto-unit -L$PWD/.build/libcxx-objects -lc++abi"
-                export VSCODE_REMOTE_CC=$(which gcc)
-                export VSCODE_REMOTE_CXX=$(which g++)
+                export HAYSTACK_REMOTE_CC=$(which gcc)
+                export HAYSTACK_REMOTE_CXX=$(which g++)
               fi
 
               for i in {1..5}; do # try 5 times
@@ -278,9 +278,9 @@ stages:
           - script: node build/azure-pipelines/distro/mixin-quality
             displayName: Mixin distro quality
             env:
-              VSCODE_QUALITY: stable
+              HAYSTACK_QUALITY: stable
 
-          - script: yarn gulp vscode-symbols-linux-$(VSCODE_ARCH)
+          - script: yarn gulp vscode-symbols-linux-$(HAYSTACK_ARCH)
             env:
               GITHUB_TOKEN: "$(github-distro-mixin-password)"
             displayName: Build
@@ -289,7 +289,7 @@ stages:
             inputs:
               toolVersion: Latest
               InputType: CommandLine
-              arguments: analyze $(agent.builddirectory)\scanbin\exe\*.* --recurse --local-symbol-directories $(agent.builddirectory)\scanbin\VSCode-linux-$(VSCODE_ARCH)\pdb
+              arguments: analyze $(agent.builddirectory)\scanbin\exe\*.* --recurse --local-symbol-directories $(agent.builddirectory)\scanbin\VSCode-linux-$(HAYSTACK_ARCH)\pdb
 
           - task: TSAUpload@2
             inputs:

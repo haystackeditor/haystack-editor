@@ -1,28 +1,39 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as eslint from 'eslint';
-import { TSESTree } from '@typescript-eslint/experimental-utils';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
-export = new class ApiLiteralOrTypes implements eslint.Rule.RuleModule {
+import * as eslint from "eslint"
+import { TSESTree } from "@typescript-eslint/experimental-utils"
 
-	readonly meta: eslint.Rule.RuleMetaData = {
-		docs: { url: 'https://github.com/microsoft/vscode/wiki/Extension-API-guidelines#enums' },
-		messages: { useEnum: 'Use enums, not literal-or-types', }
-	};
+export = new (class ApiLiteralOrTypes implements eslint.Rule.RuleModule {
+  readonly meta: eslint.Rule.RuleMetaData = {
+    docs: {
+      url: "https://github.com/microsoft/vscode/wiki/Extension-API-guidelines#enums",
+    },
+    messages: { useEnum: "Use enums, not literal-or-types" },
+  }
 
-	create(context: eslint.Rule.RuleContext): eslint.Rule.RuleListener {
-		return {
-			['TSTypeAnnotation TSUnionType']: (node: any) => {
-				if ((<TSESTree.TSUnionType>node).types.every(value => value.type === 'TSLiteralType')) {
-					context.report({
-						node: node,
-						messageId: 'useEnum'
-					});
-				}
-			}
-		};
-	}
-};
+  create(context: eslint.Rule.RuleContext): eslint.Rule.RuleListener {
+    return {
+      ["TSTypeAnnotation TSUnionType"]: (node: any) => {
+        if (
+          (<TSESTree.TSUnionType>node).types.every(
+            (value) => value.type === "TSLiteralType",
+          )
+        ) {
+          context.report({
+            node: node,
+            messageId: "useEnum",
+          })
+        }
+      },
+    }
+  }
+})()

@@ -1,30 +1,35 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-declare module 'vscode' {
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
-	// https://github.com/microsoft/vscode/issues/170248
+declare module "vscode" {
+  // https://github.com/microsoft/vscode/issues/170248
 
-	export interface TreeView<T> extends Disposable {
-		/**
-		 * Currently active item.
-		 */
-		readonly activeItem: T | undefined;
-		/**
-		 * Event that is fired when the {@link TreeView.activeItem active item} has changed
-		 */
-		readonly onDidChangeActiveItem: Event<TreeViewActiveItemChangeEvent<T>>;
-	}
+  export interface TreeView<T> extends Disposable {
+    /**
+     * Currently active item.
+     */
+    readonly activeItem: T | undefined
+    /**
+     * Event that is fired when the {@link TreeView.activeItem active item} has changed
+     */
+    readonly onDidChangeActiveItem: Event<TreeViewActiveItemChangeEvent<T>>
+  }
 
-	/**
-	 * The event that is fired when there is a change in {@link TreeView.activeItem tree view's active item}
-	 */
-	export interface TreeViewActiveItemChangeEvent<T> {
-		/**
-		 * Active item.
-		 */
-		readonly activeItem: T | undefined;
-	}
+  /**
+   * The event that is fired when there is a change in {@link TreeView.activeItem tree view's active item}
+   */
+  export interface TreeViewActiveItemChangeEvent<T> {
+    /**
+     * Active item.
+     */
+    readonly activeItem: T | undefined
+  }
 }

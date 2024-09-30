@@ -11,9 +11,9 @@ else
 	LINUX_EXTRA_ARGS="--disable-dev-shm-usage"
 fi
 
-VSCODEUSERDATADIR=`mktemp -d 2>/dev/null`
-VSCODECRASHDIR=$ROOT/.build/crashes
-VSCODELOGSDIR=$ROOT/.build/logs/integration-tests
+HAYSTACKUSERDATADIR=`mktemp -d 2>/dev/null`
+HAYSTACKCRASHDIR=$ROOT/.build/crashes
+HAYSTACKLOGSDIR=$ROOT/.build/logs/integration-tests
 
 cd $ROOT
 
@@ -24,14 +24,14 @@ then
 
 	echo "Running integration tests out of sources."
 else
-	export VSCODE_CLI=1
+	export HAYSTACK_CLI=1
 	export ELECTRON_ENABLE_LOGGING=1
 
 	echo "Running integration tests with '$INTEGRATION_TEST_ELECTRON_PATH' as build."
 fi
 
-echo "Storing crash reports into '$VSCODECRASHDIR'."
-echo "Storing log files into '$VSCODELOGSDIR'."
+echo "Storing crash reports into '$HAYSTACKCRASHDIR'."
+echo "Storing log files into '$HAYSTACKLOGSDIR'."
 
 
 # Tests standalone (AMD)
@@ -44,7 +44,7 @@ echo
 
 # Tests in the extension host
 
-API_TESTS_EXTRA_ARGS="--disable-telemetry --skip-welcome --skip-release-notes --crash-reporter-directory=$VSCODECRASHDIR --logsPath=$VSCODELOGSDIR --no-cached-data --disable-updates --use-inmemory-secretstorage --disable-extensions --disable-workspace-trust --user-data-dir=$VSCODEUSERDATADIR"
+API_TESTS_EXTRA_ARGS="--disable-telemetry --skip-welcome --skip-release-notes --crash-reporter-directory=$HAYSTACKCRASHDIR --logsPath=$HAYSTACKLOGSDIR --no-cached-data --disable-updates --use-inmemory-secretstorage --disable-extensions --disable-workspace-trust --user-data-dir=$HAYSTACKUSERDATADIR"
 
 if [ -z "$INTEGRATION_TEST_APP_NAME" ]; then
 	kill_app() { true; }
@@ -133,4 +133,4 @@ cd $ROOT/extensions/html-language-features/server && $ROOT/scripts/node-electron
 
 # Cleanup
 
-rm -rf $VSCODEUSERDATADIR
+rm -rf $HAYSTACKUSERDATADIR

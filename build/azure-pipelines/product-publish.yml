@@ -114,12 +114,12 @@ steps:
 
       # Determine which stages we need to watch
       $stages = @(
-        if ($env:VSCODE_BUILD_STAGE_WINDOWS -eq 'True') { 'Windows' }
-        if ($env:VSCODE_BUILD_STAGE_LINUX -eq 'True') { 'Linux' }
-        if ($env:VSCODE_BUILD_STAGE_LINUX_LEGACY_SERVER -eq 'True') { 'LinuxLegacyServer' }
-        if ($env:VSCODE_BUILD_STAGE_ALPINE -eq 'True') { 'Alpine' }
-        if ($env:VSCODE_BUILD_STAGE_MACOS -eq 'True') { 'macOS' }
-        if ($env:VSCODE_BUILD_STAGE_WEB -eq 'True') { 'Web' }
+        if ($env:HAYSTACK_BUILD_STAGE_WINDOWS -eq 'True') { 'Windows' }
+        if ($env:HAYSTACK_BUILD_STAGE_LINUX -eq 'True') { 'Linux' }
+        if ($env:HAYSTACK_BUILD_STAGE_LINUX_LEGACY_SERVER -eq 'True') { 'LinuxLegacyServer' }
+        if ($env:HAYSTACK_BUILD_STAGE_ALPINE -eq 'True') { 'Alpine' }
+        if ($env:HAYSTACK_BUILD_STAGE_MACOS -eq 'True') { 'macOS' }
+        if ($env:HAYSTACK_BUILD_STAGE_WEB -eq 'True') { 'Web' }
       )
       Write-Host "Stages to check: $stages"
 

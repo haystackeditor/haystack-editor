@@ -1,6 +1,12 @@
 /*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
+ *--------------------------------------------------------------------------------------------*/
+
+/*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
 extern crate dirs;
@@ -15,7 +21,7 @@ use std::{
 use serde::{de::DeserializeOwned, Serialize};
 
 use crate::{
-	constants::{DEFAULT_DATA_PARENT_DIR, VSCODE_CLI_QUALITY},
+	constants::{DEFAULT_DATA_PARENT_DIR, HAYSTACK_CLI_QUALITY},
 	download_cache::DownloadCache,
 	util::errors::{wrap, AnyError, NoHomeForLauncherError, WrappedError},
 };
@@ -210,7 +216,7 @@ impl LauncherPaths {
 	pub fn tunnel_lockfile(&self) -> PathBuf {
 		self.root.join(format!(
 			"tunnel-{}.lock",
-			VSCODE_CLI_QUALITY.unwrap_or("oss")
+			HAYSTACK_CLI_QUALITY.unwrap_or("oss")
 		))
 	}
 
@@ -218,7 +224,7 @@ impl LauncherPaths {
 	pub fn forwarding_lockfile(&self) -> PathBuf {
 		self.root.join(format!(
 			"forwarding-{}.lock",
-			VSCODE_CLI_QUALITY.unwrap_or("oss")
+			HAYSTACK_CLI_QUALITY.unwrap_or("oss")
 		))
 	}
 

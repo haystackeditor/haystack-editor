@@ -1,9 +1,15 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CharCode } from 'vs/base/common/charCode';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+import { CharCode } from "vs/base/common/charCode"
 
 /**
  * Returns:
@@ -11,25 +17,25 @@ import { CharCode } from 'vs/base/common/charCode';
  *  - otherwise => the indent level is returned value
  */
 export function computeIndentLevel(line: string, tabSize: number): number {
-	let indent = 0;
-	let i = 0;
-	const len = line.length;
+  let indent = 0
+  let i = 0
+  const len = line.length
 
-	while (i < len) {
-		const chCode = line.charCodeAt(i);
-		if (chCode === CharCode.Space) {
-			indent++;
-		} else if (chCode === CharCode.Tab) {
-			indent = indent - indent % tabSize + tabSize;
-		} else {
-			break;
-		}
-		i++;
-	}
+  while (i < len) {
+    const chCode = line.charCodeAt(i)
+    if (chCode === CharCode.Space) {
+      indent++
+    } else if (chCode === CharCode.Tab) {
+      indent = indent - (indent % tabSize) + tabSize
+    } else {
+      break
+    }
+    i++
+  }
 
-	if (i === len) {
-		return -1; // line only consists of whitespace
-	}
+  if (i === len) {
+    return -1 // line only consists of whitespace
+  }
 
-	return indent;
+  return indent
 }

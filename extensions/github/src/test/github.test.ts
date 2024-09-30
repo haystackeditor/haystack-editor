@@ -1,65 +1,78 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import 'mocha';
-import * as assert from 'assert';
-import { workspace, extensions, Uri, commands } from 'vscode';
-import { findPullRequestTemplates, pickPullRequestTemplate } from '../pushErrorHandler';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
-suite('github smoke test', function () {
-	const cwd = workspace.workspaceFolders![0].uri;
+import "mocha"
+import * as assert from "assert"
+import { workspace, extensions, Uri, commands } from "vscode"
+import {
+  findPullRequestTemplates,
+  pickPullRequestTemplate,
+} from "../pushErrorHandler"
 
-	suiteSetup(async function () {
-		const ext = extensions.getExtension('vscode.github');
-		await ext?.activate();
-	});
+suite("github smoke test", function () {
+  const cwd = workspace.workspaceFolders![0].uri
 
-	test('should find all templates', async function () {
-		const expectedValuesSorted = [
-			'PULL_REQUEST_TEMPLATE/a.md',
-			'PULL_REQUEST_TEMPLATE/b.md',
-			'docs/PULL_REQUEST_TEMPLATE.md',
-			'docs/PULL_REQUEST_TEMPLATE/a.md',
-			'docs/PULL_REQUEST_TEMPLATE/b.md',
-			'.github/PULL_REQUEST_TEMPLATE.md',
-			'.github/PULL_REQUEST_TEMPLATE/a.md',
-			'.github/PULL_REQUEST_TEMPLATE/b.md',
-			'PULL_REQUEST_TEMPLATE.md'
-		];
-		expectedValuesSorted.sort();
+  suiteSetup(async function () {
+    const ext = extensions.getExtension("vscode.github")
+    await ext?.activate()
+  })
 
-		const uris = await findPullRequestTemplates(cwd);
+  test("should find all templates", async function () {
+    const expectedValuesSorted = [
+      "PULL_REQUEST_TEMPLATE/a.md",
+      "PULL_REQUEST_TEMPLATE/b.md",
+      "docs/PULL_REQUEST_TEMPLATE.md",
+      "docs/PULL_REQUEST_TEMPLATE/a.md",
+      "docs/PULL_REQUEST_TEMPLATE/b.md",
+      ".github/PULL_REQUEST_TEMPLATE.md",
+      ".github/PULL_REQUEST_TEMPLATE/a.md",
+      ".github/PULL_REQUEST_TEMPLATE/b.md",
+      "PULL_REQUEST_TEMPLATE.md",
+    ]
+    expectedValuesSorted.sort()
 
-		const urisSorted = uris.map(x => x.path.slice(cwd.path.length));
-		urisSorted.sort();
+    const uris = await findPullRequestTemplates(cwd)
 
-		assert.deepStrictEqual(urisSorted, expectedValuesSorted);
-	});
+    const urisSorted = uris.map((x) => x.path.slice(cwd.path.length))
+    urisSorted.sort()
 
-	test('selecting non-default quick-pick item should correspond to a template', async () => {
-		const template0 = Uri.file("some-imaginary-template-0");
-		const template1 = Uri.file("some-imaginary-template-1");
-		const templates = [template0, template1];
+    assert.deepStrictEqual(urisSorted, expectedValuesSorted)
+  })
 
-		const pick = pickPullRequestTemplate(Uri.file("/"), templates);
+  test("selecting non-default quick-pick item should correspond to a template", async () => {
+    const template0 = Uri.file("some-imaginary-template-0")
+    const template1 = Uri.file("some-imaginary-template-1")
+    const templates = [template0, template1]
 
-		await commands.executeCommand('workbench.action.quickOpenSelectNext');
-		await commands.executeCommand('workbench.action.quickOpenSelectNext');
-		await commands.executeCommand('workbench.action.acceptSelectedQuickOpenItem');
+    const pick = pickPullRequestTemplate(Uri.file("/"), templates)
 
-		assert.ok(await pick === template0);
-	});
+    await commands.executeCommand("workbench.action.quickOpenSelectNext")
+    await commands.executeCommand("workbench.action.quickOpenSelectNext")
+    await commands.executeCommand(
+      "workbench.action.acceptSelectedQuickOpenItem",
+    )
 
-	test('selecting first quick-pick item should return undefined', async () => {
-		const templates = [Uri.file("some-imaginary-file")];
+    assert.ok((await pick) === template0)
+  })
 
-		const pick = pickPullRequestTemplate(Uri.file("/"), templates);
+  test("selecting first quick-pick item should return undefined", async () => {
+    const templates = [Uri.file("some-imaginary-file")]
 
-		await commands.executeCommand('workbench.action.quickOpenSelectNext');
-		await commands.executeCommand('workbench.action.acceptSelectedQuickOpenItem');
+    const pick = pickPullRequestTemplate(Uri.file("/"), templates)
 
-		assert.ok(await pick === undefined);
-	});
-});
+    await commands.executeCommand("workbench.action.quickOpenSelectNext")
+    await commands.executeCommand(
+      "workbench.action.acceptSelectedQuickOpenItem",
+    )
+
+    assert.ok((await pick) === undefined)
+  })
+})

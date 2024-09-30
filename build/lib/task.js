@@ -1,16 +1,47 @@
 "use strict";
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the Functional Source License. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.series = series;
 exports.parallel = parallel;
 exports.define = define;
-const fancyLog = require("fancy-log");
-const ansiColors = require("ansi-colors");
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+const fancy_log_1 = __importDefault(require("fancy-log"));
+const ansiColors = __importStar(require("ansi-colors"));
 function _isPromise(p) {
-    if (typeof p.then === 'function') {
+    if (typeof p.then === "function") {
         return true;
     }
     return false;
@@ -21,14 +52,14 @@ function _renderTime(time) {
 async function _execute(task) {
     const name = task.taskName || task.displayName || `<anonymous>`;
     if (!task._tasks) {
-        fancyLog('Starting', ansiColors.cyan(name), '...');
+        (0, fancy_log_1.default)("Starting", ansiColors.cyan(name), "...");
     }
     const startTime = process.hrtime();
     await _doExecute(task);
     const elapsedArr = process.hrtime(startTime);
-    const elapsedNanoseconds = (elapsedArr[0] * 1e9 + elapsedArr[1]);
+    const elapsedNanoseconds = elapsedArr[0] * 1e9 + elapsedArr[1];
     if (!task._tasks) {
-        fancyLog(`Finished`, ansiColors.cyan(name), 'after', ansiColors.magenta(_renderTime(elapsedNanoseconds / 1e6)));
+        (0, fancy_log_1.default)(`Finished`, ansiColors.cyan(name), "after", ansiColors.magenta(_renderTime(elapsedNanoseconds / 1e6)));
     }
 }
 async function _doExecute(task) {
@@ -45,7 +76,7 @@ async function _doExecute(task) {
             return;
         }
         const taskResult = task();
-        if (typeof taskResult === 'undefined') {
+        if (typeof taskResult === "undefined") {
             // this is a sync task
             resolve();
             return;
@@ -56,8 +87,8 @@ async function _doExecute(task) {
             return;
         }
         // this is a stream returning task
-        taskResult.on('end', _ => resolve());
-        taskResult.on('error', err => reject(err));
+        taskResult.on("end", (_) => resolve());
+        taskResult.on("error", (err) => reject(err));
     });
 }
 function series(...tasks) {
@@ -71,7 +102,7 @@ function series(...tasks) {
 }
 function parallel(...tasks) {
     const result = async () => {
-        await Promise.all(tasks.map(t => _execute(t)));
+        await Promise.all(tasks.map((t) => _execute(t)));
     };
     result._tasks = tasks;
     return result;

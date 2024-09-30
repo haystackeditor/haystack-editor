@@ -1,6 +1,12 @@
 /*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
+ *--------------------------------------------------------------------------------------------*/
+
+/*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
 use serde::Deserialize;
@@ -27,65 +33,67 @@ pub const PROTOCOL_VERSION_TAG_PREFIX: &str = "protocolv";
 /// Tag for the current protocol version, which is included in dev tunnels.
 pub const PROTOCOL_VERSION_TAG: &str = concatcp!("protocolv", PROTOCOL_VERSION);
 
-pub const VSCODE_CLI_VERSION: Option<&'static str> = option_env!("VSCODE_CLI_VERSION");
-pub const VSCODE_CLI_AI_KEY: Option<&'static str> = option_env!("VSCODE_CLI_AI_KEY");
-pub const VSCODE_CLI_AI_ENDPOINT: Option<&'static str> = option_env!("VSCODE_CLI_AI_ENDPOINT");
-pub const VSCODE_CLI_QUALITY: Option<&'static str> = option_env!("VSCODE_CLI_QUALITY");
-pub const DOCUMENTATION_URL: Option<&'static str> = option_env!("VSCODE_CLI_DOCUMENTATION_URL");
-pub const VSCODE_CLI_COMMIT: Option<&'static str> = option_env!("VSCODE_CLI_COMMIT");
-pub const VSCODE_CLI_UPDATE_ENDPOINT: Option<&'static str> = option_env!("VSCODE_CLI_UPDATE_URL");
+pub const HAYSTACK_CLI_VERSION: Option<&'static str> = option_env!("HAYSTACK_CLI_VERSION");
+pub const HAYSTACK_CLI_AI_KEY: Option<&'static str> = option_env!("HAYSTACK_CLI_AI_KEY");
+pub const HAYSTACK_CLI_AI_ENDPOINT: Option<&'static str> = option_env!("HAYSTACK_CLI_AI_ENDPOINT");
+pub const HAYSTACK_CLI_QUALITY: Option<&'static str> = option_env!("HAYSTACK_CLI_QUALITY");
+pub const DOCUMENTATION_URL: Option<&'static str> = option_env!("HAYSTACK_CLI_DOCUMENTATION_URL");
+pub const HAYSTACK_CLI_COMMIT: Option<&'static str> = option_env!("HAYSTACK_CLI_COMMIT");
+pub const HAYSTACK_CLI_UPDATE_ENDPOINT: Option<&'static str> =
+	option_env!("HAYSTACK_CLI_UPDATE_URL");
 
 /// Windows lock name for the running tunnel service. Used by the setup script
 /// to detect a tunnel process. See #179265.
 pub const TUNNEL_SERVICE_LOCK_NAME: Option<&'static str> =
-	option_env!("VSCODE_CLI_WIN32_TUNNEL_SERVICE_MUTEX");
+	option_env!("HAYSTACK_CLI_WIN32_TUNNEL_SERVICE_MUTEX");
 
 /// Windows lock name for the running tunnel without a service. Used by the setup
 /// script to detect a tunnel process. See #179265.
-pub const TUNNEL_CLI_LOCK_NAME: Option<&'static str> = option_env!("VSCODE_CLI_WIN32_TUNNEL_MUTEX");
+pub const TUNNEL_CLI_LOCK_NAME: Option<&'static str> =
+	option_env!("HAYSTACK_CLI_WIN32_TUNNEL_MUTEX");
 
 pub const TUNNEL_SERVICE_USER_AGENT_ENV_VAR: &str = "TUNNEL_SERVICE_USER_AGENT";
 
 /// Application name as it appears on the CLI.
-pub const APPLICATION_NAME: &str = match option_env!("VSCODE_CLI_APPLICATION_NAME") {
+pub const APPLICATION_NAME: &str = match option_env!("HAYSTACK_CLI_APPLICATION_NAME") {
 	Some(n) => n,
 	None => "code",
 };
 
 /// Full name of the product with its version.
-pub const PRODUCT_NAME_LONG: &str = match option_env!("VSCODE_CLI_NAME_LONG") {
+pub const PRODUCT_NAME_LONG: &str = match option_env!("HAYSTACK_CLI_NAME_LONG") {
 	Some(n) => n,
-	None => "Code - OSS",
+	None => "Haystack Editor",
 };
 
 /// Name of the application without quality information.
-pub const QUALITYLESS_PRODUCT_NAME: &str = match option_env!("VSCODE_CLI_QUALITYLESS_PRODUCT_NAME")
-{
-	Some(n) => n,
-	None => "Code",
-};
+pub const QUALITYLESS_PRODUCT_NAME: &str =
+	match option_env!("HAYSTACK_CLI_QUALITYLESS_PRODUCT_NAME") {
+		Some(n) => n,
+		None => "Code",
+	};
 
 /// Name of the application without quality information.
 pub const QUALITYLESS_SERVER_NAME: &str = concatcp!(QUALITYLESS_PRODUCT_NAME, " Server");
 
-pub const QUALITY: &str = match VSCODE_CLI_QUALITY {
+pub const QUALITY: &str = match HAYSTACK_CLI_QUALITY {
 	Some(q) => q,
 	_ => "oss",
 };
 
 /// Web URL the editor is hosted at. For VS Code, this is vscode.dev.
-pub const EDITOR_WEB_URL: Option<&'static str> = option_env!("VSCODE_CLI_TUNNEL_EDITOR_WEB_URL");
+pub const EDITOR_WEB_URL: Option<&'static str> = option_env!("HAYSTACK_CLI_TUNNEL_EDITOR_WEB_URL");
 
 /// Name shown in places where we need to tell a user what a process is, e.g. in sleep inhibition.
 pub const TUNNEL_ACTIVITY_NAME: &str = concatcp!(PRODUCT_NAME_LONG, " Tunnel");
 
 /// Download URL of the desktop product.
-pub const PRODUCT_DOWNLOAD_URL: Option<&'static str> = option_env!("VSCODE_CLI_DOWNLOAD_URL");
+pub const PRODUCT_DOWNLOAD_URL: Option<&'static str> = option_env!("HAYSTACK_CLI_DOWNLOAD_URL");
 
-const NONINTERACTIVE_VAR: &str = "VSCODE_CLI_NONINTERACTIVE";
+const NONINTERACTIVE_VAR: &str = "HAYSTACK_CLI_NONINTERACTIVE";
 
 /// Default data CLI data directory.
-pub const DEFAULT_DATA_PARENT_DIR: &str = match option_env!("VSCODE_CLI_DATA_FOLDER_NAME") {
+pub const DEFAULT_DATA_PARENT_DIR: &str = match option_env!("HAYSTACK_CLI_DATA_FOLDER_NAME") {
 	Some(n) => n,
 	None => ".vscode-oss",
 };
@@ -93,7 +101,7 @@ pub const DEFAULT_DATA_PARENT_DIR: &str = match option_env!("VSCODE_CLI_DATA_FOL
 pub fn get_default_user_agent() -> String {
 	format!(
 		"vscode-server-launcher/{}",
-		VSCODE_CLI_VERSION.unwrap_or("dev")
+		HAYSTACK_CLI_VERSION.unwrap_or("dev")
 	)
 }
 
@@ -114,7 +122,7 @@ lazy_static! {
 
 	/// Map of qualities to the server name
 	pub static ref SERVER_NAME_MAP: Option<HashMap<Quality, ServerQualityInfo>> =
-		option_env!("VSCODE_CLI_TUNNEL_SERVER_QUALITIES").and_then(|s| serde_json::from_str(s).unwrap());
+		option_env!("HAYSTACK_CLI_TUNNEL_SERVER_QUALITIES").and_then(|s| serde_json::from_str(s).unwrap());
 
 	/// Whether i/o interactions are allowed in the current CLI.
 	pub static ref IS_A_TTY: bool = std::io::stdin().is_terminal();
@@ -127,5 +135,5 @@ lazy_static! {
 
 	/// Map of quality names to arrays of app IDs used for them, for example, `{"stable":["ABC123"]}`
 	pub static ref WIN32_APP_IDS: Option<Vec<String>> =
-		option_env!("VSCODE_CLI_WIN32_APP_IDS").map(|s| s.split(',').map(|s| s.to_string()).collect());
+		option_env!("HAYSTACK_CLI_WIN32_APP_IDS").map(|s| s.split(',').map(|s| s.to_string()).collect());
 }

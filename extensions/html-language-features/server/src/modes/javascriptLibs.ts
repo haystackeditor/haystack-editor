@@ -1,33 +1,45 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { join, basename, dirname } from 'path';
-import { readFileSync } from 'fs';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
-const contents: { [name: string]: string } = {};
+import { join, basename, dirname } from "path"
+import { readFileSync } from "fs"
 
-const serverFolder = basename(__dirname) === 'dist' ? dirname(__dirname) : dirname(dirname(__dirname));
-const TYPESCRIPT_LIB_SOURCE = join(serverFolder, '../../node_modules/typescript/lib');
-const JQUERY_PATH = join(serverFolder, 'lib/jquery.d.ts');
+const contents: { [name: string]: string } = {}
+
+const serverFolder =
+  basename(__dirname) === "dist"
+    ? dirname(__dirname)
+    : dirname(dirname(__dirname))
+const TYPESCRIPT_LIB_SOURCE = join(
+  serverFolder,
+  "../../node_modules/typescript/lib",
+)
+const JQUERY_PATH = join(serverFolder, "lib/jquery.d.ts")
 
 export function loadLibrary(name: string) {
-	let content = contents[name];
-	if (typeof content !== 'string') {
-		let libPath;
-		if (name === 'jquery') {
-			libPath = JQUERY_PATH;
-		} else {
-			libPath = join(TYPESCRIPT_LIB_SOURCE, name); // from source
-		}
-		try {
-			content = readFileSync(libPath).toString();
-		} catch (e) {
-			console.log(`Unable to load library ${name} at ${libPath}`);
-			content = '';
-		}
-		contents[name] = content;
-	}
-	return content;
+  let content = contents[name]
+  if (typeof content !== "string") {
+    let libPath
+    if (name === "jquery") {
+      libPath = JQUERY_PATH
+    } else {
+      libPath = join(TYPESCRIPT_LIB_SOURCE, name) // from source
+    }
+    try {
+      content = readFileSync(libPath).toString()
+    } catch (e) {
+      console.log(`Unable to load library ${name} at ${libPath}`)
+      content = ""
+    }
+    contents[name] = content
+  }
+  return content
 }

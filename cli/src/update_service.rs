@@ -1,6 +1,12 @@
 /*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
+ *--------------------------------------------------------------------------------------------*/
+
+/*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
 use std::{ffi::OsStr, fmt, path::Path};
@@ -8,7 +14,7 @@ use std::{ffi::OsStr, fmt, path::Path};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-	constants::VSCODE_CLI_UPDATE_ENDPOINT,
+	constants::HAYSTACK_CLI_UPDATE_ENDPOINT,
 	debug, log, options, spanf,
 	util::{
 		errors::{AnyError, CodeError, WrappedError},
@@ -56,7 +62,7 @@ fn quality_download_segment(quality: options::Quality) -> &'static str {
 }
 
 fn get_update_endpoint() -> Result<&'static str, CodeError> {
-	VSCODE_CLI_UPDATE_ENDPOINT.ok_or_else(|| CodeError::UpdatesNotConfigured("no service url"))
+	HAYSTACK_CLI_UPDATE_ENDPOINT.ok_or_else(|| CodeError::UpdatesNotConfigured("no service url"))
 }
 
 impl UpdateService {
@@ -147,18 +153,14 @@ impl UpdateService {
 
 	/// Gets the download stream for the release.
 	pub async fn get_download_stream(&self, release: &Release) -> Result<SimpleResponse, AnyError> {
-		let update_endpoint = get_update_endpoint()?;
 		let download_segment = release
 			.target
 			.download_segment(release.platform)
 			.ok_or_else(|| CodeError::UnsupportedPlatform(release.platform.to_string()))?;
 
 		let download_url = format!(
-			"{}/commit:{}/{}/{}",
-			update_endpoint,
-			release.commit,
-			download_segment,
-			quality_download_segment(release.quality),
+			"https://d2dv27o1k99orf.cloudfront.net/server/cc102f3a62bd35f39ed059b99c5cce90e50a16e2/haystack-{}.tar.gz",
+			download_segment
 		);
 
 		let response = self.client.make_request("GET", download_url).await?;

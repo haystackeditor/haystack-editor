@@ -1,30 +1,48 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { createConnection, BrowserMessageReader, BrowserMessageWriter, Disposable } from 'vscode-languageserver/browser';
-import { RuntimeEnvironment, startServer } from '../cssServer';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
-const messageReader = new BrowserMessageReader(self);
-const messageWriter = new BrowserMessageWriter(self);
+import {
+  createConnection,
+  BrowserMessageReader,
+  BrowserMessageWriter,
+  Disposable,
+} from "vscode-languageserver/browser"
+import { RuntimeEnvironment, startServer } from "../cssServer"
 
-const connection = createConnection(messageReader, messageWriter);
+const messageReader = new BrowserMessageReader(self)
+const messageWriter = new BrowserMessageWriter(self)
 
-console.log = connection.console.log.bind(connection.console);
-console.error = connection.console.error.bind(connection.console);
+const connection = createConnection(messageReader, messageWriter)
+
+console.log = connection.console.log.bind(connection.console)
+console.error = connection.console.error.bind(connection.console)
 
 const runtime: RuntimeEnvironment = {
-	timer: {
-		setImmediate(callback: (...args: any[]) => void, ...args: any[]): Disposable {
-			const handle = setTimeout(callback, 0, ...args);
-			return { dispose: () => clearTimeout(handle) };
-		},
-		setTimeout(callback: (...args: any[]) => void, ms: number, ...args: any[]): Disposable {
-			const handle = setTimeout(callback, ms, ...args);
-			return { dispose: () => clearTimeout(handle) };
-		}
-	}
-};
+  timer: {
+    setImmediate(
+      callback: (...args: any[]) => void,
+      ...args: any[]
+    ): Disposable {
+      const handle = setTimeout(callback, 0, ...args)
+      return { dispose: () => clearTimeout(handle) }
+    },
+    setTimeout(
+      callback: (...args: any[]) => void,
+      ms: number,
+      ...args: any[]
+    ): Disposable {
+      const handle = setTimeout(callback, ms, ...args)
+      return { dispose: () => clearTimeout(handle) }
+    },
+  },
+}
 
-startServer(connection, runtime);
+startServer(connection, runtime)

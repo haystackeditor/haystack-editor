@@ -1,258 +1,277 @@
 /*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
+ *--------------------------------------------------------------------------------------------*/
+
+/*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
 //@ts-check
-'use strict';
+"use strict"
 
 // Simple module style to support node.js and browser environments
-(function (globalThis, factory) {
+;(function (globalThis, factory) {
+  // Node.js
+  if (typeof exports === "object") {
+    module.exports = factory()
+  }
 
-	// Node.js
-	if (typeof exports === 'object') {
-		module.exports = factory();
-	}
+  // Browser
+  else {
+    // @ts-ignore
+    globalThis.MonacoBootstrap = factory()
+  }
+})(this, function () {
+  const Module = typeof require === "function" ? require("module") : undefined
+  const path = typeof require === "function" ? require("path") : undefined
+  const fs = typeof require === "function" ? require("fs") : undefined
+  const util = typeof require === "function" ? require("util") : undefined
 
-	// Browser
-	else {
-		// @ts-ignore
-		globalThis.MonacoBootstrap = factory();
-	}
-}(this, function () {
-	const Module = typeof require === 'function' ? require('module') : undefined;
-	const path = typeof require === 'function' ? require('path') : undefined;
-	const fs = typeof require === 'function' ? require('fs') : undefined;
-	const util = typeof require === 'function' ? require('util') : undefined;
+  //#region global bootstrapping
 
-	//#region global bootstrapping
+  // increase number of stack frames(from 10, https://github.com/v8/v8/wiki/Stack-Trace-API)
+  Error.stackTraceLimit = 100
 
-	// increase number of stack frames(from 10, https://github.com/v8/v8/wiki/Stack-Trace-API)
-	Error.stackTraceLimit = 100;
+  if (
+    typeof process !== "undefined" &&
+    !process.env["HAYSTACK_HANDLES_SIGPIPE"]
+  ) {
+    // Workaround for Electron not installing a handler to ignore SIGPIPE
+    // (https://github.com/electron/electron/issues/13254)
+    let didLogAboutSIGPIPE = false
+    process.on("SIGPIPE", () => {
+      // See https://github.com/microsoft/vscode-remote-release/issues/6543
+      // We would normally install a SIGPIPE listener in bootstrap.js
+      // But in certain situations, the console itself can be in a broken pipe state
+      // so logging SIGPIPE to the console will cause an infinite async loop
+      if (!didLogAboutSIGPIPE) {
+        didLogAboutSIGPIPE = true
+        console.error(new Error(`Unexpected SIGPIPE`))
+      }
+    })
+  }
 
-	if (typeof process !== 'undefined' && !process.env['VSCODE_HANDLES_SIGPIPE']) {
-		// Workaround for Electron not installing a handler to ignore SIGPIPE
-		// (https://github.com/electron/electron/issues/13254)
-		let didLogAboutSIGPIPE = false;
-		process.on('SIGPIPE', () => {
-			// See https://github.com/microsoft/vscode-remote-release/issues/6543
-			// We would normally install a SIGPIPE listener in bootstrap.js
-			// But in certain situations, the console itself can be in a broken pipe state
-			// so logging SIGPIPE to the console will cause an infinite async loop
-			if (!didLogAboutSIGPIPE) {
-				didLogAboutSIGPIPE = true;
-				console.error(new Error(`Unexpected SIGPIPE`));
-			}
-		});
-	}
+  //#endregion
 
-	//#endregion
+  //#region Add support for using node_modules.asar
 
+  function enableASARSupport() {
+    if (!path || !Module || typeof process === "undefined") {
+      console.warn(
+        "enableASARSupport() is only available in node.js environments",
+      )
+      return
+    }
 
-	//#region Add support for using node_modules.asar
+    const NODE_MODULES_PATH = path.join(__dirname, "../node_modules")
+    const NODE_MODULES_ASAR_PATH = `${NODE_MODULES_PATH}.asar`
 
-	function enableASARSupport() {
-		if (!path || !Module || typeof process === 'undefined') {
-			console.warn('enableASARSupport() is only available in node.js environments');
-			return;
-		}
+    // @ts-ignore
+    const originalResolveLookupPaths = Module._resolveLookupPaths
 
-		const NODE_MODULES_PATH = path.join(__dirname, '../node_modules');
-		const NODE_MODULES_ASAR_PATH = `${NODE_MODULES_PATH}.asar`;
+    // @ts-ignore
+    Module._resolveLookupPaths = function (request, parent) {
+      const paths = originalResolveLookupPaths(request, parent)
+      if (Array.isArray(paths)) {
+        for (let i = 0, len = paths.length; i < len; i++) {
+          if (paths[i] === NODE_MODULES_PATH) {
+            paths.splice(i, 0, NODE_MODULES_ASAR_PATH)
+            break
+          }
+        }
+      }
 
-		// @ts-ignore
-		const originalResolveLookupPaths = Module._resolveLookupPaths;
+      return paths
+    }
+  }
 
-		// @ts-ignore
-		Module._resolveLookupPaths = function (request, parent) {
-			const paths = originalResolveLookupPaths(request, parent);
-			if (Array.isArray(paths)) {
-				for (let i = 0, len = paths.length; i < len; i++) {
-					if (paths[i] === NODE_MODULES_PATH) {
-						paths.splice(i, 0, NODE_MODULES_ASAR_PATH);
-						break;
-					}
-				}
-			}
+  //#endregion
 
-			return paths;
-		};
-	}
+  //#region URI helpers
 
-	//#endregion
+  /**
+   * @param {string} path
+   * @param {{ isWindows?: boolean, scheme?: string, fallbackAuthority?: string }} config
+   * @returns {string}
+   */
+  function fileUriFromPath(path, config) {
+    // Since we are building a URI, we normalize any backslash
+    // to slashes and we ensure that the path begins with a '/'.
+    let pathName = path.replace(/\\/g, "/")
+    if (pathName.length > 0 && pathName.charAt(0) !== "/") {
+      pathName = `/${pathName}`
+    }
 
+    /** @type {string} */
+    let uri
 
-	//#region URI helpers
+    // Windows: in order to support UNC paths (which start with '//')
+    // that have their own authority, we do not use the provided authority
+    // but rather preserve it.
+    if (config.isWindows && pathName.startsWith("//")) {
+      uri = encodeURI(`${config.scheme || "file"}:${pathName}`)
+    }
 
-	/**
-	 * @param {string} path
-	 * @param {{ isWindows?: boolean, scheme?: string, fallbackAuthority?: string }} config
-	 * @returns {string}
-	 */
-	function fileUriFromPath(path, config) {
+    // Otherwise we optionally add the provided authority if specified
+    else {
+      uri = encodeURI(
+        `${config.scheme || "file"}://${config.fallbackAuthority || ""}${pathName}`,
+      )
+    }
 
-		// Since we are building a URI, we normalize any backslash
-		// to slashes and we ensure that the path begins with a '/'.
-		let pathName = path.replace(/\\/g, '/');
-		if (pathName.length > 0 && pathName.charAt(0) !== '/') {
-			pathName = `/${pathName}`;
-		}
+    return uri.replace(/#/g, "%23")
+  }
 
-		/** @type {string} */
-		let uri;
+  //#endregion
 
-		// Windows: in order to support UNC paths (which start with '//')
-		// that have their own authority, we do not use the provided authority
-		// but rather preserve it.
-		if (config.isWindows && pathName.startsWith('//')) {
-			uri = encodeURI(`${config.scheme || 'file'}:${pathName}`);
-		}
+  //#region NLS helpers
 
-		// Otherwise we optionally add the provided authority if specified
-		else {
-			uri = encodeURI(`${config.scheme || 'file'}://${config.fallbackAuthority || ''}${pathName}`);
-		}
+  /**
+   * @returns {{locale?: string, availableLanguages: {[lang: string]: string;}, pseudo?: boolean } | undefined}
+   */
+  function setupNLS() {
+    // Get the nls configuration as early as possible.
+    const process = safeProcess()
+    /** @type {{ availableLanguages: {}; loadBundle?: (bundle: string, language: string, cb: (err: Error | undefined, result: string | undefined) => void) => void; _resolvedLanguagePackCoreLocation?: string; _corruptedFile?: string }} */
+    let nlsConfig = { availableLanguages: {} }
+    if (process && process.env["HAYSTACK_NLS_CONFIG"]) {
+      try {
+        nlsConfig = JSON.parse(process.env["HAYSTACK_NLS_CONFIG"])
+      } catch (e) {
+        // Ignore
+      }
+    }
 
-		return uri.replace(/#/g, '%23');
-	}
+    if (nlsConfig._resolvedLanguagePackCoreLocation) {
+      const bundles = Object.create(null)
 
-	//#endregion
+      /**
+       * @param {string} bundle
+       * @param {string} language
+       * @param {(err: Error | undefined, result: string | undefined) => void} cb
+       */
+      nlsConfig.loadBundle = function (bundle, language, cb) {
+        const result = bundles[bundle]
+        if (result) {
+          cb(undefined, result)
 
+          return
+        }
 
-	//#region NLS helpers
+        // @ts-ignore
+        safeReadNlsFile(
+          nlsConfig._resolvedLanguagePackCoreLocation,
+          `${bundle.replace(/\//g, "!")}.nls.json`,
+        )
+          .then(function (content) {
+            const json = JSON.parse(content)
+            bundles[bundle] = json
 
-	/**
-	 * @returns {{locale?: string, availableLanguages: {[lang: string]: string;}, pseudo?: boolean } | undefined}
-	 */
-	function setupNLS() {
+            cb(undefined, json)
+          })
+          .catch((error) => {
+            try {
+              if (nlsConfig._corruptedFile) {
+                safeWriteNlsFile(nlsConfig._corruptedFile, "corrupted").catch(
+                  function (error) {
+                    console.error(error)
+                  },
+                )
+              }
+            } finally {
+              cb(error, undefined)
+            }
+          })
+      }
+    }
 
-		// Get the nls configuration as early as possible.
-		const process = safeProcess();
-		/** @type {{ availableLanguages: {}; loadBundle?: (bundle: string, language: string, cb: (err: Error | undefined, result: string | undefined) => void) => void; _resolvedLanguagePackCoreLocation?: string; _corruptedFile?: string }} */
-		let nlsConfig = { availableLanguages: {} };
-		if (process && process.env['VSCODE_NLS_CONFIG']) {
-			try {
-				nlsConfig = JSON.parse(process.env['VSCODE_NLS_CONFIG']);
-			} catch (e) {
-				// Ignore
-			}
-		}
+    return nlsConfig
+  }
 
-		if (nlsConfig._resolvedLanguagePackCoreLocation) {
-			const bundles = Object.create(null);
+  /**
+   * @returns {typeof import('./vs/base/parts/sandbox/electron-sandbox/globals') | undefined}
+   */
+  function safeSandboxGlobals() {
+    const globals =
+      typeof self === "object" ? self : typeof global === "object" ? global : {}
 
-			/**
-			 * @param {string} bundle
-			 * @param {string} language
-			 * @param {(err: Error | undefined, result: string | undefined) => void} cb
-			 */
-			nlsConfig.loadBundle = function (bundle, language, cb) {
-				const result = bundles[bundle];
-				if (result) {
-					cb(undefined, result);
+    // @ts-ignore
+    return globals.vscode
+  }
 
-					return;
-				}
+  /**
+   * @returns {import('./vs/base/parts/sandbox/electron-sandbox/globals').ISandboxNodeProcess | NodeJS.Process | undefined}
+   */
+  function safeProcess() {
+    const sandboxGlobals = safeSandboxGlobals()
+    if (sandboxGlobals) {
+      return sandboxGlobals.process // Native environment (sandboxed)
+    }
 
-				// @ts-ignore
-				safeReadNlsFile(nlsConfig._resolvedLanguagePackCoreLocation, `${bundle.replace(/\//g, '!')}.nls.json`).then(function (content) {
-					const json = JSON.parse(content);
-					bundles[bundle] = json;
+    if (typeof process !== "undefined") {
+      return process // Native environment (non-sandboxed)
+    }
 
-					cb(undefined, json);
-				}).catch((error) => {
-					try {
-						if (nlsConfig._corruptedFile) {
-							safeWriteNlsFile(nlsConfig._corruptedFile, 'corrupted').catch(function (error) { console.error(error); });
-						}
-					} finally {
-						cb(error, undefined);
-					}
-				});
-			};
-		}
+    return undefined
+  }
 
-		return nlsConfig;
-	}
+  /**
+   * @returns {import('./vs/base/parts/sandbox/electron-sandbox/electronTypes').IpcRenderer | undefined}
+   */
+  function safeIpcRenderer() {
+    const sandboxGlobals = safeSandboxGlobals()
+    if (sandboxGlobals) {
+      return sandboxGlobals.ipcRenderer
+    }
 
-	/**
-	 * @returns {typeof import('./vs/base/parts/sandbox/electron-sandbox/globals') | undefined}
-	 */
-	function safeSandboxGlobals() {
-		const globals = (typeof self === 'object' ? self : typeof global === 'object' ? global : {});
+    return undefined
+  }
 
-		// @ts-ignore
-		return globals.vscode;
-	}
+  /**
+   * @param {string[]} pathSegments
+   * @returns {Promise<string>}
+   */
+  async function safeReadNlsFile(...pathSegments) {
+    const ipcRenderer = safeIpcRenderer()
+    if (ipcRenderer) {
+      return ipcRenderer.invoke("vscode:readNlsFile", ...pathSegments)
+    }
 
-	/**
-	 * @returns {import('./vs/base/parts/sandbox/electron-sandbox/globals').ISandboxNodeProcess | NodeJS.Process | undefined}
-	 */
-	function safeProcess() {
-		const sandboxGlobals = safeSandboxGlobals();
-		if (sandboxGlobals) {
-			return sandboxGlobals.process; // Native environment (sandboxed)
-		}
+    if (fs && path && util) {
+      return (
+        await util.promisify(fs.readFile)(path.join(...pathSegments))
+      ).toString()
+    }
 
-		if (typeof process !== 'undefined') {
-			return process; // Native environment (non-sandboxed)
-		}
+    throw new Error("Unsupported operation (read NLS files)")
+  }
 
-		return undefined;
-	}
+  /**
+   * @param {string} path
+   * @param {string} content
+   * @returns {Promise<void>}
+   */
+  function safeWriteNlsFile(path, content) {
+    const ipcRenderer = safeIpcRenderer()
+    if (ipcRenderer) {
+      return ipcRenderer.invoke("vscode:writeNlsFile", path, content)
+    }
 
-	/**
-	 * @returns {import('./vs/base/parts/sandbox/electron-sandbox/electronTypes').IpcRenderer | undefined}
-	 */
-	function safeIpcRenderer() {
-		const sandboxGlobals = safeSandboxGlobals();
-		if (sandboxGlobals) {
-			return sandboxGlobals.ipcRenderer;
-		}
+    if (fs && util) {
+      return util.promisify(fs.writeFile)(path, content)
+    }
 
-		return undefined;
-	}
+    throw new Error("Unsupported operation (write NLS files)")
+  }
 
-	/**
-	 * @param {string[]} pathSegments
-	 * @returns {Promise<string>}
-	 */
-	async function safeReadNlsFile(...pathSegments) {
-		const ipcRenderer = safeIpcRenderer();
-		if (ipcRenderer) {
-			return ipcRenderer.invoke('vscode:readNlsFile', ...pathSegments);
-		}
+  //#endregion
 
-		if (fs && path && util) {
-			return (await util.promisify(fs.readFile)(path.join(...pathSegments))).toString();
-		}
-
-		throw new Error('Unsupported operation (read NLS files)');
-	}
-
-	/**
-	 * @param {string} path
-	 * @param {string} content
-	 * @returns {Promise<void>}
-	 */
-	function safeWriteNlsFile(path, content) {
-		const ipcRenderer = safeIpcRenderer();
-		if (ipcRenderer) {
-			return ipcRenderer.invoke('vscode:writeNlsFile', path, content);
-		}
-
-		if (fs && util) {
-			return util.promisify(fs.writeFile)(path, content);
-		}
-
-		throw new Error('Unsupported operation (write NLS files)');
-	}
-
-	//#endregion
-
-	return {
-		enableASARSupport,
-		setupNLS,
-		fileUriFromPath
-	};
-}));
+  return {
+    enableASARSupport,
+    setupNLS,
+    fileUriFromPath,
+  }
+})

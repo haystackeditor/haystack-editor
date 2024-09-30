@@ -1,39 +1,45 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { deepStrictEqual } from 'assert';
-import 'mocha';
-import { Uri } from 'vscode';
-import { urlToUri } from '../util/url';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
-suite('urlToUri', () => {
-	test('Absolute File', () => {
-		deepStrictEqual(
-			urlToUri('file:///root/test.txt', Uri.parse('file:///usr/home/')),
-			Uri.parse('file:///root/test.txt')
-		);
-	});
+import { deepStrictEqual } from "assert"
+import "mocha"
+import { Uri } from "vscode"
+import { urlToUri } from "../util/url"
 
-	test('Relative File', () => {
-		deepStrictEqual(
-			urlToUri('./file.ext', Uri.parse('file:///usr/home/')),
-			Uri.parse('file:///usr/home/file.ext')
-		);
-	});
+suite("urlToUri", () => {
+  test("Absolute File", () => {
+    deepStrictEqual(
+      urlToUri("file:///root/test.txt", Uri.parse("file:///usr/home/")),
+      Uri.parse("file:///root/test.txt"),
+    )
+  })
 
-	test('Http Basic', () => {
-		deepStrictEqual(
-			urlToUri('http://example.org?q=10&f', Uri.parse('file:///usr/home/')),
-			Uri.parse('http://example.org?q=10&f')
-		);
-	});
+  test("Relative File", () => {
+    deepStrictEqual(
+      urlToUri("./file.ext", Uri.parse("file:///usr/home/")),
+      Uri.parse("file:///usr/home/file.ext"),
+    )
+  })
 
-	test('Http Encoded Chars', () => {
-		deepStrictEqual(
-			urlToUri('http://example.org/%C3%A4', Uri.parse('file:///usr/home/')),
-			Uri.parse('http://example.org/%C3%A4')
-		);
-	});
-});
+  test("Http Basic", () => {
+    deepStrictEqual(
+      urlToUri("http://example.org?q=10&f", Uri.parse("file:///usr/home/")),
+      Uri.parse("http://example.org?q=10&f"),
+    )
+  })
+
+  test("Http Encoded Chars", () => {
+    deepStrictEqual(
+      urlToUri("http://example.org/%C3%A4", Uri.parse("file:///usr/home/")),
+      Uri.parse("http://example.org/%C3%A4"),
+    )
+  })
+})

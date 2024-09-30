@@ -1,13 +1,19 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as dom from 'vs/base/browser/dom';
-import { mainWindow } from 'vs/base/browser/window';
-import { Event } from 'vs/base/common/event';
-import { Disposable, MutableDisposable } from 'vs/base/common/lifecycle';
-import { IUserActivityService } from 'vs/workbench/services/userActivity/common/userActivityService';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+import * as dom from "vs/base/browser/dom"
+import { mainWindow } from "vs/base/browser/window"
+import { Event } from "vs/base/common/event"
+import { Disposable, MutableDisposable } from "vs/base/common/lifecycle"
+import { IUserActivityService } from "vs/workbench/services/userActivity/common/userActivityService"
 
 /**
  * This uses a time interval and checks whether there's any activity in that
@@ -19,48 +25,75 @@ import { IUserActivityService } from 'vs/workbench/services/userActivity/common/
  * inactive. Therefore the maximum time before an inactive user is detected
  * is `CHECK_INTERVAL * (MIN_INTERVALS_WITHOUT_ACTIVITY + 1)`.
  */
-const CHECK_INTERVAL = 30_000;
+const CHECK_INTERVAL = 30_000
 
 /** See {@link CHECK_INTERVAL} */
-const MIN_INTERVALS_WITHOUT_ACTIVITY = 2;
+const MIN_INTERVALS_WITHOUT_ACTIVITY = 2
 
 const eventListenerOptions: AddEventListenerOptions = {
-	passive: true, /** does not preventDefault() */
-	capture: true, /** should dispatch first (before anyone stopPropagation()) */
-};
+  passive: true /** does not preventDefault() */,
+  capture: true /** should dispatch first (before anyone stopPropagation()) */,
+}
 
 export class DomActivityTracker extends Disposable {
-	constructor(userActivityService: IUserActivityService) {
-		super();
+  constructor(userActivityService: IUserActivityService) {
+    super()
 
-		let intervalsWithoutActivity = MIN_INTERVALS_WITHOUT_ACTIVITY;
-		const intervalTimer = this._register(new dom.WindowIntervalTimer());
-		const activeMutex = this._register(new MutableDisposable());
-		activeMutex.value = userActivityService.markActive();
+    let intervalsWithoutActivity = MIN_INTERVALS_WITHOUT_ACTIVITY
+    const intervalTimer = this._register(new dom.WindowIntervalTimer())
+    const activeMutex = this._register(new MutableDisposable())
+    activeMutex.value = userActivityService.markActive()
 
-		const onInterval = () => {
-			if (++intervalsWithoutActivity === MIN_INTERVALS_WITHOUT_ACTIVITY) {
-				activeMutex.clear();
-				intervalTimer.cancel();
-			}
-		};
+    const onInterval = () => {
+      if (++intervalsWithoutActivity === MIN_INTERVALS_WITHOUT_ACTIVITY) {
+        activeMutex.clear()
+        intervalTimer.cancel()
+      }
+    }
 
-		const onActivity = (targetWindow: Window & typeof globalThis) => {
-			// if was inactive, they've now returned
-			if (intervalsWithoutActivity === MIN_INTERVALS_WITHOUT_ACTIVITY) {
-				activeMutex.value = userActivityService.markActive();
-				intervalTimer.cancelAndSet(onInterval, CHECK_INTERVAL, targetWindow);
-			}
+    const onActivity = (targetWindow: Window & typeof globalThis) => {
+      // if was inactive, they've now returned
+      if (intervalsWithoutActivity === MIN_INTERVALS_WITHOUT_ACTIVITY) {
+        activeMutex.value = userActivityService.markActive()
+        intervalTimer.cancelAndSet(onInterval, CHECK_INTERVAL, targetWindow)
+      }
 
-			intervalsWithoutActivity = 0;
-		};
+      intervalsWithoutActivity = 0
+    }
 
-		this._register(Event.runAndSubscribe(dom.onDidRegisterWindow, ({ window, disposables }) => {
-			disposables.add(dom.addDisposableListener(window.document, 'touchstart', () => onActivity(window), eventListenerOptions));
-			disposables.add(dom.addDisposableListener(window.document, 'mousedown', () => onActivity(window), eventListenerOptions));
-			disposables.add(dom.addDisposableListener(window.document, 'keydown', () => onActivity(window), eventListenerOptions));
-		}, { window: mainWindow, disposables: this._store }));
+    this._register(
+      Event.runAndSubscribe(
+        dom.onDidRegisterWindow,
+        ({ window, disposables }) => {
+          disposables.add(
+            dom.addDisposableListener(
+              window.document,
+              "touchstart",
+              () => onActivity(window),
+              eventListenerOptions,
+            ),
+          )
+          disposables.add(
+            dom.addDisposableListener(
+              window.document,
+              "mousedown",
+              () => onActivity(window),
+              eventListenerOptions,
+            ),
+          )
+          disposables.add(
+            dom.addDisposableListener(
+              window.document,
+              "keydown",
+              () => onActivity(window),
+              eventListenerOptions,
+            ),
+          )
+        },
+        { window: mainWindow, disposables: this._store },
+      ),
+    )
 
-		onActivity(mainWindow);
-	}
+    onActivity(mainWindow)
+  }
 }

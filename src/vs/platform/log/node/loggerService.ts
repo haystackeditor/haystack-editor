@@ -1,16 +1,40 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { URI } from 'vs/base/common/uri';
-import { generateUuid } from 'vs/base/common/uuid';
-import { AbstractLoggerService, ILogger, ILoggerOptions, ILoggerService, LogLevel } from 'vs/platform/log/common/log';
-import { SpdLogLogger } from 'vs/platform/log/node/spdlogLog';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
-export class LoggerService extends AbstractLoggerService implements ILoggerService {
+import { URI } from "vs/base/common/uri"
+import { generateUuid } from "vs/base/common/uuid"
+import {
+  AbstractLoggerService,
+  ILogger,
+  ILoggerOptions,
+  ILoggerService,
+  LogLevel,
+} from "vs/platform/log/common/log"
+import { SpdLogLogger } from "vs/platform/log/node/spdlogLog"
 
-	protected doCreateLogger(resource: URI, logLevel: LogLevel, options?: ILoggerOptions): ILogger {
-		return new SpdLogLogger(generateUuid(), resource.fsPath, !options?.donotRotate, !!options?.donotUseFormatters, logLevel);
-	}
+export class LoggerService
+  extends AbstractLoggerService
+  implements ILoggerService
+{
+  protected doCreateLogger(
+    resource: URI,
+    logLevel: LogLevel,
+    options?: ILoggerOptions,
+  ): ILogger {
+    return new SpdLogLogger(
+      generateUuid(),
+      resource.fsPath,
+      !options?.donotRotate,
+      !!options?.donotUseFormatters,
+      logLevel,
+    )
+  }
 }

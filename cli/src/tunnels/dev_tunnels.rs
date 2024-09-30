@@ -1,6 +1,12 @@
 /*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
+ *--------------------------------------------------------------------------------------------*/
+
+/*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 use super::protocol::{self, PortPrivacy};
 use crate::auth;
@@ -261,9 +267,9 @@ impl ActiveTunnel {
 	}
 }
 
-const VSCODE_CLI_TUNNEL_TAG: &str = "vscode-server-launcher";
-const VSCODE_CLI_FORWARDING_TAG: &str = "vscode-port-forward";
-const OWNED_TUNNEL_TAGS: &[&str] = &[VSCODE_CLI_TUNNEL_TAG, VSCODE_CLI_FORWARDING_TAG];
+const HAYSTACK_CLI_TUNNEL_TAG: &str = "vscode-server-launcher";
+const HAYSTACK_CLI_FORWARDING_TAG: &str = "vscode-port-forward";
+const OWNED_TUNNEL_TAGS: &[&str] = &[HAYSTACK_CLI_TUNNEL_TAG, HAYSTACK_CLI_FORWARDING_TAG];
 const MAX_TUNNEL_NAME_LENGTH: usize = 20;
 
 fn get_host_token_from_tunnel(tunnel: &Tunnel) -> String {
@@ -334,7 +340,7 @@ impl DevTunnels {
 			log: log.clone(),
 			client: client.into(),
 			launcher_tunnel: PersistedState::new(paths.root().join("port_forwarding_tunnel.json")),
-			tag: VSCODE_CLI_FORWARDING_TAG,
+			tag: HAYSTACK_CLI_FORWARDING_TAG,
 		}
 	}
 
@@ -352,7 +358,7 @@ impl DevTunnels {
 			log: log.clone(),
 			client: client.into(),
 			launcher_tunnel: PersistedState::new(paths.root().join("code_tunnel.json")),
-			tag: VSCODE_CLI_TUNNEL_TAG,
+			tag: HAYSTACK_CLI_TUNNEL_TAG,
 		}
 	}
 

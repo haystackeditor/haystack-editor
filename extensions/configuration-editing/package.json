@@ -54,7 +54,8 @@
           "devcontainer.json",
           ".devcontainer.json"
         ]
-      }, {
+      },
+      {
         "id": "json",
         "extensions": [
           ".code-profile"

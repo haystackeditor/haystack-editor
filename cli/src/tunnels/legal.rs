@@ -1,6 +1,12 @@
 /*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
+ *--------------------------------------------------------------------------------------------*/
+
+/*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 use crate::constants::IS_INTERACTIVE_CLI;
 use crate::state::{LauncherPaths, PersistedState};
@@ -11,10 +17,10 @@ use serde::{Deserialize, Serialize};
 
 lazy_static! {
 	static ref LICENSE_TEXT: Option<Vec<String>> =
-		option_env!("VSCODE_CLI_SERVER_LICENSE").and_then(|s| serde_json::from_str(s).unwrap());
+		option_env!("HAYSTACK_CLI_SERVER_LICENSE").and_then(|s| serde_json::from_str(s).unwrap());
 }
 
-const LICENSE_PROMPT: Option<&'static str> = option_env!("VSCODE_CLI_REMOTE_LICENSE_PROMPT");
+const LICENSE_PROMPT: Option<&'static str> = option_env!("HAYSTACK_CLI_REMOTE_LICENSE_PROMPT");
 
 #[derive(Clone, Default, Serialize, Deserialize)]
 struct PersistedConsent {

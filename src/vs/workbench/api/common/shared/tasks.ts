@@ -1,139 +1,149 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { UriComponents } from 'vs/base/common/uri';
-import { IExtensionDescription } from 'vs/platform/extensions/common/extensions';
-import type { Dto } from 'vs/workbench/services/extensions/common/proxyIdentifier';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
+
+import { UriComponents } from "vs/base/common/uri"
+import { IExtensionDescription } from "vs/platform/extensions/common/extensions"
+import type { Dto } from "vs/workbench/services/extensions/common/proxyIdentifier"
 
 export interface ITaskDefinitionDTO {
-	type: string;
-	[name: string]: any;
+  type: string
+  [name: string]: any
 }
 
 export interface ITaskPresentationOptionsDTO {
-	reveal?: number;
-	echo?: boolean;
-	focus?: boolean;
-	panel?: number;
-	showReuseMessage?: boolean;
-	clear?: boolean;
-	group?: string;
-	close?: boolean;
+  reveal?: number
+  echo?: boolean
+  focus?: boolean
+  panel?: number
+  showReuseMessage?: boolean
+  clear?: boolean
+  group?: string
+  close?: boolean
 }
 
 export interface IRunOptionsDTO {
-	reevaluateOnRerun?: boolean;
+  reevaluateOnRerun?: boolean
 }
 
 export interface IExecutionOptionsDTO {
-	cwd?: string;
-	env?: { [key: string]: string };
+  cwd?: string
+  env?: { [key: string]: string }
 }
 
-export interface IProcessExecutionOptionsDTO extends IExecutionOptionsDTO {
-}
+export interface IProcessExecutionOptionsDTO extends IExecutionOptionsDTO {}
 
 export interface IProcessExecutionDTO {
-	process: string;
-	args: string[];
-	options?: IProcessExecutionOptionsDTO;
+  process: string
+  args: string[]
+  options?: IProcessExecutionOptionsDTO
 }
 
 export interface IShellQuotingOptionsDTO {
-	escape?: string | {
-		escapeChar: string;
-		charsToEscape: string;
-	};
-	strong?: string;
-	weak?: string;
+  escape?:
+    | string
+    | {
+        escapeChar: string
+        charsToEscape: string
+      }
+  strong?: string
+  weak?: string
 }
 
 export interface IShellExecutionOptionsDTO extends IExecutionOptionsDTO {
-	executable?: string;
-	shellArgs?: string[];
-	shellQuoting?: IShellQuotingOptionsDTO;
+  executable?: string
+  shellArgs?: string[]
+  shellQuoting?: IShellQuotingOptionsDTO
 }
 
 export interface IShellQuotedStringDTO {
-	value: string;
-	quoting: number;
+  value: string
+  quoting: number
 }
 
 export interface IShellExecutionDTO {
-	commandLine?: string;
-	command?: string | IShellQuotedStringDTO;
-	args?: Array<string | IShellQuotedStringDTO>;
-	options?: IShellExecutionOptionsDTO;
+  commandLine?: string
+  command?: string | IShellQuotedStringDTO
+  args?: Array<string | IShellQuotedStringDTO>
+  options?: IShellExecutionOptionsDTO
 }
 
 export interface ICustomExecutionDTO {
-	customExecution: 'customExecution';
+  customExecution: "customExecution"
 }
 
 export interface ITaskSourceDTO {
-	label: string;
-	extensionId?: string;
-	scope?: number | UriComponents;
-	color?: string;
-	icon?: string;
-	hide?: boolean;
+  label: string
+  extensionId?: string
+  scope?: number | UriComponents
+  color?: string
+  icon?: string
+  hide?: boolean
 }
 
 export interface ITaskHandleDTO {
-	id: string;
-	workspaceFolder: UriComponents | string;
+  id: string
+  workspaceFolder: UriComponents | string
 }
 
 export interface ITaskGroupDTO {
-	isDefault?: boolean;
-	_id: string;
+  isDefault?: boolean
+  _id: string
 }
 
 export interface ITaskDTO {
-	_id: string;
-	name?: string;
-	execution: IProcessExecutionDTO | IShellExecutionDTO | ICustomExecutionDTO | undefined;
-	definition: ITaskDefinitionDTO;
-	isBackground?: boolean;
-	source: ITaskSourceDTO;
-	group?: ITaskGroupDTO;
-	detail?: string;
-	presentationOptions?: ITaskPresentationOptionsDTO;
-	problemMatchers: string[];
-	hasDefinedMatchers: boolean;
-	runOptions?: IRunOptionsDTO;
+  _id: string
+  name?: string
+  execution:
+    | IProcessExecutionDTO
+    | IShellExecutionDTO
+    | ICustomExecutionDTO
+    | undefined
+  definition: ITaskDefinitionDTO
+  isBackground?: boolean
+  source: ITaskSourceDTO
+  group?: ITaskGroupDTO
+  detail?: string
+  presentationOptions?: ITaskPresentationOptionsDTO
+  problemMatchers: string[]
+  hasDefinedMatchers: boolean
+  runOptions?: IRunOptionsDTO
 }
 
 export interface ITaskSetDTO {
-	tasks: ITaskDTO[];
-	extension: Dto<IExtensionDescription>;
+  tasks: ITaskDTO[]
+  extension: Dto<IExtensionDescription>
 }
 
 export interface ITaskExecutionDTO {
-	id: string;
-	task: ITaskDTO | undefined;
+  id: string
+  task: ITaskDTO | undefined
 }
 
 export interface ITaskProcessStartedDTO {
-	id: string;
-	processId: number;
+  id: string
+  processId: number
 }
 
 export interface ITaskProcessEndedDTO {
-	id: string;
-	exitCode: number | undefined;
+  id: string
+  exitCode: number | undefined
 }
 
-
 export interface ITaskFilterDTO {
-	version?: string;
-	type?: string;
+  version?: string
+  type?: string
 }
 
 export interface ITaskSystemInfoDTO {
-	scheme: string;
-	authority: string;
-	platform: string;
+  scheme: string
+  authority: string
+  platform: string
 }

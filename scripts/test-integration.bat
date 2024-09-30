@@ -3,26 +3,26 @@ setlocal
 
 pushd %~dp0\..
 
-set VSCODEUSERDATADIR=%TEMP%\vscodeuserfolder-%RANDOM%-%TIME:~6,2%
-set VSCODECRASHDIR=%~dp0\..\.build\crashes
-set VSCODELOGSDIR=%~dp0\..\.build\logs\integration-tests
+set HAYSTACKUSERDATADIR=%TEMP%\vscodeuserfolder-%RANDOM%-%TIME:~6,2%
+set HAYSTACKCRASHDIR=%~dp0\..\.build\crashes
+set HAYSTACKLOGSDIR=%~dp0\..\.build\logs\integration-tests
 
 :: Figure out which Electron to use for running tests
 if "%INTEGRATION_TEST_ELECTRON_PATH%"=="" (
 	chcp 65001
 	set INTEGRATION_TEST_ELECTRON_PATH=.\scripts\code.bat
-	set VSCODE_BUILD_BUILTIN_EXTENSIONS_SILENCE_PLEASE=1
+	set HAYSTACK_BUILD_BUILTIN_EXTENSIONS_SILENCE_PLEASE=1
 
 	echo Running integration tests out of sources.
 ) else (
-	set VSCODE_CLI=1
+	set HAYSTACK_CLI=1
 	set ELECTRON_ENABLE_LOGGING=1
 
 	echo Running integration tests with '%INTEGRATION_TEST_ELECTRON_PATH%' as build.
 )
 
-echo Storing crash reports into '%VSCODECRASHDIR%'.
-echo Storing log files into '%VSCODELOGSDIR%'.
+echo Storing crash reports into '%HAYSTACKCRASHDIR%'.
+echo Storing log files into '%HAYSTACKLOGSDIR%'.
 
 
 :: Tests standalone (AMD)
@@ -35,7 +35,7 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 
 :: Tests in the extension host
 
-set API_TESTS_EXTRA_ARGS=--disable-telemetry --skip-welcome --skip-release-notes --crash-reporter-directory=%VSCODECRASHDIR% --logsPath=%VSCODELOGSDIR% --no-cached-data --disable-updates --use-inmemory-secretstorage --disable-extensions --disable-workspace-trust --user-data-dir=%VSCODEUSERDATADIR%
+set API_TESTS_EXTRA_ARGS=--disable-telemetry --skip-welcome --skip-release-notes --crash-reporter-directory=%HAYSTACKCRASHDIR% --logsPath=%HAYSTACKLOGSDIR% --no-cached-data --disable-updates --use-inmemory-secretstorage --disable-extensions --disable-workspace-trust --user-data-dir=%HAYSTACKUSERDATADIR%
 
 echo.
 echo ### API tests (folder)
@@ -112,7 +112,7 @@ if %errorlevel% neq 0 exit /b %errorlevel%
 
 :: Cleanup
 
-rmdir /s /q %VSCODEUSERDATADIR%
+rmdir /s /q %HAYSTACKUSERDATADIR%
 
 popd
 

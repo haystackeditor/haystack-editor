@@ -1,63 +1,77 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
+ *  Copyright (c) Haystack Software Inc. All rights reserved.
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
+ *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as assert from 'assert';
-import { ensureNoDisposablesAreLeakedInTestSuite } from 'vs/base/test/common/utils';
-import { OPTIONS, parseArgs } from 'vs/platform/environment/node/argv';
-import { getUserDataPath } from 'vs/platform/environment/node/userDataPath';
-import product from 'vs/platform/product/common/product';
+/*---------------------------------------------------------------------------------------------
+ *  Copyright (c) Microsoft Corporation. All rights reserved.
+ *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *--------------------------------------------------------------------------------------------*/
 
-suite('User data path', () => {
+import * as assert from "assert"
+import { ensureNoDisposablesAreLeakedInTestSuite } from "vs/base/test/common/utils"
+import { OPTIONS, parseArgs } from "vs/platform/environment/node/argv"
+import { getUserDataPath } from "vs/platform/environment/node/userDataPath"
+import product from "vs/platform/product/common/product"
 
-	test('getUserDataPath - default', () => {
-		const path = getUserDataPath(parseArgs(process.argv, OPTIONS), product.nameShort);
-		assert.ok(path.length > 0);
-	});
+suite("User data path", () => {
+  test("getUserDataPath - default", () => {
+    const path = getUserDataPath(
+      parseArgs(process.argv, OPTIONS),
+      product.nameShort,
+    )
+    assert.ok(path.length > 0)
+  })
 
-	test('getUserDataPath - portable mode', () => {
-		const origPortable = process.env['VSCODE_PORTABLE'];
-		try {
-			const portableDir = 'portable-dir';
-			process.env['VSCODE_PORTABLE'] = portableDir;
+  test("getUserDataPath - portable mode", () => {
+    const origPortable = process.env["HAYSTACK_PORTABLE"]
+    try {
+      const portableDir = "portable-dir"
+      process.env["HAYSTACK_PORTABLE"] = portableDir
 
-			const path = getUserDataPath(parseArgs(process.argv, OPTIONS), product.nameShort);
-			assert.ok(path.includes(portableDir));
-		} finally {
-			if (typeof origPortable === 'string') {
-				process.env['VSCODE_PORTABLE'] = origPortable;
-			} else {
-				delete process.env['VSCODE_PORTABLE'];
-			}
-		}
-	});
+      const path = getUserDataPath(
+        parseArgs(process.argv, OPTIONS),
+        product.nameShort,
+      )
+      assert.ok(path.includes(portableDir))
+    } finally {
+      if (typeof origPortable === "string") {
+        process.env["HAYSTACK_PORTABLE"] = origPortable
+      } else {
+        delete process.env["HAYSTACK_PORTABLE"]
+      }
+    }
+  })
 
-	test('getUserDataPath - --user-data-dir', () => {
-		const cliUserDataDir = 'cli-data-dir';
-		const args = parseArgs(process.argv, OPTIONS);
-		args['user-data-dir'] = cliUserDataDir;
+  test("getUserDataPath - --user-data-dir", () => {
+    const cliUserDataDir = "cli-data-dir"
+    const args = parseArgs(process.argv, OPTIONS)
+    args["user-data-dir"] = cliUserDataDir
 
-		const path = getUserDataPath(args, product.nameShort);
-		assert.ok(path.includes(cliUserDataDir));
-	});
+    const path = getUserDataPath(args, product.nameShort)
+    assert.ok(path.includes(cliUserDataDir))
+  })
 
-	test('getUserDataPath - VSCODE_APPDATA', () => {
-		const origAppData = process.env['VSCODE_APPDATA'];
-		try {
-			const appDataDir = 'appdata-dir';
-			process.env['VSCODE_APPDATA'] = appDataDir;
+  test("getUserDataPath - HAYSTACK_APPDATA", () => {
+    const origAppData = process.env["HAYSTACK_APPDATA"]
+    try {
+      const appDataDir = "appdata-dir"
+      process.env["HAYSTACK_APPDATA"] = appDataDir
 
-			const path = getUserDataPath(parseArgs(process.argv, OPTIONS), product.nameShort);
-			assert.ok(path.includes(appDataDir));
-		} finally {
-			if (typeof origAppData === 'string') {
-				process.env['VSCODE_APPDATA'] = origAppData;
-			} else {
-				delete process.env['VSCODE_APPDATA'];
-			}
-		}
-	});
+      const path = getUserDataPath(
+        parseArgs(process.argv, OPTIONS),
+        product.nameShort,
+      )
+      assert.ok(path.includes(appDataDir))
+    } finally {
+      if (typeof origAppData === "string") {
+        process.env["HAYSTACK_APPDATA"] = origAppData
+      } else {
+        delete process.env["HAYSTACK_APPDATA"]
+      }
+    }
+  })
 
-	ensureNoDisposablesAreLeakedInTestSuite();
-});
+  ensureNoDisposablesAreLeakedInTestSuite()
+})
