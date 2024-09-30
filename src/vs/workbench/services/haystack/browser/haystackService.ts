@@ -1785,13 +1785,14 @@ export class HaystackService extends Disposable implements IHaystackService {
         let wordAtPosition = model.getWordAtPosition(position)
 
         while (
-          wordAtPosition == null ||
-          wordAtPosition.word === " " ||
-          wordAtPosition.word === "async" ||
-          wordAtPosition.word === "public" ||
-          wordAtPosition.word === "private" ||
-          wordAtPosition.word === "protected" ||
-          wordAtPosition.word === "function"
+          position.column <= model.getLineMaxColumn(position.lineNumber) &&
+          (wordAtPosition == null ||
+            wordAtPosition.word === " " ||
+            wordAtPosition.word === "async" ||
+            wordAtPosition.word === "public" ||
+            wordAtPosition.word === "private" ||
+            wordAtPosition.word === "protected" ||
+            wordAtPosition.word === "function")
         ) {
           position = new Position(
             position.lineNumber,
