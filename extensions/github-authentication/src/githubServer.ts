@@ -127,13 +127,13 @@ export class GitHubServer implements IGitHubServer {
       }
       const message = userCancelled
         ? vscode.l10n.t(
-            "Having trouble logging in? Would you like to try a different way? ({0})",
-            mode,
-          )
+          "Having trouble logging in? Would you like to try a different way? ({0})",
+          mode,
+        )
         : vscode.l10n.t(
-            "You have not yet finished authorizing this extension to use GitHub. Would you like to try a different way? ({0})",
-            mode,
-          )
+          "You have not yet finished authorizing this extension to use GitHub. Would you like to try a different way? ({0})",
+          mode,
+        )
       const result = await vscode.window.showWarningMessage(message, yes, no)
       if (result !== yes) {
         throw new Error(CANCELLATION_ERROR)
@@ -254,7 +254,7 @@ export class GitHubServer implements IGitHubServer {
         throw new Error(`${result.status} ${result.statusText}`)
       }
     } catch (e) {
-      this._logger.warn("Failed to delete token from server." + e.message ?? e)
+      this._logger.warn("Failed to delete token from server." + e.message)
     }
   }
 
@@ -361,12 +361,12 @@ export class GitHubServer implements IGitHubServer {
     }
 
     /* __GDPR__
-			"session" : {
-				"owner": "TylerLeonhardt",
-				"isEdu": { "classification": "SystemMetaData", "purpose": "FeatureInsight" },
-				"isManaged": { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-			}
-		*/
+      "session" : {
+        "owner": "TylerLeonhardt",
+        "isEdu": { "classification": "SystemMetaData", "purpose": "FeatureInsight" },
+        "isManaged": { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+      }
+    */
     this._telemetryReporter.sendTelemetryEvent("session", {
       isEdu: edu,
       // Apparently, this is how you tell if a user is an EMU...
@@ -399,11 +399,11 @@ export class GitHubServer implements IGitHubServer {
       }
 
       /* __GDPR__
-				"ghe-session" : {
-					"owner": "TylerLeonhardt",
-					"version": { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-				}
-			*/
+        "ghe-session" : {
+          "owner": "TylerLeonhardt",
+          "version": { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+        }
+      */
       this._telemetryReporter.sendTelemetryEvent("ghe-session", {
         version,
       })

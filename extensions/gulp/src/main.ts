@@ -140,7 +140,7 @@ class FolderDetector {
   constructor(
     private _workspaceFolder: vscode.WorkspaceFolder,
     private _gulpCommand: Promise<string>,
-  ) {}
+  ) { }
 
   public get workspaceFolder(): vscode.WorkspaceFolder {
     return this._workspaceFolder
@@ -327,7 +327,7 @@ class TaskDetector {
   private taskProvider: vscode.Disposable | undefined
   private detectors: Map<string, FolderDetector> = new Map()
 
-  constructor() {}
+  constructor() { }
 
   public start(): void {
     const folders = vscode.workspace.workspaceFolders
@@ -417,6 +417,7 @@ class TaskDetector {
     if (this.detectors.size === 0) {
       return Promise.resolve([])
     } else if (this.detectors.size === 1) {
+      // @ts-ignore
       return this.detectors.values().next().value.getTasks()
     } else {
       const promises: Promise<vscode.Task[]>[] = []
@@ -444,6 +445,7 @@ class TaskDetector {
     if (this.detectors.size === 0) {
       return undefined
     } else if (this.detectors.size === 1) {
+      // @ts-ignore
       return this.detectors.values().next().value.getTask(task)
     } else {
       if (

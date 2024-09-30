@@ -110,7 +110,7 @@ class FolderDetector {
   constructor(
     private _workspaceFolder: vscode.WorkspaceFolder,
     private _gruntCommand: Promise<string>,
-  ) {}
+  ) { }
 
   public get workspaceFolder(): vscode.WorkspaceFolder {
     return this._workspaceFolder
@@ -157,27 +157,27 @@ class FolderDetector {
       const task =
         gruntTask.indexOf(" ") === -1
           ? new vscode.Task(
-              taskDefinition,
-              this.workspaceFolder,
-              gruntTask,
-              source,
-              new vscode.ShellExecution(
-                `${await this._gruntCommand}`,
-                [gruntTask, ...taskDefinition.args],
-                options,
-              ),
-            )
+            taskDefinition,
+            this.workspaceFolder,
+            gruntTask,
+            source,
+            new vscode.ShellExecution(
+              `${await this._gruntCommand}`,
+              [gruntTask, ...taskDefinition.args],
+              options,
+            ),
+          )
           : new vscode.Task(
-              taskDefinition,
-              this.workspaceFolder,
-              gruntTask,
-              source,
-              new vscode.ShellExecution(
-                `${await this._gruntCommand}`,
-                [`"${gruntTask}"`, ...taskDefinition.args],
-                options,
-              ),
-            )
+            taskDefinition,
+            this.workspaceFolder,
+            gruntTask,
+            source,
+            new vscode.ShellExecution(
+              `${await this._gruntCommand}`,
+              [`"${gruntTask}"`, ...taskDefinition.args],
+              options,
+            ),
+          )
       return task
     }
     return undefined
@@ -250,25 +250,25 @@ class FolderDetector {
                 const task =
                   name.indexOf(" ") === -1
                     ? new vscode.Task(
-                        kind,
-                        this.workspaceFolder,
-                        name,
-                        source,
-                        new vscode.ShellExecution(
-                          `${await this._gruntCommand} ${name}`,
-                          options,
-                        ),
-                      )
+                      kind,
+                      this.workspaceFolder,
+                      name,
+                      source,
+                      new vscode.ShellExecution(
+                        `${await this._gruntCommand} ${name}`,
+                        options,
+                      ),
+                    )
                     : new vscode.Task(
-                        kind,
-                        this.workspaceFolder,
-                        name,
-                        source,
-                        new vscode.ShellExecution(
-                          `${await this._gruntCommand} "${name}"`,
-                          options,
-                        ),
-                      )
+                      kind,
+                      this.workspaceFolder,
+                      name,
+                      source,
+                      new vscode.ShellExecution(
+                        `${await this._gruntCommand} "${name}"`,
+                        options,
+                      ),
+                    )
                 result.push(task)
                 const lowerCaseTaskName = name.toLowerCase()
                 if (isBuildTask(lowerCaseTaskName)) {
@@ -312,7 +312,7 @@ class TaskDetector {
   private taskProvider: vscode.Disposable | undefined
   private detectors: Map<string, FolderDetector> = new Map()
 
-  constructor() {}
+  constructor() { }
 
   public start(): void {
     const folders = vscode.workspace.workspaceFolders
@@ -402,6 +402,7 @@ class TaskDetector {
     if (this.detectors.size === 0) {
       return Promise.resolve([])
     } else if (this.detectors.size === 1) {
+      // @ts-ignore
       return this.detectors.values().next().value.getTasks()
     } else {
       const promises: Promise<vscode.Task[]>[] = []
@@ -429,6 +430,7 @@ class TaskDetector {
     if (this.detectors.size === 0) {
       return undefined
     } else if (this.detectors.size === 1) {
+      // @ts-ignore
       return this.detectors.values().next().value.getTask(task)
     } else {
       if (

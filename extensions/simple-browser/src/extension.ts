@@ -111,8 +111,8 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 function isWeb(): boolean {
-  // @ts-expect-error
   return (
+    // @ts-expect-error
     typeof navigator !== "undefined" && vscode.env.uiKind === vscode.UIKind.Web
   )
 }
