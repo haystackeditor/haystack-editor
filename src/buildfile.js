@@ -124,7 +124,6 @@ exports.code = [
   createModuleDescription("vs/code/node/cli"),
   createModuleDescription("vs/code/node/cliProcessMain", ["vs/code/node/cli"]),
   createModuleDescription("vs/code/node/sharedProcess/sharedProcessMain"),
-  createModuleDescription("vs/haystack-node/symbol_graph_process"),
   createModuleDescription(
     "vs/code/electron-sandbox/processExplorer/processExplorerMain",
   ),
