@@ -514,6 +514,7 @@ import "vs/workbench/browser/haystack-frontend/middleware/undo_redo_buffer"
 import "vs/workbench/browser/haystack-frontend/middleware/undo_redo_middleware"
 
 import "vs/workbench/browser/haystack-frontend/react_utils/class_names"
+import "vs/workbench/browser/haystack-frontend/react_utils/concatenate_class_names"
 import "vs/workbench/browser/haystack-frontend/react_utils/create_moveable"
 import "vs/workbench/browser/haystack-frontend/react_utils/create_resizable"
 import "vs/workbench/browser/haystack-frontend/react_utils/debounce"
