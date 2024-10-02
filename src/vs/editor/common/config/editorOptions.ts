@@ -257,12 +257,12 @@ export interface IEditorOptions {
    * Defaults to 'line'.
    */
   cursorStyle?:
-    | "line"
-    | "block"
-    | "underline"
-    | "line-thin"
-    | "block-outline"
-    | "underline-thin"
+  | "line"
+  | "block"
+  | "underline"
+  | "line-thin"
+  | "block-outline"
+  | "underline-thin"
   /**
    * Control the width of the cursor when cursorStyle is set to 'line'
    */
@@ -904,7 +904,7 @@ export interface IDiffEditorBaseOptions {
  */
 export interface IDiffEditorOptions
   extends IEditorOptions,
-    IDiffEditorBaseOptions {}
+  IDiffEditorBaseOptions { }
 
 /**
  * @internal
@@ -982,9 +982,9 @@ export interface IEditorOption<K extends EditorOption, V> {
    * @internal
    */
   readonly schema:
-    | IConfigurationPropertySchema
-    | { [path: string]: IConfigurationPropertySchema }
-    | undefined
+  | IConfigurationPropertySchema
+  | { [path: string]: IConfigurationPropertySchema }
+  | undefined
   /**
    * @internal
    */
@@ -1009,8 +1009,8 @@ export interface IEditorOption<K extends EditorOption, V> {
  */
 type PossibleKeyName0<V> = {
   [K in keyof IEditorOptions]: IEditorOptions[K] extends V | undefined
-    ? K
-    : never
+  ? K
+  : never
 }[keyof IEditorOptions]
 /**
  * @internal
@@ -1021,8 +1021,7 @@ type PossibleKeyName<V> = NonNullable<PossibleKeyName0<V>>
  * @internal
  */
 abstract class BaseEditorOption<K extends EditorOption, T, V>
-  implements IEditorOption<K, V>
-{
+  implements IEditorOption<K, V> {
   public readonly id: K
   public readonly name: string
   public readonly defaultValue: V
@@ -1064,7 +1063,7 @@ export class ApplyUpdateResult<T> {
   constructor(
     public readonly newValue: T,
     public readonly didChange: boolean,
-  ) {}
+  ) { }
 }
 
 function applyUpdate<T>(value: T | undefined, update: T): ApplyUpdateResult<T> {
@@ -1100,8 +1099,7 @@ function applyUpdate<T>(value: T | undefined, update: T): ApplyUpdateResult<T> {
  * @internal
  */
 abstract class ComputedEditorOption<K extends EditorOption, V>
-  implements IEditorOption<K, V>
-{
+  implements IEditorOption<K, V> {
   public readonly id: K
   public readonly name: "_never_"
   public readonly defaultValue: V
@@ -1129,8 +1127,7 @@ abstract class ComputedEditorOption<K extends EditorOption, V>
 }
 
 class SimpleEditorOption<K extends EditorOption, V>
-  implements IEditorOption<K, V>
-{
+  implements IEditorOption<K, V> {
   public readonly id: K
   public readonly name: PossibleKeyName<V>
   public readonly defaultValue: V
@@ -1965,20 +1962,20 @@ class EditorFind extends BaseEditorOption<
             ? "always"
             : "never"
           : stringSet<"never" | "always" | "selection">(
-              input.seedSearchStringFromSelection,
-              this.defaultValue.seedSearchStringFromSelection,
-              ["never", "always", "selection"],
-            ),
+            input.seedSearchStringFromSelection,
+            this.defaultValue.seedSearchStringFromSelection,
+            ["never", "always", "selection"],
+          ),
       autoFindInSelection:
         typeof _input.autoFindInSelection === "boolean"
           ? _input.autoFindInSelection
             ? "always"
             : "never"
           : stringSet<"never" | "always" | "multiline">(
-              input.autoFindInSelection,
-              this.defaultValue.autoFindInSelection,
-              ["never", "always", "multiline"],
-            ),
+            input.autoFindInSelection,
+            this.defaultValue.autoFindInSelection,
+            ["never", "always", "multiline"],
+          ),
       globalFindClipboard: boolean(
         input.globalFindClipboard,
         this.defaultValue.globalFindClipboard,
@@ -2935,23 +2932,23 @@ export class EditorLayoutInfoComputer extends ComputedEditorOption<
       input.outerHeight === stableMinimapLayoutInput.outerHeight &&
       input.lineHeight === stableMinimapLayoutInput.lineHeight &&
       input.typicalHalfwidthCharacterWidth ===
-        stableMinimapLayoutInput.typicalHalfwidthCharacterWidth &&
+      stableMinimapLayoutInput.typicalHalfwidthCharacterWidth &&
       input.pixelRatio === stableMinimapLayoutInput.pixelRatio &&
       input.scrollBeyondLastLine ===
-        stableMinimapLayoutInput.scrollBeyondLastLine &&
+      stableMinimapLayoutInput.scrollBeyondLastLine &&
       input.paddingTop === stableMinimapLayoutInput.paddingTop &&
       input.paddingBottom === stableMinimapLayoutInput.paddingBottom &&
       input.minimap.enabled === stableMinimapLayoutInput.minimap.enabled &&
       input.minimap.side === stableMinimapLayoutInput.minimap.side &&
       input.minimap.size === stableMinimapLayoutInput.minimap.size &&
       input.minimap.showSlider ===
-        stableMinimapLayoutInput.minimap.showSlider &&
+      stableMinimapLayoutInput.minimap.showSlider &&
       input.minimap.renderCharacters ===
-        stableMinimapLayoutInput.minimap.renderCharacters &&
+      stableMinimapLayoutInput.minimap.renderCharacters &&
       input.minimap.maxColumn === stableMinimapLayoutInput.minimap.maxColumn &&
       input.minimap.scale === stableMinimapLayoutInput.minimap.scale &&
       input.verticalScrollbarWidth ===
-        stableMinimapLayoutInput.verticalScrollbarWidth &&
+      stableMinimapLayoutInput.verticalScrollbarWidth &&
       // && input.viewLineCount === lastMinimapLayoutInput.viewLineCount !!! INTENTIONAL OMITTED
       // && input.remainingWidth === lastMinimapLayoutInput.remainingWidth !!! INTENTIONAL OMITTED
       input.isViewportWrapping === stableMinimapLayoutInput.isViewportWrapping
@@ -3016,7 +3013,7 @@ export class EditorLayoutInfoComputer extends ComputedEditorOption<
             (extraLinesBeforeFirstLine +
               viewLineCount +
               extraLinesBeyondLastLine) *
-              minimapLineHeight,
+            minimapLineHeight,
           )
           if (
             isViewportWrapping &&
@@ -3069,8 +3066,8 @@ export class EditorLayoutInfoComputer extends ComputedEditorOption<
             Math.max(
               typicalViewportLineCount,
               extraLinesBeforeFirstLine +
-                viewLineCount +
-                extraLinesBeyondLastLine,
+              viewLineCount +
+              extraLinesBeyondLastLine,
             ) * minimapLineHeight,
           )
           if (isViewportWrapping) {
@@ -3106,7 +3103,7 @@ export class EditorLayoutInfoComputer extends ComputedEditorOption<
         0,
         Math.floor(
           ((remainingWidth - verticalScrollbarWidth - 2) * minimapCharWidth) /
-            (typicalHalfwidthCharacterWidth + minimapCharWidth),
+          (typicalHalfwidthCharacterWidth + minimapCharWidth),
         ),
       ) + MINIMAP_GUTTER_WIDTH,
     )
@@ -3259,7 +3256,7 @@ export class EditorLayoutInfoComputer extends ComputedEditorOption<
       1,
       Math.floor(
         (contentWidth - verticalScrollbarWidth - 2) /
-          typicalHalfwidthCharacterWidth,
+        typicalHalfwidthCharacterWidth,
       ),
     )
 
@@ -3610,7 +3607,7 @@ class HaystackEditor extends BaseEditorOption<
       copilotOptOut: true,
       hideCanvasDots: false,
       middleMouseClickToCloseEditors: true,
-      enableSymbolAtFileSelection: false,
+      enableSymbolAtFileSelection: true,
     }
 
     super(EditorOption.haystackEditor, "haystackEditor", defaults, {
@@ -4141,7 +4138,7 @@ class EditorMinimap extends BaseEditorOption<
       ),
       sectionHeaderLetterSpacing: EditorFloatOption.clamp(
         input.sectionHeaderLetterSpacing ??
-          this.defaultValue.sectionHeaderLetterSpacing,
+        this.defaultValue.sectionHeaderLetterSpacing,
         0,
         5,
       ),
@@ -5774,10 +5771,10 @@ export interface ISuggestOptions {
    * Select suggestions when triggered via quick suggest or trigger characters
    */
   selectionMode?:
-    | "always"
-    | "never"
-    | "whenTriggerCharacter"
-    | "whenQuickSuggestion"
+  | "always"
+  | "never"
+  | "whenTriggerCharacter"
+  | "whenQuickSuggestion"
   /**
    * Enable or disable icons in suggestions. Defaults to true.
    */
@@ -7156,10 +7153,10 @@ export const EditorOptions = {
       EditorOption.autoClosingBrackets,
       "autoClosingBrackets",
       "languageDefined" as
-        | "always"
-        | "languageDefined"
-        | "beforeWhitespace"
-        | "never",
+      | "always"
+      | "languageDefined"
+      | "beforeWhitespace"
+      | "never",
       ["always", "languageDefined", "beforeWhitespace", "never"] as const,
       {
         enumDescriptions: [
@@ -7186,10 +7183,10 @@ export const EditorOptions = {
       EditorOption.autoClosingComments,
       "autoClosingComments",
       "languageDefined" as
-        | "always"
-        | "languageDefined"
-        | "beforeWhitespace"
-        | "never",
+      | "always"
+      | "languageDefined"
+      | "beforeWhitespace"
+      | "never",
       ["always", "languageDefined", "beforeWhitespace", "never"] as const,
       {
         enumDescriptions: [
@@ -7260,10 +7257,10 @@ export const EditorOptions = {
       EditorOption.autoClosingQuotes,
       "autoClosingQuotes",
       "languageDefined" as
-        | "always"
-        | "languageDefined"
-        | "beforeWhitespace"
-        | "never",
+      | "always"
+      | "languageDefined"
+      | "beforeWhitespace"
+      | "never",
       ["always", "languageDefined", "beforeWhitespace", "never"] as const,
       {
         enumDescriptions: [
@@ -7943,13 +7940,13 @@ export const EditorOptions = {
       {
         markdownDescription: platform.isMacintosh
           ? nls.localize(
-              "mouseWheelZoom.mac",
-              "Zoom the font of the editor when using mouse wheel and holding `Cmd`.",
-            )
+            "mouseWheelZoom.mac",
+            "Zoom the font of the editor when using mouse wheel and holding `Cmd`.",
+          )
           : nls.localize(
-              "mouseWheelZoom",
-              "Zoom the font of the editor when using mouse wheel and holding `Ctrl`.",
-            ),
+            "mouseWheelZoom",
+            "Zoom the font of the editor when using mouse wheel and holding `Ctrl`.",
+          ),
       },
     ),
   ),
@@ -8792,8 +8789,8 @@ export const EditorOptions = {
 type EditorOptionsType = typeof EditorOptions
 type FindEditorOptionsKeyById<T extends EditorOption> = {
   [K in keyof EditorOptionsType]: EditorOptionsType[K]["id"] extends T
-    ? K
-    : never
+  ? K
+  : never
 }[keyof EditorOptionsType]
 type ComputedEditorOptionValue<T extends IEditorOption<any, any>> =
   T extends IEditorOption<any, infer R> ? R : never
