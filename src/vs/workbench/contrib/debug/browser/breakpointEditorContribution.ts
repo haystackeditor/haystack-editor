@@ -132,17 +132,17 @@ export function createBreakpointDecorations(
     const range = model.validateRange(
       breakpoint.column
         ? new Range(
-            breakpoint.lineNumber,
-            breakpoint.column,
-            breakpoint.lineNumber,
-            breakpoint.column + 1,
-          )
+          breakpoint.lineNumber,
+          breakpoint.column,
+          breakpoint.lineNumber,
+          breakpoint.column + 1,
+        )
         : new Range(
-            breakpoint.lineNumber,
-            column,
-            breakpoint.lineNumber,
-            column + 1,
-          ), // Decoration has to have a width #20688
+          breakpoint.lineNumber,
+          column,
+          breakpoint.lineNumber,
+          column + 1,
+        ), // Decoration has to have a width #20688
     )
 
     result.push({
@@ -254,7 +254,7 @@ function getBreakpointDecorationOptions(
     breakpoint.column &&
     (hasOtherBreakpointsOnLine ||
       breakpoint.column >
-        model.getLineFirstNonWhitespaceColumn(breakpoint.lineNumber))
+      model.getLineFirstNonWhitespaceColumn(breakpoint.lineNumber))
   return {
     description: "breakpoint-decoration",
     glyphMargin: { position: GlyphMarginLane.Right },
@@ -263,10 +263,10 @@ function getBreakpointDecorationOptions(
     stickiness: TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
     before: renderInline
       ? {
-          content: noBreakWhitespace,
-          inlineClassName: `debug-breakpoint-placeholder`,
-          inlineClassNameAffectsLetterSpacing: true,
-        }
+        content: noBreakWhitespace,
+        inlineClassName: `debug-breakpoint-placeholder`,
+        inlineClassNameAffectsLetterSpacing: true,
+      }
       : undefined,
     overviewRuler: overviewRulerDecoration,
     zIndex: 9999,
@@ -355,10 +355,10 @@ function createCandidateDecorations(
           before: breakpointAtPosition
             ? undefined
             : {
-                content: noBreakWhitespace,
-                inlineClassName: `debug-breakpoint-placeholder`,
-                inlineClassNameAffectsLetterSpacing: true,
-              },
+              content: noBreakWhitespace,
+              inlineClassName: `debug-breakpoint-placeholder`,
+              inlineClassNameAffectsLetterSpacing: true,
+            },
         },
         breakpoint: breakpointAtPosition
           ? breakpointAtPosition.breakpoint
@@ -371,8 +371,7 @@ function createCandidateDecorations(
 }
 
 export class BreakpointEditorContribution
-  implements IBreakpointEditorContribution
-{
+  implements IBreakpointEditorContribution {
   private breakpointHintDecoration: string | null = null
   private breakpointWidget: BreakpointWidget | undefined
   private breakpointWidgetVisible!: IContextKey<boolean>
@@ -440,21 +439,26 @@ export class BreakpointEditorContribution
         }
 
         const model = this.editor.getModel()
+
+        const editRange = this.editor.getEditRange()
+        const adjustedPosition = editRange != null ? e.target.position?.delta(editRange.startLineNumber - 1) : e.target.position
+
         if (
-          !e.target.position ||
+          adjustedPosition == null ||
           !model ||
           e.target.type !== MouseTargetType.GUTTER_GLYPH_MARGIN ||
           e.target.detail.isAfterLines ||
           (!this.marginFreeFromNonDebugDecorations(
-            e.target.position.lineNumber,
+            adjustedPosition.lineNumber
           ) &&
             // don't return early if there's a breakpoint
             !e.target.element?.className.includes("breakpoint"))
         ) {
           return
         }
+
         const canSetBreakpoints = this.debugService.canSetBreakpointsIn(model)
-        const lineNumber = e.target.position.lineNumber
+        const lineNumber = adjustedPosition.lineNumber
         const uri = model.uri
 
         if (
@@ -536,19 +540,19 @@ export class BreakpointEditorContribution
                       "{0} {1}",
                       enabled
                         ? nls.localize(
-                            {
-                              key: "disable",
-                              comment: ["&& denotes a mnemonic"],
-                            },
-                            "&&Disable",
-                          )
+                          {
+                            key: "disable",
+                            comment: ["&& denotes a mnemonic"],
+                          },
+                          "&&Disable",
+                        )
                         : nls.localize(
-                            {
-                              key: "enable",
-                              comment: ["&& denotes a mnemonic"],
-                            },
-                            "&&Enable",
-                          ),
+                          {
+                            key: "enable",
+                            comment: ["&& denotes a mnemonic"],
+                          },
+                          "&&Enable",
+                        ),
                       breakpointType,
                     ),
                     run: () =>
@@ -613,19 +617,22 @@ export class BreakpointEditorContribution
             return
           }
 
+          const editRange = this.editor.getEditRange()
+          const adjustedPosition = editRange != null ? e.target.position?.delta(editRange.startLineNumber - 1) : e.target.position
+
           let showBreakpointHintAtLineNumber = -1
           const model = this.editor.getModel()
           if (
             model &&
-            e.target.position &&
+            adjustedPosition &&
             (e.target.type === MouseTargetType.GUTTER_GLYPH_MARGIN ||
               e.target.type === MouseTargetType.GUTTER_LINE_NUMBERS) &&
             this.debugService.canSetBreakpointsIn(model) &&
-            this.marginFreeFromNonDebugDecorations(e.target.position.lineNumber)
+            this.marginFreeFromNonDebugDecorations(adjustedPosition.lineNumber)
           ) {
             const data = e.target.detail
             if (!data.isAfterLines) {
-              showBreakpointHintAtLineNumber = e.target.position.lineNumber
+              showBreakpointHintAtLineNumber = adjustedPosition.lineNumber
             }
           }
           this.ensureBreakpointHintDecoration(showBreakpointHintAtLineNumber)
@@ -749,14 +756,14 @@ export class BreakpointEditorContribution
                 "removeInlineBreakpoint",
                 bp.column
                   ? nls.localize(
-                      "removeInlineBreakpointOnColumn",
-                      "Remove Inline Breakpoint on Column {0}",
-                      bp.column,
-                    )
+                    "removeInlineBreakpointOnColumn",
+                    "Remove Inline Breakpoint on Column {0}",
+                    bp.column,
+                  )
                   : nls.localize(
-                      "removeLineBreakpoint",
-                      "Remove Line Breakpoint",
-                    ),
+                    "removeLineBreakpoint",
+                    "Remove Line Breakpoint",
+                  ),
                 undefined,
                 true,
                 () => this.debugService.removeBreakpoints(bp.getId()),
@@ -775,10 +782,10 @@ export class BreakpointEditorContribution
                 "editBreakpoint",
                 bp.column
                   ? nls.localize(
-                      "editInlineBreakpointOnColumn",
-                      "Edit Inline Breakpoint on Column {0}",
-                      bp.column,
-                    )
+                    "editInlineBreakpointOnColumn",
+                    "Edit Inline Breakpoint on Column {0}",
+                    bp.column,
+                  )
                   : nls.localize("editLineBreakpoint", "Edit Line Breakpoint"),
                 undefined,
                 true,
@@ -807,24 +814,24 @@ export class BreakpointEditorContribution
                 bp.enabled
                   ? bp.column
                     ? nls.localize(
-                        "disableInlineColumnBreakpoint",
-                        "Disable Inline Breakpoint on Column {0}",
-                        bp.column,
-                      )
+                      "disableInlineColumnBreakpoint",
+                      "Disable Inline Breakpoint on Column {0}",
+                      bp.column,
+                    )
                     : nls.localize(
-                        "disableBreakpointOnLine",
-                        "Disable Line Breakpoint",
-                      )
+                      "disableBreakpointOnLine",
+                      "Disable Line Breakpoint",
+                    )
                   : bp.column
                     ? nls.localize(
-                        "enableBreakpoints",
-                        "Enable Inline Breakpoint on Column {0}",
-                        bp.column,
-                      )
+                      "enableBreakpoints",
+                      "Enable Inline Breakpoint on Column {0}",
+                      bp.column,
+                    )
                     : nls.localize(
-                        "enableBreakpointOnLine",
-                        "Enable Line Breakpoint",
-                      ),
+                      "enableBreakpointOnLine",
+                      "Enable Line Breakpoint",
+                    ),
                 undefined,
                 true,
                 () =>
@@ -989,12 +996,12 @@ export class BreakpointEditorContribution
           // We could have also rendered this first decoration as part of desiredBreakpointDecorations however at that moment we have no location information
           const icon = candidate.breakpoint
             ? getBreakpointMessageAndIcon(
-                this.debugService.state,
-                this.debugService.getModel().areBreakpointsActivated(),
-                candidate.breakpoint,
-                this.labelService,
-                this.debugService.getModel(),
-              ).icon
+              this.debugService.state,
+              this.debugService.getModel().areBreakpointsActivated(),
+              candidate.breakpoint,
+              this.labelService,
+              this.debugService.getModel(),
+            ).icon
             : icons.breakpoint.disabled
           const contextMenuActions = () =>
             this.getContextMenuActions(
@@ -1046,10 +1053,10 @@ export class BreakpointEditorContribution
     const desiredCandidatePositions =
       debugSettings.showInlineBreakpointCandidates && session
         ? requestBreakpointCandidateLocations(
-            this.editor.getModel(),
-            desiredBreakpointDecorations.map((bp) => bp.range.startLineNumber),
-            session,
-          )
+          this.editor.getModel(),
+          desiredBreakpointDecorations.map((bp) => bp.range.startLineNumber),
+          session,
+        )
         : Promise.resolve([])
     const desiredCandidatePositionsRaced = await Promise.race([
       desiredCandidatePositions,

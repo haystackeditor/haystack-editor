@@ -289,8 +289,8 @@ export class DebugService implements IDebugService {
       )(() => {
         const debugUxValue =
           this.state !== State.Inactive ||
-          (this.configurationManager.getAllConfigurations().length > 0 &&
-            this.adapterManager.hasEnabledDebuggers())
+            (this.configurationManager.getAllConfigurations().length > 0 &&
+              this.adapterManager.hasEnabledDebuggers())
             ? "default"
             : "simple"
         this.debugUx.set(debugUxValue)
@@ -468,8 +468,8 @@ export class DebugService implements IDebugService {
         // Only show the simple ux if debug is not yet started and if no launch.json exists
         const debugUxValue =
           (state !== State.Inactive && state !== State.Initializing) ||
-          (this.adapterManager.hasEnabledDebuggers() &&
-            this.configurationManager.selectedConfiguration.name)
+            (this.adapterManager.hasEnabledDebuggers() &&
+              this.configurationManager.selectedConfiguration.name)
             ? "default"
             : "simple"
         this.debugUx.set(debugUxValue)
@@ -525,13 +525,13 @@ export class DebugService implements IDebugService {
     const message =
       options && options.noDebug
         ? nls.localize(
-            "runTrust",
-            "Running executes build tasks and program code from your workspace.",
-          )
+          "runTrust",
+          "Running executes build tasks and program code from your workspace.",
+        )
         : nls.localize(
-            "debugTrust",
-            "Debugging executes build tasks and program code from your workspace.",
-          )
+          "debugTrust",
+          "Debugging executes build tasks and program code from your workspace.",
+        )
     const trust = await this.workspaceTrustRequestService.requestWorkspaceTrust(
       { message },
     )
@@ -621,15 +621,15 @@ export class DebugService implements IDebugService {
                 throw new Error(
                   launchesContainingName.length === 0
                     ? nls.localize(
-                        "noConfigurationNameInWorkspace",
-                        "Could not find launch configuration '{0}' in the workspace.",
-                        name,
-                      )
+                      "noConfigurationNameInWorkspace",
+                      "Could not find launch configuration '{0}' in the workspace.",
+                      name,
+                    )
                     : nls.localize(
-                        "multipleConfigurationNamesInWorkspace",
-                        "There are multiple launch configurations '{0}' in the workspace. Use folder name to qualify the configuration.",
-                        name,
-                      ),
+                      "multipleConfigurationNamesInWorkspace",
+                      "There are multiple launch configurations '{0}' in the workspace. Use folder name to qualify the configuration.",
+                      name,
+                    ),
                 )
               }
             } else if (configData.folder) {
@@ -672,16 +672,16 @@ export class DebugService implements IDebugService {
       if (configOrName && !config) {
         const message = !!launch
           ? nls.localize(
-              "configMissing",
-              "Configuration '{0}' is missing in 'launch.json'.",
-              typeof configOrName === "string"
-                ? configOrName
-                : configOrName.name,
-            )
+            "configMissing",
+            "Configuration '{0}' is missing in 'launch.json'.",
+            typeof configOrName === "string"
+              ? configOrName
+              : configOrName.name,
+          )
           : nls.localize(
-              "launchJsonDoesNotExist",
-              "'launch.json' does not exist for passed workspace folder.",
-            )
+            "launchJsonDoesNotExist",
+            "'launch.json' does not exist for passed workspace folder.",
+          )
         throw new Error(message)
       }
 
@@ -815,27 +815,27 @@ export class DebugService implements IDebugService {
           ) {
             message = configByProviders.request
               ? nls.localize(
-                  "debugRequestNotSupported",
-                  "Attribute '{0}' has an unsupported value '{1}' in the chosen debug configuration.",
-                  "request",
-                  configByProviders.request,
-                )
+                "debugRequestNotSupported",
+                "Attribute '{0}' has an unsupported value '{1}' in the chosen debug configuration.",
+                "request",
+                configByProviders.request,
+              )
               : nls.localize(
-                  "debugRequesMissing",
-                  "Attribute '{0}' is missing from the chosen debug configuration.",
-                  "request",
-                )
+                "debugRequesMissing",
+                "Attribute '{0}' is missing from the chosen debug configuration.",
+                "request",
+              )
           } else {
             message = resolvedConfig.type
               ? nls.localize(
-                  "debugTypeNotSupported",
-                  "Configured debug type '{0}' is not supported.",
-                  resolvedConfig.type,
-                )
+                "debugTypeNotSupported",
+                "Configured debug type '{0}' is not supported.",
+                resolvedConfig.type,
+              )
               : nls.localize(
-                  "debugTypeMissing",
-                  "Missing property 'type' for the chosen launch configuration.",
-                )
+                "debugTypeMissing",
+                "Missing property 'type' for the chosen launch configuration.",
+              )
           }
 
           const actionList: IAction[] = []
@@ -1130,7 +1130,7 @@ export class DebugService implements IDebugService {
                 "debugAdapterCrash",
                 "Debug adapter process has terminated unexpectedly ({0})",
                 adapterExitEvent.error.message ||
-                  adapterExitEvent.error.toString(),
+                adapterExitEvent.error.toString(),
               ),
             )
           }
@@ -1171,7 +1171,7 @@ export class DebugService implements IDebugService {
               return (
                 editor.resource?.scheme === DEBUG_SCHEME &&
                 session.getId() ===
-                  Source.getEncodedDebugData(editor.resource).sessionId
+                Source.getEncodedDebugData(editor.resource).sessionId
               )
             })
           this.editorService.closeEditors(editorsToClose)

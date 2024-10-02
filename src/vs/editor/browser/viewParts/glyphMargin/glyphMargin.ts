@@ -57,7 +57,7 @@ export class LineDecorationToRender {
     public readonly className: string,
     public readonly zIndex: number,
     public readonly tooltip: string | null,
-  ) {}
+  ) { }
 }
 
 /**
@@ -85,6 +85,7 @@ export abstract class DedupOverlay extends DynamicViewOverlay {
     decorations: DecorationToRender[],
   ): VisibleLineDecorationsToRender[] {
     const output: VisibleLineDecorationsToRender[] = []
+
     for (
       let lineNumber = visibleStartLineNumber;
       lineNumber <= visibleEndLineNumber;
@@ -309,6 +310,9 @@ export class GlyphMarginWidgets extends ViewPart {
       const lane = d.options.glyphMargin?.position ?? GlyphMarginLane.Center
       const zIndex = d.options.zIndex ?? 0
 
+      const editRange = this._context.viewModel.getEditRange()
+      const lineDelta = editRange != null ? editRange.startLineNumber - 1 : 0
+
       for (
         let lineNumber = startLineNumber;
         lineNumber <= endLineNumber;
@@ -318,9 +322,11 @@ export class GlyphMarginWidgets extends ViewPart {
           this._context.viewModel.coordinatesConverter.convertViewPositionToModelPosition(
             new Position(lineNumber, 0),
           )
+
         const laneIndex = this._context.viewModel.glyphLanes
-          .getLanesAtLine(modelPosition.lineNumber)
+          .getLanesAtLine(modelPosition.lineNumber + lineDelta)
           .indexOf(lane)
+
         requests.push(
           new DecorationBasedGlyphRenderRequest(
             lineNumber,
@@ -503,7 +509,7 @@ export class GlyphMarginWidgets extends ViewPart {
       } else {
         const top =
           ctx.viewportData.relativeVerticalOffset[
-            widget.renderInfo.lineNumber - ctx.viewportData.startLineNumber
+          widget.renderInfo.lineNumber - ctx.viewportData.startLineNumber
           ]
         const left =
           this._glyphMarginLeft + widget.renderInfo.laneIndex * this._lineHeight
@@ -521,7 +527,7 @@ export class GlyphMarginWidgets extends ViewPart {
       const dec = this._decorationGlyphsToRender[i]
       const top =
         ctx.viewportData.relativeVerticalOffset[
-          dec.lineNumber - ctx.viewportData.startLineNumber
+        dec.lineNumber - ctx.viewportData.startLineNumber
         ]
       const left = this._glyphMarginLeft + dec.laneIndex * this._lineHeight
 
@@ -584,7 +590,7 @@ class DecorationBasedGlyphRenderRequest {
     public readonly laneIndex: number,
     public readonly zIndex: number,
     public readonly className: string,
-  ) {}
+  ) { }
 
   accept(combinedClassName: string): DecorationBasedGlyph {
     return new DecorationBasedGlyph(
@@ -606,7 +612,7 @@ class WidgetBasedGlyphRenderRequest {
     public readonly laneIndex: number,
     public readonly zIndex: number,
     public readonly widget: IWidgetData,
-  ) {}
+  ) { }
 }
 
 type GlyphRenderRequest =
@@ -618,5 +624,5 @@ class DecorationBasedGlyph {
     public readonly lineNumber: number,
     public readonly laneIndex: number,
     public readonly combinedClassName: string,
-  ) {}
+  ) { }
 }

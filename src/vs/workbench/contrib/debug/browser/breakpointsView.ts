@@ -366,12 +366,12 @@ export class BreakpointsView extends ViewPane {
           const disassemblyView = await this.editorService.openEditor(
             DisassemblyViewInput.instance,
           )
-          // Focus on double click
-          ;(disassemblyView as DisassemblyView).goToInstructionAndOffset(
-            e.element.instructionReference,
-            e.element.offset,
-            dom.isMouseEvent(e.browserEvent) && e.browserEvent.detail === 2,
-          )
+            // Focus on double click
+            ; (disassemblyView as DisassemblyView).goToInstructionAndOffset(
+              e.element.instructionReference,
+              e.element.offset,
+              dom.isMouseEvent(e.browserEvent) && e.browserEvent.detail === 2,
+            )
         }
         if (
           dom.isMouseEvent(e.browserEvent) &&
@@ -492,7 +492,7 @@ export class BreakpointsView extends ViewPane {
     this.breakpointSupportsCondition.set(conditionSupported)
     this.breakpointIsDataBytes.set(
       element instanceof DataBreakpoint &&
-        element.src.type === DataBreakpointSetType.Address,
+      element.src.type === DataBreakpointSetType.Address,
     )
 
     const secondary: IAction[] = []
@@ -520,19 +520,19 @@ export class BreakpointsView extends ViewPane {
     this.minimumBodySize =
       this.orientation === Orientation.VERTICAL
         ? getExpandedBodySize(
-            this.debugService.getModel(),
-            sessionId,
-            MAX_VISIBLE_BREAKPOINTS,
-          )
+          this.debugService.getModel(),
+          sessionId,
+          MAX_VISIBLE_BREAKPOINTS,
+        )
         : 170
     this.maximumBodySize =
       this.orientation === Orientation.VERTICAL &&
-      containerModel.visibleViewDescriptors.length > 1
+        containerModel.visibleViewDescriptors.length > 1
         ? getExpandedBodySize(
-            this.debugService.getModel(),
-            sessionId,
-            Number.POSITIVE_INFINITY,
-          )
+          this.debugService.getModel(),
+          sessionId,
+          Number.POSITIVE_INFINITY,
+        )
         : Number.POSITIVE_INFINITY
   }
 
@@ -784,8 +784,7 @@ interface IExceptionBreakpointInputTemplateData {
 
 const breakpointIdToActionBarDomeNode = new Map<string, HTMLElement>()
 class BreakpointsRenderer
-  implements IListRenderer<IBreakpoint, IBreakpointTemplateData>
-{
+  implements IListRenderer<IBreakpoint, IBreakpointTemplateData> {
   constructor(
     private menu: IMenu,
     private breakpointHasMultipleModes: IContextKey<boolean>,
@@ -918,8 +917,7 @@ class BreakpointsRenderer
 
 class ExceptionBreakpointsRenderer
   implements
-    IListRenderer<IExceptionBreakpoint, IExceptionBreakpointTemplateData>
-{
+  IListRenderer<IExceptionBreakpoint, IExceptionBreakpointTemplateData> {
   constructor(
     private menu: IMenu,
     private breakpointHasMultipleModes: IContextKey<boolean>,
@@ -980,10 +978,10 @@ class ExceptionBreakpointsRenderer
     const exceptionBreakpointtitle = exceptionBreakpoint.verified
       ? exceptionBreakpoint.description || data.name.textContent
       : exceptionBreakpoint.message ||
-        localize(
-          "unverifiedExceptionBreakpoint",
-          "Unverified Exception Breakpoint",
-        )
+      localize(
+        "unverifiedExceptionBreakpoint",
+        "Unverified Exception Breakpoint",
+      )
     data.toDispose.push(
       this.hoverService.setupUpdatableHover(
         getDefaultHoverDelegate("mouse"),
@@ -1041,8 +1039,7 @@ class ExceptionBreakpointsRenderer
 }
 
 class FunctionBreakpointsRenderer
-  implements IListRenderer<FunctionBreakpoint, IFunctionBreakpointTemplateData>
-{
+  implements IListRenderer<FunctionBreakpoint, IFunctionBreakpointTemplateData> {
   constructor(
     private menu: IMenu,
     private breakpointSupportsCondition: IContextKey<boolean>,
@@ -1147,7 +1144,7 @@ class FunctionBreakpointsRenderer
     data.breakpoint.classList.toggle(
       "disabled",
       (session && !session.capabilities.supportsFunctionBreakpoints) ||
-        !this.debugService.getModel().areBreakpointsActivated(),
+      !this.debugService.getModel().areBreakpointsActivated(),
     )
     if (session && !session.capabilities.supportsFunctionBreakpoints) {
       data.toDispose.push(
@@ -1187,8 +1184,7 @@ class FunctionBreakpointsRenderer
 }
 
 class DataBreakpointsRenderer
-  implements IListRenderer<DataBreakpoint, IDataBreakpointTemplateData>
-{
+  implements IListRenderer<DataBreakpoint, IDataBreakpointTemplateData> {
   constructor(
     private menu: IMenu,
     private breakpointHasMultipleModes: IContextKey<boolean>,
@@ -1285,7 +1281,7 @@ class DataBreakpointsRenderer
     data.breakpoint.classList.toggle(
       "disabled",
       (session && !session.capabilities.supportsDataBreakpoints) ||
-        !this.debugService.getModel().areBreakpointsActivated(),
+      !this.debugService.getModel().areBreakpointsActivated(),
     )
     if (session && !session.capabilities.supportsDataBreakpoints) {
       data.toDispose.push(
@@ -1355,8 +1351,7 @@ class DataBreakpointsRenderer
 
 class InstructionBreakpointsRenderer
   implements
-    IListRenderer<IInstructionBreakpoint, IInstructionBreakpointTemplateData>
-{
+  IListRenderer<IInstructionBreakpoint, IInstructionBreakpointTemplateData> {
   constructor(
     @IDebugService private readonly debugService: IDebugService,
     @IHoverService private readonly hoverService: IHoverService,
@@ -1463,15 +1458,14 @@ class InstructionBreakpointsRenderer
 
 class FunctionBreakpointInputRenderer
   implements
-    IListRenderer<IFunctionBreakpoint, IFunctionBreakpointInputTemplateData>
-{
+  IListRenderer<IFunctionBreakpoint, IFunctionBreakpointInputTemplateData> {
   constructor(
     private view: BreakpointsView,
     private debugService: IDebugService,
     private contextViewService: IContextViewService,
     private readonly hoverService: IHoverService,
     private labelService: ILabelService,
-  ) {}
+  ) { }
 
   static readonly ID = "functionbreakpointinput"
 
@@ -1629,15 +1623,14 @@ class FunctionBreakpointInputRenderer
 }
 
 class DataBreakpointInputRenderer
-  implements IListRenderer<IDataBreakpoint, IDataBreakpointInputTemplateData>
-{
+  implements IListRenderer<IDataBreakpoint, IDataBreakpointInputTemplateData> {
   constructor(
     private view: BreakpointsView,
     private debugService: IDebugService,
     private contextViewService: IContextViewService,
     private readonly hoverService: IHoverService,
     private labelService: ILabelService,
-  ) {}
+  ) { }
 
   static readonly ID = "databreakpointinput"
 
@@ -1780,8 +1773,7 @@ class DataBreakpointInputRenderer
 
 class ExceptionBreakpointInputRenderer
   implements
-    IListRenderer<IExceptionBreakpoint, IExceptionBreakpointInputTemplateData>
-{
+  IListRenderer<IExceptionBreakpoint, IExceptionBreakpointInputTemplateData> {
   constructor(
     private view: BreakpointsView,
     private debugService: IDebugService,
@@ -1886,12 +1878,11 @@ class ExceptionBreakpointInputRenderer
 }
 
 class BreakpointsAccessibilityProvider
-  implements IListAccessibilityProvider<BreakpointItem>
-{
+  implements IListAccessibilityProvider<BreakpointItem> {
   constructor(
     private readonly debugService: IDebugService,
     private readonly labelService: ILabelService,
-  ) {}
+  ) { }
 
   getWidgetAriaLabel(): string {
     return localize("breakpoints", "Breakpoints")
@@ -1940,17 +1931,17 @@ export function openBreakpointSource(
 
   const selection = breakpoint.endLineNumber
     ? {
-        startLineNumber: breakpoint.lineNumber,
-        endLineNumber: breakpoint.endLineNumber,
-        startColumn: breakpoint.column || 1,
-        endColumn: breakpoint.endColumn || Constants.MAX_SAFE_SMALL_INTEGER,
-      }
+      startLineNumber: breakpoint.lineNumber,
+      endLineNumber: breakpoint.endLineNumber,
+      startColumn: breakpoint.column || 1,
+      endColumn: breakpoint.endColumn || Constants.MAX_SAFE_SMALL_INTEGER,
+    }
     : {
-        startLineNumber: breakpoint.lineNumber,
-        startColumn: breakpoint.column || 1,
-        endLineNumber: breakpoint.lineNumber,
-        endColumn: breakpoint.column || Constants.MAX_SAFE_SMALL_INTEGER,
-      }
+      startLineNumber: breakpoint.lineNumber,
+      startColumn: breakpoint.column || 1,
+      endLineNumber: breakpoint.lineNumber,
+      endColumn: breakpoint.column || Constants.MAX_SAFE_SMALL_INTEGER,
+    }
 
   return editorService.openEditor(
     {
@@ -2055,7 +2046,7 @@ export function getBreakpointMessageAndIcon(
     const messages: string[] = []
     messages.push(
       breakpoint.message ||
-        localize("functionBreakpoint", "Function Breakpoint"),
+      localize("functionBreakpoint", "Function Breakpoint"),
     )
     if (breakpoint.condition) {
       messages.push(

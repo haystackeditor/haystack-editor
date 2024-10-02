@@ -138,8 +138,7 @@ import { MenuId } from "vs/platform/actions/common/actions"
 
 export class CodeEditorWidget
   extends Disposable
-  implements editorBrowser.ICodeEditor
-{
+  implements editorBrowser.ICodeEditor {
   private static readonly dropIntoEditorDecorationOptions =
     ModelDecorationOptions.register({
       description: "workbench-dnd-target",
@@ -552,9 +551,9 @@ export class CodeEditorWidget
       this._createConfiguration(
         codeEditorWidgetOptions.isSimpleWidget || false,
         codeEditorWidgetOptions.contextMenuId ??
-          (codeEditorWidgetOptions.isSimpleWidget
-            ? MenuId.SimpleEditorContext
-            : MenuId.EditorContext),
+        (codeEditorWidgetOptions.isSimpleWidget
+          ? MenuId.SimpleEditorContext
+          : MenuId.EditorContext),
         options,
         accessibilityService,
       ),
@@ -1018,9 +1017,9 @@ export class CodeEditorWidget
     const editRange = this.getEditRange()
     const adjustedRawPosition: IPosition = editRange
       ? {
-          lineNumber: rawPosition.lineNumber + editRange.startLineNumber - 1,
-          column: rawPosition.column,
-        }
+        lineNumber: rawPosition.lineNumber + editRange.startLineNumber - 1,
+        column: rawPosition.column,
+      }
       : rawPosition
     const position = this._modelData.model.validatePosition(adjustedRawPosition)
     const tabSize = this._modelData.model.getOptions().tabSize
@@ -2000,8 +1999,8 @@ export class CodeEditorWidget
       this._decorationTypeKeysToIds[decorationTypeKey] || []
     this.changeDecorations(
       (accessor) =>
-        (this._decorationTypeKeysToIds[decorationTypeKey] =
-          accessor.deltaDecorations(oldDecorationsIds, newModelDecorations)),
+      (this._decorationTypeKeysToIds[decorationTypeKey] =
+        accessor.deltaDecorations(oldDecorationsIds, newModelDecorations)),
     )
   }
 
@@ -2031,8 +2030,8 @@ export class CodeEditorWidget
       this._decorationTypeKeysToIds[decorationTypeKey] || []
     this.changeDecorations(
       (accessor) =>
-        (this._decorationTypeKeysToIds[decorationTypeKey] =
-          accessor.deltaDecorations(oldDecorationsIds, newModelDecorations)),
+      (this._decorationTypeKeysToIds[decorationTypeKey] =
+        accessor.deltaDecorations(oldDecorationsIds, newModelDecorations)),
     )
   }
 
@@ -2818,7 +2817,7 @@ class ModelData {
     public readonly hasRealView: boolean,
     public readonly listenersToRemove: IDisposable[],
     public readonly attachedView: IAttachedView,
-  ) {}
+  ) { }
 
   public dispose(): void {
     dispose(this.listenersToRemove)
@@ -3218,9 +3217,9 @@ export class EditorModeContext extends Disposable {
         this._languageFeaturesService.documentFormattingEditProvider.has(
           model,
         ) ||
-          this._languageFeaturesService.documentRangeFormattingEditProvider.has(
-            model,
-          ),
+        this._languageFeaturesService.documentRangeFormattingEditProvider.has(
+          model,
+        ),
       )
       this._hasDocumentSelectionFormattingProvider.set(
         this._languageFeaturesService.documentRangeFormattingEditProvider.has(
@@ -3230,10 +3229,10 @@ export class EditorModeContext extends Disposable {
       this._hasMultipleDocumentFormattingProvider.set(
         this._languageFeaturesService.documentFormattingEditProvider.all(model)
           .length +
-          this._languageFeaturesService.documentRangeFormattingEditProvider.all(
-            model,
-          ).length >
-          1,
+        this._languageFeaturesService.documentRangeFormattingEditProvider.all(
+          model,
+        ).length >
+        1,
       )
       this._hasMultipleDocumentSelectionFormattingProvider.set(
         this._languageFeaturesService.documentRangeFormattingEditProvider.all(
@@ -3242,7 +3241,7 @@ export class EditorModeContext extends Disposable {
       )
       this._isInEmbeddedEditor.set(
         model.uri.scheme === Schemas.walkThroughSnippet ||
-          model.uri.scheme === Schemas.vscodeChatCodeBlock,
+        model.uri.scheme === Schemas.vscodeChatCodeBlock,
       )
     })
   }
@@ -3325,8 +3324,7 @@ class CodeEditorWidgetFocusTracker extends Disposable {
 }
 
 class EditorDecorationsCollection
-  implements editorCommon.IEditorDecorationsCollection
-{
+  implements editorCommon.IEditorDecorationsCollection {
   private _decorationIds: string[] = []
   private _isChangingDecorations: boolean = false
 
@@ -3451,8 +3449,7 @@ registerThemingParticipant((theme, collector) => {
   const errorForeground = theme.getColor(editorErrorForeground)
   if (errorForeground) {
     collector.addRule(
-      `.monaco-editor .${
-        ClassName.EditorErrorDecoration
+      `.monaco-editor .${ClassName.EditorErrorDecoration
       } { background: url("data:image/svg+xml,${getSquigglySVGData(
         errorForeground,
       )}") repeat-x bottom left; }`,
@@ -3461,8 +3458,7 @@ registerThemingParticipant((theme, collector) => {
   const warningForeground = theme.getColor(editorWarningForeground)
   if (warningForeground) {
     collector.addRule(
-      `.monaco-editor .${
-        ClassName.EditorWarningDecoration
+      `.monaco-editor .${ClassName.EditorWarningDecoration
       } { background: url("data:image/svg+xml,${getSquigglySVGData(
         warningForeground,
       )}") repeat-x bottom left; }`,
@@ -3471,8 +3467,7 @@ registerThemingParticipant((theme, collector) => {
   const infoForeground = theme.getColor(editorInfoForeground)
   if (infoForeground) {
     collector.addRule(
-      `.monaco-editor .${
-        ClassName.EditorInfoDecoration
+      `.monaco-editor .${ClassName.EditorInfoDecoration
       } { background: url("data:image/svg+xml,${getSquigglySVGData(
         infoForeground,
       )}") repeat-x bottom left; }`,
@@ -3481,8 +3476,7 @@ registerThemingParticipant((theme, collector) => {
   const hintForeground = theme.getColor(editorHintForeground)
   if (hintForeground) {
     collector.addRule(
-      `.monaco-editor .${
-        ClassName.EditorHintDecoration
+      `.monaco-editor .${ClassName.EditorHintDecoration
       } { background: url("data:image/svg+xml,${getDotDotDotSVGData(
         hintForeground,
       )}") no-repeat bottom left; }`,

@@ -540,7 +540,7 @@ export class EditorService extends Disposable implements EditorServiceImpl {
       includeUntitled: false,
       supportSideBySide: true,
     })) {
-      ;(async () => {
+      ; (async () => {
         const resource = editor.resource
         if (!resource) {
           return
@@ -920,9 +920,9 @@ export class EditorService extends Disposable implements EditorServiceImpl {
         typedEditor = isEditorInputWithOptions(editor)
           ? editor
           : {
-              editor: await this.textEditorService.resolveTextEditor(editor),
-              options: editor.options,
-            }
+            editor: await this.textEditorService.resolveTextEditor(editor),
+            options: editor.options,
+          }
       }
 
       // If group still isn't defined because of a disabled override we resolve it
@@ -1297,8 +1297,8 @@ export class EditorService extends Disposable implements EditorServiceImpl {
           replacement: isEditorReplacement(replacement)
             ? replacement.replacement
             : await this.textEditorService.resolveTextEditor(
-                replacement.replacement,
-              ),
+              replacement.replacement,
+            ),
           options: isEditorReplacement(replacement)
             ? replacement.options
             : replacement.replacement.options,
@@ -1397,8 +1397,8 @@ export class EditorService extends Disposable implements EditorServiceImpl {
           EditorInputCapabilities.Untitled,
         )
           ? this.editorGroupsContainer.groups.map(
-              (group) => group.id,
-            ) /* untitled replaces across all groups */
+            (group) => group.id,
+          ) /* untitled replaces across all groups */
           : [groupId]
         for (const targetGroup of targetGroups) {
           if (result instanceof EditorInput) {
