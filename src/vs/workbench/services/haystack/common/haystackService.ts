@@ -16,6 +16,7 @@ import {
   ISaveOptions,
   IRevertOptions,
   IUntypedEditorInput,
+  IResourceMergeEditorInput,
 } from "vs/workbench/common/editor"
 import { EditorInput } from "vs/workbench/common/editor/editorInput"
 import { URI } from "vs/base/common/uri"
@@ -136,14 +137,14 @@ export interface IBaseSaveRevertAllEditorOptions {
    * Whether to include untitled editors as well.
    */
   readonly includeUntitled?:
-    | {
-        /**
-         * Whether to include scratchpad editors.
-         * Scratchpads are not included if not specified.
-         */
-        readonly includeScratchpad: boolean
-      }
-    | boolean
+  | {
+    /**
+     * Whether to include scratchpad editors.
+     * Scratchpads are not included if not specified.
+     */
+    readonly includeScratchpad: boolean
+  }
+  | boolean
 
   /**
    * Whether to exclude sticky editors.
@@ -153,11 +154,11 @@ export interface IBaseSaveRevertAllEditorOptions {
 
 export interface ISaveAllEditorsOptions
   extends ISaveEditorsOptions,
-    IBaseSaveRevertAllEditorOptions {}
+  IBaseSaveRevertAllEditorOptions { }
 
 export interface IRevertAllEditorsOptions
   extends IRevertOptions,
-    IBaseSaveRevertAllEditorOptions {}
+  IBaseSaveRevertAllEditorOptions { }
 
 export interface IOpenEditorsOptions {
   /**
@@ -207,6 +208,10 @@ export interface IHaystackService {
     uri: URI | undefined,
     args?: EditorOpenArgs,
     options?: IEditorOptions,
+  ): Promise<IEditorPane | undefined>
+
+  createMergeEditor(input: IResourceMergeEditorInput,
+    args?: EditorOpenArgs,
   ): Promise<IEditorPane | undefined>
 
   createSymbolEditorWithSymbol(

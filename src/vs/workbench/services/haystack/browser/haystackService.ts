@@ -14,6 +14,7 @@ import {
   IEditorCloseEvent,
   IEditorWillOpenEvent,
   IUntypedEditorInput,
+  IResourceMergeEditorInput,
 } from "vs/workbench/common/editor"
 import { editorBackground } from "vs/platform/theme/common/colorRegistry"
 import { EditorInput } from "vs/workbench/common/editor/editorInput"
@@ -54,6 +55,7 @@ import {
   ICodeEditor,
   IDiffEditor,
   isCodeEditor,
+  isMergeEditor,
 } from "vs/editor/browser/editorBrowser"
 import {
   InstantiationType,
@@ -168,9 +170,11 @@ import { SpatialSortMiddleware } from "vs/workbench/browser/haystack-frontend/mi
 import {
   CanvasCodeEditor,
   CanvasEditorType,
+  CanvasMergeEditor,
   CanvasModalEditor,
   CanvasReferencesEditor,
 } from "vs/workbench/browser/haystack-frontend/editor/editor"
+import { MergeEditor } from 'vs/workbench/contrib/mergeEditor/browser/view/mergeEditor'
 
 interface IEditorConfiguration {
   editor: {
@@ -640,6 +644,65 @@ export class HaystackService extends Disposable implements IHaystackService {
     return editorPanePromise.p
   }
 
+  public async createMergeEditor(
+    input: IResourceMergeEditorInput,
+    args?: EditorOpenArgs,
+  ) {
+    await WorkspaceStoreWrapper.workspaceStoreIsInitialized.p
+    await RendererManager.rendererManagerIsInitialized.p
+
+    // Finds an existing editor first, if it exists.
+    if (!args?.forceNewEditor) {
+      for (const editorPane of this._editorService.visibleEditorPanes) {
+        const editor = editorPane.getControl()
+        if (isMergeEditor(editor)) {
+          const editorInput = editor.input as unknown as IResourceMergeEditorInput
+
+          if (
+            editorInput.input1.resource.path !==
+            input.input1.resource.path ||
+            editorInput.input2.resource.path !==
+            input.input2.resource.path
+          ) {
+            continue
+          }
+
+          if (args?.selectionRange) {
+            // Found the editor, just set the range and return
+            editor.getControl()?.setSelection(args.selectionRange)
+            editor.getControl()?.revealLineInCenterIfOutsideViewport(
+              args.selectionRange.startLineNumber,
+            )
+          }
+
+          if (
+            WorkspaceStoreWrapper.getWorkspaceState().panToEditorWithIdentifier(
+              {
+                editor: editorPane.input,
+                groupId: editorPane.group.id,
+              },
+            )
+          ) {
+            return Promise.resolve(editorPane)
+          }
+        }
+      }
+    }
+
+    const deferredEditorPanePromise = new DeferredPromise<
+      IEditorPane | undefined
+    >()
+
+    await WorkspaceStoreWrapper.getWorkspaceState().insertMergeEditorAtCenterOfViewport(
+      input,
+      args,
+      undefined,
+      deferredEditorPanePromise,
+    )
+
+    return deferredEditorPanePromise.p
+  }
+
   public createReferenceEditor(
     referencesModel: ReferencesModel,
     codeEditor: ICodeEditor,
@@ -668,9 +731,9 @@ export class HaystackService extends Disposable implements IHaystackService {
 
           if (
             editor.getOriginalEditor().getModel()?.uri.fsPath !==
-              originalUri.fsPath ||
+            originalUri.fsPath ||
             editor.getModifiedEditor().getModel()?.uri.fsPath !==
-              modifiedUri.fsPath
+            modifiedUri.fsPath
           ) {
             continue
           }
@@ -1924,11 +1987,10 @@ export class HaystackService extends Disposable implements IHaystackService {
     for (const metadatum of metadata) {
       if (metadatum == null) continue
 
-      const symbolDepKey = `${metadatum.filePath}-${
-        metadatum.enclosingSymbol
-          ? Range.fromIRange(metadatum.enclosingSymbol.range).toString()
-          : "Null"
-      }`
+      const symbolDepKey = `${metadatum.filePath}-${metadatum.enclosingSymbol
+        ? Range.fromIRange(metadatum.enclosingSymbol.range).toString()
+        : "Null"
+        }`
       let symbolDep: SymbolDep | undefined = symbolDepMap.get(symbolDepKey)
 
       if (symbolDep == null) {
@@ -2895,6 +2957,54 @@ export class HaystackService extends Disposable implements IHaystackService {
 
   private blurNotebookEditor(notebookEditor: NotebookEditor): void {
     WorkspaceStoreWrapper.getWorkspaceState().blurNotebookEditor(notebookEditor)
+  }
+
+  public async createMergeEditorElement(
+    editorInput: IResourceMergeEditorInput,
+    domElement: HTMLElement,
+    editor: CanvasMergeEditor,
+    options?: IEditorOptions,
+    args?: EditorOpenArgs,
+  ): Promise<IEditorIdentifier | null> {
+    let editorPane: IEditorPane | undefined = undefined
+    if (args?.existingEditorInput) {
+      const groupId = args.existingEditorInput.groupId
+      const group = this.editorGroupService.getGroup(groupId)
+      if (group != null) {
+        editorPane = await group.openEditor(
+          args.existingEditorInput.input,
+          options,
+          undefined,
+          domElement,
+        )
+      }
+    }
+
+    if (editorPane == null) {
+      const group = this.editorGroupService.addGroup(
+        this.editorGroupService.activeGroup,
+        GroupDirection.RIGHT,
+      )
+
+      editorPane = await this._editorService.openEditor(
+        editorInput,
+        group,
+        undefined,
+        domElement,
+      )
+    }
+
+    editor.deferredPanePromise?.complete(editorPane)
+    editor.editorPane = (editorPane as EditorPane) ?? null
+
+    if (editorPane == null || editorPane.input == null) {
+      return null
+    }
+
+    return {
+      editor: editorPane.input,
+      groupId: editorPane.group.id,
+    }
   }
 }
 

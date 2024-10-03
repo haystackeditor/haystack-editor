@@ -61,6 +61,8 @@ import { OverviewRulerZone } from "vs/editor/common/viewModel/overviewZoneManage
 import { MenuId } from "vs/platform/actions/common/actions"
 import { IContextKeyService } from "vs/platform/contextkey/common/contextkey"
 import { ServicesAccessor } from "vs/platform/instantiation/common/instantiation"
+import { MergeEditor } from 'vs/workbench/contrib/mergeEditor/browser/view/mergeEditor'
+import { isMergeEditorInput } from 'vs/workbench/services/userDataSync/browser/userDataSyncWorkbenchService'
 
 /**
  * A view zone is a full horizontal rectangle that 'pushes' text down.
@@ -285,9 +287,9 @@ export interface IOverlayWidgetPosition {
    * The position preference for the overlay widget.
    */
   preference:
-    | OverlayWidgetPositionPreference
-    | IOverlayWidgetPositionCoordinates
-    | null
+  | OverlayWidgetPositionPreference
+  | IOverlayWidgetPositionCoordinates
+  | null
 
   /**
    * When set, stacks with other overlay widgets with the same preference,
@@ -460,9 +462,9 @@ export interface IMouseTargetMarginData {
 }
 export interface IMouseTargetMargin extends IBaseMouseTarget {
   readonly type:
-    | MouseTargetType.GUTTER_GLYPH_MARGIN
-    | MouseTargetType.GUTTER_LINE_NUMBERS
-    | MouseTargetType.GUTTER_LINE_DECORATIONS
+  | MouseTargetType.GUTTER_GLYPH_MARGIN
+  | MouseTargetType.GUTTER_LINE_NUMBERS
+  | MouseTargetType.GUTTER_LINE_DECORATIONS
   readonly position: Position
   readonly range: Range
   readonly detail: IMouseTargetMarginData
@@ -476,8 +478,8 @@ export interface IMouseTargetViewZoneData {
 }
 export interface IMouseTargetViewZone extends IBaseMouseTarget {
   readonly type:
-    | MouseTargetType.GUTTER_VIEW_ZONE
-    | MouseTargetType.CONTENT_VIEW_ZONE
+  | MouseTargetType.GUTTER_VIEW_ZONE
+  | MouseTargetType.CONTENT_VIEW_ZONE
   readonly position: Position
   readonly range: Range
   readonly detail: IMouseTargetViewZoneData
@@ -599,7 +601,7 @@ export interface IEditorAriaOptions {
 
 export interface IDiffEditorConstructionOptions
   extends IDiffEditorOptions,
-    IEditorConstructionOptions {
+  IEditorConstructionOptions {
   /**
    * Place overflow widgets inside an external DOM node.
    * Defaults to an internal DOM node.
@@ -1480,6 +1482,13 @@ export function isDiffEditor(thing: unknown): thing is IDiffEditor {
   } else {
     return false
   }
+}
+
+/**
+ *@internal
+ */
+export function isMergeEditor(thing: unknown): thing is MergeEditor {
+  return !!thing && isMergeEditorInput((<MergeEditor>thing).input)
 }
 
 /**

@@ -17,7 +17,7 @@ import {
 } from "vs/platform/editor/common/editor"
 import { SymbolDepsType } from "vs/workbench/browser/haystack-frontend/workspace/editors/common"
 import { EditorPane } from "vs/workbench/browser/parts/editor/editorPane"
-import { IEditorIdentifier, IEditorPane } from "vs/workbench/common/editor"
+import { IEditorIdentifier, IEditorPane, IResourceMergeEditorInput } from "vs/workbench/common/editor"
 import { EditorInput } from "vs/workbench/common/editor/editorInput"
 import { NotebookEditor } from "vs/workbench/contrib/notebook/browser/notebookEditor"
 import { WebviewEditor } from "vs/workbench/contrib/webviewPanel/browser/webviewEditor"
@@ -30,6 +30,7 @@ export type CanvasEditor =
   | CanvasReferencesEditor
   | CanvasCopilotSettingsEditor
   | CanvasHaystackKeybindingsEditor
+  | CanvasMergeEditor
 
 export const MIN_EDITOR_WIDTH = 600
 export const MIN_EDITOR_HEIGHT = 150
@@ -46,6 +47,7 @@ export const enum CanvasEditorType {
   REFERENCES_EDITOR = 4,
   COPILOT_SETTINGS_EDITOR = 5,
   HAYSTACK_KEYBINDINGS_EDITOR = 6,
+  MERGE_EDITOR = 7,
 }
 
 export interface Reference {
@@ -148,6 +150,13 @@ export type CanvasModalEditor = BasicCanvasEditor &
   EditorBase & {
     type: CanvasEditorType.MODAL_EDITOR
     input: EditorInput | IResourceEditorInput
+    editorPane: EditorPane | null
+  }
+
+export type CanvasMergeEditor = BasicCanvasEditor &
+  EditorBase & {
+    type: CanvasEditorType.MERGE_EDITOR
+    input: IResourceMergeEditorInput
     editorPane: EditorPane | null
   }
 

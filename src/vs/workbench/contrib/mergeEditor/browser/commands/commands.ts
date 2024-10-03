@@ -21,7 +21,6 @@ import {
 } from "vs/platform/actions/common/actions"
 import { ContextKeyExpr } from "vs/platform/contextkey/common/contextkey"
 import { IDialogService } from "vs/platform/dialogs/common/dialogs"
-import { ITextEditorOptions } from "vs/platform/editor/common/editor"
 import { ServicesAccessor } from "vs/platform/instantiation/common/instantiation"
 import { IOpenerService } from "vs/platform/opener/common/opener"
 import {
@@ -48,6 +47,7 @@ import {
   StorageCloseWithConflicts,
 } from "vs/workbench/contrib/mergeEditor/common/mergeEditor"
 import { IEditorService } from "vs/workbench/services/editor/common/editorService"
+import { IHaystackService } from 'vs/workbench/services/haystack/common/haystackService'
 
 abstract class MergeEditorAction extends Action2 {
   constructor(desc: Readonly<IAction2Options>) {
@@ -141,7 +141,8 @@ export class OpenMergeEditor extends Action2 {
       result: { resource: validatedArgs.output },
       options: { preserveFocus: true },
     }
-    accessor.get(IEditorService).openEditor(input)
+
+    accessor.get(IHaystackService).createMergeEditor(input)
   }
 }
 
@@ -557,8 +558,8 @@ export class CompareInput1WithBaseCommand extends MergeEditorAction {
     viewModel: MergeEditorViewModel,
     accessor: ServicesAccessor,
   ): void {
-    const editorService = accessor.get(IEditorService)
-    mergeEditorCompare(viewModel, editorService, 1)
+    const haystackService = accessor.get(IHaystackService)
+    mergeEditorCompare(viewModel, haystackService, 1)
   }
 }
 
@@ -583,18 +584,16 @@ export class CompareInput2WithBaseCommand extends MergeEditorAction {
     viewModel: MergeEditorViewModel,
     accessor: ServicesAccessor,
   ): void {
-    const editorService = accessor.get(IEditorService)
-    mergeEditorCompare(viewModel, editorService, 2)
+    const haystackService = accessor.get(IHaystackService)
+    mergeEditorCompare(viewModel, haystackService, 2)
   }
 }
 
 async function mergeEditorCompare(
   viewModel: MergeEditorViewModel,
-  editorService: IEditorService,
+  haystackService: IHaystackService,
   inputNumber: 1 | 2,
 ) {
-  editorService.openEditor(editorService.activeEditor!, { pinned: true })
-
   const model = viewModel.model
   const base = model.base
   const input =
@@ -603,18 +602,15 @@ async function mergeEditorCompare(
       : viewModel.inputCodeEditorView2.editor
 
   const lineNumber = input.getPosition()!.lineNumber
-  await editorService.openEditor({
-    original: { resource: base.uri },
-    modified: { resource: input.getModel()!.uri },
-    options: {
-      selection: {
+  await haystackService.createFileDiffEditor(base.uri, input.getModel()!.uri,
+    {
+      selectionRange: {
         startLineNumber: lineNumber,
         startColumn: 1,
-      },
-      revealIfOpened: true,
-      revealIfVisible: true,
-    } satisfies ITextEditorOptions,
-  })
+        endLineNumber: lineNumber,
+        endColumn: 1,
+      }
+    })
 }
 
 export class OpenBaseFile extends MergeEditorAction {

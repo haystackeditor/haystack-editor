@@ -52,7 +52,7 @@ export function MainToolbar() {
     ])
 
   return (
-    <div className={classNames({ toolbar: true, darkMode })}>
+    <div className={classNames({ haystackToolbar: true, darkMode })}>
       <button
         ref={removeAllEditorsButtonRef}
         className="mainToolbarButton"

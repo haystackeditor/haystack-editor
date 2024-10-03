@@ -23,6 +23,7 @@ import { CopilotSettingsEditorContainer } from "vs/workbench/browser/haystack-fr
 import { HaystackKeybindingsEditorContainer } from "vs/workbench/browser/haystack-frontend/workspace/editors/haystack_keybindings_editor_container"
 import { KeybindingsButton } from "vs/workbench/browser/haystack-frontend/root/keybindings_button"
 import { CanvasEditorType } from "vs/workbench/browser/haystack-frontend/editor/editor"
+import { MergeEditorContainer } from "vs/workbench/browser/haystack-frontend/workspace/editors/merge_editor_container"
 
 interface CanvasEditorContainer {
   uuid: string
@@ -58,7 +59,6 @@ function WorkspaceOverlay({ showQuitModal }: WorkspaceOverlayProps) {
   })
   const contextMenuArgs = useGlobalState((state) => state.contextMenuArgs)
   const genericInputArgs = useGlobalState((state) => state.genericInputArgs)
-  const quickCommandArgs = useGlobalState((state) => state.quickCommandArgs)
 
   const rendererManager = React.useMemo(() => RendererManager.getInstance(), [])
 
@@ -107,6 +107,13 @@ function WorkspaceOverlay({ showQuitModal }: WorkspaceOverlayProps) {
           case CanvasEditorType.MODAL_EDITOR:
             return (
               <ModalEditorContainer
+                key={canvasEditor.uuid}
+                editorId={canvasEditor.uuid}
+              />
+            )
+          case CanvasEditorType.MERGE_EDITOR:
+            return (
+              <MergeEditorContainer
                 key={canvasEditor.uuid}
                 editorId={canvasEditor.uuid}
               />

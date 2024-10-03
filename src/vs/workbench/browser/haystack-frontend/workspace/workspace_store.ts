@@ -14,6 +14,7 @@ import {
   CanvasEditor,
   CanvasEditorType,
   CanvasGhostEditor,
+  CanvasMergeEditor,
   CanvasModalEditor,
   CanvasReferencesEditor,
   DEFAULT_DIFF_EDITOR_WIDTH,
@@ -82,7 +83,6 @@ import { convertStateToEvent } from "vs/workbench/browser/haystack-frontend/midd
 import { MiddlewareType } from "vs/workbench/browser/haystack-frontend/middleware/middleware_common"
 import { SpatialSortMiddleware } from "vs/workbench/browser/haystack-frontend/middleware/spatial_sort_middleware"
 import { ExtensionsInput } from "vs/workbench/contrib/extensions/common/extensionsInput"
-import { NotebookEditorInput } from "vs/workbench/contrib/notebook/common/notebookEditorInput"
 
 // This exists here because otherwise it causes weird reference errors.
 type Middleware = <
@@ -184,9 +184,9 @@ export function getWorkspaceStore() {
           return editor.isPinned
             ? new Vector(editor.vxPosition, editor.vyPosition)
             : Vector.add(
-                get().canvasCamera,
-                new Vector(editor.xPosition, editor.yPosition),
-              ).round()
+              get().canvasCamera,
+              new Vector(editor.xPosition, editor.yPosition),
+            ).round()
         },
         addModel: (modelId: string, editorId: string) => {
           const editortoEditorIdMap = new Map(get().modelIdtoEditorIdMap)
@@ -249,16 +249,16 @@ export function getWorkspaceStore() {
             codeEditor.getPosition() == null
               ? true
               : originalEditorPositionY +
-                  codeEditor.getTopForLineNumber(
-                    codeEditor.getPosition()!.lineNumber,
-                  ) -
-                  codeEditor.getScrollTop() <=
-                centerOfViewport.y
+              codeEditor.getTopForLineNumber(
+                codeEditor.getPosition()!.lineNumber,
+              ) -
+              codeEditor.getScrollTop() <=
+              centerOfViewport.y
 
           const referencesPosition = new Vector(
             VIEWPORT_PADDING,
             (showAtBottom ? centerOfViewport.y : upperLeftOfViewport.y) -
-              VIEWPORT_PADDING,
+            VIEWPORT_PADDING,
           )
 
           const viewportBoundsWithPadding = getViewportDimensionsWithPadding()
@@ -343,10 +343,10 @@ export function getWorkspaceStore() {
             xPosition != null && yPosition != null
               ? new Vector(xPosition, yPosition)
               : get().getPositionForNewEditor(
-                  upperLeftQuadrant,
-                  size,
-                  get().idToEditorMap,
-                )
+                upperLeftQuadrant,
+                size,
+                get().idToEditorMap,
+              )
           const editor = generateEditor(
             {
               type: CanvasEditorType.CODE_EDITOR,
@@ -419,10 +419,10 @@ export function getWorkspaceStore() {
             xPosition != null && yPosition != null
               ? new Vector(xPosition, yPosition)
               : get().getPositionForNewEditor(
-                  upperLeftQuadrant,
-                  size,
-                  get().idToEditorMap,
-                )
+                upperLeftQuadrant,
+                size,
+                get().idToEditorMap,
+              )
           options = options ?? {}
           options.range = range
 
@@ -548,10 +548,10 @@ export function getWorkspaceStore() {
             xPosition != null && yPosition != null
               ? new Vector(xPosition, yPosition)
               : get().getPositionForNewEditor(
-                  upperLeftQuadrant,
-                  size,
-                  get().idToEditorMap,
-                )
+                upperLeftQuadrant,
+                size,
+                get().idToEditorMap,
+              )
           const editor = generateEditor(
             {
               type: CanvasEditorType.DIFF_EDITOR,
@@ -569,6 +569,74 @@ export function getWorkspaceStore() {
             },
             get().canvasScale,
           )
+          if (editor == null) return ""
+
+          idToEditorMap.set(editorId, editor)
+          selection.add(editorId)
+          set({ idToEditorMap, selection })
+
+          if (args?.doNotPanTo === true) return editorId
+
+          const editorPos = get().getEditorPosition(editor.uuid)
+          const transformedPos = transformFromViewportToCanvas(
+            editorPos,
+            get().canvasScale,
+          )
+
+          navigateToPosition(
+            transformedPos,
+            new Vector(editor.width, editor.height),
+            NavigationType.JUST_ENOUGH,
+          )
+
+          return editorId
+        },
+        async insertMergeEditorAtCenterOfViewport(editorInput, args, options, deferredEditorPanePromise) {
+          await get().haystackServiceIsInitialized.p
+          if (get().haystackService == null) return ""
+
+          const width = args?.existingEditorInput?.input.getWidth() ?? null
+          const height = args?.existingEditorInput?.input.getHeight() ?? null
+
+          const initialSize =
+            (width != null && height != null
+              ? new Vector(width, height)
+              : await getEditorSizeForFile(editorInput.input2.resource, get().haystackService!))
+          const finalSize = new Vector(initialSize.x, initialSize.y * 2)
+
+          const idToEditorMap = new Map(get().idToEditorMap)
+          const selection = new Set<string>()
+          const editorId = uuid.generateUuid()
+          const upperLeftQuadrant = getUpperLeftQuadrantViewport()
+          const xPosition =
+            args?.existingEditorInput?.input.getXPosition() ?? null
+          const yPosition =
+            args?.existingEditorInput?.input.getYPosition() ?? null
+          const editorPosition =
+            xPosition != null && yPosition != null
+              ? new Vector(xPosition, yPosition)
+              : get().getPositionForNewEditor(
+                upperLeftQuadrant,
+                finalSize,
+                get().idToEditorMap,
+              )
+          const editor = generateEditor(
+            {
+              type: CanvasEditorType.MERGE_EDITOR,
+              uuid: editorId,
+              editorInput,
+              xPosition: editorPosition.x,
+              yPosition: editorPosition.y,
+              width: DEFAULT_DIFF_EDITOR_WIDTH,
+              height: finalSize.y,
+              deferredEditorPanePromise,
+              ...args,
+              options,
+            },
+            get().canvasScale,
+          )
+          console.log("CAZ NOVOVOICH", editor)
+
           if (editor == null) return ""
 
           idToEditorMap.set(editorId, editor)
@@ -609,13 +677,13 @@ export function getWorkspaceStore() {
             width != null && height != null
               ? new Vector(width, height)
               : new Vector(
-                  DEFAULT_EDITOR_WIDTH,
-                  Math.min(
-                    DEFAULT_EDITOR_HEIGHT,
-                    RendererManager.getInstance().getViewportDimensionsWithDoublePadding()
-                      .y,
-                  ),
-                )
+                DEFAULT_EDITOR_WIDTH,
+                Math.min(
+                  DEFAULT_EDITOR_HEIGHT,
+                  RendererManager.getInstance().getViewportDimensionsWithDoublePadding()
+                    .y,
+                ),
+              )
 
           const xPosition =
             args?.existingEditorInput?.input.getXPosition() ?? null
@@ -625,10 +693,10 @@ export function getWorkspaceStore() {
             xPosition != null && yPosition != null
               ? new Vector(xPosition, yPosition)
               : get().getPositionForNewEditor(
-                  upperLeftQuadrant,
-                  size,
-                  get().idToEditorMap,
-                )
+                upperLeftQuadrant,
+                size,
+                get().idToEditorMap,
+              )
           const editor = generateEditor(
             {
               type: CanvasEditorType.MODAL_EDITOR,
@@ -844,7 +912,7 @@ export function getWorkspaceStore() {
               longestLineWidth,
               editor.width,
               viewportSizeWithoutPadding.x / canvasScale -
-                editorPosition.x * canvasScale,
+              editorPosition.x * canvasScale,
             )
             idToEditorMap.set(id, { ...editor })
             set({ idToEditorMap })
@@ -1476,7 +1544,7 @@ export function getWorkspaceStore() {
             // Y. Continue instead.
             if (
               editorPositionInViewportSpace.y +
-                newEditorSizeInViewportSpace.y >=
+              newEditorSizeInViewportSpace.y >=
               viewportSizeInViewportSpace.y
             ) {
               continue
@@ -1829,11 +1897,11 @@ export function getWorkspaceStore() {
             scrollPosition: codeEditor.getVisibleRanges()[0].startLineNumber,
             selectionRange: codeEditor.getSelection()
               ? {
-                  startLineNumber: codeEditor.getSelection()!.startLineNumber,
-                  startColumn: codeEditor.getSelection()!.startColumn,
-                  endLineNumber: codeEditor.getSelection()!.endLineNumber,
-                  endColumn: codeEditor.getSelection()!.endColumn,
-                }
+                startLineNumber: codeEditor.getSelection()!.startLineNumber,
+                startColumn: codeEditor.getSelection()!.startColumn,
+                endLineNumber: codeEditor.getSelection()!.endLineNumber,
+                endColumn: codeEditor.getSelection()!.endColumn,
+              }
               : null,
             options: { ...canvasEditor.options, range: result?.symbol?.range },
             deferredPanePromise: new DeferredPromise<IEditorPane | undefined>(),
@@ -1880,11 +1948,11 @@ export function getWorkspaceStore() {
             scrollPosition: codeEditor.getVisibleRanges()[0].startLineNumber,
             selectionRange: codeEditor.getSelection()
               ? {
-                  startLineNumber: codeEditor.getSelection()!.startLineNumber,
-                  startColumn: codeEditor.getSelection()!.startColumn,
-                  endLineNumber: codeEditor.getSelection()!.endLineNumber,
-                  endColumn: codeEditor.getSelection()!.endColumn,
-                }
+                startLineNumber: codeEditor.getSelection()!.startLineNumber,
+                startColumn: codeEditor.getSelection()!.startColumn,
+                endLineNumber: codeEditor.getSelection()!.endLineNumber,
+                endColumn: codeEditor.getSelection()!.endColumn,
+              }
               : null,
             options: { ...canvasEditor.options, range: result?.symbol?.range },
             deferredPanePromise: new DeferredPromise<IEditorPane | undefined>(),
@@ -1930,11 +1998,11 @@ export function getWorkspaceStore() {
             scrollPosition: codeEditor.getVisibleRanges()[0].startLineNumber,
             selectionRange: codeEditor.getSelection()
               ? {
-                  startLineNumber: codeEditor.getSelection()!.startLineNumber,
-                  startColumn: codeEditor.getSelection()!.startColumn,
-                  endLineNumber: codeEditor.getSelection()!.endLineNumber,
-                  endColumn: codeEditor.getSelection()!.endColumn,
-                }
+                startLineNumber: codeEditor.getSelection()!.startLineNumber,
+                startColumn: codeEditor.getSelection()!.startColumn,
+                endLineNumber: codeEditor.getSelection()!.endLineNumber,
+                endColumn: codeEditor.getSelection()!.endColumn,
+              }
               : null,
             options: { ...canvasEditor.options, range: undefined },
             deferredPanePromise: new DeferredPromise<IEditorPane | undefined>(),
@@ -1980,11 +2048,11 @@ export function getWorkspaceStore() {
             scrollPosition: codeEditor.getVisibleRanges()[0].startLineNumber,
             selectionRange: codeEditor.getSelection()
               ? {
-                  startLineNumber: codeEditor.getSelection()!.startLineNumber,
-                  startColumn: codeEditor.getSelection()!.startColumn,
-                  endLineNumber: codeEditor.getSelection()!.endLineNumber,
-                  endColumn: codeEditor.getSelection()!.endColumn,
-                }
+                startLineNumber: codeEditor.getSelection()!.startLineNumber,
+                startColumn: codeEditor.getSelection()!.startColumn,
+                endLineNumber: codeEditor.getSelection()!.endLineNumber,
+                endColumn: codeEditor.getSelection()!.endColumn,
+              }
               : null,
             options: { ...canvasEditor.options, range: result?.symbol?.range },
             deferredPanePromise: new DeferredPromise<IEditorPane | undefined>(),
@@ -2097,6 +2165,47 @@ export function getWorkspaceStore() {
           const editor = get().idToEditorMap.get(editorId) as CanvasModalEditor
           const identifier =
             await this.haystackService?.createModalEditorElement(
+              editorInput,
+              domElement,
+              editor,
+              options,
+              {
+                highlightRange: editor.highlightRange ?? undefined,
+                selectionRange: editor.selectionRange ?? undefined,
+                existingEditorInput: editor.existingEditorInput ?? undefined,
+                scrollPosition: editor.scrollPosition ?? undefined,
+              },
+            )
+          if (identifier == null) return
+
+          const openEditors = new Set(get().openEditors)
+          openEditors.add(identifier)
+
+          const idToEditorMap = new Map(get().idToEditorMap)
+          // Grabs a new editor due to async call above.
+          const refreshedEditor = idToEditorMap.get(
+            editorId,
+          ) as CanvasModalEditor
+          if (refreshedEditor == null) return
+
+          const oldIdentifier = refreshedEditor.identifier
+
+          if (oldIdentifier != null) {
+            // We don't await here on purpose.
+            this.closeFileEditor(oldIdentifier)
+          }
+
+          idToEditorMap.set(editorId, {
+            ...refreshedEditor,
+            identifier,
+            existingEditorInput: null,
+          })
+          set({ openEditors, idToEditorMap })
+        },
+        async openMergeEditorForCanvasEditor(editorId, editorInput, domElement, options) {
+          const editor = get().idToEditorMap.get(editorId) as CanvasMergeEditor
+          const identifier =
+            await this.haystackService?.createMergeEditorElement(
               editorInput,
               domElement,
               editor,
@@ -2253,7 +2362,7 @@ export function getWorkspaceStore() {
               if (editor.identifier == null) continue
               if (
                 editor.identifier.editor.editorId ===
-                  editorIdentifier.editor.editorId &&
+                editorIdentifier.editor.editorId &&
                 editor.identifier.groupId === editorIdentifier.groupId
               ) {
                 get().navigateToEditor(editor, NavigationType.CENTER)
@@ -2522,7 +2631,7 @@ export function getWorkspaceStore() {
           if (
             previousEditorHistoryStack.length > 0 &&
             previousEditorHistoryStack[
-              previousEditorHistoryStack.length - 1
+            previousEditorHistoryStack.length - 1
             ] === editorId
           ) {
             set({
@@ -2786,7 +2895,7 @@ export function getWorkspaceStore() {
                 editor.type === CanvasEditorType.MODAL_EDITOR ||
                 editor.type === CanvasEditorType.GHOST_EDITOR) &&
               editor.identifier?.editor.editorId ===
-                editorIdentifier.editor.editorId &&
+              editorIdentifier.editor.editorId &&
               editor.identifier?.groupId === editorIdentifier.groupId
             ) {
               // Incredibly hacky, but we only reject one close event.
@@ -3318,10 +3427,9 @@ export function getWorkspaceStore() {
             get().sendTelemetry("Closed dependency list")
           } else {
             get().sendTelemetry(
-              `opened ${
-                dependencyListType === SymbolDepsType.INCOMING
-                  ? "incoming"
-                  : "outgoing"
+              `opened ${dependencyListType === SymbolDepsType.INCOMING
+                ? "incoming"
+                : "outgoing"
               } dependencies`,
               {
                 editorId: editorId,
@@ -3495,7 +3603,7 @@ export function getWorkspaceStore() {
               editor.type === CanvasEditorType.CODE_EDITOR &&
               ((editor.webviewEditor != null &&
                 (editor.webviewEditor.input as WebviewInput).webview.origin ===
-                  origin) ||
+                origin) ||
                 (editor.notebookEditor != null &&
                   editor.notebookEditor.getInnerWebview()?.origin === origin))
 
@@ -3560,7 +3668,7 @@ export function getWorkspaceStore() {
               if (editor.identifier == null) continue
               if (
                 editor.identifier.editor.editorId ===
-                  editorIdentifier.editor.editorId &&
+                editorIdentifier.editor.editorId &&
                 editor.identifier.groupId === editorIdentifier.groupId
               ) {
                 const idToEditorMap = new Map(get().idToEditorMap)
@@ -3792,6 +3900,53 @@ function generateEditor(
         currentSymbol: null,
       }
     }
+    case CanvasEditorType.MERGE_EDITOR: {
+      const editorDimensions = Vector.min(
+        getViewportDimensionsWithPadding(),
+        new Vector(DEFAULT_DIFF_EDITOR_WIDTH, EMPTY_EDITOR_HEIGHT),
+      )
+      const [editorWidth, editorHeight] = [
+        editorDimensions.x,
+        editorDimensions.y,
+      ]
+      return {
+        type: CanvasEditorType.MERGE_EDITOR,
+        uuid: editorArgs.uuid,
+        isDirty: false,
+        xPosition:
+          editorArgs.xPosition -
+          (editorArgs.positionByCenter ? (editorWidth / 2) * canvasScale : 0),
+        yPosition:
+          editorArgs.yPosition -
+          (editorArgs.positionByCenter ? (editorHeight / 2) * canvasScale : 0),
+        vxPosition: VIEWPORT_PADDING,
+        vyPosition: VIEWPORT_PADDING,
+        vWidth: 0,
+        vHeight: 0,
+        width: editorArgs.width ?? editorWidth,
+        height: editorArgs.height ?? editorHeight,
+        selectionRange: editorArgs.selectionRange ?? null,
+        scrollPosition: editorArgs.scrollPosition ?? null,
+        isGhost: false,
+        isShowingCancellationModal: false,
+        identifier: null,
+        highlightRange: editorArgs.highlightRange ?? null,
+        options: editorArgs.options ?? null,
+        existingEditorInput: editorArgs.existingEditorInput ?? null,
+        zIndex: 3,
+        hasResized: false,
+        isPinned: false,
+        editRange: null,
+        symbolName: null,
+        symbolType: null,
+        input: editorArgs.editorInput,
+        deferredPanePromise: editorArgs.editorPanePromise ?? null,
+        editorPane: null,
+        shouldRespondToCloseEvents: true,
+        editorContainer: null,
+        currentSymbol: null,
+      }
+    }
     case CanvasEditorType.REFERENCES_EDITOR: {
       const editorDimensions = Vector.min(
         getViewportDimensionsWithPadding(),
@@ -3907,7 +4062,7 @@ async function getEditorSizeForSymbol(
       DEFAULT_EDITOR_WIDTH,
       Math.min(
         (range.endLineNumber - range.startLineNumber + 1 + 5) * LINE_HEIGHT +
-          HEADER_HEIGHT,
+        HEADER_HEIGHT,
         RendererManager.getInstance().getViewportDimensionsWithDoublePadding()
           .y,
       ),

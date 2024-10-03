@@ -20,7 +20,7 @@ import {
   IEditorOptions,
   IResourceEditorInput,
 } from "vs/platform/editor/common/editor"
-import { IEditorIdentifier, IEditorPane } from "vs/workbench/common/editor"
+import { IEditorIdentifier, IEditorPane, IResourceMergeEditorInput } from "vs/workbench/common/editor"
 import { IDisposable } from "node-pty"
 import { DocumentSymbol, SymbolKind } from "vs/editor/common/languages"
 import {
@@ -239,6 +239,12 @@ type Actions = {
     options?: IEditorOptions,
     deferredEditorPanePromise?: DeferredPromise<IEditorPane | undefined>,
   ) => Promise<string>
+  insertMergeEditorAtCenterOfViewport: (
+    editorInput: IResourceMergeEditorInput,
+    args?: EditorOpenArgs,
+    options?: IEditorOptions,
+    deferredEditorPanePromise?: DeferredPromise<IEditorPane | undefined>,
+  ) => Promise<string>
   insertCopilotSettingsEditorAtCenterofViewport: () => string
   insertHaystackKeybindingsEditorAtCenterOfViewport: () => string
   removeEditor: (id: string) => void
@@ -345,6 +351,12 @@ type Actions = {
   openModalEditorForCanvasEditor: (
     editorId: string,
     editorInput: EditorInput | IResourceEditorInput,
+    domElement: HTMLElement,
+    options?: IEditorOptions,
+  ) => Promise<void>
+  openMergeEditorForCanvasEditor: (
+    editorId: string,
+    editorInput: IResourceMergeEditorInput,
     domElement: HTMLElement,
     options?: IEditorOptions,
   ) => Promise<void>
@@ -570,6 +582,12 @@ export type ModalEditorArgs = EditorBaseArgs & {
   editorInput: EditorInput | IResourceEditorInput
 }
 
+export type MergeEditorArgs = EditorBaseArgs & {
+  type: CanvasEditorType.MERGE_EDITOR
+  editorInput: IResourceMergeEditorInput
+  deferredEditorPanePromise?: DeferredPromise<IEditorPane | undefined>,
+}
+
 export type ReferencesEditorArgs = {
   type: CanvasEditorType.REFERENCES_EDITOR
   referencesModel: ReferencesModel
@@ -595,6 +613,7 @@ export type EditorArgs =
   | ReferencesEditorArgs
   | CopilotSettingsEditorArgs
   | HaystackKeybindingsSettingsEditorArgs
+  | MergeEditorArgs
 
 export type FinalEditorArgs = BasicEditorArgs & EditorArgs
 

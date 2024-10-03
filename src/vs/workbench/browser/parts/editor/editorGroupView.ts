@@ -183,6 +183,7 @@ import {
 } from "vs/platform/files/common/files"
 import { IHaystackService } from "vs/workbench/services/haystack/common/haystackService"
 import { FileEditorInput } from "vs/workbench/contrib/files/browser/editors/fileEditorInput"
+import { isMergeEditorInput } from 'vs/workbench/services/userDataSync/browser/userDataSyncWorkbenchService'
 
 export class EditorGroupView extends Themable implements IEditorGroupView {
   //#region factory
@@ -633,21 +634,21 @@ export class EditorGroupView extends Themable implements IEditorGroupView {
           )
           groupActiveCompareEditorCanSwap.set(
             activeEditorPane.input instanceof DiffEditorInput &&
-              !activeEditorPane.input.original.isReadonly() &&
-              !!primaryEditorResource &&
-              (this.fileService.hasProvider(primaryEditorResource) ||
-                primaryEditorResource.scheme === Schemas.untitled) &&
-              !!secondaryEditorResource &&
-              (this.fileService.hasProvider(secondaryEditorResource) ||
-                secondaryEditorResource.scheme === Schemas.untitled),
+            !activeEditorPane.input.original.isReadonly() &&
+            !!primaryEditorResource &&
+            (this.fileService.hasProvider(primaryEditorResource) ||
+              primaryEditorResource.scheme === Schemas.untitled) &&
+            !!secondaryEditorResource &&
+            (this.fileService.hasProvider(secondaryEditorResource) ||
+              secondaryEditorResource.scheme === Schemas.untitled),
           )
           groupActiveEditorCanToggleReadonly.set(
             !!primaryEditorResource &&
-              this.fileService.hasProvider(primaryEditorResource) &&
-              !this.fileService.hasCapability(
-                primaryEditorResource,
-                FileSystemProviderCapabilities.Readonly,
-              ),
+            this.fileService.hasProvider(primaryEditorResource) &&
+            !this.fileService.hasCapability(
+              primaryEditorResource,
+              FileSystemProviderCapabilities.Readonly,
+            ),
           )
 
           const activePaneDiffEditor =
@@ -991,6 +992,21 @@ export class EditorGroupView extends Themable implements IEditorGroupView {
     // Show active editor (intentionally not using async to keep
     // `restoreEditors` from executing in same stack)
 
+    if (isMergeEditorInput(activeEditor)) {
+      return this._haystackService.createMergeEditor({
+        base: { resource: activeEditor.base },
+        input1: {
+          description: "",
+          resource: activeEditor.input1.uri,
+        },
+        input2: {
+          description: "",
+          resource: activeEditor.input1.uri,
+        },
+        result: { resource: activeEditor.resource }
+      }, { forceNewEditor: true }).then(() => { })
+    }
+
     if (activeEditor instanceof FileEditorInput) {
       const fileEditor = activeEditor as FileEditorInput
       const editRange = fileEditor.editRange
@@ -1003,9 +1019,9 @@ export class EditorGroupView extends Themable implements IEditorGroupView {
             uri,
             range: editRange,
           })
-          .then((symbol) => {
+          .then(async (symbol) => {
             if (symbol != null) {
-              return this._haystackService
+              await this._haystackService
                 .createSymbolEditorWithSymbol(
                   symbol.name,
                   symbol.kind,
@@ -1017,12 +1033,10 @@ export class EditorGroupView extends Themable implements IEditorGroupView {
                       groupId: this.id,
                     },
                     doNotPanTo: true,
-                  },
-                )
-                .then(() => {})
+                  })
             }
 
-            return this._haystackService
+            await this._haystackService
               .createFileEditor(
                 uri,
                 {
@@ -1038,9 +1052,7 @@ export class EditorGroupView extends Themable implements IEditorGroupView {
                   },
                   doNotPanTo: true,
                 },
-                options,
-              )
-              .then(() => {})
+                options)
           })
       }
     }
@@ -1055,7 +1067,7 @@ export class EditorGroupView extends Themable implements IEditorGroupView {
           },
           options,
         )
-        .then(() => {})
+        .then(() => { })
     }
 
     return this._haystackService
@@ -1067,7 +1079,7 @@ export class EditorGroupView extends Themable implements IEditorGroupView {
         },
         options,
       )
-      .then(() => {})
+      .then(() => { })
   }
 
   //#region event handling
@@ -1148,13 +1160,13 @@ export class EditorGroupView extends Themable implements IEditorGroupView {
 
   private onDidOpenEditor(editor: EditorInput, editorIndex: number): void {
     /* __GDPR__
-			"editorOpened" : {
-				"owner": "bpasero",
-				"${include}": [
-					"${EditorTelemetryDescriptor}"
-				]
-			}
-		*/
+      "editorOpened" : {
+        "owner": "bpasero",
+        "${include}": [
+          "${EditorTelemetryDescriptor}"
+        ]
+      }
+    */
     this.telemetryService.publicLog(
       "editorOpened",
       this.toEditorTelemetryDescriptor(editor),
@@ -1198,13 +1210,13 @@ export class EditorGroupView extends Themable implements IEditorGroupView {
     }
 
     /* __GDPR__
-			"editorClosed" : {
-				"owner": "bpasero",
-				"${include}": [
-					"${EditorTelemetryDescriptor}"
-				]
-			}
-		*/
+      "editorClosed" : {
+        "owner": "bpasero",
+        "${include}": [
+          "${EditorTelemetryDescriptor}"
+        ]
+      }
+    */
     this.telemetryService.publicLog(
       "editorClosed",
       this.toEditorTelemetryDescriptor(editor),
@@ -1279,10 +1291,10 @@ export class EditorGroupView extends Themable implements IEditorGroupView {
       descriptor["resource"] = this.toResourceTelemetryDescriptor(resource)
 
       /* __GDPR__FRAGMENT__
-				"EditorTelemetryDescriptor" : {
-					"resource": { "${inline}": [ "${URIDescriptor}" ] }
-				}
-			*/
+        "EditorTelemetryDescriptor" : {
+          "resource": { "${inline}": [ "${URIDescriptor}" ] }
+        }
+      */
       return descriptor
     } else if (resource) {
       if (resource.primary) {
@@ -1296,11 +1308,11 @@ export class EditorGroupView extends Themable implements IEditorGroupView {
         )
       }
       /* __GDPR__FRAGMENT__
-				"EditorTelemetryDescriptor" : {
-					"resource": { "${inline}": [ "${URIDescriptor}" ] },
-					"resourceSecondary": { "${inline}": [ "${URIDescriptor}" ] }
-				}
-			*/
+        "EditorTelemetryDescriptor" : {
+          "resource": { "${inline}": [ "${URIDescriptor}" ] },
+          "resourceSecondary": { "${inline}": [ "${URIDescriptor}" ] }
+        }
+      */
       return descriptor
     }
 
@@ -1362,7 +1374,7 @@ export class EditorGroupView extends Themable implements IEditorGroupView {
       event.oldPartOptions.tabHeight !== event.newPartOptions.tabHeight ||
       (event.oldPartOptions.showTabs === "multiple" &&
         event.oldPartOptions.pinnedTabsOnSeparateRow !==
-          event.newPartOptions.pinnedTabsOnSeparateRow)
+        event.newPartOptions.pinnedTabsOnSeparateRow)
     ) {
       // Re-layout
       this.relayout()
@@ -1788,7 +1800,7 @@ export class EditorGroupView extends Themable implements IEditorGroupView {
       editor.isDirty() ||
       (options?.pinned ??
         typeof options?.index ===
-          "number") /* unless specified, prefer to pin when opening with index */ ||
+        "number") /* unless specified, prefer to pin when opening with index */ ||
       (typeof options?.index === "number" &&
         this.model.isSticky(options.index)) ||
       editor.hasCapability(EditorInputCapabilities.Scratchpad)
@@ -2537,7 +2549,7 @@ export class EditorGroupView extends Themable implements IEditorGroupView {
         isNative &&
         (isWindows || isLinux) &&
         this.filesConfigurationService.getAutoSaveMode(editor).mode ===
-          AutoSaveMode.ON_WINDOW_CHANGE
+        AutoSaveMode.ON_WINDOW_CHANGE
       ) {
         autoSave = true
         confirmation = ConfirmResult.SAVE
@@ -2686,12 +2698,12 @@ export class EditorGroupView extends Themable implements IEditorGroupView {
       editorsToClose =
         filter.direction === CloseDirection.LEFT
           ? editorsToClose.slice(
-              0,
-              this.model.indexOf(filter.except, editorsToClose),
-            )
+            0,
+            this.model.indexOf(filter.except, editorsToClose),
+          )
           : editorsToClose.slice(
-              this.model.indexOf(filter.except, editorsToClose) + 1,
-            )
+            this.model.indexOf(filter.except, editorsToClose) + 1,
+          )
     }
 
     // Filter: except
