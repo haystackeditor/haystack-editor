@@ -192,18 +192,18 @@ export const ReferencesEditorContainerImpl = React.memo(
             // We return here to prevent resetting the lastPressedKeyWasEscape.
             break
           }
-          case KeyCode.S: {
-            if (isModifierKeypressed(e.nativeEvent)) {
-              const model = codeEditor.getModel()
-              if (model == null || currentReferenceUri == null) return
-              WorkspaceStoreWrapper.getWorkspaceState().saveReferenceEditor(
-                currentReferenceUri,
-              )
-              e.preventDefault()
-              e.stopPropagation()
-            }
-            break
-          }
+          // case KeyCode.S: {
+          //   if (isModifierKeypressed(e.nativeEvent)) {
+          //     const model = codeEditor.getModel()
+          //     if (model == null || currentReferenceUri == null) return
+          //     WorkspaceStoreWrapper.getWorkspaceState().saveReferenceEditor(
+          //       currentReferenceUri,
+          //     )
+          //     e.preventDefault()
+          //     e.stopPropagation()
+          //   }
+          //   break
+          // }
           default:
             editorOnKeyDownCapture(e)
             break

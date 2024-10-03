@@ -65,14 +65,14 @@ export function useEditorOnKeyDown(
           focusOnPixiCanvas()
           break
         }
-        case KeyCode.S: {
-          if (isModifierKeypressed(e.nativeEvent)) {
-            saveEditor()
-            e.preventDefault()
-            e.stopPropagation()
-          }
-          break
-        }
+        // case KeyCode.S: {
+        //   if (isModifierKeypressed(e.nativeEvent)) {
+        //     saveEditor()
+        //     e.preventDefault()
+        //     e.stopPropagation()
+        //   }
+        //   break
+        // }
         default: {
           forwardKeyboardInputToPixi(e.nativeEvent)
           break
@@ -113,14 +113,14 @@ export function useEditorOnKeyDownCapture(
             forwardKeyboardInputToPixi(e.nativeEvent)
           }
           break
-        case KeyCode.S: {
-          if (isModifierKeypressed(e.nativeEvent)) {
-            saveEditor()
-            e.preventDefault()
-            e.stopPropagation()
-          }
-          break
-        }
+        // case KeyCode.S: {
+        //   if (isModifierKeypressed(e.nativeEvent)) {
+        //     saveEditor()
+        //     e.preventDefault()
+        //     e.stopPropagation()
+        //   }
+        //   break
+        // }
         case KeyCode.ARROW_RIGHT:
         case KeyCode.ARROW_LEFT:
           // Used for jumping between editors via keyboard.
