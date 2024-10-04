@@ -140,10 +140,13 @@ export class ShowOrFocusHoverAction extends EditorAction {
 
     const showContentHover = (focus: boolean) => {
       const position = editor.getPosition()
+      const editRange = editor.getEditRange()
+      const lineNumberAdjust = editRange != null ? editRange.startLineNumber - 1 : 0
+
       const range = new Range(
-        position.lineNumber,
+        position.lineNumber + lineNumberAdjust,
         position.column,
-        position.lineNumber,
+        position.lineNumber + lineNumberAdjust,
         position.column,
       )
       controller.showContentHover(
@@ -167,7 +170,7 @@ export class ShowOrFocusHoverAction extends EditorAction {
     } else {
       showContentHover(
         accessibilitySupportEnabled ||
-          focusOption === HoverFocusBehavior.AutoFocusImmediately,
+        focusOption === HoverFocusBehavior.AutoFocusImmediately,
       )
     }
   }
