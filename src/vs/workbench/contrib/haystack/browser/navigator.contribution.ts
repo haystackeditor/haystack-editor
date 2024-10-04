@@ -148,7 +148,7 @@ const viewContainer = viewContainerRegistry.registerViewContainer(
         { key: "miNavigateEditors", comment: ["&& denotes a mnemonic"] },
         "&&NavigateEditors",
       ),
-      keybindings: { primary: KeyMod.CtrlCmd | KeyMod.Shift | KeyCode.KeyK },
+      keybindings: { primary: KeyMod.CtrlCmd | KeyMod.Shift | KeyCode.KeyJ },
       order: 1,
     },
   },
