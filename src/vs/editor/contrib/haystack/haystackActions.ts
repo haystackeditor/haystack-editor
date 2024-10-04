@@ -875,7 +875,7 @@ export class ShowNavigationBar extends Action2 {
     const configurationService = accessor.get(IConfigurationService)
     return configurationService.updateValue(
       "editor.haystackEditor.showNavigationBar",
-      false,
+      true,
     )
   }
 }
