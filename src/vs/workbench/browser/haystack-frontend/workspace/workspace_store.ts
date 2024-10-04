@@ -331,14 +331,21 @@ export function getWorkspaceStore() {
               ? new Vector(width, height)
               : await getEditorSizeForFile(uri, get().haystackService!)
 
+          const canvasScale = get().canvasScale
+
           const selection = new Set<string>()
           const editorId = uuid.generateUuid()
           const upperLeftQuadrant = getUpperLeftQuadrantViewport()
 
+          const existingXPosition = args?.existingEditorInput?.input.getXPosition()
+          const existingYPosition = args?.existingEditorInput?.input.getYPosition()
+
+          const centerOfScene = Vector.sub(Vector.new(), get().canvasCamera)
+
           const xPosition =
-            args?.existingEditorInput?.input.getXPosition() ?? null
+            existingXPosition ? (existingXPosition * canvasScale + centerOfScene.x) : null
           const yPosition =
-            args?.existingEditorInput?.input.getYPosition() ?? null
+            existingYPosition ? (existingYPosition * canvasScale + centerOfScene.y) : null
 
           const editorPosition =
             xPosition != null && yPosition != null
@@ -636,7 +643,6 @@ export function getWorkspaceStore() {
             },
             get().canvasScale,
           )
-          console.log("CAZ NOVOVOICH", editor)
 
           if (editor == null) return ""
 
@@ -2712,9 +2718,12 @@ export function getWorkspaceStore() {
               editor.type === CanvasEditorType.MODAL_EDITOR
             ) {
               if (editor.identifier?.editor === editorInput) {
+                const canvasScale = get().canvasScale
+                const centerOfScene = Vector.sub(Vector.new(), get().canvasCamera)
+
                 return {
-                  xPosition: editor.xPosition,
-                  yPosition: editor.yPosition,
+                  xPosition: (editor.xPosition - centerOfScene.x) / canvasScale,
+                  yPosition: (editor.yPosition - centerOfScene.y) / canvasScale,
                   width: editor.width,
                   height: editor.height,
                 }

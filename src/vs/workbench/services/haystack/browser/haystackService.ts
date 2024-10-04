@@ -2622,12 +2622,6 @@ export class HaystackService extends Disposable implements IHaystackService {
       Parts.EDITOR_PART,
     ) as EditorPart
     editorPart.applyState(canvasWorkspace.serializedState)
-    WorkspaceStoreWrapper.getWorkspaceState().setCamera(
-      new Vector(
-        canvasWorkspace.cameraPosition.x,
-        canvasWorkspace.cameraPosition.y,
-      ),
-    )
 
     return {
       ...canvasWorkspace,
