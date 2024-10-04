@@ -309,7 +309,7 @@ export class ImportSettingsAction extends Action2 {
           userDataProfileService.currentProfile.settingsResource,
           settingsJson,
         )
-      } catch (e) {}
+      } catch (e) { }
 
       const vscodeKeybindingsUri = URI.joinPath(
         URI.file(basePath),
@@ -324,7 +324,7 @@ export class ImportSettingsAction extends Action2 {
           userDataProfileService.currentProfile.keybindingsResource,
           keybindingsJson,
         )
-      } catch (e) {}
+      } catch (e) { }
 
       // Import extensions
       const vscodeDir = URI.joinPath(homeUri, ".vscode")
@@ -377,8 +377,7 @@ export class ImportSettingsAction extends Action2 {
       )
       if (failedExtensions.length > 0) {
         notificationsService.error(
-          `Failed to import ${
-            failedExtensions.length
+          `Failed to import ${failedExtensions.length
           } extensions. Consider downloading the following extension from the VS Code store and importing them manually: ${failedExtensions.join(
             ", ",
           )}`,
@@ -502,7 +501,7 @@ export class ImportSettingsAction extends Action2 {
           const result = await textFileService.read(extensionUri)
           const metadata = JSON.parse(result.value)
           extensionName = metadata.displayName
-        } catch (e) {}
+        } catch (e) { }
         failedExtensions.push(extensionName ?? id)
       }
     }
@@ -848,5 +847,65 @@ export class UnpinCurrentEditorAction extends Action2 {
   async run(accessor: ServicesAccessor): Promise<void> {
     const haystackService = accessor.get(IHaystackService)
     haystackService.unpinCurrentEditor()
+  }
+}
+
+export class ShowNavigationBar extends Action2 {
+  static readonly ID = "editor.action.showNavigationBar"
+
+  constructor() {
+    super({
+      id: ShowNavigationBar.ID,
+      precondition: ContextKeyExpr.equals(
+        "config.editor.haystackEditor.showNavigationBar",
+        false,
+      ),
+      title: localize2("showNavigationBar", "Show Navigation Bar"),
+      menu: [{ id: MenuId.HaystackContext }, { id: MenuId.CommandPalette }],
+      keybinding: {
+        weight: KeybindingWeight.WorkbenchContrib,
+      },
+    })
+  }
+
+  override async run(accessor: ServicesAccessor): Promise<void> {
+    const haystackService = accessor.get(IHaystackService)
+    haystackService.setShowNavigationBar(true)
+
+    const configurationService = accessor.get(IConfigurationService)
+    return configurationService.updateValue(
+      "editor.haystackEditor.showNavigationBar",
+      false,
+    )
+  }
+}
+
+export class HideNavigationBar extends Action2 {
+  static readonly ID = "editor.action.hideNavigationBar"
+
+  constructor() {
+    super({
+      id: HideNavigationBar.ID,
+      precondition: ContextKeyExpr.equals(
+        "config.editor.haystackEditor.showNavigationBar",
+        true,
+      ),
+      title: localize2("showNavigationBar", "Hide Navigation Bar"),
+      menu: [{ id: MenuId.HaystackContext }, { id: MenuId.CommandPalette }],
+      keybinding: {
+        weight: KeybindingWeight.WorkbenchContrib,
+      },
+    })
+  }
+
+  override async run(accessor: ServicesAccessor): Promise<void> {
+    const haystackService = accessor.get(IHaystackService)
+    haystackService.setShowNavigationBar(false)
+
+    const configurationService = accessor.get(IConfigurationService)
+    return configurationService.updateValue(
+      "editor.haystackEditor.showNavigationBar",
+      false,
+    )
   }
 }

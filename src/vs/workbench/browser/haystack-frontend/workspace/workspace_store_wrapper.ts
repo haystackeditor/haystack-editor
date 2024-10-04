@@ -188,6 +188,7 @@ type State = {
   nextEditorHistoryStack: (string | null)[]
   previousEditorSelectionHistoryMap: Map<string, IRange[]>
   nextEditorSelectionHistoryMap: Map<string, IRange[]>
+  showNavigationBar: boolean
 }
 
 type Actions = {
@@ -510,6 +511,7 @@ type Actions = {
     editorIdentifier: IEditorIdentifier,
     uri: URI,
   ) => boolean
+  setShowNavigationBar: (showNavigationBar: boolean) => void
 }
 
 export type WorkspaceState = State & Actions

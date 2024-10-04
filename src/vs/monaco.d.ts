@@ -4276,6 +4276,10 @@ declare namespace monaco.editor {
 		 * Whether the symbol at file selection will have arrows drawn to/from it.
 		 */
 		enableSymbolAtFileSelection?: boolean;
+		/**
+		 * Whether the navigation bar at the top of the canvas should be shown.
+		 */
+		showNavigationBar?: boolean;
 	}
 
 	/**

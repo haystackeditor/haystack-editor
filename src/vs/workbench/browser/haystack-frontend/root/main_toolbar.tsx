@@ -44,91 +44,98 @@ export function MainToolbar() {
     [],
   )
 
-  const [currentCanvasWorkspaceIsDirty, darkMode, canvasScale] =
-    WorkspaceStoreWrapper.useWorkspaceState((state) => [
-      state.canvasWorkspaceIsDirty,
-      state.isDarkMode(),
-      state.canvasScale,
-    ])
+  const [
+    currentCanvasWorkspaceIsDirty,
+    darkMode,
+    showNavigationBar,
+    canvasScale,
+  ] = WorkspaceStoreWrapper.useWorkspaceState((state) => [
+    state.canvasWorkspaceIsDirty,
+    state.isDarkMode(),
+    state.showNavigationBar,
+    state.canvasScale,
+  ])
 
   return (
-    <div className={classNames({ haystackToolbar: true, darkMode })}>
-      <button
-        ref={removeAllEditorsButtonRef}
-        className="mainToolbarButton"
-        onClick={() => {
-          WorkspaceStoreWrapper.getWorkspaceState().closeAllEditors()
-          WorkspaceStoreWrapper.getWorkspaceState().sendTelemetry(
-            "Clicked close all editors button",
-          )
-        }}
-      >
-        <UiTooltip
-          text={"Clear all editors from canvas"}
-          parentElement={removeAllEditorsButtonElement}
-          orientation={Orientation.BELOW}
-        />
-        <i className="codicon codicon-trash" />
-      </button>
-      <button
-        ref={rearrangeEditorsButtonRef}
-        className="mainToolbarButton"
-        onClick={() => {
-          WorkspaceStoreWrapper.getWorkspaceState().rearrangeAllEditors()
-          WorkspaceStoreWrapper.getWorkspaceState().sendTelemetry(
-            "Clicked rearrange all editors button",
-          )
-        }}
-      >
-        <UiTooltip
-          text={"Rearrange all editor windows"}
-          parentElement={rearrangeEditorsButtonElement}
-          orientation={Orientation.BELOW}
-        />
-        <i className="codicon codicon-editor-layout" />
-      </button>
-      {canvasScale !== 1.0 && (
+    showNavigationBar && (
+      <div className={classNames({ haystackToolbar: true, darkMode })}>
         <button
-          ref={resetZoomButtonRef}
+          ref={removeAllEditorsButtonRef}
           className="mainToolbarButton"
           onClick={() => {
-            WorkspaceStoreWrapper.getWorkspaceState().setZoomLevel(1.0)
+            WorkspaceStoreWrapper.getWorkspaceState().closeAllEditors()
             WorkspaceStoreWrapper.getWorkspaceState().sendTelemetry(
-              "Clicked reset zoom level button in top toolbar",
+              "Clicked close all editors button",
             )
           }}
         >
           <UiTooltip
-            text={"Reset zoom level to 100%"}
-            parentElement={resetZoomButtonElement}
+            text={"Clear all editors from canvas"}
+            parentElement={removeAllEditorsButtonElement}
             orientation={Orientation.BELOW}
           />
-          <i
-            className={`codicon codicon-zoom-${
-              canvasScale > 1.0 ? "out" : "in"
-            }`}
-          />
+          <i className="codicon codicon-trash" />
         </button>
-      )}
-      {currentCanvasWorkspaceIsDirty && (
         <button
-          ref={saveDirtyWorkspaceButtonRef}
+          ref={rearrangeEditorsButtonRef}
           className="mainToolbarButton"
           onClick={() => {
-            WorkspaceStoreWrapper.getWorkspaceState().overwriteCurrentCanvasWorkspace()
+            WorkspaceStoreWrapper.getWorkspaceState().rearrangeAllEditors()
             WorkspaceStoreWrapper.getWorkspaceState().sendTelemetry(
-              "Clicked overwrite current canvas workspace",
+              "Clicked rearrange all editors button",
             )
           }}
         >
           <UiTooltip
-            text={"Overwrite current canvas workspace"}
-            parentElement={saveDirtyWorkspaceButtonElement}
+            text={"Rearrange all editor windows"}
+            parentElement={rearrangeEditorsButtonElement}
             orientation={Orientation.BELOW}
           />
-          <i className="codicon codicon-save-as" />
+          <i className="codicon codicon-editor-layout" />
         </button>
-      )}
-    </div>
+        {canvasScale !== 1.0 && (
+          <button
+            ref={resetZoomButtonRef}
+            className="mainToolbarButton"
+            onClick={() => {
+              WorkspaceStoreWrapper.getWorkspaceState().setZoomLevel(1.0)
+              WorkspaceStoreWrapper.getWorkspaceState().sendTelemetry(
+                "Clicked reset zoom level button in top toolbar",
+              )
+            }}
+          >
+            <UiTooltip
+              text={"Reset zoom level to 100%"}
+              parentElement={resetZoomButtonElement}
+              orientation={Orientation.BELOW}
+            />
+            <i
+              className={`codicon codicon-zoom-${
+                canvasScale > 1.0 ? "out" : "in"
+              }`}
+            />
+          </button>
+        )}
+        {currentCanvasWorkspaceIsDirty && (
+          <button
+            ref={saveDirtyWorkspaceButtonRef}
+            className="mainToolbarButton"
+            onClick={() => {
+              WorkspaceStoreWrapper.getWorkspaceState().overwriteCurrentCanvasWorkspace()
+              WorkspaceStoreWrapper.getWorkspaceState().sendTelemetry(
+                "Clicked overwrite current canvas workspace",
+              )
+            }}
+          >
+            <UiTooltip
+              text={"Overwrite current canvas workspace"}
+              parentElement={saveDirtyWorkspaceButtonElement}
+              orientation={Orientation.BELOW}
+            />
+            <i className="codicon codicon-save-as" />
+          </button>
+        )}
+      </div>
+    )
   )
 }

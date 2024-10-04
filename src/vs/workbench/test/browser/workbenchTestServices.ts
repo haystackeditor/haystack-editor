@@ -763,12 +763,12 @@ export function workbenchInstantiationService(
   const configService = overrides?.configurationService
     ? overrides.configurationService(instantiationService)
     : new TestConfigurationService({
-        files: {
-          participants: {
-            timeout: 60000,
-          },
+      files: {
+        participants: {
+          timeout: 60000,
         },
-      })
+      },
+    })
   instantiationService.stub(IConfigurationService, configService)
   const textResourceConfigurationService =
     new TestTextResourceConfigurationService(configService)
@@ -803,7 +803,7 @@ export function workbenchInstantiationService(
   const accessibilityService = new TestAccessibilityService()
   instantiationService.stub(IAccessibilityService, accessibilityService)
   instantiationService.stub(IAccessibilitySignalService, {
-    playSignal: async () => {},
+    playSignal: async () => { },
     isSoundEnabled(signal: unknown) {
       return false
     },
@@ -901,10 +901,10 @@ export function workbenchInstantiationService(
     overrides?.textFileService
       ? overrides.textFileService(instantiationService)
       : disposables.add(
-          <ITextFileService>(
-            instantiationService.createInstance(TestTextFileService)
-          ),
+        <ITextFileService>(
+          instantiationService.createInstance(TestTextFileService)
         ),
+      ),
   )
   instantiationService.stub(
     IHostService,
@@ -1095,7 +1095,7 @@ export class TestServiceAccessor {
     @IWorkspaceTrustRequestService
     public workspaceTrustRequestService: TestWorkspaceTrustRequestService,
     @IDecorationsService public decorationsService: IDecorationsService,
-  ) {}
+  ) { }
 }
 
 export class TestTextFileService extends BrowserTextFileService {
@@ -1220,7 +1220,7 @@ export class TestEncodingOracle extends EncodingOracle {
     ]
   }
 
-  protected override set encodingOverrides(overrides: IEncodingOverride[]) {}
+  protected override set encodingOverrides(overrides: IEncodingOverride[]) { }
 }
 
 class TestEnvironmentServiceWithArgs extends BrowserWorkbenchEnvironmentService {
@@ -1301,7 +1301,7 @@ export class TestFileDialogService implements IFileDialogService {
 
   private confirmResult!: ConfirmResult
 
-  constructor(@IPathService private readonly pathService: IPathService) {}
+  constructor(@IPathService private readonly pathService: IPathService) { }
   async defaultFilePath(_schemeFilter?: string): Promise<URI> {
     return this.pathService.userHome()
   }
@@ -1383,7 +1383,7 @@ export class TestLayoutService implements IWorkbenchLayoutService {
   onDidAddContainer = Event.None
   onDidChangeActiveContainer = Event.None
 
-  layout(): void {}
+  layout(): void { }
   isRestored(): boolean {
     return true
   }
@@ -1392,7 +1392,7 @@ export class TestLayoutService implements IWorkbenchLayoutService {
   hasFocus(_part: Parts): boolean {
     return false
   }
-  focusPart(_part: Parts): void {}
+  focusPart(_part: Parts): void { }
   hasMainWindowBorder(): boolean {
     return false
   }
@@ -1417,27 +1417,27 @@ export class TestLayoutService implements IWorkbenchLayoutService {
   isActivityBarHidden(): boolean {
     return false
   }
-  setActivityBarHidden(_hidden: boolean): void {}
-  setBannerHidden(_hidden: boolean): void {}
+  setActivityBarHidden(_hidden: boolean): void { }
+  setBannerHidden(_hidden: boolean): void { }
   isSideBarHidden(): boolean {
     return false
   }
-  async setEditorHidden(_hidden: boolean): Promise<void> {}
-  async setSideBarHidden(_hidden: boolean): Promise<void> {}
-  async setAuxiliaryBarHidden(_hidden: boolean): Promise<void> {}
-  async setPartHidden(_hidden: boolean, part: Parts): Promise<void> {}
+  async setEditorHidden(_hidden: boolean): Promise<void> { }
+  async setSideBarHidden(_hidden: boolean): Promise<void> { }
+  async setAuxiliaryBarHidden(_hidden: boolean): Promise<void> { }
+  async setPartHidden(_hidden: boolean, part: Parts): Promise<void> { }
   isPanelHidden(): boolean {
     return false
   }
-  async setPanelHidden(_hidden: boolean): Promise<void> {}
-  toggleMaximizedPanel(): void {}
+  async setPanelHidden(_hidden: boolean): Promise<void> { }
+  toggleMaximizedPanel(): void { }
   isPanelMaximized(): boolean {
     return false
   }
   getMenubarVisibility(): MenuBarVisibility {
     throw new Error("not implemented")
   }
-  toggleMenuBar(): void {}
+  toggleMenuBar(): void { }
   getSideBarPosition() {
     return 0
   }
@@ -1447,42 +1447,41 @@ export class TestLayoutService implements IWorkbenchLayoutService {
   getPanelAlignment(): PanelAlignment {
     return "center"
   }
-  async setPanelPosition(_position: PartPosition): Promise<void> {}
-  async setPanelAlignment(_alignment: PanelAlignment): Promise<void> {}
-  addClass(_clazz: string): void {}
-  removeClass(_clazz: string): void {}
+  async setPanelPosition(_position: PartPosition): Promise<void> { }
+  async setPanelAlignment(_alignment: PanelAlignment): Promise<void> { }
+  addClass(_clazz: string): void { }
+  removeClass(_clazz: string): void { }
   getMaximumEditorDimensions(): IDimension {
     throw new Error("not implemented")
   }
-  toggleZenMode(): void {}
+  toggleZenMode(): void { }
   isMainEditorLayoutCentered(): boolean {
     return false
   }
-  centerMainEditorLayout(_active: boolean): void {}
+  centerMainEditorLayout(_active: boolean): void { }
   resizePart(
     _part: Parts,
     _sizeChangeWidth: number,
     _sizeChangeHeight: number,
-  ): void {}
+  ): void { }
   registerPart(part: Part): IDisposable {
     return Disposable.None
   }
   isWindowMaximized(targetWindow: Window) {
     return false
   }
-  updateWindowMaximizedState(targetWindow: Window, maximized: boolean): void {}
+  updateWindowMaximizedState(targetWindow: Window, maximized: boolean): void { }
   getVisibleNeighborPart(part: Parts, direction: Direction): Parts | undefined {
     return undefined
   }
-  focus() {}
+  focus() { }
 }
 
 const activeViewlet: PaneComposite = {} as any
 
 export class TestPaneCompositeService
   extends Disposable
-  implements IPaneCompositePartService
-{
+  implements IPaneCompositePartService {
   declare readonly _serviceBrand: undefined
 
   onDidPaneCompositeOpen: Event<{
@@ -1634,18 +1633,18 @@ export class TestSideBarPart implements IPaneCompositePart {
   getProgressIndicator(id: string) {
     return undefined
   }
-  hideActivePaneComposite(): void {}
+  hideActivePaneComposite(): void { }
   getLastActivePaneCompositeId(): string {
     return undefined!
   }
-  dispose() {}
+  dispose() { }
   getPinnedPaneCompositeIds() {
     return []
   }
   getVisiblePaneCompositeIds() {
     return []
   }
-  layout(width: number, height: number, top: number, left: number): void {}
+  layout(width: number, height: number, top: number, left: number): void { }
   shouldSerialize(): boolean {
     return false
   }
@@ -1682,16 +1681,16 @@ export class TestPanelPart implements IPaneCompositePart {
   getActivePaneComposite(): IPaneComposite {
     return activeViewlet
   }
-  setPanelEnablement(id: string, enabled: boolean): void {}
-  dispose() {}
+  setPanelEnablement(id: string, enabled: boolean): void { }
+  dispose() { }
   getProgressIndicator(id: string) {
     return null!
   }
-  hideActivePaneComposite(): void {}
+  hideActivePaneComposite(): void { }
   getLastActivePaneCompositeId(): string {
     return undefined!
   }
-  layout(width: number, height: number, top: number, left: number): void {}
+  layout(width: number, height: number, top: number, left: number): void { }
   shouldSerialize(): boolean {
     return false
   }
@@ -1717,7 +1716,7 @@ export class TestViewsService implements IViewsService {
   ): Promise<IPaneComposite | null> {
     return Promise.resolve(null)
   }
-  closeViewContainer(id: string): void {}
+  closeViewContainer(id: string): void { }
 
   onDidChangeViewVisibilityEmitter = new Emitter<{
     id: string
@@ -1741,7 +1740,7 @@ export class TestViewsService implements IViewsService {
   ): Promise<T | null> {
     return Promise.resolve(null)
   }
-  closeView(id: string): void {}
+  closeView(id: string): void { }
   getViewProgressIndicator(id: string) {
     return null!
   }
@@ -1756,7 +1755,7 @@ export class TestViewsService implements IViewsService {
 export class TestEditorGroupsService implements IEditorGroupsService {
   declare readonly _serviceBrand: undefined
 
-  constructor(public groups: TestEditorGroupView[] = []) {}
+  constructor(public groups: TestEditorGroupView[] = []) { }
 
   readonly parts: readonly IEditorPart[] = [this]
 
@@ -1841,25 +1840,25 @@ export class TestEditorGroupsService implements IEditorGroupsService {
   setSize(
     _group: number | IEditorGroup,
     _size: { width: number; height: number },
-  ): void {}
-  arrangeGroups(_arrangement: GroupsArrangement): void {}
-  toggleMaximizeGroup(): void {}
+  ): void { }
+  arrangeGroups(_arrangement: GroupsArrangement): void { }
+  toggleMaximizeGroup(): void { }
   hasMaximizedGroup(): boolean {
     throw new Error("not implemented")
   }
-  toggleExpandGroup(): void {}
-  applyLayout(_layout: EditorGroupLayout): void {}
+  toggleExpandGroup(): void { }
+  applyLayout(_layout: EditorGroupLayout): void { }
   getLayout(): EditorGroupLayout {
     throw new Error("not implemented")
   }
-  setGroupOrientation(_orientation: GroupOrientation): void {}
+  setGroupOrientation(_orientation: GroupOrientation): void { }
   addGroup(
     _location: number | IEditorGroup,
     _direction: GroupDirection,
   ): IEditorGroup {
     throw new Error("not implemented")
   }
-  removeGroup(_group: number | IEditorGroup): void {}
+  removeGroup(_group: number | IEditorGroup): void { }
   moveGroup(
     _group: number | IEditorGroup,
     _location: number | IEditorGroup,
@@ -1884,7 +1883,7 @@ export class TestEditorGroupsService implements IEditorGroupsService {
   ): IEditorGroup {
     throw new Error("not implemented")
   }
-  centerLayout(active: boolean): void {}
+  centerLayout(active: boolean): void { }
   isLayoutCentered(): boolean {
     return false
   }
@@ -1915,7 +1914,7 @@ export class TestEditorGroupsService implements IEditorGroupsService {
 }
 
 export class TestEditorGroupView implements IEditorGroupView {
-  constructor(public id: number) {}
+  constructor(public id: number) { }
 
   windowId = mainWindow.vscodeWindowId
   groupsView: IEditorGroupsView = undefined!
@@ -2021,11 +2020,11 @@ export class TestEditorGroupView implements IEditorGroupView {
     _editor: EditorInput,
     _target: IEditorGroup,
     _options?: IEditorOptions,
-  ): void {}
+  ): void { }
   copyEditors(
     _editors: EditorInputWithOptions[],
     _target: IEditorGroup,
-  ): void {}
+  ): void { }
   async closeEditor(
     _editor?: EditorInput,
     options?: ICloseEditorOptions,
@@ -2041,24 +2040,24 @@ export class TestEditorGroupView implements IEditorGroupView {
   async closeAllEditors(options?: ICloseAllEditorsOptions): Promise<boolean> {
     return true
   }
-  async replaceEditors(_editors: IEditorReplacement[]): Promise<void> {}
-  pinEditor(_editor?: EditorInput): void {}
-  stickEditor(editor?: EditorInput | undefined): void {}
-  unstickEditor(editor?: EditorInput | undefined): void {}
-  lock(locked: boolean): void {}
-  focus(): void {}
+  async replaceEditors(_editors: IEditorReplacement[]): Promise<void> { }
+  pinEditor(_editor?: EditorInput): void { }
+  stickEditor(editor?: EditorInput | undefined): void { }
+  unstickEditor(editor?: EditorInput | undefined): void { }
+  lock(locked: boolean): void { }
+  focus(): void { }
   get scopedContextKeyService(): IContextKeyService {
     throw new Error("not implemented")
   }
-  setActive(_isActive: boolean): void {}
-  notifyIndexChanged(_index: number): void {}
-  notifyLabelChanged(_label: string): void {}
-  dispose(): void {}
+  setActive(_isActive: boolean): void { }
+  notifyIndexChanged(_index: number): void { }
+  notifyLabelChanged(_label: string): void { }
+  dispose(): void { }
   toJSON(): object {
     return Object.create(null)
   }
-  layout(_width: number, _height: number): void {}
-  relayout() {}
+  layout(_width: number, _height: number): void { }
+  relayout() { }
   createEditorActions(_menuDisposable: IDisposable): {
     actions: IToolbarActions
     onDidChange: Event<IMenuChangeEvent>
@@ -2237,11 +2236,11 @@ export class TestEditorService extends Disposable implements EditorServiceImpl {
   async closeEditor(
     editor: IEditorIdentifier,
     options?: ICloseEditorOptions,
-  ): Promise<void> {}
+  ): Promise<void> { }
   async closeEditors(
     editors: IEditorIdentifier[],
     options?: ICloseEditorOptions,
-  ): Promise<void> {}
+  ): Promise<void> { }
   doResolveEditorOpenRequest(
     editor: EditorInput | IUntypedEditorInput,
   ): [IEditorGroup, EditorInput, IEditorOptions | undefined] | undefined {
@@ -2436,7 +2435,7 @@ export class TestFileService implements IFileService {
   ): Promise<IFileStatWithMetadata> {
     return Promise.resolve(null!)
   }
-  async cloneFile(_source: URI, _target: URI): Promise<void> {}
+  async cloneFile(_source: URI, _target: URI): Promise<void> { }
   createFile(
     _resource: URI,
     _content?: VSBuffer | VSBufferReadable,
@@ -2465,7 +2464,7 @@ export class TestFileService implements IFileService {
   async activateProvider(_scheme: string): Promise<void> {
     this._onWillActivateFileSystemProvider.fire({
       scheme: _scheme,
-      join: () => {},
+      join: () => { },
     })
   }
   async canHandleResource(resource: URI): Promise<boolean> {
@@ -2506,12 +2505,12 @@ export class TestFileService implements IFileService {
   async del(
     _resource: URI,
     _options?: { useTrash?: boolean; recursive?: boolean },
-  ): Promise<void> {}
+  ): Promise<void> { }
 
   createWatcher(resource: URI, options: IWatchOptions): IFileSystemWatcher {
     return {
       onDidChange: Event.None,
-      dispose: () => {},
+      dispose: () => { },
     }
   }
 
@@ -2532,7 +2531,7 @@ export class TestFileService implements IFileService {
   getWriteEncoding(_resource: URI): IResourceEncoding {
     return { encoding: "utf8", hasBOM: false }
   }
-  dispose(): void {}
+  dispose(): void { }
 
   async canCreateFile(
     source: URI,
@@ -2690,8 +2689,7 @@ export class InMemoryTestWorkingCopyBackupService extends BrowserWorkingCopyBack
 
 export class TestLifecycleService
   extends Disposable
-  implements ILifecycleService
-{
+  implements ILifecycleService {
   declare readonly _serviceBrand: undefined
 
   usePhases = false
@@ -2826,14 +2824,13 @@ export class TestWillShutdownEvent implements WillShutdownEvent {
 }
 
 export class TestTextResourceConfigurationService
-  implements ITextResourceConfigurationService
-{
+  implements ITextResourceConfigurationService {
   declare readonly _serviceBrand: undefined
 
-  constructor(private configurationService = new TestConfigurationService()) {}
+  constructor(private configurationService = new TestConfigurationService()) { }
 
   onDidChangeConfiguration() {
-    return { dispose() {} }
+    return { dispose() { } }
   }
 
   getValue<T>(resource: URI, arg2?: any, arg3?: any): T {
@@ -2872,7 +2869,7 @@ export class RemoteFileSystemProvider implements IFileSystemProvider {
   constructor(
     private readonly wrappedFsp: IFileSystemProvider,
     private readonly remoteAuthority: string,
-  ) {}
+  ) { }
 
   readonly capabilities: FileSystemProviderCapabilities =
     this.wrappedFsp.capabilities
@@ -2983,8 +2980,7 @@ export class RemoteFileSystemProvider implements IFileSystemProvider {
 
 export class TestInMemoryFileSystemProvider
   extends InMemoryFileSystemProvider
-  implements IFileSystemProviderWithFileReadStreamCapability
-{
+  implements IFileSystemProviderWithFileReadStreamCapability {
   override get capabilities(): FileSystemProviderCapabilities {
     return (
       FileSystemProviderCapabilities.FileReadWrite |
@@ -2999,23 +2995,23 @@ export class TestInMemoryFileSystemProvider
       (data) => VSBuffer.concat(data.map((data) => VSBuffer.wrap(data))).buffer,
     )
 
-    ;(async () => {
-      try {
-        const data = await this.readFile(resource)
+      ; (async () => {
+        try {
+          const data = await this.readFile(resource)
 
-        let offset = 0
-        while (offset < data.length) {
+          let offset = 0
+          while (offset < data.length) {
+            await timeout(0)
+            await stream.write(data.subarray(offset, offset + BUFFER_SIZE))
+            offset += BUFFER_SIZE
+          }
+
           await timeout(0)
-          await stream.write(data.subarray(offset, offset + BUFFER_SIZE))
-          offset += BUFFER_SIZE
+          stream.end()
+        } catch (error) {
+          stream.end(error)
         }
-
-        await timeout(0)
-        stream.end()
-      } catch (error) {
-        stream.end(error)
-      }
-    })()
+      })()
 
     return stream
   }
@@ -3053,17 +3049,17 @@ export class TestHostService implements IHostService {
     this._onDidChangeFocus.fire(this._hasFocus)
   }
 
-  async restart(): Promise<void> {}
-  async reload(): Promise<void> {}
-  async close(): Promise<void> {}
+  async restart(): Promise<void> { }
+  async reload(): Promise<void> { }
+  async close(): Promise<void> { }
   async withExpectedShutdown<T>(
     expectedShutdownTask: () => Promise<T>,
   ): Promise<T> {
     return await expectedShutdownTask()
   }
 
-  async focus(): Promise<void> {}
-  async moveTop(): Promise<void> {}
+  async focus(): Promise<void> { }
+  async moveTop(): Promise<void> { }
   async getCursorScreenPoint(): Promise<undefined> {
     return undefined
   }
@@ -3071,9 +3067,9 @@ export class TestHostService implements IHostService {
   async openWindow(
     arg1?: IOpenEmptyWindowOptions | IWindowOpenable[],
     arg2?: IOpenWindowOptions,
-  ): Promise<void> {}
+  ): Promise<void> { }
 
-  async toggleFullScreen(): Promise<void> {}
+  async toggleFullScreen(): Promise<void> { }
 
   readonly colorScheme = ColorScheme.DARK
   onDidChangeColorScheme = Event.None
@@ -3147,8 +3143,8 @@ export function registerTestEditor(
     override getId(): string {
       return id
     }
-    layout(): void {}
-    protected createEditor(): void {}
+    layout(): void { }
+    protected createEditor(): void { }
 
     override get scopedContextKeyService() {
       return this._scopedContextKeyService
@@ -3168,8 +3164,7 @@ export function registerTestEditor(
     }
 
     class EditorsObserverTestEditorInputSerializer
-      implements IEditorSerializer
-    {
+      implements IEditorSerializer {
       canSerialize(editorInput: EditorInput): boolean {
         return true
       }
@@ -3267,8 +3262,7 @@ export function registerTestSideBySideEditor(): IDisposable {
 
 export class TestFileEditorInput
   extends EditorInput
-  implements IFileEditorInput
-{
+  implements IFileEditorInput {
   readonly preferredResource = this.resource
 
   gotDisposed = false
@@ -3335,18 +3329,18 @@ export class TestFileEditorInput
         other.options?.override === undefined)
     )
   }
-  setPreferredResource(resource: URI): void {}
-  async setEncoding(encoding: string) {}
+  setPreferredResource(resource: URI): void { }
+  async setEncoding(encoding: string) { }
   getEncoding() {
     return undefined
   }
-  setPreferredName(name: string): void {}
-  setPreferredDescription(description: string): void {}
-  setPreferredEncoding(encoding: string) {}
-  setPreferredContents(contents: string): void {}
-  setLanguageId(languageId: string, source?: string) {}
-  setPreferredLanguageId(languageId: string) {}
-  setForceOpenAsBinary(): void {}
+  setPreferredName(name: string): void { }
+  setPreferredDescription(description: string): void { }
+  setPreferredEncoding(encoding: string) { }
+  setPreferredContents(contents: string): void { }
+  setLanguageId(languageId: string, source?: string) { }
+  setPreferredLanguageId(languageId: string) { }
+  setForceOpenAsBinary(): void { }
   setFailToOpen(): void {
     this.fails = true
   }
@@ -3428,8 +3422,7 @@ export class TestSingletonFileEditorInput extends TestFileEditorInput {
 
 export class TestEditorPart
   extends MainEditorPart
-  implements IEditorGroupsService
-{
+  implements IEditorGroupsService {
   declare readonly _serviceBrand: undefined
 
   readonly mainPart = this
@@ -3549,7 +3542,7 @@ export class TestPathService implements IPathService {
       path: "/",
     }),
     public defaultUriScheme = Schemas.file,
-  ) {}
+  ) { }
 
   hasValidBasename(resource: URI, basename?: string): Promise<boolean>
   hasValidBasename(
@@ -3593,7 +3586,7 @@ export class TestPathService implements IPathService {
 export class TestHaystackService implements IHaystackService {
   declare readonly _serviceBrand: undefined
 
-  constructor() {}
+  constructor() { }
 
   createFileEditor(
     uri: URI | undefined,
@@ -3618,7 +3611,7 @@ export class TestHaystackService implements IHaystackService {
     referencesModel: ReferencesModel,
     codeEditor: ICodeEditor,
     range: IRange,
-  ): void {}
+  ): void { }
 
   createFileDiffEditor(
     originalUri: URI,
@@ -3656,15 +3649,15 @@ export class TestHaystackService implements IHaystackService {
     return Promise.resolve(undefined)
   }
 
-  resetZoomLevel(): void {}
+  resetZoomLevel(): void { }
 
-  deleteEditor(nodeId: string): void {}
+  deleteEditor(nodeId: string): void { }
 
   setCurrentReference(
     nodeId: string,
     uri: URI,
     numberOfReferences?: number | undefined,
-  ): void {}
+  ): void { }
 
   getOrCreateTextModelRef(
     uri: URI,
@@ -3705,9 +3698,9 @@ export class TestHaystackService implements IHaystackService {
     return null
   }
 
-  removeCanvasDots(): void {}
+  removeCanvasDots(): void { }
 
-  addCanvasDots(): void {}
+  addCanvasDots(): void { }
 
   createCopilotSettingsEditor(): Promise<void> {
     return Promise.resolve()
@@ -3717,46 +3710,50 @@ export class TestHaystackService implements IHaystackService {
     return Promise.resolve()
   }
 
-  focusOnEditorContainer(): void {}
+  focusOnEditorContainer(): void { }
 
-  focusOnCanvas(): void {}
+  focusOnCanvas(): void { }
 
-  goBackInEditorHistory(): void {}
+  goBackInEditorHistory(): void { }
 
-  goForwardInEditorHistory(): void {}
+  goForwardInEditorHistory(): void { }
 
-  goBackInSelection(): void {}
+  goBackInSelection(): void { }
 
-  goForwardInSelection(): void {}
+  goForwardInSelection(): void { }
 
-  goDownOneLevelInEditor(): void {}
+  goDownOneLevelInEditor(): void { }
 
-  goUpOneLevelInEditor(): void {}
+  goUpOneLevelInEditor(): void { }
 
-  goToFile(): void {}
+  goToFile(): void { }
 
-  goToDeepestSymbol(): void {}
+  goToDeepestSymbol(): void { }
 
-  viewIncomingDependencies(): void {}
+  viewIncomingDependencies(): void { }
 
-  viewOutgoingDependencies(): void {}
+  viewOutgoingDependencies(): void { }
 
-  pinCurrentEditor(): void {}
+  pinCurrentEditor(): void { }
 
-  unpinCurrentEditor(): void {}
+  unpinCurrentEditor(): void { }
 
-  focusOnEditorWithWebview(origin: string): void {}
+  focusOnEditorWithWebview(origin: string): void { }
 
-  blurEditorWithWebview(origin: string): void {}
+  blurEditorWithWebview(origin: string): void { }
 
-  panToEditorWithIdentifier(editor: EditorInput, groupId: number): void {}
+  panToEditorWithIdentifier(editor: EditorInput, groupId: number): void { }
 
-  forwardPointerEvent(e: PointerEvent): void {}
+  forwardPointerEvent(e: PointerEvent): void { }
+
+  setShowNavigationBar(show: boolean): void {
+
+  }
 }
 
 export interface ITestTextFileEditorModelManager
   extends ITextFileEditorModelManager,
-    IDisposable {
+  IDisposable {
   add(resource: URI, model: TextFileEditorModel): void
   remove(resource: URI): void
 }
@@ -3786,10 +3783,10 @@ export class TestWorkspacesService implements IWorkspacesService {
   }
   async deleteUntitledWorkspace(
     workspace: IWorkspaceIdentifier,
-  ): Promise<void> {}
-  async addRecentlyOpened(recents: IRecent[]): Promise<void> {}
-  async removeRecentlyOpened(workspaces: URI[]): Promise<void> {}
-  async clearRecentlyOpened(): Promise<void> {}
+  ): Promise<void> { }
+  async addRecentlyOpened(recents: IRecent[]): Promise<void> { }
+  async removeRecentlyOpened(workspaces: URI[]): Promise<void> { }
+  async clearRecentlyOpened(): Promise<void> { }
   async getRecentlyOpened(): Promise<IRecentlyOpened> {
     return { files: [], workspaces: [] }
   }
@@ -4057,15 +4054,14 @@ export class TestTerminalProfileService implements ITerminalProfileService {
 }
 
 export class TestTerminalProfileResolverService
-  implements ITerminalProfileResolverService
-{
+  implements ITerminalProfileResolverService {
   _serviceBrand: undefined
   defaultProfileName = ""
-  resolveIcon(shellLaunchConfig: IShellLaunchConfig): void {}
+  resolveIcon(shellLaunchConfig: IShellLaunchConfig): void { }
   async resolveShellLaunchConfig(
     shellLaunchConfig: IShellLaunchConfig,
     options: IShellLaunchConfigResolveOptions,
-  ): Promise<void> {}
+  ): Promise<void> { }
   async getDefaultProfile(
     options: IShellLaunchConfigResolveOptions,
   ): Promise<ITerminalProfile> {
@@ -4209,19 +4205,18 @@ export class TestRemoteAgentService implements IRemoteAgentService {
   ): Promise<IDiagnosticInfo | undefined> {
     return undefined
   }
-  async updateTelemetryLevel(telemetryLevel: TelemetryLevel): Promise<void> {}
-  async logTelemetry(eventName: string, data?: ITelemetryData): Promise<void> {}
-  async flushTelemetry(): Promise<void> {}
+  async updateTelemetryLevel(telemetryLevel: TelemetryLevel): Promise<void> { }
+  async logTelemetry(eventName: string, data?: ITelemetryData): Promise<void> { }
+  async flushTelemetry(): Promise<void> { }
   async getRoundTripTime(): Promise<number | undefined> {
     return undefined
   }
 }
 
 export class TestRemoteExtensionsScannerService
-  implements IRemoteExtensionsScannerService
-{
+  implements IRemoteExtensionsScannerService {
   declare readonly _serviceBrand: undefined
-  async whenExtensionsReady(): Promise<void> {}
+  async whenExtensionsReady(): Promise<void> { }
   scanExtensions(): Promise<IExtensionDescription[]> {
     throw new Error("Method not implemented.")
   }
@@ -4231,8 +4226,7 @@ export class TestRemoteExtensionsScannerService
 }
 
 export class TestWorkbenchExtensionEnablementService
-  implements IWorkbenchExtensionEnablementService
-{
+  implements IWorkbenchExtensionEnablementService {
   _serviceBrand: undefined
   onEnablementChanged = Event.None
   getEnablementState(extension: IExtension): EnablementState {
@@ -4270,12 +4264,11 @@ export class TestWorkbenchExtensionEnablementService
   ): Promise<boolean[]> {
     return []
   }
-  async updateExtensionsEnablementsWhenWorkspaceTrustChanges(): Promise<void> {}
+  async updateExtensionsEnablementsWhenWorkspaceTrustChanges(): Promise<void> { }
 }
 
 export class TestWorkbenchExtensionManagementService
-  implements IWorkbenchExtensionManagementService
-{
+  implements IWorkbenchExtensionManagementService {
   _serviceBrand: undefined
   onInstallExtension = Event.None
   onDidInstallExtensions = Event.None
@@ -4359,11 +4352,11 @@ export class TestWorkbenchExtensionManagementService
   ): Promise<ILocalExtension> {
     return local
   }
-  registerParticipant(pariticipant: IExtensionManagementParticipant): void {}
+  registerParticipant(pariticipant: IExtensionManagementParticipant): void { }
   async getTargetPlatform(): Promise<TargetPlatform> {
     return TargetPlatform.UNDEFINED
   }
-  async cleanUp(): Promise<void> {}
+  async cleanUp(): Promise<void> { }
   download(): Promise<URI> {
     throw new Error("Method not implemented.")
   }
@@ -4405,15 +4398,14 @@ export class TestUserDataProfileService implements IUserDataProfileService {
     URI.file("tests").with({ scheme: "vscode-tests" }),
     URI.file("tests").with({ scheme: "vscode-tests" }),
   )
-  async updateCurrentProfile(): Promise<void> {}
+  async updateCurrentProfile(): Promise<void> { }
   getShortName(profile: IUserDataProfile): string {
     return profile.shortName ?? profile.name
   }
 }
 
 export class TestWebExtensionsScannerService
-  implements IWebExtensionsScannerService
-{
+  implements IWebExtensionsScannerService {
   _serviceBrand: undefined
   onDidChangeProfile = Event.None
   async scanSystemExtensions(): Promise<IExtension[]> {
@@ -4438,16 +4430,16 @@ export class TestWebExtensionsScannerService
     location: URI,
     metadata?:
       | Partial<
-          IGalleryMetadata & {
-            isApplicationScoped: boolean
-            isMachineScoped: boolean
-            isBuiltin: boolean
-            isSystem: boolean
-            updated: boolean
-            preRelease: boolean
-            installedTimestamp: number
-          }
-        >
+        IGalleryMetadata & {
+          isApplicationScoped: boolean
+          isMachineScoped: boolean
+          isBuiltin: boolean
+          isSystem: boolean
+          updated: boolean
+          preRelease: boolean
+          installedTimestamp: number
+        }
+      >
       | undefined,
   ): Promise<IExtension> {
     throw new Error("Method not implemented.")
@@ -4456,16 +4448,16 @@ export class TestWebExtensionsScannerService
     galleryExtension: IGalleryExtension,
     metadata?:
       | Partial<
-          IGalleryMetadata & {
-            isApplicationScoped: boolean
-            isMachineScoped: boolean
-            isBuiltin: boolean
-            isSystem: boolean
-            updated: boolean
-            preRelease: boolean
-            installedTimestamp: number
-          }
-        >
+        IGalleryMetadata & {
+          isApplicationScoped: boolean
+          isMachineScoped: boolean
+          isBuiltin: boolean
+          isSystem: boolean
+          updated: boolean
+          preRelease: boolean
+          installedTimestamp: number
+        }
+      >
       | undefined,
   ): Promise<IExtension> {
     throw new Error("Method not implemented.")

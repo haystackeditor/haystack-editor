@@ -165,6 +165,7 @@ export function getWorkspaceStore() {
         canvasWorkspaces: [] as CanvasWorkspace[],
         currentCanvasWorkspace: null as CanvasWorkspace | null,
         canvasWorkspaceIsDirty: false as boolean,
+        showNavigationBar: true as boolean,
         openAiSettings: {
           apiKey: null as string | null,
           organizationid: null as string | null,
@@ -3695,6 +3696,9 @@ export function getWorkspaceStore() {
           }
 
           return false
+        },
+        setShowNavigationBar(showNavigationBar) {
+          set({ showNavigationBar })
         },
       })),
     ),

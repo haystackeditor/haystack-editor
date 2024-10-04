@@ -30,6 +30,8 @@ import {
   HaystackKeybindingsAction,
   PinCurrentEditorAction,
   UnpinCurrentEditorAction,
+  ShowNavigationBar,
+  HideNavigationBar,
 } from "vs/editor/contrib/haystack/haystackActions"
 import { registerAction2 } from "vs/platform/actions/common/actions"
 
@@ -53,3 +55,5 @@ registerAction2(ViewIncomingDependenciesAction)
 registerAction2(ViewOutgoingDependenciesAction)
 registerAction2(PinCurrentEditorAction)
 registerAction2(UnpinCurrentEditorAction)
+registerAction2(ShowNavigationBar)
+registerAction2(HideNavigationBar)

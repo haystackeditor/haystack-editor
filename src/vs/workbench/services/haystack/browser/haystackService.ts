@@ -174,7 +174,6 @@ import {
   CanvasModalEditor,
   CanvasReferencesEditor,
 } from "vs/workbench/browser/haystack-frontend/editor/editor"
-import { MergeEditor } from 'vs/workbench/contrib/mergeEditor/browser/view/mergeEditor'
 
 interface IEditorConfiguration {
   editor: {
@@ -184,6 +183,7 @@ interface IEditorConfiguration {
       hideCanvasDots: boolean
       middleMouseClickToCloseEditors: boolean
       enableSymbolAtFileSelection: boolean
+      showNavigationBar: boolean
     }
   }
 }
@@ -423,6 +423,11 @@ export class HaystackService extends Disposable implements IHaystackService {
         })
       })
     }
+
+    const showNavigationBar = this.getShowNavigationBar()
+    WorkspaceStoreWrapper.workspaceStoreIsInitialized.p.then(() => {
+      WorkspaceStoreWrapper.getWorkspaceState().setShowNavigationBar(showNavigationBar)
+    })
 
     this._codeEditorService.onCodeEditorRemove((codeEditor) => {
       WorkspaceStoreWrapper.getWorkspaceState().respondToCodeEditorClosing(
@@ -1698,6 +1703,13 @@ export class HaystackService extends Disposable implements IHaystackService {
       this.configurationService.getValue<IEditorConfiguration>()
     const haystackEditorOption = editorConfig.editor.haystackEditor
     return haystackEditorOption.middleMouseClickToCloseEditors
+  }
+
+  public getShowNavigationBar(): boolean {
+    const editorConfig =
+      this.configurationService.getValue<IEditorConfiguration>()
+    const haystackEditorOption = editorConfig.editor.haystackEditor
+    return haystackEditorOption.showNavigationBar
   }
 
   public getHideCanvasDots(): boolean {
@@ -3005,6 +3017,10 @@ export class HaystackService extends Disposable implements IHaystackService {
       editor: editorPane.input,
       groupId: editorPane.group.id,
     }
+  }
+
+  setShowNavigationBar(show: boolean): void {
+    WorkspaceStoreWrapper.getWorkspaceState().setShowNavigationBar(show)
   }
 }
 

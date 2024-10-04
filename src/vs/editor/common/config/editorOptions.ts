@@ -3589,6 +3589,11 @@ export interface IHaystackEditorOptions {
    * Whether the symbol at file selection will have arrows drawn to/from it.
    */
   enableSymbolAtFileSelection?: boolean
+
+  /**
+   * Whether the navigation bar at the top of the canvas should be shown.
+   */
+  showNavigationBar?: boolean
 }
 
 /**
@@ -3608,6 +3613,7 @@ class HaystackEditor extends BaseEditorOption<
       hideCanvasDots: false,
       middleMouseClickToCloseEditors: true,
       enableSymbolAtFileSelection: true,
+      showNavigationBar: true,
     }
 
     super(EditorOption.haystackEditor, "haystackEditor", defaults, {
@@ -3651,6 +3657,14 @@ class HaystackEditor extends BaseEditorOption<
           "Determines whether the deepest symbol at the user's selection is used for drawing dependency arrows to other editors.",
         ),
       },
+      "editor.haystackEditor.showNavigationBar": {
+        type: "boolean",
+        default: defaults.showNavigationBar,
+        description: nls.localize(
+          "editor.haystackEditor.showNavigationBar",
+          "Determines whether the canvas navigation bar is shown.",
+        ),
+      },
     })
   }
 
@@ -3672,6 +3686,7 @@ class HaystackEditor extends BaseEditorOption<
         this.defaultValue.middleMouseClickToCloseEditors,
       enableSymbolAtFileSelection:
         this.defaultValue.enableSymbolAtFileSelection,
+      showNavigationBar: this.defaultValue.showNavigationBar,
     }
   }
 }

@@ -335,6 +335,8 @@ export interface IHaystackService {
   forwardPointerEvent(e: PointerEvent): void
 
   getCopilotOptOut(): boolean
+
+  setShowNavigationBar(show: boolean): void
 }
 
 export function adjustRangeForComments(
