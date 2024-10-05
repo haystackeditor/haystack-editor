@@ -1,32 +1,9 @@
 "use strict";
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) Haystack Software Inc. All rights reserved.
- *  Licensed under the Functional Source License. See License.txt in the project root for
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
  *  license information.
  *--------------------------------------------------------------------------------------------*/
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.generatePackageDeps = generatePackageDeps;
 /*---------------------------------------------------------------------------------------------
@@ -37,7 +14,7 @@ const child_process_1 = require("child_process");
 const fs_1 = require("fs");
 const os_1 = require("os");
 const path = require("path");
-const manifests = __importStar(require("../../../cgmanifest.json"));
+const manifests = require("../../../cgmanifest.json");
 const dep_lists_1 = require("./dep-lists");
 function generatePackageDeps(files, arch, chromiumSysroot, vscodeSysroot) {
     const dependencies = files.map((file) => calculatePackageDeps(file, arch, chromiumSysroot, vscodeSysroot));
@@ -90,8 +67,6 @@ function calculatePackageDeps(binaryPath, arch, chromiumSysroot, vscodeSysroot) 
     cmd.push(`-l${chromiumSysroot}/usr/lib`);
     cmd.push(`-L${vscodeSysroot}/debian/libxkbfile1/DEBIAN/shlibs`);
     cmd.push("-O", "-e", path.resolve(binaryPath));
-    console.log("Check8: running dpkg command");
-    console.log(cmd);
     const dpkgShlibdepsResult = (0, child_process_1.spawnSync)("perl", cmd, { cwd: chromiumSysroot });
     if (dpkgShlibdepsResult.status !== 0) {
         throw new Error(`dpkg-shlibdeps failed with exit code ${dpkgShlibdepsResult.status}. stderr:\n${dpkgShlibdepsResult.stderr} `);

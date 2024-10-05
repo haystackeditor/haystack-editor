@@ -1,7 +1,7 @@
 "use strict";
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) Haystack Software Inc. All rights reserved.
- *  Licensed under the Functional Source License. See License.txt in the project root for
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
  *  license information.
  *--------------------------------------------------------------------------------------------*/
 Object.defineProperty(exports, "__esModule", { value: true });
@@ -34,8 +34,6 @@ function calculatePackageDeps(binaryPath) {
         // The package might not exist. Don't re-throw the error here.
         console.error("Tried to stat " + binaryPath + " but failed.");
     }
-    console.log("Check8: running findRequires command");
-    console.log(binaryPath);
     const findRequiresResult = (0, child_process_1.spawnSync)("/usr/lib/rpm/find-requires", {
         input: binaryPath + "\n",
     });

@@ -1,12 +1,6 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Haystack Software Inc. All rights reserved.
- *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
- *  license information.
- *--------------------------------------------------------------------------------------------*/
-
-/*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
 import * as es from "event-stream"
@@ -17,11 +11,11 @@ import * as monacodts from "./monaco-api"
 import * as nls from "./nls"
 import { createReporter } from "./reporter"
 import * as util from "./util"
-import fancyLog from "fancy-log"
+import * as fancyLog from "fancy-log"
 import * as ansiColors from "ansi-colors"
 import * as os from "os"
 import ts = require("typescript")
-import File from "vinyl"
+import * as File from "vinyl"
 import * as task from "./task"
 import { Mangler } from "./mangle/index"
 import { RawSourceMap } from "source-map"
@@ -52,7 +46,7 @@ function createCompile(
   src: string,
   build: boolean,
   emitError: boolean,
-  transpileOnly: boolean | { swc: boolean },
+  transpileOnly: boolean | { swc: boolean }
 ) {
   const tsb = require("./tsb") as typeof import("./tsb")
   const sourcemaps =
@@ -76,7 +70,7 @@ function createCompile(
       transpileOnly: Boolean(transpileOnly),
       transpileWithSwc: typeof transpileOnly !== "boolean" && transpileOnly.swc,
     },
-    () => {},
+    () => { }
   )
 
   function pipeline(token?: util.ICancellationToken) {
@@ -89,7 +83,7 @@ function createCompile(
     const isCSS = (f: File) =>
       f.path.endsWith(".css") && !f.path.includes("fixtures")
     const noDeclarationsFilter = util.filter(
-      (data) => !/\.d\.ts$/.test(data.path),
+      (data) => !/\.d\.ts$/.test(data.path)
     )
 
     const postcssNesting = require("postcss-nesting")
@@ -101,8 +95,8 @@ function createCompile(
       .pipe(
         util.$if(
           isCSS,
-          gulpPostcss([postcssNesting()], (err) => reporter(String(err))),
-        ),
+          gulpPostcss([postcssNesting()], (err) => reporter(String(err)))
+        )
       )
       .pipe(tsFilter)
       .pipe(util.loadSourcemaps())
@@ -117,8 +111,8 @@ function createCompile(
             addComment: false,
             includeContent: !!build,
             sourceRoot: overrideOptions.sourceRoot,
-          }),
-        ),
+          })
+        )
       )
       .pipe(tsFilter.restore)
       .pipe(reporter.end(!!emitError))
@@ -135,7 +129,7 @@ function createCompile(
 export function transpileTask(
   src: string,
   out: string,
-  swc: boolean,
+  swc: boolean
 ): task.StreamTask {
   const task = () => {
     const transpile = createCompile(src, false, true, { swc })
@@ -152,7 +146,7 @@ export function compileTask(
   src: string,
   out: string,
   build: boolean,
-  options: { disableMangle?: boolean } = {},
+  options: { disableMangle?: boolean } = {}
 ): task.StreamTask {
   const task = () => {
     if (os.totalmem() < 4_000_000_000) {
@@ -172,10 +166,10 @@ export function compileTask(
       let ts2tsMangler = new Mangler(
         compile.projectPath,
         (...data) => fancyLog(ansiColors.blue("[mangler]"), ...data),
-        { mangleExports: true, manglePrivateFields: true },
+        { mangleExports: true, manglePrivateFields: true }
       )
       const newContentsByFileName = ts2tsMangler.computeNewFileContents(
-        new Set(["saveState"]),
+        new Set(["saveState"])
       )
       mangleStream = es.through(
         async function write(data: File & { sourceMap?: RawSourceMap }) {
@@ -193,11 +187,11 @@ export function compileTask(
         },
         async function end() {
           // free resources
-          ;(await newContentsByFileName).clear()
+          ; (await newContentsByFileName).clear()
 
           this.push(null)
-          ;(<any>ts2tsMangler) = undefined
-        },
+            ; (<any>ts2tsMangler) = undefined
+        }
       )
     }
 
@@ -266,7 +260,7 @@ class MonacoGenerator {
       }
     })()
     this._declarationResolver = new monacodts.DeclarationResolver(
-      this._fsProvider,
+      this._fsProvider
     )
 
     if (this._isWatch) {
@@ -316,17 +310,17 @@ class MonacoGenerator {
     fs.writeFileSync(
       path.join(
         REPO_SRC_FOLDER,
-        "vs/editor/common/standalone/standaloneEnums.ts",
+        "vs/editor/common/standalone/standaloneEnums.ts"
       ),
-      result.enums,
+      result.enums
     )
     this._log(
-      `monaco.d.ts is changed - total time took ${Date.now() - startTime} ms`,
+      `monaco.d.ts is changed - total time took ${Date.now() - startTime} ms`
     )
     if (!this._isWatch) {
       this.stream.emit(
         "error",
-        "monaco.d.ts is no longer up to date. Please run gulp watch and commit the new file.",
+        "monaco.d.ts is no longer up to date. Please run gulp watch and commit the new file."
       )
     }
   }
@@ -338,7 +332,7 @@ function generateApiProposalNames() {
   try {
     const src = fs.readFileSync(
       "src/vs/workbench/services/extensions/common/extensionsApiProposals.ts",
-      "utf-8",
+      "utf-8"
     )
     const match = /\r?\n/m.exec(src)
     eol = match ? match[0] : os.EOL
@@ -367,7 +361,7 @@ function generateApiProposalNames() {
           const contents = [
             "/*---------------------------------------------------------------------------------------------",
             " *  Copyright (c) Microsoft Corporation. All rights reserved.",
-            " *  Licensed under the MIT License. See code-license.txt in the project root for license information.",
+            " *  Licensed under the MIT License. See License.txt in the project root for license information.",
             " *--------------------------------------------------------------------------------------------*/",
             "",
             "// THIS IS A GENERATED FILE. DO NOT EDIT DIRECTLY.",
@@ -376,7 +370,7 @@ function generateApiProposalNames() {
             `${names
               .map(
                 (name) =>
-                  `\t${name}: 'https://raw.githubusercontent.com/microsoft/vscode/main/src/vscode-dts/vscode.proposed.${name}.d.ts'`,
+                  `\t${name}: 'https://raw.githubusercontent.com/microsoft/vscode/main/src/vscode-dts/vscode.proposed.${name}.d.ts'`
               )
               .join(`,${eol}`)}`,
             "});",
@@ -389,11 +383,11 @@ function generateApiProposalNames() {
             new File({
               path: "vs/workbench/services/extensions/common/extensionsApiProposals.ts",
               contents: Buffer.from(contents),
-            }),
+            })
           )
           this.emit("end")
-        },
-      ),
+        }
+      )
     )
 
   return es.duplex(input, output)
@@ -409,7 +403,7 @@ export const compileApiProposalNamesTask = task.define(
       .pipe(generateApiProposalNames())
       .pipe(gulp.dest("src"))
       .pipe(apiProposalNamesReporter.end(true))
-  },
+  }
 )
 
 export const watchApiProposalNamesTask = task.define(
@@ -424,5 +418,5 @@ export const watchApiProposalNamesTask = task.define(
     return watch("src/vscode-dts/**", { readDelay: 200 })
       .pipe(util.debounce(task))
       .pipe(gulp.dest("src"))
-  },
+  }
 )

@@ -1,48 +1,25 @@
 "use strict";
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) Haystack Software Inc. All rights reserved.
- *  Licensed under the Functional Source License. See License.txt in the project root for
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
  *  license information.
  *--------------------------------------------------------------------------------------------*/
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-const fs = __importStar(require("fs"));
-const path = __importStar(require("path"));
+const fs = require("fs");
+const path = require("path");
 const stream_1 = require("stream");
 const promises_1 = require("node:stream/promises");
-const yauzl = __importStar(require("yauzl"));
-const crypto = __importStar(require("crypto"));
+const yauzl = require("yauzl");
+const crypto = require("crypto");
 const retry_1 = require("./retry");
 const cosmos_1 = require("@azure/cosmos");
 const identity_1 = require("@azure/identity");
-const cp = __importStar(require("child_process"));
-const os = __importStar(require("os"));
+const cp = require("child_process");
+const os = require("os");
 const node_worker_threads_1 = require("node:worker_threads");
 function e(name) {
     const result = process.env[name];

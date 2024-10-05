@@ -1,6 +1,6 @@
 /*---------------------------------------------------------------------------------------------
  *  Copyright (c) Haystack Software Inc. All rights reserved.
- *  Licensed under the Functional Source License. See License.txt in the project root for
+ *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
  *  license information.
  *--------------------------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------------------------
@@ -39,9 +39,6 @@ const bundledDeps = [
     "libffmpeg.so",
 ];
 async function getDependencies(packageType, buildDir, applicationName, arch) {
-    console.log(`Check8: Building application ${applicationName}`);
-    console.log(buildDir);
-    console.log(arch);
     if (packageType === "deb") {
         if (!(0, types_1.isDebianArchString)(arch)) {
             throw new Error("Invalid Debian arch string " + arch);

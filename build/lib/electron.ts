@@ -1,18 +1,12 @@
 /*---------------------------------------------------------------------------------------------
- *  Copyright (c) Haystack Software Inc. All rights reserved.
- *  Licensed under the PolyForm Strict License 1.0.0. See License.txt in the project root for
- *  license information.
- *--------------------------------------------------------------------------------------------*/
-
-/*---------------------------------------------------------------------------------------------
  *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See code-license.txt in the project root for license information.
+ *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
 import * as fs from "fs"
 import * as path from "path"
 import * as vfs from "vinyl-fs"
-import filter from "gulp-filter"
+import * as filter from "gulp-filter"
 import * as util from "./util"
 import { getVersion } from "./getVersion"
 
@@ -37,12 +31,12 @@ function isDocumentSuffix(str?: string): str is DarwinDocumentSuffix {
 
 const root = path.dirname(path.dirname(__dirname))
 const product = JSON.parse(
-  fs.readFileSync(path.join(root, "product.json"), "utf8"),
+  fs.readFileSync(path.join(root, "product.json"), "utf8")
 )
 const commit = getVersion(root)
 
 function createTemplate(
-  input: string,
+  input: string
 ): (params: Record<string, string>) => string {
   return (params: Record<string, string>) => {
     return input.replace(/<%=\s*([^\s]+)\s*%>/g, (match, key) => {
@@ -54,7 +48,7 @@ function createTemplate(
 const darwinCreditsTemplate =
   product.darwinCredits &&
   createTemplate(
-    fs.readFileSync(path.join(root, product.darwinCredits), "utf8"),
+    fs.readFileSync(path.join(root, product.darwinCredits), "utf8")
   )
 
 /**
@@ -80,7 +74,7 @@ function darwinBundleDocumentType(
   extensions: string[],
   icon: string,
   nameOrSuffix?: string | DarwinDocumentSuffix,
-  utis?: string[],
+  utis?: string[]
 ): DarwinDocumentType {
   // If given a suffix, generate a name from it. If not given anything, default to 'document'
   if (isDocumentSuffix(nameOrSuffix) || !nameOrSuffix) {
@@ -114,7 +108,7 @@ function darwinBundleDocumentType(
  */
 function darwinBundleDocumentTypes(
   types: { [name: string]: string | string[] },
-  icon: string,
+  icon: string
 ): DarwinDocumentType[] {
   return Object.keys(types).map((name: string): DarwinDocumentType => {
     const extensions = types[name]
@@ -146,11 +140,11 @@ export const config = {
   darwinBundleDocumentTypes: [
     ...darwinBundleDocumentTypes(
       { "C header file": "h", "C source code": "c" },
-      "c",
+      "c"
     ),
     ...darwinBundleDocumentTypes(
       { "Git configuration file": ["gitattributes", "gitconfig", "gitignore"] },
-      "config",
+      "config"
     ),
     ...darwinBundleDocumentTypes(
       {
@@ -164,24 +158,24 @@ export const config = {
           "shtml",
         ],
       },
-      "html",
+      "html"
     ),
     darwinBundleDocumentType(["bat", "cmd"], "bat", "Windows command script"),
     darwinBundleDocumentType(["bowerrc"], "Bower"),
     darwinBundleDocumentType(
       ["config", "editorconfig", "ini", "cfg"],
       "config",
-      "Configuration file",
+      "Configuration file"
     ),
     darwinBundleDocumentType(
       ["hh", "hpp", "hxx", "h++"],
       "cpp",
-      "C++ header file",
+      "C++ header file"
     ),
     darwinBundleDocumentType(
       ["cc", "cpp", "cxx", "c++"],
       "cpp",
-      "C++ source code",
+      "C++ source code"
     ),
     darwinBundleDocumentType(["m"], "default", "Objective-C source code"),
     darwinBundleDocumentType(["mm"], "cpp", "Objective-C++ source code"),
@@ -194,7 +188,7 @@ export const config = {
     darwinBundleDocumentType(
       ["js", "jscsrc", "jshintrc", "mjs", "cjs"],
       "Javascript",
-      "file",
+      "file"
     ),
     darwinBundleDocumentType(["json"], "JSON"),
     darwinBundleDocumentType(["less"], "Less"),
@@ -210,7 +204,7 @@ export const config = {
         "mkd",
         "mkdn",
       ],
-      "Markdown",
+      "Markdown"
     ),
     darwinBundleDocumentType(["php"], "PHP", "source code"),
     darwinBundleDocumentType(["ps1", "psd1", "psm1"], "Powershell", "script"),
@@ -223,7 +217,7 @@ export const config = {
     darwinBundleDocumentType(["vue"], "Vue", "source code"),
     darwinBundleDocumentType(
       ["ascx", "csproj", "dtd", "plist", "wxi", "wxl", "wxs", "xml", "xaml"],
-      "XML",
+      "XML"
     ),
     darwinBundleDocumentType(["eyaml", "eyml", "yaml", "yml"], "YAML"),
     darwinBundleDocumentType(
@@ -245,7 +239,7 @@ export const config = {
         "zshrc",
       ],
       "Shell",
-      "script",
+      "script"
     ),
     // Default icon with specified names
     ...darwinBundleDocumentTypes(
@@ -281,7 +275,7 @@ export const config = {
         "TOML document": "toml",
         "Swift source code": "swift",
       },
-      "default",
+      "default"
     ),
     // Default icon with default name
     darwinBundleDocumentType(
@@ -306,7 +300,7 @@ export const config = {
         "t",
       ],
       "default",
-      product.nameLong + " document",
+      product.nameLong + " document"
     ),
     // Folder support ()
     darwinBundleDocumentType([], "default", "Folder", ["public.folder"]),
@@ -321,11 +315,11 @@ export const config = {
   darwinForceDarkModeSupport: true,
   darwinCredits: darwinCreditsTemplate
     ? Buffer.from(
-        darwinCreditsTemplate({
-          commit: commit,
-          date: new Date().toISOString(),
-        }),
-      )
+      darwinCreditsTemplate({
+        commit: commit,
+        date: new Date().toISOString(),
+      })
+    )
     : undefined,
   linuxExecutableName: product.applicationName,
   winIcon: "resources/win32/haystack.ico",

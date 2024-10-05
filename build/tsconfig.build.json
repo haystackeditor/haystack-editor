@@ -5,7 +5,6 @@
     "checkJs": false,
     "noEmit": false,
     "skipLibCheck": true,
-    "moduleResolution": "NodeNext"
   },
   "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["lib/eslint-plugin-vscode/**/*"]
