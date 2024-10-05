@@ -333,7 +333,6 @@ export function getWorkspaceStore() {
 
           const canvasScale = get().canvasScale
 
-          const selection = new Set<string>()
           const editorId = uuid.generateUuid()
           const upperLeftQuadrant = getUpperLeftQuadrantViewport()
 
@@ -376,10 +375,13 @@ export function getWorkspaceStore() {
 
           idToEditorMap.set(editorId, editor)
 
-          selection.add(editorId)
-          set({ idToEditorMap, selection })
+          set({ idToEditorMap })
 
           if (args?.doNotPanTo === true) return editorId
+
+          const selection = new Set<string>()
+          selection.add(editorId)
+          set({ selection })
 
           const editorPos = get().getEditorPosition(editor.uuid)
           const transformedPos = transformFromViewportToCanvas(
@@ -418,10 +420,16 @@ export function getWorkspaceStore() {
               ? new Vector(width, height)
               : await getEditorSizeForSymbol(uri, range, get().haystackService!)
 
+          const existingXPosition = args?.existingEditorInput?.input.getXPosition()
+          const existingYPosition = args?.existingEditorInput?.input.getYPosition()
+
+          const centerOfScene = Vector.sub(Vector.new(), get().canvasCamera)
+          const canvasScale = get().canvasScale
+
           const xPosition =
-            args?.existingEditorInput?.input.getXPosition() ?? null
+            existingXPosition ? (existingXPosition * canvasScale + centerOfScene.x) : null
           const yPosition =
-            args?.existingEditorInput?.input.getYPosition() ?? null
+            existingYPosition ? (existingYPosition * canvasScale + centerOfScene.y) : null
 
           const editorPosition =
             xPosition != null && yPosition != null
@@ -431,6 +439,7 @@ export function getWorkspaceStore() {
                 size,
                 get().idToEditorMap,
               )
+
           options = options ?? {}
           options.range = range
 
@@ -860,38 +869,6 @@ export function getWorkspaceStore() {
           const idToEditorMap = new Map(get().idToEditorMap)
           idToEditorMap.delete(id)
           set({ idToEditorMap })
-        },
-        insertEditorAtPosition: (
-          editorArgs: EditorArgs,
-          position: Vector,
-          selectAndFocusEditor: boolean,
-        ) => {
-          const idToEditorMap = new Map(get().idToEditorMap)
-          const scale = get().canvasScale
-
-          const finalEditorArgs: FinalEditorArgs = {
-            ...editorArgs,
-            uuid: uuid.generateUuid(),
-            xPosition: position.x,
-            yPosition: position.y,
-          }
-
-          const insertedEditor = generateEditor(finalEditorArgs, scale)
-          if (insertedEditor == null) return ""
-
-          idToEditorMap.set(finalEditorArgs.uuid, insertedEditor)
-          if (selectAndFocusEditor) {
-            set({
-              idToEditorMap,
-              selection: new Set([insertedEditor.uuid]),
-              editorToFocus: insertedEditor.uuid,
-            })
-          } else {
-            set({
-              idToEditorMap,
-            })
-          }
-          return finalEditorArgs.uuid
         },
         updateEditorSize: (id: string, numLines?: number, column?: number) => {
           // Don't update size for non-focused editor.

@@ -249,11 +249,6 @@ type Actions = {
   insertCopilotSettingsEditorAtCenterofViewport: () => string
   insertHaystackKeybindingsEditorAtCenterOfViewport: () => string
   removeEditor: (id: string) => void
-  insertEditorAtPosition: (
-    editorArgs: EditorArgs,
-    position: Vector,
-    selectAndFocusEditor: boolean,
-  ) => string
   updateEditorSize: (id: string, numLines?: number, column?: number) => void
   updateEditorBounds: (id: string, posDelta: Vector, sizeDelta: Vector) => void
   updateUiPosition: (cameraDelta: Vector) => void

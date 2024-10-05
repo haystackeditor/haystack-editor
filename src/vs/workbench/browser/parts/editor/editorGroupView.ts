@@ -1021,7 +1021,7 @@ export class EditorGroupView extends Themable implements IEditorGroupView {
           })
           .then(async (symbol) => {
             if (symbol != null) {
-              await this._haystackService
+              return this._haystackService
                 .createSymbolEditorWithSymbol(
                   symbol.name,
                   symbol.kind,
@@ -1033,10 +1033,13 @@ export class EditorGroupView extends Themable implements IEditorGroupView {
                       groupId: this.id,
                     },
                     doNotPanTo: true,
-                  })
+                    forceNewEditor: true,
+                  },
+                  options
+                )
             }
 
-            await this._haystackService
+            return this._haystackService
               .createFileEditor(
                 uri,
                 {
@@ -1051,6 +1054,7 @@ export class EditorGroupView extends Themable implements IEditorGroupView {
                     groupId: this.id,
                   },
                   doNotPanTo: true,
+                  forceNewEditor: true,
                 },
                 options)
           })
@@ -1064,6 +1068,7 @@ export class EditorGroupView extends Themable implements IEditorGroupView {
           {
             existingEditorInput: { input: activeEditor, groupId: this.id },
             doNotPanTo: true,
+            forceNewEditor: true,
           },
           options,
         )
@@ -1075,6 +1080,7 @@ export class EditorGroupView extends Themable implements IEditorGroupView {
         activeEditor.resource,
         {
           existingEditorInput: { input: activeEditor, groupId: this.id },
+          forceNewEditor: true,
           doNotPanTo: true,
         },
         options,
