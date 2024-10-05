@@ -132,8 +132,7 @@ export type FoldingRangeProviderSelector = (
 
 export class FoldingController
   extends Disposable
-  implements IEditorContribution
-{
+  implements IEditorContribution {
   public static readonly ID = "editor.contrib.folding"
 
   public static get(editor: ICodeEditor): FoldingController | null {
@@ -655,10 +654,13 @@ export class FoldingController
     if (!foldingModel || !this.mouseDownInfo || !e.target) {
       return
     }
-    const lineNumber = this.mouseDownInfo.lineNumber
+
+    const editRange = this.editor.getEditRange()
+    const lineAdjust = editRange ? editRange.startLineNumber - 1 : 0
+    const lineNumber = this.mouseDownInfo.lineNumber + lineAdjust
     const iconClicked = this.mouseDownInfo.iconClicked
 
-    const range = e.target.range
+    const range = e.target.range?.delta(lineAdjust)
     if (!range || range.startLineNumber !== lineNumber) {
       return
     }
@@ -722,7 +724,7 @@ export class FoldingController
 }
 
 export class RangesLimitReporter implements FoldingLimitReporter {
-  constructor(private readonly editor: ICodeEditor) {}
+  constructor(private readonly editor: ICodeEditor) { }
 
   public get limit() {
     return this.editor.getOptions().get(EditorOption.foldingMaximumRegions)
@@ -802,7 +804,7 @@ abstract class FoldingAction<T> extends EditorAction {
     return this.getSelectedLines(editor)
   }
 
-  public run(_accessor: ServicesAccessor, _editor: ICodeEditor): void {}
+  public run(_accessor: ServicesAccessor, _editor: ICodeEditor): void { }
 }
 
 interface FoldingArguments {
@@ -1657,7 +1659,7 @@ CommandsRegistry.registerCommand(
           },
         )
       },
-      update: (computed: number, limited: number | false) => {},
+      update: (computed: number, limited: number | false) => { },
     }
 
     const indentRangeProvider = new IndentRangeProvider(
@@ -1675,7 +1677,7 @@ CommandsRegistry.registerCommand(
         rangeProvider = new SyntaxRangeProvider(
           model,
           providers,
-          () => {},
+          () => { },
           foldingLimitReporter,
           indentRangeProvider,
         )

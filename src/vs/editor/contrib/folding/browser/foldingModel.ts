@@ -203,10 +203,10 @@ export class FoldingModel {
     }
     this._decorationProvider.changeDecorations(
       (accessor) =>
-        (this._editorDecorationIds = accessor.deltaDecorations(
-          this._editorDecorationIds,
-          newEditorDecorations,
-        )),
+      (this._editorDecorationIds = accessor.deltaDecorations(
+        this._editorDecorationIds,
+        newEditorDecorations,
+      )),
     )
     this._regions = newRegions
     this._updateEventEmitter.fire({ model: this })
@@ -332,7 +332,7 @@ export class FoldingModel {
   private _getLinesChecksum(lineNumber1: number, lineNumber2: number): number {
     const h = hash(
       this._textModel.getLineContent(lineNumber1) +
-        this._textModel.getLineContent(lineNumber2),
+      this._textModel.getLineContent(lineNumber2),
     )
     return h % 1000000 // 6 digits is plenty
   }
