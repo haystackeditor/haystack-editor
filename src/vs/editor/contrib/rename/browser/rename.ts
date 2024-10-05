@@ -75,6 +75,7 @@ import {
   RenameWidget,
   RenameWidgetResult,
 } from "./renameWidget"
+import { edit } from 'vs/platform/userDataSync/common/content'
 
 class RenameSkeleton {
   private readonly _providers: RenameProvider[]
@@ -260,7 +261,9 @@ class RenameController implements IEditorContribution {
       return undefined
     }
 
-    const position = this.editor.getPosition()
+    const editRange = this.editor.getEditRange()
+    const position = editRange != null ? this.editor.getPosition().delta(editRange.startLineNumber - 1) : this.editor.getPosition()
+
     const skeleton = new RenameSkeleton(
       this.editor.getModel(),
       position,
@@ -303,10 +306,10 @@ class RenameController implements IEditorContribution {
         if (typeof e === "string" || isMarkdownString(e)) {
           MessageController.get(this.editor)?.showMessage(
             e ||
-              nls.localize(
-                "resolveRenameLocationFailed",
-                "An unknown error occurred while resolving rename location",
-              ),
+            nls.localize(
+              "resolveRenameLocationFailed",
+              "An unknown error occurred while resolving rename location",
+            ),
             position,
           )
         }
@@ -611,25 +614,25 @@ class RenameController implements IEditorContribution {
     const value: RenameInvokedEvent =
       typeof inputFieldResult === "boolean"
         ? {
-            kind: "cancelled",
-            languageId,
-            nRenameSuggestionProviders,
-          }
+          kind: "cancelled",
+          languageId,
+          nRenameSuggestionProviders,
+        }
         : {
-            kind: "accepted",
-            languageId,
-            nRenameSuggestionProviders,
+          kind: "accepted",
+          languageId,
+          nRenameSuggestionProviders,
 
-            source: inputFieldResult.stats.source.k,
-            nRenameSuggestions: inputFieldResult.stats.nRenameSuggestions,
-            timeBeforeFirstInputFieldEdit:
-              inputFieldResult.stats.timeBeforeFirstInputFieldEdit,
-            wantsPreview: inputFieldResult.wantsPreview,
-            nRenameSuggestionsInvocations:
-              inputFieldResult.stats.nRenameSuggestionsInvocations,
-            hadAutomaticRenameSuggestionsInvocation:
-              inputFieldResult.stats.hadAutomaticRenameSuggestionsInvocation,
-          }
+          source: inputFieldResult.stats.source.k,
+          nRenameSuggestions: inputFieldResult.stats.nRenameSuggestions,
+          timeBeforeFirstInputFieldEdit:
+            inputFieldResult.stats.timeBeforeFirstInputFieldEdit,
+          wantsPreview: inputFieldResult.wantsPreview,
+          nRenameSuggestionsInvocations:
+            inputFieldResult.stats.nRenameSuggestionsInvocations,
+          hadAutomaticRenameSuggestionsInvocation:
+            inputFieldResult.stats.hadAutomaticRenameSuggestionsInvocation,
+        }
 
     this._telemetryService.publicLog2<
       RenameInvokedEvent,
