@@ -336,15 +336,19 @@ export function getWorkspaceStore() {
           const editorId = uuid.generateUuid()
           const upperLeftQuadrant = getUpperLeftQuadrantViewport()
 
-          const existingXPosition = args?.existingEditorInput?.input.getXPosition()
-          const existingYPosition = args?.existingEditorInput?.input.getYPosition()
+          const existingXPosition =
+            args?.existingEditorInput?.input.getXPosition()
+          const existingYPosition =
+            args?.existingEditorInput?.input.getYPosition()
 
           const centerOfScene = Vector.sub(Vector.new(), get().canvasCamera)
 
-          const xPosition =
-            existingXPosition ? (existingXPosition * canvasScale + centerOfScene.x) : null
-          const yPosition =
-            existingYPosition ? (existingYPosition * canvasScale + centerOfScene.y) : null
+          const xPosition = existingXPosition
+            ? existingXPosition * canvasScale + centerOfScene.x
+            : null
+          const yPosition = existingYPosition
+            ? existingYPosition * canvasScale + centerOfScene.y
+            : null
 
           const editorPosition =
             xPosition != null && yPosition != null
@@ -420,16 +424,20 @@ export function getWorkspaceStore() {
               ? new Vector(width, height)
               : await getEditorSizeForSymbol(uri, range, get().haystackService!)
 
-          const existingXPosition = args?.existingEditorInput?.input.getXPosition()
-          const existingYPosition = args?.existingEditorInput?.input.getYPosition()
+          const existingXPosition =
+            args?.existingEditorInput?.input.getXPosition()
+          const existingYPosition =
+            args?.existingEditorInput?.input.getYPosition()
 
           const centerOfScene = Vector.sub(Vector.new(), get().canvasCamera)
           const canvasScale = get().canvasScale
 
-          const xPosition =
-            existingXPosition ? (existingXPosition * canvasScale + centerOfScene.x) : null
-          const yPosition =
-            existingYPosition ? (existingYPosition * canvasScale + centerOfScene.y) : null
+          const xPosition = existingXPosition
+            ? existingXPosition * canvasScale + centerOfScene.x
+            : null
+          const yPosition = existingYPosition
+            ? existingYPosition * canvasScale + centerOfScene.y
+            : null
 
           const editorPosition =
             xPosition != null && yPosition != null
@@ -608,7 +616,12 @@ export function getWorkspaceStore() {
 
           return editorId
         },
-        async insertMergeEditorAtCenterOfViewport(editorInput, args, options, deferredEditorPanePromise) {
+        async insertMergeEditorAtCenterOfViewport(
+          editorInput,
+          args,
+          options,
+          deferredEditorPanePromise,
+        ) {
           await get().haystackServiceIsInitialized.p
           if (get().haystackService == null) return ""
 
@@ -616,9 +629,12 @@ export function getWorkspaceStore() {
           const height = args?.existingEditorInput?.input.getHeight() ?? null
 
           const initialSize =
-            (width != null && height != null
+            width != null && height != null
               ? new Vector(width, height)
-              : await getEditorSizeForFile(editorInput.input2.resource, get().haystackService!))
+              : await getEditorSizeForFile(
+                editorInput.input2.resource,
+                get().haystackService!,
+              )
           const finalSize = new Vector(initialSize.x, initialSize.y * 2)
 
           const idToEditorMap = new Map(get().idToEditorMap)
@@ -2186,7 +2202,12 @@ export function getWorkspaceStore() {
           })
           set({ openEditors, idToEditorMap })
         },
-        async openMergeEditorForCanvasEditor(editorId, editorInput, domElement, options) {
+        async openMergeEditorForCanvasEditor(
+          editorId,
+          editorInput,
+          domElement,
+          options,
+        ) {
           const editor = get().idToEditorMap.get(editorId) as CanvasMergeEditor
           const identifier =
             await this.haystackService?.createMergeEditorElement(
@@ -2696,7 +2717,10 @@ export function getWorkspaceStore() {
             ) {
               if (editor.identifier?.editor === editorInput) {
                 const canvasScale = get().canvasScale
-                const centerOfScene = Vector.sub(Vector.new(), get().canvasCamera)
+                const centerOfScene = Vector.sub(
+                  Vector.new(),
+                  get().canvasCamera,
+                )
 
                 return {
                   xPosition: (editor.xPosition - centerOfScene.x) / canvasScale,
@@ -3502,19 +3526,13 @@ export function getWorkspaceStore() {
             editorId: editor.uuid,
           })
 
-          const idToEditorMap = new Map(get().idToEditorMap)
-
-          // Important that we delete for collision detection to work
-          // correctly.
-          idToEditorMap.delete(focusedEditorId)
-
-          const upperLeftQuadrant = getUpperLeftQuadrantViewport()
-          const unpinnedPosition = get().getPositionForNewEditor(
-            upperLeftQuadrant,
-            new Vector(editor.width, editor.height),
-            idToEditorMap,
+          const cameraPosition = get().canvasCamera
+          const unpinnedPosition = Vector.sub(
+            new Vector(editor.vxPosition, editor.vyPosition),
+            cameraPosition,
           )
 
+          const idToEditorMap = new Map(get().idToEditorMap)
           idToEditorMap.set(focusedEditorId, {
             ...editor,
             isPinned: false,
