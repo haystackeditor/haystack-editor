@@ -242,20 +242,20 @@ export class HaystackReferenceWidget extends HaystackPeekViewWidget {
       dom.$("div.ref-tree.inline"),
     )
     const treeOptions: IWorkbenchAsyncDataTreeOptions<TreeElement, FuzzyScore> =
-      {
-        keyboardSupport: this._defaultTreeKeyboardSupport,
-        accessibilityProvider: new AccessibilityProvider(),
-        keyboardNavigationLabelProvider:
-          this._instantiationService.createInstance(
-            StringRepresentationProvider,
-          ),
-        identityProvider: new IdentityProvider(),
-        openOnSingleClick: true,
-        selectionNavigation: true,
-        overrideStyles: {
-          listBackground: peekViewResultsBackground,
-        },
-      }
+    {
+      keyboardSupport: this._defaultTreeKeyboardSupport,
+      accessibilityProvider: new AccessibilityProvider(),
+      keyboardNavigationLabelProvider:
+        this._instantiationService.createInstance(
+          StringRepresentationProvider,
+        ),
+      identityProvider: new IdentityProvider(),
+      openOnSingleClick: true,
+      selectionNavigation: true,
+      overrideStyles: {
+        listBackground: peekViewResultsBackground,
+      },
+    }
     if (this._defaultTreeKeyboardSupport) {
       // the tree will consume `Escape` and prevent the widget from closing
       this._callOnDispose.add(
@@ -265,7 +265,6 @@ export class HaystackReferenceWidget extends HaystackPeekViewWidget {
           (e) => {
             if (e.equals(KeyCode.Escape)) {
               this._keybindingService.dispatchEvent(e, e.target)
-              e.stopPropagation()
             }
           },
           true,

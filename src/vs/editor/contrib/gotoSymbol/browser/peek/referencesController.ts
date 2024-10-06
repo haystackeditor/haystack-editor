@@ -115,7 +115,7 @@ export abstract class ReferencesController implements IEditorContribution {
     modelPromise: CancelablePromise<ReferencesModel>,
     range: IRange,
     peekMode: boolean,
-    nodeId: string,
+    editorId: string,
   ): HaystackReferenceWidget {
     // close current widget and return early is position didn't change
     let widgetPosition: Position | undefined
@@ -154,7 +154,7 @@ export abstract class ReferencesController implements IEditorContribution {
       this._editor,
       this._defaultTreeKeyboardSupport,
       data,
-      nodeId,
+      editorId,
     )
 
     this._widget.setTitle(nls.localize("labelLoading", "Loading..."))
@@ -237,7 +237,7 @@ export abstract class ReferencesController implements IEditorContribution {
             const firstReference = this._model.firstReference()
             if (firstReference != null) {
               this._haystackService.setCurrentReference(
-                nodeId,
+                editorId,
                 firstReference.uri,
                 this._model.references.length,
               )
@@ -255,7 +255,7 @@ export abstract class ReferencesController implements IEditorContribution {
               if (
                 this._widget &&
                 this._editor.getOption(EditorOption.peekWidgetDefaultFocus) ===
-                  "editor"
+                "editor"
               ) {
                 this._widget.focusOnPreviewEditor()
               }
@@ -320,8 +320,8 @@ export abstract class ReferencesController implements IEditorContribution {
   }
 
   closeWidget(focusEditor = true): void {
-    if (this._widget?.nodeId != null) {
-      this._haystackService.deleteEditor(this._widget.nodeId)
+    if (this._widget?.editorId != null) {
+      this._haystackService.deleteEditor(this._widget.editorId)
     }
     this._widget?.dispose()
     this._model?.dispose()
@@ -339,8 +339,8 @@ export abstract class ReferencesController implements IEditorContribution {
     ref: Location,
     openWithoutClosing: boolean,
   ): Promise<any> {
-    if (this._widget?.nodeId && !openWithoutClosing) {
-      this._haystackService.deleteEditor(this._widget.nodeId)
+    if (this._widget?.editorId && !openWithoutClosing) {
+      this._haystackService.deleteEditor(this._widget.editorId)
     }
 
     this._widget?.hide()
@@ -373,7 +373,7 @@ export abstract class ReferencesController implements IEditorContribution {
     for (const documentSymbol of documentSymbols) {
       if (
         documentSymbol.selectionRange.startLineNumber ===
-          range.startLineNumber &&
+        range.startLineNumber &&
         documentSymbol.selectionRange.endLineNumber === range.endLineNumber &&
         documentSymbol.selectionRange.startColumn === range.startColumn &&
         documentSymbol.selectionRange.endColumn === range.endColumn
@@ -479,7 +479,7 @@ export abstract class ReferencesController implements IEditorContribution {
     for (const documentSymbol of documentSymbols) {
       if (
         documentSymbol.selectionRange.startLineNumber ===
-          range.startLineNumber &&
+        range.startLineNumber &&
         documentSymbol.selectionRange.endLineNumber === range.endLineNumber &&
         documentSymbol.selectionRange.startColumn === range.startColumn &&
         documentSymbol.selectionRange.endColumn === range.endColumn
