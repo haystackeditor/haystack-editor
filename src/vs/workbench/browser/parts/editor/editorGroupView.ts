@@ -1013,6 +1013,7 @@ export class EditorGroupView extends Themable implements IEditorGroupView {
 
       if (editRange != null) {
         const uri = activeEditor.resource
+        console.log("RESUCITATE")
 
         return this._haystackService
           .getDeepestSymbolContainingRange({
@@ -1020,8 +1021,10 @@ export class EditorGroupView extends Themable implements IEditorGroupView {
             range: editRange,
           })
           .then(async (symbol) => {
+            console.log("SEEMBOL", symbol, editRange)
+
             if (symbol != null) {
-              return this._haystackService
+              await this._haystackService
                 .createSymbolEditorWithSymbol(
                   symbol.name,
                   symbol.kind,
@@ -1037,9 +1040,11 @@ export class EditorGroupView extends Themable implements IEditorGroupView {
                   },
                   options
                 )
+
+              return
             }
 
-            return this._haystackService
+            await this._haystackService
               .createFileEditor(
                 uri,
                 {

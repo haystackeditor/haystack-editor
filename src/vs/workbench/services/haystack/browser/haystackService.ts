@@ -1464,8 +1464,18 @@ export class HaystackService extends Disposable implements IHaystackService {
     let symbol: DocumentSymbol | null = null
     let documentSymbol: DocumentSymbol | undefined
 
+    const adjustedRange = adjustRangeForComments(location.range, model.object.textEditorModel)
+    // Adjust the location's range so that it doesn't include comments.
+    const finalRange = {
+      startLineNumber: adjustedRange.startLineNumber,
+      startColumn: location.range.startColumn,
+      endLineNumber: location.range.endLineNumber,
+      endColumn: location.range.endColumn
+    }
+
+
     while ((documentSymbol = documentSymbols.pop())) {
-      if (Range.containsRange(documentSymbol.range, location.range)) {
+      if (Range.containsRange(documentSymbol.range, finalRange)) {
         symbol = documentSymbol
 
         // Recurse further into the symbol subtree.
