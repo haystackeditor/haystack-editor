@@ -174,6 +174,7 @@ import {
   CanvasModalEditor,
   CanvasReferencesEditor,
 } from "vs/workbench/browser/haystack-frontend/editor/editor"
+import { isFunctionLikeSymbol } from 'vs/workbench/browser/haystack-frontend/react_utils/is_functionlike_symbol'
 
 interface IEditorConfiguration {
   editor: {
@@ -2155,20 +2156,33 @@ export class HaystackService extends Disposable implements IHaystackService {
 
     if (item == null) return null
 
-    if (predicate(item.symbol)) {
-      return item.symbol
-    }
-
+    // First, tries to find an ancestral function or method.
+    // We do not want to use a descendant of a functio or method.
     let treeItem: TreeElement | undefined = item
+    let highestFunctionAncestor: DocumentSymbol | undefined = undefined
+    let lowestNotableSymbol: DocumentSymbol | undefined = undefined
+
     while ((treeItem = treeItem.parent)) {
       if (treeItem instanceof OutlineElement) {
-        if (predicate(treeItem.symbol)) {
-          return treeItem.symbol
+        if (isFunctionLikeSymbol(treeItem.symbol.kind)) {
+          highestFunctionAncestor = treeItem.symbol
+        }
+
+        if (lowestNotableSymbol == null && predicate(treeItem.symbol)) {
+          lowestNotableSymbol = treeItem.symbol
         }
       }
     }
 
-    return null
+    if (highestFunctionAncestor != null) {
+      return highestFunctionAncestor
+    }
+
+    if (predicate(item.symbol)) {
+      return item.symbol
+    }
+
+    return lowestNotableSymbol ?? null
   }
 
   public async getEnclosingSymbol(
