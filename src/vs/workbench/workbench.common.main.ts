@@ -124,10 +124,10 @@ import "vs/workbench/services/editor/browser/editorPaneService"
 import "vs/workbench/services/editor/common/customEditorLabelService"
 
 // Open Source Services.
-import "vs/workbench/workbench.opensource.main"
+import "vs/workbench/workbench.opensource.common"
 
 // Proprietary Services. (mutually exclusive with Open Source Services)
-// import "vs/proprietary/workbench/workbench.proprietary.main"
+// import "vs/proprietary/workbench/workbench.proprietary.common"
 
 import {
   InstantiationType,

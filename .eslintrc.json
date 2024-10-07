@@ -9,7 +9,7 @@
   "rules": {
     "constructor-super": "warn",
     "curly": "warn",
-    "eqeqeq": ["warn"],
+    "eqeqeq": ["error", "smart"],
     "prefer-const": [
       "warn",
       {

@@ -62,9 +62,15 @@
       "{{WORKBENCH_WEB_BASE_URL}}",
       window.location.origin,
     ).toString()
+
     Object.keys(self.webPackagePaths).map(function (key, index) {
-      self.webPackagePaths[key] =
-        `${baseUrl}/node_modules/${key}/${self.webPackagePaths[key]}`
+      if (key === "zustand/middleware" || key === "zustand/vanilla") {
+        self.webPackagePaths[key] =
+          `${baseUrl}/remote/web/node_modules/zustand/${self.webPackagePaths[key]}`
+      } else {
+        self.webPackagePaths[key] =
+          `${baseUrl}/remote/web/node_modules/${key}/${self.webPackagePaths[key]}`
+      }
     })
 
     // Set up nls if the user is not using the default language (English)
@@ -90,6 +96,19 @@
         createScriptURL(value) {
           if (value.startsWith(window.location.origin)) {
             return value
+          } else if (value === "pixi.js") {
+            // TODO: This hack should not be necessary. Look into why Pixi specifically does not work.
+            const endPosition = window.location.pathname.indexOf("/out/")
+            const outLength = "/out/".length
+            const truncatedPath = window.location.pathname.substring(
+              0,
+              endPosition + outLength,
+            )
+            return `${
+              window.location.origin
+            }${truncatedPath}${baseNodeModulesPath}/pixi.js/dist/pixi${
+              isDev ? "" : ".min"
+            }.js`
           }
           throw new Error(`Invalid script url: ${value}`)
         },

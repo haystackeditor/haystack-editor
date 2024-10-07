@@ -68,6 +68,12 @@ import "vs/workbench/services/configurationResolver/browser/configurationResolve
 import "vs/platform/extensionResourceLoader/browser/extensionResourceLoaderService"
 import "vs/workbench/services/auxiliaryWindow/browser/auxiliaryWindowService"
 
+// Open Source Services.
+
+// Proprietary Services. (mutually exclusive with Open Source Services)
+// import "vs/proprietary/workbench/workbench.proprietary.web"
+
+
 import {
   InstantiationType,
   registerSingleton,

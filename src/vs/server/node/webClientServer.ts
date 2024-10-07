@@ -372,8 +372,8 @@ export class WebClientServer {
     const remoteAuthority = useTestResolver
       ? "test+test"
       : getFirstHeader("x-original-host") ||
-        getFirstHeader("x-forwarded-host") ||
-        req.headers.host
+      getFirstHeader("x-forwarded-host") ||
+      req.headers.host
     if (!remoteAuthority) {
       return serveError(req, res, 400, `Bad request.`)
     }
@@ -403,30 +403,30 @@ export class WebClientServer {
     ).fsPath
     const authSessionInfo =
       !this._environmentService.isBuilt &&
-      this._environmentService.args["github-auth"]
+        this._environmentService.args["github-auth"]
         ? {
-            id: generateUuid(),
-            providerId: "github",
-            accessToken: this._environmentService.args["github-auth"],
-            scopes: [["user:email"], ["repo"]],
-          }
+          id: generateUuid(),
+          providerId: "github",
+          accessToken: this._environmentService.args["github-auth"],
+          scopes: [["user:email"], ["repo"]],
+        }
         : undefined
 
     const productConfiguration = {
       embedderIdentifier: "server-distro",
       extensionsGallery:
         this._webExtensionResourceUrlTemplate &&
-        this._productService.extensionsGallery
+          this._productService.extensionsGallery
           ? {
-              ...this._productService.extensionsGallery,
-              resourceUrlTemplate: this._webExtensionResourceUrlTemplate
-                .with({
-                  scheme: "http",
-                  authority: remoteAuthority,
-                  path: `${this._webExtensionRoute}/${this._webExtensionResourceUrlTemplate.authority}${this._webExtensionResourceUrlTemplate.path}`,
-                })
-                .toString(true),
-            }
+            ...this._productService.extensionsGallery,
+            resourceUrlTemplate: this._webExtensionResourceUrlTemplate
+              .with({
+                scheme: "http",
+                authority: remoteAuthority,
+                path: `${this._webExtensionRoute}/${this._webExtensionResourceUrlTemplate.authority}${this._webExtensionResourceUrlTemplate.path}`,
+              })
+              .toString(true),
+          }
           : undefined,
     } satisfies Partial<IProductConfiguration>
 
@@ -457,7 +457,7 @@ export class WebClientServer {
       },
       settingsSyncOptions:
         !this._environmentService.isBuilt &&
-        this._environmentService.args["enable-sync"]
+          this._environmentService.args["enable-sync"]
           ? { enabled: true }
           : undefined,
       enableWorkspaceTrust:
@@ -518,7 +518,7 @@ export class WebClientServer {
     }
 
     const webWorkerExtensionHostIframeScriptSHA =
-      "sha256-75NYUUvf+5++1WbfCZOV3PSWxBhONpaxwx+mkOFRv/Y="
+      "sha256-wcyBKoCmWZKhgCst5mhUmyU9D+kbbP324A2jWi+2fYs="
 
     const cspDirectives = [
       "default-src 'self';",

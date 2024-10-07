@@ -87,6 +87,11 @@ import "vs/platform/userDataProfile/electron-sandbox/userDataProfileStorageServi
 import "vs/workbench/services/auxiliaryWindow/electron-sandbox/auxiliaryWindowService"
 import "vs/platform/extensionManagement/electron-sandbox/extensionsProfileScannerService"
 
+// Open Source Services.
+
+// Proprietary Services. (mutually exclusive with Open Source Services)
+// import "vs/proprietary/workbench/workbench.proprietary.desktop"
+
 import { registerSingleton } from "vs/platform/instantiation/common/extensions"
 import {
   IUserDataInitializationService,

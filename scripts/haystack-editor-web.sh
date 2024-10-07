@@ -21,7 +21,7 @@ function code() {
 
 	NODE=$(node build/lib/node.js)
 
-	$NODE ./scripts/code-web.js "$@"
+	$NODE ./scripts/haystack-editor-web.js "$@"
 }
 
 code "$@"

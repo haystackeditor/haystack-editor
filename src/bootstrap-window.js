@@ -172,7 +172,6 @@
       "@tanstack/react-query": `${baseNodeModulesPath}/@tanstack/react-query/build/umd/index.${
         isDev ? "development" : "production"
       }.js`,
-      "sanitize-html": `${baseNodeModulesPath}/sanitize-html/index.js`,
       "@tanstack/react-virtual": `${baseNodeModulesPath}/@tanstack/react-virtual/build/umd/index.${
         isDev ? "development" : "production"
       }.js`,

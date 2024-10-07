@@ -445,6 +445,15 @@ export function acquireWebNodePaths() {
   nodePaths['@microsoft/dynamicproto-js'] = 'lib/dist/umd/dynamicproto-js.min.js';
   nodePaths['@microsoft/applicationinsights-shims'] = 'dist/umd/applicationinsights-shims.min.js';
   nodePaths['@microsoft/applicationinsights-core-js'] = 'browser/applicationinsights-core-js.min.js';
+
+  nodePaths['pixi.js'] = 'dist/pixi.min.js'
+  nodePaths['react'] = 'umd/react.production.min.js'
+  nodePaths['react-dom'] = 'umd/react-dom.production.min.js'
+  nodePaths['rxjs'] = 'dist/bundles/rxjs.umd.min.js'
+  nodePaths['@tanstack/react-query'] = 'build/umd/index.production.js'
+  nodePaths['zustand/middleware'] = 'umd/middleware.production.js'
+  nodePaths['zustand/vanilla'] = 'umd/vanilla.production.js'
+
   return nodePaths;
 }
 
@@ -478,6 +487,7 @@ export function buildWebNodePaths(outDir: string) {
     // Now we write the node paths to out/vs
     const outDirectory = path.join(root, outDir, 'vs');
     fs.mkdirSync(outDirectory, { recursive: true });
+    console.log("I AM HERE FOR NO REASON")
     const headerWithGeneratedFileWarning = `/*---------------------------------------------------------------------------------------------
 	 *  Copyright (c) Microsoft Corporation. All rights reserved.
 	 *  Licensed under the MIT License. See License.txt in the project root for license information.
