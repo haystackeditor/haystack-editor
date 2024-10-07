@@ -1,5 +1,7 @@
 # Haystack Editor Source Available
 
+![Haystack Demo V2](https://github.com/user-attachments/assets/dfda79d9-1025-4b03-8c4f-20e3a41a5f08)
+
 ## The Repository
 
 This repository ("`Haystack Editor`") is where we (Haystack Software) develop the [Haystack Editor](https://haystackeditor.com/) product together with the community. Not only do we work on code and issues here, we also publish our [roadmap](https://github.com/haystackeditor/haystack-editor/wiki/Roadmap). This source code is available under the [PolyForm Strict License 1.0.0] (https://polyformproject.org/licenses/strict/1.0.0).
@@ -11,6 +13,23 @@ This repository ("`Haystack Editor`") is where we (Haystack Software) develop th
 [Haystack Editor](https://haystackeditor.com) combines the simplicity of a code editor with a canvas UI that makes it easier to understand code at a glance It provides comprehensive code editing, navigation, and understanding support along with lightweight debugging, a rich extensibility model, and lightweight integration with existing tools.
 
 Haystack is updated weekly with new features and bug fixes. You can download it for Windows, macOS, and Linux on [Haystack’s website](https://haystackeditor.com).
+
+## Features Sneak Peek 
+### Canvas Workspaces
+
+https://github.com/user-attachments/assets/60390166-baec-49a7-92e5-2d6308f5a31d
+
+### Explorer View
+
+https://github.com/user-attachments/assets/5616f35c-066d-472b-8208-ab93abf79882
+
+### Keyboard Navigation
+
+https://github.com/user-attachments/assets/1c5554f1-2165-440f-9751-a6eb87303059
+
+### Generate Function
+
+https://github.com/user-attachments/assets/f934bdeb-17dc-4d3e-88d3-1a4b115cf77d
 
 ## Contributing
 
