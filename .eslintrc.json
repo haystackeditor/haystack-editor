@@ -8,7 +8,6 @@
   "plugins": ["@typescript-eslint", "jsdoc", "header" /*, "local"*/],
   "rules": {
     "constructor-super": "warn",
-    "curly": "warn",
     "eqeqeq": ["error", "smart"],
     "prefer-const": [
       "warn",
