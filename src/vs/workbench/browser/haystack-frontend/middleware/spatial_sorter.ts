@@ -24,7 +24,6 @@ import {
   SymbolRelationship,
 } from "vs/workbench/services/haystack/common/haystackService"
 import { IRange, Range } from "vs/editor/common/core/range"
-const RECTANGLE_MAX_DELTA = 50
 
 const enum SortEditorType {
   EDITOR = 0,
@@ -71,6 +70,10 @@ export class SpatialSorter {
   public getSortedEditors() {
     if (this.isDirty) {
       this.sortEditors()
+
+      WorkspaceStoreWrapper.getWorkspaceState().setSortedEditors(
+        this.sortedEditors,
+      )
     }
     return this.sortedEditors
   }
@@ -79,7 +82,6 @@ export class SpatialSorter {
     idToEditorMap: Map<string, CanvasEditor>,
   ): boolean {
     let numTargetEditors = 0
-    const newCachedMap = new Map<string, CanvasEditor>()
 
     let needsRecache = this.cachedIdToEditorMap.size !== idToEditorMap.size
 
@@ -106,15 +108,15 @@ export class SpatialSorter {
         }
       }
 
-      newCachedMap.set(editorId, currentEditor)
       ++numTargetEditors
     }
 
-    // We need to re-sort regardless of whether we need to
+    // We need to re-sort regardless of whether we need to regenerate
+    // relationships.
     this.isDirty = true
+    this.cachedIdToEditorMap = idToEditorMap
 
     if (needsRecache) {
-      this.cachedIdToEditorMap = newCachedMap
       return true
     } else {
       return false

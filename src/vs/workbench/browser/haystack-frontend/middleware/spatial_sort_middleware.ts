@@ -160,10 +160,6 @@ export class SpatialSortMiddleware implements Middleware {
           return
         }
 
-        WorkspaceStoreWrapper.getWorkspaceState().setSortedEditors(
-          this.spatialSorter.getSortedEditors(),
-        )
-
         // If we awaited a call, the current ID to editor map is more updated.
         // Otherwise, the event ID to editor map is the more recent one.
         this.generateDependencyArrows(idToEditorMap)
