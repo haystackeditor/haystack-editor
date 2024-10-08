@@ -16,7 +16,7 @@ import {
   IUntypedEditorInput,
   IResourceMergeEditorInput,
 } from "vs/workbench/common/editor"
-import { editorBackground } from "vs/platform/theme/common/colorRegistry"
+import { canvasBackground } from "vs/platform/theme/common/colorRegistry"
 import { EditorInput } from "vs/workbench/common/editor/editorInput"
 import { getLargeFileConfirmationLimit } from "vs/platform/files/common/files"
 import { Event, Emitter } from "vs/base/common/event"
@@ -331,7 +331,7 @@ export class HaystackService extends Disposable implements IHaystackService {
 
     this._themeService.onDidColorThemeChange((e) => {
       const colorString =
-        e.getColor(editorBackground, true)?.toString() ?? "0xffffff"
+        e.getColor(canvasBackground, true)?.toString() ?? "0xffffff"
       const hexColorString = colorString.replace("#", "0x")
       const hexColor = Number(hexColorString)
       RendererManager.getInstance().changeColor(hexColor)

@@ -593,7 +593,7 @@ export class WorkspaceScene extends Container implements IScene {
       case KeyCode.SIX:
       case KeyCode.SEVEN:
       case KeyCode.EIGHT:
-      case KeyCode.NINE:
+      case KeyCode.NINE: {
         const number = convertKeyCodeToNumber(e.code)
         if (number == null) break
 
@@ -613,6 +613,7 @@ export class WorkspaceScene extends Container implements IScene {
           editor,
           NavigationType.JUST_ENOUGH,
         )
+      }
       default:
         handleEvent = false
         break

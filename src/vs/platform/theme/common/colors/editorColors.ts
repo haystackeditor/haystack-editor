@@ -45,6 +45,17 @@ export const editorBackground = registerColor(
   nls.localize("editorBackground", "Editor background color."),
 )
 
+export const canvasBackground = registerColor(
+  "canvas.background",
+  {
+    light: "#ffffff",
+    dark: "#0E0E0E",
+    hcDark: Color.black,
+    hcLight: Color.white,
+  },
+  nls.localize("editorBackground", "Editor background color."),
+)
+
 export const editorForeground = registerColor(
   "editor.foreground",
   {
