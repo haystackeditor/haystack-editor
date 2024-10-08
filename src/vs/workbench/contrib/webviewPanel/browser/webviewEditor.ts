@@ -150,7 +150,6 @@ export class WebviewEditor extends EditorPane {
   }
 
   public override layout(dimension: DOM.Dimension): void {
-    console.log("LAY ME OUT")
     this._dimension = dimension
     if (this.webview && this._visible) {
       this.synchronizeWebviewContainerDimensions(this.webview, dimension)

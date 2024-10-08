@@ -174,7 +174,7 @@ import {
   CanvasModalEditor,
   CanvasReferencesEditor,
 } from "vs/workbench/browser/haystack-frontend/editor/editor"
-import { isFunctionLikeSymbol } from 'vs/workbench/browser/haystack-frontend/react_utils/is_functionlike_symbol'
+import { isFunctionLikeSymbol } from "vs/workbench/browser/haystack-frontend/react_utils/is_functionlike_symbol"
 
 interface IEditorConfiguration {
   editor: {
@@ -427,7 +427,9 @@ export class HaystackService extends Disposable implements IHaystackService {
 
     const showNavigationBar = this.getShowNavigationBar()
     WorkspaceStoreWrapper.workspaceStoreIsInitialized.p.then(() => {
-      WorkspaceStoreWrapper.getWorkspaceState().setShowNavigationBar(showNavigationBar)
+      WorkspaceStoreWrapper.getWorkspaceState().setShowNavigationBar(
+        showNavigationBar,
+      )
     })
 
     this._codeEditorService.onCodeEditorRemove((codeEditor) => {
@@ -662,13 +664,12 @@ export class HaystackService extends Disposable implements IHaystackService {
       for (const editorPane of this._editorService.visibleEditorPanes) {
         const editor = editorPane.getControl()
         if (isMergeEditor(editor)) {
-          const editorInput = editor.input as unknown as IResourceMergeEditorInput
+          const editorInput =
+            editor.input as unknown as IResourceMergeEditorInput
 
           if (
-            editorInput.input1.resource.path !==
-            input.input1.resource.path ||
-            editorInput.input2.resource.path !==
-            input.input2.resource.path
+            editorInput.input1.resource.path !== input.input1.resource.path ||
+            editorInput.input2.resource.path !== input.input2.resource.path
           ) {
             continue
           }
@@ -676,9 +677,11 @@ export class HaystackService extends Disposable implements IHaystackService {
           if (args?.selectionRange) {
             // Found the editor, just set the range and return
             editor.getControl()?.setSelection(args.selectionRange)
-            editor.getControl()?.revealLineInCenterIfOutsideViewport(
-              args.selectionRange.startLineNumber,
-            )
+            editor
+              .getControl()
+              ?.revealLineInCenterIfOutsideViewport(
+                args.selectionRange.startLineNumber,
+              )
           }
 
           if (
@@ -737,9 +740,9 @@ export class HaystackService extends Disposable implements IHaystackService {
 
           if (
             editor.getOriginalEditor().getModel()?.uri.fsPath !==
-            originalUri.fsPath ||
+              originalUri.fsPath ||
             editor.getModifiedEditor().getModel()?.uri.fsPath !==
-            modifiedUri.fsPath
+              modifiedUri.fsPath
           ) {
             continue
           }
@@ -1464,15 +1467,17 @@ export class HaystackService extends Disposable implements IHaystackService {
     let symbol: DocumentSymbol | null = null
     let documentSymbol: DocumentSymbol | undefined
 
-    const adjustedRange = adjustRangeForComments(location.range, model.object.textEditorModel)
+    const adjustedRange = adjustRangeForComments(
+      location.range,
+      model.object.textEditorModel,
+    )
     // Adjust the location's range so that it doesn't include comments.
     const finalRange = {
       startLineNumber: adjustedRange.startLineNumber,
       startColumn: location.range.startColumn,
       endLineNumber: location.range.endLineNumber,
-      endColumn: location.range.endColumn
+      endColumn: location.range.endColumn,
     }
-
 
     while ((documentSymbol = documentSymbols.pop())) {
       if (Range.containsRange(documentSymbol.range, finalRange)) {
@@ -2010,10 +2015,11 @@ export class HaystackService extends Disposable implements IHaystackService {
     for (const metadatum of metadata) {
       if (metadatum == null) continue
 
-      const symbolDepKey = `${metadatum.filePath}-${metadatum.enclosingSymbol
-        ? Range.fromIRange(metadatum.enclosingSymbol.range).toString()
-        : "Null"
-        }`
+      const symbolDepKey = `${metadatum.filePath}-${
+        metadatum.enclosingSymbol
+          ? Range.fromIRange(metadatum.enclosingSymbol.range).toString()
+          : "Null"
+      }`
       let symbolDep: SymbolDep | undefined = symbolDepMap.get(symbolDepKey)
 
       if (symbolDep == null) {

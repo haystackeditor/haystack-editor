@@ -183,7 +183,7 @@ import {
 } from "vs/platform/files/common/files"
 import { IHaystackService } from "vs/workbench/services/haystack/common/haystackService"
 import { FileEditorInput } from "vs/workbench/contrib/files/browser/editors/fileEditorInput"
-import { isMergeEditorInput } from 'vs/workbench/services/userDataSync/browser/userDataSyncWorkbenchService'
+import { isMergeEditorInput } from "vs/workbench/services/userDataSync/browser/userDataSyncWorkbenchService"
 
 export class EditorGroupView extends Themable implements IEditorGroupView {
   //#region factory
@@ -634,21 +634,21 @@ export class EditorGroupView extends Themable implements IEditorGroupView {
           )
           groupActiveCompareEditorCanSwap.set(
             activeEditorPane.input instanceof DiffEditorInput &&
-            !activeEditorPane.input.original.isReadonly() &&
-            !!primaryEditorResource &&
-            (this.fileService.hasProvider(primaryEditorResource) ||
-              primaryEditorResource.scheme === Schemas.untitled) &&
-            !!secondaryEditorResource &&
-            (this.fileService.hasProvider(secondaryEditorResource) ||
-              secondaryEditorResource.scheme === Schemas.untitled),
+              !activeEditorPane.input.original.isReadonly() &&
+              !!primaryEditorResource &&
+              (this.fileService.hasProvider(primaryEditorResource) ||
+                primaryEditorResource.scheme === Schemas.untitled) &&
+              !!secondaryEditorResource &&
+              (this.fileService.hasProvider(secondaryEditorResource) ||
+                secondaryEditorResource.scheme === Schemas.untitled),
           )
           groupActiveEditorCanToggleReadonly.set(
             !!primaryEditorResource &&
-            this.fileService.hasProvider(primaryEditorResource) &&
-            !this.fileService.hasCapability(
-              primaryEditorResource,
-              FileSystemProviderCapabilities.Readonly,
-            ),
+              this.fileService.hasProvider(primaryEditorResource) &&
+              !this.fileService.hasCapability(
+                primaryEditorResource,
+                FileSystemProviderCapabilities.Readonly,
+              ),
           )
 
           const activePaneDiffEditor =
@@ -993,18 +993,23 @@ export class EditorGroupView extends Themable implements IEditorGroupView {
     // `restoreEditors` from executing in same stack)
 
     if (isMergeEditorInput(activeEditor)) {
-      return this._haystackService.createMergeEditor({
-        base: { resource: activeEditor.base },
-        input1: {
-          description: "",
-          resource: activeEditor.input1.uri,
-        },
-        input2: {
-          description: "",
-          resource: activeEditor.input1.uri,
-        },
-        result: { resource: activeEditor.resource }
-      }, { forceNewEditor: true }).then(() => { })
+      return this._haystackService
+        .createMergeEditor(
+          {
+            base: { resource: activeEditor.base },
+            input1: {
+              description: "",
+              resource: activeEditor.input1.uri,
+            },
+            input2: {
+              description: "",
+              resource: activeEditor.input1.uri,
+            },
+            result: { resource: activeEditor.resource },
+          },
+          { forceNewEditor: true },
+        )
+        .then(() => {})
     }
 
     if (activeEditor instanceof FileEditorInput) {
@@ -1013,7 +1018,6 @@ export class EditorGroupView extends Themable implements IEditorGroupView {
 
       if (editRange != null) {
         const uri = activeEditor.resource
-        console.log("RESUCITATE")
 
         return this._haystackService
           .getDeepestSymbolContainingRange({
@@ -1021,39 +1025,13 @@ export class EditorGroupView extends Themable implements IEditorGroupView {
             range: editRange,
           })
           .then(async (symbol) => {
-            console.log("SEEMBOL", symbol, editRange)
-
             if (symbol != null) {
-              await this._haystackService
-                .createSymbolEditorWithSymbol(
-                  symbol.name,
-                  symbol.kind,
-                  uri,
-                  symbol.range,
-                  {
-                    existingEditorInput: {
-                      input: activeEditor,
-                      groupId: this.id,
-                    },
-                    doNotPanTo: true,
-                    forceNewEditor: true,
-                  },
-                  options
-                )
-
-              return
-            }
-
-            await this._haystackService
-              .createFileEditor(
+              await this._haystackService.createSymbolEditorWithSymbol(
+                symbol.name,
+                symbol.kind,
                 uri,
+                symbol.range,
                 {
-                  selectionRange: {
-                    startLineNumber: editRange.startLineNumber,
-                    startColumn: editRange.startColumn,
-                    endLineNumber: editRange.startLineNumber,
-                    endColumn: editRange.startColumn,
-                  },
                   existingEditorInput: {
                     input: activeEditor,
                     groupId: this.id,
@@ -1061,7 +1039,30 @@ export class EditorGroupView extends Themable implements IEditorGroupView {
                   doNotPanTo: true,
                   forceNewEditor: true,
                 },
-                options)
+                options,
+              )
+
+              return
+            }
+
+            await this._haystackService.createFileEditor(
+              uri,
+              {
+                selectionRange: {
+                  startLineNumber: editRange.startLineNumber,
+                  startColumn: editRange.startColumn,
+                  endLineNumber: editRange.startLineNumber,
+                  endColumn: editRange.startColumn,
+                },
+                existingEditorInput: {
+                  input: activeEditor,
+                  groupId: this.id,
+                },
+                doNotPanTo: true,
+                forceNewEditor: true,
+              },
+              options,
+            )
           })
       }
     }
@@ -1077,7 +1078,7 @@ export class EditorGroupView extends Themable implements IEditorGroupView {
           },
           options,
         )
-        .then(() => { })
+        .then(() => {})
     }
 
     return this._haystackService
@@ -1090,7 +1091,7 @@ export class EditorGroupView extends Themable implements IEditorGroupView {
         },
         options,
       )
-      .then(() => { })
+      .then(() => {})
   }
 
   //#region event handling
@@ -1385,7 +1386,7 @@ export class EditorGroupView extends Themable implements IEditorGroupView {
       event.oldPartOptions.tabHeight !== event.newPartOptions.tabHeight ||
       (event.oldPartOptions.showTabs === "multiple" &&
         event.oldPartOptions.pinnedTabsOnSeparateRow !==
-        event.newPartOptions.pinnedTabsOnSeparateRow)
+          event.newPartOptions.pinnedTabsOnSeparateRow)
     ) {
       // Re-layout
       this.relayout()
@@ -1811,7 +1812,7 @@ export class EditorGroupView extends Themable implements IEditorGroupView {
       editor.isDirty() ||
       (options?.pinned ??
         typeof options?.index ===
-        "number") /* unless specified, prefer to pin when opening with index */ ||
+          "number") /* unless specified, prefer to pin when opening with index */ ||
       (typeof options?.index === "number" &&
         this.model.isSticky(options.index)) ||
       editor.hasCapability(EditorInputCapabilities.Scratchpad)
@@ -2560,7 +2561,7 @@ export class EditorGroupView extends Themable implements IEditorGroupView {
         isNative &&
         (isWindows || isLinux) &&
         this.filesConfigurationService.getAutoSaveMode(editor).mode ===
-        AutoSaveMode.ON_WINDOW_CHANGE
+          AutoSaveMode.ON_WINDOW_CHANGE
       ) {
         autoSave = true
         confirmation = ConfirmResult.SAVE
@@ -2709,12 +2710,12 @@ export class EditorGroupView extends Themable implements IEditorGroupView {
       editorsToClose =
         filter.direction === CloseDirection.LEFT
           ? editorsToClose.slice(
-            0,
-            this.model.indexOf(filter.except, editorsToClose),
-          )
+              0,
+              this.model.indexOf(filter.except, editorsToClose),
+            )
           : editorsToClose.slice(
-            this.model.indexOf(filter.except, editorsToClose) + 1,
-          )
+              this.model.indexOf(filter.except, editorsToClose) + 1,
+            )
     }
 
     // Filter: except

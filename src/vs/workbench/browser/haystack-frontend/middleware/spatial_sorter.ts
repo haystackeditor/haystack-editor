@@ -110,9 +110,11 @@ export class SpatialSorter {
       ++numTargetEditors
     }
 
+    // We need to re-sort regardless of whether we need to
+    this.isDirty = true
+
     if (needsRecache) {
       this.cachedIdToEditorMap = newCachedMap
-      this.isDirty = true
       return true
     } else {
       return false
@@ -152,7 +154,10 @@ export class SpatialSorter {
 
   private buildTree(): SortEditor[] {
     this.idToSortEditor = new Map<string, SortEditor>()
-    for (const [editorId, editor] of this.cachedIdToEditorMap.entries()) {
+
+    const roots = []
+
+    for (const editor of this.cachedIdToEditorMap.values()) {
       const editorSize = getSizeForEditor(editor)
       const sortEditor: SortEditor = {
         canvasEditor: editor,
@@ -164,42 +169,7 @@ export class SpatialSorter {
         width: editorSize.x,
         height: editorSize.y,
       }
-      this.idToSortEditor.set(editorId, sortEditor)
-    }
-
-    for (const [
-      sourceEditorId,
-      relationships,
-    ] of this.relationshipsMap.entries()) {
-      const sourceSortEditor = this.idToSortEditor.get(sourceEditorId)
-      if (sourceSortEditor == null) continue
-      for (const relationship of relationships) {
-        const destSortEditor = this.idToSortEditor.get(relationship.toEditorId)
-        if (destSortEditor == null) continue
-        sourceSortEditor.children.push(destSortEditor)
-        destSortEditor.parent = sourceSortEditor
-      }
-    }
-    const roots = []
-    const globalVisited = new Set<SortEditor>()
-    // First traversal; find all root nodes.
-    for (const sortEditor of this.idToSortEditor.values()) {
-      if (sortEditor.parent == null) {
-        roots.push(sortEditor)
-        // DFS on node to add every dependency to the visited set.
-        // This is to avoid cycles appearing as disjoint from root nodes.
-        this.detectCycle(sortEditor, new Set(), globalVisited)
-      }
-    }
-    // Second traversal; find any cycles disjoint from root nodes.
-    for (const sortEditor of this.idToSortEditor.values()) {
-      if (globalVisited.has(sortEditor)) continue
-      // Note that we need a local visited to detect cycles, but will
-      // still provide the global visited set to prevent unnecessary traversal.
-      const localVisited = new Set<SortEditor>()
-      if (this.detectCycle(sortEditor, localVisited, globalVisited)) {
-        roots.push(sortEditor)
-      }
+      roots.push(sortEditor)
     }
 
     return roots
@@ -305,6 +275,7 @@ export class SpatialSorter {
     // Sorts by Y position to allow a one-shot pass.
     sortEditors.sort((a, b) => a.yPosition - b.yPosition)
     let currentRow: SortEditor | null = null
+
     for (const sortEditor of sortEditors) {
       if (currentRow == null) {
         currentRow = {
@@ -318,12 +289,21 @@ export class SpatialSorter {
           height: sortEditor.height,
         }
       } else {
-        if (
-          sortEditor.yPosition >= currentRow.yPosition - RECTANGLE_MAX_DELTA &&
-          sortEditor.yPosition + sortEditor.height <=
-            currentRow.yPosition + currentRow.height
-        ) {
+        if (sortEditor.yPosition <= currentRow.yPosition + currentRow.height) {
           currentRow.children.push(sortEditor)
+
+          currentRow.xPosition = Math.min(
+            sortEditor.xPosition,
+            currentRow.xPosition,
+          )
+          currentRow.width = Math.max(
+            sortEditor.xPosition + sortEditor.width - currentRow.xPosition,
+            currentRow.width,
+          )
+          currentRow.height = Math.max(
+            sortEditor.yPosition + sortEditor.height - currentRow.yPosition,
+            currentRow.height,
+          )
         } else {
           if (currentRow.children.length > 1) {
             sortedGroup.push(currentRow)
@@ -343,6 +323,7 @@ export class SpatialSorter {
         }
       }
     }
+
     if (currentRow != null) {
       if (currentRow.children.length > 1) {
         sortedGroup.push(currentRow)
@@ -350,12 +331,13 @@ export class SpatialSorter {
         sortedGroup.push(currentRow.children[0])
       }
     }
+
     return sortedGroup
   }
 
   private groupEditorsByCol(sortEditors: SortEditor[]): SortEditor[] {
     const sortedGroup: SortEditor[] = []
-    // Sorts by Y position to allow a one-shot pass.
+    // Sorts by X position to allow a one-shot pass.
     sortEditors.sort((a, b) => a.xPosition - b.xPosition)
     let currentCol: SortEditor | null = null
     for (const sortEditor of sortEditors) {
@@ -371,12 +353,21 @@ export class SpatialSorter {
           height: sortEditor.height,
         }
       } else {
-        if (
-          sortEditor.xPosition >= currentCol.xPosition - RECTANGLE_MAX_DELTA &&
-          sortEditor.xPosition + sortEditor.width <=
-            currentCol.xPosition + currentCol.width
-        ) {
+        if (sortEditor.xPosition <= currentCol.xPosition + currentCol.width) {
           currentCol.children.push(sortEditor)
+
+          currentCol.yPosition = Math.min(
+            sortEditor.yPosition,
+            currentCol.yPosition,
+          )
+          currentCol.height = Math.max(
+            sortEditor.yPosition + sortEditor.height - currentCol.yPosition,
+            currentCol.height,
+          )
+          currentCol.width = Math.max(
+            sortEditor.xPosition + sortEditor.width - currentCol.xPosition,
+            currentCol.width,
+          )
         } else {
           if (currentCol.children.length > 1) {
             sortedGroup.push(currentCol)
