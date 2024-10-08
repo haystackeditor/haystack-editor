@@ -1286,10 +1286,12 @@ export class WorkspaceScene extends Container implements IScene {
 
   public removeCanvasDots(): void {
     this.removeChild(this.backgroundSprite)
+    this.update()
   }
 
   public addCanvasDots(): void {
     this.addChildAt(this.backgroundSprite, 0)
+    this.update()
   }
 
   private createDashedLineTo(
