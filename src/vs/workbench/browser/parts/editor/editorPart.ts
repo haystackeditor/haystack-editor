@@ -23,8 +23,8 @@ import {
 } from "vs/base/browser/dom"
 import { Event, Emitter, Relay, PauseableEmitter } from "vs/base/common/event"
 import {
+  canvasBackground,
   contrastBorder,
-  editorBackground,
 } from "vs/platform/theme/common/colorRegistry"
 import {
   GroupDirection,
@@ -1351,7 +1351,7 @@ export class EditorPart extends Part implements IEditorPart, IEditorGroupsView {
       this.container,
       this.themeService
         .getColorTheme()
-        .getColor(editorBackground, true)
+        .getColor(canvasBackground, true)
         ?.toString() ?? "0xffffff",
     )
 
