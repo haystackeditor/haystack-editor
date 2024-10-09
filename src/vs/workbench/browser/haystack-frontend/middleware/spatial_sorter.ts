@@ -71,9 +71,13 @@ export class SpatialSorter {
     if (this.isDirty) {
       this.sortEditors()
 
-      WorkspaceStoreWrapper.getWorkspaceState().setSortedEditors(
-        this.sortedEditors,
-      )
+      // Sets the workspace state after the next frame to prevent
+      // updates while the React render is happening.
+      requestAnimationFrame(() => {
+        WorkspaceStoreWrapper.getWorkspaceState().setSortedEditors(
+          this.sortedEditors,
+        )
+      })
     }
     return this.sortedEditors
   }
