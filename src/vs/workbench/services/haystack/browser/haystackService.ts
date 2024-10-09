@@ -175,6 +175,7 @@ import {
   CanvasReferencesEditor,
 } from "vs/workbench/browser/haystack-frontend/editor/editor"
 import { isFunctionLikeSymbol } from "vs/workbench/browser/haystack-frontend/react_utils/is_functionlike_symbol"
+import { CustomEditorInput } from "vs/workbench/contrib/customEditor/browser/customEditorInput"
 
 interface IEditorConfiguration {
   editor: {
@@ -546,6 +547,21 @@ export class HaystackService extends Disposable implements IHaystackService {
         const editorInput = editorIdentifier.editor
 
         for (const editorPane of this._editorService.visibleEditorPanes) {
+          // The editor is a webview editor. Pan to it if it matches.
+          if (
+            editorInput instanceof CustomEditorInput &&
+            editorPane.group.id === editorIdentifier.groupId &&
+            editorInput.matches(editorPane.input)
+          ) {
+            if (
+              WorkspaceStoreWrapper.getWorkspaceState().panToEditorWithIdentifier(
+                editorIdentifier,
+              )
+            ) {
+              return Promise.resolve(editorPane)
+            }
+          }
+
           if (
             editorPane.group.id === editorIdentifier.groupId &&
             editorInput.matches(editorPane.input) &&
@@ -997,7 +1013,10 @@ export class HaystackService extends Disposable implements IHaystackService {
     }
 
     if (canvasCodeEditor != null && editorPane instanceof WebviewEditor) {
-      canvasCodeEditor.webviewEditor = editorPane
+      WorkspaceStoreWrapper.getWorkspaceState().setWebviewEditor(
+        canvasCodeEditor.uuid,
+        editorPane,
+      )
     }
 
     const codeEditor = editorPane.getControl()

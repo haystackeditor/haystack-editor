@@ -2888,20 +2888,16 @@ export class EditorGroupView extends Themable implements IEditorGroupView {
         },
         activeReplacement.options,
       )
-
-      // Close replaced active editor unless they match
-      if (!activeReplacement.editor.matches(activeReplacement.replacement)) {
-        if (activeReplacement.forceReplaceDirty) {
-          this.doCloseEditor(activeReplacement.editor, true, {
-            context: EditorCloseContext.REPLACE,
-          })
-        } else {
-          await this.doCloseEditorWithConfirmationHandling(
-            activeReplacement.editor,
-            { preserveFocus: true },
-            { context: EditorCloseContext.REPLACE },
-          )
-        }
+      if (activeReplacement.forceReplaceDirty) {
+        this.doCloseEditor(activeReplacement.editor, true, {
+          context: EditorCloseContext.REPLACE,
+        })
+      } else {
+        await this.doCloseEditorWithConfirmationHandling(
+          activeReplacement.editor,
+          { preserveFocus: true },
+          { context: EditorCloseContext.REPLACE },
+        )
       }
     }
   }

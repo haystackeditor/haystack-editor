@@ -155,7 +155,6 @@ export class OverlayWebview extends Disposable implements IOverlayWebview {
     targetWindow: CodeWindow,
     scopedContextKeyService: IContextKeyService | undefined,
   ) {
-    console.log("CLAIMED!")
     if (this._isDisposed) {
       return
     }

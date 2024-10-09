@@ -20,7 +20,11 @@ import {
   IEditorOptions,
   IResourceEditorInput,
 } from "vs/platform/editor/common/editor"
-import { IEditorIdentifier, IEditorPane, IResourceMergeEditorInput } from "vs/workbench/common/editor"
+import {
+  IEditorIdentifier,
+  IEditorPane,
+  IResourceMergeEditorInput,
+} from "vs/workbench/common/editor"
 import { IDisposable } from "node-pty"
 import { DocumentSymbol, SymbolKind } from "vs/editor/common/languages"
 import {
@@ -57,6 +61,7 @@ import {
   CanvasEditorType,
   CanvasGhostEditor,
 } from "vs/workbench/browser/haystack-frontend/editor/editor"
+import { WebviewEditor } from "vs/workbench/contrib/webviewPanel/browser/webviewEditor"
 
 export class WorkspaceStoreWrapper {
   static workspaceStore: StoreApi<WorkspaceState>
@@ -507,6 +512,7 @@ type Actions = {
     uri: URI,
   ) => boolean
   setShowNavigationBar: (showNavigationBar: boolean) => void
+  setWebviewEditor: (uuid: string, webviewEditor: WebviewEditor) => void
 }
 
 export type WorkspaceState = State & Actions
@@ -582,7 +588,7 @@ export type ModalEditorArgs = EditorBaseArgs & {
 export type MergeEditorArgs = EditorBaseArgs & {
   type: CanvasEditorType.MERGE_EDITOR
   editorInput: IResourceMergeEditorInput
-  deferredEditorPanePromise?: DeferredPromise<IEditorPane | undefined>,
+  deferredEditorPanePromise?: DeferredPromise<IEditorPane | undefined>
 }
 
 export type ReferencesEditorArgs = {
