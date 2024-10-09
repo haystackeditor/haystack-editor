@@ -57,8 +57,7 @@ const dirs = [
   "test/automation",
   "test/integration/browser",
   "test/monaco",
-  "test/smoke",
-  ".vscode/extensions/vscode-selfhost-test-provider",
+  "test/smoke"
 ]
 
 if (fs.existsSync(`${__dirname}/../../.build/distro/npm`)) {
