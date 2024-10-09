@@ -24,18 +24,17 @@
   "nodejsRepository": "https://nodejs.org",
   "urlProtocol": "haystack-editor",
   "licenseName": "EULA",
-  "licenseUrl": "https://github.com/haystackeditor/haystack-license/",
+  "licenseUrl": "https://github.com/haystackeditor/haystack-editor/blob/main/LICENSE.txt",
   "licenseFileName": "LICENSE.txt",
   "version": "1.90.0",
-  "haystackVersion": "0.18",
+  "haystackVersion": "0.19",
   "builtInExtensions": [],
   "extensionsGallery": {
-    "serviceUrl": "https://tmn1bnqyd5.execute-api.us-west-2.amazonaws.com/prod/gallery",
-    "itemUrl": "https://tmn1bnqyd5.execute-api.us-west-2.amazonaws.com/prod/item"
+    "serviceUrl": "https://open-vsx.org/vscode/gallery",
+    "itemUrl": "https://open-vsx.org/vscode/item"
   },
   "linkProtectionTrustedDomains": [
-    "https://tmn1bnqyd5.execute-api.us-west-2.amazonaws.com/prod",
-    "https://open-vsx.org/vscode"
+    "https://open-vsx.org"
   ],
   "extensionAllowedBadgeProviders": [
     "api.bintray.com",
