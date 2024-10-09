@@ -67,6 +67,7 @@ import {
 import { createSingleCallFunction } from "vs/base/common/functional"
 import { LRUCache } from "vs/base/common/map"
 import { DEFAULT_FONT_FAMILY } from "vs/base/browser/fonts"
+import { StandardMouseEvent } from "vs/base/browser/mouseEvent"
 
 /**
  * The orthogonal distance to the slider at which dragging "resets". This implements "snapping"
@@ -1644,30 +1645,38 @@ class InnerMinimap extends Disposable {
         e.preventDefault()
 
         const renderMinimap = this._model.options.renderMinimap
+
         if (renderMinimap === RenderMinimap.None) {
           return
         }
+
         if (!this._lastRenderData) {
           return
         }
+
         if (this._model.options.size !== "proportional") {
           if (e.button === 0 && this._lastRenderData) {
             // pretend the click occurred in the center of the slider
             const position = dom.getDomNodePagePosition(this._slider.domNode)
             const initialPosY = position.top + position.height / 2
             this._startSliderDragging(
-              e,
+              (e as unknown as StandardMouseEvent).browserEvent as PointerEvent,
               initialPosY,
               this._lastRenderData.renderedLayout,
             )
           }
           return
         }
+
         const minimapLineHeight = this._model.options.minimapLineHeight
+
+        // We do the cast here because the event is not typed correctly.
+        // For some reason, it is a standard mouse event, which does not
+        // have offset X/Y.
         const internalOffsetY =
           (this._model.options.canvasInnerHeight /
             this._model.options.canvasOuterHeight) *
-          e.offsetY
+          (e as unknown as StandardMouseEvent).browserEvent.offsetY
         const lineIndex = Math.floor(internalOffsetY / minimapLineHeight)
 
         let lineNumber =
@@ -1688,10 +1697,14 @@ class InnerMinimap extends Disposable {
       (e) => {
         e.preventDefault()
         e.stopPropagation()
-        if (e.button === 0 && this._lastRenderData) {
+
+        if (
+          (e as unknown as StandardMouseEvent).browserEvent.button === 0 &&
+          this._lastRenderData
+        ) {
           this._startSliderDragging(
-            e,
-            e.pageY,
+            (e as unknown as StandardMouseEvent).browserEvent as PointerEvent,
+            (e as unknown as StandardMouseEvent).browserEvent.pageY,
             this._lastRenderData.renderedLayout,
           )
         }
