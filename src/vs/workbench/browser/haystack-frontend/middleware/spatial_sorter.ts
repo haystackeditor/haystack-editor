@@ -53,6 +53,7 @@ type SymbolToSymbolRelationship = {
   fromLocationRanges: IRange[]
   toEditorId: string
   dependencyArrowType: DependencyArrowType.SYMBOL_DEPENDENCY
+  unconditional: boolean
 }
 
 export class SpatialSorter {
@@ -237,6 +238,7 @@ export class SpatialSorter {
             fromLocationRanges: [relationship.fromLocationRange],
             toEditorId: relationship.toEditorId,
             dependencyArrowType: relationship.relationshipType,
+            unconditional: false,
           })
         } else if (
           existingRelationship.dependencyArrowType ===
@@ -563,6 +565,7 @@ export class SpatialSorter {
       dependencyArrowType: DependencyArrowType.SYMBOL_DEPENDENCY,
       fromLocationRanges,
       toEditorId: toEditorId,
+      unconditional: true,
     })
   }
 

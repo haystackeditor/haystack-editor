@@ -140,8 +140,6 @@ export class SpatialSortMiddleware implements Middleware {
             return
           }
 
-          // We use the store's map because it's probably more updated
-          // due to the above await.
           this.generateEditorHighlightsAndColors(idToEditorMap)
         } else if (
           !this.shouldGenerateArrows(idToEditorMap, event.previousData)
@@ -149,8 +147,6 @@ export class SpatialSortMiddleware implements Middleware {
           return
         }
 
-        // If we awaited a call, the current ID to editor map is more updated.
-        // Otherwise, the event ID to editor map is the more recent one.
         this.generateDependencyArrows(idToEditorMap)
         return
       }
@@ -448,6 +444,7 @@ export class SpatialSortMiddleware implements Middleware {
           const existingColorRelationship = this.colorRelationshipMap
             .get(fromEditorId)
             ?.get(relationship.toEditorId)
+
           if (existingColorRelationship != null) {
             // Checks if we need to perhaps fix up the highlights.
             if (existingColorRelationship.decorationIds.length === 0) {
@@ -476,6 +473,7 @@ export class SpatialSortMiddleware implements Middleware {
                   relationship.fromLocationRanges[0].startColumn,
                 )
               : null
+
           this.setColorRelationship(
             fromEditorId,
             relationship.toEditorId,
@@ -576,14 +574,38 @@ export class SpatialSortMiddleware implements Middleware {
         const previousToEditor = previousIdToEditorMap.get(toEditorId)
         const currentToEditor = idToEditorMap.get(toEditorId)
 
-        if (containsfromEditorId && idToEditorMap.has(toEditorId)) {
-          if (
-            fromEditorDeepEquals &&
-            this.deepEditorEquals(previousToEditor, currentToEditor)
-          ) {
-            continue
+        const spatialRelationships =
+          this.spatialSorter.relationshipsMap.get(fromEditorId)
+
+        let shouldSkipUnconditionalRelationship = false
+
+        if (spatialRelationships != null) {
+          for (const relationship of spatialRelationships) {
+            if (
+              relationship.dependencyArrowType ===
+                DependencyArrowType.SYMBOL_DEPENDENCY &&
+              relationship.toEditorId === toEditorId &&
+              relationship.unconditional
+            ) {
+              shouldSkipUnconditionalRelationship = true
+              break
+            }
           }
         }
+
+        if (shouldSkipUnconditionalRelationship) {
+          continue
+        }
+
+        if (this.spatialSorter.relationshipsMap.get(fromEditorId))
+          if (containsfromEditorId && idToEditorMap.has(toEditorId)) {
+            if (
+              fromEditorDeepEquals &&
+              this.deepEditorEquals(previousToEditor, currentToEditor)
+            ) {
+              continue
+            }
+          }
 
         for (const decorationId of colorRelationship.decorationIds) {
           WorkspaceStoreWrapper.getWorkspaceState().clearEditorRelationshipHighlights(
