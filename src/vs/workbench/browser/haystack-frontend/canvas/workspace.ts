@@ -699,6 +699,7 @@ export class WorkspaceScene extends Container implements IScene {
 
   public update(): void {
     workspaceMirror.setScale(this.scale.x, this.lastViewportScrolledPosition)
+
     if (Vector.sub(this.previousCamera, this.camera).mag() > 0.1) {
       workspaceMirror.updateUiPosition(
         Vector.mul(Vector.sub(this.previousCamera, this.camera), this.scale.x),
@@ -710,6 +711,7 @@ export class WorkspaceScene extends Container implements IScene {
       this.scrollTile()
       this.previousCamera = this.camera.copy()
     }
+
     this.manager.render()
   }
 
@@ -915,13 +917,13 @@ export class WorkspaceScene extends Container implements IScene {
   }
 
   public setDependencyArrows(dependencyArrows: DependencyArrow[]) {
-    this.dirtyRender()
-
     for (const dependencyArrowGraphic of this.dependencyArrows) {
       this.removeChild(dependencyArrowGraphic)
       dependencyArrowGraphic.destroy()
     }
+
     this.dependencyArrows = []
+
     for (const dependencyArrow of dependencyArrows) {
       const dependencyArrowGraphic = new Graphics()
       this.dependencyArrows.push(dependencyArrowGraphic)
@@ -1029,6 +1031,8 @@ export class WorkspaceScene extends Container implements IScene {
 
       dependencyArrowGraphic.stroke({ width: 3, color: dependencyArrow.color })
     }
+
+    this.dirtyRender()
   }
 
   private createArrowWings(

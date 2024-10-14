@@ -1109,11 +1109,11 @@ export function getWorkspaceStore() {
               editor.identifier != null
             ) {
               let editor_type
-              if (editor.type == CanvasEditorType.CODE_EDITOR) {
+              if (editor.type === CanvasEditorType.CODE_EDITOR) {
                 editor_type = "code"
-              } else if (editor.type == CanvasEditorType.GHOST_EDITOR) {
+              } else if (editor.type === CanvasEditorType.GHOST_EDITOR) {
                 editor_type = "ghost"
-              } else if (editor.type == CanvasEditorType.DIFF_EDITOR) {
+              } else if (editor.type === CanvasEditorType.DIFF_EDITOR) {
                 editor_type = "diff"
               }
               get().sendTelemetry("editor closed", {
@@ -1197,11 +1197,11 @@ export function getWorkspaceStore() {
             editor.identifier != null
           ) {
             let editor_type
-            if (editor.type == CanvasEditorType.CODE_EDITOR) {
+            if (editor.type === CanvasEditorType.CODE_EDITOR) {
               editor_type = "code"
-            } else if (editor.type == CanvasEditorType.GHOST_EDITOR) {
+            } else if (editor.type === CanvasEditorType.GHOST_EDITOR) {
               editor_type = "ghost"
-            } else if (editor.type == CanvasEditorType.DIFF_EDITOR) {
+            } else if (editor.type === CanvasEditorType.DIFF_EDITOR) {
               editor_type = "diff"
             } else if (editor.type === CanvasEditorType.MODAL_EDITOR) {
               editor_type = "modal"

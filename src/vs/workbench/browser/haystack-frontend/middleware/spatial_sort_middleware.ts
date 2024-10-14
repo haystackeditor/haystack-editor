@@ -4,7 +4,6 @@
  *  license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { DeferredPromise } from "vs/base/common/async"
 import { Position } from "vs/editor/common/core/position"
 import { IRange, Range } from "vs/editor/common/core/range"
 import { Rectangle } from "vs/workbench/browser/haystack-frontend/canvas/rectangle"
@@ -30,6 +29,7 @@ import {
   SortSymbolData,
   SymbolRelationship,
 } from "vs/workbench/services/haystack/common/haystackService"
+import { CancellationTokenSource } from "vs/base/common/cancellation"
 
 interface ColorRelationship {
   color: number
@@ -48,7 +48,8 @@ export class SpatialSortMiddleware implements Middleware {
     Map<string, ColorRelationship>
   >()
 
-  private currentSortPromise: DeferredPromise<void> | null = null
+  private currentRequestNumber = -1
+  private referencesCancellationToken: CancellationTokenSource | null = null
 
   // If you change these numbers, also change
   // haystack-code-editor/src/vs/editor/browser/widget/diffEditor/style.css
@@ -120,24 +121,10 @@ export class SpatialSortMiddleware implements Middleware {
           }
         }
 
-        // Prevents out of order dependency shenanigans.
-        const queueItem = new DeferredPromise<void>()
-
-        // Five second timeout to avoid deadlocking.
-        setTimeout(() => {
-          if (queueItem.isResolved) return
-
-          WorkspaceStoreWrapper.getWorkspaceState().sendTelemetry(
-            "Dependency arrow timeout",
-          )
-          queueItem.complete()
-        }, 5000)
-
-        const nextQueueItem = this.currentSortPromise
-        this.currentSortPromise = queueItem
-        if (nextQueueItem != null) {
-          await nextQueueItem.p
-        }
+        // Cancels any current outgoing requests.
+        this.referencesCancellationToken?.cancel()
+        this.currentRequestNumber++
+        const requestNumber = this.currentRequestNumber
 
         if (
           this.spatialSorter.shouldCacheAndRegenerateRelationships(
@@ -148,7 +135,10 @@ export class SpatialSortMiddleware implements Middleware {
           this.generateDependencyArrows(idToEditorMap)
           this.clearHighlightsAndColors(idToEditorMap, event.previousData)
 
-          await this.generateRelationshipMap()
+          await this.generateRelationshipMap(requestNumber)
+          if (requestNumber !== this.currentRequestNumber) {
+            return
+          }
 
           // We use the store's map because it's probably more updated
           // due to the above await.
@@ -156,14 +146,12 @@ export class SpatialSortMiddleware implements Middleware {
         } else if (
           !this.shouldGenerateArrows(idToEditorMap, event.previousData)
         ) {
-          queueItem.complete()
           return
         }
 
         // If we awaited a call, the current ID to editor map is more updated.
         // Otherwise, the event ID to editor map is the more recent one.
         this.generateDependencyArrows(idToEditorMap)
-        queueItem.complete()
         return
       }
       case StateEventType.SCALE_CHANGE: {
@@ -180,7 +168,7 @@ export class SpatialSortMiddleware implements Middleware {
     }
   }
 
-  private async generateRelationshipMap() {
+  private async generateRelationshipMap(requestNumber: number) {
     const symbolData: SortSymbolData[] = []
     for (const canvasEditor of this.spatialSorter.cachedIdToEditorMap.values()) {
       if (
@@ -202,6 +190,9 @@ export class SpatialSortMiddleware implements Middleware {
     }
 
     const relationships = await this.getSymbolRelationships(symbolData)
+    if (requestNumber !== this.currentRequestNumber) {
+      return
+    }
     this.spatialSorter.buildRelationshipGraph(relationships)
   }
 
@@ -394,7 +385,12 @@ export class SpatialSortMiddleware implements Middleware {
       WorkspaceStoreWrapper.getWorkspaceState().haystackService
     if (haystackService == null) return []
 
-    return haystackService.getSymbolRelationships(symbolData)
+    this.referencesCancellationToken = new CancellationTokenSource()
+
+    return haystackService.getSymbolRelationships(
+      symbolData,
+      this.referencesCancellationToken,
+    )
   }
 
   private shouldGenerateArrows(

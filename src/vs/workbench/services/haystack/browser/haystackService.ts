@@ -1846,16 +1846,16 @@ export class HaystackService extends Disposable implements IHaystackService {
 
   public async getSymbolRelationships(
     symbolData: SortSymbolData[],
+    cancellationToken: CancellationTokenSource,
   ): Promise<SymbolRelationship[]> {
     const symbolRelationships: SymbolRelationship[] = []
     for (const toSymbolDatum of symbolData) {
       const model = await this.getOrCreateModel(toSymbolDatum.uri)
       if (model == null) continue
 
-      const token = new CancellationTokenSource()
       const outlineModel = await this._outlineModelService.getOrCreate(
         model,
-        token.token,
+        cancellationToken.token,
       )
 
       if (toSymbolDatum.range == null) {
@@ -1914,6 +1914,7 @@ export class HaystackService extends Disposable implements IHaystackService {
         const references = await this.getReferencesForeditor(
           Range.fromPositions(position),
           toSymbolDatum.uri,
+          cancellationToken,
         )
 
         // Finds any symbol data that match the reference.
@@ -1949,6 +1950,7 @@ export class HaystackService extends Disposable implements IHaystackService {
   private async getReferencesForeditor(
     range: IRange,
     uri: URI,
+    cancellationToken?: CancellationTokenSource,
   ): Promise<Location[]> {
     const model = this._modelService.getModel(uri)
     if (model == null) return []
@@ -1958,7 +1960,7 @@ export class HaystackService extends Disposable implements IHaystackService {
     const references: Location[] = []
 
     for (const provider of providers) {
-      const source = new CancellationTokenSource()
+      const source = cancellationToken ?? new CancellationTokenSource()
       const providerReferences = await provider.provideReferences(
         model,
         new Position(range.startLineNumber, range.startColumn),
