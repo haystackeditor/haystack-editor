@@ -1067,7 +1067,10 @@ export class EditorGroupView extends Themable implements IEditorGroupView {
       }
     }
 
-    if (activeEditor.resource.scheme !== "file") {
+    if (
+      activeEditor.resource.scheme !== "file" &&
+      activeEditor.resource.scheme !== "vscode-remote"
+    ) {
       return this._haystackService
         .createModalEditor(
           activeEditor,
