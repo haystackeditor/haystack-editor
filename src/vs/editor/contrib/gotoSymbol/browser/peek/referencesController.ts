@@ -255,7 +255,7 @@ export abstract class ReferencesController implements IEditorContribution {
               if (
                 this._widget &&
                 this._editor.getOption(EditorOption.peekWidgetDefaultFocus) ===
-                "editor"
+                  "editor"
               ) {
                 this._widget.focusOnPreviewEditor()
               }
@@ -370,16 +370,19 @@ export abstract class ReferencesController implements IEditorContribution {
     }
 
     let symbol: DocumentSymbol | null = null
-    for (const documentSymbol of documentSymbols) {
-      if (
-        documentSymbol.selectionRange.startLineNumber ===
-        range.startLineNumber &&
-        documentSymbol.selectionRange.endLineNumber === range.endLineNumber &&
-        documentSymbol.selectionRange.startColumn === range.startColumn &&
-        documentSymbol.selectionRange.endColumn === range.endColumn
-      ) {
-        symbol = documentSymbol
-        break
+    let documentSymbol: DocumentSymbol | undefined
+
+    while ((documentSymbol = documentSymbols.pop())) {
+      if (Range.containsRange(documentSymbol.range, range)) {
+        if (Range.containsRange(documentSymbol.selectionRange, range)) {
+          symbol = documentSymbol
+          break
+        }
+
+        // Recurse further into the symbol subtree.
+        if ((documentSymbol.children?.length ?? 0) > 0) {
+          documentSymbols.push(...documentSymbol.children!)
+        }
       }
     }
 
@@ -398,6 +401,7 @@ export abstract class ReferencesController implements IEditorContribution {
           endLineNumber: range.startLineNumber,
           endColumn: range.startColumn,
         })
+        this._editor.focus()
         const modelNow = this._editor.getModel()
         const decorations = this._editor.createDecorationsCollection([
           {
@@ -440,6 +444,12 @@ export abstract class ReferencesController implements IEditorContribution {
         {
           highlightRange: range,
           doNotPanTo: openWithoutClosing,
+          selectionRange: {
+            startLineNumber: range.startLineNumber,
+            startColumn: range.startColumn,
+            endLineNumber: range.startLineNumber,
+            endColumn: range.startColumn,
+          },
         },
         { preserveFocus: openWithoutClosing },
       )
@@ -479,7 +489,7 @@ export abstract class ReferencesController implements IEditorContribution {
     for (const documentSymbol of documentSymbols) {
       if (
         documentSymbol.selectionRange.startLineNumber ===
-        range.startLineNumber &&
+          range.startLineNumber &&
         documentSymbol.selectionRange.endLineNumber === range.endLineNumber &&
         documentSymbol.selectionRange.startColumn === range.startColumn &&
         documentSymbol.selectionRange.endColumn === range.endColumn
@@ -539,6 +549,12 @@ export abstract class ReferencesController implements IEditorContribution {
         symbol.range,
         {
           highlightRange: range,
+          selectionRange: {
+            startLineNumber: range.startLineNumber,
+            startColumn: range.startColumn,
+            endLineNumber: range.startLineNumber,
+            endColumn: range.startColumn,
+          },
         },
       )
     }

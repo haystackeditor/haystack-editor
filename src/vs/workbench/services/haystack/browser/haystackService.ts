@@ -1686,7 +1686,13 @@ export class HaystackService extends Disposable implements IHaystackService {
       return
     }
 
-    await this.createSymbolEditorWithSymbol(name, symbolType, uri, symbol.range)
+    await this.createSymbolEditorWithSymbol(
+      name,
+      symbolType,
+      uri,
+      symbol.range,
+      args,
+    )
   }
 
   isValidContainerSymbol(documentSymbol: DocumentSymbol): boolean {

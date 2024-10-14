@@ -282,6 +282,14 @@ export abstract class SymbolNavigationAction extends EditorAction2 {
                       symbol.range,
                       {
                         highlightRange: range,
+                        selectionRange: range
+                          ? {
+                              startLineNumber: range.startLineNumber,
+                              startColumn: range.startColumn,
+                              endLineNumber: range.startLineNumber,
+                              endColumn: range.startColumn,
+                            }
+                          : undefined,
                       },
                     )
                   })
@@ -562,6 +570,12 @@ export abstract class SymbolNavigationAction extends EditorAction2 {
         symbol.range,
         {
           highlightRange: range,
+          selectionRange: {
+            startLineNumber: range.startLineNumber,
+            startColumn: range.startColumn,
+            endLineNumber: range.startLineNumber,
+            endColumn: range.startColumn,
+          },
           forceNewEditor: this.configuration.openNewEditor,
           unconditionallyAddDependencyRange: dependencyRange,
         },

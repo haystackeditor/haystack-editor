@@ -1038,6 +1038,12 @@ export class EditorGroupView extends Themable implements IEditorGroupView {
                   },
                   doNotPanTo: true,
                   forceNewEditor: true,
+                  selectionRange: {
+                    startLineNumber: symbol.selectionRange.startLineNumber,
+                    startColumn: symbol.selectionRange.startColumn,
+                    endLineNumber: symbol.selectionRange.startLineNumber,
+                    endColumn: symbol.selectionRange.startColumn,
+                  },
                 },
                 options,
               )
