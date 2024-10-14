@@ -27,7 +27,7 @@
   "licenseUrl": "https://github.com/haystackeditor/haystack-editor/blob/main/LICENSE.txt",
   "licenseFileName": "LICENSE.txt",
   "version": "1.90.0",
-  "haystackVersion": "0.19.1",
+  "haystackVersion": "0.19.2",
   "builtInExtensions": [],
   "extensionsGallery": {
     "serviceUrl": "https://open-vsx.org/vscode/gallery",
