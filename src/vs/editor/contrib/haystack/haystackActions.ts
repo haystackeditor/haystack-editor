@@ -309,7 +309,7 @@ export class ImportSettingsAction extends Action2 {
           userDataProfileService.currentProfile.settingsResource,
           settingsJson,
         )
-      } catch (e) { }
+      } catch (e) {}
 
       const vscodeKeybindingsUri = URI.joinPath(
         URI.file(basePath),
@@ -324,7 +324,7 @@ export class ImportSettingsAction extends Action2 {
           userDataProfileService.currentProfile.keybindingsResource,
           keybindingsJson,
         )
-      } catch (e) { }
+      } catch (e) {}
 
       // Import extensions
       const vscodeDir = URI.joinPath(homeUri, ".vscode")
@@ -377,7 +377,8 @@ export class ImportSettingsAction extends Action2 {
       )
       if (failedExtensions.length > 0) {
         notificationsService.error(
-          `Failed to import ${failedExtensions.length
+          `Failed to import ${
+            failedExtensions.length
           } extensions. Consider downloading the following extension from the VS Code store and importing them manually: ${failedExtensions.join(
             ", ",
           )}`,
@@ -501,7 +502,7 @@ export class ImportSettingsAction extends Action2 {
           const result = await textFileService.read(extensionUri)
           const metadata = JSON.parse(result.value)
           extensionName = metadata.displayName
-        } catch (e) { }
+        } catch (e) {}
         failedExtensions.push(extensionName ?? id)
       }
     }

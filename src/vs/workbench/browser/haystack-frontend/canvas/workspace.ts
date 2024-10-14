@@ -564,25 +564,6 @@ export class WorkspaceScene extends Container implements IScene {
           this.setHandMode(true)
         }
         break
-      case KeyCode.A:
-        if (isModifierKeypressed(e)) {
-          workspaceMirror.selectAllEditors()
-          commitAction()
-        }
-        break
-      case KeyCode.Z:
-        if (isModifierKeypressed(e)) {
-          const undoRedoMiddleware = middlewareManager.getMiddleware(
-            MiddlewareType.UNDO_REDO,
-          ) as UndoRedoMiddleware
-          if (undoRedoMiddleware == null) break
-          if (e.shiftKey) {
-            undoRedoMiddleware.handleRedo()
-          } else {
-            undoRedoMiddleware.handleUndo()
-          }
-        }
-        break
       case KeyCode.W:
         break
       case KeyCode.ONE:

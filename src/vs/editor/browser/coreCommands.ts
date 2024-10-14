@@ -60,6 +60,11 @@ import { IViewModel } from "vs/editor/common/viewModel"
 import { ISelection } from "vs/editor/common/core/selection"
 import { getActiveElement } from "vs/base/browser/dom"
 import { CursorContext } from "vs/editor/common/cursor/cursorContext"
+import { canvasRef } from "vs/workbench/browser/haystack-frontend/root/app_common"
+import { WorkspaceStoreWrapper } from "vs/workbench/browser/haystack-frontend/workspace/workspace_store_wrapper"
+import { middlewareManager } from "vs/workbench/browser/haystack-frontend/middleware/middleware"
+import { MiddlewareType } from "vs/workbench/browser/haystack-frontend/middleware/middleware_common"
+import { UndoRedoMiddleware } from "vs/workbench/browser/haystack-frontend/middleware/undo_redo_middleware"
 
 const CORE_WEIGHT = KeybindingWeight.EditorCore
 
@@ -383,6 +388,20 @@ abstract class EditorOrNativeTextInputCommand {
       },
     )
 
+    // 3. handle case when focus in on the canvas.
+    target.addImplementation(
+      100,
+      "canvas",
+      (accessor: ServicesAccessor, args: unknown) => {
+        const activeElement = getActiveElement()
+        if (canvasRef.current && canvasRef.current.contains(activeElement)) {
+          this._runCanvasCommand()
+          return true
+        }
+        return false
+      },
+    )
+
     // 3. (default) handle case when focus is somewhere else.
     target.addImplementation(
       0,
@@ -419,6 +438,8 @@ abstract class EditorOrNativeTextInputCommand {
     editor: ICodeEditor,
     args: unknown,
   ): void | Promise<void>
+
+  public abstract _runCanvasCommand(): void
 }
 
 export const enum NavigationCommandRevealType {
@@ -2518,6 +2539,9 @@ export namespace CoreNavigationCommands {
         ),
       ])
     }
+    public _runCanvasCommand(): void {
+      WorkspaceStoreWrapper.getWorkspaceState().selectAllEditors()
+    }
   })()
 
   export interface SetSelectionCommandOptions extends BaseCommandOptions {
@@ -2836,6 +2860,15 @@ export namespace CoreEditingCommands {
       }
       return editor.getModel().undo()
     }
+    public _runCanvasCommand(): void {
+      const undoRedoMiddleware = middlewareManager.getMiddleware(
+        MiddlewareType.UNDO_REDO,
+      ) as UndoRedoMiddleware
+
+      if (undoRedoMiddleware == null) return
+
+      undoRedoMiddleware.handleUndo()
+    }
   })()
 
   export const Redo = new (class extends EditorOrNativeTextInputCommand {
@@ -2857,6 +2890,15 @@ export namespace CoreEditingCommands {
         return
       }
       return editor.getModel().redo()
+    }
+    public _runCanvasCommand(): void {
+      const undoRedoMiddleware = middlewareManager.getMiddleware(
+        MiddlewareType.UNDO_REDO,
+      ) as UndoRedoMiddleware
+
+      if (undoRedoMiddleware == null) return
+
+      undoRedoMiddleware.handleRedo()
     }
   })()
 }
