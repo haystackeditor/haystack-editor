@@ -248,9 +248,11 @@ export abstract class SymbolNavigationAction extends EditorAction2 {
           // on a symbol with only a reference to itself.
           const singletonReference =
             referenceCount === 1 ? references.firstReference() : undefined
+
           const noReferences =
             !altAction &&
             singletonReference &&
+            singletonReference.uri.path === model.uri.path &&
             Range.containsPosition(singletonReference.range, anchor.position)
 
           if (referenceCount === 0 || noReferences) {
