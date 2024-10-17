@@ -11,7 +11,7 @@ import * as uuid from "vs/base/common/uuid"
 
 export function useResizable(
   element: HTMLElement | null,
-  options: ResizableOptions,
+  options: ResizableOptions
 ) {
   React.useEffect(() => {
     if (element == null) return

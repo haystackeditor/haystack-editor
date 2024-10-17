@@ -9,215 +9,163 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { getWindow, runWhenWindowIdle } from "vs/base/browser/dom"
-import { onUnexpectedError } from "vs/base/common/errors"
-import {
-  Disposable,
-  DisposableMap,
-  IDisposable,
-} from "vs/base/common/lifecycle"
-import { ICodeEditor } from "vs/editor/browser/editorBrowser"
-import {
-  EditorContributionInstantiation,
-  IEditorContributionDescription,
-} from "vs/editor/browser/editorExtensions"
-import { IEditorContribution } from "vs/editor/common/editorCommon"
-import { IInstantiationService } from "vs/platform/instantiation/common/instantiation"
+import { getWindow, runWhenWindowIdle } from 'vs/base/browser/dom';
+import { onUnexpectedError } from 'vs/base/common/errors';
+import { Disposable, DisposableMap, IDisposable } from 'vs/base/common/lifecycle';
+import { ICodeEditor } from 'vs/editor/browser/editorBrowser';
+import { EditorContributionInstantiation, IEditorContributionDescription } from 'vs/editor/browser/editorExtensions';
+import { IEditorContribution } from 'vs/editor/common/editorCommon';
+import { IInstantiationService } from 'vs/platform/instantiation/common/instantiation';
 
 export class CodeEditorContributions extends Disposable {
-  private _editor: ICodeEditor | null = null
-  private _instantiationService: IInstantiationService | null = null
 
-  /**
-   * Contains all instantiated contributions.
-   */
-  private readonly _instances = this._register(
-    new DisposableMap<string, IEditorContribution>(),
-  )
-  /**
-   * Contains contributions which are not yet instantiated.
-   */
-  private readonly _pending = new Map<string, IEditorContributionDescription>()
-  /**
-   * Tracks which instantiation kinds are still left in `_pending`.
-   */
-  private readonly _finishedInstantiation: boolean[] = []
+	private _editor: ICodeEditor | null = null;
+	private _instantiationService: IInstantiationService | null = null;
 
-  constructor() {
-    super()
+	/**
+	 * Contains all instantiated contributions.
+	 */
+	private readonly _instances = this._register(new DisposableMap<string, IEditorContribution>());
+	/**
+	 * Contains contributions which are not yet instantiated.
+	 */
+	private readonly _pending = new Map<string, IEditorContributionDescription>();
+	/**
+	 * Tracks which instantiation kinds are still left in `_pending`.
+	 */
+	private readonly _finishedInstantiation: boolean[] = [];
 
-    this._finishedInstantiation[EditorContributionInstantiation.Eager] = false
-    this._finishedInstantiation[
-      EditorContributionInstantiation.AfterFirstRender
-    ] = false
-    this._finishedInstantiation[
-      EditorContributionInstantiation.BeforeFirstInteraction
-    ] = false
-    this._finishedInstantiation[EditorContributionInstantiation.Eventually] =
-      false
-  }
+	constructor(
 
-  public initialize(
-    editor: ICodeEditor,
-    contributions: IEditorContributionDescription[],
-    instantiationService: IInstantiationService,
-  ) {
-    this._editor = editor
-    this._instantiationService = instantiationService
+	) {
+		super();
 
-    for (const desc of contributions) {
-      if (this._pending.has(desc.id)) {
-        onUnexpectedError(
-          new Error(
-            `Cannot have two contributions with the same id ${desc.id}`,
-          ),
-        )
-        continue
-      }
-      this._pending.set(desc.id, desc)
-    }
+		this._finishedInstantiation[EditorContributionInstantiation.Eager] = false;
+		this._finishedInstantiation[EditorContributionInstantiation.AfterFirstRender] = false;
+		this._finishedInstantiation[EditorContributionInstantiation.BeforeFirstInteraction] = false;
+		this._finishedInstantiation[EditorContributionInstantiation.Eventually] = false;
+	}
 
-    this._instantiateSome(EditorContributionInstantiation.Eager)
+	public initialize(editor: ICodeEditor, contributions: IEditorContributionDescription[], instantiationService: IInstantiationService) {
+		this._editor = editor;
+		this._instantiationService = instantiationService;
 
-    // AfterFirstRender
-    // - these extensions will be instantiated at the latest 50ms after the first render.
-    // - but if there is idle time, we will instantiate them sooner.
-    this._register(
-      runWhenWindowIdle(getWindow(this._editor.getDomNode()), () => {
-        this._instantiateSome(EditorContributionInstantiation.AfterFirstRender)
-      }),
-    )
+		for (const desc of contributions) {
+			if (this._pending.has(desc.id)) {
+				onUnexpectedError(new Error(`Cannot have two contributions with the same id ${desc.id}`));
+				continue;
+			}
+			this._pending.set(desc.id, desc);
+		}
 
-    // BeforeFirstInteraction
-    // - these extensions will be instantiated at the latest before a mouse or a keyboard event.
-    // - but if there is idle time, we will instantiate them sooner.
-    this._register(
-      runWhenWindowIdle(getWindow(this._editor.getDomNode()), () => {
-        this._instantiateSome(
-          EditorContributionInstantiation.BeforeFirstInteraction,
-        )
-      }),
-    )
+		this._instantiateSome(EditorContributionInstantiation.Eager);
 
-    // Eventually
-    // - these extensions will only be instantiated when there is idle time.
-    // - since there is no guarantee that there will ever be idle time, we set a timeout of 5s here.
-    this._register(
-      runWhenWindowIdle(
-        getWindow(this._editor.getDomNode()),
-        () => {
-          this._instantiateSome(EditorContributionInstantiation.Eventually)
-        },
-        5000,
-      ),
-    )
-  }
+		// AfterFirstRender
+		// - these extensions will be instantiated at the latest 50ms after the first render.
+		// - but if there is idle time, we will instantiate them sooner.
+		this._register(runWhenWindowIdle(getWindow(this._editor.getDomNode()), () => {
+			this._instantiateSome(EditorContributionInstantiation.AfterFirstRender);
+		}));
 
-  public saveViewState(): { [key: string]: any } {
-    const contributionsState: { [key: string]: any } = {}
-    for (const [id, contribution] of this._instances) {
-      if (typeof contribution.saveViewState === "function") {
-        contributionsState[id] = contribution.saveViewState()
-      }
-    }
-    return contributionsState
-  }
+		// BeforeFirstInteraction
+		// - these extensions will be instantiated at the latest before a mouse or a keyboard event.
+		// - but if there is idle time, we will instantiate them sooner.
+		this._register(runWhenWindowIdle(getWindow(this._editor.getDomNode()), () => {
+			this._instantiateSome(EditorContributionInstantiation.BeforeFirstInteraction);
+		}));
 
-  public restoreViewState(contributionsState: { [key: string]: any }): void {
-    for (const [id, contribution] of this._instances) {
-      if (typeof contribution.restoreViewState === "function") {
-        contribution.restoreViewState(contributionsState[id])
-      }
-    }
-  }
+		// Eventually
+		// - these extensions will only be instantiated when there is idle time.
+		// - since there is no guarantee that there will ever be idle time, we set a timeout of 5s here.
+		this._register(runWhenWindowIdle(getWindow(this._editor.getDomNode()), () => {
+			this._instantiateSome(EditorContributionInstantiation.Eventually);
+		}, 5000));
+	}
 
-  public get(id: string): IEditorContribution | null {
-    this._instantiateById(id)
-    return this._instances.get(id) || null
-  }
+	public saveViewState(): { [key: string]: any } {
+		const contributionsState: { [key: string]: any } = {};
+		for (const [id, contribution] of this._instances) {
+			if (typeof contribution.saveViewState === 'function') {
+				contributionsState[id] = contribution.saveViewState();
+			}
+		}
+		return contributionsState;
+	}
 
-  /**
-   * used by tests
-   */
-  public set(id: string, value: IEditorContribution) {
-    this._instances.set(id, value)
-  }
+	public restoreViewState(contributionsState: { [key: string]: any }): void {
+		for (const [id, contribution] of this._instances) {
+			if (typeof contribution.restoreViewState === 'function') {
+				contribution.restoreViewState(contributionsState[id]);
+			}
+		}
+	}
 
-  public onBeforeInteractionEvent(): void {
-    // this method is called very often by the editor!
-    this._instantiateSome(
-      EditorContributionInstantiation.BeforeFirstInteraction,
-    )
-  }
+	public get(id: string): IEditorContribution | null {
+		this._instantiateById(id);
+		return this._instances.get(id) || null;
+	}
 
-  public onAfterModelAttached(): IDisposable {
-    return runWhenWindowIdle(
-      getWindow(this._editor?.getDomNode()),
-      () => {
-        this._instantiateSome(EditorContributionInstantiation.AfterFirstRender)
-      },
-      50,
-    )
-  }
+	/**
+	 * used by tests
+	 */
+	public set(id: string, value: IEditorContribution) {
+		this._instances.set(id, value);
+	}
 
-  private _instantiateSome(
-    instantiation: EditorContributionInstantiation,
-  ): void {
-    if (this._finishedInstantiation[instantiation]) {
-      // already done with this instantiation!
-      return
-    }
-    this._finishedInstantiation[instantiation] = true
+	public onBeforeInteractionEvent(): void {
+		// this method is called very often by the editor!
+		this._instantiateSome(EditorContributionInstantiation.BeforeFirstInteraction);
+	}
 
-    const contribs =
-      this._findPendingContributionsByInstantiation(instantiation)
-    for (const contrib of contribs) {
-      this._instantiateById(contrib.id)
-    }
-  }
+	public onAfterModelAttached(): IDisposable {
+		return runWhenWindowIdle(getWindow(this._editor?.getDomNode()), () => {
+			this._instantiateSome(EditorContributionInstantiation.AfterFirstRender);
+		}, 50);
+	}
 
-  private _findPendingContributionsByInstantiation(
-    instantiation: EditorContributionInstantiation,
-  ): readonly IEditorContributionDescription[] {
-    const result: IEditorContributionDescription[] = []
-    for (const [, desc] of this._pending) {
-      if (desc.instantiation === instantiation) {
-        result.push(desc)
-      }
-    }
-    return result
-  }
+	private _instantiateSome(instantiation: EditorContributionInstantiation): void {
+		if (this._finishedInstantiation[instantiation]) {
+			// already done with this instantiation!
+			return;
+		}
+		this._finishedInstantiation[instantiation] = true;
 
-  private _instantiateById(id: string): void {
-    const desc = this._pending.get(id)
-    if (!desc) {
-      return
-    }
+		const contribs = this._findPendingContributionsByInstantiation(instantiation);
+		for (const contrib of contribs) {
+			this._instantiateById(contrib.id);
+		}
+	}
 
-    this._pending.delete(id)
+	private _findPendingContributionsByInstantiation(instantiation: EditorContributionInstantiation): readonly IEditorContributionDescription[] {
+		const result: IEditorContributionDescription[] = [];
+		for (const [, desc] of this._pending) {
+			if (desc.instantiation === instantiation) {
+				result.push(desc);
+			}
+		}
+		return result;
+	}
 
-    if (!this._instantiationService || !this._editor) {
-      throw new Error(
-        `Cannot instantiate contributions before being initialized!`,
-      )
-    }
+	private _instantiateById(id: string): void {
+		const desc = this._pending.get(id);
+		if (!desc) {
+			return;
+		}
 
-    try {
-      const instance = this._instantiationService.createInstance(
-        desc.ctor,
-        this._editor,
-      )
-      this._instances.set(desc.id, instance)
-      if (
-        typeof instance.restoreViewState === "function" &&
-        desc.instantiation !== EditorContributionInstantiation.Eager
-      ) {
-        console.warn(
-          `Editor contribution '${desc.id}' should be eager instantiated because it uses saveViewState / restoreViewState.`,
-        )
-      }
-    } catch (err) {
-      onUnexpectedError(err)
-    }
-  }
+		this._pending.delete(id);
+
+		if (!this._instantiationService || !this._editor) {
+			throw new Error(`Cannot instantiate contributions before being initialized!`);
+		}
+
+		try {
+			const instance = this._instantiationService.createInstance(desc.ctor, this._editor);
+			this._instances.set(desc.id, instance);
+			if (typeof instance.restoreViewState === 'function' && desc.instantiation !== EditorContributionInstantiation.Eager) {
+				console.warn(`Editor contribution '${desc.id}' should be eager instantiated because it uses saveViewState / restoreViewState.`);
+			}
+		} catch (err) {
+			onUnexpectedError(err);
+		}
+	}
 }

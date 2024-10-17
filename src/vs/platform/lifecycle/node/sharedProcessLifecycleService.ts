@@ -9,41 +9,39 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Emitter, Event } from "vs/base/common/event"
-import { Disposable } from "vs/base/common/lifecycle"
-import { createDecorator } from "vs/platform/instantiation/common/instantiation"
-import { ILogService } from "vs/platform/log/common/log"
+import { Emitter, Event } from 'vs/base/common/event';
+import { Disposable } from 'vs/base/common/lifecycle';
+import { createDecorator } from 'vs/platform/instantiation/common/instantiation';
+import { ILogService } from 'vs/platform/log/common/log';
 
-export const ISharedProcessLifecycleService =
-  createDecorator<ISharedProcessLifecycleService>(
-    "sharedProcessLifecycleService",
-  )
+export const ISharedProcessLifecycleService = createDecorator<ISharedProcessLifecycleService>('sharedProcessLifecycleService');
 
 export interface ISharedProcessLifecycleService {
-  readonly _serviceBrand: undefined
 
-  /**
-   * An event for when the application will shutdown
-   */
-  readonly onWillShutdown: Event<void>
+	readonly _serviceBrand: undefined;
+
+	/**
+	 * An event for when the application will shutdown
+	 */
+	readonly onWillShutdown: Event<void>;
 }
 
-export class SharedProcessLifecycleService
-  extends Disposable
-  implements ISharedProcessLifecycleService
-{
-  declare readonly _serviceBrand: undefined
+export class SharedProcessLifecycleService extends Disposable implements ISharedProcessLifecycleService {
 
-  private readonly _onWillShutdown = this._register(new Emitter<void>())
-  readonly onWillShutdown = this._onWillShutdown.event
+	declare readonly _serviceBrand: undefined;
 
-  constructor(@ILogService private readonly logService: ILogService) {
-    super()
-  }
+	private readonly _onWillShutdown = this._register(new Emitter<void>());
+	readonly onWillShutdown = this._onWillShutdown.event;
 
-  fireOnWillShutdown(): void {
-    this.logService.trace("Lifecycle#onWillShutdown.fire()")
+	constructor(
+		@ILogService private readonly logService: ILogService
+	) {
+		super();
+	}
 
-    this._onWillShutdown.fire()
-  }
+	fireOnWillShutdown(): void {
+		this.logService.trace('Lifecycle#onWillShutdown.fire()');
+
+		this._onWillShutdown.fire();
+	}
 }

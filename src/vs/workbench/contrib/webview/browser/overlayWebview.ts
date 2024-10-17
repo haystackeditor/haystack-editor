@@ -53,7 +53,7 @@ export class OverlayWebview extends Disposable implements IOverlayWebview {
     readonly resolve: (value: boolean) => void
   }>()
   private readonly _webview = this._register(
-    new MutableDisposable<IWebviewElement>(),
+    new MutableDisposable<IWebviewElement>()
   )
   private readonly _webviewEvents = this._register(new DisposableStore())
 
@@ -74,7 +74,7 @@ export class OverlayWebview extends Disposable implements IOverlayWebview {
   }
 
   private readonly _scopedContextKeyService = this._register(
-    new MutableDisposable<IScopedContextKeyService>(),
+    new MutableDisposable<IScopedContextKeyService>()
   )
   private _findWidgetVisible: IContextKey<boolean> | undefined
   private _findWidgetEnabled: IContextKey<boolean> | undefined
@@ -92,7 +92,7 @@ export class OverlayWebview extends Disposable implements IOverlayWebview {
     private readonly _layoutService: IWorkbenchLayoutService,
     @IWebviewService private readonly _webviewService: IWebviewService,
     @IContextKeyService
-    private readonly _baseContextKeyService: IContextKeyService,
+    private readonly _baseContextKeyService: IContextKeyService
   ) {
     super()
 
@@ -153,7 +153,7 @@ export class OverlayWebview extends Disposable implements IOverlayWebview {
   public claim(
     owner: any,
     targetWindow: CodeWindow,
-    scopedContextKeyService: IContextKeyService | undefined,
+    scopedContextKeyService: IContextKeyService | undefined
   ) {
     if (this._isDisposed) {
       return
@@ -183,7 +183,7 @@ export class OverlayWebview extends Disposable implements IOverlayWebview {
       // Otherwise we create the new context while the old one is still around
       this._scopedContextKeyService.clear()
       this._scopedContextKeyService.value = contextKeyService.createScoped(
-        this.container,
+        this.container
       )
 
       const wasFindVisible = this._findWidgetVisible?.get()
@@ -198,7 +198,7 @@ export class OverlayWebview extends Disposable implements IOverlayWebview {
       this._findWidgetEnabled.set(!!this.options.enableFindWidget)
 
       this._webview.value?.setContextKeyService(
-        this._scopedContextKeyService.value,
+        this._scopedContextKeyService.value
       )
     }
   }
@@ -229,7 +229,7 @@ export class OverlayWebview extends Disposable implements IOverlayWebview {
   public layoutWebviewOverElement(
     element: HTMLElement,
     dimension?: Dimension,
-    clippingContainer?: HTMLElement,
+    clippingContainer?: HTMLElement
   ) {
     if (!this._container || !this._container.domNode.parentElement) {
       return
@@ -242,7 +242,7 @@ export class OverlayWebview extends Disposable implements IOverlayWebview {
       // container is ready for us to compute certain
       // layout related properties.
       whenContainerStylesLoaded.then(() =>
-        this.doLayoutWebviewOverElement(element, dimension, clippingContainer),
+        this.doLayoutWebviewOverElement(element, dimension, clippingContainer)
       )
     } else {
       this.doLayoutWebviewOverElement(element, dimension, clippingContainer)
@@ -252,7 +252,7 @@ export class OverlayWebview extends Disposable implements IOverlayWebview {
   private doLayoutWebviewOverElement(
     element: HTMLElement,
     dimension?: Dimension,
-    clippingContainer?: HTMLElement,
+    clippingContainer?: HTMLElement
   ) {
     if (!this._container || !this._container.domNode.parentElement) {
       return
@@ -272,7 +272,7 @@ export class OverlayWebview extends Disposable implements IOverlayWebview {
 
     this._container.setTop(frameRect.top - containerRect.top - parentBorderTop)
     this._container.setLeft(
-      frameRect.left - containerRect.left - parentBorderLeft,
+      frameRect.left - containerRect.left - parentBorderLeft
     )
     this._container.setWidth(dimension ? dimension.width : frameRect.width)
     this._container.setHeight(dimension ? dimension.height : frameRect.height)
@@ -280,7 +280,7 @@ export class OverlayWebview extends Disposable implements IOverlayWebview {
     if (clippingContainer) {
       const { top, left, right, bottom } = computeClippingRect(
         frameRect,
-        clippingContainer,
+        clippingContainer
       )
       this._container.domNode.style.clipPath = `polygon(${left}px ${top}px, ${right}px ${top}px, ${right}px ${bottom}px, ${left}px ${bottom}px)`
     }
@@ -306,7 +306,7 @@ export class OverlayWebview extends Disposable implements IOverlayWebview {
 
       if (this._scopedContextKeyService.value) {
         this._webview.value.setContextKeyService(
-          this._scopedContextKeyService.value,
+          this._scopedContextKeyService.value
         )
       }
 
@@ -327,56 +327,56 @@ export class OverlayWebview extends Disposable implements IOverlayWebview {
       this._webviewEvents.add(
         webview.onDidFocus(() => {
           this._onDidFocus.fire()
-        }),
+        })
       )
       this._webviewEvents.add(
         webview.onDidBlur(() => {
           this._onDidBlur.fire()
-        }),
+        })
       )
       this._webviewEvents.add(
         webview.onDidClickLink((x) => {
           this._onDidClickLink.fire(x)
-        }),
+        })
       )
       this._webviewEvents.add(
         webview.onMessage((x) => {
           this._onMessage.fire(x)
-        }),
+        })
       )
       this._webviewEvents.add(
         webview.onMissingCsp((x) => {
           this._onMissingCsp.fire(x)
-        }),
+        })
       )
       this._webviewEvents.add(
         webview.onDidWheel((x) => {
           this._onDidWheel.fire(x)
-        }),
+        })
       )
       this._webviewEvents.add(
         webview.onDidReload(() => {
           this._onDidReload.fire()
-        }),
+        })
       )
       this._webviewEvents.add(
         webview.onFatalError((x) => {
           this._onFatalError.fire(x)
-        }),
+        })
       )
 
       this._webviewEvents.add(
         webview.onDidScroll((x) => {
           this._initialScrollProgress = x.scrollYPercentage
           this._onDidScroll.fire(x)
-        }),
+        })
       )
 
       this._webviewEvents.add(
         webview.onDidUpdateState((state) => {
           this._state = state
           this._onDidUpdateState.fire(state)
-        }),
+        })
       )
 
       if (this._isFirstLoad) {
@@ -467,22 +467,22 @@ export class OverlayWebview extends Disposable implements IOverlayWebview {
   public readonly onDidReload = this._onDidReload.event
 
   private readonly _onDidScroll = this._register(
-    new Emitter<{ readonly scrollYPercentage: number }>(),
+    new Emitter<{ readonly scrollYPercentage: number }>()
   )
   public readonly onDidScroll = this._onDidScroll.event
 
   private readonly _onDidUpdateState = this._register(
-    new Emitter<string | undefined>(),
+    new Emitter<string | undefined>()
   )
   public readonly onDidUpdateState = this._onDidUpdateState.event
 
   private readonly _onMessage = this._register(
-    new Emitter<WebviewMessageReceivedEvent>(),
+    new Emitter<WebviewMessageReceivedEvent>()
   )
   public readonly onMessage = this._onMessage.event
 
   private readonly _onMissingCsp = this._register(
-    new Emitter<ExtensionIdentifier>(),
+    new Emitter<ExtensionIdentifier>()
   )
   public readonly onMissingCsp = this._onMissingCsp.event
 
@@ -490,13 +490,13 @@ export class OverlayWebview extends Disposable implements IOverlayWebview {
   public readonly onDidWheel = this._onDidWheel.event
 
   private readonly _onFatalError = this._register(
-    new Emitter<{ readonly message: string }>(),
+    new Emitter<{ readonly message: string }>()
   )
   public onFatalError = this._onFatalError.event
 
   public async postMessage(
     message: any,
-    transfer?: readonly ArrayBuffer[],
+    transfer?: readonly ArrayBuffer[]
   ): Promise<boolean> {
     if (this._webview.value) {
       return this._webview.value.postMessage(message, transfer)
@@ -582,11 +582,11 @@ function computeClippingRect(frameRect: DOMRectReadOnly, clipper: HTMLElement) {
   const top = Math.max(rootRect.top - frameRect.top, 0)
   const right = Math.max(
     frameRect.width - (frameRect.right - rootRect.right),
-    0,
+    0
   )
   const bottom = Math.max(
     frameRect.height - (frameRect.bottom - rootRect.bottom),
-    0,
+    0
   )
   const left = Math.max(rootRect.left - frameRect.left, 0)
 

@@ -9,397 +9,305 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { VSBuffer } from "vs/base/common/buffer"
-import { Emitter, Event } from "vs/base/common/event"
-import { Disposable, IDisposable } from "vs/base/common/lifecycle"
-import * as resources from "vs/base/common/resources"
-import { ReadableStreamEvents, newWriteableStream } from "vs/base/common/stream"
-import { URI } from "vs/base/common/uri"
-import {
-  FileChangeType,
-  IFileDeleteOptions,
-  IFileOverwriteOptions,
-  FileSystemProviderCapabilities,
-  FileSystemProviderErrorCode,
-  FileType,
-  IFileWriteOptions,
-  IFileChange,
-  IFileSystemProviderWithFileReadWriteCapability,
-  IStat,
-  IWatchOptions,
-  createFileSystemProviderError,
-  IFileSystemProviderWithOpenReadWriteCloseCapability,
-  IFileOpenOptions,
-  IFileSystemProviderWithFileAtomicDeleteCapability,
-  IFileSystemProviderWithFileAtomicReadCapability,
-  IFileSystemProviderWithFileAtomicWriteCapability,
-  IFileSystemProviderWithFileReadStreamCapability,
-} from "vs/platform/files/common/files"
+import { VSBuffer } from 'vs/base/common/buffer';
+import { Emitter, Event } from 'vs/base/common/event';
+import { Disposable, IDisposable } from 'vs/base/common/lifecycle';
+import * as resources from 'vs/base/common/resources';
+import { ReadableStreamEvents, newWriteableStream } from 'vs/base/common/stream';
+import { URI } from 'vs/base/common/uri';
+import { FileChangeType, IFileDeleteOptions, IFileOverwriteOptions, FileSystemProviderCapabilities, FileSystemProviderErrorCode, FileType, IFileWriteOptions, IFileChange, IFileSystemProviderWithFileReadWriteCapability, IStat, IWatchOptions, createFileSystemProviderError, IFileSystemProviderWithOpenReadWriteCloseCapability, IFileOpenOptions, IFileSystemProviderWithFileAtomicDeleteCapability, IFileSystemProviderWithFileAtomicReadCapability, IFileSystemProviderWithFileAtomicWriteCapability, IFileSystemProviderWithFileReadStreamCapability } from 'vs/platform/files/common/files';
 
 class File implements IStat {
-  readonly type: FileType.File
-  readonly ctime: number
-  mtime: number
-  size: number
 
-  name: string
-  data?: Uint8Array
+	readonly type: FileType.File;
+	readonly ctime: number;
+	mtime: number;
+	size: number;
 
-  constructor(name: string) {
-    this.type = FileType.File
-    this.ctime = Date.now()
-    this.mtime = Date.now()
-    this.size = 0
-    this.name = name
-  }
+	name: string;
+	data?: Uint8Array;
+
+	constructor(name: string) {
+		this.type = FileType.File;
+		this.ctime = Date.now();
+		this.mtime = Date.now();
+		this.size = 0;
+		this.name = name;
+	}
 }
 
 class Directory implements IStat {
-  readonly type: FileType.Directory
-  readonly ctime: number
-  mtime: number
-  size: number
 
-  name: string
-  readonly entries: Map<string, File | Directory>
+	readonly type: FileType.Directory;
+	readonly ctime: number;
+	mtime: number;
+	size: number;
 
-  constructor(name: string) {
-    this.type = FileType.Directory
-    this.ctime = Date.now()
-    this.mtime = Date.now()
-    this.size = 0
-    this.name = name
-    this.entries = new Map()
-  }
+	name: string;
+	readonly entries: Map<string, File | Directory>;
+
+	constructor(name: string) {
+		this.type = FileType.Directory;
+		this.ctime = Date.now();
+		this.mtime = Date.now();
+		this.size = 0;
+		this.name = name;
+		this.entries = new Map();
+	}
 }
 
-type Entry = File | Directory
+type Entry = File | Directory;
 
-export class InMemoryFileSystemProvider
-  extends Disposable
-  implements
-    IFileSystemProviderWithFileReadWriteCapability,
-    IFileSystemProviderWithOpenReadWriteCloseCapability,
-    IFileSystemProviderWithFileReadStreamCapability,
-    IFileSystemProviderWithFileAtomicReadCapability,
-    IFileSystemProviderWithFileAtomicWriteCapability,
-    IFileSystemProviderWithFileAtomicDeleteCapability
-{
-  private memoryFdCounter = 0
-  private readonly fdMemory = new Map<number, Uint8Array>()
-  private _onDidChangeCapabilities = this._register(new Emitter<void>())
-  readonly onDidChangeCapabilities = this._onDidChangeCapabilities.event
+export class InMemoryFileSystemProvider extends Disposable implements
+	IFileSystemProviderWithFileReadWriteCapability,
+	IFileSystemProviderWithOpenReadWriteCloseCapability,
+	IFileSystemProviderWithFileReadStreamCapability,
+	IFileSystemProviderWithFileAtomicReadCapability,
+	IFileSystemProviderWithFileAtomicWriteCapability,
+	IFileSystemProviderWithFileAtomicDeleteCapability {
 
-  private _capabilities =
-    FileSystemProviderCapabilities.FileReadWrite |
-    FileSystemProviderCapabilities.PathCaseSensitive
-  get capabilities(): FileSystemProviderCapabilities {
-    return this._capabilities
-  }
+	private memoryFdCounter = 0;
+	private readonly fdMemory = new Map<number, Uint8Array>();
+	private _onDidChangeCapabilities = this._register(new Emitter<void>());
+	readonly onDidChangeCapabilities = this._onDidChangeCapabilities.event;
 
-  setReadOnly(readonly: boolean) {
-    const isReadonly = !!(
-      this._capabilities & FileSystemProviderCapabilities.Readonly
-    )
-    if (readonly !== isReadonly) {
-      this._capabilities = readonly
-        ? FileSystemProviderCapabilities.Readonly |
-          FileSystemProviderCapabilities.PathCaseSensitive |
-          FileSystemProviderCapabilities.FileReadWrite
-        : FileSystemProviderCapabilities.FileReadWrite |
-          FileSystemProviderCapabilities.PathCaseSensitive
-      this._onDidChangeCapabilities.fire()
-    }
-  }
+	private _capabilities = FileSystemProviderCapabilities.FileReadWrite | FileSystemProviderCapabilities.PathCaseSensitive;
+	get capabilities(): FileSystemProviderCapabilities { return this._capabilities; }
 
-  root = new Directory("")
+	setReadOnly(readonly: boolean) {
+		const isReadonly = !!(this._capabilities & FileSystemProviderCapabilities.Readonly);
+		if (readonly !== isReadonly) {
+			this._capabilities = readonly ? FileSystemProviderCapabilities.Readonly | FileSystemProviderCapabilities.PathCaseSensitive | FileSystemProviderCapabilities.FileReadWrite
+				: FileSystemProviderCapabilities.FileReadWrite | FileSystemProviderCapabilities.PathCaseSensitive;
+			this._onDidChangeCapabilities.fire();
+		}
+	}
 
-  // --- manage file metadata
+	root = new Directory('');
 
-  async stat(resource: URI): Promise<IStat> {
-    return this._lookup(resource, false)
-  }
+	// --- manage file metadata
 
-  async readdir(resource: URI): Promise<[string, FileType][]> {
-    const entry = this._lookupAsDirectory(resource, false)
-    const result: [string, FileType][] = []
-    entry.entries.forEach((child, name) => result.push([name, child.type]))
-    return result
-  }
+	async stat(resource: URI): Promise<IStat> {
+		return this._lookup(resource, false);
+	}
 
-  // --- manage file contents
+	async readdir(resource: URI): Promise<[string, FileType][]> {
+		const entry = this._lookupAsDirectory(resource, false);
+		const result: [string, FileType][] = [];
+		entry.entries.forEach((child, name) => result.push([name, child.type]));
+		return result;
+	}
 
-  async readFile(resource: URI): Promise<Uint8Array> {
-    const data = this._lookupAsFile(resource, false).data
-    if (data) {
-      return data
-    }
-    throw createFileSystemProviderError(
-      "file not found",
-      FileSystemProviderErrorCode.FileNotFound,
-    )
-  }
+	// --- manage file contents
 
-  readFileStream(resource: URI): ReadableStreamEvents<Uint8Array> {
-    const data = this._lookupAsFile(resource, false).data
+	async readFile(resource: URI): Promise<Uint8Array> {
+		const data = this._lookupAsFile(resource, false).data;
+		if (data) {
+			return data;
+		}
+		throw createFileSystemProviderError('file not found', FileSystemProviderErrorCode.FileNotFound);
+	}
 
-    const stream = newWriteableStream<Uint8Array>(
-      (data) => VSBuffer.concat(data.map((data) => VSBuffer.wrap(data))).buffer,
-    )
-    stream.end(data)
+	readFileStream(resource: URI): ReadableStreamEvents<Uint8Array> {
+		const data = this._lookupAsFile(resource, false).data;
 
-    return stream
-  }
+		const stream = newWriteableStream<Uint8Array>(data => VSBuffer.concat(data.map(data => VSBuffer.wrap(data))).buffer);
+		stream.end(data);
 
-  async writeFile(
-    resource: URI,
-    content: Uint8Array,
-    opts: IFileWriteOptions,
-  ): Promise<void> {
-    const basename = resources.basename(resource)
-    const parent = this._lookupParentDirectory(resource)
-    let entry = parent.entries.get(basename)
-    if (entry instanceof Directory) {
-      throw createFileSystemProviderError(
-        "file is directory",
-        FileSystemProviderErrorCode.FileIsADirectory,
-      )
-    }
-    if (!entry && !opts.create) {
-      throw createFileSystemProviderError(
-        "file not found",
-        FileSystemProviderErrorCode.FileNotFound,
-      )
-    }
-    if (entry && opts.create && !opts.overwrite) {
-      throw createFileSystemProviderError(
-        "file exists already",
-        FileSystemProviderErrorCode.FileExists,
-      )
-    }
-    if (!entry) {
-      entry = new File(basename)
-      parent.entries.set(basename, entry)
-      this._fireSoon({ type: FileChangeType.ADDED, resource })
-    }
-    entry.mtime = Date.now()
-    entry.size = content.byteLength
-    entry.data = content
+		return stream;
+	}
 
-    this._fireSoon({ type: FileChangeType.UPDATED, resource })
-  }
+	async writeFile(resource: URI, content: Uint8Array, opts: IFileWriteOptions): Promise<void> {
+		const basename = resources.basename(resource);
+		const parent = this._lookupParentDirectory(resource);
+		let entry = parent.entries.get(basename);
+		if (entry instanceof Directory) {
+			throw createFileSystemProviderError('file is directory', FileSystemProviderErrorCode.FileIsADirectory);
+		}
+		if (!entry && !opts.create) {
+			throw createFileSystemProviderError('file not found', FileSystemProviderErrorCode.FileNotFound);
+		}
+		if (entry && opts.create && !opts.overwrite) {
+			throw createFileSystemProviderError('file exists already', FileSystemProviderErrorCode.FileExists);
+		}
+		if (!entry) {
+			entry = new File(basename);
+			parent.entries.set(basename, entry);
+			this._fireSoon({ type: FileChangeType.ADDED, resource });
+		}
+		entry.mtime = Date.now();
+		entry.size = content.byteLength;
+		entry.data = content;
 
-  // file open/read/write/close
-  open(resource: URI, opts: IFileOpenOptions): Promise<number> {
-    const data = this._lookupAsFile(resource, false).data
-    if (data) {
-      const fd = this.memoryFdCounter++
-      this.fdMemory.set(fd, data)
-      return Promise.resolve(fd)
-    }
-    throw createFileSystemProviderError(
-      "file not found",
-      FileSystemProviderErrorCode.FileNotFound,
-    )
-  }
+		this._fireSoon({ type: FileChangeType.UPDATED, resource });
+	}
 
-  close(fd: number): Promise<void> {
-    this.fdMemory.delete(fd)
-    return Promise.resolve()
-  }
+	// file open/read/write/close
+	open(resource: URI, opts: IFileOpenOptions): Promise<number> {
+		const data = this._lookupAsFile(resource, false).data;
+		if (data) {
+			const fd = this.memoryFdCounter++;
+			this.fdMemory.set(fd, data);
+			return Promise.resolve(fd);
+		}
+		throw createFileSystemProviderError('file not found', FileSystemProviderErrorCode.FileNotFound);
+	}
 
-  read(
-    fd: number,
-    pos: number,
-    data: Uint8Array,
-    offset: number,
-    length: number,
-  ): Promise<number> {
-    const memory = this.fdMemory.get(fd)
-    if (!memory) {
-      throw createFileSystemProviderError(
-        `No file with that descriptor open`,
-        FileSystemProviderErrorCode.Unavailable,
-      )
-    }
+	close(fd: number): Promise<void> {
+		this.fdMemory.delete(fd);
+		return Promise.resolve();
+	}
 
-    const toWrite = VSBuffer.wrap(memory).slice(pos, pos + length)
-    data.set(toWrite.buffer, offset)
-    return Promise.resolve(toWrite.byteLength)
-  }
+	read(fd: number, pos: number, data: Uint8Array, offset: number, length: number): Promise<number> {
+		const memory = this.fdMemory.get(fd);
+		if (!memory) {
+			throw createFileSystemProviderError(`No file with that descriptor open`, FileSystemProviderErrorCode.Unavailable);
+		}
 
-  write(
-    fd: number,
-    pos: number,
-    data: Uint8Array,
-    offset: number,
-    length: number,
-  ): Promise<number> {
-    const memory = this.fdMemory.get(fd)
-    if (!memory) {
-      throw createFileSystemProviderError(
-        `No file with that descriptor open`,
-        FileSystemProviderErrorCode.Unavailable,
-      )
-    }
+		const toWrite = VSBuffer.wrap(memory).slice(pos, pos + length);
+		data.set(toWrite.buffer, offset);
+		return Promise.resolve(toWrite.byteLength);
+	}
 
-    const toWrite = VSBuffer.wrap(data).slice(offset, offset + length)
-    memory.set(toWrite.buffer, pos)
-    return Promise.resolve(toWrite.byteLength)
-  }
+	write(fd: number, pos: number, data: Uint8Array, offset: number, length: number): Promise<number> {
+		const memory = this.fdMemory.get(fd);
+		if (!memory) {
+			throw createFileSystemProviderError(`No file with that descriptor open`, FileSystemProviderErrorCode.Unavailable);
+		}
 
-  // --- manage files/folders
+		const toWrite = VSBuffer.wrap(data).slice(offset, offset + length);
+		memory.set(toWrite.buffer, pos);
+		return Promise.resolve(toWrite.byteLength);
+	}
 
-  async rename(from: URI, to: URI, opts: IFileOverwriteOptions): Promise<void> {
-    if (!opts.overwrite && this._lookup(to, true)) {
-      throw createFileSystemProviderError(
-        "file exists already",
-        FileSystemProviderErrorCode.FileExists,
-      )
-    }
+	// --- manage files/folders
 
-    const entry = this._lookup(from, false)
-    const oldParent = this._lookupParentDirectory(from)
+	async rename(from: URI, to: URI, opts: IFileOverwriteOptions): Promise<void> {
+		if (!opts.overwrite && this._lookup(to, true)) {
+			throw createFileSystemProviderError('file exists already', FileSystemProviderErrorCode.FileExists);
+		}
 
-    const newParent = this._lookupParentDirectory(to)
-    const newName = resources.basename(to)
+		const entry = this._lookup(from, false);
+		const oldParent = this._lookupParentDirectory(from);
 
-    oldParent.entries.delete(entry.name)
-    entry.name = newName
-    newParent.entries.set(newName, entry)
+		const newParent = this._lookupParentDirectory(to);
+		const newName = resources.basename(to);
 
-    this._fireSoon(
-      { type: FileChangeType.DELETED, resource: from },
-      { type: FileChangeType.ADDED, resource: to },
-    )
-  }
+		oldParent.entries.delete(entry.name);
+		entry.name = newName;
+		newParent.entries.set(newName, entry);
 
-  async delete(resource: URI, opts: IFileDeleteOptions): Promise<void> {
-    const dirname = resources.dirname(resource)
-    const basename = resources.basename(resource)
-    const parent = this._lookupAsDirectory(dirname, false)
-    if (parent.entries.has(basename)) {
-      parent.entries.delete(basename)
-      parent.mtime = Date.now()
-      parent.size -= 1
-      this._fireSoon(
-        { type: FileChangeType.UPDATED, resource: dirname },
-        { resource, type: FileChangeType.DELETED },
-      )
-    }
-  }
+		this._fireSoon(
+			{ type: FileChangeType.DELETED, resource: from },
+			{ type: FileChangeType.ADDED, resource: to }
+		);
+	}
 
-  async mkdir(resource: URI): Promise<void> {
-    if (this._lookup(resource, true)) {
-      throw createFileSystemProviderError(
-        "file exists already",
-        FileSystemProviderErrorCode.FileExists,
-      )
-    }
+	async delete(resource: URI, opts: IFileDeleteOptions): Promise<void> {
+		const dirname = resources.dirname(resource);
+		const basename = resources.basename(resource);
+		const parent = this._lookupAsDirectory(dirname, false);
+		if (parent.entries.has(basename)) {
+			parent.entries.delete(basename);
+			parent.mtime = Date.now();
+			parent.size -= 1;
+			this._fireSoon({ type: FileChangeType.UPDATED, resource: dirname }, { resource, type: FileChangeType.DELETED });
+		}
+	}
 
-    const basename = resources.basename(resource)
-    const dirname = resources.dirname(resource)
-    const parent = this._lookupAsDirectory(dirname, false)
+	async mkdir(resource: URI): Promise<void> {
+		if (this._lookup(resource, true)) {
+			throw createFileSystemProviderError('file exists already', FileSystemProviderErrorCode.FileExists);
+		}
 
-    const entry = new Directory(basename)
-    parent.entries.set(entry.name, entry)
-    parent.mtime = Date.now()
-    parent.size += 1
-    this._fireSoon(
-      { type: FileChangeType.UPDATED, resource: dirname },
-      { type: FileChangeType.ADDED, resource },
-    )
-  }
+		const basename = resources.basename(resource);
+		const dirname = resources.dirname(resource);
+		const parent = this._lookupAsDirectory(dirname, false);
 
-  // --- lookup
+		const entry = new Directory(basename);
+		parent.entries.set(entry.name, entry);
+		parent.mtime = Date.now();
+		parent.size += 1;
+		this._fireSoon({ type: FileChangeType.UPDATED, resource: dirname }, { type: FileChangeType.ADDED, resource });
+	}
 
-  private _lookup(uri: URI, silent: false): Entry
-  private _lookup(uri: URI, silent: boolean): Entry | undefined
-  private _lookup(uri: URI, silent: boolean): Entry | undefined {
-    const parts = uri.path.split("/")
-    let entry: Entry = this.root
-    for (const part of parts) {
-      if (!part) {
-        continue
-      }
-      let child: Entry | undefined
-      if (entry instanceof Directory) {
-        child = entry.entries.get(part)
-      }
-      if (!child) {
-        if (!silent) {
-          throw createFileSystemProviderError(
-            "file not found",
-            FileSystemProviderErrorCode.FileNotFound,
-          )
-        } else {
-          return undefined
-        }
-      }
-      entry = child
-    }
-    return entry
-  }
+	// --- lookup
 
-  private _lookupAsDirectory(uri: URI, silent: boolean): Directory {
-    const entry = this._lookup(uri, silent)
-    if (entry instanceof Directory) {
-      return entry
-    }
-    throw createFileSystemProviderError(
-      "file not a directory",
-      FileSystemProviderErrorCode.FileNotADirectory,
-    )
-  }
+	private _lookup(uri: URI, silent: false): Entry;
+	private _lookup(uri: URI, silent: boolean): Entry | undefined;
+	private _lookup(uri: URI, silent: boolean): Entry | undefined {
+		const parts = uri.path.split('/');
+		let entry: Entry = this.root;
+		for (const part of parts) {
+			if (!part) {
+				continue;
+			}
+			let child: Entry | undefined;
+			if (entry instanceof Directory) {
+				child = entry.entries.get(part);
+			}
+			if (!child) {
+				if (!silent) {
+					throw createFileSystemProviderError('file not found', FileSystemProviderErrorCode.FileNotFound);
+				} else {
+					return undefined;
+				}
+			}
+			entry = child;
+		}
+		return entry;
+	}
 
-  private _lookupAsFile(uri: URI, silent: boolean): File {
-    const entry = this._lookup(uri, silent)
-    if (entry instanceof File) {
-      return entry
-    }
-    throw createFileSystemProviderError(
-      "file is a directory",
-      FileSystemProviderErrorCode.FileIsADirectory,
-    )
-  }
+	private _lookupAsDirectory(uri: URI, silent: boolean): Directory {
+		const entry = this._lookup(uri, silent);
+		if (entry instanceof Directory) {
+			return entry;
+		}
+		throw createFileSystemProviderError('file not a directory', FileSystemProviderErrorCode.FileNotADirectory);
+	}
 
-  private _lookupParentDirectory(uri: URI): Directory {
-    const dirname = resources.dirname(uri)
-    return this._lookupAsDirectory(dirname, false)
-  }
+	private _lookupAsFile(uri: URI, silent: boolean): File {
+		const entry = this._lookup(uri, silent);
+		if (entry instanceof File) {
+			return entry;
+		}
+		throw createFileSystemProviderError('file is a directory', FileSystemProviderErrorCode.FileIsADirectory);
+	}
 
-  // --- manage file events
+	private _lookupParentDirectory(uri: URI): Directory {
+		const dirname = resources.dirname(uri);
+		return this._lookupAsDirectory(dirname, false);
+	}
 
-  private readonly _onDidChangeFile = this._register(
-    new Emitter<readonly IFileChange[]>(),
-  )
-  readonly onDidChangeFile: Event<readonly IFileChange[]> =
-    this._onDidChangeFile.event
+	// --- manage file events
 
-  private _bufferedChanges: IFileChange[] = []
-  private _fireSoonHandle?: any
+	private readonly _onDidChangeFile = this._register(new Emitter<readonly IFileChange[]>());
+	readonly onDidChangeFile: Event<readonly IFileChange[]> = this._onDidChangeFile.event;
 
-  watch(resource: URI, opts: IWatchOptions): IDisposable {
-    // ignore, fires for all changes...
-    return Disposable.None
-  }
+	private _bufferedChanges: IFileChange[] = [];
+	private _fireSoonHandle?: any;
 
-  private _fireSoon(...changes: IFileChange[]): void {
-    this._bufferedChanges.push(...changes)
+	watch(resource: URI, opts: IWatchOptions): IDisposable {
+		// ignore, fires for all changes...
+		return Disposable.None;
+	}
 
-    if (this._fireSoonHandle) {
-      clearTimeout(this._fireSoonHandle)
-    }
+	private _fireSoon(...changes: IFileChange[]): void {
+		this._bufferedChanges.push(...changes);
 
-    this._fireSoonHandle = setTimeout(() => {
-      this._onDidChangeFile.fire(this._bufferedChanges)
-      this._bufferedChanges.length = 0
-    }, 5)
-  }
+		if (this._fireSoonHandle) {
+			clearTimeout(this._fireSoonHandle);
+		}
 
-  override dispose(): void {
-    super.dispose()
+		this._fireSoonHandle = setTimeout(() => {
+			this._onDidChangeFile.fire(this._bufferedChanges);
+			this._bufferedChanges.length = 0;
+		}, 5);
+	}
 
-    this.fdMemory.clear()
-  }
+	override dispose(): void {
+		super.dispose();
+
+		this.fdMemory.clear();
+	}
 }

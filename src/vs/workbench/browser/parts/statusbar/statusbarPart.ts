@@ -118,13 +118,13 @@ export interface IStatusbarEntryContainer extends IDisposable {
     entry: IStatusbarEntry,
     id: string,
     alignment: StatusbarAlignment,
-    priority?: number | IStatusbarEntryPriority,
+    priority?: number | IStatusbarEntryPriority
   ): IStatusbarEntryAccessor
   addEntry(
     entry: IStatusbarEntry,
     id: string,
     alignment: StatusbarAlignment,
-    priority?: number | IStatusbarEntryPriority | IStatusbarEntryLocation,
+    priority?: number | IStatusbarEntryPriority | IStatusbarEntryLocation
   ): IStatusbarEntryAccessor
 
   /**
@@ -139,7 +139,7 @@ export interface IStatusbarEntryContainer extends IDisposable {
     entry: IStatusbarEntry,
     id: string,
     alignment: StatusbarAlignment,
-    location?: IStatusbarEntryLocation,
+    location?: IStatusbarEntryLocation
   ): IStatusbarEntryAccessor
 
   /**
@@ -204,7 +204,7 @@ class StatusbarPart extends Part implements IStatusbarEntryContainer {
   private pendingEntries: IPendingStatusbarEntry[] = []
 
   private readonly viewModel = this._register(
-    new StatusbarViewModel(this.storageService),
+    new StatusbarViewModel(this.storageService)
   )
 
   readonly onDidChangeEntryVisibility =
@@ -226,12 +226,12 @@ class StatusbarPart extends Part implements IStatusbarEntryContainer {
           hideOnKeyDown: true,
           sticky: focus,
         },
-      }),
-    ),
+      })
+    )
   )
 
   private readonly compactEntriesDisposable = this._register(
-    new MutableDisposable<DisposableStore>(),
+    new MutableDisposable<DisposableStore>()
   )
   private readonly styleOverrides = new Set<IStatusbarStyleOverride>()
 
@@ -246,7 +246,7 @@ class StatusbarPart extends Part implements IStatusbarEntryContainer {
     @IWorkbenchLayoutService layoutService: IWorkbenchLayoutService,
     @IContextMenuService
     private readonly contextMenuService: IContextMenuService,
-    @IContextKeyService private readonly contextKeyService: IContextKeyService,
+    @IContextKeyService private readonly contextKeyService: IContextKeyService
   ) {
     super(id, { hasTitle: false }, themeService, storageService, layoutService)
 
@@ -256,12 +256,12 @@ class StatusbarPart extends Part implements IStatusbarEntryContainer {
   private registerListeners(): void {
     // Entry visibility changes
     this._register(
-      this.onDidChangeEntryVisibility(() => this.updateCompactEntries()),
+      this.onDidChangeEntryVisibility(() => this.updateCompactEntries())
     )
 
     // Workbench state changes
     this._register(
-      this.contextService.onDidChangeWorkbenchState(() => this.updateStyles()),
+      this.contextService.onDidChangeWorkbenchState(() => this.updateStyles())
     )
   }
 
@@ -272,7 +272,7 @@ class StatusbarPart extends Part implements IStatusbarEntryContainer {
     priorityOrLocation:
       | number
       | IStatusbarEntryLocation
-      | IStatusbarEntryPriority = 0,
+      | IStatusbarEntryPriority = 0
   ): IStatusbarEntryAccessor {
     let priority: IStatusbarEntryPriority
     if (isStatusbarEntryPriority(priorityOrLocation)) {
@@ -298,7 +298,7 @@ class StatusbarPart extends Part implements IStatusbarEntryContainer {
     entry: IStatusbarEntry,
     id: string,
     alignment: StatusbarAlignment,
-    priority: IStatusbarEntryPriority,
+    priority: IStatusbarEntryPriority
   ): IStatusbarEntryAccessor {
     const pendingEntry: IPendingStatusbarEntry = {
       entry,
@@ -322,7 +322,7 @@ class StatusbarPart extends Part implements IStatusbarEntryContainer {
           pendingEntry.accessor.dispose()
         } else {
           this.pendingEntries = this.pendingEntries.filter(
-            (entry) => entry !== pendingEntry,
+            (entry) => entry !== pendingEntry
           )
         }
       },
@@ -335,7 +335,7 @@ class StatusbarPart extends Part implements IStatusbarEntryContainer {
     entry: IStatusbarEntry,
     id: string,
     alignment: StatusbarAlignment,
-    priority: IStatusbarEntryPriority,
+    priority: IStatusbarEntryPriority
   ): IStatusbarEntryAccessor {
     // View model item
     const itemContainer = this.doCreateStatusItem(id, alignment)
@@ -343,7 +343,7 @@ class StatusbarPart extends Part implements IStatusbarEntryContainer {
       StatusbarEntryItem,
       itemContainer,
       entry,
-      this.hoverDelegate,
+      this.hoverDelegate
     )
 
     // View model entry
@@ -367,7 +367,7 @@ class StatusbarPart extends Part implements IStatusbarEntryContainer {
     // Add to view model
     const { needsFullRefresh } = this.doAddOrRemoveModelEntry(
       viewModelEntry,
-      true,
+      true
     )
     if (needsFullRefresh) {
       this.appendStatusbarEntries()
@@ -382,7 +382,7 @@ class StatusbarPart extends Part implements IStatusbarEntryContainer {
       dispose: () => {
         const { needsFullRefresh } = this.doAddOrRemoveModelEntry(
           viewModelEntry,
-          false,
+          false
         )
         if (needsFullRefresh) {
           this.appendStatusbarEntries()
@@ -418,7 +418,7 @@ class StatusbarPart extends Part implements IStatusbarEntryContainer {
 
   private doAddOrRemoveModelEntry(
     entry: IStatusbarViewModelEntry,
-    add: boolean,
+    add: boolean
   ) {
     // Update model but remember previous entries
     const entriesBefore = this.viewModel.entries
@@ -479,7 +479,7 @@ class StatusbarPart extends Part implements IStatusbarEntryContainer {
 
     // Track focus within container
     const scopedContextKeyService = this._register(
-      this.contextKeyService.createScoped(this.element),
+      this.contextKeyService.createScoped(this.element)
     )
     StatusBarFocused.bindTo(scopedContextKeyService).set(true)
 
@@ -497,14 +497,14 @@ class StatusbarPart extends Part implements IStatusbarEntryContainer {
     // Context menu support
     this._register(
       addDisposableListener(parent, EventType.CONTEXT_MENU, (e) =>
-        this.showContextMenu(e),
-      ),
+        this.showContextMenu(e)
+      )
     )
     this._register(Gesture.addTarget(parent))
     this._register(
       addDisposableListener(parent, TouchEventType.Contextmenu, (e) =>
-        this.showContextMenu(e),
-      ),
+        this.showContextMenu(e)
+      )
     )
 
     // Initial status bar entries
@@ -525,7 +525,7 @@ class StatusbarPart extends Part implements IStatusbarEntryContainer {
           pending.entry,
           pending.id,
           pending.alignment,
-          pending.priority.primary,
+          pending.priority.primary
         )
       }
     }
@@ -566,7 +566,7 @@ class StatusbarPart extends Part implements IStatusbarEntryContainer {
     const target = assertIsDefined(
       entry.alignment === StatusbarAlignment.LEFT
         ? this.leftItemsContainer
-        : this.rightItemsContainer,
+        : this.rightItemsContainer
     )
 
     const index = entries.indexOf(entry)
@@ -632,10 +632,10 @@ class StatusbarPart extends Part implements IStatusbarEntryContainer {
     // Install mouse listeners to update hover feedback for
     // all compact entries that belong to each other
     const statusBarItemHoverBackground = this.getColor(
-      STATUS_BAR_ITEM_HOVER_BACKGROUND,
+      STATUS_BAR_ITEM_HOVER_BACKGROUND
     )
     const statusBarItemCompactHoverBackground = this.getColor(
-      STATUS_BAR_ITEM_COMPACT_HOVER_BACKGROUND,
+      STATUS_BAR_ITEM_COMPACT_HOVER_BACKGROUND
     )
     this.compactEntriesDisposable.value = new DisposableStore()
     if (
@@ -657,12 +657,12 @@ class StatusbarPart extends Part implements IStatusbarEntryContainer {
                 compactEntryGroup.forEach(
                   (compactEntry) =>
                     (compactEntry.labelContainer.style.backgroundColor =
-                      statusBarItemHoverBackground),
+                      statusBarItemHoverBackground)
                 )
                 compactEntry.labelContainer.style.backgroundColor =
                   statusBarItemCompactHoverBackground
-              },
-            ),
+              }
+            )
           )
 
           this.compactEntriesDisposable.value.add(
@@ -672,10 +672,10 @@ class StatusbarPart extends Part implements IStatusbarEntryContainer {
               () => {
                 compactEntryGroup.forEach(
                   (compactEntry) =>
-                    (compactEntry.labelContainer.style.backgroundColor = ""),
+                    (compactEntry.labelContainer.style.backgroundColor = "")
                 )
-              },
-            ),
+              }
+            )
           )
         }
       }
@@ -713,9 +713,9 @@ class StatusbarPart extends Part implements IStatusbarEntryContainer {
         label: localize("hideStatusBar", "Hide Status Bar"),
         run: () =>
           this.instantiationService.invokeFunction((accessor) =>
-            new ToggleStatusbarVisibilityAction().run(accessor),
+            new ToggleStatusbarVisibilityAction().run(accessor)
           ),
-      }),
+      })
     )
     actions.push(new Separator())
 
@@ -730,8 +730,8 @@ class StatusbarPart extends Part implements IStatusbarEntryContainer {
           new ToggleStatusbarEntryVisibilityAction(
             entry.id,
             entry.name,
-            this.viewModel,
-          ),
+            this.viewModel
+          )
         )
         handledEntries.add(entry.id)
       }
@@ -757,8 +757,8 @@ class StatusbarPart extends Part implements IStatusbarEntryContainer {
         new HideStatusbarEntryAction(
           statusEntryUnderMouse.id,
           statusEntryUnderMouse.name,
-          this.viewModel,
-        ),
+          this.viewModel
+        )
       )
     }
 
@@ -785,7 +785,7 @@ class StatusbarPart extends Part implements IStatusbarEntryContainer {
         styleOverride?.background ??
           (this.contextService.getWorkbenchState() !== WorkbenchState.EMPTY
             ? STATUS_BAR_BACKGROUND
-            : STATUS_BAR_NO_FOLDER_BACKGROUND),
+            : STATUS_BAR_NO_FOLDER_BACKGROUND)
       ) || ""
     container.style.backgroundColor = backgroundColor
     const foregroundColor =
@@ -793,7 +793,7 @@ class StatusbarPart extends Part implements IStatusbarEntryContainer {
         styleOverride?.foreground ??
           (this.contextService.getWorkbenchState() !== WorkbenchState.EMPTY
             ? STATUS_BAR_FOREGROUND
-            : STATUS_BAR_NO_FOLDER_FOREGROUND),
+            : STATUS_BAR_NO_FOLDER_FOREGROUND)
       ) || ""
     container.style.color = foregroundColor
     const itemBorderColor = this.getColor(STATUS_BAR_ITEM_FOCUS_BORDER)
@@ -804,7 +804,7 @@ class StatusbarPart extends Part implements IStatusbarEntryContainer {
         styleOverride?.border ??
           (this.contextService.getWorkbenchState() !== WorkbenchState.EMPTY
             ? STATUS_BAR_BORDER
-            : STATUS_BAR_NO_FOLDER_BORDER),
+            : STATUS_BAR_NO_FOLDER_BORDER)
       ) || this.getColor(contrastBorder)
     if (borderColor) {
       container.classList.add("status-border-top")
@@ -846,7 +846,7 @@ class StatusbarPart extends Part implements IStatusbarEntryContainer {
     width: number,
     height: number,
     top: number,
-    left: number,
+    left: number
   ): void {
     super.layout(width, height, top, left)
     super.layoutContents(width, height)
@@ -887,7 +887,7 @@ export class MainStatusbarPart extends StatusbarPart {
     @IStorageService storageService: IStorageService,
     @IWorkbenchLayoutService layoutService: IWorkbenchLayoutService,
     @IContextMenuService contextMenuService: IContextMenuService,
-    @IContextKeyService contextKeyService: IContextKeyService,
+    @IContextKeyService contextKeyService: IContextKeyService
   ) {
     super(
       Parts.STATUSBAR_PART,
@@ -897,7 +897,7 @@ export class MainStatusbarPart extends StatusbarPart {
       storageService,
       layoutService,
       contextMenuService,
-      contextKeyService,
+      contextKeyService
     )
   }
 }
@@ -925,7 +925,7 @@ export class AuxiliaryStatusbarPart
     @IStorageService storageService: IStorageService,
     @IWorkbenchLayoutService layoutService: IWorkbenchLayoutService,
     @IContextMenuService contextMenuService: IContextMenuService,
-    @IContextKeyService contextKeyService: IContextKeyService,
+    @IContextKeyService contextKeyService: IContextKeyService
   ) {
     const id = AuxiliaryStatusbarPart.COUNTER++
     super(
@@ -936,7 +936,7 @@ export class AuxiliaryStatusbarPart
       storageService,
       layoutService,
       contextMenuService,
-      contextKeyService,
+      contextKeyService
     )
   }
 }
@@ -948,11 +948,11 @@ export class StatusbarService
   declare readonly _serviceBrand: undefined
 
   readonly mainPart = this._register(
-    this.instantiationService.createInstance(MainStatusbarPart),
+    this.instantiationService.createInstance(MainStatusbarPart)
   )
 
   private readonly _onDidCreateAuxiliaryStatusbarPart = this._register(
-    new Emitter<AuxiliaryStatusbarPart>(),
+    new Emitter<AuxiliaryStatusbarPart>()
   )
   private readonly onDidCreateAuxiliaryStatusbarPart =
     this._onDidCreateAuxiliaryStatusbarPart.event
@@ -961,7 +961,7 @@ export class StatusbarService
     @IInstantiationService
     private readonly instantiationService: IInstantiationService,
     @IStorageService storageService: IStorageService,
-    @IThemeService themeService: IThemeService,
+    @IThemeService themeService: IThemeService
   ) {
     super("workbench.statusBarService", themeService, storageService)
 
@@ -971,7 +971,7 @@ export class StatusbarService
   //#region Auxiliary Statusbar Parts
 
   createAuxiliaryStatusbarPart(
-    container: HTMLElement,
+    container: HTMLElement
   ): IAuxiliaryStatusbarPart {
     // Container
     const statusbarPartContainer = document.createElement("footer")
@@ -985,7 +985,7 @@ export class StatusbarService
     // Statusbar Part
     const statusbarPart = this.instantiationService.createInstance(
       AuxiliaryStatusbarPart,
-      statusbarPartContainer,
+      statusbarPartContainer
     )
     const disposable = this.registerPart(statusbarPart)
 
@@ -1001,13 +1001,13 @@ export class StatusbarService
 
   createScoped(
     statusbarEntryContainer: IStatusbarEntryContainer,
-    disposables: DisposableStore,
+    disposables: DisposableStore
   ): IStatusbarService {
     return disposables.add(
       this.instantiationService.createInstance(
         ScopedStatusbarService,
-        statusbarEntryContainer,
-      ),
+        statusbarEntryContainer
+      )
     )
   }
 
@@ -1024,14 +1024,14 @@ export class StatusbarService
     priorityOrLocation:
       | number
       | IStatusbarEntryLocation
-      | IStatusbarEntryPriority = 0,
+      | IStatusbarEntryPriority = 0
   ): IStatusbarEntryAccessor {
     if (entry.showInAllWindows) {
       return this.doAddEntryToAllWindows(
         entry,
         id,
         alignment,
-        priorityOrLocation,
+        priorityOrLocation
       )
     }
 
@@ -1045,7 +1045,7 @@ export class StatusbarService
     priorityOrLocation:
       | number
       | IStatusbarEntryLocation
-      | IStatusbarEntryPriority = 0,
+      | IStatusbarEntryPriority = 0
   ): IStatusbarEntryAccessor {
     const entryDisposables = new DisposableStore()
 
@@ -1056,14 +1056,14 @@ export class StatusbarService
       partDisposables.add(part.onWillDispose(() => partDisposables.dispose()))
 
       const accessor = partDisposables.add(
-        part.addEntry(entry, id, alignment, priorityOrLocation),
+        part.addEntry(entry, id, alignment, priorityOrLocation)
       )
       accessors.add(accessor)
       partDisposables.add(toDisposable(() => accessors.delete(accessor)))
 
       entryDisposables.add(partDisposables)
       partDisposables.add(
-        toDisposable(() => entryDisposables.delete(partDisposables)),
+        toDisposable(() => entryDisposables.delete(partDisposables))
       )
     }
 
@@ -1072,7 +1072,7 @@ export class StatusbarService
     }
 
     entryDisposables.add(
-      this.onDidCreateAuxiliaryStatusbarPart((part) => addEntry(part)),
+      this.onDidCreateAuxiliaryStatusbarPart((part) => addEntry(part))
     )
 
     return {
@@ -1132,24 +1132,24 @@ export class ScopedStatusbarService
 
   constructor(
     private readonly statusbarEntryContainer: IStatusbarEntryContainer,
-    @IStatusbarService private readonly statusbarService: IStatusbarService,
+    @IStatusbarService private readonly statusbarService: IStatusbarService
   ) {
     super()
   }
 
   createAuxiliaryStatusbarPart(
-    container: HTMLElement,
+    container: HTMLElement
   ): IAuxiliaryStatusbarPart {
     return this.statusbarService.createAuxiliaryStatusbarPart(container)
   }
 
   createScoped(
     statusbarEntryContainer: IStatusbarEntryContainer,
-    disposables: DisposableStore,
+    disposables: DisposableStore
   ): IStatusbarService {
     return this.statusbarService.createScoped(
       statusbarEntryContainer,
-      disposables,
+      disposables
     )
   }
 
@@ -1167,13 +1167,13 @@ export class ScopedStatusbarService
     priorityOrLocation:
       | number
       | IStatusbarEntryLocation
-      | IStatusbarEntryPriority = 0,
+      | IStatusbarEntryPriority = 0
   ): IStatusbarEntryAccessor {
     return this.statusbarEntryContainer.addEntry(
       entry,
       id,
       alignment,
-      priorityOrLocation,
+      priorityOrLocation
     )
   }
 

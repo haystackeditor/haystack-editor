@@ -31,7 +31,7 @@ import { registerIcon } from "vs/platform/theme/common/iconRegistry"
 const openEditorsViewIcon = registerIcon(
   "open-editors-view-icon",
   Codicon.book,
-  localize("openEditorsIcon", "View icon of the open editors view."),
+  localize("openEditorsIcon", "View icon of the open editors view.")
 )
 
 const viewsRegistry = Registry.as<IViewsRegistry>(Extensions.ViewsRegistry)
@@ -47,7 +47,7 @@ export class HaystackNavigatorViewPaneContainer extends ViewPaneContainer {
     @IConfigurationService configurationService: IConfigurationService,
     @IExtensionService extensionService: IExtensionService,
     @IWorkspaceContextService contextService: IWorkspaceContextService,
-    @IViewDescriptorService viewDescriptorService: IViewDescriptorService,
+    @IViewDescriptorService viewDescriptorService: IViewDescriptorService
   ) {
     super(
       NAVIGATOR_VIEWLET_ID,
@@ -61,7 +61,7 @@ export class HaystackNavigatorViewPaneContainer extends ViewPaneContainer {
       themeService,
       storageService,
       contextService,
-      viewDescriptorService,
+      viewDescriptorService
     )
 
     this.registerViews()
@@ -96,14 +96,14 @@ export class HaystackNavigatorViewPaneContainer extends ViewPaneContainer {
 
   protected override createView(
     viewDescriptor: IViewDescriptor,
-    options: IViewletViewOptions,
+    options: IViewletViewOptions
   ): ViewPane {
     if (viewDescriptor.id === NavigatorOpenEditorsView.ID) {
       return this.instantiationService.createInstance(
         NavigatorOpenEditorsView,
         {
           ...options,
-        },
+        }
       )
     }
     return super.createView(viewDescriptor, options)
@@ -131,7 +131,7 @@ export class HaystackNavigatorViewPaneContainer extends ViewPaneContainer {
 }
 
 const viewContainerRegistry = Registry.as<IViewContainersRegistry>(
-  Extensions.ViewContainersRegistry,
+  Extensions.ViewContainersRegistry
 )
 
 const viewContainer = viewContainerRegistry.registerViewContainer(
@@ -146,12 +146,12 @@ const viewContainer = viewContainerRegistry.registerViewContainer(
       id: NAVIGATOR_VIEWLET_ID,
       mnemonicTitle: nls.localize(
         { key: "miNavigateEditors", comment: ["&& denotes a mnemonic"] },
-        "&&NavigateEditors",
+        "&&NavigateEditors"
       ),
       keybindings: { primary: KeyMod.CtrlCmd | KeyMod.Shift | KeyCode.KeyJ },
       order: 1,
     },
   },
   ViewContainerLocation.Sidebar,
-  { isDefault: true },
+  { isDefault: true }
 )

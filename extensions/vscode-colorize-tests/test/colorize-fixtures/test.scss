@@ -7,16 +7,11 @@
 /* nested rules */
 #main {
   width: 97%;
-  p,
-  div {
+  p, div {
     font-size: 2em;
-    a {
-      font-weight: bold;
-    }
+    a { font-weight: bold; }
   }
-  pre {
-    font-size: 3em;
-  }
+  pre { font-size: 3em; }
 }
 
 /* parent selector (&) */
@@ -24,9 +19,7 @@
   color: black;
   a {
     font-weight: bold;
-    &:hover {
-      color: red;
-    }
+    &:hover { color: red; }
   }
 }
 
@@ -42,18 +35,15 @@
 
 /* nesting conflicts */
 tr.default {
-  foo: {
-    // properties
-    foo: 1;
+  foo: { // properties
+    foo : 1;
   }
   foo: 1px; // rule
-  foo.bar {
-    // selector
-    foo: 1;
+  foo.bar { // selector
+    foo : 1;
   }
-  foo:bar {
-    // selector
-    foo: 1;
+  foo:bar { // selector
+    foo : 1;
   }
   foo: 1px; // rule
 }
@@ -63,16 +53,12 @@ tr.default {
  * several lines long.
  * since it uses the CSS comment syntax,
  * it will appear in the CSS output. */
-body {
-  color: black;
-}
+body { color: black; }
 
 // These comments are only one line long each.
 // They won't appear in the CSS output,
 // since they use the single-line comment syntax.
-a {
-  color: green;
-}
+a { color: green; }
 
 /* variables */
 $width: 5em;
@@ -93,7 +79,7 @@ p.#{$name} {
 
 /* variable declaration with whitespaces */
 // Set the color of your columns
-$grid-background-column-color: rgba(100, 100, 225, 0.25) !default;
+$grid-background-column-color     : rgba(100, 100, 225, 0.25)   !default;
 
 /* operations*/
 p {
@@ -111,15 +97,12 @@ $gutter-width: 10px;
 @function grid-width($n) {
   @return $n * $grid-width + ($n - 1) * $gutter-width;
 }
-#sidebar {
-  width: grid-width(5);
-}
+#sidebar { width: grid-width(5); }
 
 /* @import */
 @import "foo.scss";
 $family: unquote("Droid+Sans");
-@import "rounded-corners",
-  url("http://fonts.googleapis.com/css?family=#{$family}");
+@import "rounded-corners", url("http://fonts.googleapis.com/css?family=#{$family}");
 #main {
   @import "example";
 }
@@ -161,24 +144,16 @@ $family: unquote("Droid+Sans");
     @warn "Assuming #{$y} to be in pixels";
     $y: 1px * $y;
   }
-  position: relative;
-  left: $x;
-  top: $y;
+  position: relative; left: $x; top: $y;
 }
 
 /* control directives */
 
 /* if statement */
 p {
-  @if 1 + 1 == 2 {
-    border: 1px solid;
-  }
-  @if 5 < 3 {
-    border: 2px dotted;
-  }
-  @if null {
-    border: 3px double;
-  }
+  @if 1 + 1 == 2 { border: 1px solid;  }
+  @if 5 < 3      { border: 2px dotted; }
+  @if null       { border: 3px double; }
 }
 
 /* if else statement */
@@ -193,24 +168,20 @@ p {
 
 /* for statement */
 @for $i from 1 through 3 {
-  .item-#{$i} {
-    width: 2em * $i;
-  }
+  .item-#{$i} { width: 2em * $i; }
 }
 
 /* each statement */
 @each $animal in puma, sea-slug, egret, salamander {
   .#{$animal}-icon {
-    background-image: url("/images/#{$animal}.png");
+    background-image: url('/images/#{$animal}.png');
   }
 }
 
 /* while statement */
 $i: 6;
 @while $i > 0 {
-  .item-#{$i} {
-    width: 2em * $i;
-  }
+  .item-#{$i} { width: 2em * $i; }
   $i: $i - 2;
 }
 
@@ -219,7 +190,7 @@ $i: 6;
   @for $i from 0 to $total {
     @if (unit($a) == "%") and ($i == ($total - 1)) {
       $z: 100%;
-      @return "1";
+      @return '1';
     }
   }
   @return $grid;
@@ -247,9 +218,7 @@ $i: 6;
     style: dashed;
   }
 }
-p {
-  @include sexy-border(blue);
-}
+p { @include sexy-border(blue); }
 
 /* mixin with varargs */
 @mixin box-shadow($shadows...) {
@@ -289,9 +258,10 @@ $values: #ff0000, #00ff00, #0000ff;
   }
 }
 
+
 /* attributes */
 [rel="external"]::after {
-  content: "s";
+    content: 's';
 }
 /*page */
 @page :left {
@@ -302,50 +272,36 @@ $values: #ff0000, #00ff00, #0000ff;
 /* missing semicolons */
 tr.default {
   foo.bar {
-    $foo: 1px;
+    $foo: 1px
   }
   foo: {
-    foo: white;
+    foo : white
   }
   foo.bar1 {
-    @extend tr.default;
+    @extend tr.default
   }
   foo.bar2 {
-    @import "compass";
+    @import "compass"
   }
-  bar: black;
+  bar: black
 }
 
 /* rules without whitespace */
-legend {
-  foo {
-    a: s;
-  }
-  margin-top: 0;
-  margin-bottom: #123;
-  margin-top: s(1);
-}
+legend {foo{a:s}margin-top:0;margin-bottom:#123;margin-top:s(1)}
 
 /* extend with interpolation variable */
 @mixin error($a: false) {
   @extend .#{$a};
   @extend ##{$a};
 }
-#bar {
-  a: 1px;
-}
-.bar {
-  b: 1px;
-}
+#bar {a: 1px;}
+.bar {b: 1px;}
 foo {
-  @include error("bar");
+  @include error('bar');
 }
 
 /* css3: @font face */
-@font-face {
-  font-family: Delicious;
-  src: url("Delicious-Roman.otf");
-}
+@font-face { font-family: Delicious; src: url('Delicious-Roman.otf'); }
 
 /* rule names with variables */
 .orbit-#{$d}-prev {
@@ -357,43 +313,28 @@ foo {
 
 /* keyframes */
 @-webkit-keyframes NAME-YOUR-ANIMATION {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
 }
 @-moz-keyframes NAME-YOUR-ANIMATION {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
 }
 @-o-keyframes NAME-YOUR-ANIMATION {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
 }
 @keyframes NAME-YOUR-ANIMATION {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
 }
 
 /* string escaping */
-[data-icon="test-1"]:before {
-  content: "\\";
+[data-icon='test-1']:before {
+  content:'\\';
 }
 /* a comment */
-$var1: "'";
-$var2: '"';
+$var1: '\'';
+$var2: "\"";
 /* another comment */
+

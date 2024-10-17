@@ -53,7 +53,7 @@ export class MergeEditorInputData {
     readonly uri: URI,
     readonly title: string | undefined,
     readonly detail: string | undefined,
-    readonly description: string | undefined,
+    readonly description: string | undefined
   ) {}
 }
 
@@ -100,7 +100,7 @@ export class MergeEditorInput
     @ITextResourceConfigurationService
     textResourceConfigurationService: ITextResourceConfigurationService,
     @ICustomEditorLabelService
-    customEditorLabelService: ICustomEditorLabelService,
+    customEditorLabelService: ICustomEditorLabelService
   ) {
     super(
       result,
@@ -116,7 +116,7 @@ export class MergeEditorInput
       fileService,
       filesConfigurationService,
       textResourceConfigurationService,
-      customEditorLabelService,
+      customEditorLabelService
     )
   }
 
@@ -149,7 +149,7 @@ export class MergeEditorInput
     this.useWorkingCopy
       ? TempFileMergeEditorModeFactory
       : WorkspaceMergeEditorModeFactory,
-    this._instaService.createInstance(MergeEditorTelemetry),
+    this._instaService.createInstance(MergeEditorTelemetry)
   )
 
   override async resolve(): Promise<IMergeEditorInputModel> {
@@ -160,7 +160,7 @@ export class MergeEditorInput
           input1: this.input1,
           input2: this.input2,
           result: this.result,
-        }),
+        })
       )
       this._inputModel = inputModel
 
@@ -169,7 +169,7 @@ export class MergeEditorInput
           /** @description fire dirty event */
           inputModel.isDirty.read(reader)
           this._onDidChangeDirty.fire()
-        }),
+        })
       )
 
       await this._inputModel.model.onInitialized
@@ -184,7 +184,7 @@ export class MergeEditorInput
 
   override async save(
     group: number,
-    options?: ITextFileSaveOptions | undefined,
+    options?: ITextFileSaveOptions | undefined
   ): Promise<IUntypedEditorInput | undefined> {
     await this._inputModel?.save(options)
     return undefined
@@ -240,7 +240,7 @@ export class MergeEditorInput
 
   override async revert(
     group: number,
-    options?: IRevertOptions,
+    options?: IRevertOptions
   ): Promise<void> {
     return this._inputModel?.revert(options)
   }

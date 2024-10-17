@@ -9,10 +9,8 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IUpdateService } from "vs/platform/update/common/update"
-import { registerMainProcessRemoteService } from "vs/platform/ipc/electron-sandbox/services"
-import { UpdateChannelClient } from "vs/platform/update/common/updateIpc"
+import { IUpdateService } from 'vs/platform/update/common/update';
+import { registerMainProcessRemoteService } from 'vs/platform/ipc/electron-sandbox/services';
+import { UpdateChannelClient } from 'vs/platform/update/common/updateIpc';
 
-registerMainProcessRemoteService(IUpdateService, "update", {
-  channelClientCtor: UpdateChannelClient,
-})
+registerMainProcessRemoteService(IUpdateService, 'update', { channelClientCtor: UpdateChannelClient });

@@ -10,6 +10,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 .monaco-editor .mwh {
-  position: absolute;
-  color: var(--vscode-editorWhitespace-foreground) !important;
+	position: absolute;
+	color: var(--vscode-editorWhitespace-foreground) !important;
 }

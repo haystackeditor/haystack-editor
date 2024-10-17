@@ -9,17 +9,7 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import {
-  InstantiationType,
-  registerSingleton,
-} from "vs/platform/instantiation/common/extensions"
-import {
-  ITerminalContributionService,
-  TerminalContributionService,
-} from "vs/workbench/contrib/terminal/common/terminalExtensionPoints"
+import { InstantiationType, registerSingleton } from 'vs/platform/instantiation/common/extensions';
+import { ITerminalContributionService, TerminalContributionService } from 'vs/workbench/contrib/terminal/common/terminalExtensionPoints';
 
-registerSingleton(
-  ITerminalContributionService,
-  TerminalContributionService,
-  InstantiationType.Delayed,
-)
+registerSingleton(ITerminalContributionService, TerminalContributionService, InstantiationType.Delayed);

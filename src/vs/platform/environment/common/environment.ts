@@ -9,28 +9,21 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { URI } from "vs/base/common/uri"
-import { NativeParsedArgs } from "vs/platform/environment/common/argv"
-import {
-  createDecorator,
-  refineServiceDecorator,
-} from "vs/platform/instantiation/common/instantiation"
+import { URI } from 'vs/base/common/uri';
+import { NativeParsedArgs } from 'vs/platform/environment/common/argv';
+import { createDecorator, refineServiceDecorator } from 'vs/platform/instantiation/common/instantiation';
 
-export const IEnvironmentService =
-  createDecorator<IEnvironmentService>("environmentService")
-export const INativeEnvironmentService = refineServiceDecorator<
-  IEnvironmentService,
-  INativeEnvironmentService
->(IEnvironmentService)
+export const IEnvironmentService = createDecorator<IEnvironmentService>('environmentService');
+export const INativeEnvironmentService = refineServiceDecorator<IEnvironmentService, INativeEnvironmentService>(IEnvironmentService);
 
 export interface IDebugParams {
-  port: number | null
-  break: boolean
+	port: number | null;
+	break: boolean;
 }
 
 export interface IExtensionHostDebugParams extends IDebugParams {
-  debugId?: string
-  env?: Record<string, string>
+	debugId?: string;
+	env?: Record<string, string>;
 }
 
 /**
@@ -38,7 +31,7 @@ export interface IExtensionHostDebugParams extends IDebugParams {
  *
  * **NOTE**: This is defined in `platform/environment` because it can appear as a CLI argument.
  */
-export type ExtensionKind = "ui" | "workspace" | "web"
+export type ExtensionKind = 'ui' | 'workspace' | 'web';
 
 /**
  * A basic environment service that can be used in various processes,
@@ -46,72 +39,73 @@ export type ExtensionKind = "ui" | "workspace" | "web"
  * service for specific environment.
  */
 export interface IEnvironmentService {
-  readonly _serviceBrand: undefined
 
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  //
-  // NOTE: KEEP THIS INTERFACE AS SMALL AS POSSIBLE.
-  //
-  // AS SUCH:
-  //   - PUT NON-WEB PROPERTIES INTO NATIVE ENVIRONMENT SERVICE
-  //   - PUT WORKBENCH ONLY PROPERTIES INTO WORKBENCH ENVIRONMENT SERVICE
-  //   - PUT ELECTRON-MAIN ONLY PROPERTIES INTO MAIN ENVIRONMENT SERVICE
-  //
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	readonly _serviceBrand: undefined;
 
-  // --- user roaming data
-  stateResource: URI
-  userRoamingDataHome: URI
-  keyboardLayoutResource: URI
-  argvResource: URI
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	//
+	// NOTE: KEEP THIS INTERFACE AS SMALL AS POSSIBLE.
+	//
+	// AS SUCH:
+	//   - PUT NON-WEB PROPERTIES INTO NATIVE ENVIRONMENT SERVICE
+	//   - PUT WORKBENCH ONLY PROPERTIES INTO WORKBENCH ENVIRONMENT SERVICE
+	//   - PUT ELECTRON-MAIN ONLY PROPERTIES INTO MAIN ENVIRONMENT SERVICE
+	//
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  // --- data paths
-  untitledWorkspacesHome: URI
-  workspaceStorageHome: URI
-  localHistoryHome: URI
-  cacheHome: URI
+	// --- user roaming data
+	stateResource: URI;
+	userRoamingDataHome: URI;
+	keyboardLayoutResource: URI;
+	argvResource: URI;
 
-  // --- settings sync
-  userDataSyncHome: URI
-  sync: "on" | "off" | undefined
+	// --- data paths
+	untitledWorkspacesHome: URI;
+	workspaceStorageHome: URI;
+	localHistoryHome: URI;
+	cacheHome: URI;
 
-  // --- continue edit session
-  continueOn?: string
-  editSessionId?: string
+	// --- settings sync
+	userDataSyncHome: URI;
+	sync: 'on' | 'off' | undefined;
 
-  // --- extension development
-  debugExtensionHost: IExtensionHostDebugParams
-  isExtensionDevelopment: boolean
-  disableExtensions: boolean | string[]
-  enableExtensions?: readonly string[]
-  extensionDevelopmentLocationURI?: URI[]
-  extensionDevelopmentKind?: ExtensionKind[]
-  extensionTestsLocationURI?: URI
+	// --- continue edit session
+	continueOn?: string;
+	editSessionId?: string;
 
-  // --- logging
-  logsHome: URI
-  logLevel?: string
-  extensionLogLevel?: [string, string][]
-  verbose: boolean
-  isBuilt: boolean
+	// --- extension development
+	debugExtensionHost: IExtensionHostDebugParams;
+	isExtensionDevelopment: boolean;
+	disableExtensions: boolean | string[];
+	enableExtensions?: readonly string[];
+	extensionDevelopmentLocationURI?: URI[];
+	extensionDevelopmentKind?: ExtensionKind[];
+	extensionTestsLocationURI?: URI;
 
-  // --- telemetry
-  disableTelemetry: boolean
-  serviceMachineIdResource: URI
+	// --- logging
+	logsHome: URI;
+	logLevel?: string;
+	extensionLogLevel?: [string, string][];
+	verbose: boolean;
+	isBuilt: boolean;
 
-  // --- Policy
-  policyFile?: URI
+	// --- telemetry
+	disableTelemetry: boolean;
+	serviceMachineIdResource: URI;
 
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  //
-  // NOTE: KEEP THIS INTERFACE AS SMALL AS POSSIBLE.
-  //
-  // AS SUCH:
-  //   - PUT NON-WEB PROPERTIES INTO NATIVE ENVIRONMENT SERVICE
-  //   - PUT WORKBENCH ONLY PROPERTIES INTO WORKBENCH ENVIRONMENT SERVICE
-  //   - PUT ELECTRON-MAIN ONLY PROPERTIES INTO MAIN ENVIRONMENT SERVICE
-  //
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	// --- Policy
+	policyFile?: URI;
+
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	//
+	// NOTE: KEEP THIS INTERFACE AS SMALL AS POSSIBLE.
+	//
+	// AS SUCH:
+	//   - PUT NON-WEB PROPERTIES INTO NATIVE ENVIRONMENT SERVICE
+	//   - PUT WORKBENCH ONLY PROPERTIES INTO WORKBENCH ENVIRONMENT SERVICE
+	//   - PUT ELECTRON-MAIN ONLY PROPERTIES INTO MAIN ENVIRONMENT SERVICE
+	//
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 }
 
 /**
@@ -119,52 +113,53 @@ export interface IEnvironmentService {
  * environments (Windows, Linux, macOS) but not e.g. web.
  */
 export interface INativeEnvironmentService extends IEnvironmentService {
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  //
-  // NOTE: KEEP THIS INTERFACE AS SMALL AS POSSIBLE.
-  //
-  // AS SUCH:
-  //   - PUT WORKBENCH ONLY PROPERTIES INTO WORKBENCH ENVIRONMENT SERVICE
-  //   - PUT ELECTRON-MAIN ONLY PROPERTIES INTO MAIN ENVIRONMENT SERVICE
-  //
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  // --- CLI Arguments
-  args: NativeParsedArgs
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	//
+	// NOTE: KEEP THIS INTERFACE AS SMALL AS POSSIBLE.
+	//
+	// AS SUCH:
+	//   - PUT WORKBENCH ONLY PROPERTIES INTO WORKBENCH ENVIRONMENT SERVICE
+	//   - PUT ELECTRON-MAIN ONLY PROPERTIES INTO MAIN ENVIRONMENT SERVICE
+	//
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-  // --- data paths
-  /**
-   * Root path of the JavaScript sources.
-   *
-   * Note: This is NOT the installation root
-   * directory itself but contained in it at
-   * a level that is platform dependent.
-   */
-  appRoot: string
-  userHome: URI
-  appSettingsHome: URI
-  tmpDir: URI
-  userDataPath: string
-  machineSettingsResource: URI
+	// --- CLI Arguments
+	args: NativeParsedArgs;
 
-  // --- extensions
-  extensionsPath: string
-  extensionsDownloadLocation: URI
-  builtinExtensionsPath: string
+	// --- data paths
+	/**
+	 * Root path of the JavaScript sources.
+	 *
+	 * Note: This is NOT the installation root
+	 * directory itself but contained in it at
+	 * a level that is platform dependent.
+	 */
+	appRoot: string;
+	userHome: URI;
+	appSettingsHome: URI;
+	tmpDir: URI;
+	userDataPath: string;
+	machineSettingsResource: URI;
 
-  // --- use in-memory Secret Storage
-  useInMemorySecretStorage?: boolean
+	// --- extensions
+	extensionsPath: string;
+	extensionsDownloadLocation: URI;
+	builtinExtensionsPath: string;
 
-  crossOriginIsolated?: boolean
+	// --- use in-memory Secret Storage
+	useInMemorySecretStorage?: boolean;
 
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  //
-  // NOTE: KEEP THIS INTERFACE AS SMALL AS POSSIBLE.
-  //
-  // AS SUCH:
-  //   - PUT NON-WEB PROPERTIES INTO NATIVE ENVIRONMENT SERVICE
-  //   - PUT WORKBENCH ONLY PROPERTIES INTO WORKBENCH ENVIRONMENT SERVICE
-  //   - PUT ELECTRON-MAIN ONLY PROPERTIES INTO MAIN ENVIRONMENT SERVICE
-  //
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	crossOriginIsolated?: boolean;
+
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	//
+	// NOTE: KEEP THIS INTERFACE AS SMALL AS POSSIBLE.
+	//
+	// AS SUCH:
+	//   - PUT NON-WEB PROPERTIES INTO NATIVE ENVIRONMENT SERVICE
+	//   - PUT WORKBENCH ONLY PROPERTIES INTO WORKBENCH ENVIRONMENT SERVICE
+	//   - PUT ELECTRON-MAIN ONLY PROPERTIES INTO MAIN ENVIRONMENT SERVICE
+	//
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 }

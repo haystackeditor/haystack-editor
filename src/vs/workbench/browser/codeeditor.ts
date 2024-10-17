@@ -89,7 +89,7 @@ export class RangeHighlightDecorations extends Disposable {
 
   private doHighlightRange(
     editor: ICodeEditor,
-    selectionRange: IRangeHighlightDecoration,
+    selectionRange: IRangeHighlightDecoration
   ) {
     this.removeHighlightRange()
 
@@ -97,16 +97,16 @@ export class RangeHighlightDecorations extends Disposable {
       (changeAccessor: IModelDecorationsChangeAccessor) => {
         this.rangeHighlightDecorationId = changeAccessor.addDecoration(
           selectionRange.range,
-          this.createRangeHighlightDecoration(selectionRange.isWholeLine),
+          this.createRangeHighlightDecoration(selectionRange.isWholeLine)
         )
-      },
+      }
     )
 
     this.setEditor(editor)
   }
 
   private getEditor(
-    resourceRange: IRangeHighlightDecoration,
+    resourceRange: IRangeHighlightDecoration
   ): ICodeEditor | undefined {
     const resource = this.editorService.activeEditor?.resource
     if (
@@ -135,19 +135,19 @@ export class RangeHighlightDecorations extends Disposable {
             ) {
               this.removeHighlightRange()
             }
-          },
-        ),
+          }
+        )
       )
       this.editorDisposables.add(
         this.editor.onDidChangeModel(() => {
           this.removeHighlightRange()
-        }),
+        })
       )
       this.editorDisposables.add(
         this.editor.onDidDispose(() => {
           this.removeHighlightRange()
           this.editor = null
-        }),
+        })
       )
     }
   }
@@ -167,7 +167,7 @@ export class RangeHighlightDecorations extends Disposable {
   })
 
   private createRangeHighlightDecoration(
-    isWholeLine: boolean = true,
+    isWholeLine: boolean = true
   ): ModelDecorationOptions {
     return isWholeLine
       ? RangeHighlightDecorations._WHOLE_LINE_RANGE_HIGHLIGHT
@@ -192,14 +192,14 @@ export class FloatingEditorClickWidget
     private editor: ICodeEditor,
     label: string,
     keyBindingAction: string | null,
-    @IKeybindingService keybindingService: IKeybindingService,
+    @IKeybindingService keybindingService: IKeybindingService
   ) {
     super(
       keyBindingAction && keybindingService.lookupKeybinding(keyBindingAction)
         ? `${label} (${keybindingService
             .lookupKeybinding(keyBindingAction)!
             .getLabel()})`
-        : label,
+        : label
     )
   }
 
@@ -235,7 +235,7 @@ export class FloatingEditorClickMenu
     @IInstantiationService
     private readonly instantiationService: IInstantiationService,
     @IMenuService menuService: IMenuService,
-    @IContextKeyService contextKeyService: IContextKeyService,
+    @IContextKeyService contextKeyService: IContextKeyService
   ) {
     super(MenuId.EditorContent, menuService, contextKeyService)
     this.render()
@@ -246,7 +246,7 @@ export class FloatingEditorClickMenu
       FloatingEditorClickWidget,
       this.editor,
       action.label,
-      action.id,
+      action.id
     )
   }
 

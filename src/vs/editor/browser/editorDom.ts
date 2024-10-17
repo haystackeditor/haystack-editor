@@ -28,15 +28,12 @@ import { ThemeColor } from "vs/base/common/themables"
 export class PageCoordinates {
   _pageCoordinatesBrand: void = undefined
 
-  constructor(
-    public readonly x: number,
-    public readonly y: number,
-  ) {}
+  constructor(public readonly x: number, public readonly y: number) {}
 
   public toClientCoordinates(targetWindow: Window): ClientCoordinates {
     return new ClientCoordinates(
       this.x - targetWindow.scrollX,
-      this.y - targetWindow.scrollY,
+      this.y - targetWindow.scrollY
     )
   }
 }
@@ -53,13 +50,13 @@ export class ClientCoordinates {
 
   constructor(
     public readonly clientX: number,
-    public readonly clientY: number,
+    public readonly clientY: number
   ) {}
 
   public toPageCoordinates(targetWindow: Window): PageCoordinates {
     return new PageCoordinates(
       this.clientX + targetWindow.scrollX,
-      this.clientY + targetWindow.scrollY,
+      this.clientY + targetWindow.scrollY
     )
   }
 }
@@ -74,7 +71,7 @@ export class EditorPagePosition {
     public readonly x: number,
     public readonly y: number,
     public readonly width: number,
-    public readonly height: number,
+    public readonly height: number
   ) {}
 }
 
@@ -87,28 +84,25 @@ export class EditorPagePosition {
 export class CoordinatesRelativeToEditor {
   _positionRelativeToEditorBrand: void = undefined
 
-  constructor(
-    public readonly x: number,
-    public readonly y: number,
-  ) {}
+  constructor(public readonly x: number, public readonly y: number) {}
 }
 
 export function createEditorPagePosition(
-  editorViewDomNode: HTMLElement,
+  editorViewDomNode: HTMLElement
 ): EditorPagePosition {
   const editorPos = dom.getDomNodePagePosition(editorViewDomNode)
   return new EditorPagePosition(
     editorPos.left,
     editorPos.top,
     editorPos.width,
-    editorPos.height,
+    editorPos.height
   )
 }
 
 export function createCoordinatesRelativeToEditor(
   editorViewDomNode: HTMLElement,
   editorPagePosition: EditorPagePosition,
-  pos: PageCoordinates,
+  pos: PageCoordinates
 ) {
   // The editor's page position is read from the DOM using getBoundingClientRect().
   //
@@ -157,7 +151,7 @@ export class EditorMouseEvent extends StandardMouseEvent {
   constructor(
     e: MouseEvent,
     isFromPointerCapture: boolean,
-    editorViewDomNode: HTMLElement,
+    editorViewDomNode: HTMLElement
   ) {
     super(dom.getWindow(editorViewDomNode), e)
     this.isFromPointerCapture = isFromPointerCapture
@@ -166,7 +160,7 @@ export class EditorMouseEvent extends StandardMouseEvent {
     this.relativePos = createCoordinatesRelativeToEditor(
       editorViewDomNode,
       this.editorPos,
-      this.pos,
+      this.pos
     )
   }
 }
@@ -184,7 +178,7 @@ export class EditorMouseEventFactory {
 
   public onContextMenu(
     target: HTMLElement,
-    callback: (e: EditorMouseEvent) => void,
+    callback: (e: EditorMouseEvent) => void
   ): IDisposable {
     return dom.addDisposableListener(target, "contextmenu", (e: MouseEvent) => {
       callback(this._create(e))
@@ -193,7 +187,7 @@ export class EditorMouseEventFactory {
 
   public onMouseUp(
     target: HTMLElement,
-    callback: (e: EditorMouseEvent) => void,
+    callback: (e: EditorMouseEvent) => void
   ): IDisposable {
     return dom.addDisposableListener(target, "mouseup", (e: MouseEvent) => {
       callback(this._create(e))
@@ -202,62 +196,62 @@ export class EditorMouseEventFactory {
 
   public onMouseDown(
     target: HTMLElement,
-    callback: (e: EditorMouseEvent) => void,
+    callback: (e: EditorMouseEvent) => void
   ): IDisposable {
     return dom.addDisposableListener(
       target,
       dom.EventType.MOUSE_DOWN,
       (e: MouseEvent) => {
         callback(this._create(e))
-      },
+      }
     )
   }
 
   public onPointerDown(
     target: HTMLElement,
-    callback: (e: EditorMouseEvent, pointerId: number) => void,
+    callback: (e: EditorMouseEvent, pointerId: number) => void
   ): IDisposable {
     return dom.addDisposableListener(
       target,
       dom.EventType.POINTER_DOWN,
       (e: PointerEvent) => {
         callback(this._create(e), e.pointerId)
-      },
+      }
     )
   }
 
   public onPointerUp(
     target: HTMLElement,
-    callback: (e: EditorMouseEvent, pointerId: number) => void,
+    callback: (e: EditorMouseEvent, pointerId: number) => void
   ): IDisposable {
     return dom.addDisposableListener(
       target,
       dom.EventType.POINTER_UP,
       (e: PointerEvent) => {
         callback(this._create(e), e.pointerId)
-      },
+      }
     )
   }
 
   public onMouseLeave(
     target: HTMLElement,
-    callback: (e: EditorMouseEvent) => void,
+    callback: (e: EditorMouseEvent) => void
   ): IDisposable {
     return dom.addDisposableListener(
       target,
       dom.EventType.MOUSE_LEAVE,
       (e: MouseEvent) => {
         callback(this._create(e))
-      },
+      }
     )
   }
 
   public onMouseMove(
     target: HTMLElement,
-    callback: (e: EditorMouseEvent) => void,
+    callback: (e: EditorMouseEvent) => void
   ): IDisposable {
     return dom.addDisposableListener(target, "mousemove", (e) =>
-      callback(this._create(e)),
+      callback(this._create(e))
     )
   }
 }
@@ -275,7 +269,7 @@ export class EditorPointerEventFactory {
 
   public onPointerUp(
     target: HTMLElement,
-    callback: (e: EditorMouseEvent) => void,
+    callback: (e: EditorMouseEvent) => void
   ): IDisposable {
     return dom.addDisposableListener(target, "pointerup", (e: MouseEvent) => {
       callback(this._create(e))
@@ -284,36 +278,36 @@ export class EditorPointerEventFactory {
 
   public onPointerDown(
     target: HTMLElement,
-    callback: (e: EditorMouseEvent, pointerId: number) => void,
+    callback: (e: EditorMouseEvent, pointerId: number) => void
   ): IDisposable {
     return dom.addDisposableListener(
       target,
       dom.EventType.POINTER_DOWN,
       (e: PointerEvent) => {
         callback(this._create(e), e.pointerId)
-      },
+      }
     )
   }
 
   public onPointerLeave(
     target: HTMLElement,
-    callback: (e: EditorMouseEvent) => void,
+    callback: (e: EditorMouseEvent) => void
   ): IDisposable {
     return dom.addDisposableListener(
       target,
       dom.EventType.POINTER_LEAVE,
       (e: MouseEvent) => {
         callback(this._create(e))
-      },
+      }
     )
   }
 
   public onPointerMove(
     target: HTMLElement,
-    callback: (e: EditorMouseEvent) => void,
+    callback: (e: EditorMouseEvent) => void
   ): IDisposable {
     return dom.addDisposableListener(target, "pointermove", (e) =>
-      callback(this._create(e)),
+      callback(this._create(e))
     )
   }
 }
@@ -327,7 +321,7 @@ export class GlobalEditorPointerMoveMonitor extends Disposable {
     super()
     this._editorViewDomNode = editorViewDomNode
     this._globalPointerMoveMonitor = this._register(
-      new GlobalPointerMoveMonitor(),
+      new GlobalPointerMoveMonitor()
     )
     this._keydownListener = null
   }
@@ -337,7 +331,7 @@ export class GlobalEditorPointerMoveMonitor extends Disposable {
     pointerId: number,
     initialButtons: number,
     pointerMoveCallback: (e: EditorMouseEvent) => void,
-    onStopCallback: (browserEvent?: PointerEvent | KeyboardEvent) => void,
+    onStopCallback: (browserEvent?: PointerEvent | KeyboardEvent) => void
   ): void {
     // Add a <<capture>> keydown event listener that will cancel the monitoring
     // if something other than a modifier key is pressed
@@ -352,7 +346,7 @@ export class GlobalEditorPointerMoveMonitor extends Disposable {
         }
         this._globalPointerMoveMonitor.stopMonitoring(true, e.browserEvent)
       },
-      true,
+      true
     )
 
     this._globalPointerMoveMonitor.startMonitoring(
@@ -361,13 +355,13 @@ export class GlobalEditorPointerMoveMonitor extends Disposable {
       initialButtons,
       (e) => {
         pointerMoveCallback(
-          new EditorMouseEvent(e, true, this._editorViewDomNode),
+          new EditorMouseEvent(e, true, this._editorViewDomNode)
         )
       },
       (e) => {
         this._keydownListener!.dispose()
         onStopCallback(e)
-      },
+      }
     )
   }
 
@@ -390,7 +384,7 @@ export class DynamicCssRules {
   // We delay garbage collection so that hanging rules can be reused.
   private readonly _garbageCollectionScheduler = new RunOnceScheduler(
     () => this.garbageCollect(),
-    1000,
+    1000
   )
 
   constructor(private readonly _editor: ICodeEditor) {}
@@ -419,7 +413,7 @@ export class DynamicCssRules {
         dom.isInShadowDOM(this._editor.getContainerDomNode())
           ? this._editor.getContainerDomNode()
           : undefined,
-        properties,
+        properties
       )
       this._rules.set(key, existingRule)
     }
@@ -475,17 +469,17 @@ class RefCountedCssRule {
     public readonly key: string,
     public readonly className: string,
     _containerElement: HTMLElement | undefined,
-    public readonly properties: CssProperties,
+    public readonly properties: CssProperties
   ) {
     this._styleElementDisposables = new DisposableStore()
     this._styleElement = dom.createStyleSheet(
       _containerElement,
       undefined,
-      this._styleElementDisposables,
+      this._styleElementDisposables
     )
     this._styleElement.textContent = this.getCssText(
       this.className,
-      this.properties,
+      this.properties
     )
   }
 

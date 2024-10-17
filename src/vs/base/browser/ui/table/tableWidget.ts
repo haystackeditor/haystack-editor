@@ -74,7 +74,7 @@ class TableListRenderer<TRow> implements IListRenderer<TRow, RowTemplateData> {
   constructor(
     private columns: ITableColumn<TRow, TCell>[],
     renderers: ITableRenderer<TCell, unknown>[],
-    private getColumnSize: (index: number) => number,
+    private getColumnSize: (index: number) => number
   ) {
     const rendererMap = new Map(renderers.map((r) => [r.templateId, r]))
     this.renderers = []
@@ -84,7 +84,7 @@ class TableListRenderer<TRow> implements IListRenderer<TRow, RowTemplateData> {
 
       if (!renderer) {
         throw new Error(
-          `Table cell renderer for template id ${column.templateId} not found.`,
+          `Table cell renderer for template id ${column.templateId} not found.`
         )
       }
 
@@ -101,7 +101,7 @@ class TableListRenderer<TRow> implements IListRenderer<TRow, RowTemplateData> {
       const renderer = this.renderers[i]
       const cellContainer = append(
         rowContainer,
-        $(".monaco-table-td", { "data-col-index": i }),
+        $(".monaco-table-td", { "data-col-index": i })
       )
 
       cellContainer.style.width = `${this.getColumnSize(i)}px`
@@ -119,7 +119,7 @@ class TableListRenderer<TRow> implements IListRenderer<TRow, RowTemplateData> {
     element: TRow,
     index: number,
     templateData: RowTemplateData,
-    height: number | undefined,
+    height: number | undefined
   ): void {
     for (let i = 0; i < this.columns.length; i++) {
       const column = this.columns[i]
@@ -129,7 +129,7 @@ class TableListRenderer<TRow> implements IListRenderer<TRow, RowTemplateData> {
         cell,
         index,
         templateData.cellTemplateData[i],
-        height,
+        height
       )
     }
   }
@@ -138,7 +138,7 @@ class TableListRenderer<TRow> implements IListRenderer<TRow, RowTemplateData> {
     element: TRow,
     index: number,
     templateData: RowTemplateData,
-    height: number | undefined,
+    height: number | undefined
   ): void {
     for (let i = 0; i < this.columns.length; i++) {
       const renderer = this.renderers[i]
@@ -151,7 +151,7 @@ class TableListRenderer<TRow> implements IListRenderer<TRow, RowTemplateData> {
           cell,
           index,
           templateData.cellTemplateData[i],
-          height,
+          height
         )
       }
     }
@@ -175,7 +175,7 @@ class TableListRenderer<TRow> implements IListRenderer<TRow, RowTemplateData> {
 }
 
 function asListVirtualDelegate<TRow>(
-  delegate: ITableVirtualDelegate<TRow>,
+  delegate: ITableVirtualDelegate<TRow>
 ): IListVirtualDelegate<TRow> {
   return {
     getHeight(row) {
@@ -205,14 +205,14 @@ class ColumnHeader<TRow, TCell> extends Disposable implements IView {
 
   constructor(
     readonly column: ITableColumn<TRow, TCell>,
-    private index: number,
+    private index: number
   ) {
     super()
 
     this.element = $(
       ".monaco-table-th",
       { "data-col-index": index },
-      column.label,
+      column.label
     )
 
     if (column.tooltip) {
@@ -220,8 +220,8 @@ class ColumnHeader<TRow, TCell> extends Disposable implements IView {
         getBaseLayerHoverDelegate().setupUpdatableHover(
           getDefaultHoverDelegate("mouse"),
           this.element,
-          column.tooltip,
-        ),
+          column.tooltip
+        )
       )
     }
   }
@@ -330,12 +330,12 @@ export class Table<TRow> implements ISpliceable<TRow>, IDisposable {
     private virtualDelegate: ITableVirtualDelegate<TRow>,
     columns: ITableColumn<TRow, TCell>[],
     renderers: ITableRenderer<TCell, unknown>[],
-    _options?: ITableOptions<TRow>,
+    _options?: ITableOptions<TRow>
   ) {
     this.domNode = append(container, $(`.monaco-table.${this.domId}`))
 
     const headers = columns.map((c, i) =>
-      this.disposables.add(new ColumnHeader(c, i)),
+      this.disposables.add(new ColumnHeader(c, i))
     )
     const descriptor: ISplitViewDescriptor = {
       size: headers.reduce((a, b) => a + b.column.weight, 0),
@@ -348,14 +348,14 @@ export class Table<TRow> implements ISpliceable<TRow>, IDisposable {
         scrollbarVisibility: ScrollbarVisibility.Hidden,
         getSashOrthogonalSize: () => this.cachedHeight,
         descriptor,
-      }),
+      })
     )
 
     this.splitview.el.style.height = `${virtualDelegate.headerRowHeight}px`
     this.splitview.el.style.lineHeight = `${virtualDelegate.headerRowHeight}px`
 
     const renderer = new TableListRenderer(columns, renderers, (i) =>
-      this.splitview.getViewSize(i),
+      this.splitview.getViewSize(i)
     )
     this.list = this.disposables.add(
       new List(
@@ -363,14 +363,14 @@ export class Table<TRow> implements ISpliceable<TRow>, IDisposable {
         this.domNode,
         asListVirtualDelegate(virtualDelegate),
         [renderer],
-        _options,
-      ),
+        _options
+      )
     )
 
     Event.any(...headers.map((h) => h.onDidLayout))(
       ([index, size]) => renderer.layoutColumn(index, size),
       null,
-      this.disposables,
+      this.disposables
     )
 
     this.splitview.onDidSashReset(
@@ -380,7 +380,7 @@ export class Table<TRow> implements ISpliceable<TRow>, IDisposable {
         this.splitview.resizeView(index, size)
       },
       null,
-      this.disposables,
+      this.disposables
     )
 
     this.styleElement = createStyleSheet(this.domNode)
@@ -394,7 +394,7 @@ export class Table<TRow> implements ISpliceable<TRow>, IDisposable {
   splice(
     start: number,
     deleteCount: number,
-    elements: readonly TRow[] = [],
+    elements: readonly TRow[] = []
   ): void {
     this.list.splice(start, deleteCount, elements)
   }

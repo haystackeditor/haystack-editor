@@ -9,13 +9,14 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-declare module "vscode" {
-  // https://github.com/microsoft/vscode/issues/106744
+declare module 'vscode' {
 
-  export interface NotebookCellOutput {
-    /**
-     * @deprecated
-     */
-    id: string
-  }
+	// https://github.com/microsoft/vscode/issues/106744
+
+	export interface NotebookCellOutput {
+		/**
+		 * @deprecated
+		 */
+		id: string;
+	}
 }

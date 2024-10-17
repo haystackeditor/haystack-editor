@@ -88,7 +88,7 @@ export class StandardMouseEvent implements IMouseEvent {
     const iframeOffsets =
       IframeUtils.getPositionOfChildWindowRelativeToAncestorWindow(
         targetWindow,
-        e.view,
+        e.view
       )
     this.posx -= iframeOffsets.left
     this.posy -= iframeOffsets.top
@@ -144,7 +144,7 @@ export class StandardWheelEvent {
   constructor(
     e: IMouseWheelEvent | null,
     deltaX: number = 0,
-    deltaY: number = 0,
+    deltaY: number = 0
   ) {
     this.browserEvent = e || null
     this.target = e ? e.target || (<any>e).targetNode || e.srcElement : null

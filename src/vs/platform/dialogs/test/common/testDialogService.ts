@@ -9,85 +9,63 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Event } from "vs/base/common/event"
-import Severity from "vs/base/common/severity"
-import {
-  IConfirmation,
-  IConfirmationResult,
-  IDialogService,
-  IInputResult,
-  IPrompt,
-  IPromptBaseButton,
-  IPromptResult,
-  IPromptResultWithCancel,
-  IPromptWithCustomCancel,
-  IPromptWithDefaultCancel,
-} from "vs/platform/dialogs/common/dialogs"
+import { Event } from 'vs/base/common/event';
+import Severity from 'vs/base/common/severity';
+import { IConfirmation, IConfirmationResult, IDialogService, IInputResult, IPrompt, IPromptBaseButton, IPromptResult, IPromptResultWithCancel, IPromptWithCustomCancel, IPromptWithDefaultCancel } from 'vs/platform/dialogs/common/dialogs';
 
 export class TestDialogService implements IDialogService {
-  declare readonly _serviceBrand: undefined
 
-  readonly onWillShowDialog = Event.None
-  readonly onDidShowDialog = Event.None
+	declare readonly _serviceBrand: undefined;
 
-  constructor(
-    private defaultConfirmResult: IConfirmationResult | undefined = undefined,
-    private defaultPromptResult: IPromptResult<any> | undefined = undefined,
-  ) {}
+	readonly onWillShowDialog = Event.None;
+	readonly onDidShowDialog = Event.None;
 
-  private confirmResult: IConfirmationResult | undefined = undefined
-  setConfirmResult(result: IConfirmationResult) {
-    this.confirmResult = result
-  }
+	constructor(
+		private defaultConfirmResult: IConfirmationResult | undefined = undefined,
+		private defaultPromptResult: IPromptResult<any> | undefined = undefined
+	) { }
 
-  async confirm(confirmation: IConfirmation): Promise<IConfirmationResult> {
-    if (this.confirmResult) {
-      const confirmResult = this.confirmResult
-      this.confirmResult = undefined
+	private confirmResult: IConfirmationResult | undefined = undefined;
+	setConfirmResult(result: IConfirmationResult) {
+		this.confirmResult = result;
+	}
 
-      return confirmResult
-    }
+	async confirm(confirmation: IConfirmation): Promise<IConfirmationResult> {
+		if (this.confirmResult) {
+			const confirmResult = this.confirmResult;
+			this.confirmResult = undefined;
 
-    return this.defaultConfirmResult ?? { confirmed: false }
-  }
+			return confirmResult;
+		}
 
-  prompt<T>(
-    prompt: IPromptWithCustomCancel<T>,
-  ): Promise<IPromptResultWithCancel<T>>
-  prompt<T>(prompt: IPromptWithDefaultCancel<T>): Promise<IPromptResult<T>>
-  prompt<T>(prompt: IPrompt<T>): Promise<IPromptResult<T>>
-  async prompt<T>(
-    prompt: IPrompt<T> | IPromptWithCustomCancel<T>,
-  ): Promise<IPromptResult<T> | IPromptResultWithCancel<T>> {
-    if (this.defaultPromptResult) {
-      return this.defaultPromptResult
-    }
-    const promptButtons: IPromptBaseButton<T>[] = [...(prompt.buttons ?? [])]
-    if (
-      prompt.cancelButton &&
-      typeof prompt.cancelButton !== "string" &&
-      typeof prompt.cancelButton !== "boolean"
-    ) {
-      promptButtons.push(prompt.cancelButton)
-    }
+		return this.defaultConfirmResult ?? { confirmed: false };
+	}
 
-    return { result: await promptButtons[0]?.run({ checkboxChecked: false }) }
-  }
-  async info(message: string, detail?: string): Promise<void> {
-    await this.prompt({ type: Severity.Info, message, detail })
-  }
+	prompt<T>(prompt: IPromptWithCustomCancel<T>): Promise<IPromptResultWithCancel<T>>;
+	prompt<T>(prompt: IPromptWithDefaultCancel<T>): Promise<IPromptResult<T>>;
+	prompt<T>(prompt: IPrompt<T>): Promise<IPromptResult<T>>;
+	async prompt<T>(prompt: IPrompt<T> | IPromptWithCustomCancel<T>): Promise<IPromptResult<T> | IPromptResultWithCancel<T>> {
+		if (this.defaultPromptResult) {
+			return this.defaultPromptResult;
+		}
+		const promptButtons: IPromptBaseButton<T>[] = [...(prompt.buttons ?? [])];
+		if (prompt.cancelButton && typeof prompt.cancelButton !== 'string' && typeof prompt.cancelButton !== 'boolean') {
+			promptButtons.push(prompt.cancelButton);
+		}
 
-  async warn(message: string, detail?: string): Promise<void> {
-    await this.prompt({ type: Severity.Warning, message, detail })
-  }
+		return { result: await promptButtons[0]?.run({ checkboxChecked: false }) };
+	}
+	async info(message: string, detail?: string): Promise<void> {
+		await this.prompt({ type: Severity.Info, message, detail });
+	}
 
-  async error(message: string, detail?: string): Promise<void> {
-    await this.prompt({ type: Severity.Error, message, detail })
-  }
-  async input(): Promise<IInputResult> {
-    {
-      return { confirmed: true, values: [] }
-    }
-  }
-  async about(): Promise<void> {}
+	async warn(message: string, detail?: string): Promise<void> {
+		await this.prompt({ type: Severity.Warning, message, detail });
+	}
+
+	async error(message: string, detail?: string): Promise<void> {
+		await this.prompt({ type: Severity.Error, message, detail });
+	}
+	async input(): Promise<IInputResult> { { return { confirmed: true, values: [] }; } }
+	async about(): Promise<void> { }
 }

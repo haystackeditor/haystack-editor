@@ -54,19 +54,19 @@ export class CopilotOptOut extends Action2 {
         ...localize2("optOutCopilot", "Opt out of navigational copilot"),
         mnemonicTitle: localize(
           { key: "mioptOutCopilot", comment: ["&& denotes a mnemonic"] },
-          "&&Opt out of navigational copilot",
+          "&&Opt out of navigational copilot"
         ),
       },
       metadata: {
         description: localize2(
           "optOutCopilot.description",
-          "Opts out of Haystack's navigational copilot",
+          "Opts out of Haystack's navigational copilot"
         ),
       },
       category: Categories.Haystack,
       precondition: ContextKeyExpr.equals(
         "config.editor.haystackEditor.copilotOptOut",
-        false,
+        false
       ),
       menu: [
         { id: MenuId.CommandPalette },
@@ -80,7 +80,7 @@ export class CopilotOptOut extends Action2 {
     const configurationService = accessor.get(IConfigurationService)
     return configurationService.updateValue(
       "editor.haystackEditor.copilotOptOut",
-      true,
+      true
     )
   }
 }
@@ -93,19 +93,19 @@ export class CopilotOptIn extends Action2 {
         ...localize2("optInCopilot", "Opt into navigational copilot"),
         mnemonicTitle: localize(
           { key: "mioptInCopilot", comment: ["&& denotes a mnemonic"] },
-          "&&Opt into navigational copilot",
+          "&&Opt into navigational copilot"
         ),
       },
       metadata: {
         description: localize2(
           "optInCopilot.description",
-          "Opts into Haystack's navigational copilot",
+          "Opts into Haystack's navigational copilot"
         ),
       },
       category: Categories.Haystack,
       precondition: ContextKeyExpr.equals(
         "config.editor.haystackEditor.copilotOptOut",
-        true,
+        true
       ),
       menu: [
         { id: MenuId.CommandPalette },
@@ -119,7 +119,7 @@ export class CopilotOptIn extends Action2 {
     const configurationService = accessor.get(IConfigurationService)
     return configurationService.updateValue(
       "editor.haystackEditor.copilotOptOut",
-      false,
+      false
     )
   }
 }
@@ -132,13 +132,13 @@ export class ResetZoomLevel extends Action2 {
         ...localize2("resetZoomLevel", "Reset canvas zoom level"),
         mnemonicTitle: localize(
           { key: "miresetZoomLevel", comment: ["&& denotes a mnemonic"] },
-          "&&Resets the canvas zoom level",
+          "&&Resets the canvas zoom level"
         ),
       },
       metadata: {
         description: localize2(
           "resetZoomLevel.description",
-          "Resets the canvas zoom level to the default",
+          "Resets the canvas zoom level to the default"
         ),
       },
       category: Categories.Haystack,
@@ -164,7 +164,7 @@ export class HideCanvasDots extends Action2 {
       category: Categories.Haystack,
       precondition: ContextKeyExpr.equals(
         "config.editor.haystackEditor.hideCanvasDots",
-        false,
+        false
       ),
       menu: [
         { id: MenuId.CommandPalette },
@@ -181,7 +181,7 @@ export class HideCanvasDots extends Action2 {
     const configurationService = accessor.get(IConfigurationService)
     configurationService.updateValue(
       "editor.haystackEditor.hideCanvasDots",
-      true,
+      true
     )
   }
 }
@@ -194,7 +194,7 @@ export class ShowCanvasDots extends Action2 {
       category: Categories.Haystack,
       precondition: ContextKeyExpr.equals(
         "config.editor.haystackEditor.hideCanvasDots",
-        true,
+        true
       ),
       menu: [
         { id: MenuId.CommandPalette },
@@ -211,7 +211,7 @@ export class ShowCanvasDots extends Action2 {
     const configurationService = accessor.get(IConfigurationService)
     configurationService.updateValue(
       "editor.haystackEditor.hideCanvasDots",
-      false,
+      false
     )
   }
 }
@@ -233,7 +233,7 @@ export class ImportSettingsAction extends Action2 {
       id: IMPORT_VSCODE_SETTINGS_ID,
       title: localize(
         "importSettings.label",
-        "Import VS Code Settings and Extensions",
+        "Import VS Code Settings and Extensions"
       ),
       category: Categories.Settings,
       menu: [
@@ -267,9 +267,9 @@ export class ImportSettingsAction extends Action2 {
           extensionsService,
           userDataProfileService,
           extensionGalleryService,
-          extensionManagementService,
+          extensionManagementService
         )
-      },
+      }
     )
   }
 
@@ -280,7 +280,7 @@ export class ImportSettingsAction extends Action2 {
     extensionsService: IExtensionsWorkbenchService,
     userDataProfileService: IUserDataProfileService,
     extensionGalleryService: IExtensionGalleryService,
-    extensionManagementService: IExtensionManagementService,
+    extensionManagementService: IExtensionManagementService
   ): Promise<void> {
     try {
       const homeUri = await pathService.userHome()
@@ -307,22 +307,23 @@ export class ImportSettingsAction extends Action2 {
         const settingsJson = settingsContent.value
         await textFileService.write(
           userDataProfileService.currentProfile.settingsResource,
-          settingsJson,
+          settingsJson
         )
       } catch (e) {}
 
       const vscodeKeybindingsUri = URI.joinPath(
         URI.file(basePath),
-        "Code/User/keybindings.json",
+        "Code/User/keybindings.json"
       )
 
       try {
-        const keybindingsContent =
-          await textFileService.read(vscodeKeybindingsUri)
+        const keybindingsContent = await textFileService.read(
+          vscodeKeybindingsUri
+        )
         const keybindingsJson = keybindingsContent.value
         await textFileService.write(
           userDataProfileService.currentProfile.keybindingsResource,
-          keybindingsJson,
+          keybindingsJson
         )
       } catch (e) {}
 
@@ -332,12 +333,12 @@ export class ImportSettingsAction extends Action2 {
       // Import keybindings
       const extensionsPath = URI.joinPath(
         vscodeDir,
-        "extensions/extensions.json",
+        "extensions/extensions.json"
       )
       const extensionsContent = await textFileService.read(extensionsPath)
 
       const extensions = JSON.parse(
-        extensionsContent.value,
+        extensionsContent.value
       ) as ExtensionMetadata[]
 
       const failedExtensions: string[] = []
@@ -365,23 +366,23 @@ export class ImportSettingsAction extends Action2 {
             extensionGalleryService,
             extensionManagementService,
             textFileService,
-            failedExtensions,
-          ),
+            failedExtensions
+          )
         )
       }
 
       await Promise.all(extensionPromises)
 
       notificationsService.info(
-        "Finished importing VS Code settings and extensions!",
+        "Finished importing VS Code settings and extensions!"
       )
       if (failedExtensions.length > 0) {
         notificationsService.error(
           `Failed to import ${
             failedExtensions.length
           } extensions. Consider downloading the following extension from the VS Code store and importing them manually: ${failedExtensions.join(
-            ", ",
-          )}`,
+            ", "
+          )}`
         )
       }
     } catch (error) {
@@ -426,7 +427,7 @@ export class ImportSettingsAction extends Action2 {
     extensionGalleryService: IExtensionGalleryService,
     extensionManagementService: IExtensionManagementService,
     textFileService: ITextFileService,
-    failedExtensions: string[],
+    failedExtensions: string[]
   ): Promise<void> {
     // Try to grab the VSIX from the cache as a fallback.
     const extensionPath =
@@ -439,7 +440,7 @@ export class ImportSettingsAction extends Action2 {
       try {
         const [gallery] = await extensionGalleryService.getExtensions(
           [{ id }],
-          CancellationToken.None,
+          CancellationToken.None
         )
         if (!gallery) {
           throw new Error("failed to install extension")
@@ -470,7 +471,7 @@ export class ImportSettingsAction extends Action2 {
               enable: true,
               isMachineScoped: true,
             },
-            ProgressLocation.Notification,
+            ProgressLocation.Notification
           ),
           timeout(20000).then(() => {
             throw new Error("Failed to download extension in 10 seconds")
@@ -484,7 +485,7 @@ export class ImportSettingsAction extends Action2 {
           await extensionsService.install(
             vsixUri,
             undefined,
-            ProgressLocation.Notification,
+            ProgressLocation.Notification
           ),
           timeout(20000).then(() => {
             throw new Error("Failed to download extension in 10 seconds")
@@ -497,7 +498,7 @@ export class ImportSettingsAction extends Action2 {
         try {
           const extensionUri = URI.joinPath(
             vsCodeDir,
-            `extensions/${extensionPath}/package.json`,
+            `extensions/${extensionPath}/package.json`
           )
           const result = await textFileService.read(extensionUri)
           const metadata = JSON.parse(result.value)
@@ -767,7 +768,7 @@ export class ViewIncomingDependenciesAction extends Action2 {
       id: ViewIncomingDependenciesAction.ID,
       title: localize2(
         "viewIncomingDependencies",
-        "View incoming dependencies",
+        "View incoming dependencies"
       ),
       menu: [{ id: MenuId.HaystackContext }],
       keybinding: {
@@ -792,7 +793,7 @@ export class ViewOutgoingDependenciesAction extends Action2 {
 
       title: localize2(
         "viewOutgoingDependencies",
-        "View outgoing dependencies",
+        "View outgoing dependencies"
       ),
       menu: [{ id: MenuId.HaystackContext }],
       keybinding: {

@@ -9,61 +9,55 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Disposable } from "vs/base/common/lifecycle"
-import { Event } from "vs/base/common/event"
-import {
-  ILogger,
-  ILogService,
-  LogLevel,
-  MultiplexLogger,
-} from "vs/platform/log/common/log"
+import { Disposable } from 'vs/base/common/lifecycle';
+import { Event } from 'vs/base/common/event';
+import { ILogger, ILogService, LogLevel, MultiplexLogger } from 'vs/platform/log/common/log';
 
 export class LogService extends Disposable implements ILogService {
-  declare readonly _serviceBrand: undefined
 
-  private readonly logger: ILogger
+	declare readonly _serviceBrand: undefined;
 
-  constructor(primaryLogger: ILogger, otherLoggers: ILogger[] = []) {
-    super()
-    this.logger = new MultiplexLogger([primaryLogger, ...otherLoggers])
-    this._register(
-      primaryLogger.onDidChangeLogLevel((level) => this.setLevel(level)),
-    )
-  }
+	private readonly logger: ILogger;
 
-  get onDidChangeLogLevel(): Event<LogLevel> {
-    return this.logger.onDidChangeLogLevel
-  }
+	constructor(primaryLogger: ILogger, otherLoggers: ILogger[] = []) {
+		super();
+		this.logger = new MultiplexLogger([primaryLogger, ...otherLoggers]);
+		this._register(primaryLogger.onDidChangeLogLevel(level => this.setLevel(level)));
+	}
 
-  setLevel(level: LogLevel): void {
-    this.logger.setLevel(level)
-  }
+	get onDidChangeLogLevel(): Event<LogLevel> {
+		return this.logger.onDidChangeLogLevel;
+	}
 
-  getLevel(): LogLevel {
-    return this.logger.getLevel()
-  }
+	setLevel(level: LogLevel): void {
+		this.logger.setLevel(level);
+	}
 
-  trace(message: string, ...args: any[]): void {
-    this.logger.trace(message, ...args)
-  }
+	getLevel(): LogLevel {
+		return this.logger.getLevel();
+	}
 
-  debug(message: string, ...args: any[]): void {
-    this.logger.debug(message, ...args)
-  }
+	trace(message: string, ...args: any[]): void {
+		this.logger.trace(message, ...args);
+	}
 
-  info(message: string, ...args: any[]): void {
-    this.logger.info(message, ...args)
-  }
+	debug(message: string, ...args: any[]): void {
+		this.logger.debug(message, ...args);
+	}
 
-  warn(message: string, ...args: any[]): void {
-    this.logger.warn(message, ...args)
-  }
+	info(message: string, ...args: any[]): void {
+		this.logger.info(message, ...args);
+	}
 
-  error(message: string | Error, ...args: any[]): void {
-    this.logger.error(message, ...args)
-  }
+	warn(message: string, ...args: any[]): void {
+		this.logger.warn(message, ...args);
+	}
 
-  flush(): void {
-    this.logger.flush()
-  }
+	error(message: string | Error, ...args: any[]): void {
+		this.logger.error(message, ...args);
+	}
+
+	flush(): void {
+		this.logger.flush();
+	}
 }

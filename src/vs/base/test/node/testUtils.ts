@@ -9,15 +9,12 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { randomPath } from "vs/base/common/extpath"
-import { join } from "vs/base/common/path"
-import * as testUtils from "vs/base/test/common/testUtils"
+import { randomPath } from 'vs/base/common/extpath';
+import { join } from 'vs/base/common/path';
+import * as testUtils from 'vs/base/test/common/testUtils';
 
-export function getRandomTestPath(
-  tmpdir: string,
-  ...segments: string[]
-): string {
-  return randomPath(join(tmpdir, ...segments))
+export function getRandomTestPath(tmpdir: string, ...segments: string[]): string {
+	return randomPath(join(tmpdir, ...segments));
 }
 
-export import flakySuite = testUtils.flakySuite
+export import flakySuite = testUtils.flakySuite;

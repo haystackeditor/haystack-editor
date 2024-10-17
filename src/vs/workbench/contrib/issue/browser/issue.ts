@@ -75,14 +75,14 @@ export class BaseIssueReporterService extends Disposable {
     public product: IProductConfiguration,
     public readonly window: Window,
     public readonly isWeb: boolean,
-    @IIssueMainService public readonly issueMainService: IIssueMainService,
+    @IIssueMainService public readonly issueMainService: IIssueMainService
   ) {
     super()
     const targetExtension = data.extensionId
       ? data.enabledExtensions.find(
           (extension) =>
             extension.id.toLocaleLowerCase() ===
-            data.extensionId?.toLocaleLowerCase(),
+            data.extensionId?.toLocaleLowerCase()
         )
       : undefined
     this.issueReporterModel = new IssueReporterModel({
@@ -116,7 +116,7 @@ export class BaseIssueReporterService extends Disposable {
     if (issueReporterElement) {
       this.previewButton = new Button(
         issueReporterElement,
-        unthemedButtonStyles,
+        unthemedButtonStyles
       )
       const issueRepoName = document.createElement("a")
       issueReporterElement.appendChild(issueRepoName)
@@ -192,48 +192,48 @@ export class BaseIssueReporterService extends Disposable {
 
     if (styles.inputBackground) {
       content.push(
-        `input[type="text"], textarea, select, .issues-container > .issue > .issue-state, .block-info { background-color: ${styles.inputBackground} !important; }`,
+        `input[type="text"], textarea, select, .issues-container > .issue > .issue-state, .block-info { background-color: ${styles.inputBackground} !important; }`
       )
     }
 
     if (styles.inputBorder) {
       content.push(
-        `input[type="text"], textarea, select { border: 1px solid ${styles.inputBorder}; }`,
+        `input[type="text"], textarea, select { border: 1px solid ${styles.inputBorder}; }`
       )
     } else {
       content.push(
-        `input[type="text"], textarea, select { border: 1px solid transparent; }`,
+        `input[type="text"], textarea, select { border: 1px solid transparent; }`
       )
     }
 
     if (styles.inputForeground) {
       content.push(
-        `input[type="text"], textarea, select, .issues-container > .issue > .issue-state, .block-info { color: ${styles.inputForeground} !important; }`,
+        `input[type="text"], textarea, select, .issues-container > .issue > .issue-state, .block-info { color: ${styles.inputForeground} !important; }`
       )
     }
 
     if (styles.inputErrorBorder) {
       content.push(
-        `.invalid-input, .invalid-input:focus, .validation-error { border: 1px solid ${styles.inputErrorBorder} !important; }`,
+        `.invalid-input, .invalid-input:focus, .validation-error { border: 1px solid ${styles.inputErrorBorder} !important; }`
       )
       content.push(`.required-input { color: ${styles.inputErrorBorder}; }`)
     }
 
     if (styles.inputErrorBackground) {
       content.push(
-        `.validation-error { background: ${styles.inputErrorBackground}; }`,
+        `.validation-error { background: ${styles.inputErrorBackground}; }`
       )
     }
 
     if (styles.inputErrorForeground) {
       content.push(
-        `.validation-error { color: ${styles.inputErrorForeground}; }`,
+        `.validation-error { color: ${styles.inputErrorForeground}; }`
       )
     }
 
     if (styles.inputActiveBorder) {
       content.push(
-        `input[type='text']:focus, textarea:focus, select:focus, summary:focus, button:focus, a:focus, .workbenchCommand:focus  { border: 1px solid ${styles.inputActiveBorder}; outline-style: none; }`,
+        `input[type='text']:focus, textarea:focus, select:focus, summary:focus, button:focus, a:focus, .workbenchCommand:focus  { border: 1px solid ${styles.inputActiveBorder}; outline-style: none; }`
       )
     }
 
@@ -247,43 +247,43 @@ export class BaseIssueReporterService extends Disposable {
 
     if (styles.textLinkActiveForeground) {
       content.push(
-        `a:hover, .workbenchCommand:hover { color: ${styles.textLinkActiveForeground}; }`,
+        `a:hover, .workbenchCommand:hover { color: ${styles.textLinkActiveForeground}; }`
       )
     }
 
     if (styles.sliderBackgroundColor) {
       content.push(
-        `::-webkit-scrollbar-thumb { background-color: ${styles.sliderBackgroundColor}; }`,
+        `::-webkit-scrollbar-thumb { background-color: ${styles.sliderBackgroundColor}; }`
       )
     }
 
     if (styles.sliderActiveColor) {
       content.push(
-        `::-webkit-scrollbar-thumb:active { background-color: ${styles.sliderActiveColor}; }`,
+        `::-webkit-scrollbar-thumb:active { background-color: ${styles.sliderActiveColor}; }`
       )
     }
 
     if (styles.sliderHoverColor) {
       content.push(
-        `::--webkit-scrollbar-thumb:hover { background-color: ${styles.sliderHoverColor}; }`,
+        `::--webkit-scrollbar-thumb:hover { background-color: ${styles.sliderHoverColor}; }`
       )
     }
 
     if (styles.buttonBackground) {
       content.push(
-        `.monaco-text-button { background-color: ${styles.buttonBackground} !important; }`,
+        `.monaco-text-button { background-color: ${styles.buttonBackground} !important; }`
       )
     }
 
     if (styles.buttonForeground) {
       content.push(
-        `.monaco-text-button { color: ${styles.buttonForeground} !important; }`,
+        `.monaco-text-button { color: ${styles.buttonForeground} !important; }`
       )
     }
 
     if (styles.buttonHoverBackground) {
       content.push(
-        `.monaco-text-button:not(.disabled):hover, .monaco-text-button:focus { background-color: ${styles.buttonHoverBackground} !important; }`,
+        `.monaco-text-button:not(.disabled):hover, .monaco-text-button:focus { background-color: ${styles.buttonHoverBackground} !important; }`
       )
     }
 
@@ -293,7 +293,7 @@ export class BaseIssueReporterService extends Disposable {
   }
 
   private async updateIssueReporterUri(
-    extension: IssueReporterExtensionData,
+    extension: IssueReporterExtensionData
   ): Promise<void> {
     try {
       if (extension.uri) {
@@ -325,7 +325,7 @@ export class BaseIssueReporterService extends Disposable {
       if (descriptionTextArea) {
         descriptionTextArea.placeholder = localize(
           "undefinedPlaceholder",
-          "Please enter a title",
+          "Please enter a title"
         )
       }
 
@@ -372,14 +372,14 @@ export class BaseIssueReporterService extends Disposable {
               label.textContent = localize("show", "show")
             }
           }
-        },
+        }
       )
     }
 
     this.addEventListener("issue-source", "change", (e: Event) => {
       const value = (<HTMLInputElement>e.target).value
       const problemSourceHelpText = this.getElementById(
-        "problem-source-help-text",
+        "problem-source-help-text"
       )!
       if (value === "") {
         this.issueReporterModel.update({ fileOnExtension: undefined })
@@ -397,22 +397,22 @@ export class BaseIssueReporterService extends Disposable {
       if (value === IssueSource.Haystack) {
         descriptionTextArea.placeholder = localize(
           "vscodePlaceholder",
-          "E.g Workbench is missing problems panel",
+          "E.g Workbench is missing problems panel"
         )
       } else if (value === IssueSource.Extension) {
         descriptionTextArea.placeholder = localize(
           "extensionPlaceholder",
-          "E.g. Missing alt text on extension readme image",
+          "E.g. Missing alt text on extension readme image"
         )
       } else if (value === IssueSource.Marketplace) {
         descriptionTextArea.placeholder = localize(
           "marketplacePlaceholder",
-          "E.g Cannot disable installed extension",
+          "E.g Cannot disable installed extension"
         )
       } else {
         descriptionTextArea.placeholder = localize(
           "undefinedPlaceholder",
-          "Please enter a title",
+          "Please enter a title"
         )
       }
 
@@ -445,7 +445,7 @@ export class BaseIssueReporterService extends Disposable {
 
     this.addEventListener("issue-title", "input", (_) => {
       const titleElement = this.getElementById(
-        "issue-title",
+        "issue-title"
       ) as HTMLInputElement
       if (titleElement) {
         const title = titleElement.value
@@ -456,7 +456,7 @@ export class BaseIssueReporterService extends Disposable {
     this.addEventListener("issue-title", "input", (e: Event) => {
       const title = (<HTMLInputElement>e.target).value
       const lengthValidationMessage = this.getElementById(
-        "issue-title-length-validation-error",
+        "issue-title-length-validation-error"
       )
       const issueUrl = this.getIssueUrl()
       if (
@@ -493,12 +493,12 @@ export class BaseIssueReporterService extends Disposable {
       if (this.data.githubAccessToken) {
         this.previewButton.label = localize(
           "createOnGitHub",
-          "Create on GitHub",
+          "Create on GitHub"
         )
       } else {
         this.previewButton.label = localize(
           "previewOnGitHub",
-          "Preview on GitHub",
+          "Preview on GitHub"
         )
       }
       this.previewButton.enabled = true
@@ -508,7 +508,7 @@ export class BaseIssueReporterService extends Disposable {
     }
 
     const issueRepoName = this.getElementById(
-      "show-repo-name",
+      "show-repo-name"
     )! as HTMLAnchorElement
     const selectedExtension =
       this.issueReporterModel.getData().selectedExtension
@@ -517,7 +517,7 @@ export class BaseIssueReporterService extends Disposable {
       issueRepoName.href = urlString
       issueRepoName.addEventListener("click", (e) => this.openLink(e))
       issueRepoName.addEventListener("auxclick", (e) =>
-        this.openLink(<MouseEvent>e),
+        this.openLink(<MouseEvent>e)
       )
       const gitHubInfo = this.parseGitHubUrl(urlString)
       issueRepoName.textContent = gitHubInfo
@@ -598,7 +598,7 @@ export class BaseIssueReporterService extends Disposable {
   public searchIssues(
     title: string,
     fileOnExtension: boolean | undefined,
-    fileOnMarketplace: boolean | undefined,
+    fileOnMarketplace: boolean | undefined
   ): void {
     if (fileOnExtension) {
       return this.searchExtensionIssues(title)
@@ -634,12 +634,12 @@ export class BaseIssueReporterService extends Disposable {
   private searchMarketplaceIssues(title: string): void {
     if (title) {
       const gitHubInfo = this.parseGitHubUrl(
-        this.product.reportMarketplaceIssueUrl!,
+        this.product.reportMarketplaceIssueUrl!
       )
       if (gitHubInfo) {
         return this.searchGitHub(
           `${gitHubInfo.owner}/${gitHubInfo.repositoryName}`,
-          title,
+          title
         )
       }
     }
@@ -673,7 +673,7 @@ export class BaseIssueReporterService extends Disposable {
               const message = $("div.list-title")
               message.textContent = localize(
                 "rateLimited",
-                "GitHub query limit exceeded. Please wait.",
+                "GitHub query limit exceeded. Please wait."
               )
               similarIssues.appendChild(message)
 
@@ -761,10 +761,8 @@ export class BaseIssueReporterService extends Disposable {
           const issueIcon = $("span.issue-icon")
           issueIcon.appendChild(
             renderIcon(
-              issue.state === "open"
-                ? Codicon.issueOpened
-                : Codicon.issueClosed,
-            ),
+              issue.state === "open" ? Codicon.issueOpened : Codicon.issueClosed
+            )
           )
 
           const issueStateLabel = $("span.issue-state.label")
@@ -794,7 +792,7 @@ export class BaseIssueReporterService extends Disposable {
       const message = $("div.list-title")
       message.textContent = localize(
         "noSimilarIssues",
-        "No similar issues found",
+        "No similar issues found"
       )
       similarIssues.appendChild(message)
     }
@@ -811,12 +809,12 @@ export class BaseIssueReporterService extends Disposable {
       makeOption(IssueType.Bug, localize("bugReporter", "Bug Report")),
       makeOption(
         IssueType.FeatureRequest,
-        localize("featureRequest", "Feature Request"),
+        localize("featureRequest", "Feature Request")
       ),
       makeOption(
         IssueType.PerformanceIssue,
-        localize("performanceIssue", "Performance Issue (freeze, slow, crash)"),
-      ),
+        localize("performanceIssue", "Performance Issue (freeze, slow, crash)")
+      )
     )
 
     typeSelect.value = issueType.toString()
@@ -827,7 +825,7 @@ export class BaseIssueReporterService extends Disposable {
   public makeOption(
     value: string,
     description: string,
-    disabled: boolean,
+    disabled: boolean
   ): HTMLOptionElement {
     const option: HTMLOptionElement = document.createElement("option")
     option.disabled = disabled
@@ -839,7 +837,7 @@ export class BaseIssueReporterService extends Disposable {
 
   public setSourceOptions(): void {
     const sourceSelect = this.getElementById(
-      "issue-source",
+      "issue-source"
     )! as HTMLSelectElement
     const {
       issueType,
@@ -863,29 +861,29 @@ export class BaseIssueReporterService extends Disposable {
 
     sourceSelect.innerText = ""
     sourceSelect.append(
-      this.makeOption("", localize("selectSource", "Select source"), true),
+      this.makeOption("", localize("selectSource", "Select source"), true)
     )
     sourceSelect.append(
       this.makeOption(
         IssueSource.Haystack,
         localize("vscode", "Haystack Editor"),
-        false,
-      ),
+        false
+      )
     )
     sourceSelect.append(
       this.makeOption(
         IssueSource.Extension,
         localize("extension", "A VS Code extension"),
-        false,
-      ),
+        false
+      )
     )
     if (this.product.reportMarketplaceIssueUrl) {
       sourceSelect.append(
         this.makeOption(
           IssueSource.Marketplace,
           localize("marketplace", "Extensions Marketplace"),
-          false,
-        ),
+          false
+        )
       )
     }
 
@@ -894,8 +892,8 @@ export class BaseIssueReporterService extends Disposable {
         this.makeOption(
           IssueSource.Unknown,
           localize("unknown", "Don't know"),
-          false,
-        ),
+          false
+        )
       )
     }
 
@@ -921,13 +919,13 @@ export class BaseIssueReporterService extends Disposable {
     const experimentsBlock =
       this.window.document.querySelector(".block-experiments")
     const extensionDataBlock = this.window.document.querySelector(
-      ".block-extension-data",
+      ".block-extension-data"
     )
 
     const problemSource = this.getElementById("problem-source")!
     const descriptionTitle = this.getElementById("issue-description-label")!
     const descriptionSubtitle = this.getElementById(
-      "issue-description-subtitle",
+      "issue-description-subtitle"
     )!
     const extensionSelector = this.getElementById("extension-selection")!
 
@@ -961,20 +959,20 @@ export class BaseIssueReporterService extends Disposable {
         descriptionTitle,
         localize(
           "handlesIssuesElsewhere",
-          "This extension handles issues outside of VS Code",
-        ),
+          "This extension handles issues outside of VS Code"
+        )
       )
       reset(
         descriptionSubtitle,
         localize(
           "elsewhereDescription",
           "The '{0}' extension prefers to use an external issue reporter. To be taken to that issue reporting experience, click the button below.",
-          selectedExtension.displayName,
-        ),
+          selectedExtension.displayName
+        )
       )
       this.previewButton.label = localize(
         "openIssueReporter",
-        "Open External Issue Reporter",
+        "Open External Issue Reporter"
       )
       return
     }
@@ -1011,14 +1009,14 @@ export class BaseIssueReporterService extends Disposable {
       reset(
         descriptionTitle,
         localize("stepsToReproduce", "Steps to Reproduce") + " ",
-        $("span.required-input", undefined, "*"),
+        $("span.required-input", undefined, "*")
       )
       reset(
         descriptionSubtitle,
         localize(
           "bugDescription",
-          "Share the steps needed to reliably reproduce the problem. Please include actual and expected results. We support GitHub-flavored Markdown. You will be able to edit your issue and add screenshots when we preview it on GitHub.",
-        ),
+          "Share the steps needed to reliably reproduce the problem. Please include actual and expected results. We support GitHub-flavored Markdown. You will be able to edit your issue and add screenshots when we preview it on GitHub."
+        )
       )
     } else if (issueType === IssueType.PerformanceIssue) {
       if (!fileOnMarketplace) {
@@ -1038,27 +1036,27 @@ export class BaseIssueReporterService extends Disposable {
       reset(
         descriptionTitle,
         localize("stepsToReproduce", "Steps to Reproduce") + " ",
-        $("span.required-input", undefined, "*"),
+        $("span.required-input", undefined, "*")
       )
       reset(
         descriptionSubtitle,
         localize(
           "performanceIssueDesciption",
-          "When did this performance issue happen? Does it occur on startup or after a specific series of actions? We support GitHub-flavored Markdown. You will be able to edit your issue and add screenshots when we preview it on GitHub.",
-        ),
+          "When did this performance issue happen? Does it occur on startup or after a specific series of actions? We support GitHub-flavored Markdown. You will be able to edit your issue and add screenshots when we preview it on GitHub."
+        )
       )
     } else if (issueType === IssueType.FeatureRequest) {
       reset(
         descriptionTitle,
         localize("description", "Description") + " ",
-        $("span.required-input", undefined, "*"),
+        $("span.required-input", undefined, "*")
       )
       reset(
         descriptionSubtitle,
         localize(
           "featureRequestDescription",
-          "Please describe the feature you would like to see. We support GitHub-flavored Markdown. You will be able to edit your issue and add screenshots when we preview it on GitHub.",
-        ),
+          "Please describe the feature you would like to see. We support GitHub-flavored Markdown. You will be able to edit your issue and add screenshots when we preview it on GitHub."
+        )
       )
     }
   }
@@ -1067,7 +1065,7 @@ export class BaseIssueReporterService extends Disposable {
     const inputElement = <HTMLInputElement>this.getElementById(inputId)
     const inputValidationMessage = this.getElementById(`${inputId}-empty-error`)
     const descriptionShortMessage = this.getElementById(
-      `description-short-error`,
+      `description-short-error`
     )
     if (!inputElement.value) {
       inputElement.classList.add("invalid-input")
@@ -1105,7 +1103,7 @@ export class BaseIssueReporterService extends Disposable {
   public async submitToGitHub(
     issueTitle: string,
     issueBody: string,
-    gitHubDetails: { owner: string; repositoryName: string },
+    gitHubDetails: { owner: string; repositoryName: string }
   ): Promise<boolean> {
     const url = `https://api.github.com/repos/${gitHubDetails.owner}/${gitHubDetails.repositoryName}/issues`
     const init = {
@@ -1199,7 +1197,7 @@ export class BaseIssueReporterService extends Disposable {
 
     const baseUrl = this.getIssueUrlWithTitle(
       (<HTMLInputElement>this.getElementById("issue-title")).value,
-      issueUrl,
+      issueUrl
     )
     let url = baseUrl + `&body=${encodeURIComponent(issueBody)}`
 
@@ -1219,7 +1217,7 @@ export class BaseIssueReporterService extends Disposable {
 
   public async writeToClipboard(
     baseUrl: string,
-    issueBody: string,
+    issueBody: string
   ): Promise<string> {
     const shouldWrite = await this.issueMainService.$showClipboardDialog()
     if (!shouldWrite) {
@@ -1231,8 +1229,8 @@ export class BaseIssueReporterService extends Disposable {
       `&body=${encodeURIComponent(
         localize(
           "pasteData",
-          "We have written the needed data into your clipboard because it was too large to send. Please paste.",
-        ),
+          "We have written the needed data into your clipboard because it was too large to send. Please paste."
+        )
       )}`
     )
   }
@@ -1241,12 +1239,12 @@ export class BaseIssueReporterService extends Disposable {
     return this.issueReporterModel.fileOnExtension()
       ? this.getExtensionGitHubUrl()
       : this.issueReporterModel.getData().fileOnMarketplace
-        ? this.product.reportMarketplaceIssueUrl!
-        : this.product.reportIssueUrl!
+      ? this.product.reportMarketplaceIssueUrl!
+      : this.product.reportIssueUrl!
   }
 
   public parseGitHubUrl(
-    url: string,
+    url: string
   ): undefined | { repositoryName: string; owner: string } {
     // Assumes a GitHub url to a particular repo, https://github.com/repositoryName/owner.
     // Repository name and owner cannot contain '/'
@@ -1271,7 +1269,7 @@ export class BaseIssueReporterService extends Disposable {
     if (
       bugsUrl &&
       bugsUrl.match(
-        /^https?:\/\/github\.com\/([^\/]*)\/([^\/]*)\/?(\/issues)?$/,
+        /^https?:\/\/github\.com\/([^\/]*)\/([^\/]*)\/?(\/issues)?$/
       )
     ) {
       // matches exactly: https://github.com/owner/repo/issues
@@ -1292,7 +1290,7 @@ export class BaseIssueReporterService extends Disposable {
 
   public getIssueUrlWithTitle(
     issueTitle: string,
-    repositoryUrl: string,
+    repositoryUrl: string
   ): string {
     if (this.issueReporterModel.fileOnExtension()) {
       repositoryUrl = repositoryUrl + "/issues/new"
@@ -1300,7 +1298,7 @@ export class BaseIssueReporterService extends Disposable {
 
     const queryStringPrefix = repositoryUrl.indexOf("?") === -1 ? "?" : "&"
     return `${repositoryUrl}${queryStringPrefix}title=${encodeURIComponent(
-      issueTitle,
+      issueTitle
     )}`
   }
 
@@ -1338,7 +1336,7 @@ export class BaseIssueReporterService extends Disposable {
       this.issueReporterModel.update({ extensionData: data })
       extension.data = data
       const extensionDataBlock = this.window.document.querySelector(
-        ".block-extension-data",
+        ".block-extension-data"
       )!
       show(extensionDataBlock)
       this.renderBlocks()
@@ -1360,10 +1358,10 @@ export class BaseIssueReporterService extends Disposable {
 
   public validateSelectedExtension(): void {
     const extensionValidationMessage = this.getElementById(
-      "extension-selection-validation-error",
+      "extension-selection-validation-error"
     )!
     const extensionValidationNoUrlsMessage = this.getElementById(
-      "extension-selection-validation-error-no-url",
+      "extension-selection-validation-error-no-url"
     )!
     hide(extensionValidationMessage)
     hide(extensionValidationNoUrlsMessage)
@@ -1397,10 +1395,10 @@ export class BaseIssueReporterService extends Disposable {
     hide(extensionDataCaption)
 
     const extensionDataCaption2 = Array.from(
-      this.window.document.querySelectorAll(".ext-parens"),
+      this.window.document.querySelectorAll(".ext-parens")
     )
     extensionDataCaption2.forEach((extensionDataCaption2) =>
-      hide(extensionDataCaption2),
+      hide(extensionDataCaption2)
     )
 
     const showLoading = this.getElementById("ext-loading")!
@@ -1422,10 +1420,10 @@ export class BaseIssueReporterService extends Disposable {
     show(extensionDataCaption)
 
     const extensionDataCaption2 = Array.from(
-      this.window.document.querySelectorAll(".ext-parens"),
+      this.window.document.querySelectorAll(".ext-parens")
     )
     extensionDataCaption2.forEach((extensionDataCaption2) =>
-      show(extensionDataCaption2),
+      show(extensionDataCaption2)
     )
 
     const hideLoading = this.getElementById("ext-loading")!
@@ -1438,10 +1436,10 @@ export class BaseIssueReporterService extends Disposable {
 
   private setExtensionValidationMessage(): void {
     const extensionValidationMessage = this.getElementById(
-      "extension-selection-validation-error",
+      "extension-selection-validation-error"
     )!
     const extensionValidationNoUrlsMessage = this.getElementById(
-      "extension-selection-validation-error-no-url",
+      "extension-selection-validation-error-no-url"
     )!
     const bugsUrl = this.getExtensionBugsUrl()
     if (bugsUrl) {
@@ -1464,7 +1462,7 @@ export class BaseIssueReporterService extends Disposable {
 
   private updateProcessInfo(state: IssueReporterModelData) {
     const target = this.window.document.querySelector(
-      ".block-process .block-info",
+      ".block-process .block-info"
     ) as HTMLElement
     if (target) {
       reset(target, $("code", undefined, state.processInfo ?? ""))
@@ -1473,16 +1471,16 @@ export class BaseIssueReporterService extends Disposable {
 
   private updateWorkspaceInfo(state: IssueReporterModelData) {
     this.window.document.querySelector(
-      ".block-workspace .block-info code",
+      ".block-workspace .block-info code"
     )!.textContent = "\n" + state.workspaceInfo
   }
 
   public updateExtensionTable(
     extensions: IssueReporterExtensionData[],
-    numThemeExtensions: number,
+    numThemeExtensions: number
   ): void {
     const target = this.window.document.querySelector<HTMLElement>(
-      ".block-extensions .block-info",
+      ".block-extensions .block-info"
     )
     if (target) {
       if (this.disableExtensions) {
@@ -1503,13 +1501,13 @@ export class BaseIssueReporterService extends Disposable {
       reset(
         target,
         this.getExtensionTableHtml(extensions),
-        document.createTextNode(themeExclusionStr),
+        document.createTextNode(themeExclusionStr)
       )
     }
   }
 
   private getExtensionTableHtml(
-    extensions: IssueReporterExtensionData[],
+    extensions: IssueReporterExtensionData[]
   ): HTMLTableElement {
     return $(
       "table",
@@ -1519,7 +1517,7 @@ export class BaseIssueReporterService extends Disposable {
         undefined,
         $("th", undefined, "Extension"),
         $("th", undefined, "Author (truncated)" as string),
-        $("th", undefined, "Version"),
+        $("th", undefined, "Version")
       ),
       ...extensions.map((extension) =>
         $(
@@ -1527,9 +1525,9 @@ export class BaseIssueReporterService extends Disposable {
           undefined,
           $("td", undefined, extension.name),
           $("td", undefined, extension.publisher?.substr(0, 3) ?? "N/A"),
-          $("td", undefined, extension.version),
-        ),
-      ),
+          $("td", undefined, extension.version)
+        )
+      )
     )
   }
 
@@ -1543,7 +1541,7 @@ export class BaseIssueReporterService extends Disposable {
   }
 
   public getElementById<T extends HTMLElement = HTMLElement>(
-    elementId: string,
+    elementId: string
   ): T | undefined {
     const element = this.window.document.getElementById(elementId) as
       | T
@@ -1558,7 +1556,7 @@ export class BaseIssueReporterService extends Disposable {
   public addEventListener(
     elementId: string,
     eventType: string,
-    handler: (event: Event) => void,
+    handler: (event: Event) => void
   ): void {
     const element = this.getElementById(elementId)
     element?.addEventListener(eventType, handler)

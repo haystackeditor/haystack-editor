@@ -164,12 +164,12 @@ export class KeybindingsEditor
     this._onDefineWhenExpression.event
 
   private _onRejectWhenExpression = this._register(
-    new Emitter<IKeybindingItemEntry>(),
+    new Emitter<IKeybindingItemEntry>()
   )
   readonly onRejectWhenExpression = this._onRejectWhenExpression.event
 
   private _onAcceptWhenExpression = this._register(
-    new Emitter<IKeybindingItemEntry>(),
+    new Emitter<IKeybindingItemEntry>()
   )
   readonly onAcceptWhenExpression = this._onAcceptWhenExpression.event
 
@@ -223,48 +223,48 @@ export class KeybindingsEditor
     @IEditorService private readonly editorService: IEditorService,
     @IStorageService storageService: IStorageService,
     @IConfigurationService
-    private readonly configurationService: IConfigurationService,
+    private readonly configurationService: IConfigurationService
   ) {
     super(
       KeybindingsEditor.ID,
       group,
       telemetryService,
       themeService,
-      storageService,
+      storageService
     )
     this.delayedFiltering = new Delayer<void>(300)
     this._register(
       keybindingsService.onDidUpdateKeybindings(() =>
-        this.render(!!this.keybindingFocusContextKey.get()),
-      ),
+        this.render(!!this.keybindingFocusContextKey.get())
+      )
     )
 
     this.keybindingsEditorContextKey = CONTEXT_KEYBINDINGS_EDITOR.bindTo(
-      this.contextKeyService,
+      this.contextKeyService
     )
     this.searchFocusContextKey = CONTEXT_KEYBINDINGS_SEARCH_FOCUS.bindTo(
-      this.contextKeyService,
+      this.contextKeyService
     )
     this.keybindingFocusContextKey = CONTEXT_KEYBINDING_FOCUS.bindTo(
-      this.contextKeyService,
+      this.contextKeyService
     )
     this.searchHistoryDelayer = new Delayer<void>(500)
 
     this.recordKeysAction = new Action(
       KEYBINDINGS_EDITOR_COMMAND_RECORD_SEARCH_KEYS,
       localize("recordKeysLabel", "Record Keys"),
-      ThemeIcon.asClassName(keybindingsRecordKeysIcon),
+      ThemeIcon.asClassName(keybindingsRecordKeysIcon)
     )
     this.recordKeysAction.checked = false
 
     this.sortByPrecedenceAction = new Action(
       KEYBINDINGS_EDITOR_COMMAND_SORTBY_PRECEDENCE,
       localize("sortByPrecedeneLabel", "Sort by Precedence (Highest first)"),
-      ThemeIcon.asClassName(keybindingsSortIcon),
+      ThemeIcon.asClassName(keybindingsSortIcon)
     )
     this.sortByPrecedenceAction.checked = false
     this.overflowWidgetsDomNode = $(
-      ".keybindings-overflow-widgets-container.monaco-editor",
+      ".keybindings-overflow-widgets-container.monaco-editor"
     )
   }
 
@@ -284,14 +284,14 @@ export class KeybindingsEditor
             this.focusSearch()
           }
         },
-      }),
+      })
     )
   }
 
   protected createEditor(parent: HTMLElement): void {
     const keybindingsEditorElement = DOM.append(
       parent,
-      $("div", { class: "keybindings-editor" }),
+      $("div", { class: "keybindings-editor" })
     )
 
     this.createAriaLabelElement(keybindingsEditorElement)
@@ -304,7 +304,7 @@ export class KeybindingsEditor
     input: KeybindingsEditorInput,
     options: IEditorOptions | undefined,
     context: IEditorOpenContext,
-    token: CancellationToken,
+    token: CancellationToken
   ): Promise<void> {
     this.keybindingsEditorContextKey.set(true)
     return super
@@ -351,7 +351,7 @@ export class KeybindingsEditor
 
   async defineKeybinding(
     keybindingEntry: IKeybindingItemEntry,
-    add: boolean,
+    add: boolean
   ): Promise<void> {
     this.selectEntry(keybindingEntry)
     this.showOverlayContainer()
@@ -362,7 +362,7 @@ export class KeybindingsEditor
           keybindingEntry,
           key,
           keybindingEntry.keybindingItem.when,
-          add,
+          add
         )
       }
     } catch (error) {
@@ -392,7 +392,7 @@ export class KeybindingsEditor
     keybindingEntry: IKeybindingItemEntry,
     key: string,
     when: string | undefined,
-    add?: boolean,
+    add?: boolean
   ): Promise<void> {
     const currentKey = keybindingEntry.keybindingItem.keybinding
       ? keybindingEntry.keybindingItem.keybinding.getUserSettingsLabel()
@@ -402,13 +402,13 @@ export class KeybindingsEditor
         await this.keybindingEditingService.addKeybinding(
           keybindingEntry.keybindingItem.keybindingItem,
           key,
-          when || undefined,
+          when || undefined
         )
       } else {
         await this.keybindingEditingService.editKeybinding(
           keybindingEntry.keybindingItem.keybindingItem,
           key,
-          when || undefined,
+          when || undefined
         )
       }
       if (!keybindingEntry.keybindingItem.keybinding) {
@@ -424,7 +424,7 @@ export class KeybindingsEditor
       // This should be a pre-condition
       try {
         await this.keybindingEditingService.removeKeybinding(
-          keybindingEntry.keybindingItem.keybindingItem,
+          keybindingEntry.keybindingItem.keybindingItem
         )
         this.focus()
       } catch (error) {
@@ -438,7 +438,7 @@ export class KeybindingsEditor
     this.selectEntry(keybindingEntry)
     try {
       await this.keybindingEditingService.resetKeybinding(
-        keybindingEntry.keybindingItem.keybindingItem,
+        keybindingEntry.keybindingItem.keybindingItem
       )
       if (!keybindingEntry.keybindingItem.keybinding) {
         // reveal only if keybinding was added to unassinged. Because the entry will be placed in different position after rendering
@@ -463,7 +463,7 @@ export class KeybindingsEditor
       userFriendlyKeybinding.when = keybinding.keybindingItem.when
     }
     await this.clipboardService.writeText(
-      JSON.stringify(userFriendlyKeybinding, null, "  "),
+      JSON.stringify(userFriendlyKeybinding, null, "  ")
     )
   }
 
@@ -473,11 +473,11 @@ export class KeybindingsEditor
   }
 
   async copyKeybindingCommandTitle(
-    keybinding: IKeybindingItemEntry,
+    keybinding: IKeybindingItemEntry
   ): Promise<void> {
     this.selectEntry(keybinding)
     await this.clipboardService.writeText(
-      keybinding.keybindingItem.commandLabel,
+      keybinding.keybindingItem.commandLabel
     )
   }
 
@@ -506,7 +506,7 @@ export class KeybindingsEditor
     this.ariaLabelElement = DOM.append(parent, DOM.$(""))
     this.ariaLabelElement.setAttribute(
       "id",
-      "keybindings-editor-aria-label-element",
+      "keybindings-editor-aria-label-element"
     )
     this.ariaLabelElement.setAttribute("aria-live", "assertive")
   }
@@ -518,20 +518,20 @@ export class KeybindingsEditor
     this.defineKeybindingWidget = this._register(
       this.instantiationService.createInstance(
         DefineKeybindingWidget,
-        this.overlayContainer,
-      ),
+        this.overlayContainer
+      )
     )
     this._register(
       this.defineKeybindingWidget.onDidChange((keybindingStr) =>
         this.defineKeybindingWidget.printExisting(
-          this.keybindingsEditorModel!.fetch(`"${keybindingStr}"`).length,
-        ),
-      ),
+          this.keybindingsEditorModel!.fetch(`"${keybindingStr}"`).length
+        )
+      )
     )
     this._register(
       this.defineKeybindingWidget.onShowExistingKeybidings((keybindingStr) =>
-        this.searchWidget.setValue(`"${keybindingStr}"`),
-      ),
+        this.searchWidget.setValue(`"${keybindingStr}"`)
+      )
     )
     this.hideOverlayContainer()
   }
@@ -548,11 +548,11 @@ export class KeybindingsEditor
     this.headerContainer = DOM.append(parent, $(".keybindings-header"))
     const fullTextSearchPlaceholder = localize(
       "SearchKeybindings.FullTextSearchPlaceholder",
-      "Type to search in keybindings",
+      "Type to search in keybindings"
     )
     const keybindingsSearchPlaceholder = localize(
       "SearchKeybindings.KeybindingsSearchPlaceholder",
-      "Recording Keys. Press Escape to exit",
+      "Recording Keys. Press Escape to exit"
     )
 
     const clearInputAction = new Action(
@@ -560,12 +560,12 @@ export class KeybindingsEditor
       localize("clearInput", "Clear Keybindings Search Input"),
       ThemeIcon.asClassName(preferencesClearInputIcon),
       false,
-      async () => this.clearSearchResults(),
+      async () => this.clearSearchResults()
     )
 
     const searchContainer = DOM.append(
       this.headerContainer,
-      $(".search-container"),
+      $(".search-container")
     )
     this.searchWidget = this._register(
       this.instantiationService.createInstance(
@@ -585,23 +585,23 @@ export class KeybindingsEditor
           inputBoxStyles: getInputBoxStyle({
             inputBorder: settingsTextInputBorder,
           }),
-        },
-      ),
+        }
+      )
     )
     this._register(
       this.searchWidget.onDidChange((searchValue) => {
         clearInputAction.enabled = !!searchValue
         this.delayedFiltering.trigger(() => this.filterKeybindings())
         this.updateSearchOptions()
-      }),
+      })
     )
     this._register(
-      this.searchWidget.onEscape(() => (this.recordKeysAction.checked = false)),
+      this.searchWidget.onEscape(() => (this.recordKeysAction.checked = false))
     )
 
     this.actionsContainer = DOM.append(
       searchContainer,
-      DOM.$(".keybindings-search-actions-container"),
+      DOM.$(".keybindings-search-actions-container")
     )
     const recordingBadge = this.createRecordingBadge(this.actionsContainer)
 
@@ -611,7 +611,7 @@ export class KeybindingsEditor
           this.renderKeybindingsEntries(false)
         }
         this.updateSearchOptions()
-      }),
+      })
     )
 
     this._register(
@@ -620,10 +620,10 @@ export class KeybindingsEditor
           recordingBadge.classList.toggle("disabled", !e.checked)
           if (e.checked) {
             this.searchWidget.inputBox.setPlaceHolder(
-              keybindingsSearchPlaceholder,
+              keybindingsSearchPlaceholder
             )
             this.searchWidget.inputBox.setAriaLabel(
-              keybindingsSearchPlaceholder,
+              keybindingsSearchPlaceholder
             )
             this.searchWidget.startRecordingKeys()
             this.searchWidget.focus()
@@ -635,7 +635,7 @@ export class KeybindingsEditor
           }
           this.updateSearchOptions()
         }
-      }),
+      })
     )
 
     const actions = [
@@ -647,7 +647,7 @@ export class KeybindingsEditor
       new ToolBar(this.actionsContainer, this.contextMenuService, {
         actionViewItemProvider: (
           action: IAction,
-          options: IActionViewItemOptions,
+          options: IActionViewItemOptions
         ) => {
           if (
             action.id === this.sortByPrecedenceAction.id ||
@@ -665,13 +665,13 @@ export class KeybindingsEditor
         },
         getKeyBinding: (action) =>
           this.keybindingsService.lookupKeybinding(action.id),
-      }),
+      })
     )
     toolBar.setActions(actions)
     this._register(
       this.keybindingsService.onDidUpdateKeybindings(() =>
-        toolBar.setActions(actions),
-      ),
+        toolBar.setActions(actions)
+      )
     )
   }
 
@@ -689,7 +689,7 @@ export class KeybindingsEditor
   private createRecordingBadge(container: HTMLElement): HTMLElement {
     const recordingBadge = DOM.append(
       container,
-      DOM.$(".recording-badge.monaco-count-badge.long.disabled"),
+      DOM.$(".recording-badge.monaco-count-badge.long.disabled")
     )
     recordingBadge.textContent = localize("recording", "Recording Keys")
 
@@ -716,7 +716,7 @@ export class KeybindingsEditor
   private createTable(parent: HTMLElement): void {
     this.keybindingsTableContainer = DOM.append(
       parent,
-      $(".keybindings-table-container"),
+      $(".keybindings-table-container")
     )
     this.keybindingsTable = this._register(
       this.instantiationService.createInstance(
@@ -784,7 +784,7 @@ export class KeybindingsEditor
           identityProvider: { getId: (e: IKeybindingItemEntry) => e.id },
           horizontalScrolling: false,
           accessibilityProvider: new AccessibilityProvider(
-            this.configurationService,
+            this.configurationService
           ),
           keyboardNavigationLabelProvider: {
             getKeyboardNavigationLabel: (e: IKeybindingItemEntry) =>
@@ -797,27 +797,27 @@ export class KeybindingsEditor
           setRowLineHeight: false,
           openOnSingleClick: false,
           transformOptimization: false, // disable transform optimization as it causes the editor overflow widgets to be mispositioned
-        },
-      ),
+        }
+      )
     ) as WorkbenchTable<IKeybindingItemEntry>
 
     this._register(
-      this.keybindingsTable.onContextMenu((e) => this.onContextMenu(e)),
+      this.keybindingsTable.onContextMenu((e) => this.onContextMenu(e))
     )
     this._register(
-      this.keybindingsTable.onDidChangeFocus((e) => this.onFocusChange()),
+      this.keybindingsTable.onDidChangeFocus((e) => this.onFocusChange())
     )
     this._register(
       this.keybindingsTable.onDidFocus(() => {
         this.keybindingsTable.getHTMLElement().classList.add("focused")
         this.onFocusChange()
-      }),
+      })
     )
     this._register(
       this.keybindingsTable.onDidBlur(() => {
         this.keybindingsTable.getHTMLElement().classList.remove("focused")
         this.keybindingFocusContextKey.reset()
-      }),
+      })
     )
     this._register(
       this.keybindingsTable.onDidOpen((e) => {
@@ -829,7 +829,7 @@ export class KeybindingsEditor
         if (activeKeybindingEntry) {
           this.defineKeybinding(activeKeybindingEntry, false)
         }
-      }),
+      })
     )
 
     DOM.append(this.keybindingsTableContainer, this.overflowWidgetsDomNode)
@@ -870,7 +870,7 @@ export class KeybindingsEditor
           : undefined
         actionsLabels.set(
           menuItem.command.id,
-          category ? `${category}: ${title}` : title,
+          category ? `${category}: ${title}` : title
         )
       }
     }
@@ -897,19 +897,19 @@ export class KeybindingsEditor
 
   private renderKeybindingsEntries(
     reset: boolean,
-    preserveFocus?: boolean,
+    preserveFocus?: boolean
   ): void {
     if (this.keybindingsEditorModel) {
       const filter = this.searchWidget.getValue()
       const keybindingsEntries: IKeybindingItemEntry[] =
         this.keybindingsEditorModel.fetch(
           filter,
-          this.sortByPrecedenceAction.checked,
+          this.sortByPrecedenceAction.checked
         )
 
       this.ariaLabelElement.setAttribute(
         "aria-label",
-        this.getAriaLabel(keybindingsEntries),
+        this.getAriaLabel(keybindingsEntries)
       )
 
       if (keybindingsEntries.length === 0) {
@@ -920,7 +920,7 @@ export class KeybindingsEditor
       this.keybindingsTable.splice(
         0,
         this.keybindingsTable.length,
-        this.tableEntries,
+        this.tableEntries
       )
       this.layoutKeybindingsTable()
 
@@ -930,7 +930,7 @@ export class KeybindingsEditor
       } else {
         if (this.unAssignedKeybindingItemToRevealAndFocus) {
           const index = this.getNewIndexOfUnassignedKeybinding(
-            this.unAssignedKeybindingItemToRevealAndFocus,
+            this.unAssignedKeybindingItemToRevealAndFocus
           )
           if (index !== -1) {
             this.keybindingsTable.reveal(index, 0.2)
@@ -957,13 +957,13 @@ export class KeybindingsEditor
       return localize(
         "show sorted keybindings",
         "Showing {0} Keybindings in precedence order",
-        keybindingsEntries.length,
+        keybindingsEntries.length
       )
     } else {
       return localize(
         "show keybindings",
         "Showing {0} Keybindings in alphabetical order",
-        keybindingsEntries.length,
+        keybindingsEntries.length
       )
     }
   }
@@ -993,7 +993,7 @@ export class KeybindingsEditor
   }
 
   private getNewIndexOfUnassignedKeybinding(
-    unassignedKeybinding: IKeybindingItemEntry,
+    unassignedKeybinding: IKeybindingItemEntry
   ): number {
     for (let index = 0; index < this.tableEntries.length; index++) {
       const entry = this.tableEntries[index]
@@ -1012,7 +1012,7 @@ export class KeybindingsEditor
 
   private selectEntry(
     keybindingItemEntry: IKeybindingItemEntry | number,
-    focus: boolean = true,
+    focus: boolean = true
   ): void {
     const index =
       typeof keybindingItemEntry === "number"
@@ -1092,7 +1092,7 @@ export class KeybindingsEditor
   }
 
   private createDefineKeybindingAction(
-    keybindingItemEntry: IKeybindingItemEntry,
+    keybindingItemEntry: IKeybindingItemEntry
   ): IAction {
     return <IAction>{
       label: keybindingItemEntry.keybindingItem.keybinding
@@ -1105,7 +1105,7 @@ export class KeybindingsEditor
   }
 
   private createAddKeybindingAction(
-    keybindingItemEntry: IKeybindingItemEntry,
+    keybindingItemEntry: IKeybindingItemEntry
   ): IAction {
     return <IAction>{
       label: localize("addLabel", "Add Keybinding..."),
@@ -1116,7 +1116,7 @@ export class KeybindingsEditor
   }
 
   private createDefineWhenExpressionAction(
-    keybindingItemEntry: IKeybindingItemEntry,
+    keybindingItemEntry: IKeybindingItemEntry
   ): IAction {
     return <IAction>{
       label: localize("editWhen", "Change When Expression"),
@@ -1145,7 +1145,7 @@ export class KeybindingsEditor
   }
 
   private createShowConflictsAction(
-    keybindingItem: IKeybindingItemEntry,
+    keybindingItem: IKeybindingItemEntry
   ): IAction {
     return <IAction>{
       label: localize("showSameKeybindings", "Show Same Keybindings"),
@@ -1174,7 +1174,7 @@ export class KeybindingsEditor
   }
 
   private createCopyCommandTitleAction(
-    keybinding: IKeybindingItemEntry,
+    keybinding: IKeybindingItemEntry
   ): IAction {
     return <IAction>{
       label: localize("copyCommandTitleLabel", "Copy Command Title"),
@@ -1191,8 +1191,8 @@ export class KeybindingsEditor
         : localize(
             "error",
             "Error '{0}' while editing the keybinding. Please open 'keybindings.json' file and check for errors.",
-            `${error}`,
-          ),
+            `${error}`
+          )
     )
   }
 }
@@ -1237,7 +1237,7 @@ class ActionsColumnRenderer
 
   constructor(
     private readonly keybindingsEditor: KeybindingsEditor,
-    @IKeybindingService private readonly keybindingsService: IKeybindingService,
+    @IKeybindingService private readonly keybindingsService: IKeybindingService
   ) {}
 
   renderTemplate(container: HTMLElement): IActionsColumnTemplateData {
@@ -1250,7 +1250,7 @@ class ActionsColumnRenderer
     keybindingItemEntry: IKeybindingItemEntry,
     index: number,
     templateData: IActionsColumnTemplateData,
-    height: number | undefined,
+    height: number | undefined
   ): void {
     templateData.actionBar.clear()
     const actions: IAction[] = []
@@ -1264,7 +1264,7 @@ class ActionsColumnRenderer
 
   private createEditAction(keybindingItemEntry: IKeybindingItemEntry): IAction {
     const keybinding = this.keybindingsService.lookupKeybinding(
-      KEYBINDINGS_EDITOR_COMMAND_DEFINE,
+      KEYBINDINGS_EDITOR_COMMAND_DEFINE
     )
     return <IAction>{
       class: ThemeIcon.asClassName(keybindingsEditIcon),
@@ -1274,7 +1274,7 @@ class ActionsColumnRenderer
         ? localize(
             "editKeybindingLabelWithKey",
             "Change Keybinding {0}",
-            `(${keybinding.getLabel()})`,
+            `(${keybinding.getLabel()})`
           )
         : localize("editKeybindingLabel", "Change Keybinding"),
       run: () =>
@@ -1284,7 +1284,7 @@ class ActionsColumnRenderer
 
   private createAddAction(keybindingItemEntry: IKeybindingItemEntry): IAction {
     const keybinding = this.keybindingsService.lookupKeybinding(
-      KEYBINDINGS_EDITOR_COMMAND_DEFINE,
+      KEYBINDINGS_EDITOR_COMMAND_DEFINE
     )
     return <IAction>{
       class: ThemeIcon.asClassName(keybindingsAddIcon),
@@ -1294,7 +1294,7 @@ class ActionsColumnRenderer
         ? localize(
             "addKeybindingLabelWithKey",
             "Add Keybinding {0}",
-            `(${keybinding.getLabel()})`,
+            `(${keybinding.getLabel()})`
           )
         : localize("addKeybindingLabel", "Add Keybinding"),
       run: () =>
@@ -1332,20 +1332,20 @@ class CommandColumnRenderer
     const commandColumnHover = this._hoverService.setupUpdatableHover(
       getDefaultHoverDelegate("mouse"),
       commandColumn,
-      "",
+      ""
     )
     const commandLabelContainer = DOM.append(commandColumn, $(".command-label"))
     const commandLabel = new HighlightedLabel(commandLabelContainer)
     const commandDefaultLabelContainer = DOM.append(
       commandColumn,
-      $(".command-default-label"),
+      $(".command-default-label")
     )
     const commandDefaultLabel = new HighlightedLabel(
-      commandDefaultLabelContainer,
+      commandDefaultLabelContainer
     )
     const commandIdLabelContainer = DOM.append(
       commandColumn,
-      $(".command-id.code"),
+      $(".command-id.code")
     )
     const commandIdLabel = new HighlightedLabel(commandIdLabelContainer)
     return {
@@ -1364,7 +1364,7 @@ class CommandColumnRenderer
     keybindingItemEntry: IKeybindingItemEntry,
     index: number,
     templateData: ICommandColumnTemplateData,
-    height: number | undefined,
+    height: number | undefined
   ): void {
     const keybindingItem = keybindingItemEntry.keybindingItem
     const commandIdMatched = !!(
@@ -1375,14 +1375,14 @@ class CommandColumnRenderer
 
     templateData.commandColumn.classList.toggle(
       "vertical-align-column",
-      commandIdMatched || commandDefaultLabelMatched,
+      commandIdMatched || commandDefaultLabelMatched
     )
     const title = keybindingItem.commandLabel
       ? localize(
           "title",
           "{0} ({1})",
           keybindingItem.commandLabel,
-          keybindingItem.command,
+          keybindingItem.command
         )
       : keybindingItem.command
     templateData.commandColumn.setAttribute("aria-label", title)
@@ -1392,7 +1392,7 @@ class CommandColumnRenderer
       templateData.commandLabelContainer.classList.remove("hide")
       templateData.commandLabel.set(
         keybindingItem.commandLabel,
-        keybindingItemEntry.commandLabelMatches,
+        keybindingItemEntry.commandLabelMatches
       )
     } else {
       templateData.commandLabelContainer.classList.add("hide")
@@ -1403,7 +1403,7 @@ class CommandColumnRenderer
       templateData.commandDefaultLabelContainer.classList.remove("hide")
       templateData.commandDefaultLabel.set(
         keybindingItem.commandDefaultLabel,
-        keybindingItemEntry.commandDefaultLabelMatches,
+        keybindingItemEntry.commandDefaultLabelMatches
       )
     } else {
       templateData.commandDefaultLabelContainer.classList.add("hide")
@@ -1414,7 +1414,7 @@ class CommandColumnRenderer
       templateData.commandIdLabelContainer.classList.remove("hide")
       templateData.commandIdLabel.set(
         keybindingItem.command,
-        keybindingItemEntry.commandIdMatches,
+        keybindingItemEntry.commandIdMatches
       )
     } else {
       templateData.commandIdLabelContainer.classList.add("hide")
@@ -1449,7 +1449,7 @@ class KeybindingColumnRenderer
     const keybindingLabel = new KeybindingLabel(
       DOM.append(element, $("div.keybinding-label")),
       OS,
-      defaultKeybindingLabelStyles,
+      defaultKeybindingLabelStyles
     )
     return { keybindingLabel }
   }
@@ -1458,12 +1458,12 @@ class KeybindingColumnRenderer
     keybindingItemEntry: IKeybindingItemEntry,
     index: number,
     templateData: IKeybindingColumnTemplateData,
-    height: number | undefined,
+    height: number | undefined
   ): void {
     if (keybindingItemEntry.keybindingItem.keybinding) {
       templateData.keybindingLabel.set(
         keybindingItemEntry.keybindingItem.keybinding,
-        keybindingItemEntry.keybindingMatches,
+        keybindingItemEntry.keybindingMatches
       )
     } else {
       templateData.keybindingLabel.set(undefined, undefined)
@@ -1491,8 +1491,8 @@ function onClick(element: HTMLElement, callback: () => void): IDisposable {
     DOM.addDisposableListener(
       element,
       DOM.EventType.CLICK,
-      DOM.finalHandler(callback),
-    ),
+      DOM.finalHandler(callback)
+    )
   )
   disposables.add(
     DOM.addDisposableListener(element, DOM.EventType.KEY_UP, (e) => {
@@ -1505,7 +1505,7 @@ function onClick(element: HTMLElement, callback: () => void): IDisposable {
         e.stopPropagation()
         callback()
       }
-    }),
+    })
   )
   return disposables
 }
@@ -1520,7 +1520,7 @@ class SourceColumnRenderer
   constructor(
     @IExtensionsWorkbenchService
     private readonly extensionsWorkbenchService: IExtensionsWorkbenchService,
-    @IHoverService private readonly hoverService: IHoverService,
+    @IHoverService private readonly hoverService: IHoverService
   ) {}
 
   renderTemplate(container: HTMLElement): ISourceColumnTemplateData {
@@ -1528,21 +1528,21 @@ class SourceColumnRenderer
     const sourceColumnHover = this.hoverService.setupUpdatableHover(
       getDefaultHoverDelegate("mouse"),
       sourceColumn,
-      "",
+      ""
     )
     const sourceLabel = new HighlightedLabel(
-      DOM.append(sourceColumn, $(".source-label")),
+      DOM.append(sourceColumn, $(".source-label"))
     )
     const extensionContainer = DOM.append(
       sourceColumn,
-      $(".extension-container"),
+      $(".extension-container")
     )
     const extensionLabel = DOM.append<HTMLAnchorElement>(
       extensionContainer,
-      $("a.extension-label", { tabindex: 0 }),
+      $("a.extension-label", { tabindex: 0 })
     )
     const extensionId = new HighlightedLabel(
-      DOM.append(extensionContainer, $(".extension-id-container.code")),
+      DOM.append(extensionContainer, $(".extension-id-container.code"))
     )
     return {
       sourceColumn,
@@ -1559,7 +1559,7 @@ class SourceColumnRenderer
     keybindingItemEntry: IKeybindingItemEntry,
     index: number,
     templateData: ISourceColumnTemplateData,
-    height: number | undefined,
+    height: number | undefined
   ): void {
     templateData.disposables.clear()
     if (isString(keybindingItemEntry.keybindingItem.source)) {
@@ -1568,7 +1568,7 @@ class SourceColumnRenderer
       templateData.sourceColumnHover.update("")
       templateData.sourceLabel.set(
         keybindingItemEntry.keybindingItem.source || "-",
-        keybindingItemEntry.sourceMatches,
+        keybindingItemEntry.sourceMatches
       )
     } else {
       templateData.extensionContainer.classList.remove("hide")
@@ -1576,19 +1576,19 @@ class SourceColumnRenderer
       const extension = keybindingItemEntry.keybindingItem.source
       const extensionLabel = extension.displayName ?? extension.identifier.value
       templateData.sourceColumnHover.update(
-        localize("extension label", "Extension ({0})", extensionLabel),
+        localize("extension label", "Extension ({0})", extensionLabel)
       )
       templateData.extensionLabel.textContent = extensionLabel
       templateData.disposables.add(
         onClick(templateData.extensionLabel, () => {
           this.extensionsWorkbenchService.open(extension.identifier.value)
-        }),
+        })
       )
       if (keybindingItemEntry.extensionIdMatches) {
         templateData.extensionId.element.classList.remove("hide")
         templateData.extensionId.set(
           extension.identifier.value,
-          keybindingItemEntry.extensionIdMatches,
+          keybindingItemEntry.extensionIdMatches
         )
       } else {
         templateData.extensionId.element.classList.add("hide")
@@ -1618,7 +1618,7 @@ class WhenInputWidget extends Disposable {
     parent: HTMLElement,
     keybindingsEditor: KeybindingsEditor,
     @IInstantiationService instantiationService: IInstantiationService,
-    @IContextKeyService contextKeyService: IContextKeyService,
+    @IContextKeyService contextKeyService: IContextKeyService
   ) {
     super()
     const focusContextKey = CONTEXT_WHEN_FOCUS.bindTo(contextKeyService)
@@ -1649,29 +1649,29 @@ class WhenInputWidget extends Disposable {
         {
           focusContextKey,
           overflowWidgetsDomNode: keybindingsEditor.overflowWidgetsDomNode,
-        },
-      ),
+        }
+      )
     )
 
     this._register(
       DOM.addDisposableListener(
         this.input.element,
         DOM.EventType.DBLCLICK,
-        (e) => DOM.EventHelper.stop(e),
-      ),
+        (e) => DOM.EventHelper.stop(e)
+      )
     )
     this._register(toDisposable(() => focusContextKey.reset()))
 
     this._register(
       keybindingsEditor.onAcceptWhenExpression(() =>
-        this._onDidAccept.fire(this.input.getValue()),
-      ),
+        this._onDidAccept.fire(this.input.getValue())
+      )
     )
     this._register(
       Event.any(
         keybindingsEditor.onRejectWhenExpression,
-        this.input.onDidBlur,
-      )(() => this._onDidReject.fire()),
+        this.input.onDidBlur
+      )(() => this._onDidReject.fire())
     )
   }
 
@@ -1704,7 +1704,7 @@ class WhenColumnRenderer
     private readonly keybindingsEditor: KeybindingsEditor,
     @IHoverService private readonly hoverService: IHoverService,
     @IInstantiationService
-    private readonly instantiationService: IInstantiationService,
+    private readonly instantiationService: IInstantiationService
   ) {}
 
   renderTemplate(container: HTMLElement): IWhenColumnTemplateData {
@@ -1715,7 +1715,7 @@ class WhenColumnRenderer
 
     const whenInputContainer = DOM.append(
       element,
-      $("div.when-input-container"),
+      $("div.when-input-container")
     )
 
     return {
@@ -1731,11 +1731,11 @@ class WhenColumnRenderer
     keybindingItemEntry: IKeybindingItemEntry,
     index: number,
     templateData: IWhenColumnTemplateData,
-    height: number | undefined,
+    height: number | undefined
   ): void {
     templateData.disposables.clear()
     const whenInputDisposables = templateData.disposables.add(
-      new DisposableStore(),
+      new DisposableStore()
     )
     templateData.disposables.add(
       this.keybindingsEditor.onDefineWhenExpression((e) => {
@@ -1746,14 +1746,14 @@ class WhenColumnRenderer
             this.instantiationService.createInstance(
               WhenInputWidget,
               templateData.whenInputContainer,
-              this.keybindingsEditor,
-            ),
+              this.keybindingsEditor
+            )
           )
           inputWidget.layout(
             new DOM.Dimension(
               templateData.element.parentElement!.clientWidth,
-              18,
-            ),
+              18
+            )
           )
           inputWidget.show(keybindingItemEntry.keybindingItem.when || "")
 
@@ -1773,45 +1773,45 @@ class WhenColumnRenderer
                   ? keybindingItemEntry.keybindingItem.keybinding.getUserSettingsLabel() ||
                       ""
                   : "",
-                value,
+                value
               )
               this.keybindingsEditor.selectKeybinding(keybindingItemEntry)
-            }),
+            })
           )
 
           whenInputDisposables.add(
             inputWidget.onDidReject(() => {
               hideInputWidget()
               this.keybindingsEditor.selectKeybinding(keybindingItemEntry)
-            }),
+            })
           )
 
           templateData.element.parentElement!.style.paddingLeft = "0px"
         }
-      }),
+      })
     )
 
     templateData.whenLabelContainer.classList.toggle(
       "code",
-      !!keybindingItemEntry.keybindingItem.when,
+      !!keybindingItemEntry.keybindingItem.when
     )
     templateData.whenLabelContainer.classList.toggle(
       "empty",
-      !keybindingItemEntry.keybindingItem.when,
+      !keybindingItemEntry.keybindingItem.when
     )
 
     if (keybindingItemEntry.keybindingItem.when) {
       templateData.whenLabel.set(
         keybindingItemEntry.keybindingItem.when,
         keybindingItemEntry.whenMatches,
-        keybindingItemEntry.keybindingItem.when,
+        keybindingItemEntry.keybindingItem.when
       )
       templateData.disposables.add(
         this.hoverService.setupUpdatableHover(
           getDefaultHoverDelegate("mouse"),
           templateData.element,
-          keybindingItemEntry.keybindingItem.when,
-        ),
+          keybindingItemEntry.keybindingItem.when
+        )
       )
     } else {
       templateData.whenLabel.set("-")
@@ -1845,17 +1845,17 @@ class AccessibilityProvider
         : localize("noWhen", "No when context"),
       isString(keybindingItem.source)
         ? keybindingItem.source
-        : (keybindingItem.source.description ??
-          keybindingItem.source.identifier.value),
+        : keybindingItem.source.description ??
+          keybindingItem.source.identifier.value,
     ]
     if (
       this.configurationService.getValue(
-        AccessibilityVerbositySettingId.KeybindingsEditor,
+        AccessibilityVerbositySettingId.KeybindingsEditor
       )
     ) {
       const kbEditorAriaLabel = localize(
         "keyboard shortcuts aria label",
-        "use space or enter to change the keybinding.",
+        "use space or enter to change the keybinding."
       )
       ariaLabel.push(kbEditorAriaLabel)
     }
@@ -1871,7 +1871,7 @@ registerColor(
     hcDark: tableOddRowsBackgroundColor,
     hcLight: tableOddRowsBackgroundColor,
   },
-  "Background color for the keyboard shortcuts table header.",
+  "Background color for the keyboard shortcuts table header."
 )
 registerColor(
   "keybindingTable.rowsBackground",
@@ -1881,7 +1881,7 @@ registerColor(
     hcDark: tableOddRowsBackgroundColor,
     hcLight: tableOddRowsBackgroundColor,
   },
-  "Background color for the keyboard shortcuts table alternating rows.",
+  "Background color for the keyboard shortcuts table alternating rows."
 )
 
 registerThemingParticipant(
@@ -1892,15 +1892,15 @@ registerThemingParticipant(
         .transparent(0.8)
         .makeOpaque(WORKBENCH_BACKGROUND(theme))
       collector.addRule(
-        `.keybindings-editor > .keybindings-body > .keybindings-table-container .monaco-table .monaco-table-tr .monaco-table-td .code { color: ${whenForegroundColor}; }`,
+        `.keybindings-editor > .keybindings-body > .keybindings-table-container .monaco-table .monaco-table-tr .monaco-table-td .code { color: ${whenForegroundColor}; }`
       )
     }
 
     const listActiveSelectionForegroundColor = theme.getColor(
-      listActiveSelectionForeground,
+      listActiveSelectionForeground
     )
     const listActiveSelectionBackgroundColor = theme.getColor(
-      listActiveSelectionBackground,
+      listActiveSelectionBackground
     )
     if (
       listActiveSelectionForegroundColor &&
@@ -1910,15 +1910,15 @@ registerThemingParticipant(
         .transparent(0.8)
         .makeOpaque(listActiveSelectionBackgroundColor)
       collector.addRule(
-        `.keybindings-editor > .keybindings-body > .keybindings-table-container .monaco-table.focused .monaco-list-row.selected .monaco-table-tr .monaco-table-td .code { color: ${whenForegroundColor}; }`,
+        `.keybindings-editor > .keybindings-body > .keybindings-table-container .monaco-table.focused .monaco-list-row.selected .monaco-table-tr .monaco-table-td .code { color: ${whenForegroundColor}; }`
       )
     }
 
     const listInactiveSelectionForegroundColor = theme.getColor(
-      listInactiveSelectionForeground,
+      listInactiveSelectionForeground
     )
     const listInactiveSelectionBackgroundColor = theme.getColor(
-      listInactiveSelectionBackground,
+      listInactiveSelectionBackground
     )
     if (
       listInactiveSelectionForegroundColor &&
@@ -1928,7 +1928,7 @@ registerThemingParticipant(
         .transparent(0.8)
         .makeOpaque(listInactiveSelectionBackgroundColor)
       collector.addRule(
-        `.keybindings-editor > .keybindings-body > .keybindings-table-container .monaco-table .monaco-list-row.selected .monaco-table-tr .monaco-table-td .code { color: ${whenForegroundColor}; }`,
+        `.keybindings-editor > .keybindings-body > .keybindings-table-container .monaco-table .monaco-list-row.selected .monaco-table-tr .monaco-table-td .code { color: ${whenForegroundColor}; }`
       )
     }
 
@@ -1939,7 +1939,7 @@ registerThemingParticipant(
         .transparent(0.8)
         .makeOpaque(listFocusBackgroundColor)
       collector.addRule(
-        `.keybindings-editor > .keybindings-body > .keybindings-table-container .monaco-table.focused .monaco-list-row.focused .monaco-table-tr .monaco-table-td .code { color: ${whenForegroundColor}; }`,
+        `.keybindings-editor > .keybindings-body > .keybindings-table-container .monaco-table.focused .monaco-list-row.focused .monaco-table-tr .monaco-table-td .code { color: ${whenForegroundColor}; }`
       )
     }
 
@@ -1950,8 +1950,8 @@ registerThemingParticipant(
         .transparent(0.8)
         .makeOpaque(listHoverBackgroundColor)
       collector.addRule(
-        `.keybindings-editor > .keybindings-body > .keybindings-table-container .monaco-table.focused .monaco-list-row:hover:not(.focused):not(.selected) .monaco-table-tr .monaco-table-td .code { color: ${whenForegroundColor}; }`,
+        `.keybindings-editor > .keybindings-body > .keybindings-table-container .monaco-table.focused .monaco-list-row:hover:not(.focused):not(.selected) .monaco-table-tr .monaco-table-td .code { color: ${whenForegroundColor}; }`
       )
     }
-  },
+  }
 )

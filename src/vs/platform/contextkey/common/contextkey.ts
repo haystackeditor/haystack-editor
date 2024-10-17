@@ -50,7 +50,7 @@ CONSTANT_VALUES.set("isSafari", isSafari)
 export function setConstant(key: string, value: boolean) {
   if (CONSTANT_VALUES.get(key) !== undefined) {
     throw illegalArgument(
-      "contextkey.setConstant(k, v) invoked with already set constant `k`",
+      "contextkey.setConstant(k, v) invoked with already set constant `k`"
     )
   }
 
@@ -178,35 +178,35 @@ export type ParsingError = {
 
 const errorEmptyString = localize(
   "contextkey.parser.error.emptyString",
-  "Empty context key expression",
+  "Empty context key expression"
 )
 const hintEmptyString = localize(
   "contextkey.parser.error.emptyString.hint",
-  "Did you forget to write an expression? You can also put 'false' or 'true' to always evaluate to false or true, respectively.",
+  "Did you forget to write an expression? You can also put 'false' or 'true' to always evaluate to false or true, respectively."
 )
 const errorNoInAfterNot = localize(
   "contextkey.parser.error.noInAfterNot",
-  "'in' after 'not'.",
+  "'in' after 'not'."
 )
 const errorClosingParenthesis = localize(
   "contextkey.parser.error.closingParenthesis",
-  "closing parenthesis ')'",
+  "closing parenthesis ')'"
 )
 const errorUnexpectedToken = localize(
   "contextkey.parser.error.unexpectedToken",
-  "Unexpected token",
+  "Unexpected token"
 )
 const hintUnexpectedToken = localize(
   "contextkey.parser.error.unexpectedToken.hint",
-  "Did you forget to put && or || before the token?",
+  "Did you forget to put && or || before the token?"
 )
 const errorUnexpectedEOF = localize(
   "contextkey.parser.error.unexpectedEOF",
-  "Unexpected end of expression",
+  "Unexpected end of expression"
 )
 const hintUnexpectedEOF = localize(
   "contextkey.parser.error.unexpectedEOF.hint",
-  "Did you forget to put a context key?",
+  "Did you forget to put a context key?"
 )
 
 /**
@@ -344,7 +344,7 @@ export class Parser {
         default:
           throw this._errExpectedButGot(
             `KEY | true | false | '(' expression ')'`,
-            peek,
+            peek
           )
       }
     }
@@ -390,13 +390,13 @@ export class Parser {
               closingSlashIndex === regexLexeme.length - 1
                 ? undefined
                 : this._removeFlagsGY(
-                    regexLexeme.substring(closingSlashIndex + 1),
+                    regexLexeme.substring(closingSlashIndex + 1)
                   )
             let regexp: RegExp | null
             try {
               regexp = new RegExp(
                 regexLexeme.substring(1, closingSlashIndex),
-                flags,
+                flags
               )
             } catch (e) {
               throw this._errExpectedButGot(`REGEX`, expr)
@@ -462,13 +462,13 @@ export class Parser {
                 closingSlashIndex === regexLexeme.length - 1
                   ? undefined
                   : this._removeFlagsGY(
-                      regexLexeme.substring(closingSlashIndex + 1),
+                      regexLexeme.substring(closingSlashIndex + 1)
                     )
               let regexp: RegExp | null
               try {
                 regexp = new RegExp(
                   regexLexeme.substring(1, closingSlashIndex),
-                  flags,
+                  flags
                 )
               } catch (e) {
                 throw this._errExpectedButGot(`REGEX`, expr)
@@ -594,7 +594,7 @@ export class Parser {
       default:
         throw this._errExpectedButGot(
           `true | false | KEY \n\t| KEY '=~' REGEX \n\t| KEY ('==' | '!=' | '<' | '<=' | '>' | '>=' | 'in' | 'not' 'in') value`,
-          this._peek(),
+          this._peek()
         )
     }
   }
@@ -659,13 +659,13 @@ export class Parser {
   private _errExpectedButGot(
     expected: string,
     got: Token,
-    additionalInfo?: string,
+    additionalInfo?: string
   ) {
     const message = localize(
       "contextkey.parser.error.expectedButGot",
       "Expected: {0}\nReceived: '{1}'.",
       expected,
-      Scanner.getLexeme(got),
+      Scanner.getLexeme(got)
     )
     const offset = got.offset
     const lexeme = Scanner.getLexeme(got)
@@ -729,7 +729,7 @@ export abstract class ContextKeyExpr {
   }
   public static greaterEquals(
     key: string,
-    value: number,
+    value: number
   ): ContextKeyExpression {
     return ContextKeyGreaterEqualsExpr.create(key, value)
   }
@@ -738,14 +738,14 @@ export abstract class ContextKeyExpr {
   }
   public static smallerEquals(
     key: string,
-    value: number,
+    value: number
   ): ContextKeyExpression {
     return ContextKeySmallerEqualsExpr.create(key, value)
   }
 
   private static _parser = new Parser({ regexParsingWithErrorRecovery: false })
   public static deserialize(
-    serialized: string | null | undefined,
+    serialized: string | null | undefined
   ): ContextKeyExpression | undefined {
     if (serialized === undefined || serialized === null) {
       // an empty string needs to be handled by the parser to get a corresponding parsing error reported
@@ -769,7 +769,7 @@ export function validateWhenClauses(whenClauses: string[]): any {
           ? localize(
               "contextkey.scanner.errorForLinterWithHint",
               "Unexpected token. Hint: {0}",
-              se.additionalInfo,
+              se.additionalInfo
             )
           : localize("contextkey.scanner.errorForLinter", "Unexpected token."),
         offset: se.offset,
@@ -791,7 +791,7 @@ export function validateWhenClauses(whenClauses: string[]): any {
 
 export function expressionsAreEqualWithConstantSubstitution(
   a: ContextKeyExpression | null | undefined,
-  b: ContextKeyExpression | null | undefined,
+  b: ContextKeyExpression | null | undefined
 ): boolean {
   const aExpr = a ? a.substituteConstants() : undefined
   const bExpr = b ? b.substituteConstants() : undefined
@@ -891,7 +891,7 @@ export class ContextKeyTrueExpr implements IContextKeyExpression {
 export class ContextKeyDefinedExpr implements IContextKeyExpression {
   public static create(
     key: string,
-    negated: ContextKeyExpression | null = null,
+    negated: ContextKeyExpression | null = null
   ): ContextKeyExpression {
     const constantValue = CONSTANT_VALUES.get(key)
     if (typeof constantValue === "boolean") {
@@ -906,7 +906,7 @@ export class ContextKeyDefinedExpr implements IContextKeyExpression {
 
   protected constructor(
     readonly key: string,
-    private negated: ContextKeyExpression | null,
+    private negated: ContextKeyExpression | null
   ) {}
 
   public cmp(other: ContextKeyExpression): number {
@@ -961,7 +961,7 @@ export class ContextKeyEqualsExpr implements IContextKeyExpression {
   public static create(
     key: string,
     value: any,
-    negated: ContextKeyExpression | null = null,
+    negated: ContextKeyExpression | null = null
   ): ContextKeyExpression {
     if (typeof value === "boolean") {
       return value
@@ -983,7 +983,7 @@ export class ContextKeyEqualsExpr implements IContextKeyExpression {
   private constructor(
     private readonly key: string,
     private readonly value: any,
-    private negated: ContextKeyExpression | null,
+    private negated: ContextKeyExpression | null
   ) {}
 
   public cmp(other: ContextKeyExpression): number {
@@ -1047,7 +1047,7 @@ export class ContextKeyInExpr implements IContextKeyExpression {
 
   private constructor(
     private readonly key: string,
-    private readonly valueKey: string,
+    private readonly valueKey: string
   ) {}
 
   public cmp(other: ContextKeyExpression): number {
@@ -1118,7 +1118,7 @@ export class ContextKeyNotInExpr implements IContextKeyExpression {
 
   private constructor(
     private readonly key: string,
-    private readonly valueKey: string,
+    private readonly valueKey: string
   ) {
     this._negated = ContextKeyInExpr.create(key, valueKey)
   }
@@ -1166,7 +1166,7 @@ export class ContextKeyNotEqualsExpr implements IContextKeyExpression {
   public static create(
     key: string,
     value: any,
-    negated: ContextKeyExpression | null = null,
+    negated: ContextKeyExpression | null = null
   ): ContextKeyExpression {
     if (typeof value === "boolean") {
       if (value) {
@@ -1189,7 +1189,7 @@ export class ContextKeyNotEqualsExpr implements IContextKeyExpression {
   private constructor(
     private readonly key: string,
     private readonly value: any,
-    private negated: ContextKeyExpression | null,
+    private negated: ContextKeyExpression | null
   ) {}
 
   public cmp(other: ContextKeyExpression): number {
@@ -1246,7 +1246,7 @@ export class ContextKeyNotEqualsExpr implements IContextKeyExpression {
 export class ContextKeyNotExpr implements IContextKeyExpression {
   public static create(
     key: string,
-    negated: ContextKeyExpression | null = null,
+    negated: ContextKeyExpression | null = null
   ): ContextKeyExpression {
     const constantValue = CONSTANT_VALUES.get(key)
     if (typeof constantValue === "boolean") {
@@ -1261,7 +1261,7 @@ export class ContextKeyNotExpr implements IContextKeyExpression {
 
   private constructor(
     private readonly key: string,
-    private negated: ContextKeyExpression | null,
+    private negated: ContextKeyExpression | null
   ) {}
 
   public cmp(other: ContextKeyExpression): number {
@@ -1314,7 +1314,7 @@ export class ContextKeyNotExpr implements IContextKeyExpression {
 
 function withFloatOrStr<T extends ContextKeyExpression>(
   value: any,
-  callback: (value: number | string) => T,
+  callback: (value: number | string) => T
 ): T | ContextKeyFalseExpr {
   if (typeof value === "string") {
     const n = parseFloat(value)
@@ -1332,11 +1332,11 @@ export class ContextKeyGreaterExpr implements IContextKeyExpression {
   public static create(
     key: string,
     _value: any,
-    negated: ContextKeyExpression | null = null,
+    negated: ContextKeyExpression | null = null
   ): ContextKeyExpression {
     return withFloatOrStr(
       _value,
-      (value) => new ContextKeyGreaterExpr(key, value, negated),
+      (value) => new ContextKeyGreaterExpr(key, value, negated)
     )
   }
 
@@ -1345,7 +1345,7 @@ export class ContextKeyGreaterExpr implements IContextKeyExpression {
   private constructor(
     private readonly key: string,
     private readonly value: number | string,
-    private negated: ContextKeyExpression | null,
+    private negated: ContextKeyExpression | null
   ) {}
 
   public cmp(other: ContextKeyExpression): number {
@@ -1390,7 +1390,7 @@ export class ContextKeyGreaterExpr implements IContextKeyExpression {
       this.negated = ContextKeySmallerEqualsExpr.create(
         this.key,
         this.value,
-        this,
+        this
       )
     }
     return this.negated
@@ -1401,11 +1401,11 @@ export class ContextKeyGreaterEqualsExpr implements IContextKeyExpression {
   public static create(
     key: string,
     _value: any,
-    negated: ContextKeyExpression | null = null,
+    negated: ContextKeyExpression | null = null
   ): ContextKeyExpression {
     return withFloatOrStr(
       _value,
-      (value) => new ContextKeyGreaterEqualsExpr(key, value, negated),
+      (value) => new ContextKeyGreaterEqualsExpr(key, value, negated)
     )
   }
 
@@ -1414,7 +1414,7 @@ export class ContextKeyGreaterEqualsExpr implements IContextKeyExpression {
   private constructor(
     private readonly key: string,
     private readonly value: number | string,
-    private negated: ContextKeyExpression | null,
+    private negated: ContextKeyExpression | null
   ) {}
 
   public cmp(other: ContextKeyExpression): number {
@@ -1466,11 +1466,11 @@ export class ContextKeySmallerExpr implements IContextKeyExpression {
   public static create(
     key: string,
     _value: any,
-    negated: ContextKeyExpression | null = null,
+    negated: ContextKeyExpression | null = null
   ): ContextKeyExpression {
     return withFloatOrStr(
       _value,
-      (value) => new ContextKeySmallerExpr(key, value, negated),
+      (value) => new ContextKeySmallerExpr(key, value, negated)
     )
   }
 
@@ -1479,7 +1479,7 @@ export class ContextKeySmallerExpr implements IContextKeyExpression {
   private constructor(
     private readonly key: string,
     private readonly value: number | string,
-    private negated: ContextKeyExpression | null,
+    private negated: ContextKeyExpression | null
   ) {}
 
   public cmp(other: ContextKeyExpression): number {
@@ -1524,7 +1524,7 @@ export class ContextKeySmallerExpr implements IContextKeyExpression {
       this.negated = ContextKeyGreaterEqualsExpr.create(
         this.key,
         this.value,
-        this,
+        this
       )
     }
     return this.negated
@@ -1535,11 +1535,11 @@ export class ContextKeySmallerEqualsExpr implements IContextKeyExpression {
   public static create(
     key: string,
     _value: any,
-    negated: ContextKeyExpression | null = null,
+    negated: ContextKeyExpression | null = null
   ): ContextKeyExpression {
     return withFloatOrStr(
       _value,
-      (value) => new ContextKeySmallerEqualsExpr(key, value, negated),
+      (value) => new ContextKeySmallerEqualsExpr(key, value, negated)
     )
   }
 
@@ -1548,7 +1548,7 @@ export class ContextKeySmallerEqualsExpr implements IContextKeyExpression {
   private constructor(
     private readonly key: string,
     private readonly value: number | string,
-    private negated: ContextKeyExpression | null,
+    private negated: ContextKeyExpression | null
   ) {}
 
   public cmp(other: ContextKeyExpression): number {
@@ -1599,7 +1599,7 @@ export class ContextKeySmallerEqualsExpr implements IContextKeyExpression {
 export class ContextKeyRegexExpr implements IContextKeyExpression {
   public static create(
     key: string,
-    regexp: RegExp | null,
+    regexp: RegExp | null
   ): ContextKeyRegexExpr {
     return new ContextKeyRegexExpr(key, regexp)
   }
@@ -1609,7 +1609,7 @@ export class ContextKeyRegexExpr implements IContextKeyExpression {
 
   private constructor(
     private readonly key: string,
-    private readonly regexp: RegExp | null,
+    private readonly regexp: RegExp | null
   ) {
     //
   }
@@ -1730,7 +1730,7 @@ export class ContextKeyNotRegexExpr implements IContextKeyExpression {
  * @returns the same instance if nothing changed.
  */
 function eliminateConstantsInArray(
-  arr: ContextKeyExpression[],
+  arr: ContextKeyExpression[]
 ): (ContextKeyExpression | undefined)[] {
   // Allocate array only if there is a difference
   let newArr: (ContextKeyExpression | undefined)[] | null = null
@@ -1764,7 +1764,7 @@ export class ContextKeyAndExpr implements IContextKeyExpression {
   public static create(
     _expr: ReadonlyArray<ContextKeyExpression | null | undefined>,
     negated: ContextKeyExpression | null,
-    extraRedundantCheck: boolean,
+    extraRedundantCheck: boolean
   ): ContextKeyExpression | undefined {
     return ContextKeyAndExpr._normalizeArr(_expr, negated, extraRedundantCheck)
   }
@@ -1773,7 +1773,7 @@ export class ContextKeyAndExpr implements IContextKeyExpression {
 
   private constructor(
     public readonly expr: ContextKeyExpression[],
-    private negated: ContextKeyExpression | null,
+    private negated: ContextKeyExpression | null
   ) {}
 
   public cmp(other: ContextKeyExpression): number {
@@ -1831,7 +1831,7 @@ export class ContextKeyAndExpr implements IContextKeyExpression {
   private static _normalizeArr(
     arr: ReadonlyArray<ContextKeyExpression | null | undefined>,
     negated: ContextKeyExpression | null,
-    extraRedundantCheck: boolean,
+    extraRedundantCheck: boolean
   ): ContextKeyExpression | undefined {
     const expr: ContextKeyExpression[] = []
     let hasTrue = false
@@ -1907,11 +1907,11 @@ export class ContextKeyAndExpr implements IContextKeyExpression {
           ContextKeyAndExpr.create(
             [el, secondToLastElement],
             null,
-            extraRedundantCheck,
-          ),
+            extraRedundantCheck
+          )
         ),
         null,
-        isFinished,
+        isFinished
       )
 
       if (resultElement) {
@@ -1958,7 +1958,7 @@ export class ContextKeyAndExpr implements IContextKeyExpression {
   public map(mapFnc: IContextKeyExprMapper): ContextKeyExpression {
     return new ContextKeyAndExpr(
       this.expr.map((expr) => expr.map(mapFnc)),
-      null,
+      null
     )
   }
 
@@ -1978,7 +1978,7 @@ export class ContextKeyOrExpr implements IContextKeyExpression {
   public static create(
     _expr: ReadonlyArray<ContextKeyExpression | null | undefined>,
     negated: ContextKeyExpression | null,
-    extraRedundantCheck: boolean,
+    extraRedundantCheck: boolean
   ): ContextKeyExpression | undefined {
     return ContextKeyOrExpr._normalizeArr(_expr, negated, extraRedundantCheck)
   }
@@ -1987,7 +1987,7 @@ export class ContextKeyOrExpr implements IContextKeyExpression {
 
   private constructor(
     public readonly expr: ContextKeyExpression[],
-    private negated: ContextKeyExpression | null,
+    private negated: ContextKeyExpression | null
   ) {}
 
   public cmp(other: ContextKeyExpression): number {
@@ -2045,7 +2045,7 @@ export class ContextKeyOrExpr implements IContextKeyExpression {
   private static _normalizeArr(
     arr: ReadonlyArray<ContextKeyExpression | null | undefined>,
     negated: ContextKeyExpression | null,
-    extraRedundantCheck: boolean,
+    extraRedundantCheck: boolean
   ): ContextKeyExpression | undefined {
     let expr: ContextKeyExpression[] = []
     let hasFalse = false
@@ -2137,7 +2137,7 @@ export class ContextKeyOrExpr implements IContextKeyExpression {
   public map(mapFnc: IContextKeyExprMapper): ContextKeyExpression {
     return new ContextKeyOrExpr(
       this.expr.map((expr) => expr.map(mapFnc)),
-      null,
+      null
     )
   }
 
@@ -2177,7 +2177,7 @@ export interface ContextKeyInfo {
 }
 
 export class RawContextKey<
-  T extends ContextKeyValue,
+  T extends ContextKeyValue
 > extends ContextKeyDefinedExpr {
   private static _info: ContextKeyInfo[] = []
 
@@ -2190,7 +2190,7 @@ export class RawContextKey<
   constructor(
     key: string,
     defaultValue: T | undefined,
-    metaOrHide?: string | true | { type: string; description: string },
+    metaOrHide?: string | true | { type: string; description: string }
   ) {
     super(key, null)
     this._defaultValue = defaultValue
@@ -2242,7 +2242,7 @@ export type ContextKeyValue =
 
 export interface IContext {
   getValue<T extends ContextKeyValue = ContextKeyValue>(
-    key: string,
+    key: string
   ): T | undefined
 }
 
@@ -2282,7 +2282,7 @@ export interface IContextKeyService {
 
   createKey<T extends ContextKeyValue>(
     key: string,
-    defaultValue: T | undefined,
+    defaultValue: T | undefined
   ): IContextKey<T>
   contextMatchesRules(rules: ContextKeyExpression | undefined): boolean
   getContextKeyValue<T>(key: string): T | undefined
@@ -2325,7 +2325,7 @@ function cmp2(key1: string, value1: any, key2: string, value2: any): number {
  */
 export function implies(
   p: ContextKeyExpression,
-  q: ContextKeyExpression,
+  q: ContextKeyExpression
 ): boolean {
   if (
     p.type === ContextKeyExprType.False ||
@@ -2375,7 +2375,7 @@ export function implies(
  */
 function allElementsIncluded(
   p: ContextKeyExpression[],
-  q: ContextKeyExpression[],
+  q: ContextKeyExpression[]
 ): boolean {
   let pIndex = 0
   let qIndex = 0

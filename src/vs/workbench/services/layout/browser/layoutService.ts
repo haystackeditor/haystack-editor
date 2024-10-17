@@ -128,7 +128,7 @@ export function positionFromString(str: string): Position {
 }
 
 function panelOpensMaximizedSettingToString(
-  setting: PanelOpensMaximizedOptions,
+  setting: PanelOpensMaximizedOptions
 ): string {
   switch (setting) {
     case PanelOpensMaximizedOptions.ALWAYS:
@@ -150,12 +150,12 @@ const panelOpensMaximizedByString: {
   [panelOpensMaximizedSettingToString(PanelOpensMaximizedOptions.NEVER)]:
     PanelOpensMaximizedOptions.NEVER,
   [panelOpensMaximizedSettingToString(
-    PanelOpensMaximizedOptions.REMEMBER_LAST,
+    PanelOpensMaximizedOptions.REMEMBER_LAST
   )]: PanelOpensMaximizedOptions.REMEMBER_LAST,
 }
 
 export function panelOpensMaximizedFromString(
-  str: string,
+  str: string
 ): PanelOpensMaximizedOptions {
   return panelOpensMaximizedByString[str]
 }
@@ -261,7 +261,7 @@ export interface IWorkbenchLayoutService extends ILayoutService {
     part: Exclude<
       SINGLE_WINDOW_PARTS,
       Parts.STATUSBAR_PART | Parts.TITLEBAR_PART
-    >,
+    >
   ): void
   setPartHidden(
     hidden: boolean,
@@ -269,12 +269,12 @@ export interface IWorkbenchLayoutService extends ILayoutService {
       MULTI_WINDOW_PARTS,
       Parts.STATUSBAR_PART | Parts.TITLEBAR_PART
     >,
-    targetWindow: Window,
+    targetWindow: Window
   ): void
   setPartHidden(
     hidden: boolean,
     part: Exclude<Parts, Parts.STATUSBAR_PART | Parts.TITLEBAR_PART>,
-    targetWindow: Window,
+    targetWindow: Window
   ): void
 
   /**
@@ -354,7 +354,7 @@ export interface IWorkbenchLayoutService extends ILayoutService {
   resizePart(
     part: Parts,
     sizeChangeWidth: number,
-    sizeChangeHeight: number,
+    sizeChangeHeight: number
   ): void
 
   /**
@@ -382,7 +382,7 @@ export function shouldShowCustomTitleBar(
   configurationService: IConfigurationService,
   window: Window,
   menuBarToggled?: boolean,
-  zenModeActive?: boolean,
+  zenModeActive?: boolean
 ): boolean {
   if (!hasCustomTitlebar(configurationService)) {
     return false
@@ -398,7 +398,7 @@ export function shouldShowCustomTitleBar(
   if (!isWeb) {
     const showCustomTitleBar =
       configurationService.getValue<CustomTitleBarVisibility>(
-        TitleBarSetting.CUSTOM_TITLE_BAR_VISIBILITY,
+        TitleBarSetting.CUSTOM_TITLE_BAR_VISIBILITY
       )
     if (
       (showCustomTitleBar === CustomTitleBarVisibility.NEVER &&
@@ -461,7 +461,7 @@ function isTitleBarEmpty(configurationService: IConfigurationService): boolean {
   // with the activity bar on top, we should always show
   const activityBarPosition =
     configurationService.getValue<ActivityBarPosition>(
-      LayoutSettings.ACTIVITY_BAR_LOCATION,
+      LayoutSettings.ACTIVITY_BAR_LOCATION
     )
   if (
     activityBarPosition === ActivityBarPosition.TOP ||
@@ -473,10 +473,10 @@ function isTitleBarEmpty(configurationService: IConfigurationService): boolean {
   // with the editor actions on top, we should always show
   const editorActionsLocation =
     configurationService.getValue<EditorActionsLocation>(
-      LayoutSettings.EDITOR_ACTIONS_LOCATION,
+      LayoutSettings.EDITOR_ACTIONS_LOCATION
     )
   const editorTabsMode = configurationService.getValue<EditorTabsMode>(
-    LayoutSettings.EDITOR_TABS_MODE,
+    LayoutSettings.EDITOR_TABS_MODE
   )
   if (
     editorActionsLocation === EditorActionsLocation.TITLEBAR ||

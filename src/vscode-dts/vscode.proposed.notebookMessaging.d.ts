@@ -9,75 +9,66 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-declare module "vscode" {
-  // https://github.com/microsoft/vscode/issues/123601
+declare module 'vscode' {
 
-  /**
-   * Represents a script that is loaded into the notebook renderer before rendering output. This allows
-   * to provide and share functionality for notebook markup and notebook output renderers.
-   */
-  export class NotebookRendererScript {
-    /**
-     * APIs that the preload provides to the renderer. These are matched
-     * against the `dependencies` and `optionalDependencies` arrays in the
-     * notebook renderer contribution point.
-     */
-    provides: readonly string[]
+	// https://github.com/microsoft/vscode/issues/123601
 
-    /**
-     * URI of the JavaScript module to preload.
-     *
-     * This module must export an `activate` function that takes a context object that contains the notebook API.
-     */
-    uri: Uri
+	/**
+	 * Represents a script that is loaded into the notebook renderer before rendering output. This allows
+	 * to provide and share functionality for notebook markup and notebook output renderers.
+	 */
+	export class NotebookRendererScript {
 
-    /**
-     * @param uri URI of the JavaScript module to preload
-     * @param provides Value for the `provides` property
-     */
-    constructor(uri: Uri, provides?: string | readonly string[])
-  }
+		/**
+		 * APIs that the preload provides to the renderer. These are matched
+		 * against the `dependencies` and `optionalDependencies` arrays in the
+		 * notebook renderer contribution point.
+		 */
+		provides: readonly string[];
 
-  export interface NotebookController {
-    // todo@API allow add, not remove
-    readonly rendererScripts: NotebookRendererScript[]
+		/**
+		 * URI of the JavaScript module to preload.
+		 *
+		 * This module must export an `activate` function that takes a context object that contains the notebook API.
+		 */
+		uri: Uri;
 
-    /**
-     * An event that fires when a {@link NotebookController.rendererScripts renderer script} has send a message to
-     * the controller.
-     */
-    readonly onDidReceiveMessage: Event<{
-      readonly editor: NotebookEditor
-      readonly message: any
-    }>
+		/**
+		 * @param uri URI of the JavaScript module to preload
+		 * @param provides Value for the `provides` property
+		 */
+		constructor(uri: Uri, provides?: string | readonly string[]);
+	}
 
-    /**
-     * Send a message to the renderer of notebook editors.
-     *
-     * Note that only editors showing documents that are bound to this controller
-     * are receiving the message.
-     *
-     * @param message The message to send.
-     * @param editor A specific editor to send the message to. When `undefined` all applicable editors are receiving the message.
-     * @returns A promise that resolves to a boolean indicating if the message has been send or not.
-     */
-    postMessage(message: any, editor?: NotebookEditor): Thenable<boolean>
+	export interface NotebookController {
 
-    //todo@API validate this works
-    asWebviewUri(localResource: Uri): Uri
-  }
+		// todo@API allow add, not remove
+		readonly rendererScripts: NotebookRendererScript[];
 
-  export namespace notebooks {
-    export function createNotebookController(
-      id: string,
-      viewType: string,
-      label: string,
-      handler?: (
-        cells: NotebookCell[],
-        notebook: NotebookDocument,
-        controller: NotebookController,
-      ) => void | Thenable<void>,
-      rendererScripts?: NotebookRendererScript[],
-    ): NotebookController
-  }
+		/**
+		 * An event that fires when a {@link NotebookController.rendererScripts renderer script} has send a message to
+		 * the controller.
+		 */
+		readonly onDidReceiveMessage: Event<{ readonly editor: NotebookEditor; readonly message: any }>;
+
+		/**
+		 * Send a message to the renderer of notebook editors.
+		 *
+		 * Note that only editors showing documents that are bound to this controller
+		 * are receiving the message.
+		 *
+		 * @param message The message to send.
+		 * @param editor A specific editor to send the message to. When `undefined` all applicable editors are receiving the message.
+		 * @returns A promise that resolves to a boolean indicating if the message has been send or not.
+		 */
+		postMessage(message: any, editor?: NotebookEditor): Thenable<boolean>;
+
+		//todo@API validate this works
+		asWebviewUri(localResource: Uri): Uri;
+	}
+
+	export namespace notebooks {
+
+		export function createNotebookController(id: string, viewType: string, label: string, handler?: (cells: NotebookCell[], notebook: NotebookDocument, controller: NotebookController) => void | Thenable<void>, rendererScripts?: NotebookRendererScript[]): NotebookController;
+	}
 }

@@ -97,7 +97,7 @@ export class DraggedEditorGroupIdentifier {
 }
 
 export async function extractTreeDropData(
-  dataTransfer: VSDataTransfer,
+  dataTransfer: VSDataTransfer
 ): Promise<Array<IDraggedResourceEditorInput>> {
   const editors: IDraggedResourceEditorInput[] = []
   const resourcesKey = Mimes.uriList.toLowerCase()
@@ -108,7 +108,7 @@ export async function extractTreeDropData(
       const asString = await dataTransfer.get(resourcesKey)?.asString()
       const rawResourcesData = JSON.stringify(UriList.parse(asString ?? ""))
       editors.push(
-        ...createDraggedEditorInputFromRawResourcesData(rawResourcesData),
+        ...createDraggedEditorInputFromRawResourcesData(rawResourcesData)
       )
     } catch (error) {
       // Invalid transfer
@@ -144,17 +144,17 @@ export class ResourcesDropHandler {
     private readonly contextService: IWorkspaceContextService,
     @IInstantiationService
     private readonly instantiationService: IInstantiationService,
-    @IHaystackService private readonly haystackService: IHaystackService,
+    @IHaystackService private readonly haystackService: IHaystackService
   ) {}
 
   async handleDrop(
     event: DragEvent,
     targetWindow: Window,
     afterDrop?: (targetGroup: IEditorGroup | undefined) => void,
-    options?: IEditorOptions,
+    options?: IEditorOptions
   ): Promise<void> {
     const editors = await this.instantiationService.invokeFunction((accessor) =>
-      extractEditorsAndFilesDropData(accessor, event),
+      extractEditorsAndFilesDropData(accessor, event)
     )
     if (!editors.length) {
       return
@@ -170,13 +170,13 @@ export class ResourcesDropHandler {
           .filter(
             (editor) =>
               editor.allowWorkspaceOpen &&
-              editor.resource?.scheme === Schemas.file,
+              editor.resource?.scheme === Schemas.file
           )
-          .map((editor) => editor.resource),
+          .map((editor) => editor.resource)
       )
       if (localFilesAllowedToOpenAsWorkspace.length > 0) {
         const isWorkspaceOpening = await this.handleWorkspaceDrop(
-          localFilesAllowedToOpenAsWorkspace,
+          localFilesAllowedToOpenAsWorkspace
         )
         if (isWorkspaceOpening) {
           return // return early if the drop operation resulted in this window changing to a workspace
@@ -189,13 +189,13 @@ export class ResourcesDropHandler {
       editors
         .filter(
           (editor) =>
-            editor.isExternal && editor.resource?.scheme === Schemas.file,
+            editor.isExternal && editor.resource?.scheme === Schemas.file
         )
-        .map((editor) => editor.resource),
+        .map((editor) => editor.resource)
     )
     if (externalLocalFiles.length) {
       this.workspacesService.addRecentlyOpened(
-        externalLocalFiles.map((resource) => ({ fileUri: resource })),
+        externalLocalFiles.map((resource) => ({ fileUri: resource }))
       )
     }
 
@@ -204,7 +204,7 @@ export class ResourcesDropHandler {
 
     for (const editor of editors) {
       editorPromises.push(
-        this.haystackService.createFileEditor(editor.resource),
+        this.haystackService.createFileEditor(editor.resource)
       )
     }
 
@@ -247,7 +247,7 @@ export class ResourcesDropHandler {
         } catch (error) {
           // Ignore error
         }
-      }),
+      })
     )
 
     // Return early if no external resource is a folder or workspace
@@ -278,25 +278,25 @@ export function fillEditorsDragData(
   accessor: ServicesAccessor,
   resources: URI[],
   event: DragMouseEvent | DragEvent,
-  options?: { disableStandardTransfer: boolean },
+  options?: { disableStandardTransfer: boolean }
 ): void
 export function fillEditorsDragData(
   accessor: ServicesAccessor,
   resources: IResourceStat[],
   event: DragMouseEvent | DragEvent,
-  options?: { disableStandardTransfer: boolean },
+  options?: { disableStandardTransfer: boolean }
 ): void
 export function fillEditorsDragData(
   accessor: ServicesAccessor,
   editors: IEditorIdentifier[],
   event: DragMouseEvent | DragEvent,
-  options?: { disableStandardTransfer: boolean },
+  options?: { disableStandardTransfer: boolean }
 ): void
 export function fillEditorsDragData(
   accessor: ServicesAccessor,
   resourcesOrEditors: Array<URI | IResourceStat | IEditorIdentifier>,
   event: DragMouseEvent | DragEvent,
-  options?: { disableStandardTransfer: boolean },
+  options?: { disableStandardTransfer: boolean }
 ): void {
   if (resourcesOrEditors.length === 0 || !event.dataTransfer) {
     return
@@ -324,11 +324,11 @@ export function fillEditorsDragData(
       }
 
       return resourceOrEditor
-    }),
+    })
   )
 
   const fileSystemResources = resources.filter(({ resource }) =>
-    fileService.hasProvider(resource),
+    fileService.hasProvider(resource)
   )
   if (!options?.disableStandardTransfer) {
     // Text: allows to paste into text-capable areas
@@ -337,9 +337,9 @@ export function fillEditorsDragData(
       DataTransfers.TEXT,
       fileSystemResources
         .map(({ resource }) =>
-          labelService.getUriLabel(resource, { noPrefix: true }),
+          labelService.getUriLabel(resource, { noPrefix: true })
         )
-        .join(lineDelimiter),
+        .join(lineDelimiter)
     )
 
     // Download URL: enables support to drag a tab as file to desktop
@@ -348,7 +348,7 @@ export function fillEditorsDragData(
     // - only a single file is supported
     // - only file:/ resources are supported
     const firstFile = fileSystemResources.find(
-      ({ isDirectory }) => !isDirectory,
+      ({ isDirectory }) => !isDirectory
     )
     if (firstFile) {
       const firstFileUri = FileAccess.uriToFileUri(firstFile.resource) // enforce `file:` URIs
@@ -359,7 +359,7 @@ export function fillEditorsDragData(
             Mimes.binary,
             basename(firstFile.resource),
             firstFileUri.toString(),
-          ].join(":"),
+          ].join(":")
         )
       }
     }
@@ -370,13 +370,13 @@ export function fillEditorsDragData(
   if (files.length) {
     event.dataTransfer.setData(
       DataTransfers.RESOURCES,
-      JSON.stringify(files.map(({ resource }) => resource.toString())),
+      JSON.stringify(files.map(({ resource }) => resource.toString()))
     )
   }
 
   // Contributions
   const contributions = Registry.as<IDragAndDropContributionRegistry>(
-    Extensions.DragAndDropContribution,
+    Extensions.DragAndDropContribution
   ).getAll()
   for (const contribution of contributions) {
     contribution.setData(resources, event)
@@ -467,7 +467,7 @@ export function fillEditorsDragData(
   if (draggedEditors.length) {
     event.dataTransfer.setData(
       CodeDataTransfers.EDITORS,
-      stringify(draggedEditors),
+      stringify(draggedEditors)
     )
 
     // Add a URI list entry
@@ -495,12 +495,12 @@ export function fillEditorsDragData(
     if (!options?.disableStandardTransfer) {
       event.dataTransfer.setData(
         Mimes.uriList,
-        UriList.create(uriListEntries.slice(0, 1)),
+        UriList.create(uriListEntries.slice(0, 1))
       )
     }
     event.dataTransfer.setData(
       DataTransfers.INTERNAL_URI_LIST,
-      UriList.create(uriListEntries),
+      UriList.create(uriListEntries)
     )
   }
 }
@@ -519,17 +519,17 @@ export interface ICompositeDragAndDrop {
     data: IDragAndDropData,
     target: string | undefined,
     originalEvent: DragEvent,
-    before?: Before2D,
+    before?: Before2D
   ): void
   onDragOver(
     data: IDragAndDropData,
     target: string | undefined,
-    originalEvent: DragEvent,
+    originalEvent: DragEvent
   ): boolean
   onDragEnter(
     data: IDragAndDropData,
     target: string | undefined,
-    originalEvent: DragEvent,
+    originalEvent: DragEvent
   ): boolean
 }
 
@@ -543,10 +543,7 @@ export interface ICompositeDragAndDropObserverCallbacks {
 }
 
 export class CompositeDragAndDropData implements IDragAndDropData {
-  constructor(
-    private type: "view" | "composite",
-    private id: string,
-  ) {}
+  constructor(private type: "view" | "composite", private id: string) {}
 
   update(dataTransfer: DataTransfer): void {
     // no-op
@@ -600,10 +597,10 @@ export class CompositeDragAndDropObserver extends Disposable {
   >()
 
   private readonly onDragStart = this._register(
-    new Emitter<IDraggedCompositeData>(),
+    new Emitter<IDraggedCompositeData>()
   )
   private readonly onDragEnd = this._register(
-    new Emitter<IDraggedCompositeData>(),
+    new Emitter<IDraggedCompositeData>()
   )
 
   private constructor() {
@@ -618,10 +615,10 @@ export class CompositeDragAndDropObserver extends Disposable {
           this.transferData.clearData(
             type === "view"
               ? DraggedViewIdentifier.prototype
-              : DraggedCompositeIdentifier.prototype,
+              : DraggedCompositeIdentifier.prototype
           )
         }
-      }),
+      })
     )
   }
 
@@ -630,13 +627,13 @@ export class CompositeDragAndDropObserver extends Disposable {
       this.transferData.hasData(
         type === "view"
           ? DraggedViewIdentifier.prototype
-          : DraggedCompositeIdentifier.prototype,
+          : DraggedCompositeIdentifier.prototype
       )
     ) {
       const data = this.transferData.getData(
         type === "view"
           ? DraggedViewIdentifier.prototype
-          : DraggedCompositeIdentifier.prototype,
+          : DraggedCompositeIdentifier.prototype
       )
       if (data && data[0]) {
         return new CompositeDragAndDropData(type, data[0].id)
@@ -655,13 +652,13 @@ export class CompositeDragAndDropObserver extends Disposable {
       ],
       type === "view"
         ? DraggedViewIdentifier.prototype
-        : DraggedCompositeIdentifier.prototype,
+        : DraggedCompositeIdentifier.prototype
     )
   }
 
   registerTarget(
     element: HTMLElement,
-    callbacks: ICompositeDragAndDropObserverCallbacks,
+    callbacks: ICompositeDragAndDropObserverCallbacks
   ): IDisposable {
     const disposableStore = new DisposableStore()
     disposableStore.add(
@@ -712,7 +709,7 @@ export class CompositeDragAndDropObserver extends Disposable {
             callbacks.onDragOver({ eventData: e, dragAndDropData: data })
           }
         },
-      }),
+      })
     )
 
     if (callbacks.onDragStart) {
@@ -721,7 +718,7 @@ export class CompositeDragAndDropObserver extends Disposable {
           callbacks.onDragStart!(e)
         },
         this,
-        disposableStore,
+        disposableStore
       )
     }
 
@@ -731,7 +728,7 @@ export class CompositeDragAndDropObserver extends Disposable {
           callbacks.onDragEnd!(e)
         },
         this,
-        disposableStore,
+        disposableStore
       )
     }
 
@@ -741,7 +738,7 @@ export class CompositeDragAndDropObserver extends Disposable {
   registerDraggable(
     element: HTMLElement,
     draggedItemProvider: () => { type: ViewType; id: string },
-    callbacks: ICompositeDragAndDropObserverCallbacks,
+    callbacks: ICompositeDragAndDropObserverCallbacks
   ): IDisposable {
     element.draggable = true
 
@@ -816,7 +813,7 @@ export class CompositeDragAndDropObserver extends Disposable {
             callbacks.onDragOver({ eventData: e, dragAndDropData: data })
           }
         },
-      }),
+      })
     )
 
     if (callbacks.onDragStart) {
@@ -825,7 +822,7 @@ export class CompositeDragAndDropObserver extends Disposable {
           callbacks.onDragStart!(e)
         },
         this,
-        disposableStore,
+        disposableStore
       )
     }
 
@@ -835,7 +832,7 @@ export class CompositeDragAndDropObserver extends Disposable {
           callbacks.onDragEnd!(e)
         },
         this,
-        disposableStore,
+        disposableStore
       )
     }
 
@@ -846,7 +843,7 @@ export class CompositeDragAndDropObserver extends Disposable {
 export function toggleDropEffect(
   dataTransfer: DataTransfer | null,
   dropEffect: "none" | "copy" | "link" | "move",
-  shouldHaveIt: boolean,
+  shouldHaveIt: boolean
 ) {
   if (!dataTransfer) {
     return
@@ -859,7 +856,7 @@ export class ResourceListDnDHandler<T> implements IListDragAndDrop<T> {
   constructor(
     private readonly toResource: (e: T) => URI | null,
     @IInstantiationService
-    private readonly instantiationService: IInstantiationService,
+    private readonly instantiationService: IInstantiationService
   ) {}
 
   getDragURI(element: T): string | null {
@@ -872,8 +869,8 @@ export class ResourceListDnDHandler<T> implements IListDragAndDrop<T> {
     return resources.length === 1
       ? basename(resources[0])
       : resources.length > 1
-        ? String(resources.length)
-        : undefined
+      ? String(resources.length)
+      : undefined
   }
 
   onDragStart(data: IDragAndDropData, originalEvent: DragEvent): void {
@@ -887,7 +884,7 @@ export class ResourceListDnDHandler<T> implements IListDragAndDrop<T> {
     if (resources.length) {
       // Apply some datatransfer types to allow for dragging the element outside of the application
       this.instantiationService.invokeFunction((accessor) =>
-        fillEditorsDragData(accessor, resources, originalEvent),
+        fillEditorsDragData(accessor, resources, originalEvent)
       )
     }
   }
@@ -897,7 +894,7 @@ export class ResourceListDnDHandler<T> implements IListDragAndDrop<T> {
     targetElement: T,
     targetIndex: number,
     targetSector: ListViewTargetSector | undefined,
-    originalEvent: DragEvent,
+    originalEvent: DragEvent
   ): boolean | ITreeDragOverReaction {
     return false
   }
@@ -907,7 +904,7 @@ export class ResourceListDnDHandler<T> implements IListDragAndDrop<T> {
     targetElement: T,
     targetIndex: number,
     targetSector: ListViewTargetSector | undefined,
-    originalEvent: DragEvent,
+    originalEvent: DragEvent
   ): void {}
 
   dispose(): void {}
@@ -920,8 +917,8 @@ class GlobalWindowDraggedOverTracker extends Disposable {
 
   private readonly broadcaster = this._register(
     new BroadcastDataChannel<boolean>(
-      GlobalWindowDraggedOverTracker.CHANNEL_NAME,
-    ),
+      GlobalWindowDraggedOverTracker.CHANNEL_NAME
+    )
   )
 
   constructor() {
@@ -940,20 +937,20 @@ class GlobalWindowDraggedOverTracker extends Disposable {
               window,
               EventType.DRAG_OVER,
               () => this.markDraggedOver(false),
-              true,
-            ),
+              true
+            )
           )
           disposables.add(
             addDisposableListener(
               window,
               EventType.DRAG_LEAVE,
               () => this.clearDraggedOver(false),
-              true,
-            ),
+              true
+            )
           )
         },
-        { window: mainWindow, disposables: this._store },
-      ),
+        { window: mainWindow, disposables: this._store }
+      )
     )
 
     this._register(
@@ -963,7 +960,7 @@ class GlobalWindowDraggedOverTracker extends Disposable {
         } else {
           this.clearDraggedOver(true)
         }
-      }),
+      })
     )
   }
 

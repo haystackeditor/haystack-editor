@@ -29,12 +29,12 @@ export class Explorer extends Viewlet {
   }
 
   async waitForOpenEditorsViewTitle(
-    fn: (title: string) => boolean,
+    fn: (title: string) => boolean
   ): Promise<void> {
     await this.code.waitForTextContent(
       Explorer.OPEN_EDITORS_VIEW,
       undefined,
-      fn,
+      fn
     )
   }
 

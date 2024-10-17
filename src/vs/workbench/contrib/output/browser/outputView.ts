@@ -80,7 +80,7 @@ export class OutputViewPane extends ViewPane {
     @IOpenerService openerService: IOpenerService,
     @IThemeService themeService: IThemeService,
     @ITelemetryService telemetryService: ITelemetryService,
-    @IHoverService hoverService: IHoverService,
+    @IHoverService hoverService: IHoverService
   ) {
     super(
       options,
@@ -93,26 +93,26 @@ export class OutputViewPane extends ViewPane {
       openerService,
       themeService,
       telemetryService,
-      hoverService,
+      hoverService
     )
     this.scrollLockContextKey = CONTEXT_OUTPUT_SCROLL_LOCK.bindTo(
-      this.contextKeyService,
+      this.contextKeyService
     )
 
     const editorInstantiationService = instantiationService.createChild(
-      new ServiceCollection([IContextKeyService, this.scopedContextKeyService]),
+      new ServiceCollection([IContextKeyService, this.scopedContextKeyService])
     )
     this.editor = editorInstantiationService.createInstance(OutputEditor)
     this._register(
       this.editor.onTitleAreaUpdate(() => {
         this.updateTitle(this.editor.getTitle())
         this.updateActions()
-      }),
+      })
     )
     this._register(
       this.onDidChangeBodyVisibility(() =>
-        this.onDidChangeVisibility(this.isBodyVisible()),
-      ),
+        this.onDidChangeVisibility(this.isBodyVisible())
+      )
     )
   }
 
@@ -141,7 +141,7 @@ export class OutputViewPane extends ViewPane {
         if (!this.scrollLock) {
           this.editor.revealLastLine()
         }
-      }),
+      })
     )
     this._register(
       codeEditor.onDidChangeCursorPosition((e) => {
@@ -159,7 +159,7 @@ export class OutputViewPane extends ViewPane {
           const lastLine = model.getLineCount()
           this.scrollLock = lastLine !== newPositionLine
         }
-      }),
+      })
     )
   }
 
@@ -187,9 +187,9 @@ export class OutputViewPane extends ViewPane {
             this.createInput(channel),
             { preserveFocus: true },
             Object.create(null),
-            token,
+            token
           )
-          .then(() => this.editor),
+          .then(() => this.editor)
       )
     }
   }
@@ -212,7 +212,7 @@ export class OutputViewPane extends ViewPane {
       undefined,
       undefined,
       undefined,
-      undefined,
+      undefined
     )
   }
 }
@@ -231,7 +231,7 @@ class OutputEditor extends AbstractTextResourceEditor {
     @IThemeService themeService: IThemeService,
     @IEditorGroupsService editorGroupService: IEditorGroupsService,
     @IEditorService editorService: IEditorService,
-    @IFileService fileService: IFileService,
+    @IFileService fileService: IFileService
   ) {
     super(
       OUTPUT_VIEW_ID,
@@ -243,11 +243,11 @@ class OutputEditor extends AbstractTextResourceEditor {
       themeService,
       editorGroupService,
       editorService,
-      fileService,
+      fileService
     )
 
     this.resourceContext = this._register(
-      instantiationService.createInstance(ResourceContextKey),
+      instantiationService.createInstance(ResourceContextKey)
     )
   }
 
@@ -260,7 +260,7 @@ class OutputEditor extends AbstractTextResourceEditor {
   }
 
   protected override getConfigurationOverrides(
-    configuration: IEditorConfiguration,
+    configuration: IEditorConfiguration
   ): ICodeEditorOptions {
     const options = super.getConfigurationOverrides(configuration)
     options.wordWrap = "on" // all output editors wrap
@@ -307,7 +307,7 @@ class OutputEditor extends AbstractTextResourceEditor {
           this.input,
           undefined,
           undefined,
-          this.editorGroupService.count,
+          this.editorGroupService.count
         )
       : this.getAriaLabel()
   }
@@ -316,7 +316,7 @@ class OutputEditor extends AbstractTextResourceEditor {
     input: TextResourceEditorInput,
     options: ITextEditorOptions | undefined,
     context: IEditorOpenContext,
-    token: CancellationToken,
+    token: CancellationToken
   ): Promise<void> {
     const focus = !(options && options.preserveFocus)
     if (this.input && input.matches(this.input)) {

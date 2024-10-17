@@ -9,305 +9,250 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-declare module "vscode" {
-  export interface ChatParticipant {
-    onDidPerformAction: Event<ChatUserActionEvent>
-  }
+declare module 'vscode' {
 
-  /**
-   * Now only used for the "intent detection" API below
-   */
-  export interface ChatCommand {
-    readonly name: string
-    readonly description: string
-  }
+	export interface ChatParticipant {
+		onDidPerformAction: Event<ChatUserActionEvent>;
+	}
 
-  export class ChatResponseDetectedParticipantPart {
-    participant: string
-    // TODO@API validate this against statically-declared slash commands?
-    command?: ChatCommand
-    constructor(participant: string, command?: ChatCommand)
-  }
+	/**
+	 * Now only used for the "intent detection" API below
+	 */
+	export interface ChatCommand {
+		readonly name: string;
+		readonly description: string;
+	}
 
-  export interface ChatVulnerability {
-    title: string
-    description: string
-    // id: string; // Later we will need to be able to link these across multiple content chunks.
-  }
+	export class ChatResponseDetectedParticipantPart {
+		participant: string;
+		// TODO@API validate this against statically-declared slash commands?
+		command?: ChatCommand;
+		constructor(participant: string, command?: ChatCommand);
+	}
 
-  export class ChatResponseMarkdownWithVulnerabilitiesPart {
-    value: MarkdownString
-    vulnerabilities: ChatVulnerability[]
-    constructor(
-      value: string | MarkdownString,
-      vulnerabilities: ChatVulnerability[],
-    )
-  }
+	export interface ChatVulnerability {
+		title: string;
+		description: string;
+		// id: string; // Later we will need to be able to link these across multiple content chunks.
+	}
 
-  /**
-   * Displays a {@link Command command} as a button in the chat response.
-   */
-  export interface ChatCommandButton {
-    command: Command
-  }
+	export class ChatResponseMarkdownWithVulnerabilitiesPart {
+		value: MarkdownString;
+		vulnerabilities: ChatVulnerability[];
+		constructor(value: string | MarkdownString, vulnerabilities: ChatVulnerability[]);
+	}
 
-  export interface ChatDocumentContext {
-    uri: Uri
-    version: number
-    ranges: Range[]
-  }
+	/**
+	 * Displays a {@link Command command} as a button in the chat response.
+	 */
+	export interface ChatCommandButton {
+		command: Command;
+	}
 
-  export class ChatResponseTextEditPart {
-    uri: Uri
-    edits: TextEdit[]
-    constructor(uri: Uri, edits: TextEdit | TextEdit[])
-  }
+	export interface ChatDocumentContext {
+		uri: Uri;
+		version: number;
+		ranges: Range[];
+	}
 
-  export class ChatResponseConfirmationPart {
-    title: string
-    message: string
-    data: any
-    constructor(title: string, message: string, data: any)
-  }
+	export class ChatResponseTextEditPart {
+		uri: Uri;
+		edits: TextEdit[];
+		constructor(uri: Uri, edits: TextEdit | TextEdit[]);
+	}
 
-  export type ExtendedChatResponsePart =
-    | ChatResponsePart
-    | ChatResponseTextEditPart
-    | ChatResponseDetectedParticipantPart
-    | ChatResponseConfirmationPart
+	export class ChatResponseConfirmationPart {
+		title: string;
+		message: string;
+		data: any;
+		constructor(title: string, message: string, data: any);
+	}
 
-  export class ChatResponseWarningPart {
-    value: MarkdownString
-    constructor(value: string | MarkdownString)
-  }
+	export type ExtendedChatResponsePart = ChatResponsePart | ChatResponseTextEditPart | ChatResponseDetectedParticipantPart | ChatResponseConfirmationPart;
 
-  export class ChatResponseProgressPart2 extends ChatResponseProgressPart {
-    value: string
-    task?: (
-      progress: Progress<ChatResponseWarningPart | ChatResponseReferencePart>,
-    ) => Thenable<string | void>
-    constructor(
-      value: string,
-      task?: (
-        progress: Progress<ChatResponseWarningPart | ChatResponseReferencePart>,
-      ) => Thenable<string | void>,
-    )
-  }
+	export class ChatResponseWarningPart {
+		value: MarkdownString;
+		constructor(value: string | MarkdownString);
+	}
 
-  export interface ChatResponseStream {
-    /**
-     * Push a progress part to this stream. Short-hand for
-     * `push(new ChatResponseProgressPart(value))`.
-     *
-     * @param value A progress message
-     * @param task If provided, a task to run while the progress is displayed. When the Thenable resolves, the progress will be marked complete in the UI, and the progress message will be updated to the resolved string if one is specified.
-     * @returns This stream.
-     */
-    progress(
-      value: string,
-      task?: (
-        progress: Progress<ChatResponseWarningPart | ChatResponseReferencePart>,
-      ) => Thenable<string | void>,
-    ): void
+	export class ChatResponseProgressPart2 extends ChatResponseProgressPart {
+		value: string;
+		task?: (progress: Progress<ChatResponseWarningPart | ChatResponseReferencePart>) => Thenable<string | void>;
+		constructor(value: string, task?: (progress: Progress<ChatResponseWarningPart | ChatResponseReferencePart>) => Thenable<string | void>);
+	}
 
-    textEdit(target: Uri, edits: TextEdit | TextEdit[]): void
-    markdownWithVulnerabilities(
-      value: string | MarkdownString,
-      vulnerabilities: ChatVulnerability[],
-    ): void
-    detectedParticipant(participant: string, command?: ChatCommand): void
-    push(
-      part:
-        | ChatResponsePart
-        | ChatResponseTextEditPart
-        | ChatResponseDetectedParticipantPart
-        | ChatResponseWarningPart
-        | ChatResponseProgressPart2,
-    ): void
+	export interface ChatResponseStream {
 
-    /**
-     * Show an inline message in the chat view asking the user to confirm an action.
-     * Multiple confirmations may be shown per response. The UI might show "Accept All" / "Reject All" actions.
-     * @param title The title of the confirmation entry
-     * @param message An extra message to display to the user
-     * @param data An arbitrary JSON-stringifiable object that will be included in the ChatRequest when
-     * the confirmation is accepted or rejected
-     * TODO@API should this be MarkdownString?
-     * TODO@API should actually be a more generic function that takes an array of buttons
-     */
-    confirmation(title: string, message: string, data: any): void
+		/**
+		 * Push a progress part to this stream. Short-hand for
+		 * `push(new ChatResponseProgressPart(value))`.
+		*
+		* @param value A progress message
+		* @param task If provided, a task to run while the progress is displayed. When the Thenable resolves, the progress will be marked complete in the UI, and the progress message will be updated to the resolved string if one is specified.
+		* @returns This stream.
+		*/
+		progress(value: string, task?: (progress: Progress<ChatResponseWarningPart | ChatResponseReferencePart>) => Thenable<string | void>): void;
 
-    /**
-     * Push a warning to this stream. Short-hand for
-     * `push(new ChatResponseWarningPart(message))`.
-     *
-     * @param message A warning message
-     * @returns This stream.
-     */
-    warning(message: string | MarkdownString): void
+		textEdit(target: Uri, edits: TextEdit | TextEdit[]): void;
+		markdownWithVulnerabilities(value: string | MarkdownString, vulnerabilities: ChatVulnerability[]): void;
+		detectedParticipant(participant: string, command?: ChatCommand): void;
+		push(part: ChatResponsePart | ChatResponseTextEditPart | ChatResponseDetectedParticipantPart | ChatResponseWarningPart | ChatResponseProgressPart2): void;
 
-    reference(
-      value: Uri | Location | { variableName: string; value?: Uri | Location },
-      iconPath?: Uri | ThemeIcon | { light: Uri; dark: Uri },
-    ): void
+		/**
+		 * Show an inline message in the chat view asking the user to confirm an action.
+		 * Multiple confirmations may be shown per response. The UI might show "Accept All" / "Reject All" actions.
+		 * @param title The title of the confirmation entry
+		 * @param message An extra message to display to the user
+		 * @param data An arbitrary JSON-stringifiable object that will be included in the ChatRequest when
+		 * the confirmation is accepted or rejected
+		 * TODO@API should this be MarkdownString?
+		 * TODO@API should actually be a more generic function that takes an array of buttons
+		 */
+		confirmation(title: string, message: string, data: any): void;
 
-    push(part: ExtendedChatResponsePart): void
-  }
+		/**
+		 * Push a warning to this stream. Short-hand for
+		 * `push(new ChatResponseWarningPart(message))`.
+		 *
+		 * @param message A warning message
+		 * @returns This stream.
+		 */
+		warning(message: string | MarkdownString): void;
 
-  /**
-   * Does this piggy-back on the existing ChatRequest, or is it a different type of request entirely?
-   * Does it show up in history?
-   */
-  export interface ChatRequest {
-    /**
-     * The `data` for any confirmations that were accepted
-     */
-    acceptedConfirmationData?: any[]
+		reference(value: Uri | Location | { variableName: string; value?: Uri | Location }, iconPath?: Uri | ThemeIcon | { light: Uri; dark: Uri }): void;
 
-    /**
-     * The `data` for any confirmations that were rejected
-     */
-    rejectedConfirmationData?: any[]
-  }
+		push(part: ExtendedChatResponsePart): void;
+	}
 
-  // TODO@API fit this into the stream
-  export interface ChatUsedContext {
-    documents: ChatDocumentContext[]
-  }
+	/**
+	 * Does this piggy-back on the existing ChatRequest, or is it a different type of request entirely?
+	 * Does it show up in history?
+	 */
+	export interface ChatRequest {
+		/**
+		 * The `data` for any confirmations that were accepted
+		 */
+		acceptedConfirmationData?: any[];
 
-  export interface ChatParticipant {
-    /**
-     * Provide a set of variables that can only be used with this participant.
-     */
-    participantVariableProvider?: {
-      provider: ChatParticipantCompletionItemProvider
-      triggerCharacters: string[]
-    }
-  }
+		/**
+		 * The `data` for any confirmations that were rejected
+		 */
+		rejectedConfirmationData?: any[];
+	}
 
-  export interface ChatParticipantCompletionItemProvider {
-    provideCompletionItems(
-      query: string,
-      token: CancellationToken,
-    ): ProviderResult<ChatCompletionItem[]>
-  }
+	// TODO@API fit this into the stream
+	export interface ChatUsedContext {
+		documents: ChatDocumentContext[];
+	}
 
-  export class ChatCompletionItem {
-    id: string
-    label: string | CompletionItemLabel
-    values: ChatVariableValue[]
-    fullName?: string
-    icon?: ThemeIcon
-    insertText?: string
-    detail?: string
-    documentation?: string | MarkdownString
-    command?: Command
+	export interface ChatParticipant {
+		/**
+		 * Provide a set of variables that can only be used with this participant.
+		 */
+		participantVariableProvider?: { provider: ChatParticipantCompletionItemProvider; triggerCharacters: string[] };
+	}
 
-    constructor(
-      id: string,
-      label: string | CompletionItemLabel,
-      values: ChatVariableValue[],
-    )
-  }
+	export interface ChatParticipantCompletionItemProvider {
+		provideCompletionItems(query: string, token: CancellationToken): ProviderResult<ChatCompletionItem[]>;
+	}
 
-  export type ChatExtendedRequestHandler = (
-    request: ChatRequest,
-    context: ChatContext,
-    response: ChatResponseStream,
-    token: CancellationToken,
-  ) => ProviderResult<ChatResult | void>
+	export class ChatCompletionItem {
+		id: string;
+		label: string | CompletionItemLabel;
+		values: ChatVariableValue[];
+		fullName?: string;
+		icon?: ThemeIcon;
+		insertText?: string;
+		detail?: string;
+		documentation?: string | MarkdownString;
+		command?: Command;
 
-  export namespace chat {
-    /**
-     * Create a chat participant with the extended progress type
-     */
-    export function createChatParticipant(
-      id: string,
-      handler: ChatExtendedRequestHandler,
-    ): ChatParticipant
+		constructor(id: string, label: string | CompletionItemLabel, values: ChatVariableValue[]);
+	}
 
-    /**
-     * Current version of the proposal. Changes whenever backwards-incompatible changes are made.
-     * If a new feature is added that doesn't break existing code, the version is not incremented. When the extension uses this new feature, it should set its engines.vscode version appropriately.
-     * But if a change is made to an existing feature that would break existing code, the version should be incremented.
-     * The chat extension should not activate if it doesn't support the current version.
-     */
-    export const _version: 1 | number
-  }
+	export type ChatExtendedRequestHandler = (request: ChatRequest, context: ChatContext, response: ChatResponseStream, token: CancellationToken) => ProviderResult<ChatResult | void>;
 
-  /*
-   * User action events
-   */
+	export namespace chat {
+		/**
+		 * Create a chat participant with the extended progress type
+		 */
+		export function createChatParticipant(id: string, handler: ChatExtendedRequestHandler): ChatParticipant;
 
-  export enum ChatCopyKind {
-    // Keyboard shortcut or context menu
-    Action = 1,
-    Toolbar = 2,
-  }
+		/**
+		 * Current version of the proposal. Changes whenever backwards-incompatible changes are made.
+		 * If a new feature is added that doesn't break existing code, the version is not incremented. When the extension uses this new feature, it should set its engines.vscode version appropriately.
+		 * But if a change is made to an existing feature that would break existing code, the version should be incremented.
+		 * The chat extension should not activate if it doesn't support the current version.
+		 */
+		export const _version: 1 | number;
+	}
 
-  export interface ChatCopyAction {
-    // eslint-disable-next-line local/vscode-dts-string-type-literals
-    kind: "copy"
-    codeBlockIndex: number
-    copyKind: ChatCopyKind
-    copiedCharacters: number
-    totalCharacters: number
-    copiedText: string
-  }
+	/*
+	 * User action events
+	 */
 
-  export interface ChatInsertAction {
-    // eslint-disable-next-line local/vscode-dts-string-type-literals
-    kind: "insert"
-    codeBlockIndex: number
-    totalCharacters: number
-    newFile?: boolean
-  }
+	export enum ChatCopyKind {
+		// Keyboard shortcut or context menu
+		Action = 1,
+		Toolbar = 2
+	}
 
-  export interface ChatTerminalAction {
-    // eslint-disable-next-line local/vscode-dts-string-type-literals
-    kind: "runInTerminal"
-    codeBlockIndex: number
-    languageId?: string
-  }
+	export interface ChatCopyAction {
+		// eslint-disable-next-line local/vscode-dts-string-type-literals
+		kind: 'copy';
+		codeBlockIndex: number;
+		copyKind: ChatCopyKind;
+		copiedCharacters: number;
+		totalCharacters: number;
+		copiedText: string;
+	}
 
-  export interface ChatCommandAction {
-    // eslint-disable-next-line local/vscode-dts-string-type-literals
-    kind: "command"
-    commandButton: ChatCommandButton
-  }
+	export interface ChatInsertAction {
+		// eslint-disable-next-line local/vscode-dts-string-type-literals
+		kind: 'insert';
+		codeBlockIndex: number;
+		totalCharacters: number;
+		newFile?: boolean;
+	}
 
-  export interface ChatFollowupAction {
-    // eslint-disable-next-line local/vscode-dts-string-type-literals
-    kind: "followUp"
-    followup: ChatFollowup
-  }
+	export interface ChatTerminalAction {
+		// eslint-disable-next-line local/vscode-dts-string-type-literals
+		kind: 'runInTerminal';
+		codeBlockIndex: number;
+		languageId?: string;
+	}
 
-  export interface ChatBugReportAction {
-    // eslint-disable-next-line local/vscode-dts-string-type-literals
-    kind: "bug"
-  }
+	export interface ChatCommandAction {
+		// eslint-disable-next-line local/vscode-dts-string-type-literals
+		kind: 'command';
+		commandButton: ChatCommandButton;
+	}
 
-  export interface ChatEditorAction {
-    kind: "editor"
-    accepted: boolean
-  }
+	export interface ChatFollowupAction {
+		// eslint-disable-next-line local/vscode-dts-string-type-literals
+		kind: 'followUp';
+		followup: ChatFollowup;
+	}
 
-  export interface ChatUserActionEvent {
-    readonly result: ChatResult
-    readonly action:
-      | ChatCopyAction
-      | ChatInsertAction
-      | ChatTerminalAction
-      | ChatCommandAction
-      | ChatFollowupAction
-      | ChatBugReportAction
-      | ChatEditorAction
-  }
+	export interface ChatBugReportAction {
+		// eslint-disable-next-line local/vscode-dts-string-type-literals
+		kind: 'bug';
+	}
 
-  export interface ChatPromptReference {
-    /**
-     * TODO Needed for now to drive the variableName-type reference, but probably both of these should go away in the future.
-     */
-    readonly name: string
-  }
+	export interface ChatEditorAction {
+		kind: 'editor';
+		accepted: boolean;
+	}
+
+	export interface ChatUserActionEvent {
+		readonly result: ChatResult;
+		readonly action: ChatCopyAction | ChatInsertAction | ChatTerminalAction | ChatCommandAction | ChatFollowupAction | ChatBugReportAction | ChatEditorAction;
+	}
+
+	export interface ChatPromptReference {
+		/**
+		 * TODO Needed for now to drive the variableName-type reference, but probably both of these should go away in the future.
+		 */
+		readonly name: string;
+	}
 }

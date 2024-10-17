@@ -61,7 +61,7 @@ export abstract class AbstractTextResourceEditorInput extends AbstractResourceEd
     @ITextResourceConfigurationService
     textResourceConfigurationService: ITextResourceConfigurationService,
     @ICustomEditorLabelService
-    customEditorLabelService: ICustomEditorLabelService,
+    customEditorLabelService: ICustomEditorLabelService
   ) {
     super(
       resource,
@@ -75,13 +75,13 @@ export abstract class AbstractTextResourceEditorInput extends AbstractResourceEd
       fileService,
       filesConfigurationService,
       textResourceConfigurationService,
-      customEditorLabelService,
+      customEditorLabelService
     )
   }
 
   override save(
     group: GroupIdentifier,
-    options?: ITextFileSaveOptions,
+    options?: ITextFileSaveOptions
   ): Promise<IUntypedEditorInput | undefined> {
     // If this is neither an `untitled` resource, nor a resource
     // we can handle with the file service, we can only "Save As..."
@@ -98,7 +98,7 @@ export abstract class AbstractTextResourceEditorInput extends AbstractResourceEd
 
   override saveAs(
     group: GroupIdentifier,
-    options?: ITextFileSaveOptions,
+    options?: ITextFileSaveOptions
   ): Promise<IUntypedEditorInput | undefined> {
     return this.doSave(options, true, group)
   }
@@ -106,7 +106,7 @@ export abstract class AbstractTextResourceEditorInput extends AbstractResourceEd
   private async doSave(
     options: ITextFileSaveOptions | undefined,
     saveAs: boolean,
-    group: GroupIdentifier | undefined,
+    group: GroupIdentifier | undefined
   ): Promise<IUntypedEditorInput | undefined> {
     // Save / Save As
     let target: URI | undefined
@@ -128,7 +128,7 @@ export abstract class AbstractTextResourceEditorInput extends AbstractResourceEd
 
   override async revert(
     group: GroupIdentifier,
-    options?: IRevertOptions,
+    options?: IRevertOptions
   ): Promise<void> {
     await this.textFileService.revert(this.resource, options)
   }
@@ -177,7 +177,7 @@ export class TextResourceEditorInput
     @ITextResourceConfigurationService
     textResourceConfigurationService: ITextResourceConfigurationService,
     @ICustomEditorLabelService
-    customEditorLabelService: ICustomEditorLabelService,
+    customEditorLabelService: ICustomEditorLabelService
   ) {
     super(
       resource,
@@ -193,7 +193,7 @@ export class TextResourceEditorInput
       fileService,
       filesConfigurationService,
       textResourceConfigurationService,
-      customEditorLabelService,
+      customEditorLabelService
     )
   }
 
@@ -248,7 +248,7 @@ export class TextResourceEditorInput
 
     if (!this.modelReference) {
       this.modelReference = this.textModelService.createModelReference(
-        this.resource,
+        this.resource
       )
     }
 
@@ -261,7 +261,7 @@ export class TextResourceEditorInput
       this.modelReference = undefined
 
       throw new Error(
-        `Unexpected model for TextResourceEditorInput: ${this.resource}`,
+        `Unexpected model for TextResourceEditorInput: ${this.resource}`
       )
     }
 
@@ -276,7 +276,7 @@ export class TextResourceEditorInput
         typeof preferredContents === "string"
           ? createTextBufferFactory(preferredContents)
           : undefined,
-        preferredLanguageId,
+        preferredLanguageId
       )
     }
 

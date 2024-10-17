@@ -118,11 +118,11 @@ export interface WebviewHostMessaging {
   postMessage<K extends keyof FromWebviewMessage>(
     channel: K,
     data: FromWebviewMessage[K],
-    transfer?: [],
+    transfer?: []
   ): void
 
   onMessage<K extends keyof ToWebviewMessage>(
     channel: K,
-    handler: (e: Event, data: ToWebviewMessage[K]) => void,
+    handler: (e: Event, data: ToWebviewMessage[K]) => void
   ): void
 }

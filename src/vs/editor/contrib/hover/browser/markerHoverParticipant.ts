@@ -68,7 +68,7 @@ export class MarkerHover implements IHoverPart {
   constructor(
     public readonly owner: IEditorHoverParticipant<MarkerHover>,
     public readonly range: Range,
-    public readonly marker: IMarker,
+    public readonly marker: IMarker
   ) {}
 
   public isValidForHoverAnchor(anchor: HoverAnchor): boolean {
@@ -101,12 +101,12 @@ export class MarkerHoverParticipant
     private readonly _markerDecorationsService: IMarkerDecorationsService,
     @IHaystackService private readonly _haystackService: IHaystackService,
     @ILanguageFeaturesService
-    private readonly _languageFeaturesService: ILanguageFeaturesService,
+    private readonly _languageFeaturesService: ILanguageFeaturesService
   ) {}
 
   public computeSync(
     anchor: HoverAnchor,
-    lineDecorations: IModelDecoration[],
+    lineDecorations: IModelDecoration[]
   ): MarkerHover[] {
     if (
       !this._editor.hasModel() ||
@@ -134,7 +134,7 @@ export class MarkerHoverParticipant
         anchor.range.startLineNumber,
         startColumn,
         anchor.range.startLineNumber,
-        endColumn,
+        endColumn
       )
       result.push(new MarkerHover(this, range, marker))
     }
@@ -144,20 +144,20 @@ export class MarkerHoverParticipant
 
   public renderHoverParts(
     context: IEditorHoverRenderContext,
-    hoverParts: MarkerHover[],
+    hoverParts: MarkerHover[]
   ): IDisposable {
     if (!hoverParts.length) {
       return Disposable.None
     }
     const disposables = new DisposableStore()
     hoverParts.forEach((msg) =>
-      context.fragment.appendChild(this.renderMarkerHover(msg, disposables)),
+      context.fragment.appendChild(this.renderMarkerHover(msg, disposables))
     )
     const markerHoverForStatusbar =
       hoverParts.length === 1
         ? hoverParts[0]
         : hoverParts.sort((a, b) =>
-            MarkerSeverity.compare(a.marker.severity, b.marker.severity),
+            MarkerSeverity.compare(a.marker.severity, b.marker.severity)
           )[0]
     this.renderMarkerStatusbar(context, markerHoverForStatusbar, disposables)
     return disposables
@@ -165,13 +165,13 @@ export class MarkerHoverParticipant
 
   private renderMarkerHover(
     markerHover: MarkerHover,
-    disposables: DisposableStore,
+    disposables: DisposableStore
   ): HTMLElement {
     const hoverElement = $("div.hover-row")
     hoverElement.tabIndex = 0
     const markerElement = dom.append(
       hoverElement,
-      $("div.marker.hover-contents"),
+      $("div.marker.hover-contents")
     )
     const { source, message, code, relatedInformation } = markerHover.marker
 
@@ -196,7 +196,7 @@ export class MarkerHoverParticipant
             this._haystackService.createFileEditor(code.target)
             e.preventDefault()
             e.stopPropagation()
-          }),
+          })
         )
 
         const codeElement = dom.append(codeLink, $("span"))
@@ -225,7 +225,7 @@ export class MarkerHoverParticipant
         relatedInfoContainer.style.marginTop = "8px"
         const a = dom.append(relatedInfoContainer, $("a"))
         a.innerText = `${basename(
-          resource,
+          resource
         )}(${startLineNumber}, ${startColumn}): `
         a.style.cursor = "pointer"
         disposables.add(
@@ -240,11 +240,11 @@ export class MarkerHoverParticipant
                 endColumn: startColumn,
               },
             })
-          }),
+          })
         )
         const messageElement = dom.append<HTMLAnchorElement>(
           relatedInfoContainer,
-          $("span"),
+          $("span")
         )
         messageElement.innerText = message
         this._editor.applyFontInfo(messageElement)
@@ -257,7 +257,7 @@ export class MarkerHoverParticipant
   private renderMarkerStatusbar(
     context: IEditorHoverRenderContext,
     markerHover: MarkerHover,
-    disposables: DisposableStore,
+    disposables: DisposableStore
   ): void {
     if (
       markerHover.marker.severity === MarkerSeverity.Error ||
@@ -288,7 +288,7 @@ export class MarkerHoverParticipant
           if (!this.recentMarkerCodeActionsInfo.hasCodeActions) {
             quickfixPlaceholderElement.textContent = nls.localize(
               "noQuickFixes",
-              "No quick fixes available",
+              "No quick fixes available"
             )
           }
         } else {
@@ -303,10 +303,10 @@ export class MarkerHoverParticipant
               () =>
                 (quickfixPlaceholderElement.textContent = nls.localize(
                   "checkingForQuickFixes",
-                  "Checking for quick fixes...",
+                  "Checking for quick fixes..."
                 )),
               200,
-              disposables,
+              disposables
             )
       if (!quickfixPlaceholderElement.textContent) {
         // Have some content in here to avoid flickering
@@ -325,7 +325,7 @@ export class MarkerHoverParticipant
           actions.dispose()
           quickfixPlaceholderElement.textContent = nls.localize(
             "noQuickFixes",
-            "No quick fixes available",
+            "No quick fixes available"
           )
           return
         }
@@ -337,7 +337,7 @@ export class MarkerHoverParticipant
             if (!showing) {
               actions.dispose()
             }
-          }),
+          })
         )
 
         context.statusBar.addAction({
@@ -371,11 +371,11 @@ export class MarkerHoverParticipant
           marker.startLineNumber,
           marker.startColumn,
           marker.endLineNumber,
-          marker.endColumn,
+          marker.endColumn
         ),
         markerCodeActionTrigger,
         Progress.None,
-        cancellationToken,
+        cancellationToken
       )
     })
   }

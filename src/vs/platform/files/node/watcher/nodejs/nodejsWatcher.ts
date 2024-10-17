@@ -9,215 +9,164 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Event } from "vs/base/common/event"
-import { patternsEquals } from "vs/base/common/glob"
-import { BaseWatcher } from "vs/platform/files/node/watcher/baseWatcher"
-import { isLinux } from "vs/base/common/platform"
-import {
-  INonRecursiveWatchRequest,
-  INonRecursiveWatcher,
-  IRecursiveWatcherWithSubscribe,
-} from "vs/platform/files/common/watcher"
-import { NodeJSFileWatcherLibrary } from "vs/platform/files/node/watcher/nodejs/nodejsWatcherLib"
-import { isEqual } from "vs/base/common/extpath"
+import { Event } from 'vs/base/common/event';
+import { patternsEquals } from 'vs/base/common/glob';
+import { BaseWatcher } from 'vs/platform/files/node/watcher/baseWatcher';
+import { isLinux } from 'vs/base/common/platform';
+import { INonRecursiveWatchRequest, INonRecursiveWatcher, IRecursiveWatcherWithSubscribe } from 'vs/platform/files/common/watcher';
+import { NodeJSFileWatcherLibrary } from 'vs/platform/files/node/watcher/nodejs/nodejsWatcherLib';
+import { isEqual } from 'vs/base/common/extpath';
 
 export interface INodeJSWatcherInstance {
-  /**
-   * The watcher instance.
-   */
-  readonly instance: NodeJSFileWatcherLibrary
 
-  /**
-   * The watch request associated to the watcher.
-   */
-  readonly request: INonRecursiveWatchRequest
+	/**
+	 * The watcher instance.
+	 */
+	readonly instance: NodeJSFileWatcherLibrary;
+
+	/**
+	 * The watch request associated to the watcher.
+	 */
+	readonly request: INonRecursiveWatchRequest;
 }
 
 export class NodeJSWatcher extends BaseWatcher implements INonRecursiveWatcher {
-  readonly onDidError = Event.None
 
-  readonly watchers = new Set<INodeJSWatcherInstance>()
+	readonly onDidError = Event.None;
 
-  constructor(
-    protected readonly recursiveWatcher:
-      | IRecursiveWatcherWithSubscribe
-      | undefined,
-  ) {
-    super()
-  }
+	readonly watchers = new Set<INodeJSWatcherInstance>();
 
-  protected override async doWatch(
-    requests: INonRecursiveWatchRequest[],
-  ): Promise<void> {
-    // Figure out duplicates to remove from the requests
-    requests = this.removeDuplicateRequests(requests)
+	constructor(protected readonly recursiveWatcher: IRecursiveWatcherWithSubscribe | undefined) {
+		super();
+	}
 
-    // Figure out which watchers to start and which to stop
-    const requestsToStart: INonRecursiveWatchRequest[] = []
-    const watchersToStop = new Set(Array.from(this.watchers))
-    for (const request of requests) {
-      const watcher = this.findWatcher(request)
-      if (
-        watcher &&
-        patternsEquals(watcher.request.excludes, request.excludes) &&
-        patternsEquals(watcher.request.includes, request.includes)
-      ) {
-        watchersToStop.delete(watcher) // keep watcher
-      } else {
-        requestsToStart.push(request) // start watching
-      }
-    }
+	protected override async doWatch(requests: INonRecursiveWatchRequest[]): Promise<void> {
 
-    // Logging
+		// Figure out duplicates to remove from the requests
+		requests = this.removeDuplicateRequests(requests);
 
-    if (requestsToStart.length) {
-      this.trace(
-        `Request to start watching: ${requestsToStart.map((request) => this.requestToString(request)).join(",")}`,
-      )
-    }
+		// Figure out which watchers to start and which to stop
+		const requestsToStart: INonRecursiveWatchRequest[] = [];
+		const watchersToStop = new Set(Array.from(this.watchers));
+		for (const request of requests) {
+			const watcher = this.findWatcher(request);
+			if (watcher && patternsEquals(watcher.request.excludes, request.excludes) && patternsEquals(watcher.request.includes, request.includes)) {
+				watchersToStop.delete(watcher); // keep watcher
+			} else {
+				requestsToStart.push(request); // start watching
+			}
+		}
 
-    if (watchersToStop.size) {
-      this.trace(
-        `Request to stop watching: ${Array.from(watchersToStop)
-          .map((watcher) => this.requestToString(watcher.request))
-          .join(",")}`,
-      )
-    }
+		// Logging
 
-    // Stop watching as instructed
-    for (const watcher of watchersToStop) {
-      this.stopWatching(watcher)
-    }
+		if (requestsToStart.length) {
+			this.trace(`Request to start watching: ${requestsToStart.map(request => this.requestToString(request)).join(',')}`);
+		}
 
-    // Start watching as instructed
-    for (const request of requestsToStart) {
-      this.startWatching(request)
-    }
-  }
+		if (watchersToStop.size) {
+			this.trace(`Request to stop watching: ${Array.from(watchersToStop).map(watcher => this.requestToString(watcher.request)).join(',')}`);
+		}
 
-  private findWatcher(
-    request: INonRecursiveWatchRequest,
-  ): INodeJSWatcherInstance | undefined {
-    for (const watcher of this.watchers) {
-      // Requests or watchers with correlation always match on that
-      if (
-        typeof request.correlationId === "number" ||
-        typeof watcher.request.correlationId === "number"
-      ) {
-        if (watcher.request.correlationId === request.correlationId) {
-          return watcher
-        }
-      }
+		// Stop watching as instructed
+		for (const watcher of watchersToStop) {
+			this.stopWatching(watcher);
+		}
 
-      // Non-correlated requests or watchers match on path
-      else {
-        if (
-          isEqual(watcher.request.path, request.path, !isLinux /* ignorecase */)
-        ) {
-          return watcher
-        }
-      }
-    }
+		// Start watching as instructed
+		for (const request of requestsToStart) {
+			this.startWatching(request);
+		}
+	}
 
-    return undefined
-  }
+	private findWatcher(request: INonRecursiveWatchRequest): INodeJSWatcherInstance | undefined {
+		for (const watcher of this.watchers) {
 
-  private startWatching(request: INonRecursiveWatchRequest): void {
-    // Start via node.js lib
-    const instance = new NodeJSFileWatcherLibrary(
-      request,
-      this.recursiveWatcher,
-      (changes) => this._onDidChangeFile.fire(changes),
-      () => this._onDidWatchFail.fire(request),
-      (msg) => this._onDidLogMessage.fire(msg),
-      this.verboseLogging,
-    )
+			// Requests or watchers with correlation always match on that
+			if (typeof request.correlationId === 'number' || typeof watcher.request.correlationId === 'number') {
+				if (watcher.request.correlationId === request.correlationId) {
+					return watcher;
+				}
+			}
 
-    // Remember as watcher instance
-    const watcher: INodeJSWatcherInstance = { request, instance }
-    this.watchers.add(watcher)
-  }
+			// Non-correlated requests or watchers match on path
+			else {
+				if (isEqual(watcher.request.path, request.path, !isLinux /* ignorecase */)) {
+					return watcher;
+				}
+			}
+		}
 
-  override async stop(): Promise<void> {
-    await super.stop()
+		return undefined;
+	}
 
-    for (const watcher of this.watchers) {
-      this.stopWatching(watcher)
-    }
-  }
+	private startWatching(request: INonRecursiveWatchRequest): void {
 
-  private stopWatching(watcher: INodeJSWatcherInstance): void {
-    this.trace(`stopping file watcher`, watcher)
+		// Start via node.js lib
+		const instance = new NodeJSFileWatcherLibrary(request, this.recursiveWatcher, changes => this._onDidChangeFile.fire(changes), () => this._onDidWatchFail.fire(request), msg => this._onDidLogMessage.fire(msg), this.verboseLogging);
 
-    this.watchers.delete(watcher)
+		// Remember as watcher instance
+		const watcher: INodeJSWatcherInstance = { request, instance };
+		this.watchers.add(watcher);
+	}
 
-    watcher.instance.dispose()
-  }
+	override async stop(): Promise<void> {
+		await super.stop();
 
-  private removeDuplicateRequests(
-    requests: INonRecursiveWatchRequest[],
-  ): INonRecursiveWatchRequest[] {
-    const mapCorrelationtoRequests = new Map<
-      number | undefined /* correlation */,
-      Map<string, INonRecursiveWatchRequest>
-    >()
+		for (const watcher of this.watchers) {
+			this.stopWatching(watcher);
+		}
+	}
 
-    // Ignore requests for the same paths that have the same correlation
-    for (const request of requests) {
-      const path = isLinux ? request.path : request.path.toLowerCase() // adjust for case sensitivity
+	private stopWatching(watcher: INodeJSWatcherInstance): void {
+		this.trace(`stopping file watcher`, watcher);
 
-      let requestsForCorrelation = mapCorrelationtoRequests.get(
-        request.correlationId,
-      )
-      if (!requestsForCorrelation) {
-        requestsForCorrelation = new Map<string, INonRecursiveWatchRequest>()
-        mapCorrelationtoRequests.set(
-          request.correlationId,
-          requestsForCorrelation,
-        )
-      }
+		this.watchers.delete(watcher);
 
-      if (requestsForCorrelation.has(path)) {
-        this.trace(
-          `ignoring a request for watching who's path is already watched: ${this.requestToString(request)}`,
-        )
-      }
+		watcher.instance.dispose();
+	}
 
-      requestsForCorrelation.set(path, request)
-    }
+	private removeDuplicateRequests(requests: INonRecursiveWatchRequest[]): INonRecursiveWatchRequest[] {
+		const mapCorrelationtoRequests = new Map<number | undefined /* correlation */, Map<string, INonRecursiveWatchRequest>>();
 
-    return Array.from(mapCorrelationtoRequests.values())
-      .map((requests) => Array.from(requests.values()))
-      .flat()
-  }
+		// Ignore requests for the same paths that have the same correlation
+		for (const request of requests) {
+			const path = isLinux ? request.path : request.path.toLowerCase(); // adjust for case sensitivity
 
-  override async setVerboseLogging(enabled: boolean): Promise<void> {
-    super.setVerboseLogging(enabled)
+			let requestsForCorrelation = mapCorrelationtoRequests.get(request.correlationId);
+			if (!requestsForCorrelation) {
+				requestsForCorrelation = new Map<string, INonRecursiveWatchRequest>();
+				mapCorrelationtoRequests.set(request.correlationId, requestsForCorrelation);
+			}
 
-    for (const watcher of this.watchers) {
-      watcher.instance.setVerboseLogging(enabled)
-    }
-  }
+			if (requestsForCorrelation.has(path)) {
+				this.trace(`ignoring a request for watching who's path is already watched: ${this.requestToString(request)}`);
+			}
 
-  protected trace(message: string, watcher?: INodeJSWatcherInstance): void {
-    if (this.verboseLogging) {
-      this._onDidLogMessage.fire({
-        type: "trace",
-        message: this.toMessage(message, watcher),
-      })
-    }
-  }
+			requestsForCorrelation.set(path, request);
+		}
 
-  protected warn(message: string): void {
-    this._onDidLogMessage.fire({
-      type: "warn",
-      message: this.toMessage(message),
-    })
-  }
+		return Array.from(mapCorrelationtoRequests.values()).map(requests => Array.from(requests.values())).flat();
+	}
 
-  private toMessage(message: string, watcher?: INodeJSWatcherInstance): string {
-    return watcher
-      ? `[File Watcher (node.js)] ${message} (${this.requestToString(watcher.request)})`
-      : `[File Watcher (node.js)] ${message}`
-  }
+	override async setVerboseLogging(enabled: boolean): Promise<void> {
+		super.setVerboseLogging(enabled);
+
+		for (const watcher of this.watchers) {
+			watcher.instance.setVerboseLogging(enabled);
+		}
+	}
+
+	protected trace(message: string, watcher?: INodeJSWatcherInstance): void {
+		if (this.verboseLogging) {
+			this._onDidLogMessage.fire({ type: 'trace', message: this.toMessage(message, watcher) });
+		}
+	}
+
+	protected warn(message: string): void {
+		this._onDidLogMessage.fire({ type: 'warn', message: this.toMessage(message) });
+	}
+
+	private toMessage(message: string, watcher?: INodeJSWatcherInstance): string {
+		return watcher ? `[File Watcher (node.js)] ${message} (${this.requestToString(watcher.request)})` : `[File Watcher (node.js)] ${message}`;
+	}
 }

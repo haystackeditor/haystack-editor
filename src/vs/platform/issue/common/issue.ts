@@ -155,7 +155,7 @@ export interface IIssueMainService {
   $showClipboardDialog(): Promise<boolean>
   $sendReporterMenu(
     extensionId: string,
-    extensionName: string,
+    extensionName: string
   ): Promise<IssueReporterData | undefined>
   $closeReporter(): Promise<void>
 }

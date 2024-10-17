@@ -9,76 +9,67 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Disposable } from "vs/base/common/lifecycle"
-import { IChatWidget } from "vs/workbench/contrib/chat/browser/chat"
-import {
-  ChatWidget,
-  IChatWidgetContrib,
-} from "vs/workbench/contrib/chat/browser/chatWidget"
-import { IChatRequestVariableEntry } from "vs/workbench/contrib/chat/common/chatModel"
+import { Disposable } from 'vs/base/common/lifecycle';
+import { IChatWidget } from 'vs/workbench/contrib/chat/browser/chat';
+import { ChatWidget, IChatWidgetContrib } from 'vs/workbench/contrib/chat/browser/chatWidget';
+import { IChatRequestVariableEntry } from 'vs/workbench/contrib/chat/common/chatModel';
 
-export class ChatContextAttachments
-  extends Disposable
-  implements IChatWidgetContrib
-{
-  private _attachedContext = new Set<IChatRequestVariableEntry>()
+export class ChatContextAttachments extends Disposable implements IChatWidgetContrib {
 
-  public static readonly ID = "chatContextAttachments"
+	private _attachedContext = new Set<IChatRequestVariableEntry>();
 
-  get id() {
-    return ChatContextAttachments.ID
-  }
+	public static readonly ID = 'chatContextAttachments';
 
-  constructor(readonly widget: IChatWidget) {
-    super()
+	get id() {
+		return ChatContextAttachments.ID;
+	}
 
-    this._register(
-      this.widget.onDidDeleteContext((e) => {
-        this._removeContext(e)
-      }),
-    )
+	constructor(readonly widget: IChatWidget) {
+		super();
 
-    this._register(
-      this.widget.onDidSubmitAgent(() => {
-        this._clearAttachedContext()
-      }),
-    )
-  }
+		this._register(this.widget.onDidDeleteContext((e) => {
+			this._removeContext(e);
+		}));
 
-  getInputState?() {
-    return [...this._attachedContext.values()]
-  }
+		this._register(this.widget.onDidSubmitAgent(() => {
+			this._clearAttachedContext();
+		}));
+	}
 
-  setInputState?(s: any): void {
-    if (!Array.isArray(s)) {
-      return
-    }
+	getInputState?() {
+		return [...this._attachedContext.values()];
+	}
 
-    this.widget.setContext(true, ...s)
-  }
+	setInputState?(s: any): void {
+		if (!Array.isArray(s)) {
+			return;
+		}
 
-  getContext() {
-    return new Set([...this._attachedContext.values()].map((v) => v.id))
-  }
+		this.widget.setContext(true, ...s);
+	}
 
-  setContext(overwrite: boolean, ...attachments: IChatRequestVariableEntry[]) {
-    if (overwrite) {
-      this._attachedContext.clear()
-    }
-    for (const attachment of attachments) {
-      this._attachedContext.add(attachment)
-    }
+	getContext() {
+		return new Set([...this._attachedContext.values()].map((v) => v.id));
+	}
 
-    this.widget.setContext(overwrite, ...attachments)
-  }
+	setContext(overwrite: boolean, ...attachments: IChatRequestVariableEntry[]) {
+		if (overwrite) {
+			this._attachedContext.clear();
+		}
+		for (const attachment of attachments) {
+			this._attachedContext.add(attachment);
+		}
 
-  private _removeContext(attachment: IChatRequestVariableEntry) {
-    this._attachedContext.delete(attachment)
-  }
+		this.widget.setContext(overwrite, ...attachments);
+	}
 
-  private _clearAttachedContext() {
-    this._attachedContext.clear()
-  }
+	private _removeContext(attachment: IChatRequestVariableEntry) {
+		this._attachedContext.delete(attachment);
+	}
+
+	private _clearAttachedContext() {
+		this._attachedContext.clear();
+	}
 }
 
-ChatWidget.CONTRIBS.push(ChatContextAttachments)
+ChatWidget.CONTRIBS.push(ChatContextAttachments);

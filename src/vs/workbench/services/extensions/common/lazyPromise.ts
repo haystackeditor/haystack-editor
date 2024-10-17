@@ -9,98 +9,99 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CancellationError, onUnexpectedError } from "vs/base/common/errors"
+import { CancellationError, onUnexpectedError } from 'vs/base/common/errors';
 
 export class LazyPromise implements Promise<any> {
-  private _actual: Promise<any> | null
-  private _actualOk: ((value?: any) => any) | null
-  private _actualErr: ((err?: any) => any) | null
 
-  private _hasValue: boolean
-  private _value: any
+	private _actual: Promise<any> | null;
+	private _actualOk: ((value?: any) => any) | null;
+	private _actualErr: ((err?: any) => any) | null;
 
-  protected _hasErr: boolean
-  protected _err: any
+	private _hasValue: boolean;
+	private _value: any;
 
-  constructor() {
-    this._actual = null
-    this._actualOk = null
-    this._actualErr = null
-    this._hasValue = false
-    this._value = null
-    this._hasErr = false
-    this._err = null
-  }
+	protected _hasErr: boolean;
+	protected _err: any;
 
-  get [Symbol.toStringTag](): string {
-    return this.toString()
-  }
+	constructor() {
+		this._actual = null;
+		this._actualOk = null;
+		this._actualErr = null;
+		this._hasValue = false;
+		this._value = null;
+		this._hasErr = false;
+		this._err = null;
+	}
 
-  private _ensureActual(): Promise<any> {
-    if (!this._actual) {
-      this._actual = new Promise<any>((c, e) => {
-        this._actualOk = c
-        this._actualErr = e
+	get [Symbol.toStringTag](): string {
+		return this.toString();
+	}
 
-        if (this._hasValue) {
-          this._actualOk(this._value)
-        }
+	private _ensureActual(): Promise<any> {
+		if (!this._actual) {
+			this._actual = new Promise<any>((c, e) => {
+				this._actualOk = c;
+				this._actualErr = e;
 
-        if (this._hasErr) {
-          this._actualErr(this._err)
-        }
-      })
-    }
-    return this._actual
-  }
+				if (this._hasValue) {
+					this._actualOk(this._value);
+				}
 
-  public resolveOk(value: any): void {
-    if (this._hasValue || this._hasErr) {
-      return
-    }
+				if (this._hasErr) {
+					this._actualErr(this._err);
+				}
+			});
+		}
+		return this._actual;
+	}
 
-    this._hasValue = true
-    this._value = value
+	public resolveOk(value: any): void {
+		if (this._hasValue || this._hasErr) {
+			return;
+		}
 
-    if (this._actual) {
-      this._actualOk!(value)
-    }
-  }
+		this._hasValue = true;
+		this._value = value;
 
-  public resolveErr(err: any): void {
-    if (this._hasValue || this._hasErr) {
-      return
-    }
+		if (this._actual) {
+			this._actualOk!(value);
+		}
+	}
 
-    this._hasErr = true
-    this._err = err
+	public resolveErr(err: any): void {
+		if (this._hasValue || this._hasErr) {
+			return;
+		}
 
-    if (this._actual) {
-      this._actualErr!(err)
-    } else {
-      // If nobody's listening at this point, it is safe to assume they never will,
-      // since resolving this promise is always "async"
-      onUnexpectedError(err)
-    }
-  }
+		this._hasErr = true;
+		this._err = err;
 
-  public then(success: any, error: any): any {
-    return this._ensureActual().then(success, error)
-  }
+		if (this._actual) {
+			this._actualErr!(err);
+		} else {
+			// If nobody's listening at this point, it is safe to assume they never will,
+			// since resolving this promise is always "async"
+			onUnexpectedError(err);
+		}
+	}
 
-  public catch(error: any): any {
-    return this._ensureActual().then(undefined, error)
-  }
+	public then(success: any, error: any): any {
+		return this._ensureActual().then(success, error);
+	}
 
-  public finally(callback: () => void): any {
-    return this._ensureActual().finally(callback)
-  }
+	public catch(error: any): any {
+		return this._ensureActual().then(undefined, error);
+	}
+
+	public finally(callback: () => void): any {
+		return this._ensureActual().finally(callback);
+	}
 }
 
 export class CanceledLazyPromise extends LazyPromise {
-  constructor() {
-    super()
-    this._hasErr = true
-    this._err = new CancellationError()
-  }
+	constructor() {
+		super();
+		this._hasErr = true;
+		this._err = new CancellationError();
+	}
 }

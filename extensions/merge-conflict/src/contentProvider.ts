@@ -9,82 +9,52 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from "vscode"
+import * as vscode from 'vscode';
 
-export default class MergeConflictContentProvider
-  implements vscode.TextDocumentContentProvider, vscode.Disposable
-{
-  static scheme = "merge-conflict.conflict-diff"
+export default class MergeConflictContentProvider implements vscode.TextDocumentContentProvider, vscode.Disposable {
 
-  constructor(private context: vscode.ExtensionContext) {}
+	static scheme = 'merge-conflict.conflict-diff';
 
-  begin() {
-    this.context.subscriptions.push(
-      vscode.workspace.registerTextDocumentContentProvider(
-        MergeConflictContentProvider.scheme,
-        this,
-      ),
-    )
-  }
+	constructor(private context: vscode.ExtensionContext) {
+	}
 
-  dispose() {}
+	begin() {
+		this.context.subscriptions.push(
+			vscode.workspace.registerTextDocumentContentProvider(MergeConflictContentProvider.scheme, this)
+		);
+	}
 
-  async provideTextDocumentContent(uri: vscode.Uri): Promise<string | null> {
-    try {
-      const { scheme, ranges } = JSON.parse(uri.query) as {
-        scheme: string
-        ranges: [
-          { line: number; character: number }[],
-          { line: number; character: number }[],
-        ][]
-      }
+	dispose() {
+	}
 
-      // complete diff
-      const document = await vscode.workspace.openTextDocument(
-        uri.with({ scheme, query: "" }),
-      )
+	async provideTextDocumentContent(uri: vscode.Uri): Promise<string | null> {
+		try {
+			const { scheme, ranges } = JSON.parse(uri.query) as { scheme: string; ranges: [{ line: number; character: number }[], { line: number; character: number }[]][] };
 
-      let text = ""
-      let lastPosition = new vscode.Position(0, 0)
+			// complete diff
+			const document = await vscode.workspace.openTextDocument(uri.with({ scheme, query: '' }));
 
-      ranges.forEach((rangeObj) => {
-        const [conflictRange, fullRange] = rangeObj
-        const [start, end] = conflictRange
-        const [fullStart, fullEnd] = fullRange
+			let text = '';
+			let lastPosition = new vscode.Position(0, 0);
 
-        text += document.getText(
-          new vscode.Range(
-            lastPosition.line,
-            lastPosition.character,
-            fullStart.line,
-            fullStart.character,
-          ),
-        )
-        text += document.getText(
-          new vscode.Range(
-            start.line,
-            start.character,
-            end.line,
-            end.character,
-          ),
-        )
-        lastPosition = new vscode.Position(fullEnd.line, fullEnd.character)
-      })
+			ranges.forEach(rangeObj => {
+				const [conflictRange, fullRange] = rangeObj;
+				const [start, end] = conflictRange;
+				const [fullStart, fullEnd] = fullRange;
 
-      const documentEnd = document.lineAt(document.lineCount - 1).range.end
-      text += document.getText(
-        new vscode.Range(
-          lastPosition.line,
-          lastPosition.character,
-          documentEnd.line,
-          documentEnd.character,
-        ),
-      )
+				text += document.getText(new vscode.Range(lastPosition.line, lastPosition.character, fullStart.line, fullStart.character));
+				text += document.getText(new vscode.Range(start.line, start.character, end.line, end.character));
+				lastPosition = new vscode.Position(fullEnd.line, fullEnd.character);
+			});
 
-      return text
-    } catch (ex) {
-      await vscode.window.showErrorMessage("Unable to show comparison")
-      return null
-    }
-  }
+			const documentEnd = document.lineAt(document.lineCount - 1).range.end;
+			text += document.getText(new vscode.Range(lastPosition.line, lastPosition.character, documentEnd.line, documentEnd.character));
+
+			return text;
+		}
+		catch (ex) {
+			await vscode.window.showErrorMessage('Unable to show comparison');
+			return null;
+		}
+	}
 }

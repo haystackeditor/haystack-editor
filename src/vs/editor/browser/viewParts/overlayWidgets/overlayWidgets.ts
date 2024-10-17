@@ -77,14 +77,14 @@ export class ViewOverlayWidgets extends ViewPart {
     this._domNode.setClassName("overlayWidgets")
 
     this.overflowingOverlayWidgetsDomNode = createFastDomNode(
-      document.createElement("div"),
+      document.createElement("div")
     )
     PartFingerprints.write(
       this.overflowingOverlayWidgetsDomNode,
-      PartFingerprint.OverflowingOverlayWidgets,
+      PartFingerprint.OverflowingOverlayWidgets
     )
     this.overflowingOverlayWidgetsDomNode.setClassName(
-      "overflowingOverlayWidgets",
+      "overflowingOverlayWidgets"
     )
   }
 
@@ -100,7 +100,7 @@ export class ViewOverlayWidgets extends ViewPart {
   // ---- begin view event handlers
 
   public override onConfigurationChanged(
-    e: viewEvents.ViewConfigurationChangedEvent,
+    e: viewEvents.ViewConfigurationChangedEvent
   ): boolean {
     const options = this._context.configuration.options
     const layoutInfo = options.get(EditorOption.layoutInfo)
@@ -140,7 +140,7 @@ export class ViewOverlayWidgets extends ViewPart {
 
   public setWidgetPosition(
     widget: IOverlayWidget,
-    position: IOverlayWidgetPosition | null,
+    position: IOverlayWidgetPosition | null
   ): boolean {
     const widgetData = this._widgets[widget.getId()]
     const preference = position ? position.preference : null
@@ -187,7 +187,7 @@ export class ViewOverlayWidgets extends ViewPart {
 
   private _renderWidget(
     widgetData: IWidgetData,
-    stackCoordinates: number[],
+    stackCoordinates: number[]
   ): void {
     const domNode = widgetData.domNode
 
@@ -211,7 +211,7 @@ export class ViewOverlayWidgets extends ViewPart {
         domNode.setTop(
           this._editorHeight -
             widgetHeight -
-            2 * this._horizontalScrollbarHeight,
+            2 * this._horizontalScrollbarHeight
         )
       } else {
         domNode.setTop(0)
@@ -229,7 +229,7 @@ export class ViewOverlayWidgets extends ViewPart {
       domNode.domNode.style.right = "50%"
       if (widgetData.stack !== undefined) {
         domNode.setTop(
-          stackCoordinates[OverlayWidgetPositionPreference.TOP_CENTER],
+          stackCoordinates[OverlayWidgetPositionPreference.TOP_CENTER]
         )
         stackCoordinates[OverlayWidgetPositionPreference.TOP_CENTER] +=
           domNode.domNode.clientHeight
@@ -248,7 +248,7 @@ export class ViewOverlayWidgets extends ViewPart {
 
   public prepareRender(ctx: RenderingContext): void {
     this._viewDomNodeRect = dom.getDomNodePagePosition(
-      this._viewDomNode.domNode,
+      this._viewDomNode.domNode
     )
   }
 
@@ -258,10 +258,10 @@ export class ViewOverlayWidgets extends ViewPart {
     const keys = Object.keys(this._widgets)
     const stackCoordinates = Array.from(
       { length: OverlayWidgetPositionPreference.TOP_CENTER + 1 },
-      () => 0,
+      () => 0
     )
     keys.sort(
-      (a, b) => (this._widgets[a].stack || 0) - (this._widgets[b].stack || 0),
+      (a, b) => (this._widgets[a].stack || 0) - (this._widgets[b].stack || 0)
     )
 
     for (let i = 0, len = keys.length; i < len; i++) {

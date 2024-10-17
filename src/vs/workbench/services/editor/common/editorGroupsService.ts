@@ -49,7 +49,7 @@ import { IMenuChangeEvent } from "vs/platform/actions/common/actions"
 import { DeepPartial } from "vs/base/common/types"
 
 export const IEditorGroupsService = createDecorator<IEditorGroupsService>(
-  "editorGroupsService",
+  "editorGroupsService"
 )
 
 export const enum GroupDirection {
@@ -164,7 +164,7 @@ export interface IEditorReplacement {
 }
 
 export function isEditorReplacement(
-  replacement: unknown,
+  replacement: unknown
 ): replacement is IEditorReplacement {
   const candidate = replacement as IEditorReplacement | undefined
 
@@ -199,7 +199,7 @@ export interface IEditorSideGroup {
    */
   openEditor(
     editor: EditorInput,
-    options?: IEditorOptions,
+    options?: IEditorOptions
   ): Promise<IEditorPane | undefined>
 }
 
@@ -351,7 +351,7 @@ export interface IEditorGroupsContainer {
    */
   setSize(
     group: IEditorGroup | GroupIdentifier,
-    size: { width: number; height: number },
+    size: { width: number; height: number }
   ): void
 
   /**
@@ -359,7 +359,7 @@ export interface IEditorGroupsContainer {
    */
   arrangeGroups(
     arrangement: GroupsArrangement,
-    target?: IEditorGroup | GroupIdentifier,
+    target?: IEditorGroup | GroupIdentifier
   ): void
 
   /**
@@ -405,7 +405,7 @@ export interface IEditorGroupsContainer {
   findGroup(
     scope: IFindGroupScope,
     source?: IEditorGroup | GroupIdentifier,
-    wrap?: boolean,
+    wrap?: boolean
   ): IEditorGroup | undefined
 
   /**
@@ -417,7 +417,7 @@ export interface IEditorGroupsContainer {
    */
   addGroup(
     location: IEditorGroup | GroupIdentifier,
-    direction: GroupDirection,
+    direction: GroupDirection
   ): IEditorGroup
 
   /**
@@ -435,7 +435,7 @@ export interface IEditorGroupsContainer {
   moveGroup(
     group: IEditorGroup | GroupIdentifier,
     location: IEditorGroup | GroupIdentifier,
-    direction: GroupDirection,
+    direction: GroupDirection
   ): IEditorGroup
 
   /**
@@ -455,7 +455,7 @@ export interface IEditorGroupsContainer {
   mergeGroup(
     group: IEditorGroup | GroupIdentifier,
     target: IEditorGroup | GroupIdentifier,
-    options?: IMergeGroupOptions,
+    options?: IMergeGroupOptions
   ): boolean
 
   /**
@@ -475,7 +475,7 @@ export interface IEditorGroupsContainer {
   copyGroup(
     group: IEditorGroup | GroupIdentifier,
     location: IEditorGroup | GroupIdentifier,
-    direction: GroupDirection,
+    direction: GroupDirection
   ): IEditorGroup
 
   /**
@@ -484,7 +484,7 @@ export interface IEditorGroupsContainer {
    */
   createEditorDropTarget(
     container: unknown /* HTMLElement */,
-    delegate: IEditorDropTargetDelegate,
+    delegate: IEditorDropTargetDelegate
   ): IDisposable
 }
 
@@ -643,7 +643,7 @@ export interface IEditorGroupsService extends IEditorGroupsContainer {
    */
   applyWorkingSet(
     workingSet: IEditorWorkingSet | "empty",
-    options?: IEditorWorkingSetOptions,
+    options?: IEditorWorkingSetOptions
   ): Promise<boolean>
 
   /**
@@ -658,7 +658,7 @@ export interface IEditorGroupsService extends IEditorGroupsContainer {
    * @returns - A disposable object to unregister the provider.
    */
   registerContextKeyProvider<T extends ContextKeyValue>(
-    provider: IEditorGroupContextKeyProvider<T>,
+    provider: IEditorGroupContextKeyProvider<T>
   ): IDisposable
 }
 
@@ -802,7 +802,7 @@ export interface IEditorGroup {
    */
   getEditors(
     order: EditorsOrder,
-    options?: { excludeSticky?: boolean },
+    options?: { excludeSticky?: boolean }
   ): readonly EditorInput[]
 
   /**
@@ -816,7 +816,7 @@ export interface IEditorGroup {
    */
   findEditors(
     resource: URI,
-    options?: IFindEditorOptions,
+    options?: IFindEditorOptions
   ): readonly EditorInput[]
 
   /**
@@ -849,7 +849,7 @@ export interface IEditorGroup {
     editor: EditorInput,
     options?: IEditorOptions,
     adoy?: undefined,
-    domElement?: HTMLElement,
+    domElement?: HTMLElement
   ): Promise<IEditorPane | undefined>
 
   /**
@@ -861,7 +861,7 @@ export interface IEditorGroup {
    * opened, the result will only be one editor.
    */
   openEditors(
-    editors: EditorInputWithOptions[],
+    editors: EditorInputWithOptions[]
   ): Promise<IEditorPane | undefined>
 
   /**
@@ -898,7 +898,7 @@ export interface IEditorGroup {
    */
   setSelection(
     activeSelectedEditor: EditorInput,
-    inactiveSelectedEditors: EditorInput[],
+    inactiveSelectedEditors: EditorInput[]
   ): Promise<void>
 
   /**
@@ -909,7 +909,7 @@ export interface IEditorGroup {
    */
   contains(
     candidate: EditorInput | IUntypedEditorInput,
-    options?: IMatchEditorOptions,
+    options?: IMatchEditorOptions
   ): boolean
 
   /**
@@ -920,7 +920,7 @@ export interface IEditorGroup {
   moveEditor(
     editor: EditorInput,
     target: IEditorGroup,
-    options?: IEditorOptions,
+    options?: IEditorOptions
   ): boolean
 
   /**
@@ -938,7 +938,7 @@ export interface IEditorGroup {
   copyEditor(
     editor: EditorInput,
     target: IEditorGroup,
-    options?: IEditorOptions,
+    options?: IEditorOptions
   ): void
 
   /**
@@ -961,7 +961,7 @@ export interface IEditorGroup {
    */
   closeEditor(
     editor?: EditorInput,
-    options?: ICloseEditorOptions,
+    options?: ICloseEditorOptions
   ): Promise<boolean>
 
   /**
@@ -974,7 +974,7 @@ export interface IEditorGroup {
    */
   closeEditors(
     editors: EditorInput[] | ICloseEditorsFilter,
-    options?: ICloseEditorOptions,
+    options?: ICloseEditorOptions
   ): Promise<boolean>
 
   /**
@@ -1049,10 +1049,10 @@ export function isEditorGroup(obj: unknown): obj is IEditorGroup {
 //#region Editor Group Helpers
 
 export function preferredSideBySideGroupDirection(
-  configurationService: IConfigurationService,
+  configurationService: IConfigurationService
 ): GroupDirection.DOWN | GroupDirection.RIGHT {
   const openSideBySideDirection = configurationService.getValue(
-    "workbench.editor.openSideBySideDirection",
+    "workbench.editor.openSideBySideDirection"
   )
 
   if (openSideBySideDirection === "down") {

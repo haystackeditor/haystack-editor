@@ -9,8 +9,8 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { UserDataSyncStoreClient } from "vs/platform/userDataSync/common/userDataSyncStoreService"
+import { UserDataSyncStoreClient } from 'vs/platform/userDataSync/common/userDataSyncStoreService';
 
 export class EditSessionsStoreClient extends UserDataSyncStoreClient {
-  _serviceBrand: any
+	_serviceBrand: any;
 }

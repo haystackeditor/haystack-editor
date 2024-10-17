@@ -9,46 +9,43 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as eslint from "eslint"
-import { TSESTree } from "@typescript-eslint/experimental-utils"
+import * as eslint from 'eslint';
+import { TSESTree } from '@typescript-eslint/experimental-utils';
 
-export = new (class ApiProviderNaming implements eslint.Rule.RuleModule {
-  readonly meta: eslint.Rule.RuleMetaData = {
-    messages: {
-      naming:
-        "A provider should only have functions like provideXYZ or resolveXYZ",
-    },
-  }
+export = new class ApiProviderNaming implements eslint.Rule.RuleModule {
 
-  private static _providerFunctionNames = /^(provide|resolve|prepare).+/
+	readonly meta: eslint.Rule.RuleMetaData = {
+		messages: {
+			naming: 'A provider should only have functions like provideXYZ or resolveXYZ',
+		}
+	};
 
-  create(context: eslint.Rule.RuleContext): eslint.Rule.RuleListener {
-    const config = <{ allowed: string[] }>context.options[0]
-    const allowed = new Set(config.allowed)
+	private static _providerFunctionNames = /^(provide|resolve|prepare).+/;
 
-    return {
-      ["TSInterfaceDeclaration[id.name=/.+Provider/] TSMethodSignature"]: (
-        node: any,
-      ) => {
-        const interfaceName = (<TSESTree.TSInterfaceDeclaration>(
-          (<TSESTree.Identifier>node).parent?.parent
-        )).id.name
-        if (allowed.has(interfaceName)) {
-          // allowed
-          return
-        }
+	create(context: eslint.Rule.RuleContext): eslint.Rule.RuleListener {
 
-        const methodName = (<any>(
-          (<TSESTree.TSMethodSignatureNonComputedName>node).key
-        )).name
+		const config = <{ allowed: string[] }>context.options[0];
+		const allowed = new Set(config.allowed);
 
-        if (!ApiProviderNaming._providerFunctionNames.test(methodName)) {
-          context.report({
-            node,
-            messageId: "naming",
-          })
-        }
-      },
-    }
-  }
-})()
+		return {
+			['TSInterfaceDeclaration[id.name=/.+Provider/] TSMethodSignature']: (node: any) => {
+
+
+				const interfaceName = (<TSESTree.TSInterfaceDeclaration>(<TSESTree.Identifier>node).parent?.parent).id.name;
+				if (allowed.has(interfaceName)) {
+					// allowed
+					return;
+				}
+
+				const methodName = (<any>(<TSESTree.TSMethodSignatureNonComputedName>node).key).name;
+
+				if (!ApiProviderNaming._providerFunctionNames.test(methodName)) {
+					context.report({
+						node,
+						messageId: 'naming'
+					});
+				}
+			}
+		};
+	}
+};

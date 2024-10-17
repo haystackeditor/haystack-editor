@@ -134,7 +134,7 @@ export class MarkersWidgetAccessibilityProvider
       return Messages.MARKERS_TREE_ARIA_LABEL_RESOURCE(
         element.markers.length,
         element.name,
-        paths.dirname(path),
+        paths.dirname(path)
       )
     }
     if (element instanceof Marker || element instanceof MarkerTableItem) {
@@ -226,12 +226,12 @@ export class ResourceMarkersRenderer
     private labels: ResourceLabels,
     onDidChangeRenderNodeCount: Event<
       ITreeNode<ResourceMarkers, ResourceMarkersFilterData>
-    >,
+    >
   ) {
     onDidChangeRenderNodeCount(
       this.onDidChangeRenderNodeCount,
       this,
-      this.disposables,
+      this.disposables
     )
   }
 
@@ -240,7 +240,7 @@ export class ResourceMarkersRenderer
   renderTemplate(container: HTMLElement): IResourceMarkersTemplateData {
     const resourceLabelContainer = dom.append(
       container,
-      dom.$(".resource-label-container"),
+      dom.$(".resource-label-container")
     )
     const resourceLabel = this.labels.create(resourceLabelContainer, {
       supportHighlights: true,
@@ -255,7 +255,7 @@ export class ResourceMarkersRenderer
   renderElement(
     node: ITreeNode<ResourceMarkers, ResourceMarkersFilterData>,
     _: number,
-    templateData: IResourceMarkersTemplateData,
+    templateData: IResourceMarkersTemplateData
   ): void {
     const resourceMarkers = node.element
     const uriMatches = (node.filterData && node.filterData.uriMatches) || []
@@ -272,11 +272,11 @@ export class ResourceMarkersRenderer
   disposeElement(
     node: ITreeNode<ResourceMarkers, ResourceMarkersFilterData>,
     index: number,
-    templateData: IResourceMarkersTemplateData,
+    templateData: IResourceMarkersTemplateData
   ): void {
     const nodeRenders = this.renderedNodes.get(node.element) ?? []
     const nodeRenderIndex = nodeRenders.findIndex(
-      (nodeRender) => templateData === nodeRender,
+      (nodeRender) => templateData === nodeRender
     )
 
     if (nodeRenderIndex < 0) {
@@ -295,7 +295,7 @@ export class ResourceMarkersRenderer
   }
 
   private onDidChangeRenderNodeCount(
-    node: ITreeNode<ResourceMarkers, ResourceMarkersFilterData>,
+    node: ITreeNode<ResourceMarkers, ResourceMarkersFilterData>
   ): void {
     const nodeRenders = this.renderedNodes.get(node.element)
 
@@ -308,10 +308,10 @@ export class ResourceMarkersRenderer
 
   private updateCount(
     node: ITreeNode<ResourceMarkers, ResourceMarkersFilterData>,
-    templateData: IResourceMarkersTemplateData,
+    templateData: IResourceMarkersTemplateData
   ): void {
     templateData.count.setCount(
-      node.children.reduce((r, n) => r + (n.visible ? 1 : 0), 0),
+      node.children.reduce((r, n) => r + (n.visible ? 1 : 0), 0)
     )
   }
 
@@ -331,7 +331,7 @@ export class MarkerRenderer
     @IInstantiationService
     protected instantiationService: IInstantiationService,
     @IOpenerService protected openerService: IOpenerService,
-    @IHaystackService protected haystackService: IHaystackService,
+    @IHaystackService protected haystackService: IHaystackService
   ) {}
 
   templateId = TemplateId.Marker
@@ -344,7 +344,7 @@ export class MarkerRenderer
       this.hoverService,
       this.openerService,
       this.haystackService,
-      this.instantiationService,
+      this.instantiationService
     )
     return data
   }
@@ -352,7 +352,7 @@ export class MarkerRenderer
   renderElement(
     node: ITreeNode<Marker, MarkerFilterData>,
     _: number,
-    templateData: IMarkerTemplateData,
+    templateData: IMarkerTemplateData
   ): void {
     templateData.markerWidget.render(node.element, node.filterData)
   }
@@ -367,16 +367,16 @@ const expandedIcon = registerIcon(
   Codicon.chevronUp,
   localize(
     "expandedIcon",
-    "Icon indicating that multiple lines are shown in the markers view.",
-  ),
+    "Icon indicating that multiple lines are shown in the markers view."
+  )
 )
 const collapsedIcon = registerIcon(
   "markers-view-multi-line-collapsed",
   Codicon.chevronDown,
   localize(
     "collapsedIcon",
-    "Icon indicating that multiple lines are collapsed in the markers view.",
-  ),
+    "Icon indicating that multiple lines are collapsed in the markers view."
+  )
 )
 
 const toggleMultilineAction = "problems.action.toggleMultiline"
@@ -395,7 +395,7 @@ class ToggleMultilineActionViewItem extends ActionViewItem {
   private updateExpandedAttribute(): void {
     this.element?.setAttribute(
       "aria-expanded",
-      `${this._action.class === ThemeIcon.asClassName(expandedIcon)}`,
+      `${this._action.class === ThemeIcon.asClassName(expandedIcon)}`
     )
   }
 }
@@ -414,7 +414,7 @@ class MarkerWidget extends Disposable {
     private readonly _hoverService: IHoverService,
     private readonly _openerService: IOpenerService,
     private readonly _haystackService: IHaystackService,
-    _instantiationService: IInstantiationService,
+    _instantiationService: IInstantiationService
   ) {
     super()
     this.actionBar = this._register(
@@ -424,10 +424,10 @@ class MarkerWidget extends Disposable {
             ? _instantiationService.createInstance(
                 QuickFixActionViewItem,
                 <QuickFixAction>action,
-                options,
+                options
               )
             : undefined,
-      }),
+      })
     )
 
     // wrap the icon in a container that get the icon color as foreground color. That way, if the
@@ -437,14 +437,14 @@ class MarkerWidget extends Disposable {
     this.icon = dom.append(this.iconContainer, dom.$(""))
     this.messageAndDetailsContainer = dom.append(
       parent,
-      dom.$(".marker-message-details-container"),
+      dom.$(".marker-message-details-container")
     )
     this.messageAndDetailsContainerHover = this._register(
       this._hoverService.setupUpdatableHover(
         getDefaultHoverDelegate("mouse"),
         this.messageAndDetailsContainer,
-        "",
-      ),
+        ""
+      )
     )
   }
 
@@ -454,23 +454,23 @@ class MarkerWidget extends Disposable {
     dom.clearNode(this.messageAndDetailsContainer)
 
     this.iconContainer.className = `marker-icon ${Severity.toString(
-      MarkerSeverity.toSeverity(element.marker.severity),
+      MarkerSeverity.toSeverity(element.marker.severity)
     )}`
     this.icon.className = `codicon ${SeverityIcon.className(
-      MarkerSeverity.toSeverity(element.marker.severity),
+      MarkerSeverity.toSeverity(element.marker.severity)
     )}`
     this.renderQuickfixActionbar(element)
 
     this.renderMessageAndDetails(element, filterData)
     this.disposables.add(
       dom.addDisposableListener(this.parent, dom.EventType.MOUSE_OVER, () =>
-        this.markersViewModel.onMarkerMouseHover(element),
-      ),
+        this.markersViewModel.onMarkerMouseHover(element)
+      )
     )
     this.disposables.add(
       dom.addDisposableListener(this.parent, dom.EventType.MOUSE_LEAVE, () =>
-        this.markersViewModel.onMarkerMouseLeave(element),
-      ),
+        this.markersViewModel.onMarkerMouseLeave(element)
+      )
     )
   }
 
@@ -487,7 +487,7 @@ class MarkerWidget extends Disposable {
           }
         },
         this,
-        this.disposables,
+        this.disposables
       )
       quickFixAction.onShowQuickFixes(
         () => {
@@ -499,7 +499,7 @@ class MarkerWidget extends Disposable {
           }
         },
         this,
-        this.disposables,
+        this.disposables
       )
     }
   }
@@ -516,7 +516,7 @@ class MarkerWidget extends Disposable {
           }
           return undefined
         },
-      }),
+      })
     )
     this.disposables.add(toDisposable(() => multilineActionbar.dispose()))
 
@@ -528,7 +528,7 @@ class MarkerWidget extends Disposable {
       ? localize("single line", "Show message in single line")
       : localize("multi line", "Show message in multiple lines")
     action.class = ThemeIcon.asClassName(
-      multiline ? expandedIcon : collapsedIcon,
+      multiline ? expandedIcon : collapsedIcon
     )
     action.run = () => {
       if (viewModel) {
@@ -541,7 +541,7 @@ class MarkerWidget extends Disposable {
 
   private renderMessageAndDetails(
     element: Marker,
-    filterData: MarkerFilterData | undefined,
+    filterData: MarkerFilterData | undefined
   ): void {
     const { marker, lines } = element
     const viewState = this.markersViewModel.getViewModel(element)
@@ -553,17 +553,17 @@ class MarkerWidget extends Disposable {
     for (let index = 0; index < (multiline ? lines.length : 1); index++) {
       const lineElement = dom.append(
         this.messageAndDetailsContainer,
-        dom.$(".marker-message-line"),
+        dom.$(".marker-message-line")
       )
       const messageElement = dom.append(lineElement, dom.$(".marker-message"))
       const highlightedLabel = this.disposables.add(
-        new HighlightedLabel(messageElement),
+        new HighlightedLabel(messageElement)
       )
       highlightedLabel.set(
         lines[index].length > 1000
           ? `${lines[index].substring(0, 1000)}...`
           : lines[index],
-        lineMatches[index],
+        lineMatches[index]
       )
       if (lines[index] === "") {
         lineElement.style.height = `${VirtualDelegate.LINE_HEIGHT}px`
@@ -577,13 +577,13 @@ class MarkerWidget extends Disposable {
   private renderDetails(
     marker: IMarker,
     filterData: MarkerFilterData | undefined,
-    parent: HTMLElement,
+    parent: HTMLElement
   ): void {
     parent.classList.add("details-container")
 
     if (marker.source || marker.code) {
       const source = this.disposables.add(
-        new HighlightedLabel(dom.append(parent, dom.$(".marker-source"))),
+        new HighlightedLabel(dom.append(parent, dom.$(".marker-source")))
       )
       const sourceMatches = (filterData && filterData.sourceMatches) || []
       source.set(marker.source, sourceMatches)
@@ -591,7 +591,7 @@ class MarkerWidget extends Disposable {
       if (marker.code) {
         if (typeof marker.code === "string") {
           const code = this.disposables.add(
-            new HighlightedLabel(dom.append(parent, dom.$(".marker-code"))),
+            new HighlightedLabel(dom.append(parent, dom.$(".marker-code")))
           )
           const codeMatches = (filterData && filterData.codeMatches) || []
           code.set(marker.code, codeMatches)
@@ -606,8 +606,8 @@ class MarkerWidget extends Disposable {
               undefined,
               this._hoverService,
               this._openerService,
-              this._haystackService,
-            ),
+              this._haystackService
+            )
           )
           const codeMatches = (filterData && filterData.codeMatches) || []
           code.set(marker.code.value, codeMatches)
@@ -618,7 +618,7 @@ class MarkerWidget extends Disposable {
     const lnCol = dom.append(parent, dom.$("span.marker-line"))
     lnCol.textContent = Messages.MARKERS_PANEL_AT_LINE_COL_NUMBER(
       marker.startLineNumber,
-      marker.startColumn,
+      marker.startColumn
     )
   }
 }
@@ -642,19 +642,19 @@ export class RelatedInformationRenderer
     dom.append(container, dom.$(".icon"))
 
     data.resourceLabel = new HighlightedLabel(
-      dom.append(container, dom.$(".related-info-resource")),
+      dom.append(container, dom.$(".related-info-resource"))
     )
     data.lnCol = dom.append(container, dom.$("span.marker-line"))
 
     const separator = dom.append(
       container,
-      dom.$("span.related-info-resource-separator"),
+      dom.$("span.related-info-resource-separator")
     )
     separator.textContent = ":"
     separator.style.paddingRight = "4px"
 
     data.description = new HighlightedLabel(
-      dom.append(container, dom.$(".marker-description")),
+      dom.append(container, dom.$(".marker-description"))
     )
     return data
   }
@@ -662,7 +662,7 @@ export class RelatedInformationRenderer
   renderElement(
     node: ITreeNode<RelatedInformation, RelatedInformationFilterData>,
     _: number,
-    templateData: IRelatedInformationTemplateData,
+    templateData: IRelatedInformationTemplateData
   ): void {
     const relatedInformation = node.element.raw
     const uriMatches = (node.filterData && node.filterData.uriMatches) || []
@@ -671,21 +671,21 @@ export class RelatedInformationRenderer
 
     const resourceLabelTitle = this.labelService.getUriLabel(
       relatedInformation.resource,
-      { relative: true },
+      { relative: true }
     )
     templateData.resourceLabel.set(
       basename(relatedInformation.resource),
       uriMatches,
-      resourceLabelTitle,
+      resourceLabelTitle
     )
     templateData.lnCol.textContent = Messages.MARKERS_PANEL_AT_LINE_COL_NUMBER(
       relatedInformation.startLineNumber,
-      relatedInformation.startColumn,
+      relatedInformation.startColumn
     )
     templateData.description.set(
       relatedInformation.message,
       messageMatches,
-      relatedInformation.message,
+      relatedInformation.message
     )
   }
 
@@ -700,7 +700,7 @@ export class Filter implements ITreeFilter<MarkerElement, FilterData> {
 
   filter(
     element: MarkerElement,
-    parentVisibility: TreeVisibility,
+    parentVisibility: TreeVisibility
   ): TreeFilterResult<FilterData> {
     if (element instanceof ResourceMarkers) {
       return this.filterResourceMarkers(element)
@@ -712,7 +712,7 @@ export class Filter implements ITreeFilter<MarkerElement, FilterData> {
   }
 
   private filterResourceMarkers(
-    resourceMarkers: ResourceMarkers,
+    resourceMarkers: ResourceMarkers
   ): TreeFilterResult<FilterData> {
     if (unsupportedSchemas.has(resourceMarkers.resource.scheme)) {
       return false
@@ -733,7 +733,7 @@ export class Filter implements ITreeFilter<MarkerElement, FilterData> {
     if (this.options.textFilter.text && !this.options.textFilter.negate) {
       const uriMatches = FilterOptions._filter(
         this.options.textFilter.text,
-        basename(resourceMarkers.resource),
+        basename(resourceMarkers.resource)
       )
       if (uriMatches) {
         return {
@@ -751,7 +751,7 @@ export class Filter implements ITreeFilter<MarkerElement, FilterData> {
 
   private filterMarker(
     marker: Marker,
-    parentVisibility: TreeVisibility,
+    parentVisibility: TreeVisibility
   ): TreeFilterResult<FilterData> {
     const matchesSeverity =
       (this.options.showErrors &&
@@ -772,7 +772,7 @@ export class Filter implements ITreeFilter<MarkerElement, FilterData> {
     for (const line of marker.lines) {
       const lineMatch = FilterOptions._messageFilter(
         this.options.textFilter.text,
-        line,
+        line
       )
       lineMatches.push(lineMatch || [])
     }
@@ -780,7 +780,7 @@ export class Filter implements ITreeFilter<MarkerElement, FilterData> {
     const sourceMatches = marker.marker.source
       ? FilterOptions._filter(
           this.options.textFilter.text,
-          marker.marker.source,
+          marker.marker.source
         )
       : undefined
     const codeMatches = marker.marker.code
@@ -788,7 +788,7 @@ export class Filter implements ITreeFilter<MarkerElement, FilterData> {
           this.options.textFilter.text,
           typeof marker.marker.code === "string"
             ? marker.marker.code
-            : marker.marker.code.value,
+            : marker.marker.code.value
         )
       : undefined
     const matched =
@@ -832,7 +832,7 @@ export class Filter implements ITreeFilter<MarkerElement, FilterData> {
 
   private filterRelatedInformation(
     relatedInformation: RelatedInformation,
-    parentVisibility: TreeVisibility,
+    parentVisibility: TreeVisibility
   ): TreeFilterResult<FilterData> {
     if (!this.options.textFilter.text) {
       return true
@@ -840,11 +840,11 @@ export class Filter implements ITreeFilter<MarkerElement, FilterData> {
 
     const uriMatches = FilterOptions._filter(
       this.options.textFilter.text,
-      basename(relatedInformation.raw.resource),
+      basename(relatedInformation.raw.resource)
     )
     const messageMatches = FilterOptions._messageFilter(
       this.options.textFilter.text,
-      paths.basename(relatedInformation.raw.message),
+      paths.basename(relatedInformation.raw.message)
     )
     const matched = uriMatches || messageMatches
 
@@ -884,7 +884,7 @@ export class Filter implements ITreeFilter<MarkerElement, FilterData> {
 
 export class MarkerViewModel extends Disposable {
   private readonly _onDidChange: Emitter<void> = this._register(
-    new Emitter<void>(),
+    new Emitter<void>()
   )
   readonly onDidChange: Event<void> = this._onDidChange.event
 
@@ -897,7 +897,7 @@ export class MarkerViewModel extends Disposable {
     @IInstantiationService private instantiationService: IInstantiationService,
     @IEditorService private readonly editorService: IEditorService,
     @ILanguageFeaturesService
-    private readonly languageFeaturesService: ILanguageFeaturesService,
+    private readonly languageFeaturesService: ILanguageFeaturesService
   ) {
     super()
     this._register(
@@ -908,7 +908,7 @@ export class MarkerViewModel extends Disposable {
         if (this.codeActionsPromise) {
           this.codeActionsPromise.cancel()
         }
-      }),
+      })
     )
   }
 
@@ -928,7 +928,7 @@ export class MarkerViewModel extends Disposable {
   get quickFixAction(): QuickFixAction {
     if (!this._quickFixAction) {
       this._quickFixAction = this._register(
-        this.instantiationService.createInstance(QuickFixAction, this.marker),
+        this.instantiationService.createInstance(QuickFixAction, this.marker)
       )
     }
     return this._quickFixAction
@@ -962,7 +962,7 @@ export class MarkerViewModel extends Disposable {
                   this.marker.range.startLineNumber,
                   this.marker.range.startColumn,
                   this.marker.range.endLineNumber,
-                  this.marker.range.endColumn,
+                  this.marker.range.endColumn
                 ),
                 {
                   type: CodeActionTriggerType.Invoke,
@@ -970,11 +970,11 @@ export class MarkerViewModel extends Disposable {
                   filter: { include: CodeActionKind.QuickFix },
                 },
                 Progress.None,
-                cancellationToken,
+                cancellationToken
               ).then((actions) => {
                 return this._register(actions)
               })
-            },
+            }
           )
         }
         return this.codeActionsPromise
@@ -996,11 +996,11 @@ export class MarkerViewModel extends Disposable {
               this.instantiationService.invokeFunction(
                 applyCodeAction,
                 item,
-                ApplyCodeActionReason.FromProblemsView,
-              ),
+                ApplyCodeActionReason.FromProblemsView
+              )
             )
-          },
-        ),
+          }
+        )
     )
   }
 
@@ -1020,7 +1020,7 @@ export class MarkerViewModel extends Disposable {
             revealIfVisible: true,
           },
         },
-        ACTIVE_GROUP,
+        ACTIVE_GROUP
       )
       .then(() => undefined)
   }
@@ -1039,7 +1039,7 @@ export class MarkerViewModel extends Disposable {
                 if (isEqual(model.uri, this.marker.resource)) {
                   c(model)
                 }
-              }),
+              })
             )
           })
         })
@@ -1052,7 +1052,7 @@ export class MarkerViewModel extends Disposable {
 
 export class MarkersViewModel extends Disposable {
   private readonly _onDidChange: Emitter<Marker | undefined> = this._register(
-    new Emitter<Marker | undefined>(),
+    new Emitter<Marker | undefined>()
   )
   readonly onDidChange: Event<Marker | undefined> = this._onDidChange.event
 
@@ -1084,7 +1084,7 @@ export class MarkersViewModel extends Disposable {
     viewMode: MarkersViewMode = MarkersViewMode.Tree,
     @IContextKeyService private readonly contextKeyService: IContextKeyService,
     @IInstantiationService
-    private readonly instantiationService: IInstantiationService,
+    private readonly instantiationService: IInstantiationService
   ) {
     super()
     this._multiline = multiline
@@ -1092,7 +1092,7 @@ export class MarkersViewModel extends Disposable {
 
     this.viewModeContextKey =
       MarkersContextKeys.MarkersViewModeContextKey.bindTo(
-        this.contextKeyService,
+        this.contextKeyService
       )
     this.viewModeContextKey.set(viewMode)
   }
@@ -1101,7 +1101,7 @@ export class MarkersViewModel extends Disposable {
     if (!this.markersViewStates.has(marker.id)) {
       const viewModel = this.instantiationService.createInstance(
         MarkerViewModel,
-        marker,
+        marker
       )
       const disposables: IDisposable[] = [viewModel]
       viewModel.multiline = this.multiline
@@ -1112,7 +1112,7 @@ export class MarkersViewModel extends Disposable {
           }
         },
         this,
-        disposables,
+        disposables
       )
       this.markersViewStates.set(marker.id, { viewModel, disposables })
 

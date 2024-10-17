@@ -76,20 +76,20 @@ export class HoverService extends Disposable implements IHoverService {
     @IKeybindingService private readonly _keybindingService: IKeybindingService,
     @ILayoutService private readonly _layoutService: ILayoutService,
     @IAccessibilityService
-    private readonly _accessibilityService: IAccessibilityService,
+    private readonly _accessibilityService: IAccessibilityService
   ) {
     super()
 
     contextMenuService.onDidShowContextMenu(() => this.hideHover())
     this._contextViewHandler = this._register(
-      new ContextViewHandler(this._layoutService),
+      new ContextViewHandler(this._layoutService)
     )
   }
 
   showHover(
     options: IHoverOptions,
     focus?: boolean,
-    skipLastFocusedUpdate?: boolean,
+    skipLastFocusedUpdate?: boolean
   ): IHoverWidget | undefined {
     if (
       getHoverOptionsIdentity(this._currentHoverOptions) ===
@@ -118,7 +118,7 @@ export class HoverService extends Disposable implements IHoverService {
     const hoverDisposables = new DisposableStore()
     const hover = this._instantiationService.createInstance(
       HoverWidget,
-      options,
+      options
     )
     if (options.persistence?.sticky) {
       hover.isLocked = true
@@ -141,7 +141,7 @@ export class HoverService extends Disposable implements IHoverService {
         hoverDisposables.dispose()
       },
       undefined,
-      hoverDisposables,
+      hoverDisposables
     )
     // Set the container explicitly to enable aux window support
     if (!options.container) {
@@ -149,18 +149,18 @@ export class HoverService extends Disposable implements IHoverService {
         ? options.target
         : options.target.targetElements[0]
       options.container = this._layoutService.getContainer(
-        getWindow(targetElement),
+        getWindow(targetElement)
       )
     }
 
     this._contextViewHandler.showContextView(
       new HoverContextViewDelegate(hover, focus),
-      options.container,
+      options.container
     )
     hover.onRequestLayout(
       () => this._contextViewHandler.layout(),
       undefined,
-      hoverDisposables,
+      hoverDisposables
     )
     if (options.persistence?.sticky) {
       hoverDisposables.add(
@@ -171,23 +171,23 @@ export class HoverService extends Disposable implements IHoverService {
             if (!isAncestor(e.target as HTMLElement, hover.domNode)) {
               this.doHideHover()
             }
-          },
-        ),
+          }
+        )
       )
     } else {
       if ("targetElements" in options.target) {
         for (const element of options.target.targetElements) {
           hoverDisposables.add(
             addDisposableListener(element, EventType.CLICK, () =>
-              this.hideHover(),
-            ),
+              this.hideHover()
+            )
           )
         }
       } else {
         hoverDisposables.add(
           addDisposableListener(options.target, EventType.CLICK, () =>
-            this.hideHover(),
-          ),
+            this.hideHover()
+          )
         )
       }
       const focusedElement = getActiveElement()
@@ -195,26 +195,25 @@ export class HoverService extends Disposable implements IHoverService {
         const focusedElementDocument = getWindow(focusedElement).document
         hoverDisposables.add(
           addDisposableListener(focusedElement, EventType.KEY_DOWN, (e) =>
-            this._keyDown(e, hover, !!options.persistence?.hideOnKeyDown),
-          ),
+            this._keyDown(e, hover, !!options.persistence?.hideOnKeyDown)
+          )
         )
         hoverDisposables.add(
           addDisposableListener(
             focusedElementDocument,
             EventType.KEY_DOWN,
-            (e) =>
-              this._keyDown(e, hover, !!options.persistence?.hideOnKeyDown),
-          ),
+            (e) => this._keyDown(e, hover, !!options.persistence?.hideOnKeyDown)
+          )
         )
         hoverDisposables.add(
           addDisposableListener(focusedElement, EventType.KEY_UP, (e) =>
-            this._keyUp(e, hover),
-          ),
+            this._keyUp(e, hover)
+          )
         )
         hoverDisposables.add(
           addDisposableListener(focusedElementDocument, EventType.KEY_UP, (e) =>
-            this._keyUp(e, hover),
-          ),
+            this._keyUp(e, hover)
+          )
         )
       }
     }
@@ -222,7 +221,7 @@ export class HoverService extends Disposable implements IHoverService {
     if ("IntersectionObserver" in mainWindow) {
       const observer = new IntersectionObserver(
         (e) => this._intersectionChange(e, hover),
-        { threshold: 0 },
+        { threshold: 0 }
       )
       const firstTargetElement =
         "targetElements" in options.target
@@ -252,7 +251,7 @@ export class HoverService extends Disposable implements IHoverService {
 
   private _intersectionChange(
     entries: IntersectionObserverEntry[],
-    hover: IDisposable,
+    hover: IDisposable
   ): void {
     const entry = entries[entries.length - 1]
     if (!entry.isIntersecting) {
@@ -270,7 +269,7 @@ export class HoverService extends Disposable implements IHoverService {
   private _keyDown(
     e: KeyboardEvent,
     hover: HoverWidget,
-    hideOnKeyDown: boolean,
+    hideOnKeyDown: boolean
   ) {
     if (e.key === "Alt") {
       hover.isLocked = true
@@ -313,13 +312,13 @@ export class HoverService extends Disposable implements IHoverService {
     hoverDelegate: IHoverDelegate,
     htmlElement: HTMLElement,
     content: IUpdatableHoverContentOrFactory,
-    options?: IUpdatableHoverOptions | undefined,
+    options?: IUpdatableHoverOptions | undefined
   ): IUpdatableHover {
     htmlElement.setAttribute("custom-hover", "true")
 
     if (htmlElement.title !== "") {
       console.warn(
-        "HTML element already has a title attribute, which will conflict with the custom hover. Please remove the title attribute.",
+        "HTML element already has a title attribute, which will conflict with the custom hover. Please remove the title attribute."
       )
       console.trace("Stack trace:", htmlElement.title)
       htmlElement.title = ""
@@ -348,19 +347,19 @@ export class HoverService extends Disposable implements IHoverService {
       delay: number,
       focus?: boolean,
       target?: IHoverDelegateTarget,
-      trapFocus?: boolean,
+      trapFocus?: boolean
     ) => {
       return new TimeoutTimer(async () => {
         if (!hoverWidget || hoverWidget.isDisposed) {
           hoverWidget = new UpdatableHoverWidget(
             hoverDelegate,
             target || htmlElement,
-            delay > 0,
+            delay > 0
           )
           await hoverWidget.update(
             typeof content === "function" ? content() : content,
             focus,
-            { ...options, trapFocus },
+            { ...options, trapFocus }
           )
         }
       }, delay)
@@ -374,7 +373,7 @@ export class HoverService extends Disposable implements IHoverService {
         isMouseDown = true
         hideHover(true, true)
       },
-      true,
+      true
     )
     const mouseUpEmitter = addDisposableListener(
       htmlElement,
@@ -382,7 +381,7 @@ export class HoverService extends Disposable implements IHoverService {
       () => {
         isMouseDown = false
       },
-      true,
+      true
     )
     const mouseLeaveEmitter = addDisposableListener(
       htmlElement,
@@ -391,7 +390,7 @@ export class HoverService extends Disposable implements IHoverService {
         isMouseDown = false
         hideHover(false, (<any>e).fromElement === htmlElement)
       },
-      true,
+      true
     )
 
     const onMouseOver = (e: MouseEvent) => {
@@ -424,8 +423,8 @@ export class HoverService extends Disposable implements IHoverService {
             htmlElement,
             EventType.MOUSE_MOVE,
             onMouseMove,
-            true,
-          ),
+            true
+          )
         )
       }
 
@@ -445,7 +444,7 @@ export class HoverService extends Disposable implements IHoverService {
       htmlElement,
       EventType.MOUSE_OVER,
       onMouseOver,
-      true,
+      true
     )
 
     const onFocus = () => {
@@ -459,7 +458,7 @@ export class HoverService extends Disposable implements IHoverService {
       const toDispose: DisposableStore = new DisposableStore()
       const onBlur = () => hideHover(true, true)
       toDispose.add(
-        addDisposableListener(htmlElement, EventType.BLUR, onBlur, true),
+        addDisposableListener(htmlElement, EventType.BLUR, onBlur, true)
       )
       toDispose.add(triggerShowHover(hoverDelegate.delay, false, target))
       hoverPreparation = toDispose
@@ -473,7 +472,7 @@ export class HoverService extends Disposable implements IHoverService {
         htmlElement,
         EventType.FOCUS,
         onFocus,
-        true,
+        true
       )
     }
 
@@ -517,7 +516,7 @@ export class HoverService extends Disposable implements IHoverService {
 }
 
 function getHoverOptionsIdentity(
-  options: IHoverOptions | undefined,
+  options: IHoverOptions | undefined
 ): IHoverOptions | number | string | undefined {
   if (options === undefined) {
     return undefined
@@ -535,7 +534,7 @@ class HoverContextViewDelegate implements IDelegate {
 
   constructor(
     private readonly _hover: HoverWidget,
-    private readonly _focus: boolean = false,
+    private readonly _focus: boolean = false
   ) {}
 
   render(container: HTMLElement) {
@@ -560,7 +559,7 @@ class HoverContextViewDelegate implements IDelegate {
 
 function getHoverTargetElement(
   element: HTMLElement,
-  stopElement?: HTMLElement,
+  stopElement?: HTMLElement
 ): HTMLElement {
   stopElement = stopElement ?? getWindow(element).document.body
   while (!element.hasAttribute("custom-hover") && element !== stopElement) {
@@ -576,13 +575,13 @@ registerThemingParticipant((theme, collector) => {
   if (hoverBorder) {
     collector.addRule(
       `.monaco-workbench .workbench-hover .hover-row:not(:first-child):not(:empty) { border-top: 1px solid ${hoverBorder.transparent(
-        0.5,
-      )}; }`,
+        0.5
+      )}; }`
     )
     collector.addRule(
       `.monaco-workbench .workbench-hover hr { border-top: 1px solid ${hoverBorder.transparent(
-        0.5,
-      )}; }`,
+        0.5
+      )}; }`
     )
   }
 })

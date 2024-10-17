@@ -9,27 +9,28 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { createHash } from "crypto"
-import { listenStream } from "vs/base/common/stream"
-import { URI } from "vs/base/common/uri"
-import { IChecksumService } from "vs/platform/checksum/common/checksumService"
-import { IFileService } from "vs/platform/files/common/files"
+import { createHash } from 'crypto';
+import { listenStream } from 'vs/base/common/stream';
+import { URI } from 'vs/base/common/uri';
+import { IChecksumService } from 'vs/platform/checksum/common/checksumService';
+import { IFileService } from 'vs/platform/files/common/files';
 
 export class ChecksumService implements IChecksumService {
-  declare readonly _serviceBrand: undefined
 
-  constructor(@IFileService private readonly fileService: IFileService) {}
+	declare readonly _serviceBrand: undefined;
 
-  async checksum(resource: URI): Promise<string> {
-    const stream = (await this.fileService.readFileStream(resource)).value
-    return new Promise<string>((resolve, reject) => {
-      const hash = createHash("sha256")
+	constructor(@IFileService private readonly fileService: IFileService) { }
 
-      listenStream(stream, {
-        onData: (data) => hash.update(data.buffer),
-        onError: (error) => reject(error),
-        onEnd: () => resolve(hash.digest("base64").replace(/=+$/, "")),
-      })
-    })
-  }
+	async checksum(resource: URI): Promise<string> {
+		const stream = (await this.fileService.readFileStream(resource)).value;
+		return new Promise<string>((resolve, reject) => {
+			const hash = createHash('sha256');
+
+			listenStream(stream, {
+				onData: data => hash.update(data.buffer),
+				onError: error => reject(error),
+				onEnd: () => resolve(hash.digest('base64').replace(/=+$/, ''))
+			});
+		});
+	}
 }

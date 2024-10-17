@@ -75,7 +75,7 @@ export class GotoDefinitionAtPositionEditorContribution
     private readonly textModelResolverService: ITextModelService,
     @ILanguageService private readonly languageService: ILanguageService,
     @ILanguageFeaturesService
-    private readonly languageFeaturesService: ILanguageFeaturesService,
+    private readonly languageFeaturesService: ILanguageFeaturesService
   ) {
     this.editor = editor
     this.linkDecorations = this.editor.createDecorationsCollection()
@@ -88,10 +88,10 @@ export class GotoDefinitionAtPositionEditorContribution
         ([mouseEvent, keyboardEvent]) => {
           this.startFindDefinitionFromMouse(
             mouseEvent,
-            keyboardEvent ?? undefined,
+            keyboardEvent ?? undefined
           )
-        },
-      ),
+        }
+      )
     )
 
     this.toUnhook.add(
@@ -99,7 +99,7 @@ export class GotoDefinitionAtPositionEditorContribution
         if (this.isEnabled(mouseEvent)) {
           this.gotoDefinition(
             mouseEvent.target.position!,
-            mouseEvent.isShiftClick,
+            mouseEvent.isShiftClick
           )
             .catch((error: Error) => {
               onUnexpectedError(error)
@@ -108,22 +108,22 @@ export class GotoDefinitionAtPositionEditorContribution
               this.removeLinkDecorations()
             })
         }
-      }),
+      })
     )
 
     this.toUnhook.add(
       linkGesture.onCancel(() => {
         this.removeLinkDecorations()
         this.currentWordAtPosition = null
-      }),
+      })
     )
   }
 
   static get(
-    editor: ICodeEditor,
+    editor: ICodeEditor
   ): GotoDefinitionAtPositionEditorContribution | null {
     return editor.getContribution<GotoDefinitionAtPositionEditorContribution>(
-      GotoDefinitionAtPositionEditorContribution.ID,
+      GotoDefinitionAtPositionEditorContribution.ID
     )
   }
 
@@ -136,7 +136,7 @@ export class GotoDefinitionAtPositionEditorContribution
     const editRange = this.editor._getViewModel()?.getEditRange()
     if (editRange != null) {
       await this.startFindDefinition(
-        position.delta(editRange.startLineNumber - 1),
+        position.delta(editRange.startLineNumber - 1)
       )
     } else {
       await this.startFindDefinition(position)
@@ -151,7 +151,7 @@ export class GotoDefinitionAtPositionEditorContribution
         this.currentWordAtPosition = null
         this.removeLinkDecorations()
         this.toUnhookForKeyboard.clear()
-      }),
+      })
     )
     this.toUnhookForKeyboard.add(
       this.editor.onKeyDown((e: IKeyboardEvent) => {
@@ -160,13 +160,13 @@ export class GotoDefinitionAtPositionEditorContribution
           this.removeLinkDecorations()
           this.toUnhookForKeyboard.clear()
         }
-      }),
+      })
     )
   }
 
   private startFindDefinitionFromMouse(
     mouseEvent: ClickLinkMouseEvent,
-    withKey?: ClickLinkKeyboardEvent,
+    withKey?: ClickLinkKeyboardEvent
   ): void {
     // check if we are active and on a content widget
     if (
@@ -224,7 +224,7 @@ export class GotoDefinitionAtPositionEditorContribution
       CodeEditorStateFlag.Position |
         CodeEditorStateFlag.Value |
         CodeEditorStateFlag.Selection |
-        CodeEditorStateFlag.Scroll,
+        CodeEditorStateFlag.Scroll
     )
 
     if (this.previousPromise) {
@@ -233,7 +233,7 @@ export class GotoDefinitionAtPositionEditorContribution
     }
 
     this.previousPromise = createCancelablePromise((token) =>
-      this.findDefinition(position, token),
+      this.findDefinition(position, token)
     )
 
     let results: LocationLink[] | null
@@ -255,7 +255,7 @@ export class GotoDefinitionAtPositionEditorContribution
           position.lineNumber,
           word.startColumn,
           position.lineNumber,
-          word.endColumn,
+          word.endColumn
         )
 
     // Multiple results
@@ -273,9 +273,9 @@ export class GotoDefinitionAtPositionEditorContribution
           nls.localize(
             "multipleResults",
             "Click to show {0} definitions.",
-            results.length,
-          ),
-        ),
+            results.length
+          )
+        )
       )
     } else {
       // Single result
@@ -310,20 +310,20 @@ export class GotoDefinitionAtPositionEditorContribution
           const previewValue = this.getPreviewValue(
             textEditorModel,
             startLineNumber,
-            result,
+            result
           )
           const languageId =
             this.languageService.guessLanguageIdByFilepathOrFirstLine(
-              textEditorModel.uri,
+              textEditorModel.uri
             )
           this.addDecoration(
             linkRange,
             previewValue
               ? new MarkdownString().appendCodeblock(
                   languageId ? languageId : "",
-                  previewValue,
+                  previewValue
                 )
-              : undefined,
+              : undefined
           )
           ref.dispose()
         })
@@ -333,7 +333,7 @@ export class GotoDefinitionAtPositionEditorContribution
   private getPreviewValue(
     textEditorModel: ITextModel,
     startLineNumber: number,
-    result: LocationLink,
+    result: LocationLink
   ) {
     let rangeToUse = result.range
     const numberOfLinesInRange =
@@ -344,14 +344,14 @@ export class GotoDefinitionAtPositionEditorContribution
     ) {
       rangeToUse = this.getPreviewRangeBasedOnIndentation(
         textEditorModel,
-        startLineNumber,
+        startLineNumber
       )
     }
 
     const previewValue = this.stripIndentationFromPreviewRange(
       textEditorModel,
       startLineNumber,
-      rangeToUse,
+      rangeToUse
     )
     return previewValue
   }
@@ -359,7 +359,7 @@ export class GotoDefinitionAtPositionEditorContribution
   private stripIndentationFromPreviewRange(
     textEditorModel: ITextModel,
     startLineNumber: number,
-    previewRange: IRange,
+    previewRange: IRange
   ) {
     const startIndent =
       textEditorModel.getLineFirstNonWhitespaceColumn(startLineNumber)
@@ -384,14 +384,14 @@ export class GotoDefinitionAtPositionEditorContribution
 
   private getPreviewRangeBasedOnIndentation(
     textEditorModel: ITextModel,
-    startLineNumber: number,
+    startLineNumber: number
   ) {
     const startIndent =
       textEditorModel.getLineFirstNonWhitespaceColumn(startLineNumber)
     const maxLineNumber = Math.min(
       textEditorModel.getLineCount(),
       startLineNumber +
-        GotoDefinitionAtPositionEditorContribution.MAX_SOURCE_PREVIEW_LINES,
+        GotoDefinitionAtPositionEditorContribution.MAX_SOURCE_PREVIEW_LINES
     )
     let endLineNumber = startLineNumber + 1
 
@@ -409,7 +409,7 @@ export class GotoDefinitionAtPositionEditorContribution
 
   private addDecoration(
     range: Range,
-    hoverMessage: MarkdownString | undefined,
+    hoverMessage: MarkdownString | undefined
   ): void {
     const newDecorations: IModelDeltaDecoration = {
       range: range,
@@ -429,7 +429,7 @@ export class GotoDefinitionAtPositionEditorContribution
 
   private isEnabled(
     mouseEvent: ClickLinkMouseEvent,
-    withKey?: ClickLinkKeyboardEvent,
+    withKey?: ClickLinkKeyboardEvent
   ): boolean {
     return (
       this.editor.hasModel() &&
@@ -443,14 +443,14 @@ export class GotoDefinitionAtPositionEditorContribution
       (mouseEvent.hasTriggerModifier ||
         (withKey ? withKey.keyCodeIsTriggerKey : false)) &&
       this.languageFeaturesService.definitionProvider.has(
-        this.editor.getModel(),
+        this.editor.getModel()
       )
     )
   }
 
   private findDefinition(
     position: Position,
-    token: CancellationToken,
+    token: CancellationToken
   ): Promise<LocationLink[] | null> {
     const model = this.editor.getModel()
     if (!model) {
@@ -461,16 +461,16 @@ export class GotoDefinitionAtPositionEditorContribution
       this.languageFeaturesService.definitionProvider,
       model,
       position,
-      token,
+      token
     )
   }
 
   private gotoDefinition(
     position: Position,
-    isShiftClick: boolean,
+    isShiftClick: boolean
   ): Promise<any> {
     WorkspaceStoreWrapper.getWorkspaceState().sendTelemetry(
-      "command-click used to navigate",
+      "command-click used to navigate"
     )
     const editRange = this.editor._getViewModel()?.getEditRange()
     const adjustedPosition = editRange
@@ -490,7 +490,7 @@ export class GotoDefinitionAtPositionEditorContribution
           muteMessage: true,
           openNewEditor: isShiftClick,
         },
-        { title: { value: "", original: "" }, id: "", precondition: undefined },
+        { title: { value: "", original: "" }, id: "", precondition: undefined }
       )
       return action.run(accessor)
     })
@@ -510,5 +510,5 @@ export class GotoDefinitionAtPositionEditorContribution
 registerEditorContribution(
   GotoDefinitionAtPositionEditorContribution.ID,
   GotoDefinitionAtPositionEditorContribution,
-  EditorContributionInstantiation.BeforeFirstInteraction,
+  EditorContributionInstantiation.BeforeFirstInteraction
 )

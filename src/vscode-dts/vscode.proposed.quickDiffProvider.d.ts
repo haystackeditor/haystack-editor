@@ -9,19 +9,15 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-declare module "vscode" {
-  // https://github.com/microsoft/vscode/issues/169012
+declare module 'vscode' {
 
-  export namespace window {
-    export function registerQuickDiffProvider(
-      selector: DocumentSelector,
-      quickDiffProvider: QuickDiffProvider,
-      label: string,
-      rootUri?: Uri,
-    ): Disposable
-  }
+	// https://github.com/microsoft/vscode/issues/169012
 
-  interface QuickDiffProvider {
-    label?: string
-  }
+	export namespace window {
+		export function registerQuickDiffProvider(selector: DocumentSelector, quickDiffProvider: QuickDiffProvider, label: string, rootUri?: Uri): Disposable;
+	}
+
+	interface QuickDiffProvider {
+		label?: string;
+	}
 }

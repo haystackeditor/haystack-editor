@@ -10,40 +10,39 @@
  *--------------------------------------------------------------------------------------------*/
 
 .monaco-editor .suggest-preview-additional-widget {
-  white-space: nowrap;
+	white-space: nowrap;
 }
 
 .monaco-editor .suggest-preview-additional-widget .content-spacer {
-  color: transparent;
-  white-space: pre;
+	color: transparent;
+	white-space: pre;
 }
 
 .monaco-editor .suggest-preview-additional-widget .button {
-  display: inline-block;
-  cursor: pointer;
-  text-decoration: underline;
-  text-underline-position: under;
+	display: inline-block;
+	cursor: pointer;
+	text-decoration: underline;
+	text-underline-position: under;
 }
 
 .monaco-editor .ghost-text-hidden {
-  opacity: 0;
-  font-size: 0;
+	opacity: 0;
+	font-size: 0;
 }
 
-.monaco-editor .ghost-text-decoration,
-.monaco-editor .suggest-preview-text .ghost-text {
-  font-style: italic;
+.monaco-editor .ghost-text-decoration, .monaco-editor .suggest-preview-text .ghost-text {
+	font-style: italic;
 }
 
 .monaco-editor .inline-completion-text-to-replace {
-  text-decoration: underline;
-  text-underline-position: under;
+	text-decoration: underline;
+	text-underline-position: under;
 }
 
 .monaco-editor .ghost-text-decoration,
 .monaco-editor .ghost-text-decoration-preview,
 .monaco-editor .suggest-preview-text .ghost-text {
-  color: var(--vscode-editorGhostText-foreground) !important;
-  background-color: var(--vscode-editorGhostText-background);
-  border: 1px solid var(--vscode-editorGhostText-border);
+	color: var(--vscode-editorGhostText-foreground) !important;
+	background-color: var(--vscode-editorGhostText-background);
+	border: 1px solid var(--vscode-editorGhostText-border);
 }

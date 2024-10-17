@@ -9,45 +9,49 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as assert from "assert"
-import { isFunction } from "vs/base/common/types"
-import { Registry } from "vs/platform/registry/common/platform"
+import * as assert from 'assert';
+import { isFunction } from 'vs/base/common/types';
+import { Registry } from 'vs/platform/registry/common/platform';
 
-suite("Platform / Registry", () => {
-  test("registry - api", function () {
-    assert.ok(isFunction(Registry.add))
-    assert.ok(isFunction(Registry.as))
-    assert.ok(isFunction(Registry.knows))
-  })
+suite('Platform / Registry', () => {
 
-  test("registry - mixin", function () {
-    Registry.add("foo", { bar: true })
+	test('registry - api', function () {
+		assert.ok(isFunction(Registry.add));
+		assert.ok(isFunction(Registry.as));
+		assert.ok(isFunction(Registry.knows));
+	});
 
-    assert.ok(Registry.knows("foo"))
-    assert.ok(Registry.as<any>("foo").bar)
-    assert.strictEqual(Registry.as<any>("foo").bar, true)
-  })
+	test('registry - mixin', function () {
 
-  test("registry - knows, as", function () {
-    const ext = {}
+		Registry.add('foo', { bar: true });
 
-    Registry.add("knows,as", ext)
+		assert.ok(Registry.knows('foo'));
+		assert.ok(Registry.as<any>('foo').bar);
+		assert.strictEqual(Registry.as<any>('foo').bar, true);
+	});
 
-    assert.ok(Registry.knows("knows,as"))
-    assert.ok(!Registry.knows("knows,as1234"))
+	test('registry - knows, as', function () {
 
-    assert.ok(Registry.as("knows,as") === ext)
-    assert.ok(Registry.as("knows,as1234") === null)
-  })
+		const ext = {};
 
-  test("registry - mixin, fails on duplicate ids", function () {
-    Registry.add("foo-dup", { bar: true })
+		Registry.add('knows,as', ext);
 
-    try {
-      Registry.add("foo-dup", { bar: false })
-      assert.ok(false)
-    } catch (e) {
-      assert.ok(true)
-    }
-  })
-})
+		assert.ok(Registry.knows('knows,as'));
+		assert.ok(!Registry.knows('knows,as1234'));
+
+		assert.ok(Registry.as('knows,as') === ext);
+		assert.ok(Registry.as('knows,as1234') === null);
+	});
+
+	test('registry - mixin, fails on duplicate ids', function () {
+
+		Registry.add('foo-dup', { bar: true });
+
+		try {
+			Registry.add('foo-dup', { bar: false });
+			assert.ok(false);
+		} catch (e) {
+			assert.ok(true);
+		}
+	});
+});

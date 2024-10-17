@@ -14,7 +14,7 @@
     baseUrl?: string
     createTrustedTypesPolicy<Options extends TrustedTypePolicyOptions>(
       policyName: string,
-      policyOptions?: Options,
+      policyOptions?: Options
     ):
       | undefined
       | Pick<
@@ -31,7 +31,7 @@
 
   function createTrustedTypesPolicy<Options extends TrustedTypePolicyOptions>(
     policyName: string,
-    policyOptions?: Options,
+    policyOptions?: Options
   ):
     | undefined
     | Pick<
@@ -42,7 +42,7 @@
       try {
         return monacoEnvironment.createTrustedTypesPolicy(
           policyName,
-          policyOptions,
+          policyOptions
         )
       } catch (err) {
         console.warn(err)
@@ -111,10 +111,7 @@
             text = `${text}\n//# sourceURL=${loaderSrc}`
             const func = trustedTypesPolicy
               ? globalThis.eval(
-                  trustedTypesPolicy.createScript(
-                    "",
-                    text,
-                  ) as unknown as string,
+                  trustedTypesPolicy.createScript("", text) as unknown as string
                 ) // CodeQL [SM01632] fetch + eval is used on the web worker instead of importScripts if possible because importScripts is synchronous and we observed deadlocks on Safari
               : new Function(text) // CodeQL [SM01632] fetch + eval is used on the web worker instead of importScripts if possible because importScripts is synchronous and we observed deadlocks on Safari
             func.call(globalThis)
@@ -126,7 +123,7 @@
 
       if (trustedTypesPolicy) {
         importScripts(
-          trustedTypesPolicy.createScriptURL(loaderSrc) as unknown as string,
+          trustedTypesPolicy.createScriptURL(loaderSrc) as unknown as string
         )
       } else {
         importScripts(loaderSrc as string)
@@ -153,7 +150,7 @@
             (msg: any, transfer?: Transferable[]) => {
               ;(<any>globalThis).postMessage(msg, transfer)
             },
-            null,
+            null
           )
 
           globalThis.onmessage = (e: MessageEvent) =>

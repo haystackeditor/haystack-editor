@@ -21,7 +21,7 @@ import { TestThemeService } from "vs/platform/theme/test/common/testThemeService
 export function testViewModel(
   text: string[],
   options: IEditorOptions,
-  callback: (viewModel: ViewModel, model: TextModel) => void,
+  callback: (viewModel: ViewModel, model: TextModel) => void
 ): void {
   const EDITOR_ID = 1
 
@@ -44,7 +44,7 @@ export function testViewModel(
     new TestThemeService(),
     {
       setVisibleLines(visibleLines, stabilized) {},
-    },
+    }
   )
 
   callback(viewModel, model)

@@ -103,7 +103,7 @@ export class NotebookEditor
   private readonly _editorMemento: IEditorMemento<INotebookEditorViewState>
   private readonly _groupListener = this._register(new DisposableStore())
   private readonly _widgetDisposableStore: DisposableStore = this._register(
-    new DisposableStore(),
+    new DisposableStore()
   )
   private _widget: IBorrowValue<NotebookEditorWidget> = { value: undefined }
   private _rootElement!: HTMLElement
@@ -128,7 +128,7 @@ export class NotebookEditor
   readonly onDidChangeModel: Event<void> = this._onDidChangeModel.event
 
   private readonly _onDidChangeSelection = this._register(
-    new Emitter<IEditorPaneSelectionChangeEvent>(),
+    new Emitter<IEditorPaneSelectionChangeEvent>()
   )
   readonly onDidChangeSelection = this._onDidChangeSelection.event
 
@@ -162,30 +162,30 @@ export class NotebookEditor
     @INotebookEditorWorkerService
     private readonly _notebookEditorWorkerService: INotebookEditorWorkerService,
     @IPreferencesService
-    private readonly _preferencesService: IPreferencesService,
+    private readonly _preferencesService: IPreferencesService
   ) {
     super(
       NotebookEditor.ID,
       group,
       telemetryService,
       themeService,
-      storageService,
+      storageService
     )
     this._editorMemento = this.getEditorMemento<INotebookEditorViewState>(
       _editorGroupService,
       configurationService,
-      NOTEBOOK_EDITOR_VIEW_STATE_PREFERENCE_KEY,
+      NOTEBOOK_EDITOR_VIEW_STATE_PREFERENCE_KEY
     )
 
     this._register(
       this._fileService.onDidChangeFileSystemProviderCapabilities((e) =>
-        this._onDidChangeFileSystemProvider(e.scheme),
-      ),
+        this._onDidChangeFileSystemProvider(e.scheme)
+      )
     )
     this._register(
       this._fileService.onDidChangeFileSystemProviderRegistrations((e) =>
-        this._onDidChangeFileSystemProvider(e.scheme),
-      ),
+        this._onDidChangeFileSystemProvider(e.scheme)
+      )
     )
   }
 
@@ -239,7 +239,7 @@ export class NotebookEditor
 
   override getActionViewItem(
     action: IAction,
-    options: IActionViewItemOptions,
+    options: IActionViewItemOptions
   ): IActionViewItem | undefined {
     if (action.id === SELECT_KERNEL_ID) {
       // this is being disposed by the consumer
@@ -247,7 +247,7 @@ export class NotebookEditor
         NotebooKernelActionViewItem,
         action,
         this,
-        options,
+        options
       )
     }
     return undefined
@@ -269,14 +269,14 @@ export class NotebookEditor
     super.setEditorVisible(visible)
     this._groupListener.clear()
     this._groupListener.add(
-      this.group.onWillCloseEditor((e) => this._saveEditorViewState(e.editor)),
+      this.group.onWillCloseEditor((e) => this._saveEditorViewState(e.editor))
     )
     this._groupListener.add(
       this.group.onDidModelChange(() => {
         if (this._editorGroupService.activeGroup !== this.group) {
           this._widget?.value?.updateEditorFocus()
         }
-      }),
+      })
     )
 
     if (!visible) {
@@ -307,7 +307,7 @@ export class NotebookEditor
       !!value &&
       DOM.isAncestorOfActiveElement(
         value.getDomNode() ||
-          DOM.isAncestorOfActiveElement(value.getOverflowContainerDomNode()),
+          DOM.isAncestorOfActiveElement(value.getOverflowContainerDomNode())
       )
     )
   }
@@ -317,7 +317,7 @@ export class NotebookEditor
     options: INotebookEditorOptions | undefined,
     context: IEditorOpenContext,
     token: CancellationToken,
-    noRetry?: boolean,
+    noRetry?: boolean
   ): Promise<void> {
     try {
       let perfMarksCaptured = false
@@ -331,7 +331,7 @@ export class NotebookEditor
       perf.mark("startTime")
 
       this._inputListener.value = input.onDidChangeCapabilities(() =>
-        this._onDidChangeInputCapabilities(input),
+        this._onDidChangeInputCapabilities(input)
       )
 
       this._widgetDisposableStore.clear()
@@ -347,29 +347,29 @@ export class NotebookEditor
           input,
           undefined,
           this._pagePosition?.dimension,
-          this.window,
+          this.window
         )
       )
 
       if (this._rootElement && this._widget.value!.getDomNode()) {
         this._rootElement.setAttribute(
           "aria-flowto",
-          this._widget.value!.getDomNode().id || "",
+          this._widget.value!.getDomNode().id || ""
         )
         DOM.setParentFlowTo(this._widget.value!.getDomNode(), this._rootElement)
       }
 
       this._widgetDisposableStore.add(
         this._widget.value!.onDidChangeModel(() =>
-          this._onDidChangeModel.fire(),
-        ),
+          this._onDidChangeModel.fire()
+        )
       )
       this._widgetDisposableStore.add(
         this._widget.value!.onDidChangeActiveCell(() =>
           this._onDidChangeSelection.fire({
             reason: EditorPaneSelectionChangeReason.USER,
-          }),
-        ),
+          })
+        )
       )
 
       // if (this._pagePosition) {
@@ -403,7 +403,7 @@ export class NotebookEditor
 
       if (model === null) {
         const knownProvider = this._notebookService.getViewTypeProvider(
-          input.viewType,
+          input.viewType
         )
 
         if (!knownProvider) {
@@ -411,14 +411,14 @@ export class NotebookEditor
             localize(
               "fail.noEditor",
               "Cannot open resource with notebook editor type '{0}', please check if you have the right extension installed and enabled.",
-              input.viewType,
-            ),
+              input.viewType
+            )
           )
         }
 
         await this._extensionsWorkbenchService.whenInitialized
         const extensionInfo = this._extensionsWorkbenchService.local.find(
-          (e) => e.identifier.id === knownProvider,
+          (e) => e.identifier.id === knownProvider
         )
 
         throw createEditorOpenError(
@@ -426,8 +426,8 @@ export class NotebookEditor
             localize(
               "fail.noEditor.extensionMissing",
               "Cannot open resource with notebook editor type '{0}', please check if you have the right extension installed and enabled.",
-              input.viewType,
-            ),
+              input.viewType
+            )
           ),
           [
             toAction({
@@ -436,12 +436,12 @@ export class NotebookEditor
                 ? localize(
                     "notebookOpenEnableMissingViewType",
                     "Enable extension for '{0}'",
-                    input.viewType,
+                    input.viewType
                   )
                 : localize(
                     "notebookOpenInstallMissingViewType",
                     "Install extension for '{0}'",
-                    input.viewType,
+                    input.viewType
                   ),
               run: async () => {
                 const d = this._notebookService.onAddViewType((viewType) => {
@@ -453,7 +453,7 @@ export class NotebookEditor
                 })
                 const extensionInfo =
                   this._extensionsWorkbenchService.local.find(
-                    (e) => e.identifier.id === knownProvider,
+                    (e) => e.identifier.id === knownProvider
                   )
 
                 try {
@@ -463,20 +463,20 @@ export class NotebookEditor
                       extensionInfo.enablementState ===
                         EnablementState.DisabledWorkspace
                         ? EnablementState.EnabledWorkspace
-                        : EnablementState.EnabledGlobally,
+                        : EnablementState.EnabledGlobally
                     )
                   } else {
                     await this._instantiationService
                       .createInstance(
                         InstallRecommendedExtensionAction,
-                        knownProvider,
+                        knownProvider
                       )
                       .run()
                   }
                 } catch (ex) {
                   this.logService.error(
                     `Failed to install or enable extension ${knownProvider}`,
-                    ex,
+                    ex
                   )
                   d.dispose()
                 }
@@ -489,7 +489,7 @@ export class NotebookEditor
                 const backup = await this._workingCopyBackupService.resolve({
                   resource: input.resource,
                   typeId: NotebookWorkingCopyTypeIdentifier.create(
-                    input.viewType,
+                    input.viewType
                   ),
                 })
                 if (backup) {
@@ -513,7 +513,7 @@ export class NotebookEditor
               },
             }),
           ],
-          { allowDialog: true },
+          { allowDialog: true }
         )
       }
 
@@ -521,8 +521,8 @@ export class NotebookEditor
         model.notebook.onDidChangeContent(() =>
           this._onDidChangeSelection.fire({
             reason: EditorPaneSelectionChangeReason.EDIT,
-          }),
-        ),
+          })
+        )
       )
 
       const viewState =
@@ -536,12 +536,10 @@ export class NotebookEditor
       const isReadOnly = !!input.isReadonly()
       await this._widget.value.setOptions({ ...options, isReadOnly })
       this._widgetDisposableStore.add(
-        this._widget.value.onDidFocusWidget(() =>
-          this._onDidFocusWidget.fire(),
-        ),
+        this._widget.value.onDidFocusWidget(() => this._onDidFocusWidget.fire())
       )
       this._widgetDisposableStore.add(
-        this._widget.value.onDidBlurWidget(() => this._onDidBlurWidget.fire()),
+        this._widget.value.onDidBlurWidget(() => this._onDidBlurWidget.fire())
       )
 
       this._widgetDisposableStore.add(
@@ -549,14 +547,14 @@ export class NotebookEditor
           this._widget.value.getDomNode(),
           {
             containsGroup: (group) => this.group.id === group.id,
-          },
-        ),
+          }
+        )
       )
 
       this._widgetDisposableStore.add(
         this._widget.value.onDidScroll(() => {
           this._onDidChangeScroll.fire()
-        }),
+        })
       )
 
       perf.mark("editorLoaded")
@@ -584,12 +582,12 @@ export class NotebookEditor
           message = localize(
             "notebookTooLargeForHeapErrorWithSize",
             "The notebook is not displayed in the notebook editor because it is very large ({0}).",
-            ByteSize.formatSize(e.size),
+            ByteSize.formatSize(e.size)
           )
         } else {
           message = localize(
             "notebookTooLargeForHeapErrorWithoutSize",
-            "The notebook is not displayed in the notebook editor because it is very large.",
+            "The notebook is not displayed in the notebook editor because it is very large."
           )
         }
 
@@ -598,7 +596,7 @@ export class NotebookEditor
           input,
           options,
           message,
-          this._preferencesService,
+          this._preferencesService
         )
       }
 
@@ -637,7 +635,7 @@ export class NotebookEditor
             },
           }),
         ],
-        { allowDialog: true },
+        { allowDialog: true }
       )
 
       throw error
@@ -647,7 +645,7 @@ export class NotebookEditor
   private _handlePerfMark(
     perf: NotebookPerfMarks,
     input: NotebookEditorInput,
-    notebook?: NotebookTextModel,
+    notebook?: NotebookTextModel
   ) {
     const perfMarks = perf.value
 
@@ -804,9 +802,9 @@ export class NotebookEditor
                 prev +
                 cur.outputs.reduce(
                   (size, item) => size + item.data.byteLength,
-                  0,
+                  0
                 ),
-              0,
+              0
             )
         } else {
           mdCellCount = (mdCellCount || 0) + 1
@@ -819,7 +817,7 @@ export class NotebookEditor
     this.logService.trace(
       `[NotebookEditor] open notebook perf ${
         notebook?.uri.toString() ?? ""
-      } - extensionActivation: ${extensionActivationTimespan}, inputLoad: ${inputLoadingTimespan}, webviewComm: ${webviewCommLoadingTimespan}, customMarkdown: ${customMarkdownLoadingTimespan}, editorLoad: ${editorLoadingTimespan}`,
+      } - extensionActivation: ${extensionActivationTimespan}, inputLoad: ${inputLoadingTimespan}, webviewComm: ${webviewCommLoadingTimespan}, customMarkdown: ${customMarkdownLoadingTimespan}, editorLoad: ${editorLoadingTimespan}`
     )
 
     this.telemetryService.publicLog2<
@@ -946,11 +944,11 @@ export class NotebookEditor
   }
 
   private _loadNotebookEditorViewState(
-    input: NotebookEditorInput,
+    input: NotebookEditorInput
   ): INotebookEditorViewState | undefined {
     const result = this._editorMemento.loadEditorState(
       this.group,
-      input.resource,
+      input.resource
     )
     if (result) {
       return result
@@ -958,7 +956,7 @@ export class NotebookEditor
     // when we don't have a view state for the group/input-tuple then we try to use an existing
     // editor for the same resource.
     for (const group of this._editorGroupService.getGroups(
-      GroupsOrder.MOST_RECENTLY_ACTIVE,
+      GroupsOrder.MOST_RECENTLY_ACTIVE
     )) {
       if (
         group.activeEditorPane !== this &&
@@ -974,7 +972,7 @@ export class NotebookEditor
   layout(dimension: DOM.Dimension, position: DOM.IDomPosition): void {
     this._rootElement.classList.toggle(
       "mid-width",
-      dimension.width < 1000 && dimension.width >= 600,
+      dimension.width < 1000 && dimension.width >= 600
     )
     this._rootElement.classList.toggle("narrow-width", dimension.width < 600)
     this._pagePosition = { dimension, position }
@@ -1011,7 +1009,7 @@ export class NotebookEditor
 class NotebookEditorSelection implements IEditorPaneSelection {
   constructor(
     private readonly cellUri: URI,
-    private readonly selections: Selection[],
+    private readonly selections: Selection[]
   ) {}
 
   compare(other: IEditorPaneSelection): EditorPaneSelectionCompareResult {

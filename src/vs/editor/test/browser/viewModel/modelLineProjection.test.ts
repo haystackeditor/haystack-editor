@@ -45,7 +45,7 @@ suite("Editor ViewModel - SplitLinesCollection", () => {
     assert.strictEqual(line1.getViewLineContent(model1, 1, 1), "My Second Line")
     assert.strictEqual(
       line1.getViewLineContent(model1, 1, 2),
-      "And another one",
+      "And another one"
     )
     assert.strictEqual(line1.getViewLineMaxColumn(model1, 1, 0), 14)
     assert.strictEqual(line1.getViewLineMaxColumn(model1, 1, 1), 15)
@@ -54,42 +54,42 @@ suite("Editor ViewModel - SplitLinesCollection", () => {
       assert.strictEqual(
         line1.getModelColumnOfViewPosition(0, col),
         col,
-        "getInputColumnOfOutputPosition(0, " + col + ")",
+        "getInputColumnOfOutputPosition(0, " + col + ")"
       )
     }
     for (let col = 1; col <= 15; col++) {
       assert.strictEqual(
         line1.getModelColumnOfViewPosition(1, col),
         13 + col,
-        "getInputColumnOfOutputPosition(1, " + col + ")",
+        "getInputColumnOfOutputPosition(1, " + col + ")"
       )
     }
     for (let col = 1; col <= 16; col++) {
       assert.strictEqual(
         line1.getModelColumnOfViewPosition(2, col),
         13 + 14 + col,
-        "getInputColumnOfOutputPosition(2, " + col + ")",
+        "getInputColumnOfOutputPosition(2, " + col + ")"
       )
     }
     for (let col = 1; col <= 13; col++) {
       assert.deepStrictEqual(
         line1.getViewPositionOfModelPosition(0, col),
         pos(0, col),
-        "getOutputPositionOfInputPosition(" + col + ")",
+        "getOutputPositionOfInputPosition(" + col + ")"
       )
     }
     for (let col = 1 + 13; col <= 14 + 13; col++) {
       assert.deepStrictEqual(
         line1.getViewPositionOfModelPosition(0, col),
         pos(1, col - 13),
-        "getOutputPositionOfInputPosition(" + col + ")",
+        "getOutputPositionOfInputPosition(" + col + ")"
       )
     }
     for (let col = 1 + 13 + 14; col <= 15 + 14 + 13; col++) {
       assert.deepStrictEqual(
         line1.getViewPositionOfModelPosition(0, col),
         pos(2, col - 13 - 14),
-        "getOutputPositionOfInputPosition(" + col + ")",
+        "getOutputPositionOfInputPosition(" + col + ")"
       )
     }
 
@@ -100,11 +100,11 @@ suite("Editor ViewModel - SplitLinesCollection", () => {
     assert.strictEqual(line1.getViewLineContent(model1, 1, 0), "My First Line")
     assert.strictEqual(
       line1.getViewLineContent(model1, 1, 1),
-      "    My Second Line",
+      "    My Second Line"
     )
     assert.strictEqual(
       line1.getViewLineContent(model1, 1, 2),
-      "    And another one",
+      "    And another one"
     )
     assert.strictEqual(line1.getViewLineMaxColumn(model1, 1, 0), 14)
     assert.strictEqual(line1.getViewLineMaxColumn(model1, 1, 1), 19)
@@ -119,7 +119,7 @@ suite("Editor ViewModel - SplitLinesCollection", () => {
         col++
       ) {
         actualLineViewColumnMapping.push(
-          line1.getModelColumnOfViewPosition(lineIndex, col),
+          line1.getModelColumnOfViewPosition(lineIndex, col)
         )
       }
       actualViewColumnMapping.push(actualLineViewColumnMapping)
@@ -140,21 +140,21 @@ suite("Editor ViewModel - SplitLinesCollection", () => {
       assert.deepStrictEqual(
         line1.getViewPositionOfModelPosition(0, col),
         pos(0, col),
-        "6.getOutputPositionOfInputPosition(" + col + ")",
+        "6.getOutputPositionOfInputPosition(" + col + ")"
       )
     }
     for (let col = 1 + 13; col <= 14 + 13; col++) {
       assert.deepStrictEqual(
         line1.getViewPositionOfModelPosition(0, col),
         pos(1, 4 + col - 13),
-        "7.getOutputPositionOfInputPosition(" + col + ")",
+        "7.getOutputPositionOfInputPosition(" + col + ")"
       )
     }
     for (let col = 1 + 13 + 14; col <= 15 + 14 + 13; col++) {
       assert.deepStrictEqual(
         line1.getViewPositionOfModelPosition(0, col),
         pos(2, 4 + col - 13 - 14),
-        "8.getOutputPositionOfInputPosition(" + col + ")",
+        "8.getOutputPositionOfInputPosition(" + col + ")"
       )
     }
   })
@@ -163,23 +163,23 @@ suite("Editor ViewModel - SplitLinesCollection", () => {
     text: string,
     callback: (
       model: TextModel,
-      linesCollection: ViewModelLinesFromProjectedModel,
-    ) => void,
+      linesCollection: ViewModelLinesFromProjectedModel
+    ) => void
   ): void {
     const config = new TestConfiguration({})
     const wrappingInfo = config.options.get(EditorOption.wrappingInfo)
     const fontInfo = config.options.get(EditorOption.fontInfo)
     const wordWrapBreakAfterCharacters = config.options.get(
-      EditorOption.wordWrapBreakAfterCharacters,
+      EditorOption.wordWrapBreakAfterCharacters
     )
     const wordWrapBreakBeforeCharacters = config.options.get(
-      EditorOption.wordWrapBreakBeforeCharacters,
+      EditorOption.wordWrapBreakBeforeCharacters
     )
     const wrappingIndent = config.options.get(EditorOption.wrappingIndent)
     const wordBreak = config.options.get(EditorOption.wordBreak)
     const lineBreaksComputerFactory = new MonospaceLineBreaksComputerFactory(
       wordWrapBreakBeforeCharacters,
-      wordWrapBreakAfterCharacters,
+      wordWrapBreakAfterCharacters
     )
 
     const model = createTextModel(
@@ -190,7 +190,7 @@ suite("Editor ViewModel - SplitLinesCollection", () => {
         "int main() {",
         '\tprintf("Hello world!");',
         "}",
-      ].join("\n"),
+      ].join("\n")
     )
 
     const linesCollection = new ViewModelLinesFromProjectedModel(
@@ -204,7 +204,7 @@ suite("Editor ViewModel - SplitLinesCollection", () => {
       "simple",
       wrappingInfo.wrappingColumn,
       wrappingIndent,
-      wordBreak,
+      wordBreak
     )
 
     callback(model, linesCollection)
@@ -258,7 +258,7 @@ suite("Editor ViewModel - SplitLinesCollection", () => {
 
       assert.deepStrictEqual(
         linesCollection.getViewLinesIndentGuides(0, 7),
-        [0, 1, 0, 0, 1, 0],
+        [0, 1, 0, 0, 1, 0]
       )
 
       // getOutputLineContent
@@ -267,13 +267,13 @@ suite("Editor ViewModel - SplitLinesCollection", () => {
       assert.strictEqual(linesCollection.getViewLineContent(1), "int main() {")
       assert.strictEqual(
         linesCollection.getViewLineContent(2),
-        '\tprintf("Hello world!");',
+        '\tprintf("Hello world!");'
       )
       assert.strictEqual(linesCollection.getViewLineContent(3), "}")
       assert.strictEqual(linesCollection.getViewLineContent(4), "int main() {")
       assert.strictEqual(
         linesCollection.getViewLineContent(5),
-        '\tprintf("Hello world!");',
+        '\tprintf("Hello world!");'
       )
       assert.strictEqual(linesCollection.getViewLineContent(6), "}")
       assert.strictEqual(linesCollection.getViewLineContent(7), "}")
@@ -303,43 +303,43 @@ suite("Editor ViewModel - SplitLinesCollection", () => {
       // convertOutputPositionToInputPosition
       assert.deepStrictEqual(
         linesCollection.convertViewPositionToModelPosition(-1, 1),
-        new Position(1, 1),
+        new Position(1, 1)
       )
       assert.deepStrictEqual(
         linesCollection.convertViewPositionToModelPosition(0, 1),
-        new Position(1, 1),
+        new Position(1, 1)
       )
       assert.deepStrictEqual(
         linesCollection.convertViewPositionToModelPosition(1, 1),
-        new Position(1, 1),
+        new Position(1, 1)
       )
       assert.deepStrictEqual(
         linesCollection.convertViewPositionToModelPosition(2, 1),
-        new Position(2, 1),
+        new Position(2, 1)
       )
       assert.deepStrictEqual(
         linesCollection.convertViewPositionToModelPosition(3, 1),
-        new Position(3, 1),
+        new Position(3, 1)
       )
       assert.deepStrictEqual(
         linesCollection.convertViewPositionToModelPosition(4, 1),
-        new Position(4, 1),
+        new Position(4, 1)
       )
       assert.deepStrictEqual(
         linesCollection.convertViewPositionToModelPosition(5, 1),
-        new Position(5, 1),
+        new Position(5, 1)
       )
       assert.deepStrictEqual(
         linesCollection.convertViewPositionToModelPosition(6, 1),
-        new Position(6, 1),
+        new Position(6, 1)
       )
       assert.deepStrictEqual(
         linesCollection.convertViewPositionToModelPosition(7, 1),
-        new Position(6, 1),
+        new Position(6, 1)
       )
       assert.deepStrictEqual(
         linesCollection.convertViewPositionToModelPosition(8, 1),
-        new Position(6, 1),
+        new Position(6, 1)
       )
     })
   })
@@ -381,7 +381,7 @@ suite("Editor ViewModel - SplitLinesCollection", () => {
           const viewPosition =
             linesCollection.convertModelPositionToViewPosition(
               lineNumber,
-              column,
+              column
             )
 
           // validate view position
@@ -408,7 +408,7 @@ suite("Editor ViewModel - SplitLinesCollection", () => {
           assert.strictEqual(
             viewPosition.toString(),
             validViewPosition.toString(),
-            "model->view for " + lineNumber + ", " + column,
+            "model->view for " + lineNumber + ", " + column
           )
         }
       }
@@ -424,13 +424,13 @@ suite("Editor ViewModel - SplitLinesCollection", () => {
           const modelPosition =
             linesCollection.convertViewPositionToModelPosition(
               lineNumber,
-              column,
+              column
             )
           const validModelPosition = model.validatePosition(modelPosition)
           assert.strictEqual(
             modelPosition.toString(),
             validModelPosition.toString(),
-            "view->model for " + lineNumber + ", " + column,
+            "view->model for " + lineNumber + ", " + column
           )
         }
       }
@@ -505,7 +505,7 @@ suite("SplitLinesCollection", () => {
       tokenizeEncoded: (
         line: string,
         hasEOL: boolean,
-        state: languages.IState,
+        state: languages.IState
       ): languages.EncodedTokenizationResult => {
         const tokens = _tokens[_lineIndex++]
 
@@ -521,7 +521,7 @@ suite("SplitLinesCollection", () => {
     const LANGUAGE_ID = "modelModeTest1"
     languageRegistration = languages.TokenizationRegistry.register(
       LANGUAGE_ID,
-      tokenizationSupport,
+      tokenizationSupport
     )
     model = createTextModel(_text.join("\n"), LANGUAGE_ID)
     // force tokenization
@@ -542,7 +542,7 @@ suite("SplitLinesCollection", () => {
 
   function assertViewLineTokens(
     _actual: IViewLineTokens,
-    expected: ITestViewLineToken[],
+    expected: ITestViewLineToken[]
   ): void {
     const actual: ITestViewLineToken[] = []
     for (let i = 0, len = _actual.getCount(); i < len; i++) {
@@ -563,7 +563,7 @@ suite("SplitLinesCollection", () => {
 
   function assertMinimapLineRenderingData(
     actual: ViewLineData,
-    expected: ITestMinimapLineRenderingData | null,
+    expected: ITestMinimapLineRenderingData | null
   ): void {
     if (actual === null && expected === null) {
       assert.ok(true)
@@ -580,7 +580,7 @@ suite("SplitLinesCollection", () => {
 
   function assertMinimapLinesRenderingData(
     actual: ViewLineData[],
-    expected: Array<ITestMinimapLineRenderingData | null>,
+    expected: Array<ITestMinimapLineRenderingData | null>
   ): void {
     assert.strictEqual(actual.length, expected.length)
     for (let i = 0; i < expected.length; i++) {
@@ -590,13 +590,13 @@ suite("SplitLinesCollection", () => {
 
   function assertAllMinimapLinesRenderingData(
     splitLinesCollection: ViewModelLinesFromProjectedModel,
-    all: ITestMinimapLineRenderingData[],
+    all: ITestMinimapLineRenderingData[]
   ): void {
     const lineCount = all.length
     for (let line = 1; line <= lineCount; line++) {
       assert.strictEqual(
         splitLinesCollection.getViewLineData(line).content,
-        splitLinesCollection.getViewLineContent(line),
+        splitLinesCollection.getViewLineContent(line)
       )
     }
 
@@ -613,7 +613,7 @@ suite("SplitLinesCollection", () => {
           const actual = splitLinesCollection.getViewLinesData(
             start,
             end,
-            needed,
+            needed
           )
 
           assertMinimapLinesRenderingData(actual, expected)
@@ -629,35 +629,35 @@ suite("SplitLinesCollection", () => {
       assert.strictEqual(splitLinesCollection.getViewLineCount(), 8)
       assert.strictEqual(
         splitLinesCollection.modelPositionIsVisible(1, 1),
-        true,
+        true
       )
       assert.strictEqual(
         splitLinesCollection.modelPositionIsVisible(2, 1),
-        true,
+        true
       )
       assert.strictEqual(
         splitLinesCollection.modelPositionIsVisible(3, 1),
-        true,
+        true
       )
       assert.strictEqual(
         splitLinesCollection.modelPositionIsVisible(4, 1),
-        true,
+        true
       )
       assert.strictEqual(
         splitLinesCollection.modelPositionIsVisible(5, 1),
-        true,
+        true
       )
       assert.strictEqual(
         splitLinesCollection.modelPositionIsVisible(6, 1),
-        true,
+        true
       )
       assert.strictEqual(
         splitLinesCollection.modelPositionIsVisible(7, 1),
-        true,
+        true
       )
       assert.strictEqual(
         splitLinesCollection.modelPositionIsVisible(8, 1),
-        true,
+        true
       )
 
       const _expected: ITestMinimapLineRenderingData[] = [
@@ -760,35 +760,35 @@ suite("SplitLinesCollection", () => {
       assert.strictEqual(splitLinesCollection.getViewLineCount(), 5)
       assert.strictEqual(
         splitLinesCollection.modelPositionIsVisible(1, 1),
-        true,
+        true
       )
       assert.strictEqual(
         splitLinesCollection.modelPositionIsVisible(2, 1),
-        false,
+        false
       )
       assert.strictEqual(
         splitLinesCollection.modelPositionIsVisible(3, 1),
-        false,
+        false
       )
       assert.strictEqual(
         splitLinesCollection.modelPositionIsVisible(4, 1),
-        false,
+        false
       )
       assert.strictEqual(
         splitLinesCollection.modelPositionIsVisible(5, 1),
-        true,
+        true
       )
       assert.strictEqual(
         splitLinesCollection.modelPositionIsVisible(6, 1),
-        true,
+        true
       )
       assert.strictEqual(
         splitLinesCollection.modelPositionIsVisible(7, 1),
-        true,
+        true
       )
       assert.strictEqual(
         splitLinesCollection.modelPositionIsVisible(8, 1),
-        true,
+        true
       )
 
       assertAllMinimapLinesRenderingData(splitLinesCollection, [
@@ -810,35 +810,35 @@ suite("SplitLinesCollection", () => {
         assert.strictEqual(splitLinesCollection.getViewLineCount(), 12)
         assert.strictEqual(
           splitLinesCollection.modelPositionIsVisible(1, 1),
-          true,
+          true
         )
         assert.strictEqual(
           splitLinesCollection.modelPositionIsVisible(2, 1),
-          true,
+          true
         )
         assert.strictEqual(
           splitLinesCollection.modelPositionIsVisible(3, 1),
-          true,
+          true
         )
         assert.strictEqual(
           splitLinesCollection.modelPositionIsVisible(4, 1),
-          true,
+          true
         )
         assert.strictEqual(
           splitLinesCollection.modelPositionIsVisible(5, 1),
-          true,
+          true
         )
         assert.strictEqual(
           splitLinesCollection.modelPositionIsVisible(6, 1),
-          true,
+          true
         )
         assert.strictEqual(
           splitLinesCollection.modelPositionIsVisible(7, 1),
-          true,
+          true
         )
         assert.strictEqual(
           splitLinesCollection.modelPositionIsVisible(8, 1),
-          true,
+          true
         )
 
         const _expected: ITestMinimapLineRenderingData[] = [
@@ -972,35 +972,35 @@ suite("SplitLinesCollection", () => {
         assert.strictEqual(splitLinesCollection.getViewLineCount(), 8)
         assert.strictEqual(
           splitLinesCollection.modelPositionIsVisible(1, 1),
-          true,
+          true
         )
         assert.strictEqual(
           splitLinesCollection.modelPositionIsVisible(2, 1),
-          false,
+          false
         )
         assert.strictEqual(
           splitLinesCollection.modelPositionIsVisible(3, 1),
-          false,
+          false
         )
         assert.strictEqual(
           splitLinesCollection.modelPositionIsVisible(4, 1),
-          false,
+          false
         )
         assert.strictEqual(
           splitLinesCollection.modelPositionIsVisible(5, 1),
-          true,
+          true
         )
         assert.strictEqual(
           splitLinesCollection.modelPositionIsVisible(6, 1),
-          true,
+          true
         )
         assert.strictEqual(
           splitLinesCollection.modelPositionIsVisible(7, 1),
-          true,
+          true
         )
         assert.strictEqual(
           splitLinesCollection.modelPositionIsVisible(8, 1),
-          true,
+          true
         )
 
         assertAllMinimapLinesRenderingData(splitLinesCollection, [
@@ -1013,7 +1013,7 @@ suite("SplitLinesCollection", () => {
           _expected[10],
           _expected[11],
         ])
-      },
+      }
     )
   })
 
@@ -1032,7 +1032,7 @@ suite("SplitLinesCollection", () => {
             showIfCollapsed: true,
           },
         },
-      ],
+      ]
     )
 
     withSplitLinesCollection(
@@ -1190,7 +1190,7 @@ suite("SplitLinesCollection", () => {
         const data = splitLinesCollection.getViewLinesData(
           1,
           14,
-          new Array(14).fill(true),
+          new Array(14).fill(true)
         )
         assert.deepStrictEqual(
           data.map((d) => ({
@@ -1214,9 +1214,9 @@ suite("SplitLinesCollection", () => {
             { inlineDecorations: undefined },
             { inlineDecorations: undefined },
             { inlineDecorations: undefined },
-          ],
+          ]
         )
-      },
+      }
     )
   })
 
@@ -1224,7 +1224,7 @@ suite("SplitLinesCollection", () => {
     model: TextModel,
     wordWrap: "on" | "off" | "wordWrapColumn" | "bounded",
     wordWrapColumn: number,
-    callback: (splitLinesCollection: ViewModelLinesFromProjectedModel) => void,
+    callback: (splitLinesCollection: ViewModelLinesFromProjectedModel) => void
   ): void {
     const configuration = new TestConfiguration({
       wordWrap: wordWrap,
@@ -1234,19 +1234,19 @@ suite("SplitLinesCollection", () => {
     const wrappingInfo = configuration.options.get(EditorOption.wrappingInfo)
     const fontInfo = configuration.options.get(EditorOption.fontInfo)
     const wordWrapBreakAfterCharacters = configuration.options.get(
-      EditorOption.wordWrapBreakAfterCharacters,
+      EditorOption.wordWrapBreakAfterCharacters
     )
     const wordWrapBreakBeforeCharacters = configuration.options.get(
-      EditorOption.wordWrapBreakBeforeCharacters,
+      EditorOption.wordWrapBreakBeforeCharacters
     )
     const wrappingIndent = configuration.options.get(
-      EditorOption.wrappingIndent,
+      EditorOption.wrappingIndent
     )
     const wordBreak = configuration.options.get(EditorOption.wordBreak)
 
     const lineBreaksComputerFactory = new MonospaceLineBreaksComputerFactory(
       wordWrapBreakBeforeCharacters,
-      wordWrapBreakAfterCharacters,
+      wordWrapBreakAfterCharacters
     )
 
     const linesCollection = new ViewModelLinesFromProjectedModel(
@@ -1260,7 +1260,7 @@ suite("SplitLinesCollection", () => {
       "simple",
       wrappingInfo.wrappingColumn,
       wrappingIndent,
-      wordBreak,
+      wordBreak
     )
 
     callback(linesCollection)
@@ -1277,22 +1277,22 @@ function createSplitLine(
   splitLengths: number[],
   breakingOffsetsVisibleColumn: number[],
   wrappedTextIndentWidth: number,
-  isVisible: boolean = true,
+  isVisible: boolean = true
 ): IModelLineProjection {
   return createModelLineProjection(
     createLineBreakData(
       splitLengths,
       breakingOffsetsVisibleColumn,
-      wrappedTextIndentWidth,
+      wrappedTextIndentWidth
     ),
-    isVisible,
+    isVisible
   )
 }
 
 function createLineBreakData(
   breakingLengths: number[],
   breakingOffsetsVisibleColumn: number[],
-  wrappedTextIndentWidth: number,
+  wrappedTextIndentWidth: number
 ): ModelLineProjectionData {
   const sums: number[] = []
   for (let i = 0; i < breakingLengths.length; i++) {
@@ -1303,7 +1303,7 @@ function createLineBreakData(
     null,
     sums,
     breakingOffsetsVisibleColumn,
-    wrappedTextIndentWidth,
+    wrappedTextIndentWidth
   )
 }
 

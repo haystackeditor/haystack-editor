@@ -9,87 +9,77 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Emitter, Event } from "vs/base/common/event"
-import { IChannel, IServerChannel } from "vs/base/parts/ipc/common/ipc"
-import { IUpdateService, State } from "vs/platform/update/common/update"
+import { Emitter, Event } from 'vs/base/common/event';
+import { IChannel, IServerChannel } from 'vs/base/parts/ipc/common/ipc';
+import { IUpdateService, State } from 'vs/platform/update/common/update';
 
 export class UpdateChannel implements IServerChannel {
-  constructor(private service: IUpdateService) {}
 
-  listen(_: unknown, event: string): Event<any> {
-    switch (event) {
-      case "onStateChange":
-        return this.service.onStateChange
-    }
+	constructor(private service: IUpdateService) { }
 
-    throw new Error(`Event not found: ${event}`)
-  }
+	listen(_: unknown, event: string): Event<any> {
+		switch (event) {
+			case 'onStateChange': return this.service.onStateChange;
+		}
 
-  call(_: unknown, command: string, arg?: any): Promise<any> {
-    switch (command) {
-      case "checkForUpdates":
-        return this.service.checkForUpdates(arg)
-      case "downloadUpdate":
-        return this.service.downloadUpdate()
-      case "applyUpdate":
-        return this.service.applyUpdate()
-      case "quitAndInstall":
-        return this.service.quitAndInstall()
-      case "_getInitialState":
-        return Promise.resolve(this.service.state)
-      case "isLatestVersion":
-        return this.service.isLatestVersion()
-      case "_applySpecificUpdate":
-        return this.service._applySpecificUpdate(arg)
-    }
+		throw new Error(`Event not found: ${event}`);
+	}
 
-    throw new Error(`Call not found: ${command}`)
-  }
+	call(_: unknown, command: string, arg?: any): Promise<any> {
+		switch (command) {
+			case 'checkForUpdates': return this.service.checkForUpdates(arg);
+			case 'downloadUpdate': return this.service.downloadUpdate();
+			case 'applyUpdate': return this.service.applyUpdate();
+			case 'quitAndInstall': return this.service.quitAndInstall();
+			case '_getInitialState': return Promise.resolve(this.service.state);
+			case 'isLatestVersion': return this.service.isLatestVersion();
+			case '_applySpecificUpdate': return this.service._applySpecificUpdate(arg);
+		}
+
+		throw new Error(`Call not found: ${command}`);
+	}
 }
 
 export class UpdateChannelClient implements IUpdateService {
-  declare readonly _serviceBrand: undefined
 
-  private readonly _onStateChange = new Emitter<State>()
-  readonly onStateChange: Event<State> = this._onStateChange.event
+	declare readonly _serviceBrand: undefined;
 
-  private _state: State = State.Uninitialized
-  get state(): State {
-    return this._state
-  }
-  set state(state: State) {
-    this._state = state
-    this._onStateChange.fire(state)
-  }
+	private readonly _onStateChange = new Emitter<State>();
+	readonly onStateChange: Event<State> = this._onStateChange.event;
 
-  constructor(private readonly channel: IChannel) {
-    this.channel.listen<State>("onStateChange")((state) => (this.state = state))
-    this.channel
-      .call<State>("_getInitialState")
-      .then((state) => (this.state = state))
-  }
+	private _state: State = State.Uninitialized;
+	get state(): State { return this._state; }
+	set state(state: State) {
+		this._state = state;
+		this._onStateChange.fire(state);
+	}
 
-  checkForUpdates(explicit: boolean): Promise<void> {
-    return this.channel.call("checkForUpdates", explicit)
-  }
+	constructor(private readonly channel: IChannel) {
+		this.channel.listen<State>('onStateChange')(state => this.state = state);
+		this.channel.call<State>('_getInitialState').then(state => this.state = state);
+	}
 
-  downloadUpdate(): Promise<void> {
-    return this.channel.call("downloadUpdate")
-  }
+	checkForUpdates(explicit: boolean): Promise<void> {
+		return this.channel.call('checkForUpdates', explicit);
+	}
 
-  applyUpdate(): Promise<void> {
-    return this.channel.call("applyUpdate")
-  }
+	downloadUpdate(): Promise<void> {
+		return this.channel.call('downloadUpdate');
+	}
 
-  quitAndInstall(): Promise<void> {
-    return this.channel.call("quitAndInstall")
-  }
+	applyUpdate(): Promise<void> {
+		return this.channel.call('applyUpdate');
+	}
 
-  isLatestVersion(): Promise<boolean | undefined> {
-    return this.channel.call("isLatestVersion")
-  }
+	quitAndInstall(): Promise<void> {
+		return this.channel.call('quitAndInstall');
+	}
 
-  _applySpecificUpdate(packagePath: string): Promise<void> {
-    return this.channel.call("_applySpecificUpdate", packagePath)
-  }
+	isLatestVersion(): Promise<boolean | undefined> {
+		return this.channel.call('isLatestVersion');
+	}
+
+	_applySpecificUpdate(packagePath: string): Promise<void> {
+		return this.channel.call('_applySpecificUpdate', packagePath);
+	}
 }

@@ -61,15 +61,15 @@ suite("Files - NativeTextFileService", function () {
           fileService,
           disposables.add(new WorkingCopyService()),
           instantiationService,
-          disposables.add(new UriIdentityService(fileService)),
-        ),
-      ),
+          disposables.add(new UriIdentityService(fileService))
+        )
+      )
     )
 
     service = disposables.add(
       instantiationService
         .createChild(collection)
-        .createInstance(TestNativeTextFileServiceWithEncodingOverrides),
+        .createInstance(TestNativeTextFileServiceWithEncodingOverrides)
     )
     disposables.add(<TextFileEditorModelManager>service.files)
   })
@@ -86,8 +86,8 @@ suite("Files - NativeTextFileService", function () {
         "utf8",
         undefined,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
 
     await model.resolve()

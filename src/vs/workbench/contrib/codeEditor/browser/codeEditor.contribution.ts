@@ -9,24 +9,24 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import "./menuPreventer"
-import "./accessibility/accessibility"
-import "./diffEditorHelper"
-import "./editorFeatures"
-import "./editorSettingsMigration"
-import "./inspectKeybindings"
-import "./largeFileOptimizations"
-import "./inspectEditorTokens/inspectEditorTokens"
-import "./quickaccess/gotoLineQuickAccess"
-import "./quickaccess/gotoSymbolQuickAccess"
-import "./saveParticipants"
-import "./toggleColumnSelection"
-import "./toggleMinimap"
-import "./toggleMultiCursorModifier"
-import "./toggleRenderControlCharacter"
-import "./toggleRenderWhitespace"
-import "./toggleWordWrap"
-import "./emptyTextEditorHint/emptyTextEditorHint"
-import "./workbenchReferenceSearch"
-import "./editorLineNumberMenu"
-import "./dictation/editorDictation"
+import './menuPreventer';
+import './accessibility/accessibility';
+import './diffEditorHelper';
+import './editorFeatures';
+import './editorSettingsMigration';
+import './inspectKeybindings';
+import './largeFileOptimizations';
+import './inspectEditorTokens/inspectEditorTokens';
+import './quickaccess/gotoLineQuickAccess';
+import './quickaccess/gotoSymbolQuickAccess';
+import './saveParticipants';
+import './toggleColumnSelection';
+import './toggleMinimap';
+import './toggleMultiCursorModifier';
+import './toggleRenderControlCharacter';
+import './toggleRenderWhitespace';
+import './toggleWordWrap';
+import './emptyTextEditorHint/emptyTextEditorHint';
+import './workbenchReferenceSearch';
+import './editorLineNumberMenu';
+import './dictation/editorDictation';

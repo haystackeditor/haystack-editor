@@ -9,104 +9,68 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Emitter, Event } from "vs/base/common/event"
-import { Disposable } from "vs/base/common/lifecycle"
-import { createDecorator } from "vs/platform/instantiation/common/instantiation"
-import {
-  IUserDataSyncLogService,
-  IUserDataSyncStoreService,
-  UserDataSyncErrorCode,
-} from "vs/platform/userDataSync/common/userDataSync"
+import { Emitter, Event } from 'vs/base/common/event';
+import { Disposable } from 'vs/base/common/lifecycle';
+import { createDecorator } from 'vs/platform/instantiation/common/instantiation';
+import { IUserDataSyncLogService, IUserDataSyncStoreService, UserDataSyncErrorCode } from 'vs/platform/userDataSync/common/userDataSync';
 
 export interface IUserDataSyncAccount {
-  readonly authenticationProviderId: string
-  readonly token: string
+	readonly authenticationProviderId: string;
+	readonly token: string;
 }
 
-export const IUserDataSyncAccountService =
-  createDecorator<IUserDataSyncAccountService>("IUserDataSyncAccountService")
+export const IUserDataSyncAccountService = createDecorator<IUserDataSyncAccountService>('IUserDataSyncAccountService');
 export interface IUserDataSyncAccountService {
-  readonly _serviceBrand: undefined
+	readonly _serviceBrand: undefined;
 
-  readonly onTokenFailed: Event<boolean /*bail out*/>
-  readonly account: IUserDataSyncAccount | undefined
-  readonly onDidChangeAccount: Event<IUserDataSyncAccount | undefined>
-  updateAccount(account: IUserDataSyncAccount | undefined): Promise<void>
+	readonly onTokenFailed: Event<boolean/*bail out*/>;
+	readonly account: IUserDataSyncAccount | undefined;
+	readonly onDidChangeAccount: Event<IUserDataSyncAccount | undefined>;
+	updateAccount(account: IUserDataSyncAccount | undefined): Promise<void>;
+
 }
 
-export class UserDataSyncAccountService
-  extends Disposable
-  implements IUserDataSyncAccountService
-{
-  _serviceBrand: any
+export class UserDataSyncAccountService extends Disposable implements IUserDataSyncAccountService {
 
-  private _account: IUserDataSyncAccount | undefined
-  get account(): IUserDataSyncAccount | undefined {
-    return this._account
-  }
-  private _onDidChangeAccount = this._register(
-    new Emitter<IUserDataSyncAccount | undefined>(),
-  )
-  readonly onDidChangeAccount = this._onDidChangeAccount.event
+	_serviceBrand: any;
 
-  private _onTokenFailed: Emitter<boolean> = this._register(
-    new Emitter<boolean>(),
-  )
-  readonly onTokenFailed: Event<boolean> = this._onTokenFailed.event
+	private _account: IUserDataSyncAccount | undefined;
+	get account(): IUserDataSyncAccount | undefined { return this._account; }
+	private _onDidChangeAccount = this._register(new Emitter<IUserDataSyncAccount | undefined>());
+	readonly onDidChangeAccount = this._onDidChangeAccount.event;
 
-  private wasTokenFailed: boolean = false
+	private _onTokenFailed: Emitter<boolean> = this._register(new Emitter<boolean>());
+	readonly onTokenFailed: Event<boolean> = this._onTokenFailed.event;
 
-  constructor(
-    @IUserDataSyncStoreService
-    private readonly userDataSyncStoreService: IUserDataSyncStoreService,
-    @IUserDataSyncLogService
-    private readonly logService: IUserDataSyncLogService,
-  ) {
-    super()
-    this._register(
-      userDataSyncStoreService.onTokenFailed((code) => {
-        this.logService.info(
-          "Settings Sync auth token failed",
-          this.account?.authenticationProviderId,
-          this.wasTokenFailed,
-          code,
-        )
-        this.updateAccount(undefined)
-        if (code === UserDataSyncErrorCode.Forbidden) {
-          this._onTokenFailed.fire(true /*bail out immediately*/)
-        } else {
-          this._onTokenFailed.fire(
-            this.wasTokenFailed /* bail out if token failed before */,
-          )
-        }
-        this.wasTokenFailed = true
-      }),
-    )
-    this._register(
-      userDataSyncStoreService.onTokenSucceed(
-        () => (this.wasTokenFailed = false),
-      ),
-    )
-  }
+	private wasTokenFailed: boolean = false;
 
-  async updateAccount(
-    account: IUserDataSyncAccount | undefined,
-  ): Promise<void> {
-    if (
-      account && this._account
-        ? account.token !== this._account.token ||
-          account.authenticationProviderId !==
-            this._account.authenticationProviderId
-        : account !== this._account
-    ) {
-      this._account = account
-      if (this._account) {
-        this.userDataSyncStoreService.setAuthToken(
-          this._account.token,
-          this._account.authenticationProviderId,
-        )
-      }
-      this._onDidChangeAccount.fire(account)
-    }
-  }
+	constructor(
+		@IUserDataSyncStoreService private readonly userDataSyncStoreService: IUserDataSyncStoreService,
+		@IUserDataSyncLogService private readonly logService: IUserDataSyncLogService,
+	) {
+		super();
+		this._register(userDataSyncStoreService.onTokenFailed(code => {
+			this.logService.info('Settings Sync auth token failed', this.account?.authenticationProviderId, this.wasTokenFailed, code);
+			this.updateAccount(undefined);
+			if (code === UserDataSyncErrorCode.Forbidden) {
+				this._onTokenFailed.fire(true /*bail out immediately*/);
+			} else {
+				this._onTokenFailed.fire(this.wasTokenFailed /* bail out if token failed before */);
+			}
+			this.wasTokenFailed = true;
+		}));
+		this._register(userDataSyncStoreService.onTokenSucceed(() => this.wasTokenFailed = false));
+	}
+
+	async updateAccount(account: IUserDataSyncAccount | undefined): Promise<void> {
+		if (account && this._account ? account.token !== this._account.token || account.authenticationProviderId !== this._account.authenticationProviderId : account !== this._account) {
+			this._account = account;
+			if (this._account) {
+				this.userDataSyncStoreService.setAuthToken(this._account.token, this._account.authenticationProviderId);
+			}
+			this._onDidChangeAccount.fire(account);
+		}
+	}
+
 }
+

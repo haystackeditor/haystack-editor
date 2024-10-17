@@ -10,5 +10,5 @@
  *--------------------------------------------------------------------------------------------*/
 
 .monaco-editor .placeholder-text {
-  color: var(--vscode-editorGhostText-foreground) !important;
+	color: var(--vscode-editorGhostText-foreground) !important;
 }

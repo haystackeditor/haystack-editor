@@ -63,7 +63,7 @@ suite("Files - TextFileEditorModel", () => {
     content = accessor.fileService.getContent()
     disposables.add(<TextFileEditorModelManager>accessor.textFileService.files)
     disposables.add(
-      toDisposable(() => accessor.fileService.setContent(content)),
+      toDisposable(() => accessor.fileService.setContent(content))
     )
   })
 
@@ -83,8 +83,8 @@ suite("Files - TextFileEditorModel", () => {
         "utf8",
         undefined,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
     accessor.workingCopyService.testUnregisterWorkingCopy(model) // causes issues with subsequent resolves otherwise
 
@@ -123,7 +123,7 @@ suite("Files - TextFileEditorModel", () => {
       "utf8",
       undefined,
       undefined,
-      undefined,
+      undefined
     )
 
     assert.strictEqual(isTextFileEditorModel(model), true)
@@ -138,7 +138,7 @@ suite("Files - TextFileEditorModel", () => {
       "utf8",
       undefined,
       undefined,
-      undefined,
+      undefined
     )
 
     await model.resolve()
@@ -159,7 +159,7 @@ suite("Files - TextFileEditorModel", () => {
     assert.strictEqual(accessor.workingCopyService.dirtyCount, 1)
     assert.strictEqual(
       accessor.workingCopyService.isDirty(model.resource, model.typeId),
-      true,
+      true
     )
 
     let workingCopyEvent = false
@@ -168,7 +168,7 @@ suite("Files - TextFileEditorModel", () => {
         if (e.resource.toString() === model.resource.toString()) {
           workingCopyEvent = true
         }
-      }),
+      })
     )
 
     const source = SaveSourceRegistry.registerSource("testSource", "Hello Save")
@@ -187,18 +187,18 @@ suite("Files - TextFileEditorModel", () => {
     assert.ok((savedEvent as ITextFileEditorModelSaveEvent).stat)
     assert.strictEqual(
       (savedEvent as ITextFileEditorModelSaveEvent).reason,
-      SaveReason.AUTO,
+      SaveReason.AUTO
     )
     assert.strictEqual(
       (savedEvent as ITextFileEditorModelSaveEvent).source,
-      source,
+      source
     )
     assert.ok(workingCopyEvent)
 
     assert.strictEqual(accessor.workingCopyService.dirtyCount, 0)
     assert.strictEqual(
       accessor.workingCopyService.isDirty(model.resource, model.typeId),
-      false,
+      false
     )
 
     savedEvent = undefined
@@ -217,7 +217,7 @@ suite("Files - TextFileEditorModel", () => {
       "utf8",
       undefined,
       undefined,
-      undefined,
+      undefined
     )
 
     await model.resolve()
@@ -231,7 +231,7 @@ suite("Files - TextFileEditorModel", () => {
         if (e.resource.toString() === model.resource.toString()) {
           workingCopyEvent = true
         }
-      }),
+      })
     )
 
     await model.save({ force: true })
@@ -250,7 +250,7 @@ suite("Files - TextFileEditorModel", () => {
       "utf8",
       undefined,
       undefined,
-      undefined,
+      undefined
     )
 
     await model.resolve()
@@ -273,7 +273,7 @@ suite("Files - TextFileEditorModel", () => {
       assert.strictEqual(accessor.workingCopyService.dirtyCount, 1)
       assert.strictEqual(
         accessor.workingCopyService.isDirty(model.resource, model.typeId),
-        true,
+        true
       )
     } finally {
       accessor.fileService.writeShouldThrowError = undefined
@@ -295,7 +295,7 @@ suite("Files - TextFileEditorModel", () => {
       "utf8",
       undefined,
       undefined,
-      undefined,
+      undefined
     )
 
     await model.resolve()
@@ -322,7 +322,7 @@ suite("Files - TextFileEditorModel", () => {
       "utf8",
       undefined,
       undefined,
-      undefined,
+      undefined
     )
 
     await model.resolve()
@@ -347,7 +347,7 @@ suite("Files - TextFileEditorModel", () => {
       assert.strictEqual(accessor.workingCopyService.dirtyCount, 1)
       assert.strictEqual(
         accessor.workingCopyService.isDirty(model.resource, model.typeId),
-        true,
+        true
       )
 
       model.dispose()
@@ -363,7 +363,7 @@ suite("Files - TextFileEditorModel", () => {
       "utf8",
       undefined,
       undefined,
-      undefined,
+      undefined
     )
 
     await model.resolve()
@@ -375,7 +375,7 @@ suite("Files - TextFileEditorModel", () => {
 
     accessor.fileService.writeShouldThrowError = new FileOperationError(
       "save conflict",
-      FileOperationResult.FILE_MODIFIED_SINCE,
+      FileOperationResult.FILE_MODIFIED_SINCE
     )
     try {
       const pendingSave = model.save()
@@ -391,7 +391,7 @@ suite("Files - TextFileEditorModel", () => {
       assert.strictEqual(accessor.workingCopyService.dirtyCount, 1)
       assert.strictEqual(
         accessor.workingCopyService.isDirty(model.resource, model.typeId),
-        true,
+        true
       )
 
       model.dispose()
@@ -408,8 +408,8 @@ suite("Files - TextFileEditorModel", () => {
         "utf8",
         undefined,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
 
     let encodingEvent = false
@@ -435,8 +435,8 @@ suite("Files - TextFileEditorModel", () => {
         "utf8",
         undefined,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
     accessor.workingCopyService.testUnregisterWorkingCopy(model) // causes issues with subsequent resolves otherwise
 
@@ -458,8 +458,8 @@ suite("Files - TextFileEditorModel", () => {
         "utf8",
         undefined,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
     accessor.workingCopyService.testUnregisterWorkingCopy(model) // causes issues with subsequent resolves otherwise
 
@@ -478,7 +478,7 @@ suite("Files - TextFileEditorModel", () => {
     disposables.add(
       accessor.languageService.registerLanguage({
         id: languageId,
-      }),
+      })
     )
 
     accessor.testConfigurationService.setOverrideIdentifiers("files.encoding", [
@@ -492,8 +492,8 @@ suite("Files - TextFileEditorModel", () => {
         "utf8",
         undefined,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
     accessor.workingCopyService.testUnregisterWorkingCopy(model) // causes issues with subsequent resolves otherwise
 
@@ -508,12 +508,12 @@ suite("Files - TextFileEditorModel", () => {
         if (isEqual(e.resource, model.resource)) {
           deferredPromise.complete(model as TextFileEditorModel)
         }
-      }),
+      })
     )
 
     accessor.testConfigurationService.setUserConfiguration(
       "files.encoding",
-      UTF16be,
+      UTF16be
     )
 
     model.setLanguageId(languageId)
@@ -528,7 +528,7 @@ suite("Files - TextFileEditorModel", () => {
     disposables.add(
       accessor.languageService.registerLanguage({
         id: languageId,
-      }),
+      })
     )
 
     const model: TextFileEditorModel = instantiationService.createInstance(
@@ -537,7 +537,7 @@ suite("Files - TextFileEditorModel", () => {
       "utf8",
       languageId,
       undefined,
-      undefined,
+      undefined
     )
 
     await model.resolve()
@@ -555,7 +555,7 @@ suite("Files - TextFileEditorModel", () => {
       "utf8",
       undefined,
       undefined,
-      undefined,
+      undefined
     )
 
     await model.resolve()
@@ -571,7 +571,7 @@ suite("Files - TextFileEditorModel", () => {
       "utf8",
       undefined,
       undefined,
-      undefined,
+      undefined
     )
     assert.ok(model.hasState(TextFileEditorModelState.SAVED))
 
@@ -592,8 +592,8 @@ suite("Files - TextFileEditorModel", () => {
         "utf8",
         undefined,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
 
     await model.resolve()
@@ -612,7 +612,7 @@ suite("Files - TextFileEditorModel", () => {
       "utf8",
       undefined,
       undefined,
-      undefined,
+      undefined
     )
 
     await model.resolve({ contents: createTextBufferFactory("Hello World") })
@@ -644,8 +644,8 @@ suite("Files - TextFileEditorModel", () => {
         "utf8",
         undefined,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
 
     disposables.add(model.onDidRevert(() => eventCounter++))
@@ -656,7 +656,7 @@ suite("Files - TextFileEditorModel", () => {
         if (e.resource.toString() === model.resource.toString()) {
           workingCopyEvent = true
         }
-      }),
+      })
     )
 
     await model.resolve()
@@ -667,7 +667,7 @@ suite("Files - TextFileEditorModel", () => {
     assert.strictEqual(accessor.workingCopyService.dirtyCount, 1)
     assert.strictEqual(
       accessor.workingCopyService.isDirty(model.resource, model.typeId),
-      true,
+      true
     )
 
     accessor.workingCopyService.testUnregisterWorkingCopy(model) // causes issues with subsequent resolves otherwise
@@ -687,7 +687,7 @@ suite("Files - TextFileEditorModel", () => {
     assert.strictEqual(accessor.workingCopyService.dirtyCount, 0)
     assert.strictEqual(
       accessor.workingCopyService.isDirty(model.resource, model.typeId),
-      false,
+      false
     )
   })
 
@@ -701,8 +701,8 @@ suite("Files - TextFileEditorModel", () => {
         "utf8",
         undefined,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
 
     disposables.add(model.onDidRevert(() => eventCounter++))
@@ -713,7 +713,7 @@ suite("Files - TextFileEditorModel", () => {
         if (e.resource.toString() === model.resource.toString()) {
           workingCopyEvent = true
         }
-      }),
+      })
     )
 
     await model.resolve()
@@ -724,7 +724,7 @@ suite("Files - TextFileEditorModel", () => {
     assert.strictEqual(accessor.workingCopyService.dirtyCount, 1)
     assert.strictEqual(
       accessor.workingCopyService.isDirty(model.resource, model.typeId),
-      true,
+      true
     )
 
     await model.revert({ soft: true })
@@ -737,7 +737,7 @@ suite("Files - TextFileEditorModel", () => {
     assert.strictEqual(accessor.workingCopyService.dirtyCount, 0)
     assert.strictEqual(
       accessor.workingCopyService.isDirty(model.resource, model.typeId),
-      false,
+      false
     )
   })
 
@@ -749,8 +749,8 @@ suite("Files - TextFileEditorModel", () => {
         "utf8",
         undefined,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
     await model.resolve()
     model.updateTextEditorModel(createTextBufferFactory("Hello Text"))
@@ -768,8 +768,8 @@ suite("Files - TextFileEditorModel", () => {
         "utf8",
         undefined,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
     await model.resolve()
     accessor.fileService.setContent("Hello Change")
@@ -781,7 +781,7 @@ suite("Files - TextFileEditorModel", () => {
     assert.strictEqual(accessor.workingCopyService.dirtyCount, 1)
     assert.strictEqual(
       accessor.workingCopyService.isDirty(model.resource, model.typeId),
-      true,
+      true
     )
   })
 
@@ -795,8 +795,8 @@ suite("Files - TextFileEditorModel", () => {
         "utf8",
         undefined,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
 
     model.setDirty(true)
@@ -817,7 +817,7 @@ suite("Files - TextFileEditorModel", () => {
         if (e.resource.toString() === model.resource.toString()) {
           workingCopyEvent = true
         }
-      }),
+      })
     )
 
     model.setDirty(true)
@@ -837,7 +837,7 @@ suite("Files - TextFileEditorModel", () => {
         if (e.resource.toString() === model.resource.toString()) {
           workingCopyEvent = true
         }
-      }),
+      })
     )
 
     const model = disposables.add(
@@ -847,15 +847,15 @@ suite("Files - TextFileEditorModel", () => {
         "utf8",
         undefined,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
 
     let saveEvent = false
     disposables.add(
       model.onDidSave(() => {
         saveEvent = true
-      }),
+      })
     )
 
     await model.resolve()
@@ -879,8 +879,8 @@ suite("Files - TextFileEditorModel", () => {
         "utf8",
         undefined,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
 
     await model.resolve()
@@ -889,8 +889,8 @@ suite("Files - TextFileEditorModel", () => {
     accessor.textFileService.setReadStreamErrorOnce(
       new FileOperationError(
         "error",
-        FileOperationResult.FILE_NOT_MODIFIED_SINCE,
-      ),
+        FileOperationResult.FILE_NOT_MODIFIED_SINCE
+      )
     )
 
     await model.resolve()
@@ -907,13 +907,13 @@ suite("Files - TextFileEditorModel", () => {
         "utf8",
         undefined,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
 
     await model.resolve()
     accessor.textFileService.setReadStreamErrorOnce(
-      new FileOperationError("error", FileOperationResult.FILE_NOT_FOUND),
+      new FileOperationError("error", FileOperationResult.FILE_NOT_FOUND)
     )
 
     await model.resolve()
@@ -924,21 +924,21 @@ suite("Files - TextFileEditorModel", () => {
     const input1 = disposables.add(
       createFileEditorInput(
         instantiationService,
-        toResource.call(this, "/path/index_async2.txt"),
-      ),
+        toResource.call(this, "/path/index_async2.txt")
+      )
     )
     const input2 = disposables.add(
       createFileEditorInput(
         instantiationService,
-        toResource.call(this, "/path/index_async.txt"),
-      ),
+        toResource.call(this, "/path/index_async.txt")
+      )
     )
 
     const model1 = disposables.add(
-      (await input1.resolve()) as TextFileEditorModel,
+      (await input1.resolve()) as TextFileEditorModel
     )
     const model2 = disposables.add(
-      (await input2.resolve()) as TextFileEditorModel,
+      (await input2.resolve()) as TextFileEditorModel
     )
 
     model1.updateTextEditorModel(createTextBufferFactory("foo"))
@@ -950,38 +950,38 @@ suite("Files - TextFileEditorModel", () => {
 
     assert.ok(
       accessor.textFileService.isDirty(
-        toResource.call(this, "/path/index_async2.txt"),
-      ),
+        toResource.call(this, "/path/index_async2.txt")
+      )
     )
     assert.ok(
       !accessor.textFileService.isDirty(
-        toResource.call(this, "/path/index_async.txt"),
-      ),
+        toResource.call(this, "/path/index_async.txt")
+      )
     )
 
     model2.updateTextEditorModel(createTextBufferFactory("foo"))
     assert.ok(
       accessor.textFileService.isDirty(
-        toResource.call(this, "/path/index_async.txt"),
-      ),
+        toResource.call(this, "/path/index_async.txt")
+      )
     )
 
     await timeout(10)
     await accessor.textFileService.save(
-      toResource.call(this, "/path/index_async.txt"),
+      toResource.call(this, "/path/index_async.txt")
     )
     await accessor.textFileService.save(
-      toResource.call(this, "/path/index_async2.txt"),
+      toResource.call(this, "/path/index_async2.txt")
     )
     assert.ok(
       !accessor.textFileService.isDirty(
-        toResource.call(this, "/path/index_async.txt"),
-      ),
+        toResource.call(this, "/path/index_async.txt")
+      )
     )
     assert.ok(
       !accessor.textFileService.isDirty(
-        toResource.call(this, "/path/index_async2.txt"),
-      ),
+        toResource.call(this, "/path/index_async2.txt")
+      )
     )
 
     if (isWeb) {
@@ -989,18 +989,18 @@ suite("Files - TextFileEditorModel", () => {
       // really assert the mtime to be different, only that it is equal or greater.
       // https://github.com/microsoft/vscode/issues/161886
       assert.ok(
-        assertIsDefined(getLastResolvedFileStat(model1)).mtime >= m1Mtime,
+        assertIsDefined(getLastResolvedFileStat(model1)).mtime >= m1Mtime
       )
       assert.ok(
-        assertIsDefined(getLastResolvedFileStat(model2)).mtime >= m2Mtime,
+        assertIsDefined(getLastResolvedFileStat(model2)).mtime >= m2Mtime
       )
     } else {
       // on desktop we want to assert this condition more strictly though
       assert.ok(
-        assertIsDefined(getLastResolvedFileStat(model1)).mtime > m1Mtime,
+        assertIsDefined(getLastResolvedFileStat(model1)).mtime > m1Mtime
       )
       assert.ok(
-        assertIsDefined(getLastResolvedFileStat(model2)).mtime > m2Mtime,
+        assertIsDefined(getLastResolvedFileStat(model2)).mtime > m2Mtime
       )
     }
   })
@@ -1014,26 +1014,26 @@ suite("Files - TextFileEditorModel", () => {
         "utf8",
         undefined,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
 
     disposables.add(
       model.onDidSave(() => {
         assert.strictEqual(
           snapshotToString(model.createSnapshot()!),
-          eventCounter === 1 ? "bar" : "foobar",
+          eventCounter === 1 ? "bar" : "foobar"
         )
         assert.ok(!model.isDirty())
         eventCounter++
-      }),
+      })
     )
 
     const participant = accessor.textFileService.files.addSaveParticipant({
       participate: async (model) => {
         assert.ok(model.isDirty())
         ;(model as TextFileEditorModel).updateTextEditorModel(
-          createTextBufferFactory("bar"),
+          createTextBufferFactory("bar")
         )
         assert.ok(model.isDirty())
         eventCounter++
@@ -1064,8 +1064,8 @@ suite("Files - TextFileEditorModel", () => {
         "utf8",
         undefined,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
 
     disposables.add(
@@ -1073,7 +1073,7 @@ suite("Files - TextFileEditorModel", () => {
         participate: async () => {
           eventCounter++
         },
-      }),
+      })
     )
 
     await model.resolve()
@@ -1092,15 +1092,15 @@ suite("Files - TextFileEditorModel", () => {
         "utf8",
         undefined,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
 
     disposables.add(
       model.onDidSave(() => {
         assert.ok(!model.isDirty())
         eventCounter++
-      }),
+      })
     )
 
     disposables.add(
@@ -1108,14 +1108,14 @@ suite("Files - TextFileEditorModel", () => {
         participate: (model) => {
           assert.ok(model.isDirty())
           ;(model as TextFileEditorModel).updateTextEditorModel(
-            createTextBufferFactory("bar"),
+            createTextBufferFactory("bar")
           )
           assert.ok(model.isDirty())
           eventCounter++
 
           return timeout(10)
         },
-      }),
+      })
     )
 
     await model.resolve()
@@ -1135,8 +1135,8 @@ suite("Files - TextFileEditorModel", () => {
         "utf8",
         undefined,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
 
     disposables.add(
@@ -1144,7 +1144,7 @@ suite("Files - TextFileEditorModel", () => {
         participate: async () => {
           new Error("boom")
         },
-      }),
+      })
     )
 
     await model.resolve()
@@ -1161,8 +1161,8 @@ suite("Files - TextFileEditorModel", () => {
         "utf8",
         undefined,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
 
     const participations: boolean[] = []
@@ -1176,7 +1176,7 @@ suite("Files - TextFileEditorModel", () => {
             participations.push(true)
           }
         },
-      }),
+      })
     )
 
     await model.resolve()
@@ -1205,8 +1205,8 @@ suite("Files - TextFileEditorModel", () => {
         "utf8",
         undefined,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
 
     await testSaveFromSaveParticipant(model, false, false, false)
@@ -1220,8 +1220,8 @@ suite("Files - TextFileEditorModel", () => {
         "utf8",
         undefined,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
 
     await testSaveFromSaveParticipant(model, true, false, false)
@@ -1235,8 +1235,8 @@ suite("Files - TextFileEditorModel", () => {
         "utf8",
         undefined,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
 
     await testSaveFromSaveParticipant(model, false, true, false)
@@ -1250,8 +1250,8 @@ suite("Files - TextFileEditorModel", () => {
         "utf8",
         undefined,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
 
     await testSaveFromSaveParticipant(model, true, true, false)
@@ -1265,8 +1265,8 @@ suite("Files - TextFileEditorModel", () => {
         "utf8",
         undefined,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
 
     await testSaveFromSaveParticipant(model, false, false, true)
@@ -1276,7 +1276,7 @@ suite("Files - TextFileEditorModel", () => {
     model: TextFileEditorModel,
     async: boolean,
     modelChange: boolean,
-    force: boolean,
+    force: boolean
   ): Promise<void> {
     disposables.add(
       accessor.textFileService.files.addSaveParticipant({
@@ -1303,7 +1303,7 @@ suite("Files - TextFileEditorModel", () => {
             await savePromise
           }
         },
-      }),
+      })
     )
 
     await model.resolve()
@@ -1321,8 +1321,8 @@ suite("Files - TextFileEditorModel", () => {
         "utf8",
         undefined,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
 
     const from = URI.file("testFrom")
@@ -1337,7 +1337,7 @@ suite("Files - TextFileEditorModel", () => {
             e = error
           }
         },
-      }),
+      })
     )
 
     await model.resolve()

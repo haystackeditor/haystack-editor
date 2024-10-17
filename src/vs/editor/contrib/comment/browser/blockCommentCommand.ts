@@ -9,325 +9,205 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CharCode } from "vs/base/common/charCode"
-import {
-  EditOperation,
-  ISingleEditOperation,
-} from "vs/editor/common/core/editOperation"
-import { Position } from "vs/editor/common/core/position"
-import { Range } from "vs/editor/common/core/range"
-import { Selection } from "vs/editor/common/core/selection"
-import {
-  ICommand,
-  ICursorStateComputerData,
-  IEditOperationBuilder,
-} from "vs/editor/common/editorCommon"
-import { ITextModel } from "vs/editor/common/model"
-import { ILanguageConfigurationService } from "vs/editor/common/languages/languageConfigurationRegistry"
+import { CharCode } from 'vs/base/common/charCode';
+import { EditOperation, ISingleEditOperation } from 'vs/editor/common/core/editOperation';
+import { Position } from 'vs/editor/common/core/position';
+import { Range } from 'vs/editor/common/core/range';
+import { Selection } from 'vs/editor/common/core/selection';
+import { ICommand, ICursorStateComputerData, IEditOperationBuilder } from 'vs/editor/common/editorCommon';
+import { ITextModel } from 'vs/editor/common/model';
+import { ILanguageConfigurationService } from 'vs/editor/common/languages/languageConfigurationRegistry';
 
 export class BlockCommentCommand implements ICommand {
-  private readonly _selection: Selection
-  private readonly _insertSpace: boolean
-  private _usedEndToken: string | null
 
-  constructor(
-    selection: Selection,
-    insertSpace: boolean,
-    private readonly languageConfigurationService: ILanguageConfigurationService,
-  ) {
-    this._selection = selection
-    this._insertSpace = insertSpace
-    this._usedEndToken = null
-  }
+	private readonly _selection: Selection;
+	private readonly _insertSpace: boolean;
+	private _usedEndToken: string | null;
 
-  public static _haystackHasNeedleAtOffset(
-    haystack: string,
-    needle: string,
-    offset: number,
-  ): boolean {
-    if (offset < 0) {
-      return false
-    }
-    const needleLength = needle.length
-    const haystackLength = haystack.length
-    if (offset + needleLength > haystackLength) {
-      return false
-    }
+	constructor(
+		selection: Selection,
+		insertSpace: boolean,
+		private readonly languageConfigurationService: ILanguageConfigurationService
+	) {
+		this._selection = selection;
+		this._insertSpace = insertSpace;
+		this._usedEndToken = null;
+	}
 
-    for (let i = 0; i < needleLength; i++) {
-      const codeA = haystack.charCodeAt(offset + i)
-      const codeB = needle.charCodeAt(i)
+	public static _haystackHasNeedleAtOffset(haystack: string, needle: string, offset: number): boolean {
+		if (offset < 0) {
+			return false;
+		}
+		const needleLength = needle.length;
+		const haystackLength = haystack.length;
+		if (offset + needleLength > haystackLength) {
+			return false;
+		}
 
-      if (codeA === codeB) {
-        continue
-      }
-      if (codeA >= CharCode.A && codeA <= CharCode.Z && codeA + 32 === codeB) {
-        // codeA is upper-case variant of codeB
-        continue
-      }
-      if (codeB >= CharCode.A && codeB <= CharCode.Z && codeB + 32 === codeA) {
-        // codeB is upper-case variant of codeA
-        continue
-      }
+		for (let i = 0; i < needleLength; i++) {
+			const codeA = haystack.charCodeAt(offset + i);
+			const codeB = needle.charCodeAt(i);
 
-      return false
-    }
-    return true
-  }
+			if (codeA === codeB) {
+				continue;
+			}
+			if (codeA >= CharCode.A && codeA <= CharCode.Z && codeA + 32 === codeB) {
+				// codeA is upper-case variant of codeB
+				continue;
+			}
+			if (codeB >= CharCode.A && codeB <= CharCode.Z && codeB + 32 === codeA) {
+				// codeB is upper-case variant of codeA
+				continue;
+			}
 
-  private _createOperationsForBlockComment(
-    selection: Range,
-    startToken: string,
-    endToken: string,
-    insertSpace: boolean,
-    model: ITextModel,
-    builder: IEditOperationBuilder,
-  ): void {
-    const startLineNumber = selection.startLineNumber
-    const startColumn = selection.startColumn
-    const endLineNumber = selection.endLineNumber
-    const endColumn = selection.endColumn
+			return false;
+		}
+		return true;
+	}
 
-    const startLineText = model.getLineContent(startLineNumber)
-    const endLineText = model.getLineContent(endLineNumber)
+	private _createOperationsForBlockComment(selection: Range, startToken: string, endToken: string, insertSpace: boolean, model: ITextModel, builder: IEditOperationBuilder): void {
+		const startLineNumber = selection.startLineNumber;
+		const startColumn = selection.startColumn;
+		const endLineNumber = selection.endLineNumber;
+		const endColumn = selection.endColumn;
 
-    let startTokenIndex = startLineText.lastIndexOf(
-      startToken,
-      startColumn - 1 + startToken.length,
-    )
-    let endTokenIndex = endLineText.indexOf(
-      endToken,
-      endColumn - 1 - endToken.length,
-    )
+		const startLineText = model.getLineContent(startLineNumber);
+		const endLineText = model.getLineContent(endLineNumber);
 
-    if (startTokenIndex !== -1 && endTokenIndex !== -1) {
-      if (startLineNumber === endLineNumber) {
-        const lineBetweenTokens = startLineText.substring(
-          startTokenIndex + startToken.length,
-          endTokenIndex,
-        )
+		let startTokenIndex = startLineText.lastIndexOf(startToken, startColumn - 1 + startToken.length);
+		let endTokenIndex = endLineText.indexOf(endToken, endColumn - 1 - endToken.length);
 
-        if (lineBetweenTokens.indexOf(endToken) >= 0) {
-          // force to add a block comment
-          startTokenIndex = -1
-          endTokenIndex = -1
-        }
-      } else {
-        const startLineAfterStartToken = startLineText.substring(
-          startTokenIndex + startToken.length,
-        )
-        const endLineBeforeEndToken = endLineText.substring(0, endTokenIndex)
+		if (startTokenIndex !== -1 && endTokenIndex !== -1) {
 
-        if (
-          startLineAfterStartToken.indexOf(endToken) >= 0 ||
-          endLineBeforeEndToken.indexOf(endToken) >= 0
-        ) {
-          // force to add a block comment
-          startTokenIndex = -1
-          endTokenIndex = -1
-        }
-      }
-    }
+			if (startLineNumber === endLineNumber) {
+				const lineBetweenTokens = startLineText.substring(startTokenIndex + startToken.length, endTokenIndex);
 
-    let ops: ISingleEditOperation[]
+				if (lineBetweenTokens.indexOf(endToken) >= 0) {
+					// force to add a block comment
+					startTokenIndex = -1;
+					endTokenIndex = -1;
+				}
+			} else {
+				const startLineAfterStartToken = startLineText.substring(startTokenIndex + startToken.length);
+				const endLineBeforeEndToken = endLineText.substring(0, endTokenIndex);
 
-    if (startTokenIndex !== -1 && endTokenIndex !== -1) {
-      // Consider spaces as part of the comment tokens
-      if (
-        insertSpace &&
-        startTokenIndex + startToken.length < startLineText.length &&
-        startLineText.charCodeAt(startTokenIndex + startToken.length) ===
-          CharCode.Space
-      ) {
-        // Pretend the start token contains a trailing space
-        startToken = startToken + " "
-      }
+				if (startLineAfterStartToken.indexOf(endToken) >= 0 || endLineBeforeEndToken.indexOf(endToken) >= 0) {
+					// force to add a block comment
+					startTokenIndex = -1;
+					endTokenIndex = -1;
+				}
+			}
+		}
 
-      if (
-        insertSpace &&
-        endTokenIndex > 0 &&
-        endLineText.charCodeAt(endTokenIndex - 1) === CharCode.Space
-      ) {
-        // Pretend the end token contains a leading space
-        endToken = " " + endToken
-        endTokenIndex -= 1
-      }
-      ops = BlockCommentCommand._createRemoveBlockCommentOperations(
-        new Range(
-          startLineNumber,
-          startTokenIndex + startToken.length + 1,
-          endLineNumber,
-          endTokenIndex + 1,
-        ),
-        startToken,
-        endToken,
-      )
-    } else {
-      ops = BlockCommentCommand._createAddBlockCommentOperations(
-        selection,
-        startToken,
-        endToken,
-        this._insertSpace,
-      )
-      this._usedEndToken = ops.length === 1 ? endToken : null
-    }
+		let ops: ISingleEditOperation[];
 
-    for (const op of ops) {
-      builder.addTrackedEditOperation(op.range, op.text)
-    }
-  }
+		if (startTokenIndex !== -1 && endTokenIndex !== -1) {
+			// Consider spaces as part of the comment tokens
+			if (insertSpace && startTokenIndex + startToken.length < startLineText.length && startLineText.charCodeAt(startTokenIndex + startToken.length) === CharCode.Space) {
+				// Pretend the start token contains a trailing space
+				startToken = startToken + ' ';
+			}
 
-  public static _createRemoveBlockCommentOperations(
-    r: Range,
-    startToken: string,
-    endToken: string,
-  ): ISingleEditOperation[] {
-    const res: ISingleEditOperation[] = []
+			if (insertSpace && endTokenIndex > 0 && endLineText.charCodeAt(endTokenIndex - 1) === CharCode.Space) {
+				// Pretend the end token contains a leading space
+				endToken = ' ' + endToken;
+				endTokenIndex -= 1;
+			}
+			ops = BlockCommentCommand._createRemoveBlockCommentOperations(
+				new Range(startLineNumber, startTokenIndex + startToken.length + 1, endLineNumber, endTokenIndex + 1), startToken, endToken
+			);
+		} else {
+			ops = BlockCommentCommand._createAddBlockCommentOperations(selection, startToken, endToken, this._insertSpace);
+			this._usedEndToken = ops.length === 1 ? endToken : null;
+		}
 
-    if (!Range.isEmpty(r)) {
-      // Remove block comment start
-      res.push(
-        EditOperation.delete(
-          new Range(
-            r.startLineNumber,
-            r.startColumn - startToken.length,
-            r.startLineNumber,
-            r.startColumn,
-          ),
-        ),
-      )
+		for (const op of ops) {
+			builder.addTrackedEditOperation(op.range, op.text);
+		}
+	}
 
-      // Remove block comment end
-      res.push(
-        EditOperation.delete(
-          new Range(
-            r.endLineNumber,
-            r.endColumn,
-            r.endLineNumber,
-            r.endColumn + endToken.length,
-          ),
-        ),
-      )
-    } else {
-      // Remove both continuously
-      res.push(
-        EditOperation.delete(
-          new Range(
-            r.startLineNumber,
-            r.startColumn - startToken.length,
-            r.endLineNumber,
-            r.endColumn + endToken.length,
-          ),
-        ),
-      )
-    }
+	public static _createRemoveBlockCommentOperations(r: Range, startToken: string, endToken: string): ISingleEditOperation[] {
+		const res: ISingleEditOperation[] = [];
 
-    return res
-  }
+		if (!Range.isEmpty(r)) {
+			// Remove block comment start
+			res.push(EditOperation.delete(new Range(
+				r.startLineNumber, r.startColumn - startToken.length,
+				r.startLineNumber, r.startColumn
+			)));
 
-  public static _createAddBlockCommentOperations(
-    r: Range,
-    startToken: string,
-    endToken: string,
-    insertSpace: boolean,
-  ): ISingleEditOperation[] {
-    const res: ISingleEditOperation[] = []
+			// Remove block comment end
+			res.push(EditOperation.delete(new Range(
+				r.endLineNumber, r.endColumn,
+				r.endLineNumber, r.endColumn + endToken.length
+			)));
+		} else {
+			// Remove both continuously
+			res.push(EditOperation.delete(new Range(
+				r.startLineNumber, r.startColumn - startToken.length,
+				r.endLineNumber, r.endColumn + endToken.length
+			)));
+		}
 
-    if (!Range.isEmpty(r)) {
-      // Insert block comment start
-      res.push(
-        EditOperation.insert(
-          new Position(r.startLineNumber, r.startColumn),
-          startToken + (insertSpace ? " " : ""),
-        ),
-      )
+		return res;
+	}
 
-      // Insert block comment end
-      res.push(
-        EditOperation.insert(
-          new Position(r.endLineNumber, r.endColumn),
-          (insertSpace ? " " : "") + endToken,
-        ),
-      )
-    } else {
-      // Insert both continuously
-      res.push(
-        EditOperation.replace(
-          new Range(
-            r.startLineNumber,
-            r.startColumn,
-            r.endLineNumber,
-            r.endColumn,
-          ),
-          startToken + "  " + endToken,
-        ),
-      )
-    }
+	public static _createAddBlockCommentOperations(r: Range, startToken: string, endToken: string, insertSpace: boolean): ISingleEditOperation[] {
+		const res: ISingleEditOperation[] = [];
 
-    return res
-  }
+		if (!Range.isEmpty(r)) {
+			// Insert block comment start
+			res.push(EditOperation.insert(new Position(r.startLineNumber, r.startColumn), startToken + (insertSpace ? ' ' : '')));
 
-  public getEditOperations(
-    model: ITextModel,
-    builder: IEditOperationBuilder,
-  ): void {
-    const startLineNumber = this._selection.startLineNumber
-    const startColumn = this._selection.startColumn
+			// Insert block comment end
+			res.push(EditOperation.insert(new Position(r.endLineNumber, r.endColumn), (insertSpace ? ' ' : '') + endToken));
+		} else {
+			// Insert both continuously
+			res.push(EditOperation.replace(new Range(
+				r.startLineNumber, r.startColumn,
+				r.endLineNumber, r.endColumn
+			), startToken + '  ' + endToken));
+		}
 
-    model.tokenization.tokenizeIfCheap(startLineNumber)
-    const languageId = model.getLanguageIdAtPosition(
-      startLineNumber,
-      startColumn,
-    )
-    const config =
-      this.languageConfigurationService.getLanguageConfiguration(
-        languageId,
-      ).comments
-    if (
-      !config ||
-      !config.blockCommentStartToken ||
-      !config.blockCommentEndToken
-    ) {
-      // Mode does not support block comments
-      return
-    }
+		return res;
+	}
 
-    this._createOperationsForBlockComment(
-      this._selection,
-      config.blockCommentStartToken,
-      config.blockCommentEndToken,
-      this._insertSpace,
-      model,
-      builder,
-    )
-  }
+	public getEditOperations(model: ITextModel, builder: IEditOperationBuilder): void {
+		const startLineNumber = this._selection.startLineNumber;
+		const startColumn = this._selection.startColumn;
 
-  public computeCursorState(
-    model: ITextModel,
-    helper: ICursorStateComputerData,
-  ): Selection {
-    const inverseEditOperations = helper.getInverseEditOperations()
-    if (inverseEditOperations.length === 2) {
-      const startTokenEditOperation = inverseEditOperations[0]
-      const endTokenEditOperation = inverseEditOperations[1]
+		model.tokenization.tokenizeIfCheap(startLineNumber);
+		const languageId = model.getLanguageIdAtPosition(startLineNumber, startColumn);
+		const config = this.languageConfigurationService.getLanguageConfiguration(languageId).comments;
+		if (!config || !config.blockCommentStartToken || !config.blockCommentEndToken) {
+			// Mode does not support block comments
+			return;
+		}
 
-      return new Selection(
-        startTokenEditOperation.range.endLineNumber,
-        startTokenEditOperation.range.endColumn,
-        endTokenEditOperation.range.startLineNumber,
-        endTokenEditOperation.range.startColumn,
-      )
-    } else {
-      const srcRange = inverseEditOperations[0].range
-      const deltaColumn = this._usedEndToken
-        ? -this._usedEndToken.length - 1
-        : 0 // minus 1 space before endToken
-      return new Selection(
-        srcRange.endLineNumber,
-        srcRange.endColumn + deltaColumn,
-        srcRange.endLineNumber,
-        srcRange.endColumn + deltaColumn,
-      )
-    }
-  }
+		this._createOperationsForBlockComment(this._selection, config.blockCommentStartToken, config.blockCommentEndToken, this._insertSpace, model, builder);
+	}
+
+	public computeCursorState(model: ITextModel, helper: ICursorStateComputerData): Selection {
+		const inverseEditOperations = helper.getInverseEditOperations();
+		if (inverseEditOperations.length === 2) {
+			const startTokenEditOperation = inverseEditOperations[0];
+			const endTokenEditOperation = inverseEditOperations[1];
+
+			return new Selection(
+				startTokenEditOperation.range.endLineNumber,
+				startTokenEditOperation.range.endColumn,
+				endTokenEditOperation.range.startLineNumber,
+				endTokenEditOperation.range.startColumn
+			);
+		} else {
+			const srcRange = inverseEditOperations[0].range;
+			const deltaColumn = this._usedEndToken ? -this._usedEndToken.length - 1 : 0; // minus 1 space before endToken
+			return new Selection(
+				srcRange.endLineNumber,
+				srcRange.endColumn + deltaColumn,
+				srcRange.endLineNumber,
+				srcRange.endColumn + deltaColumn
+			);
+		}
+	}
 }

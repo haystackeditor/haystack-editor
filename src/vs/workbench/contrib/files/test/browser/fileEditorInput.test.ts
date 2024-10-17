@@ -60,7 +60,7 @@ suite("Files - FileEditorInput", () => {
     preferredLanguageId?: string,
     preferredName?: string,
     preferredDescription?: string,
-    preferredContents?: string,
+    preferredContents?: string
   ): FileEditorInput {
     return disposables.add(
       instantiationService.createInstance(
@@ -77,8 +77,8 @@ suite("Files - FileEditorInput", () => {
         undefined,
         undefined,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
   }
 
@@ -98,7 +98,7 @@ suite("Files - FileEditorInput", () => {
         textEditorService: (instantiationService) =>
           instantiationService.createInstance(TestTextEditorService),
       },
-      disposables,
+      disposables
     )
 
     accessor = instantiationService.createInstance(TestServiceAccessor)
@@ -111,10 +111,10 @@ suite("Files - FileEditorInput", () => {
   test("Basics", async function () {
     let input = createFileInput(toResource.call(this, "/foo/bar/file.js"))
     const otherInput = createFileInput(
-      toResource.call(this, "foo/bar/otherfile.js"),
+      toResource.call(this, "foo/bar/otherfile.js")
     )
     const otherInputSame = createFileInput(
-      toResource.call(this, "foo/bar/file.js"),
+      toResource.call(this, "foo/bar/file.js")
     )
 
     assert(input.matches(input))
@@ -133,24 +133,24 @@ suite("Files - FileEditorInput", () => {
     const untypedInput = input.toUntyped({ preserveViewState: 0 })
     assert.strictEqual(
       untypedInput.resource.toString(),
-      input.resource.toString(),
+      input.resource.toString()
     )
 
     assert.strictEqual("file.js", input.getName())
 
     assert.strictEqual(
       toResource.call(this, "/foo/bar/file.js").fsPath,
-      input.resource.fsPath,
+      input.resource.fsPath
     )
     assert(input.resource instanceof URI)
 
     input = createFileInput(toResource.call(this, "/foo/bar.html"))
 
     const inputToResolve: FileEditorInput = createFileInput(
-      toResource.call(this, "/foo/bar/file.js"),
+      toResource.call(this, "/foo/bar/file.js")
     )
     const sameOtherInput: FileEditorInput = createFileInput(
-      toResource.call(this, "/foo/bar/file.js"),
+      toResource.call(this, "/foo/bar/file.js")
     )
 
     let resolved = await inputToResolve.resolve()
@@ -189,7 +189,7 @@ suite("Files - FileEditorInput", () => {
     const input = createFileInput(
       toResource
         .call(this, "/foo/bar/file.js")
-        .with({ scheme: "someTestingScheme" }),
+        .with({ scheme: "someTestingScheme" })
     )
 
     assert.ok(input.hasCapability(EditorInputCapabilities.Untitled))
@@ -199,20 +199,20 @@ suite("Files - FileEditorInput", () => {
 
   test("reports as readonly with readonly file scheme", async function () {
     const inMemoryFilesystemProvider = disposables.add(
-      new InMemoryFileSystemProvider(),
+      new InMemoryFileSystemProvider()
     )
     inMemoryFilesystemProvider.setReadOnly(true)
 
     disposables.add(
       accessor.fileService.registerProvider(
         "someTestingReadonlyScheme",
-        inMemoryFilesystemProvider,
-      ),
+        inMemoryFilesystemProvider
+      )
     )
     const input = createFileInput(
       toResource
         .call(this, "/foo/bar/file.js")
-        .with({ scheme: "someTestingReadonlyScheme" }),
+        .with({ scheme: "someTestingReadonlyScheme" })
     )
 
     assert.ok(!input.hasCapability(EditorInputCapabilities.Untitled))
@@ -227,49 +227,49 @@ suite("Files - FileEditorInput", () => {
     const inputWithoutPreferredResource = createFileInput(resource)
     assert.strictEqual(
       inputWithoutPreferredResource.resource.toString(),
-      resource.toString(),
+      resource.toString()
     )
     assert.strictEqual(
       inputWithoutPreferredResource.preferredResource.toString(),
-      resource.toString(),
+      resource.toString()
     )
 
     const inputWithPreferredResource = createFileInput(
       resource,
-      preferredResource,
+      preferredResource
     )
 
     assert.strictEqual(
       inputWithPreferredResource.resource.toString(),
-      resource.toString(),
+      resource.toString()
     )
     assert.strictEqual(
       inputWithPreferredResource.preferredResource.toString(),
-      preferredResource.toString(),
+      preferredResource.toString()
     )
 
     let didChangeLabel = false
     disposables.add(
       inputWithPreferredResource.onDidChangeLabel((e) => {
         didChangeLabel = true
-      }),
+      })
     )
 
     assert.strictEqual(inputWithPreferredResource.getName(), "UPDATEFILE.js")
 
     const otherPreferredResource = toResource.call(
       this,
-      "/FOO/BAR/updateFILE.js",
+      "/FOO/BAR/updateFILE.js"
     )
     inputWithPreferredResource.setPreferredResource(otherPreferredResource)
 
     assert.strictEqual(
       inputWithPreferredResource.resource.toString(),
-      resource.toString(),
+      resource.toString()
     )
     assert.strictEqual(
       inputWithPreferredResource.preferredResource.toString(),
-      otherPreferredResource.toString(),
+      otherPreferredResource.toString()
     )
     assert.strictEqual(inputWithPreferredResource.getName(), "updateFILE.js")
     assert.strictEqual(didChangeLabel, true)
@@ -280,18 +280,18 @@ suite("Files - FileEditorInput", () => {
     disposables.add(
       accessor.languageService.registerLanguage({
         id: languageId,
-      }),
+      })
     )
 
     const input = createFileInput(
       toResource.call(this, "/foo/bar/file.js"),
       undefined,
-      languageId,
+      languageId
     )
     assert.strictEqual(input.getPreferredLanguageId(), languageId)
 
     const model = disposables.add(
-      (await input.resolve()) as TextFileEditorModel,
+      (await input.resolve()) as TextFileEditorModel
     )
     assert.strictEqual(model.textEditorModel!.getLanguageId(), languageId)
 
@@ -299,14 +299,14 @@ suite("Files - FileEditorInput", () => {
     assert.strictEqual(input.getPreferredLanguageId(), "text")
     assert.strictEqual(
       model.textEditorModel!.getLanguageId(),
-      PLAINTEXT_LANGUAGE_ID,
+      PLAINTEXT_LANGUAGE_ID
     )
 
     const input2 = createFileInput(toResource.call(this, "/foo/bar/file.js"))
     input2.setPreferredLanguageId(languageId)
 
     const model2 = disposables.add(
-      (await input2.resolve()) as TextFileEditorModel,
+      (await input2.resolve()) as TextFileEditorModel
     )
     assert.strictEqual(model2.textEditorModel!.getLanguageId(), languageId)
   })
@@ -318,11 +318,11 @@ suite("Files - FileEditorInput", () => {
       undefined,
       undefined,
       undefined,
-      "My contents",
+      "My contents"
     )
 
     const model = disposables.add(
-      (await input.resolve()) as TextFileEditorModel,
+      (await input.resolve()) as TextFileEditorModel
     )
     assert.strictEqual(model.textEditorModel!.getValue(), "My contents")
     assert.strictEqual(input.isDirty(), true)
@@ -351,14 +351,14 @@ suite("Files - FileEditorInput", () => {
 
   test("matches", function () {
     const input1 = createFileInput(
-      toResource.call(this, "/foo/bar/updatefile.js"),
+      toResource.call(this, "/foo/bar/updatefile.js")
     )
     const input2 = createFileInput(
-      toResource.call(this, "/foo/bar/updatefile.js"),
+      toResource.call(this, "/foo/bar/updatefile.js")
     )
     const input3 = createFileInput(toResource.call(this, "/foo/bar/other.js"))
     const input2Upper = createFileInput(
-      toResource.call(this, "/foo/bar/UPDATEFILE.js"),
+      toResource.call(this, "/foo/bar/UPDATEFILE.js")
     )
 
     assert.strictEqual(input1.matches(input1), true)
@@ -370,25 +370,25 @@ suite("Files - FileEditorInput", () => {
 
   test("getEncoding/setEncoding", async function () {
     const input = createFileInput(
-      toResource.call(this, "/foo/bar/updatefile.js"),
+      toResource.call(this, "/foo/bar/updatefile.js")
     )
 
     await input.setEncoding("utf16", EncodingMode.Encode)
     assert.strictEqual(input.getEncoding(), "utf16")
 
     const resolved = disposables.add(
-      (await input.resolve()) as TextFileEditorModel,
+      (await input.resolve()) as TextFileEditorModel
     )
     assert.strictEqual(input.getEncoding(), resolved.getEncoding())
   })
 
   test("save", async function () {
     const input = createFileInput(
-      toResource.call(this, "/foo/bar/updatefile.js"),
+      toResource.call(this, "/foo/bar/updatefile.js")
     )
 
     const resolved = disposables.add(
-      (await input.resolve()) as TextFileEditorModel,
+      (await input.resolve()) as TextFileEditorModel
     )
     resolved.textEditorModel!.setValue("changed")
     assert.ok(input.isDirty())
@@ -401,11 +401,11 @@ suite("Files - FileEditorInput", () => {
 
   test("revert", async function () {
     const input = createFileInput(
-      toResource.call(this, "/foo/bar/updatefile.js"),
+      toResource.call(this, "/foo/bar/updatefile.js")
     )
 
     const resolved = disposables.add(
-      (await input.resolve()) as TextFileEditorModel,
+      (await input.resolve()) as TextFileEditorModel
     )
     resolved.textEditorModel!.setValue("changed")
     assert.ok(input.isDirty())
@@ -421,14 +421,14 @@ suite("Files - FileEditorInput", () => {
 
   test("resolve handles binary files", async function () {
     const input = createFileInput(
-      toResource.call(this, "/foo/bar/updatefile.js"),
+      toResource.call(this, "/foo/bar/updatefile.js")
     )
 
     accessor.textFileService.setReadStreamErrorOnce(
       new TextFileOperationError(
         "error",
-        TextFileOperationResult.FILE_IS_BINARY,
-      ),
+        TextFileOperationResult.FILE_IS_BINARY
+      )
     )
 
     const resolved = disposables.add(await input.resolve())
@@ -437,7 +437,7 @@ suite("Files - FileEditorInput", () => {
 
   test("resolve throws for too large files", async function () {
     const input = createFileInput(
-      toResource.call(this, "/foo/bar/updatefile.js"),
+      toResource.call(this, "/foo/bar/updatefile.js")
     )
 
     let e: Error | undefined = undefined
@@ -445,8 +445,8 @@ suite("Files - FileEditorInput", () => {
       new TooLargeFileOperationError(
         "error",
         FileOperationResult.FILE_TOO_LARGE,
-        1000,
-      ),
+        1000
+      )
     )
     try {
       await input.resolve()
@@ -458,20 +458,20 @@ suite("Files - FileEditorInput", () => {
 
   test("attaches to model when created and reports dirty", async function () {
     const input = createFileInput(
-      toResource.call(this, "/foo/bar/updatefile.js"),
+      toResource.call(this, "/foo/bar/updatefile.js")
     )
 
     let listenerCount = 0
     disposables.add(
       input.onDidChangeDirty(() => {
         listenerCount++
-      }),
+      })
     )
 
     // instead of going through file input resolve method
     // we resolve the model directly through the service
     const model = disposables.add(
-      await accessor.textFileService.files.resolve(input.resource),
+      await accessor.textFileService.files.resolve(input.resource)
     )
     model.textEditorModel?.setValue("hello world")
 
@@ -481,7 +481,7 @@ suite("Files - FileEditorInput", () => {
 
   test("force open text/binary", async function () {
     const input = createFileInput(
-      toResource.call(this, "/foo/bar/updatefile.js"),
+      toResource.call(this, "/foo/bar/updatefile.js")
     )
     input.setForceOpenAsBinary()
 
@@ -497,25 +497,25 @@ suite("Files - FileEditorInput", () => {
   test("file editor serializer", async function () {
     instantiationService.invokeFunction((accessor) =>
       Registry.as<IEditorFactoryRegistry>(EditorExtensions.EditorFactory).start(
-        accessor,
-      ),
+        accessor
+      )
     )
 
     const input = createFileInput(
-      toResource.call(this, "/foo/bar/updatefile.js"),
+      toResource.call(this, "/foo/bar/updatefile.js")
     )
 
     disposables.add(
       Registry.as<IEditorFactoryRegistry>(
-        EditorExtensions.EditorFactory,
+        EditorExtensions.EditorFactory
       ).registerEditorSerializer(
         "workbench.editors.files.fileEditorInput",
-        FileEditorInputSerializer,
-      ),
+        FileEditorInputSerializer
+      )
     )
 
     const editorSerializer = Registry.as<IEditorFactoryRegistry>(
-      EditorExtensions.EditorFactory,
+      EditorExtensions.EditorFactory
     ).getEditorSerializer(input.typeId)
     if (!editorSerializer) {
       assert.fail("File Editor Input Serializer missing")
@@ -530,21 +530,21 @@ suite("Files - FileEditorInput", () => {
 
     const inputDeserialized = editorSerializer.deserialize(
       instantiationService,
-      inputSerialized,
+      inputSerialized
     )
     assert.strictEqual(
       inputDeserialized ? input.matches(inputDeserialized) : false,
-      true,
+      true
     )
 
     const preferredResource = toResource.call(this, "/foo/bar/UPDATEfile.js")
     const inputWithPreferredResource = createFileInput(
       toResource.call(this, "/foo/bar/updatefile.js"),
-      preferredResource,
+      preferredResource
     )
 
     const inputWithPreferredResourceSerialized = editorSerializer.serialize(
-      inputWithPreferredResource,
+      inputWithPreferredResource
     )
     if (!inputWithPreferredResourceSerialized) {
       assert.fail("Unexpected serialized file input")
@@ -552,15 +552,15 @@ suite("Files - FileEditorInput", () => {
 
     const inputWithPreferredResourceDeserialized = editorSerializer.deserialize(
       instantiationService,
-      inputWithPreferredResourceSerialized,
+      inputWithPreferredResourceSerialized
     ) as FileEditorInput
     assert.strictEqual(
       inputWithPreferredResource.resource.toString(),
-      inputWithPreferredResourceDeserialized.resource.toString(),
+      inputWithPreferredResourceDeserialized.resource.toString()
     )
     assert.strictEqual(
       inputWithPreferredResource.preferredResource.toString(),
-      inputWithPreferredResourceDeserialized.preferredResource.toString(),
+      inputWithPreferredResourceDeserialized.preferredResource.toString()
     )
   })
 
@@ -573,14 +573,14 @@ suite("Files - FileEditorInput", () => {
       undefined,
       undefined,
       "My Name",
-      "My Description",
+      "My Description"
     )
 
     let didChangeLabelCounter = 0
     disposables.add(
       customFileInput.onDidChangeLabel(() => {
         didChangeLabelCounter++
-      }),
+      })
     )
 
     assert.strictEqual(customFileInput.getName(), "My Name")
@@ -602,14 +602,14 @@ suite("Files - FileEditorInput", () => {
       undefined,
       undefined,
       "My Name",
-      "My Description",
+      "My Description"
     )
 
     didChangeLabelCounter = 0
     disposables.add(
       fileInput.onDidChangeLabel(() => {
         didChangeLabelCounter++
-      }),
+      })
     )
 
     assert.notStrictEqual(fileInput.getName(), "My Name")
@@ -626,24 +626,24 @@ suite("Files - FileEditorInput", () => {
 
   test("reports readonly changes", async function () {
     const input = createFileInput(
-      toResource.call(this, "/foo/bar/updatefile.js"),
+      toResource.call(this, "/foo/bar/updatefile.js")
     )
 
     let listenerCount = 0
     disposables.add(
       input.onDidChangeCapabilities(() => {
         listenerCount++
-      }),
+      })
     )
 
     const model = disposables.add(
-      await accessor.textFileService.files.resolve(input.resource),
+      await accessor.textFileService.files.resolve(input.resource)
     )
 
     assert.strictEqual(model.isReadonly(), false)
     assert.strictEqual(
       input.hasCapability(EditorInputCapabilities.Readonly),
-      false,
+      false
     )
     assert.strictEqual(input.isReadonly(), false)
 
@@ -665,7 +665,7 @@ suite("Files - FileEditorInput", () => {
     assert.strictEqual(!!model.isReadonly(), true)
     assert.strictEqual(
       input.hasCapability(EditorInputCapabilities.Readonly),
-      true,
+      true
     )
     assert.strictEqual(!!input.isReadonly(), true)
     assert.strictEqual(listenerCount, 1)
@@ -684,7 +684,7 @@ suite("Files - FileEditorInput", () => {
     assert.strictEqual(model.isReadonly(), false)
     assert.strictEqual(
       input.hasCapability(EditorInputCapabilities.Readonly),
-      false,
+      false
     )
     assert.strictEqual(input.isReadonly(), false)
     assert.strictEqual(listenerCount, 2)

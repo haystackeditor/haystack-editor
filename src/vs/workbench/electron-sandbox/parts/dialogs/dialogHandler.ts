@@ -30,7 +30,7 @@ export class NativeDialogHandler extends AbstractDialogHandler {
     @ILogService private readonly logService: ILogService,
     @INativeHostService private readonly nativeHostService: INativeHostService,
     @IProductService private readonly productService: IProductService,
-    @IClipboardService private readonly clipboardService: IClipboardService,
+    @IClipboardService private readonly clipboardService: IClipboardService
   ) {
     super()
   }
@@ -106,7 +106,7 @@ export class NativeDialogHandler extends AbstractDialogHandler {
         process.versions["chrome"],
         `${osProps.type} ${osProps.arch} ${osProps.release}${
           isLinuxSnap ? " snap" : ""
-        }`,
+        }`
       )
     }
 

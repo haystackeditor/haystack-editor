@@ -9,7 +9,7 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IMenubarService } from "vs/platform/menubar/electron-sandbox/menubar"
-import { registerMainProcessRemoteService } from "vs/platform/ipc/electron-sandbox/services"
+import { IMenubarService } from 'vs/platform/menubar/electron-sandbox/menubar';
+import { registerMainProcessRemoteService } from 'vs/platform/ipc/electron-sandbox/services';
 
-registerMainProcessRemoteService(IMenubarService, "menubar")
+registerMainProcessRemoteService(IMenubarService, 'menubar');

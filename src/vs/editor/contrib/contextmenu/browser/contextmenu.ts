@@ -60,7 +60,7 @@ export class ContextMenuController implements IEditorContribution {
 
   public static get(editor: ICodeEditor): ContextMenuController | null {
     return editor.getContribution<ContextMenuController>(
-      ContextMenuController.ID,
+      ContextMenuController.ID
     )
   }
 
@@ -80,14 +80,14 @@ export class ContextMenuController implements IEditorContribution {
     @IConfigurationService
     private readonly _configurationService: IConfigurationService,
     @IWorkspaceContextService
-    private readonly _workspaceContextService: IWorkspaceContextService,
+    private readonly _workspaceContextService: IWorkspaceContextService
   ) {
     this._editor = editor
 
     this._toDispose.add(
       this._editor.onContextMenu((e: IEditorMouseEvent) =>
-        this._onContextMenu(e),
-      ),
+        this._onContextMenu(e)
+      )
     )
     this._toDispose.add(
       this._editor.onMouseWheel((e: IMouseWheelEvent) => {
@@ -105,7 +105,7 @@ export class ContextMenuController implements IEditorContribution {
             this._contextViewService.hideContextView()
           }
         }
-      }),
+      })
     )
     this._toDispose.add(
       this._editor.onKeyDown((e: IKeyboardEvent) => {
@@ -118,7 +118,7 @@ export class ContextMenuController implements IEditorContribution {
           e.stopPropagation()
           this.showContextMenu()
         }
-      }),
+      })
     )
   }
 
@@ -210,7 +210,7 @@ export class ContextMenuController implements IEditorContribution {
     // Find actions available for menu
     const menuActions = this._getMenuActions(
       this._editor.getModel(),
-      this._editor.contextMenuId,
+      this._editor.contextMenuId
     )
 
     // Show menu if we have actions to show
@@ -258,7 +258,7 @@ export class ContextMenuController implements IEditorContribution {
 
   private _doShowContextMenu(
     actions: IAction[],
-    event: IMouseEvent | null = null,
+    event: IMouseEvent | null = null
   ): void {
     if (!this._editor.hasModel()) {
       return
@@ -277,12 +277,12 @@ export class ContextMenuController implements IEditorContribution {
       // Ensure selection is visible
       this._editor.revealPosition(
         this._editor.getPosition(),
-        ScrollType.Immediate,
+        ScrollType.Immediate
       )
 
       this._editor.render()
       const cursorCoords = this._editor.getScrolledVisiblePosition(
-        this._editor.getPosition(),
+        this._editor.getPosition()
       )
 
       // Translate to absolute editor position
@@ -373,13 +373,13 @@ export class ContextMenuController implements IEditorContribution {
     }
     const createSubmenuAction = (
       label: string,
-      actions: IAction[],
+      actions: IAction[]
     ): SubmenuAction => {
       return new SubmenuAction(
         `menu-action-${++lastId}`,
         label,
         actions,
-        undefined,
+        undefined
       )
     }
     const createEnumAction = <T>(
@@ -387,7 +387,7 @@ export class ContextMenuController implements IEditorContribution {
       enabled: boolean,
       configName: string,
       configuredValue: T,
-      options: { label: string; value: T }[],
+      options: { label: string; value: T }[]
     ): IAction => {
       if (!enabled) {
         return createAction({ label, enabled, run: () => {} })
@@ -404,7 +404,7 @@ export class ContextMenuController implements IEditorContribution {
             label: option.label,
             checked: configuredValue === option.value,
             run: createRunner(option.value),
-          }),
+          })
         )
       }
       return createSubmenuAction(label, actions)
@@ -418,27 +418,27 @@ export class ContextMenuController implements IEditorContribution {
         run: () => {
           this._configurationService.updateValue(
             `editor.minimap.enabled`,
-            !minimapOptions.enabled,
+            !minimapOptions.enabled
           )
         },
-      }),
+      })
     )
     actions.push(new Separator())
     actions.push(
       createAction({
         label: nls.localize(
           "context.minimap.renderCharacters",
-          "Render Characters",
+          "Render Characters"
         ),
         enabled: minimapOptions.enabled,
         checked: minimapOptions.renderCharacters,
         run: () => {
           this._configurationService.updateValue(
             `editor.minimap.renderCharacters`,
-            !minimapOptions.renderCharacters,
+            !minimapOptions.renderCharacters
           )
         },
-      }),
+      })
     )
     actions.push(
       createEnumAction<"proportional" | "fill" | "fit">(
@@ -450,7 +450,7 @@ export class ContextMenuController implements IEditorContribution {
           {
             label: nls.localize(
               "context.minimap.size.proportional",
-              "Proportional",
+              "Proportional"
             ),
             value: "proportional",
           },
@@ -462,8 +462,8 @@ export class ContextMenuController implements IEditorContribution {
             label: nls.localize("context.minimap.size.fit", "Fit"),
             value: "fit",
           },
-        ],
-      ),
+        ]
+      )
     )
     actions.push(
       createEnumAction<"always" | "mouseover">(
@@ -475,7 +475,7 @@ export class ContextMenuController implements IEditorContribution {
           {
             label: nls.localize(
               "context.minimap.slider.mouseover",
-              "Mouse Over",
+              "Mouse Over"
             ),
             value: "mouseover",
           },
@@ -483,8 +483,8 @@ export class ContextMenuController implements IEditorContribution {
             label: nls.localize("context.minimap.slider.always", "Always"),
             value: "always",
           },
-        ],
-      ),
+        ]
+      )
     )
 
     const useShadowDOM =
@@ -520,7 +520,7 @@ class ShowContextMenu extends EditorAction {
       id: "editor.action.showContextMenu",
       label: nls.localize(
         "action.showContextMenu.label",
-        "Show Editor Context Menu",
+        "Show Editor Context Menu"
       ),
       alias: "Show Editor Context Menu",
       precondition: undefined,
@@ -540,6 +540,6 @@ class ShowContextMenu extends EditorAction {
 registerEditorContribution(
   ContextMenuController.ID,
   ContextMenuController,
-  EditorContributionInstantiation.BeforeFirstInteraction,
+  EditorContributionInstantiation.BeforeFirstInteraction
 )
 registerEditorAction(ShowContextMenu)

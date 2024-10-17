@@ -109,7 +109,7 @@ KeybindingsRegistry.registerCommandAndKeybindingRule({
   weight: KeybindingWeight.WorkbenchContrib + 50,
   handler: getQuickNavigateHandler(
     quickAccessNavigatePreviousInFilePickerId,
-    false,
+    false
   ),
   when: defaultQuickAccessContext,
   primary: globalQuickAccessKeybinding.primary | KeyMod.Shift,
@@ -179,10 +179,10 @@ registerAction2(
         {
           preserveValue:
             typeof prefix === "string" /* preserve as is if provided */,
-        },
+        }
       )
     }
-  },
+  }
 )
 
 registerAction2(
@@ -209,7 +209,7 @@ registerAction2(
         } as AnythingQuickAccessProviderRunOptions,
       })
     }
-  },
+  }
 )
 
 CommandsRegistry.registerCommand(
@@ -220,7 +220,7 @@ CommandsRegistry.registerCommand(
     quickInputService.quickAccess.show("", {
       itemActivation: ItemActivation.SECOND,
     })
-  },
+  }
 )
 
 //#endregion
@@ -233,7 +233,7 @@ class BaseQuickAccessNavigateAction extends Action2 {
     title: ILocalizedString,
     private next: boolean,
     private quickNavigate: boolean,
-    keybinding?: Omit<IKeybindingRule, "id">,
+    keybinding?: Omit<IKeybindingRule, "id">
   ) {
     super({ id, title, f1: true, keybinding })
   }
@@ -255,7 +255,7 @@ class QuickAccessNavigateNextAction extends BaseQuickAccessNavigateAction {
       "workbench.action.quickOpenNavigateNext",
       localize2("quickNavigateNext", "Navigate Next in Quick Open"),
       true,
-      true,
+      true
     )
   }
 }
@@ -266,7 +266,7 @@ class QuickAccessNavigatePreviousAction extends BaseQuickAccessNavigateAction {
       "workbench.action.quickOpenNavigatePrevious",
       localize2("quickNavigatePrevious", "Navigate Previous in Quick Open"),
       false,
-      true,
+      true
     )
   }
 }
@@ -283,7 +283,7 @@ class QuickAccessSelectNextAction extends BaseQuickAccessNavigateAction {
         when: inQuickPickContext,
         primary: 0,
         mac: { primary: KeyMod.WinCtrl | KeyCode.KeyN },
-      },
+      }
     )
   }
 }
@@ -300,7 +300,7 @@ class QuickAccessSelectPreviousAction extends BaseQuickAccessNavigateAction {
         when: inQuickPickContext,
         primary: 0,
         mac: { primary: KeyMod.WinCtrl | KeyCode.KeyP },
-      },
+      }
     )
   }
 }

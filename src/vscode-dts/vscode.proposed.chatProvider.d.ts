@@ -9,87 +9,75 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-declare module "vscode" {
-  export interface ChatResponseFragment {
-    index: number
-    part: string
-  }
+declare module 'vscode' {
 
-  // @API extension ship a d.ts files for their options
+	export interface ChatResponseFragment {
+		index: number;
+		part: string;
+	}
 
-  /**
-   * Represents a large language model that accepts ChatML messages and produces a streaming response
-   */
-  export interface ChatResponseProvider {
-    onDidReceiveLanguageModelResponse2?: Event<{
-      readonly extensionId: string
-      readonly participant?: string
-      readonly tokenCount?: number
-    }>
+	// @API extension ship a d.ts files for their options
 
-    provideLanguageModelResponse(
-      messages: LanguageModelChatMessage[],
-      options: { [name: string]: any },
-      extensionId: string,
-      progress: Progress<ChatResponseFragment>,
-      token: CancellationToken,
-    ): Thenable<any>
+	/**
+	 * Represents a large language model that accepts ChatML messages and produces a streaming response
+	 */
+	export interface ChatResponseProvider {
 
-    provideTokenCount(
-      text: string | LanguageModelChatMessage,
-      token: CancellationToken,
-    ): Thenable<number>
-  }
+		onDidReceiveLanguageModelResponse2?: Event<{ readonly extensionId: string; readonly participant?: string; readonly tokenCount?: number }>;
 
-  export interface ChatResponseProviderMetadata {
-    readonly vendor: string
+		provideLanguageModelResponse(messages: LanguageModelChatMessage[], options: { [name: string]: any }, extensionId: string, progress: Progress<ChatResponseFragment>, token: CancellationToken): Thenable<any>;
 
-    /**
-     * Human-readable name of the language model.
-     */
-    readonly name: string
-    /**
-     * Opaque family-name of the language model. Values might be `gpt-3.5-turbo`, `gpt4`, `phi2`, or `llama`
-     * but they are defined by extensions contributing languages and subject to change.
-     */
-    readonly family: string
+		provideTokenCount(text: string | LanguageModelChatMessage, token: CancellationToken): Thenable<number>;
+	}
 
-    /**
-     * Opaque version string of the model. This is defined by the extension contributing the language model
-     * and subject to change while the identifier is stable.
-     */
-    readonly version: string
+	export interface ChatResponseProviderMetadata {
 
-    readonly maxInputTokens: number
+		readonly vendor: string;
 
-    readonly maxOutputTokens: number
+		/**
+		 * Human-readable name of the language model.
+		 */
+		readonly name: string;
+		/**
+		 * Opaque family-name of the language model. Values might be `gpt-3.5-turbo`, `gpt4`, `phi2`, or `llama`
+		 * but they are defined by extensions contributing languages and subject to change.
+		 */
+		readonly family: string;
 
-    /**
-     * When present, this gates the use of `requestLanguageModelAccess` behind an authorization flow where
-     * the user must approve of another extension accessing the models contributed by this extension.
-     * Additionally, the extension can provide a label that will be shown in the UI.
-     */
-    auth?: true | { label: string }
-  }
+		/**
+		 * Opaque version string of the model. This is defined by the extension contributing the language model
+		 * and subject to change while the identifier is stable.
+		 */
+		readonly version: string;
 
-  export interface ChatResponseProviderMetadata {
-    // limit this provider to some extensions
-    extensions?: string[]
-  }
+		readonly maxInputTokens: number;
 
-  export namespace chat {
-    /**
-     * Register a LLM as chat response provider to the editor.
-     *
-     *
-     * @param id
-     * @param provider
-     * @param metadata
-     */
-    export function registerChatResponseProvider(
-      id: string,
-      provider: ChatResponseProvider,
-      metadata: ChatResponseProviderMetadata,
-    ): Disposable
-  }
+		readonly maxOutputTokens: number;
+
+		/**
+		 * When present, this gates the use of `requestLanguageModelAccess` behind an authorization flow where
+		 * the user must approve of another extension accessing the models contributed by this extension.
+		 * Additionally, the extension can provide a label that will be shown in the UI.
+		 */
+		auth?: true | { label: string };
+	}
+
+	export interface ChatResponseProviderMetadata {
+		// limit this provider to some extensions
+		extensions?: string[];
+	}
+
+	export namespace chat {
+
+		/**
+		 * Register a LLM as chat response provider to the editor.
+		 *
+		 *
+		 * @param id
+		 * @param provider
+		 * @param metadata
+		 */
+		export function registerChatResponseProvider(id: string, provider: ChatResponseProvider, metadata: ChatResponseProviderMetadata): Disposable;
+	}
+
 }

@@ -9,12 +9,12 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-const es = require("event-stream")
-const vfs = require("vinyl-fs")
-const { eslintFilter } = require("./filters")
+const es = require("event-stream");
+const vfs = require("vinyl-fs");
+const { eslintFilter } = require("./filters");
 
 function eslint() {
-  const gulpeslint = require("gulp-eslint")
+  const gulpeslint = require("gulp-eslint");
   return vfs
     .src(eslintFilter, { base: ".", follow: true, allowEmpty: true })
     .pipe(
@@ -26,7 +26,7 @@ function eslint() {
     .pipe(
       gulpeslint.results((results) => {
         if (results.warningCount > 0 || results.errorCount > 0) {
-          throw new Error("eslint failed with warnings and/or errors")
+          throw new Error("eslint failed with warnings and/or errors");
         }
       }),
     )
@@ -34,14 +34,14 @@ function eslint() {
       es.through(function () {
         /* noop, important for the stream to end */
       }),
-    )
+    );
 }
 
 if (require.main === module) {
   eslint().on("error", (err) => {
-    console.log("HELLO WORLD")
-    console.error()
-    console.error(err)
-    process.exit(1)
-  })
+    console.log("HELLO WORLD");
+    console.error();
+    console.error(err);
+    process.exit(1);
+  });
 }

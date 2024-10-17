@@ -25,7 +25,7 @@ function useSyncExternalStoreWithSelector<Snapshot, Selection>(
   getSnapshot: () => Snapshot,
   getServerSnapshot: void | null | (() => Snapshot),
   selector: (snapshot: Snapshot) => Selection,
-  isEqual?: (a: Selection, b: Selection) => boolean,
+  isEqual?: (a: Selection, b: Selection) => boolean
 ): Selection {
   interface Inst {
     hasValue: boolean
@@ -116,7 +116,7 @@ function useSyncExternalStoreWithSelector<Snapshot, Selection>(
   const value = useSyncExternalStore(
     subscribe,
     getSelection,
-    getServerSelection,
+    getServerSelection
   )
 
   useEffect(() => {
@@ -131,13 +131,13 @@ function useSyncExternalStoreWithSelector<Snapshot, Selection>(
 export function useZustand<State, Slice>(
   store: StoreApi<State>,
   selector: (state: State) => Slice,
-  areEqual: (a: Slice, b: Slice) => boolean = Object.is,
+  areEqual: (a: Slice, b: Slice) => boolean = Object.is
 ) {
   return useSyncExternalStoreWithSelector(
     store.subscribe,
     store.getState,
     store.getInitialState,
     selector,
-    areEqual,
+    areEqual
   )
 }

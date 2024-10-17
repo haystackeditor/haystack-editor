@@ -9,16 +9,17 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from "vscode"
+import * as vscode from 'vscode';
 
 export function isWeb(): boolean {
-  return "navigator" in globalThis && vscode.env.uiKind === vscode.UIKind.Web
+	return 'navigator' in globalThis && vscode.env.uiKind === vscode.UIKind.Web;
 }
 
 export function isWebAndHasSharedArrayBuffers(): boolean {
-  return isWeb() && (globalThis as any)["crossOriginIsolated"]
+	return isWeb() && (globalThis as any)['crossOriginIsolated'];
 }
 
 export function supportsReadableByteStreams(): boolean {
-  return isWeb() && "ReadableByteStreamController" in globalThis
+	return isWeb() && 'ReadableByteStreamController' in globalThis;
 }
+

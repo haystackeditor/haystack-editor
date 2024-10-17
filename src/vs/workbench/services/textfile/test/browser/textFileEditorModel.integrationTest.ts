@@ -39,7 +39,7 @@ suite("Files - TextFileEditorModel (integration)", () => {
     accessor = instantiationService.createInstance(TestServiceAccessor)
     content = accessor.fileService.getContent()
     disposables.add(
-      toDisposable(() => accessor.fileService.setContent(content)),
+      toDisposable(() => accessor.fileService.setContent(content))
     )
     disposables.add(<TextFileEditorModelManager>accessor.textFileService.files)
   })
@@ -52,7 +52,7 @@ suite("Files - TextFileEditorModel (integration)", () => {
     return testBackupAndRestore(
       toResource.call(this, "/path/index_async.txt"),
       toResource.call(this, "/path/index_async2.txt"),
-      "Some very small file text content.",
+      "Some very small file text content."
     )
   })
 
@@ -61,14 +61,14 @@ suite("Files - TextFileEditorModel (integration)", () => {
     return testBackupAndRestore(
       toResource.call(this, "/path/index_async.txt"),
       toResource.call(this, "/path/index_async2.txt"),
-      largeContent,
+      largeContent
     )
   })
 
   async function testBackupAndRestore(
     resourceA: URI,
     resourceB: URI,
-    contents: string,
+    contents: string
   ): Promise<void> {
     const originalModel: TextFileEditorModel = disposables.add(
       instantiationService.createInstance(
@@ -77,15 +77,15 @@ suite("Files - TextFileEditorModel (integration)", () => {
         "utf8",
         undefined,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
     await originalModel.resolve({
       contents: await createTextBufferFactoryFromStream(
         await accessor.textFileService.getDecodedStream(
           resourceA,
-          bufferToStream(VSBuffer.fromString(contents)),
-        ),
+          bufferToStream(VSBuffer.fromString(contents))
+        )
       ),
     })
 
@@ -98,7 +98,7 @@ suite("Files - TextFileEditorModel (integration)", () => {
     }
     await accessor.workingCopyBackupService.backup(
       modelRestoredIdentifier,
-      backup.content,
+      backup.content
     )
 
     const modelRestored: TextFileEditorModel = disposables.add(
@@ -108,8 +108,8 @@ suite("Files - TextFileEditorModel (integration)", () => {
         "utf8",
         undefined,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
     await modelRestored.resolve()
 

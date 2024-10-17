@@ -9,79 +9,81 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as eslint from "eslint"
-import { join, dirname } from "path"
-import { createImportRuleListener } from "./utils"
+import * as eslint from 'eslint';
+import { join, dirname } from 'path';
+import { createImportRuleListener } from './utils';
 
 type Config = {
-  allowed: Set<string>
-  disallowed: Set<string>
-}
+	allowed: Set<string>;
+	disallowed: Set<string>;
+};
 
-export = new (class implements eslint.Rule.RuleModule {
-  readonly meta: eslint.Rule.RuleMetaData = {
-    messages: {
-      layerbreaker:
-        "Bad layering. You are not allowed to access {{from}} from here, allowed layers are: [{{allowed}}]",
-    },
-    docs: {
-      url: "https://github.com/microsoft/vscode/wiki/Source-Code-Organization",
-    },
-  }
+export = new class implements eslint.Rule.RuleModule {
 
-  create(context: eslint.Rule.RuleContext): eslint.Rule.RuleListener {
-    const fileDirname = dirname(context.getFilename())
-    const parts = fileDirname.split(/\\|\//)
-    const ruleArgs = <Record<string, string[]>>context.options[0]
+	readonly meta: eslint.Rule.RuleMetaData = {
+		messages: {
+			layerbreaker: 'Bad layering. You are not allowed to access {{from}} from here, allowed layers are: [{{allowed}}]'
+		},
+		docs: {
+			url: 'https://github.com/microsoft/vscode/wiki/Source-Code-Organization'
+		}
+	};
 
-    let config: Config | undefined
-    for (let i = parts.length - 1; i >= 0; i--) {
-      if (ruleArgs[parts[i]]) {
-        config = {
-          allowed: new Set(ruleArgs[parts[i]]).add(parts[i]),
-          disallowed: new Set(),
-        }
-        Object.keys(ruleArgs).forEach((key) => {
-          if (!config!.allowed.has(key)) {
-            config!.disallowed.add(key)
-          }
-        })
-        break
-      }
-    }
+	create(context: eslint.Rule.RuleContext): eslint.Rule.RuleListener {
 
-    if (!config) {
-      // nothing
-      return {}
-    }
+		const fileDirname = dirname(context.getFilename());
+		const parts = fileDirname.split(/\\|\//);
+		const ruleArgs = <Record<string, string[]>>context.options[0];
 
-    return createImportRuleListener((node, path) => {
-      if (path[0] === ".") {
-        path = join(dirname(context.getFilename()), path)
-      }
+		let config: Config | undefined;
+		for (let i = parts.length - 1; i >= 0; i--) {
+			if (ruleArgs[parts[i]]) {
+				config = {
+					allowed: new Set(ruleArgs[parts[i]]).add(parts[i]),
+					disallowed: new Set()
+				};
+				Object.keys(ruleArgs).forEach(key => {
+					if (!config!.allowed.has(key)) {
+						config!.disallowed.add(key);
+					}
+				});
+				break;
+			}
+		}
 
-      const parts = dirname(path).split(/\\|\//)
-      for (let i = parts.length - 1; i >= 0; i--) {
-        const part = parts[i]
+		if (!config) {
+			// nothing
+			return {};
+		}
 
-        if (config!.allowed.has(part)) {
-          // GOOD - same layer
-          break
-        }
+		return createImportRuleListener((node, path) => {
+			if (path[0] === '.') {
+				path = join(dirname(context.getFilename()), path);
+			}
 
-        if (config!.disallowed.has(part)) {
-          // BAD - wrong layer
-          context.report({
-            loc: node.loc,
-            messageId: "layerbreaker",
-            data: {
-              from: part,
-              allowed: [...config!.allowed.keys()].join(", "),
-            },
-          })
-          break
-        }
-      }
-    })
-  }
-})()
+			const parts = dirname(path).split(/\\|\//);
+			for (let i = parts.length - 1; i >= 0; i--) {
+				const part = parts[i];
+
+				if (config!.allowed.has(part)) {
+					// GOOD - same layer
+					break;
+				}
+
+				if (config!.disallowed.has(part)) {
+					// BAD - wrong layer
+					context.report({
+						loc: node.loc,
+						messageId: 'layerbreaker',
+						data: {
+							from: part,
+							allowed: [...config!.allowed.keys()].join(', ')
+						}
+					});
+					break;
+				}
+			}
+		});
+	}
+};
+

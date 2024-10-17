@@ -85,10 +85,10 @@ interface CompositeItem {
 
 export abstract class CompositePart<T extends Composite> extends Part {
   protected readonly onDidCompositeOpen = this._register(
-    new Emitter<{ composite: IComposite; focus: boolean }>(),
+    new Emitter<{ composite: IComposite; focus: boolean }>()
   )
   protected readonly onDidCompositeClose = this._register(
-    new Emitter<IComposite>(),
+    new Emitter<IComposite>()
   )
 
   protected toolBar: WorkbenchToolBar | undefined
@@ -126,14 +126,14 @@ export abstract class CompositePart<T extends Composite> extends Part {
     private readonly compositeCSSClass: string,
     private readonly titleForegroundColor: string | undefined,
     id: string,
-    options: IPartOptions,
+    options: IPartOptions
   ) {
     super(id, options, themeService, storageService, layoutService)
 
     this.lastActiveCompositeId = storageService.get(
       activeCompositeSettingsKey,
       StorageScope.WORKSPACE,
-      this.defaultCompositeId,
+      this.defaultCompositeId
     )
     this.toolbarHoverDelegate = this._register(createInstantHoverDelegate())
   }
@@ -160,7 +160,7 @@ export abstract class CompositePart<T extends Composite> extends Part {
 
   private doOpenComposite(
     id: string,
-    focus: boolean = false,
+    focus: boolean = false
   ): Composite | undefined {
     // Use a generated token to avoid race conditions from long running promises
     const currentCompositeOpenToken = defaultGenerator.nextId()
@@ -228,27 +228,27 @@ export abstract class CompositePart<T extends Composite> extends Part {
             super(compositeDescriptor!.id, !!isActive)
             this._register(
               that.onDidCompositeOpen.event((e) =>
-                this.onScopeOpened(e.composite.getId()),
-              ),
+                this.onScopeOpened(e.composite.getId())
+              )
             )
             this._register(
               that.onDidCompositeClose.event((e) =>
-                this.onScopeClosed(e.getId()),
-              ),
+                this.onScopeClosed(e.getId())
+              )
             )
           }
-        })(),
+        })()
       )
       const compositeInstantiationService = this._register(
         this.instantiationService.createChild(
           new ServiceCollection(
-            [IEditorProgressService, compositeProgressIndicator], // provide the editor progress service for any editors instantiated within the composite
-          ),
-        ),
+            [IEditorProgressService, compositeProgressIndicator] // provide the editor progress service for any editors instantiated within the composite
+          )
+        )
       )
 
       const composite = compositeDescriptor.instantiate(
-        compositeInstantiationService,
+        compositeInstantiationService
       )
       const disposable = new DisposableStore()
 
@@ -263,8 +263,8 @@ export abstract class CompositePart<T extends Composite> extends Part {
       disposable.add(
         composite.onTitleAreaUpdate(
           () => this.onTitleAreaUpdate(composite.getId()),
-          this,
-        ),
+          this
+        )
       )
       disposable.add(compositeInstantiationService)
 
@@ -285,12 +285,12 @@ export abstract class CompositePart<T extends Composite> extends Part {
         this.activeCompositeSettingsKey,
         id,
         StorageScope.WORKSPACE,
-        StorageTarget.MACHINE,
+        StorageTarget.MACHINE
       )
     } else {
       this.storageService.remove(
         this.activeCompositeSettingsKey,
-        StorageScope.WORKSPACE,
+        StorageScope.WORKSPACE
       )
     }
 
@@ -299,7 +299,7 @@ export abstract class CompositePart<T extends Composite> extends Part {
 
     // Composites created for the first time
     let compositeContainer = this.mapCompositeToCompositeContainer.get(
-      composite.getId(),
+      composite.getId()
     )
     if (!compositeContainer) {
       // Build Container off-DOM
@@ -313,7 +313,7 @@ export abstract class CompositePart<T extends Composite> extends Part {
       // Remember composite container
       this.mapCompositeToCompositeContainer.set(
         composite.getId(),
-        compositeContainer,
+        compositeContainer
       )
     }
 
@@ -343,7 +343,7 @@ export abstract class CompositePart<T extends Composite> extends Part {
 
     // Handle Composite Actions
     let actionsBinding = this.mapActionsBindingToComposite.get(
-      composite.getId(),
+      composite.getId()
     )
     if (!actionsBinding) {
       actionsBinding = this.collectCompositeActions(composite)
@@ -394,7 +394,7 @@ export abstract class CompositePart<T extends Composite> extends Part {
       const actionsBinding = this.collectCompositeActions(this.activeComposite)
       this.mapActionsBindingToComposite.set(
         this.activeComposite.getId(),
-        actionsBinding,
+        actionsBinding
       )
       actionsBinding()
     }
@@ -420,12 +420,12 @@ export abstract class CompositePart<T extends Composite> extends Part {
     this.titleLabel.updateTitle(
       compositeId,
       compositeTitle,
-      keybinding?.getLabel() ?? undefined,
+      keybinding?.getLabel() ?? undefined
     )
 
     const toolBar = assertIsDefined(this.toolBar)
     toolBar.setAriaLabel(
-      localize("ariaCompositeToolbarLabel", "{0} actions", compositeTitle),
+      localize("ariaCompositeToolbarLabel", "{0} actions", compositeTitle)
     )
   }
 
@@ -445,7 +445,7 @@ export abstract class CompositePart<T extends Composite> extends Part {
       toolBar.setActions(
         prepareActions(primaryActions),
         prepareActions(secondaryActions),
-        menuIds,
+        menuIds
       )
   }
 
@@ -466,7 +466,7 @@ export abstract class CompositePart<T extends Composite> extends Part {
     this.activeComposite = undefined
 
     const compositeContainer = this.mapCompositeToCompositeContainer.get(
-      composite.getId(),
+      composite.getId()
     )
 
     // Indicate to Composite
@@ -516,12 +516,12 @@ export abstract class CompositePart<T extends Composite> extends Part {
             this.getTitleAreaDropDownAnchorAlignment(),
           toggleMenuTitle: localize(
             "viewsAndMoreActions",
-            "Views and More Actions...",
+            "Views and More Actions..."
           ),
           telemetrySource: this.nameForTelemetry,
           hoverDelegate: this.toolbarHoverDelegate,
-        },
-      ),
+        }
+      )
     )
 
     this.collectCompositeActions()()
@@ -537,8 +537,8 @@ export abstract class CompositePart<T extends Composite> extends Part {
       this.hoverService.setupUpdatableHover(
         getDefaultHoverDelegate("mouse"),
         titleLabel,
-        "",
-      ),
+        ""
+      )
     )
 
     const $this = this
@@ -550,7 +550,7 @@ export abstract class CompositePart<T extends Composite> extends Part {
           hover.update(
             keybinding
               ? localize("titleTooltip", "{0} ({1})", title, keybinding)
-              : title,
+              : title
           )
         }
       },
@@ -587,7 +587,7 @@ export abstract class CompositePart<T extends Composite> extends Part {
 
   protected actionViewItemProvider(
     action: IAction,
-    options: IBaseActionViewItemOptions,
+    options: IBaseActionViewItemOptions
   ): IActionViewItem | undefined {
     // Check Active Composite
     if (this.activeComposite) {
@@ -610,7 +610,7 @@ export abstract class CompositePart<T extends Composite> extends Part {
     const contentContainer = append(parent, $(".content"))
 
     this.progressBar = this._register(
-      new ProgressBar(contentContainer, defaultProgressBarStyles),
+      new ProgressBar(contentContainer, defaultProgressBarStyles)
     )
     this.progressBar.hide()
 
@@ -631,13 +631,13 @@ export abstract class CompositePart<T extends Composite> extends Part {
     width: number,
     height: number,
     top: number,
-    left: number,
+    left: number
   ): void {
     super.layout(width, height, top, left)
 
     // Layout contents
     this.contentAreaSize = Dimension.lift(
-      super.layoutContents(width, height).contentSize,
+      super.layoutContents(width, height).contentSize
     )
 
     // Layout composite

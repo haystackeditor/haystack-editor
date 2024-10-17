@@ -44,7 +44,7 @@ export abstract class HaystackZoneWidget {
   constructor(
     domElement: HTMLElement,
     protected readonly codeEditor: ICodeEditor,
-    options: IOptions = {},
+    options: IOptions = {}
   ) {
     this.options = objects.deepClone(options)
     objects.mixin(this.options, defaultOptions, false)

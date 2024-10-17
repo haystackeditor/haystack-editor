@@ -80,7 +80,7 @@ import { isMouseEvent } from "vs/base/browser/dom"
 const explorerViewIcon = registerIcon(
   "explorer-view-icon",
   Codicon.files,
-  localize("explorerViewIcon", "View icon of the explorer view."),
+  localize("explorerViewIcon", "View icon of the explorer view.")
 )
 
 export class ExplorerViewletViewsContribution
@@ -92,26 +92,26 @@ export class ExplorerViewletViewsContribution
   constructor(
     @IWorkspaceContextService
     private readonly workspaceContextService: IWorkspaceContextService,
-    @IProgressService progressService: IProgressService,
+    @IProgressService progressService: IProgressService
   ) {
     super()
 
     progressService
       .withProgress({ location: ProgressLocation.Explorer }, () =>
-        workspaceContextService.getCompleteWorkspace(),
+        workspaceContextService.getCompleteWorkspace()
       )
       .finally(() => {
         this.registerViews()
 
         this._register(
           workspaceContextService.onDidChangeWorkbenchState(() =>
-            this.registerViews(),
-          ),
+            this.registerViews()
+          )
         )
         this._register(
           workspaceContextService.onDidChangeWorkspaceFolders(() =>
-            this.registerViews(),
-          ),
+            this.registerViews()
+          )
         )
       })
   }
@@ -131,11 +131,11 @@ export class ExplorerViewletViewsContribution
 
     const explorerViewDescriptor = this.createExplorerViewDescriptor()
     const registeredExplorerViewDescriptor = viewDescriptors.find(
-      (v) => v.id === explorerViewDescriptor.id,
+      (v) => v.id === explorerViewDescriptor.id
     )
     const emptyViewDescriptor = this.createEmptyViewDescriptor()
     const registeredEmptyViewDescriptor = viewDescriptors.find(
-      (v) => v.id === emptyViewDescriptor.id,
+      (v) => v.id === emptyViewDescriptor.id
     )
 
     if (
@@ -212,7 +212,7 @@ export class ExplorerViewPaneContainer extends ViewPaneContainer {
     @IThemeService themeService: IThemeService,
     @IContextMenuService contextMenuService: IContextMenuService,
     @IExtensionService extensionService: IExtensionService,
-    @IViewDescriptorService viewDescriptorService: IViewDescriptorService,
+    @IViewDescriptorService viewDescriptorService: IViewDescriptorService
   ) {
     super(
       VIEWLET_ID,
@@ -226,15 +226,15 @@ export class ExplorerViewPaneContainer extends ViewPaneContainer {
       themeService,
       storageService,
       contextService,
-      viewDescriptorService,
+      viewDescriptorService
     )
 
     this.viewletVisibleContextKey =
       ExplorerViewletVisibleContext.bindTo(contextKeyService)
     this._register(
       this.contextService.onDidChangeWorkspaceName((e) =>
-        this.updateTitleArea(),
-      ),
+        this.updateTitleArea()
+      )
     )
   }
 
@@ -245,7 +245,7 @@ export class ExplorerViewPaneContainer extends ViewPaneContainer {
 
   protected override createView(
     viewDescriptor: IViewDescriptor,
-    options: IViewletViewOptions,
+    options: IViewletViewOptions
   ): ViewPane {
     if (viewDescriptor.id === VIEW_ID) {
       return this.instantiationService.createInstance(ExplorerView, {
@@ -316,7 +316,7 @@ export class ExplorerViewPaneContainer extends ViewPaneContainer {
 }
 
 const viewContainerRegistry = Registry.as<IViewContainersRegistry>(
-  Extensions.ViewContainersRegistry,
+  Extensions.ViewContainersRegistry
 )
 
 /**
@@ -338,14 +338,14 @@ export const VIEW_CONTAINER: ViewContainer =
         title: localize2("explore", "Explorer"),
         mnemonicTitle: localize(
           { key: "miViewExplorer", comment: ["&& denotes a mnemonic"] },
-          "&&Explorer",
+          "&&Explorer"
         ),
         keybindings: { primary: KeyMod.CtrlCmd | KeyMod.Shift | KeyCode.KeyE },
         order: 0,
       },
     },
     ViewContainerLocation.Sidebar,
-    { isDefault: true },
+    { isDefault: true }
   )
 
 const openFolder = localize("openFolder", "Open Folder")
@@ -370,13 +370,13 @@ viewsRegistry.registerViewWelcomeContent(EmptyView.ID, {
       ],
     },
     "You have not yet added a folder to the workspace.\n{0}",
-    addRootFolderButton,
+    addRootFolderButton
   ),
   when: ContextKeyExpr.and(
     // inside a .code-workspace
     WorkbenchStateContext.isEqualTo("workspace"),
     // unless we cannot enter or open workspaces (e.g. web serverless)
-    OpenFolderWorkspaceSupportContext,
+    OpenFolderWorkspaceSupportContext
   ),
   group: ViewContentGroups.Open,
   order: 1,
@@ -392,13 +392,13 @@ viewsRegistry.registerViewWelcomeContent(EmptyView.ID, {
     },
     "You have not yet opened a folder.\n{0}\n{1}",
     openFolderViaWorkspaceButton,
-    openRecentButton,
+    openRecentButton
   ),
   when: ContextKeyExpr.and(
     // inside a .code-workspace
     WorkbenchStateContext.isEqualTo("workspace"),
     // we cannot enter workspaces (e.g. web serverless)
-    OpenFolderWorkspaceSupportContext.toNegated(),
+    OpenFolderWorkspaceSupportContext.toNegated()
   ),
   group: ViewContentGroups.Open,
   order: 1,
@@ -413,7 +413,7 @@ viewsRegistry.registerViewWelcomeContent(EmptyView.ID, {
       ],
     },
     "Connected to remote.\n{0}",
-    openFolderButton,
+    openFolderButton
   ),
   when: ContextKeyExpr.and(
     // not inside a .code-workspace
@@ -421,7 +421,7 @@ viewsRegistry.registerViewWelcomeContent(EmptyView.ID, {
     // connected to a remote
     RemoteNameContext.notEqualsTo(""),
     // but not in web
-    IsWebContext.toNegated(),
+    IsWebContext.toNegated()
   ),
   group: ViewContentGroups.Open,
   order: 1,
@@ -437,7 +437,7 @@ viewsRegistry.registerViewWelcomeContent(EmptyView.ID, {
     },
     "You have not yet opened a folder.\n{0}\nOpening a folder will close all currently open editors. To keep them open, {1} instead.",
     openFolderButton,
-    addAFolderButton,
+    addAFolderButton
   ),
   when: ContextKeyExpr.and(
     // editors are opened
@@ -446,14 +446,14 @@ viewsRegistry.registerViewWelcomeContent(EmptyView.ID, {
       // not inside a .code-workspace and local
       ContextKeyExpr.and(
         WorkbenchStateContext.notEqualsTo("workspace"),
-        RemoteNameContext.isEqualTo(""),
+        RemoteNameContext.isEqualTo("")
       ),
       // not inside a .code-workspace and web
       ContextKeyExpr.and(
         WorkbenchStateContext.notEqualsTo("workspace"),
-        IsWebContext,
-      ),
-    ),
+        IsWebContext
+      )
+    )
   ),
   group: ViewContentGroups.Open,
   order: 1,
@@ -468,7 +468,7 @@ viewsRegistry.registerViewWelcomeContent(EmptyView.ID, {
       ],
     },
     "You have not yet opened a folder.\n{0}",
-    openFolderButton,
+    openFolderButton
   ),
   when: ContextKeyExpr.and(
     // no editor is open
@@ -477,14 +477,14 @@ viewsRegistry.registerViewWelcomeContent(EmptyView.ID, {
       // not inside a .code-workspace and local
       ContextKeyExpr.and(
         WorkbenchStateContext.notEqualsTo("workspace"),
-        RemoteNameContext.isEqualTo(""),
+        RemoteNameContext.isEqualTo("")
       ),
       // not inside a .code-workspace and web
       ContextKeyExpr.and(
         WorkbenchStateContext.notEqualsTo("workspace"),
-        IsWebContext,
-      ),
-    ),
+        IsWebContext
+      )
+    )
   ),
   group: ViewContentGroups.Open,
   order: 1,

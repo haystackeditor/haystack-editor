@@ -9,57 +9,52 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-declare module "vscode" {
-  export type ChatWelcomeMessageContent = string | MarkdownString
+declare module 'vscode' {
 
-  export interface ChatWelcomeMessageProvider {
-    provideWelcomeMessage(
-      location: ChatLocation,
-      token: CancellationToken,
-    ): ProviderResult<ChatWelcomeMessageContent[]>
-    provideSampleQuestions?(
-      location: ChatLocation,
-      token: CancellationToken,
-    ): ProviderResult<ChatFollowup[]>
-  }
+	export type ChatWelcomeMessageContent = string | MarkdownString;
 
-  export interface ChatRequesterInformation {
-    name: string
+	export interface ChatWelcomeMessageProvider {
+		provideWelcomeMessage(location: ChatLocation, token: CancellationToken): ProviderResult<ChatWelcomeMessageContent[]>;
+		provideSampleQuestions?(location: ChatLocation, token: CancellationToken): ProviderResult<ChatFollowup[]>;
+	}
 
-    /**
-     * A full URI for the icon of the request.
-     */
-    icon?: Uri
-  }
+	export interface ChatRequesterInformation {
+		name: string;
 
-  export interface ChatParticipant {
-    /**
-     * When true, this participant is invoked by default when no other participant is being invoked
-     */
-    isDefault?: boolean
+		/**
+		 * A full URI for the icon of the request.
+		 */
+		icon?: Uri;
+	}
 
-    /**
-     * When true, this participant is invoked when the user submits their query using ctrl/cmd+enter
-     * TODO@API name
-     */
-    isSecondary?: boolean
+	export interface ChatParticipant {
+		/**
+		 * When true, this participant is invoked by default when no other participant is being invoked
+		 */
+		isDefault?: boolean;
 
-    /**
-     * A string that will be added before the listing of chat participants in `/help`.
-     */
-    helpTextPrefix?: string | MarkdownString
+		/**
+		 * When true, this participant is invoked when the user submits their query using ctrl/cmd+enter
+		 * TODO@API name
+		 */
+		isSecondary?: boolean;
 
-    /**
-     * A string that will be added before the listing of chat variables in `/help`.
-     */
-    helpTextVariablesPrefix?: string | MarkdownString
+		/**
+		 * A string that will be added before the listing of chat participants in `/help`.
+		 */
+		helpTextPrefix?: string | MarkdownString;
 
-    /**
-     * A string that will be appended after the listing of chat participants in `/help`.
-     */
-    helpTextPostfix?: string | MarkdownString
+		/**
+		 * A string that will be added before the listing of chat variables in `/help`.
+		 */
+		helpTextVariablesPrefix?: string | MarkdownString;
 
-    welcomeMessageProvider?: ChatWelcomeMessageProvider
-    requester?: ChatRequesterInformation
-  }
+		/**
+		 * A string that will be appended after the listing of chat participants in `/help`.
+		 */
+		helpTextPostfix?: string | MarkdownString;
+
+		welcomeMessageProvider?: ChatWelcomeMessageProvider;
+		requester?: ChatRequesterInformation;
+	}
 }

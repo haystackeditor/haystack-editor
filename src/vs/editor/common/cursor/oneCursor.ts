@@ -45,15 +45,15 @@ export class Cursor {
         SelectionStartKind.Simple,
         0,
         new Position(1, 1),
-        0,
+        0
       ),
       new SingleCursorState(
         new Range(1, 1, 1, 1),
         SelectionStartKind.Simple,
         0,
         new Position(1, 1),
-        0,
-      ),
+        0
+      )
     )
   }
 
@@ -79,7 +79,7 @@ export class Cursor {
     this._selTrackedRange = context.model._setTrackedRange(
       this._selTrackedRange,
       this.modelState.selection,
-      TrackedRangeStickiness.AlwaysGrowsWhenTypingAtEdges,
+      TrackedRangeStickiness.AlwaysGrowsWhenTypingAtEdges
     )
   }
 
@@ -87,7 +87,7 @@ export class Cursor {
     this._selTrackedRange = context.model._setTrackedRange(
       this._selTrackedRange,
       null,
-      TrackedRangeStickiness.AlwaysGrowsWhenTypingAtEdges,
+      TrackedRangeStickiness.AlwaysGrowsWhenTypingAtEdges
     )
   }
 
@@ -102,7 +102,7 @@ export class Cursor {
       // Avoid selecting text when recovering from markers
       return Selection.fromRange(
         range.collapseToEnd(),
-        this.modelState.selection.getDirection(),
+        this.modelState.selection.getDirection()
       )
     }
 
@@ -116,7 +116,7 @@ export class Cursor {
   public setState(
     context: CursorContext,
     modelState: SingleCursorState | null,
-    viewState: SingleCursorState | null,
+    viewState: SingleCursorState | null
   ): void {
     this._setState(context, modelState, viewState)
   }
@@ -125,7 +125,7 @@ export class Cursor {
     viewModel: ICursorSimpleModel,
     position: Position,
     cacheInput: Position,
-    cacheOutput: Position,
+    cacheOutput: Position
   ): Position {
     if (position.equals(cacheInput)) {
       return cacheOutput
@@ -135,7 +135,7 @@ export class Cursor {
 
   private static _validateViewState(
     viewModel: ICursorSimpleModel,
-    viewState: SingleCursorState,
+    viewState: SingleCursorState
   ): SingleCursorState {
     const position = viewState.position
     const sStartPosition = viewState.selectionStart.getStartPosition()
@@ -143,19 +143,19 @@ export class Cursor {
 
     const validPosition = viewModel.normalizePosition(
       position,
-      PositionAffinity.None,
+      PositionAffinity.None
     )
     const validSStartPosition = this._validatePositionWithCache(
       viewModel,
       sStartPosition,
       position,
-      validPosition,
+      validPosition
     )
     const validSEndPosition = this._validatePositionWithCache(
       viewModel,
       sEndPosition,
       sStartPosition,
-      validSStartPosition,
+      validSStartPosition
     )
 
     if (
@@ -174,14 +174,14 @@ export class Cursor {
         sStartPosition.column -
         validSStartPosition.column,
       validPosition,
-      viewState.leftoverVisibleColumns + position.column - validPosition.column,
+      viewState.leftoverVisibleColumns + position.column - validPosition.column
     )
   }
 
   private _setState(
     context: CursorContext,
     modelState: SingleCursorState | null,
-    viewState: SingleCursorState | null,
+    viewState: SingleCursorState | null
   ): void {
     if (viewState) {
       viewState = Cursor._validateViewState(context.viewModel, viewState)
@@ -194,7 +194,7 @@ export class Cursor {
 
       const modelSelectionStart =
         context.coordinatesConverter.convertViewRangeToModelRange(
-          viewState.selectionStart,
+          viewState.selectionStart
         )
       const adjustedModelSelectionStart = context.editRange
         ? modelSelectionStart.delta(context.editRange.startLineNumber - 1)
@@ -202,7 +202,7 @@ export class Cursor {
 
       const modelPosition =
         context.coordinatesConverter.convertViewPositionToModelPosition(
-          viewState.position,
+          viewState.position
         )
       const adjustedModelPosition = context.editRange
         ? modelPosition.delta(context.editRange.startLineNumber - 1)
@@ -210,7 +210,7 @@ export class Cursor {
 
       // We only have the view state => compute the model state
       const selectionStart = context.model.validateRange(
-        adjustedModelSelectionStart,
+        adjustedModelSelectionStart
       )
 
       const position = context.model.validatePosition(adjustedModelPosition)
@@ -220,12 +220,12 @@ export class Cursor {
         viewState.selectionStartKind,
         viewState.selectionStartLeftoverVisibleColumns,
         position,
-        viewState.leftoverVisibleColumns,
+        viewState.leftoverVisibleColumns
       )
     } else {
       // Validate new model state
       const selectionStart = context.model.validateRange(
-        modelState.selectionStart,
+        modelState.selectionStart
       )
       const selectionStartLeftoverVisibleColumns =
         modelState.selectionStart.equalsRange(selectionStart)
@@ -242,7 +242,7 @@ export class Cursor {
         modelState.selectionStartKind,
         selectionStartLeftoverVisibleColumns,
         position,
-        leftoverVisibleColumns,
+        leftoverVisibleColumns
       )
     }
 
@@ -253,7 +253,7 @@ export class Cursor {
         modelState.selectionStart.startColumn,
         modelState.selectionStart.endLineNumber -
           (context.editRange ? context.editRange?.startLineNumber - 1 : 0),
-        modelState.selectionStart.endColumn,
+        modelState.selectionStart.endColumn
       )
       const adjustedModelPosition = context.editRange
         ? modelState.position.delta(-context.editRange.startLineNumber + 1)
@@ -264,49 +264,49 @@ export class Cursor {
         context.coordinatesConverter.convertModelPositionToViewPosition(
           new Position(
             adjustedModelRange.startLineNumber,
-            adjustedModelRange.startColumn,
-          ),
+            adjustedModelRange.startColumn
+          )
         )
       const viewSelectionStart2 =
         context.coordinatesConverter.convertModelPositionToViewPosition(
           new Position(
             adjustedModelRange.endLineNumber,
-            adjustedModelRange.endColumn,
-          ),
+            adjustedModelRange.endColumn
+          )
         )
       const viewSelectionStart = new Range(
         viewSelectionStart1.lineNumber,
         viewSelectionStart1.column,
         viewSelectionStart2.lineNumber,
-        viewSelectionStart2.column,
+        viewSelectionStart2.column
       )
       const viewPosition =
         context.coordinatesConverter.convertModelPositionToViewPosition(
-          adjustedModelPosition,
+          adjustedModelPosition
         )
       viewState = new SingleCursorState(
         viewSelectionStart,
         modelState.selectionStartKind,
         modelState.selectionStartLeftoverVisibleColumns,
         viewPosition,
-        modelState.leftoverVisibleColumns,
+        modelState.leftoverVisibleColumns
       )
     } else {
       // Validate new view state
       const viewSelectionStart = context.coordinatesConverter.validateViewRange(
         viewState.selectionStart,
-        modelState.selectionStart,
+        modelState.selectionStart
       )
       const viewPosition = context.coordinatesConverter.validateViewPosition(
         viewState.position,
-        modelState.position,
+        modelState.position
       )
       viewState = new SingleCursorState(
         viewSelectionStart,
         modelState.selectionStartKind,
         modelState.selectionStartLeftoverVisibleColumns,
         viewPosition,
-        modelState.leftoverVisibleColumns,
+        modelState.leftoverVisibleColumns
       )
     }
 

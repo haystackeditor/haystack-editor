@@ -20,7 +20,7 @@ interface CanvasWorkspaceViewProps {}
 
 function CanvasWorkspaceView({}: CanvasWorkspaceViewProps) {
   const workspaces = WorkspaceStoreWrapper.useWorkspaceState(
-    (state) => state.canvasWorkspaces,
+    (state) => state.canvasWorkspaces
   )
 
   const inputRef = React.useRef<HTMLInputElement | null>(null)
@@ -44,11 +44,11 @@ function CanvasWorkspaceView({}: CanvasWorkspaceViewProps) {
             WorkspaceStoreWrapper.getWorkspaceState().saveCurrentCanvasWorkspace(
               inputRef.current.value,
               WorkspaceStoreWrapper.getWorkspaceState().canvasCamera,
-              WorkspaceStoreWrapper.getWorkspaceState().canvasScale,
+              WorkspaceStoreWrapper.getWorkspaceState().canvasScale
             )
 
             WorkspaceStoreWrapper.getWorkspaceState().sendTelemetry(
-              "Current canvas workspace saved",
+              "Current canvas workspace saved"
             )
 
             inputRef.current.value = ""
@@ -61,11 +61,11 @@ function CanvasWorkspaceView({}: CanvasWorkspaceViewProps) {
               WorkspaceStoreWrapper.getWorkspaceState().saveCurrentCanvasWorkspace(
                 inputRef.current.value,
                 WorkspaceStoreWrapper.getWorkspaceState().canvasCamera,
-                WorkspaceStoreWrapper.getWorkspaceState().canvasScale,
+                WorkspaceStoreWrapper.getWorkspaceState().canvasScale
               )
 
               WorkspaceStoreWrapper.getWorkspaceState().sendTelemetry(
-                "Current canvas workspace saved",
+                "Current canvas workspace saved"
               )
 
               inputRef.current.value = ""
@@ -104,7 +104,7 @@ function CanvasWorkspaceButton({ workspace }: CanvasWorkspaceButtonProps) {
     (saveButtonElement: HTMLButtonElement) => {
       setSaveButtonElement(saveButtonElement)
     },
-    [setSaveButtonElement],
+    [setSaveButtonElement]
   )
   const [removeButtonElement, setRemoveButtonElement] =
     React.useState<HTMLButtonElement | null>(null)
@@ -112,11 +112,11 @@ function CanvasWorkspaceButton({ workspace }: CanvasWorkspaceButtonProps) {
     (removeButtonElement: HTMLButtonElement) => {
       setRemoveButtonElement(removeButtonElement)
     },
-    [setRemoveButtonElement],
+    [setRemoveButtonElement]
   )
 
   const currentCanvasWorkspace = WorkspaceStoreWrapper.useWorkspaceState(
-    (state) => state.currentCanvasWorkspace,
+    (state) => state.currentCanvasWorkspace
   )
 
   return (
@@ -136,19 +136,19 @@ function CanvasWorkspaceButton({ workspace }: CanvasWorkspaceButtonProps) {
               "You have unsaved changes in your current workspace",
               "Your changes to the current workspace will be lost if you don't save them",
               "Save",
-              "Don't save",
+              "Don't save"
             )
 
           switch (result) {
             case ConfirmResult.SAVE:
               WorkspaceStoreWrapper.getWorkspaceState().overwriteCurrentCanvasWorkspace()
               WorkspaceStoreWrapper.getWorkspaceState().sendTelemetry(
-                "Overwrote current canvas workplace via dialog",
+                "Overwrote current canvas workplace via dialog"
               )
               break
             case ConfirmResult.DONT_SAVE:
               WorkspaceStoreWrapper.getWorkspaceState().sendTelemetry(
-                "Loaded new canvas workspace without saving",
+                "Loaded new canvas workspace without saving"
               )
               break
             case ConfirmResult.CANCEL:
@@ -158,10 +158,10 @@ function CanvasWorkspaceButton({ workspace }: CanvasWorkspaceButtonProps) {
         }
 
         WorkspaceStoreWrapper.getWorkspaceState().openCanvasWorkspace(
-          workspace.uniqueId,
+          workspace.uniqueId
         )
         WorkspaceStoreWrapper.getWorkspaceState().sendTelemetry(
-          "Canvas workspace loaded",
+          "Canvas workspace loaded"
         )
       }}
     >
@@ -175,7 +175,7 @@ function CanvasWorkspaceButton({ workspace }: CanvasWorkspaceButtonProps) {
           onClick={(e) => {
             WorkspaceStoreWrapper.getWorkspaceState().overwriteCurrentCanvasWorkspace()
             WorkspaceStoreWrapper.getWorkspaceState().sendTelemetry(
-              "Overwrote current canvas workplace",
+              "Overwrote current canvas workplace"
             )
             e.preventDefault()
             e.stopPropagation()
@@ -194,10 +194,10 @@ function CanvasWorkspaceButton({ workspace }: CanvasWorkspaceButtonProps) {
         className="removeCanvasWorkspaceButton"
         onClick={(e) => {
           WorkspaceStoreWrapper.getWorkspaceState().deleteCanvasWorkspace(
-            workspace.uniqueId,
+            workspace.uniqueId
           )
           WorkspaceStoreWrapper.getWorkspaceState().sendTelemetry(
-            "Canvas workspace removed",
+            "Canvas workspace removed"
           )
           e.preventDefault()
           e.stopPropagation()

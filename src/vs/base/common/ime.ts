@@ -9,33 +9,34 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Emitter } from "vs/base/common/event"
+import { Emitter } from 'vs/base/common/event';
 
 export class IMEImpl {
-  private readonly _onDidChange = new Emitter<void>()
-  public readonly onDidChange = this._onDidChange.event
 
-  private _enabled = true
+	private readonly _onDidChange = new Emitter<void>();
+	public readonly onDidChange = this._onDidChange.event;
 
-  public get enabled() {
-    return this._enabled
-  }
+	private _enabled = true;
 
-  /**
-   * Enable IME
-   */
-  public enable(): void {
-    this._enabled = true
-    this._onDidChange.fire()
-  }
+	public get enabled() {
+		return this._enabled;
+	}
 
-  /**
-   * Disable IME
-   */
-  public disable(): void {
-    this._enabled = false
-    this._onDidChange.fire()
-  }
+	/**
+	 * Enable IME
+	 */
+	public enable(): void {
+		this._enabled = true;
+		this._onDidChange.fire();
+	}
+
+	/**
+	 * Disable IME
+	 */
+	public disable(): void {
+		this._enabled = false;
+		this._onDidChange.fire();
+	}
 }
 
-export const IME = new IMEImpl()
+export const IME = new IMEImpl();

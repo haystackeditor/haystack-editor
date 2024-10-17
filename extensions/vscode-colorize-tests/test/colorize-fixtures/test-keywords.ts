@@ -1,1 +1,1 @@
-export var foo = () => new RegExp("")
+export var foo = () => new RegExp('');

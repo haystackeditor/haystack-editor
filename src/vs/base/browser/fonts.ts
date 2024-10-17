@@ -9,7 +9,7 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { isMacintosh, isWindows } from "vs/base/common/platform"
+import { isMacintosh, isWindows } from 'vs/base/common/platform';
 
 /**
  * The best font-family to be used in CSS based on the platform:
@@ -19,8 +19,4 @@ import { isMacintosh, isWindows } from "vs/base/common/platform"
  *
  * Note: this currently does not adjust for different locales.
  */
-export const DEFAULT_FONT_FAMILY = isWindows
-  ? '"Segoe WPC", "Segoe UI", sans-serif'
-  : isMacintosh
-    ? "-apple-system, BlinkMacSystemFont, sans-serif"
-    : 'system-ui, "Ubuntu", "Droid Sans", sans-serif'
+export const DEFAULT_FONT_FAMILY = isWindows ? '"Segoe WPC", "Segoe UI", sans-serif' : isMacintosh ? '-apple-system, BlinkMacSystemFont, sans-serif' : 'system-ui, "Ubuntu", "Droid Sans", sans-serif';

@@ -10,6 +10,6 @@
  *--------------------------------------------------------------------------------------------*/
 
 export interface IEditorWorkerHost {
-  // foreign host request
-  fhr(method: string, args: any[]): Promise<any>
+	// foreign host request
+	fhr(method: string, args: any[]): Promise<any>;
 }

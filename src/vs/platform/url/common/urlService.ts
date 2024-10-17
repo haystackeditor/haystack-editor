@@ -34,7 +34,7 @@ export abstract class AbstractURLService
     return first(
       handlers.map((h) => () => h.handleURL(uri, options)),
       undefined,
-      false,
+      false
     ).then((val) => val || false)
   }
 
@@ -46,7 +46,7 @@ export abstract class AbstractURLService
 
 export class NativeURLService extends AbstractURLService {
   constructor(
-    @IProductService protected readonly productService: IProductService,
+    @IProductService protected readonly productService: IProductService
   ) {
     super()
   }

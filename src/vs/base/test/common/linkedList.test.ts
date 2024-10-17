@@ -9,135 +9,137 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as assert from "assert"
-import { LinkedList } from "vs/base/common/linkedList"
-import { ensureNoDisposablesAreLeakedInTestSuite } from "vs/base/test/common/utils"
+import * as assert from 'assert';
+import { LinkedList } from 'vs/base/common/linkedList';
+import { ensureNoDisposablesAreLeakedInTestSuite } from 'vs/base/test/common/utils';
 
-suite("LinkedList", function () {
-  ensureNoDisposablesAreLeakedInTestSuite()
+suite('LinkedList', function () {
 
-  function assertElements<E>(list: LinkedList<E>, ...elements: E[]) {
-    // check size
-    assert.strictEqual(list.size, elements.length)
+	ensureNoDisposablesAreLeakedInTestSuite();
 
-    // assert toArray
-    assert.deepStrictEqual(Array.from(list), elements)
+	function assertElements<E>(list: LinkedList<E>, ...elements: E[]) {
 
-    // assert Symbol.iterator (1)
-    assert.deepStrictEqual([...list], elements)
+		// check size
+		assert.strictEqual(list.size, elements.length);
 
-    // assert Symbol.iterator (2)
-    for (const item of list) {
-      assert.strictEqual(item, elements.shift())
-    }
-    assert.strictEqual(elements.length, 0)
-  }
+		// assert toArray
+		assert.deepStrictEqual(Array.from(list), elements);
 
-  test("Push/Iter", () => {
-    const list = new LinkedList<number>()
-    list.push(0)
-    list.push(1)
-    list.push(2)
-    assertElements(list, 0, 1, 2)
-  })
+		// assert Symbol.iterator (1)
+		assert.deepStrictEqual([...list], elements);
 
-  test("Push/Remove", () => {
-    let list = new LinkedList<number>()
-    let disp = list.push(0)
-    list.push(1)
-    list.push(2)
-    disp()
-    assertElements(list, 1, 2)
+		// assert Symbol.iterator (2)
+		for (const item of list) {
+			assert.strictEqual(item, elements.shift());
+		}
+		assert.strictEqual(elements.length, 0);
+	}
 
-    list = new LinkedList<number>()
-    list.push(0)
-    disp = list.push(1)
-    list.push(2)
-    disp()
-    assertElements(list, 0, 2)
+	test('Push/Iter', () => {
+		const list = new LinkedList<number>();
+		list.push(0);
+		list.push(1);
+		list.push(2);
+		assertElements(list, 0, 1, 2);
+	});
 
-    list = new LinkedList<number>()
-    list.push(0)
-    list.push(1)
-    disp = list.push(2)
-    disp()
-    assertElements(list, 0, 1)
+	test('Push/Remove', () => {
+		let list = new LinkedList<number>();
+		let disp = list.push(0);
+		list.push(1);
+		list.push(2);
+		disp();
+		assertElements(list, 1, 2);
 
-    list = new LinkedList<number>()
-    list.push(0)
-    list.push(1)
-    disp = list.push(2)
-    disp()
-    disp()
-    assertElements(list, 0, 1)
-  })
+		list = new LinkedList<number>();
+		list.push(0);
+		disp = list.push(1);
+		list.push(2);
+		disp();
+		assertElements(list, 0, 2);
 
-  test("Push/toArray", () => {
-    const list = new LinkedList<string>()
-    list.push("foo")
-    list.push("bar")
-    list.push("far")
-    list.push("boo")
+		list = new LinkedList<number>();
+		list.push(0);
+		list.push(1);
+		disp = list.push(2);
+		disp();
+		assertElements(list, 0, 1);
 
-    assertElements(list, "foo", "bar", "far", "boo")
-  })
+		list = new LinkedList<number>();
+		list.push(0);
+		list.push(1);
+		disp = list.push(2);
+		disp();
+		disp();
+		assertElements(list, 0, 1);
+	});
 
-  test("unshift/Iter", () => {
-    const list = new LinkedList<number>()
-    list.unshift(0)
-    list.unshift(1)
-    list.unshift(2)
-    assertElements(list, 2, 1, 0)
-  })
+	test('Push/toArray', () => {
+		const list = new LinkedList<string>();
+		list.push('foo');
+		list.push('bar');
+		list.push('far');
+		list.push('boo');
 
-  test("unshift/Remove", () => {
-    let list = new LinkedList<number>()
-    let disp = list.unshift(0)
-    list.unshift(1)
-    list.unshift(2)
-    disp()
-    assertElements(list, 2, 1)
+		assertElements(list, 'foo', 'bar', 'far', 'boo');
+	});
 
-    list = new LinkedList<number>()
-    list.unshift(0)
-    disp = list.unshift(1)
-    list.unshift(2)
-    disp()
-    assertElements(list, 2, 0)
+	test('unshift/Iter', () => {
+		const list = new LinkedList<number>();
+		list.unshift(0);
+		list.unshift(1);
+		list.unshift(2);
+		assertElements(list, 2, 1, 0);
+	});
 
-    list = new LinkedList<number>()
-    list.unshift(0)
-    list.unshift(1)
-    disp = list.unshift(2)
-    disp()
-    assertElements(list, 1, 0)
-  })
+	test('unshift/Remove', () => {
+		let list = new LinkedList<number>();
+		let disp = list.unshift(0);
+		list.unshift(1);
+		list.unshift(2);
+		disp();
+		assertElements(list, 2, 1);
 
-  test("unshift/toArray", () => {
-    const list = new LinkedList<string>()
-    list.unshift("foo")
-    list.unshift("bar")
-    list.unshift("far")
-    list.unshift("boo")
-    assertElements(list, "boo", "far", "bar", "foo")
-  })
+		list = new LinkedList<number>();
+		list.unshift(0);
+		disp = list.unshift(1);
+		list.unshift(2);
+		disp();
+		assertElements(list, 2, 0);
 
-  test("pop/unshift", function () {
-    const list = new LinkedList<string>()
-    list.push("a")
-    list.push("b")
+		list = new LinkedList<number>();
+		list.unshift(0);
+		list.unshift(1);
+		disp = list.unshift(2);
+		disp();
+		assertElements(list, 1, 0);
+	});
 
-    assertElements(list, "a", "b")
+	test('unshift/toArray', () => {
+		const list = new LinkedList<string>();
+		list.unshift('foo');
+		list.unshift('bar');
+		list.unshift('far');
+		list.unshift('boo');
+		assertElements(list, 'boo', 'far', 'bar', 'foo');
+	});
 
-    const a = list.shift()
-    assert.strictEqual(a, "a")
-    assertElements(list, "b")
+	test('pop/unshift', function () {
+		const list = new LinkedList<string>();
+		list.push('a');
+		list.push('b');
 
-    list.unshift("a")
-    assertElements(list, "a", "b")
+		assertElements(list, 'a', 'b');
 
-    const b = list.pop()
-    assert.strictEqual(b, "b")
-    assertElements(list, "a")
-  })
-})
+		const a = list.shift();
+		assert.strictEqual(a, 'a');
+		assertElements(list, 'b');
+
+		list.unshift('a');
+		assertElements(list, 'a', 'b');
+
+		const b = list.pop();
+		assert.strictEqual(b, 'b');
+		assertElements(list, 'a');
+	});
+});

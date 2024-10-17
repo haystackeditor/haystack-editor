@@ -9,15 +9,8 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { EnvironmentVariableService } from "vs/workbench/contrib/terminal/common/environmentVariableService"
-import {
-  InstantiationType,
-  registerSingleton,
-} from "vs/platform/instantiation/common/extensions"
-import { IEnvironmentVariableService } from "vs/workbench/contrib/terminal/common/environmentVariable"
+import { EnvironmentVariableService } from 'vs/workbench/contrib/terminal/common/environmentVariableService';
+import { InstantiationType, registerSingleton } from 'vs/platform/instantiation/common/extensions';
+import { IEnvironmentVariableService } from 'vs/workbench/contrib/terminal/common/environmentVariable';
 
-registerSingleton(
-  IEnvironmentVariableService,
-  EnvironmentVariableService,
-  InstantiationType.Delayed,
-)
+registerSingleton(IEnvironmentVariableService, EnvironmentVariableService, InstantiationType.Delayed);

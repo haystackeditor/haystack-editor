@@ -77,7 +77,7 @@ export interface IPointerHandlerHelper {
 
   visibleRangeForPosition(
     lineNumber: number,
-    column: number,
+    column: number
   ): HorizontalPosition | null
   getLineWidth(lineNumber: number): number
 }
@@ -95,7 +95,7 @@ export class MouseHandler extends ViewEventHandler {
   constructor(
     context: ViewContext,
     viewController: ViewController,
-    viewHelper: IPointerHandlerHelper,
+    viewHelper: IPointerHandlerHelper
   ) {
     super()
 
@@ -111,13 +111,13 @@ export class MouseHandler extends ViewEventHandler {
         this.viewHelper,
         this.mouseTargetFactory,
         (e, testEventTarget) => this._createMouseTarget(e, testEventTarget),
-        (e) => this._getMouseColumn(e),
-      ),
+        (e) => this._getMouseColumn(e)
+      )
     )
 
     this.lastMouseLeaveTime = -1
     this._height = this._context.configuration.options.get(
-      EditorOption.layoutInfo,
+      EditorOption.layoutInfo
     ).height
 
     const mouseEvents = new EditorMouseEventFactory(this.viewHelper.viewDomNode)
@@ -125,7 +125,7 @@ export class MouseHandler extends ViewEventHandler {
     this._register(
       mouseEvents.onContextMenu(this.viewHelper.viewDomNode, (e) => {
         this._onContextMenu(e, true)
-      }),
+      })
     )
 
     this._register(
@@ -149,25 +149,25 @@ export class MouseHandler extends ViewEventHandler {
               ) {
                 // went outside the editor!
                 this._onMouseLeave(
-                  new EditorMouseEvent(e, false, this.viewHelper.viewDomNode),
+                  new EditorMouseEvent(e, false, this.viewHelper.viewDomNode)
                 )
               }
-            },
+            }
           )
         }
-      }),
+      })
     )
 
     this._register(
       mouseEvents.onMouseUp(this.viewHelper.viewDomNode, (e) =>
-        this._onMouseUp(e),
-      ),
+        this._onMouseUp(e)
+      )
     )
 
     this._register(
       mouseEvents.onMouseLeave(this.viewHelper.viewDomNode, (e) =>
-        this._onMouseLeave(e),
-      ),
+        this._onMouseLeave(e)
+      )
     )
 
     // `pointerdown` events can't be used to determine if there's a double click, or triple click
@@ -178,7 +178,7 @@ export class MouseHandler extends ViewEventHandler {
     this._register(
       mouseEvents.onPointerDown(this.viewHelper.viewDomNode, (e, pointerId) => {
         capturePointerId = pointerId
-      }),
+      })
     )
     // The `pointerup` listener registered by `GlobalEditorPointerMoveMonitor` does not get invoked 100% of the times.
     // I speculate that this is because the `pointerup` listener is only registered during the `mousedown` event, and perhaps
@@ -191,13 +191,13 @@ export class MouseHandler extends ViewEventHandler {
         dom.EventType.POINTER_UP,
         (e: PointerEvent) => {
           this._mouseDownOperation.onPointerUp()
-        },
-      ),
+        }
+      )
     )
     this._register(
       mouseEvents.onMouseDown(this.viewHelper.viewDomNode, (e) =>
-        this._onMouseDown(e, capturePointerId),
-      ),
+        this._onMouseDown(e, capturePointerId)
+      )
     )
     this._setupMouseWheelZoomListener()
 
@@ -248,7 +248,7 @@ export class MouseHandler extends ViewEventHandler {
 
         if (gestureHasZoomModifiers) {
           EditorZoom.setZoomLevel(
-            gestureStartZoomLevel + gestureAccumulatedDelta / 5,
+            gestureStartZoomLevel + gestureAccumulatedDelta / 5
           )
           e.preventDefault()
           e.stopPropagation()
@@ -260,12 +260,12 @@ export class MouseHandler extends ViewEventHandler {
         this.viewHelper.viewDomNode,
         dom.EventType.MOUSE_WHEEL,
         onMouseWheel,
-        { capture: true, passive: false },
-      ),
+        { capture: true, passive: false }
+      )
     )
 
     function hasMouseWheelZoomModifiers(
-      browserEvent: IMouseWheelEvent,
+      browserEvent: IMouseWheelEvent
     ): boolean {
       return platform.isMacintosh
         ? // on macOS we support cmd + two fingers scroll (`metaKey` set)
@@ -291,12 +291,12 @@ export class MouseHandler extends ViewEventHandler {
 
   // --- begin event handlers
   public override onConfigurationChanged(
-    e: viewEvents.ViewConfigurationChangedEvent,
+    e: viewEvents.ViewConfigurationChangedEvent
   ): boolean {
     if (e.hasChanged(EditorOption.layoutInfo)) {
       // layout change
       const height = this._context.configuration.options.get(
-        EditorOption.layoutInfo,
+        EditorOption.layoutInfo
       ).height
       if (this._height !== height) {
         this._height = height
@@ -306,7 +306,7 @@ export class MouseHandler extends ViewEventHandler {
     return false
   }
   public override onCursorStateChanged(
-    e: viewEvents.ViewCursorStateChangedEvent,
+    e: viewEvents.ViewCursorStateChangedEvent
   ): boolean {
     this._mouseDownOperation.onCursorStateChanged(e)
     return false
@@ -318,11 +318,11 @@ export class MouseHandler extends ViewEventHandler {
 
   public getTargetAtClientPoint(
     clientX: number,
-    clientY: number,
+    clientY: number
   ): IMouseTarget | null {
     const clientPos = new ClientCoordinates(clientX, clientY)
     const pos = clientPos.toPageCoordinates(
-      dom.getWindow(this.viewHelper.viewDomNode),
+      dom.getWindow(this.viewHelper.viewDomNode)
     )
     const editorPos = createEditorPagePosition(this.viewHelper.viewDomNode)
 
@@ -338,20 +338,20 @@ export class MouseHandler extends ViewEventHandler {
     const relativePos = createCoordinatesRelativeToEditor(
       this.viewHelper.viewDomNode,
       editorPos,
-      pos,
+      pos
     )
     return this.mouseTargetFactory.createMouseTarget(
       this.viewHelper.getLastRenderData(),
       editorPos,
       pos,
       relativePos,
-      null,
+      null
     )
   }
 
   protected _createMouseTarget(
     e: EditorMouseEvent,
-    testEventTarget: boolean,
+    testEventTarget: boolean
   ): IMouseTarget {
     let target = e.target
     if (!this.viewHelper.viewDomNode.contains(target)) {
@@ -367,7 +367,7 @@ export class MouseHandler extends ViewEventHandler {
       e.editorPos,
       e.pos,
       e.relativePos,
-      testEventTarget ? target : null,
+      testEventTarget ? target : null
     )
   }
 
@@ -377,7 +377,7 @@ export class MouseHandler extends ViewEventHandler {
 
   protected _onContextMenu(
     e: EditorMouseEvent,
-    testEventTarget: boolean,
+    testEventTarget: boolean
   ): void {
     this.viewController.emitContextMenu({
       event: e,
@@ -438,7 +438,7 @@ export class MouseHandler extends ViewEventHandler {
       t.type === MouseTargetType.GUTTER_LINE_DECORATIONS
     const targetIsLineNumbers = t.type === MouseTargetType.GUTTER_LINE_NUMBERS
     const selectOnLineNumbers = this._context.configuration.options.get(
-      EditorOption.selectOnLineNumbers,
+      EditorOption.selectOnLineNumbers
     )
     const targetIsViewZone =
       t.type === MouseTargetType.CONTENT_VIEW_ZONE ||
@@ -469,7 +469,7 @@ export class MouseHandler extends ViewEventHandler {
       if (
         shouldHandle &&
         this.viewHelper.shouldSuppressMouseDownOnViewZone(
-          viewZoneData.viewZoneId,
+          viewZoneData.viewZoneId
         )
       ) {
         focus()
@@ -498,7 +498,7 @@ export class MouseHandler extends ViewEventHandler {
 class MouseDownOperation extends Disposable {
   private readonly _createMouseTarget: (
     e: EditorMouseEvent,
-    testEventTarget: boolean,
+    testEventTarget: boolean
   ) => IMouseTarget
   private readonly _getMouseColumn: (e: EditorMouseEvent) => number
 
@@ -517,16 +517,16 @@ class MouseDownOperation extends Disposable {
     private readonly _mouseTargetFactory: MouseTargetFactory,
     createMouseTarget: (
       e: EditorMouseEvent,
-      testEventTarget: boolean,
+      testEventTarget: boolean
     ) => IMouseTarget,
-    getMouseColumn: (e: EditorMouseEvent) => number,
+    getMouseColumn: (e: EditorMouseEvent) => number
   ) {
     super()
     this._createMouseTarget = createMouseTarget
     this._getMouseColumn = getMouseColumn
 
     this._mouseMoveMonitor = this._register(
-      new GlobalEditorPointerMoveMonitor(this._viewHelper.viewDomNode),
+      new GlobalEditorPointerMoveMonitor(this._viewHelper.viewDomNode)
     )
     this._topBottomDragScrolling = this._register(
       new TopBottomDragScrolling(
@@ -534,8 +534,8 @@ class MouseDownOperation extends Disposable {
         this._viewHelper,
         this._mouseTargetFactory,
         (position, inSelectionMode, revealType) =>
-          this._dispatchMouse(position, inSelectionMode, revealType),
-      ),
+          this._dispatchMouse(position, inSelectionMode, revealType)
+      )
     )
     this._mouseState = new MouseDownState()
 
@@ -584,12 +584,12 @@ class MouseDownOperation extends Disposable {
   public start(
     targetType: MouseTargetType,
     e: EditorMouseEvent,
-    pointerId: number,
+    pointerId: number
   ): void {
     this._lastMouseEvent = e
 
     this._mouseState.setStartedOnLineNumbers(
-      targetType === MouseTargetType.GUTTER_LINE_NUMBERS,
+      targetType === MouseTargetType.GUTTER_LINE_NUMBERS
     )
     this._mouseState.setStartButtons(e)
     this._mouseState.setModifiers(e)
@@ -642,7 +642,7 @@ class MouseDownOperation extends Disposable {
           }
 
           this._stop()
-        },
+        }
       )
 
       return
@@ -652,7 +652,7 @@ class MouseDownOperation extends Disposable {
     this._dispatchMouse(
       position,
       e.shiftKey,
-      NavigationCommandRevealType.Minimal,
+      NavigationCommandRevealType.Minimal
     )
 
     if (!this._isActive) {
@@ -662,7 +662,7 @@ class MouseDownOperation extends Disposable {
         pointerId,
         e.buttons,
         (e) => this._onMouseDownThenMove(e),
-        () => this._stop(),
+        () => this._stop()
       )
     }
   }
@@ -695,11 +695,11 @@ class MouseDownOperation extends Disposable {
       const outsideDistance = editorContent.y - e.posy
       const verticalOffset = Math.max(
         viewLayout.getCurrentScrollTop() - outsideDistance,
-        0,
+        0
       )
       const viewZoneData = HitTestContext.getZoneAtCoord(
         this._context,
-        verticalOffset,
+        verticalOffset
       )
       if (viewZoneData) {
         const newPosition = this._helpPositionJumpOverViewZone(viewZoneData)
@@ -708,7 +708,7 @@ class MouseDownOperation extends Disposable {
             mouseColumn,
             newPosition,
             "above",
-            outsideDistance,
+            outsideDistance
           )
         }
       }
@@ -719,7 +719,7 @@ class MouseDownOperation extends Disposable {
         mouseColumn,
         new Position(aboveLineNumber, 1),
         "above",
-        outsideDistance,
+        outsideDistance
       )
     }
 
@@ -728,7 +728,7 @@ class MouseDownOperation extends Disposable {
       const verticalOffset = viewLayout.getCurrentScrollTop() + e.relativePos.y
       const viewZoneData = HitTestContext.getZoneAtCoord(
         this._context,
-        verticalOffset,
+        verticalOffset
       )
       if (viewZoneData) {
         const newPosition = this._helpPositionJumpOverViewZone(viewZoneData)
@@ -737,7 +737,7 @@ class MouseDownOperation extends Disposable {
             mouseColumn,
             newPosition,
             "below",
-            outsideDistance,
+            outsideDistance
           )
         }
       }
@@ -748,12 +748,12 @@ class MouseDownOperation extends Disposable {
         mouseColumn,
         new Position(belowLineNumber, model.getLineMaxColumn(belowLineNumber)),
         "below",
-        outsideDistance,
+        outsideDistance
       )
     }
 
     const possibleLineNumber = viewLayout.getLineNumberAtVerticalOffset(
-      viewLayout.getCurrentScrollTop() + e.relativePos.y,
+      viewLayout.getCurrentScrollTop() + e.relativePos.y
     )
 
     if (e.posx < editorContent.x) {
@@ -762,7 +762,7 @@ class MouseDownOperation extends Disposable {
         mouseColumn,
         new Position(possibleLineNumber, 1),
         "left",
-        outsideDistance,
+        outsideDistance
       )
     }
 
@@ -772,10 +772,10 @@ class MouseDownOperation extends Disposable {
         mouseColumn,
         new Position(
           possibleLineNumber,
-          model.getLineMaxColumn(possibleLineNumber),
+          model.getLineMaxColumn(possibleLineNumber)
         ),
         "right",
-        outsideDistance,
+        outsideDistance
       )
     }
 
@@ -784,7 +784,7 @@ class MouseDownOperation extends Disposable {
 
   private _findMousePosition(
     e: EditorMouseEvent,
-    testEventTarget: boolean,
+    testEventTarget: boolean
   ): IMouseTarget | null {
     const positionOutsideEditor = this._getPositionOutsideEditor(e)
     if (positionOutsideEditor) {
@@ -808,7 +808,7 @@ class MouseDownOperation extends Disposable {
           t.element,
           t.mouseColumn,
           newPosition,
-          t.detail,
+          t.detail
         )
       }
     }
@@ -817,12 +817,12 @@ class MouseDownOperation extends Disposable {
   }
 
   private _helpPositionJumpOverViewZone(
-    viewZoneData: IMouseTargetViewZoneData,
+    viewZoneData: IMouseTargetViewZoneData
   ): Position | null {
     // Force position on view zones to go above or below depending on where selection started from
     const selectionStart = new Position(
       this._currentSelection.selectionStartLineNumber,
-      this._currentSelection.selectionStartColumn,
+      this._currentSelection.selectionStartColumn
     )
     const positionBefore = viewZoneData.positionBefore
     const positionAfter = viewZoneData.positionAfter
@@ -840,7 +840,7 @@ class MouseDownOperation extends Disposable {
   private _dispatchMouse(
     position: IMouseTarget,
     inSelectionMode: boolean,
-    revealType: NavigationCommandRevealType,
+    revealType: NavigationCommandRevealType
   ): void {
     if (!position.position) {
       return
@@ -878,8 +878,8 @@ class TopBottomDragScrolling extends Disposable {
     private readonly _dispatchMouse: (
       position: IMouseTarget,
       inSelectionMode: boolean,
-      revealType: NavigationCommandRevealType,
-    ) => void,
+      revealType: NavigationCommandRevealType
+    ) => void
   ) {
     super()
     this._operation = null
@@ -892,7 +892,7 @@ class TopBottomDragScrolling extends Disposable {
 
   public start(
     position: IMouseTargetOutsideEditor,
-    mouseEvent: EditorMouseEvent,
+    mouseEvent: EditorMouseEvent
   ): void {
     if (this._operation) {
       this._operation.setPosition(position, mouseEvent)
@@ -903,7 +903,7 @@ class TopBottomDragScrolling extends Disposable {
         this._mouseTargetFactory,
         this._dispatchMouse,
         position,
-        mouseEvent,
+        mouseEvent
       )
     }
   }
@@ -929,10 +929,10 @@ class TopBottomDragScrollingOperation extends Disposable {
     private readonly _dispatchMouse: (
       position: IMouseTarget,
       inSelectionMode: boolean,
-      revealType: NavigationCommandRevealType,
+      revealType: NavigationCommandRevealType
     ) => void,
     position: IMouseTargetOutsideEditor,
-    mouseEvent: EditorMouseEvent,
+    mouseEvent: EditorMouseEvent
   ) {
     super()
     this._position = position
@@ -940,7 +940,7 @@ class TopBottomDragScrollingOperation extends Disposable {
     this._lastTime = Date.now()
     this._animationFrameDisposable = dom.scheduleAtNextAnimationFrame(
       dom.getWindow(mouseEvent.browserEvent),
-      () => this._execute(),
+      () => this._execute()
     )
   }
 
@@ -951,7 +951,7 @@ class TopBottomDragScrollingOperation extends Disposable {
 
   public setPosition(
     position: IMouseTargetOutsideEditor,
-    mouseEvent: EditorMouseEvent,
+    mouseEvent: EditorMouseEvent
   ): void {
     this._position = position
     this._mouseEvent = mouseEvent
@@ -972,7 +972,7 @@ class TopBottomDragScrollingOperation extends Disposable {
    */
   private _getScrollSpeed(): number {
     const lineHeight = this._context.configuration.options.get(
-      EditorOption.lineHeight,
+      EditorOption.lineHeight
     )
     const viewportInLines =
       this._context.configuration.options.get(EditorOption.layoutInfo).height /
@@ -990,7 +990,7 @@ class TopBottomDragScrollingOperation extends Disposable {
 
   private _execute(): void {
     const lineHeight = this._context.configuration.options.get(
-      EditorOption.lineHeight,
+      EditorOption.lineHeight
     )
     const scrollSpeedInLines = this._getScrollSpeed()
     const elapsed = this._tick()
@@ -1014,23 +1014,23 @@ class TopBottomDragScrollingOperation extends Disposable {
     {
       const editorPos = createEditorPagePosition(this._viewHelper.viewDomNode)
       const horizontalScrollbarHeight = this._context.configuration.options.get(
-        EditorOption.layoutInfo,
+        EditorOption.layoutInfo
       ).horizontalScrollbarHeight
       const pos = new PageCoordinates(
         this._mouseEvent.pos.x,
-        editorPos.y + editorPos.height - horizontalScrollbarHeight - 0.1,
+        editorPos.y + editorPos.height - horizontalScrollbarHeight - 0.1
       )
       const relativePos = createCoordinatesRelativeToEditor(
         this._viewHelper.viewDomNode,
         editorPos,
-        pos,
+        pos
       )
       mouseTarget = this._mouseTargetFactory.createMouseTarget(
         this._viewHelper.getLastRenderData(),
         editorPos,
         pos,
         relativePos,
-        null,
+        null
       )
     }
     if (
@@ -1042,17 +1042,17 @@ class TopBottomDragScrollingOperation extends Disposable {
           this._position.mouseColumn,
           new Position(edgeLineNumber, 1),
           "above",
-          this._position.outsideDistance,
+          this._position.outsideDistance
         )
       } else {
         mouseTarget = MouseTarget.createOutsideEditor(
           this._position.mouseColumn,
           new Position(
             edgeLineNumber,
-            this._context.viewModel.getLineMaxColumn(edgeLineNumber),
+            this._context.viewModel.getLineMaxColumn(edgeLineNumber)
           ),
           "below",
-          this._position.outsideDistance,
+          this._position.outsideDistance
         )
       }
     }
@@ -1060,7 +1060,7 @@ class TopBottomDragScrollingOperation extends Disposable {
     this._dispatchMouse(mouseTarget, true, NavigationCommandRevealType.None)
     this._animationFrameDisposable = dom.scheduleAtNextAnimationFrame(
       dom.getWindow(mouseTarget.element),
-      () => this._execute(),
+      () => this._execute()
     )
   }
 }
@@ -1146,7 +1146,7 @@ class MouseDownState {
 
   public trySetCount(
     setMouseDownCount: number,
-    newMouseDownPosition: Position,
+    newMouseDownPosition: Position
   ): void {
     // a. Invalidate multiple clicking if too much time has passed (will be hit by IE because the detail field of mouse events contains garbage in IE10)
     const currentTime = new Date().getTime()
@@ -1177,7 +1177,7 @@ class MouseDownState {
     // Finally set the lastMouseDownCount
     this._lastMouseDownCount = Math.min(
       setMouseDownCount,
-      this._lastMouseDownPositionEqualCount,
+      this._lastMouseDownPositionEqualCount
     )
   }
 }

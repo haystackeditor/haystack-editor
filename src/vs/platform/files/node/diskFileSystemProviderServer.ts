@@ -9,474 +9,333 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Emitter, Event } from "vs/base/common/event"
-import { IServerChannel } from "vs/base/parts/ipc/common/ipc"
-import { DiskFileSystemProvider } from "vs/platform/files/node/diskFileSystemProvider"
-import {
-  Disposable,
-  dispose,
-  IDisposable,
-  toDisposable,
-} from "vs/base/common/lifecycle"
-import { ILogService } from "vs/platform/log/common/log"
-import { IURITransformer } from "vs/base/common/uriIpc"
-import { URI, UriComponents } from "vs/base/common/uri"
-import { VSBuffer } from "vs/base/common/buffer"
-import { ReadableStreamEventPayload, listenStream } from "vs/base/common/stream"
-import {
-  IStat,
-  IFileReadStreamOptions,
-  IFileWriteOptions,
-  IFileOpenOptions,
-  IFileDeleteOptions,
-  IFileOverwriteOptions,
-  IFileChange,
-  IWatchOptions,
-  FileType,
-  IFileAtomicReadOptions,
-} from "vs/platform/files/common/files"
-import { CancellationTokenSource } from "vs/base/common/cancellation"
-import { IRecursiveWatcherOptions } from "vs/platform/files/common/watcher"
-import { IEnvironmentService } from "vs/platform/environment/common/environment"
+import { Emitter, Event } from 'vs/base/common/event';
+import { IServerChannel } from 'vs/base/parts/ipc/common/ipc';
+import { DiskFileSystemProvider } from 'vs/platform/files/node/diskFileSystemProvider';
+import { Disposable, dispose, IDisposable, toDisposable } from 'vs/base/common/lifecycle';
+import { ILogService } from 'vs/platform/log/common/log';
+import { IURITransformer } from 'vs/base/common/uriIpc';
+import { URI, UriComponents } from 'vs/base/common/uri';
+import { VSBuffer } from 'vs/base/common/buffer';
+import { ReadableStreamEventPayload, listenStream } from 'vs/base/common/stream';
+import { IStat, IFileReadStreamOptions, IFileWriteOptions, IFileOpenOptions, IFileDeleteOptions, IFileOverwriteOptions, IFileChange, IWatchOptions, FileType, IFileAtomicReadOptions } from 'vs/platform/files/common/files';
+import { CancellationTokenSource } from 'vs/base/common/cancellation';
+import { IRecursiveWatcherOptions } from 'vs/platform/files/common/watcher';
+import { IEnvironmentService } from 'vs/platform/environment/common/environment';
 
 export interface ISessionFileWatcher extends IDisposable {
-  watch(req: number, resource: URI, opts: IWatchOptions): IDisposable
+	watch(req: number, resource: URI, opts: IWatchOptions): IDisposable;
 }
 
 /**
  * A server implementation for a IPC based file system provider client.
  */
-export abstract class AbstractDiskFileSystemProviderChannel<T>
-  extends Disposable
-  implements IServerChannel<T>
-{
-  constructor(
-    protected readonly provider: DiskFileSystemProvider,
-    protected readonly logService: ILogService,
-  ) {
-    super()
-  }
+export abstract class AbstractDiskFileSystemProviderChannel<T> extends Disposable implements IServerChannel<T> {
 
-  call(ctx: T, command: string, arg?: any): Promise<any> {
-    const uriTransformer = this.getUriTransformer(ctx)
+	constructor(
+		protected readonly provider: DiskFileSystemProvider,
+		protected readonly logService: ILogService
+	) {
+		super();
+	}
 
-    switch (command) {
-      case "stat":
-        return this.stat(uriTransformer, arg[0])
-      case "readdir":
-        return this.readdir(uriTransformer, arg[0])
-      case "open":
-        return this.open(uriTransformer, arg[0], arg[1])
-      case "close":
-        return this.close(arg[0])
-      case "read":
-        return this.read(arg[0], arg[1], arg[2])
-      case "readFile":
-        return this.readFile(uriTransformer, arg[0], arg[1])
-      case "write":
-        return this.write(arg[0], arg[1], arg[2], arg[3], arg[4])
-      case "writeFile":
-        return this.writeFile(uriTransformer, arg[0], arg[1], arg[2])
-      case "rename":
-        return this.rename(uriTransformer, arg[0], arg[1], arg[2])
-      case "copy":
-        return this.copy(uriTransformer, arg[0], arg[1], arg[2])
-      case "cloneFile":
-        return this.cloneFile(uriTransformer, arg[0], arg[1])
-      case "mkdir":
-        return this.mkdir(uriTransformer, arg[0])
-      case "delete":
-        return this.delete(uriTransformer, arg[0], arg[1])
-      case "watch":
-        return this.watch(uriTransformer, arg[0], arg[1], arg[2], arg[3])
-      case "unwatch":
-        return this.unwatch(arg[0], arg[1])
-    }
+	call(ctx: T, command: string, arg?: any): Promise<any> {
+		const uriTransformer = this.getUriTransformer(ctx);
 
-    throw new Error(`IPC Command ${command} not found`)
-  }
+		switch (command) {
+			case 'stat': return this.stat(uriTransformer, arg[0]);
+			case 'readdir': return this.readdir(uriTransformer, arg[0]);
+			case 'open': return this.open(uriTransformer, arg[0], arg[1]);
+			case 'close': return this.close(arg[0]);
+			case 'read': return this.read(arg[0], arg[1], arg[2]);
+			case 'readFile': return this.readFile(uriTransformer, arg[0], arg[1]);
+			case 'write': return this.write(arg[0], arg[1], arg[2], arg[3], arg[4]);
+			case 'writeFile': return this.writeFile(uriTransformer, arg[0], arg[1], arg[2]);
+			case 'rename': return this.rename(uriTransformer, arg[0], arg[1], arg[2]);
+			case 'copy': return this.copy(uriTransformer, arg[0], arg[1], arg[2]);
+			case 'cloneFile': return this.cloneFile(uriTransformer, arg[0], arg[1]);
+			case 'mkdir': return this.mkdir(uriTransformer, arg[0]);
+			case 'delete': return this.delete(uriTransformer, arg[0], arg[1]);
+			case 'watch': return this.watch(uriTransformer, arg[0], arg[1], arg[2], arg[3]);
+			case 'unwatch': return this.unwatch(arg[0], arg[1]);
+		}
 
-  listen(ctx: T, event: string, arg: any): Event<any> {
-    const uriTransformer = this.getUriTransformer(ctx)
+		throw new Error(`IPC Command ${command} not found`);
+	}
 
-    switch (event) {
-      case "fileChange":
-        return this.onFileChange(uriTransformer, arg[0])
-      case "readFileStream":
-        return this.onReadFileStream(uriTransformer, arg[0], arg[1])
-    }
+	listen(ctx: T, event: string, arg: any): Event<any> {
+		const uriTransformer = this.getUriTransformer(ctx);
 
-    throw new Error(`Unknown event ${event}`)
-  }
+		switch (event) {
+			case 'fileChange': return this.onFileChange(uriTransformer, arg[0]);
+			case 'readFileStream': return this.onReadFileStream(uriTransformer, arg[0], arg[1]);
+		}
 
-  protected abstract getUriTransformer(ctx: T): IURITransformer
+		throw new Error(`Unknown event ${event}`);
+	}
 
-  protected abstract transformIncoming(
-    uriTransformer: IURITransformer,
-    _resource: UriComponents,
-    supportVSCodeResource?: boolean,
-  ): URI
+	protected abstract getUriTransformer(ctx: T): IURITransformer;
 
-  //#region File Metadata Resolving
+	protected abstract transformIncoming(uriTransformer: IURITransformer, _resource: UriComponents, supportVSCodeResource?: boolean): URI;
 
-  private stat(
-    uriTransformer: IURITransformer,
-    _resource: UriComponents,
-  ): Promise<IStat> {
-    const resource = this.transformIncoming(uriTransformer, _resource, true)
+	//#region File Metadata Resolving
 
-    return this.provider.stat(resource)
-  }
+	private stat(uriTransformer: IURITransformer, _resource: UriComponents): Promise<IStat> {
+		const resource = this.transformIncoming(uriTransformer, _resource, true);
 
-  private readdir(
-    uriTransformer: IURITransformer,
-    _resource: UriComponents,
-  ): Promise<[string, FileType][]> {
-    const resource = this.transformIncoming(uriTransformer, _resource)
+		return this.provider.stat(resource);
+	}
 
-    return this.provider.readdir(resource)
-  }
+	private readdir(uriTransformer: IURITransformer, _resource: UriComponents): Promise<[string, FileType][]> {
+		const resource = this.transformIncoming(uriTransformer, _resource);
 
-  //#endregion
+		return this.provider.readdir(resource);
+	}
 
-  //#region File Reading/Writing
+	//#endregion
 
-  private async readFile(
-    uriTransformer: IURITransformer,
-    _resource: UriComponents,
-    opts?: IFileAtomicReadOptions,
-  ): Promise<VSBuffer> {
-    const resource = this.transformIncoming(uriTransformer, _resource, true)
-    const buffer = await this.provider.readFile(resource, opts)
+	//#region File Reading/Writing
 
-    return VSBuffer.wrap(buffer)
-  }
+	private async readFile(uriTransformer: IURITransformer, _resource: UriComponents, opts?: IFileAtomicReadOptions): Promise<VSBuffer> {
+		const resource = this.transformIncoming(uriTransformer, _resource, true);
+		const buffer = await this.provider.readFile(resource, opts);
 
-  private onReadFileStream(
-    uriTransformer: IURITransformer,
-    _resource: URI,
-    opts: IFileReadStreamOptions,
-  ): Event<ReadableStreamEventPayload<VSBuffer>> {
-    const resource = this.transformIncoming(uriTransformer, _resource, true)
-    const cts = new CancellationTokenSource()
+		return VSBuffer.wrap(buffer);
+	}
 
-    const emitter = new Emitter<ReadableStreamEventPayload<VSBuffer>>({
-      onDidRemoveLastListener: () => {
-        // Ensure to cancel the read operation when there is no more
-        // listener on the other side to prevent unneeded work.
-        cts.cancel()
-      },
-    })
+	private onReadFileStream(uriTransformer: IURITransformer, _resource: URI, opts: IFileReadStreamOptions): Event<ReadableStreamEventPayload<VSBuffer>> {
+		const resource = this.transformIncoming(uriTransformer, _resource, true);
+		const cts = new CancellationTokenSource();
 
-    const fileStream = this.provider.readFileStream(resource, opts, cts.token)
-    listenStream(fileStream, {
-      onData: (chunk) => emitter.fire(VSBuffer.wrap(chunk)),
-      onError: (error) => emitter.fire(error),
-      onEnd: () => {
-        // Forward event
-        emitter.fire("end")
+		const emitter = new Emitter<ReadableStreamEventPayload<VSBuffer>>({
+			onDidRemoveLastListener: () => {
 
-        // Cleanup
-        emitter.dispose()
-        cts.dispose()
-      },
-    })
+				// Ensure to cancel the read operation when there is no more
+				// listener on the other side to prevent unneeded work.
+				cts.cancel();
+			}
+		});
 
-    return emitter.event
-  }
+		const fileStream = this.provider.readFileStream(resource, opts, cts.token);
+		listenStream(fileStream, {
+			onData: chunk => emitter.fire(VSBuffer.wrap(chunk)),
+			onError: error => emitter.fire(error),
+			onEnd: () => {
 
-  private writeFile(
-    uriTransformer: IURITransformer,
-    _resource: UriComponents,
-    content: VSBuffer,
-    opts: IFileWriteOptions,
-  ): Promise<void> {
-    const resource = this.transformIncoming(uriTransformer, _resource)
+				// Forward event
+				emitter.fire('end');
 
-    return this.provider.writeFile(resource, content.buffer, opts)
-  }
+				// Cleanup
+				emitter.dispose();
+				cts.dispose();
+			}
+		});
 
-  private open(
-    uriTransformer: IURITransformer,
-    _resource: UriComponents,
-    opts: IFileOpenOptions,
-  ): Promise<number> {
-    const resource = this.transformIncoming(uriTransformer, _resource, true)
+		return emitter.event;
+	}
 
-    return this.provider.open(resource, opts)
-  }
+	private writeFile(uriTransformer: IURITransformer, _resource: UriComponents, content: VSBuffer, opts: IFileWriteOptions): Promise<void> {
+		const resource = this.transformIncoming(uriTransformer, _resource);
 
-  private close(fd: number): Promise<void> {
-    return this.provider.close(fd)
-  }
+		return this.provider.writeFile(resource, content.buffer, opts);
+	}
 
-  private async read(
-    fd: number,
-    pos: number,
-    length: number,
-  ): Promise<[VSBuffer, number]> {
-    const buffer = VSBuffer.alloc(length)
-    const bufferOffset = 0 // offset is 0 because we create a buffer to read into for each call
-    const bytesRead = await this.provider.read(
-      fd,
-      pos,
-      buffer.buffer,
-      bufferOffset,
-      length,
-    )
+	private open(uriTransformer: IURITransformer, _resource: UriComponents, opts: IFileOpenOptions): Promise<number> {
+		const resource = this.transformIncoming(uriTransformer, _resource, true);
 
-    return [buffer, bytesRead]
-  }
+		return this.provider.open(resource, opts);
+	}
 
-  private write(
-    fd: number,
-    pos: number,
-    data: VSBuffer,
-    offset: number,
-    length: number,
-  ): Promise<number> {
-    return this.provider.write(fd, pos, data.buffer, offset, length)
-  }
+	private close(fd: number): Promise<void> {
+		return this.provider.close(fd);
+	}
 
-  //#endregion
+	private async read(fd: number, pos: number, length: number): Promise<[VSBuffer, number]> {
+		const buffer = VSBuffer.alloc(length);
+		const bufferOffset = 0; // offset is 0 because we create a buffer to read into for each call
+		const bytesRead = await this.provider.read(fd, pos, buffer.buffer, bufferOffset, length);
 
-  //#region Move/Copy/Delete/Create Folder
+		return [buffer, bytesRead];
+	}
 
-  private mkdir(
-    uriTransformer: IURITransformer,
-    _resource: UriComponents,
-  ): Promise<void> {
-    const resource = this.transformIncoming(uriTransformer, _resource)
+	private write(fd: number, pos: number, data: VSBuffer, offset: number, length: number): Promise<number> {
+		return this.provider.write(fd, pos, data.buffer, offset, length);
+	}
 
-    return this.provider.mkdir(resource)
-  }
+	//#endregion
 
-  protected delete(
-    uriTransformer: IURITransformer,
-    _resource: UriComponents,
-    opts: IFileDeleteOptions,
-  ): Promise<void> {
-    const resource = this.transformIncoming(uriTransformer, _resource)
+	//#region Move/Copy/Delete/Create Folder
 
-    return this.provider.delete(resource, opts)
-  }
+	private mkdir(uriTransformer: IURITransformer, _resource: UriComponents): Promise<void> {
+		const resource = this.transformIncoming(uriTransformer, _resource);
 
-  private rename(
-    uriTransformer: IURITransformer,
-    _source: UriComponents,
-    _target: UriComponents,
-    opts: IFileOverwriteOptions,
-  ): Promise<void> {
-    const source = this.transformIncoming(uriTransformer, _source)
-    const target = this.transformIncoming(uriTransformer, _target)
+		return this.provider.mkdir(resource);
+	}
 
-    return this.provider.rename(source, target, opts)
-  }
+	protected delete(uriTransformer: IURITransformer, _resource: UriComponents, opts: IFileDeleteOptions): Promise<void> {
+		const resource = this.transformIncoming(uriTransformer, _resource);
 
-  private copy(
-    uriTransformer: IURITransformer,
-    _source: UriComponents,
-    _target: UriComponents,
-    opts: IFileOverwriteOptions,
-  ): Promise<void> {
-    const source = this.transformIncoming(uriTransformer, _source)
-    const target = this.transformIncoming(uriTransformer, _target)
+		return this.provider.delete(resource, opts);
+	}
 
-    return this.provider.copy(source, target, opts)
-  }
+	private rename(uriTransformer: IURITransformer, _source: UriComponents, _target: UriComponents, opts: IFileOverwriteOptions): Promise<void> {
+		const source = this.transformIncoming(uriTransformer, _source);
+		const target = this.transformIncoming(uriTransformer, _target);
 
-  //#endregion
+		return this.provider.rename(source, target, opts);
+	}
 
-  //#region Clone File
+	private copy(uriTransformer: IURITransformer, _source: UriComponents, _target: UriComponents, opts: IFileOverwriteOptions): Promise<void> {
+		const source = this.transformIncoming(uriTransformer, _source);
+		const target = this.transformIncoming(uriTransformer, _target);
 
-  private cloneFile(
-    uriTransformer: IURITransformer,
-    _source: UriComponents,
-    _target: UriComponents,
-  ): Promise<void> {
-    const source = this.transformIncoming(uriTransformer, _source)
-    const target = this.transformIncoming(uriTransformer, _target)
+		return this.provider.copy(source, target, opts);
+	}
 
-    return this.provider.cloneFile(source, target)
-  }
+	//#endregion
 
-  //#endregion
+	//#region Clone File
 
-  //#region File Watching
+	private cloneFile(uriTransformer: IURITransformer, _source: UriComponents, _target: UriComponents): Promise<void> {
+		const source = this.transformIncoming(uriTransformer, _source);
+		const target = this.transformIncoming(uriTransformer, _target);
 
-  private readonly sessionToWatcher = new Map<
-    string /* session ID */,
-    ISessionFileWatcher
-  >()
-  private readonly watchRequests = new Map<
-    string /* session ID + request ID */,
-    IDisposable
-  >()
+		return this.provider.cloneFile(source, target);
+	}
 
-  private onFileChange(
-    uriTransformer: IURITransformer,
-    sessionId: string,
-  ): Event<IFileChange[] | string> {
-    // We want a specific emitter for the given session so that events
-    // from the one session do not end up on the other session. As such
-    // we create a `SessionFileWatcher` and a `Emitter` for that session.
+	//#endregion
 
-    const emitter = new Emitter<IFileChange[] | string>({
-      onWillAddFirstListener: () => {
-        this.sessionToWatcher.set(
-          sessionId,
-          this.createSessionFileWatcher(uriTransformer, emitter),
-        )
-      },
-      onDidRemoveLastListener: () => {
-        dispose(this.sessionToWatcher.get(sessionId))
-        this.sessionToWatcher.delete(sessionId)
-      },
-    })
+	//#region File Watching
 
-    return emitter.event
-  }
+	private readonly sessionToWatcher = new Map<string /* session ID */, ISessionFileWatcher>();
+	private readonly watchRequests = new Map<string /* session ID + request ID */, IDisposable>();
 
-  private async watch(
-    uriTransformer: IURITransformer,
-    sessionId: string,
-    req: number,
-    _resource: UriComponents,
-    opts: IWatchOptions,
-  ): Promise<void> {
-    const watcher = this.sessionToWatcher.get(sessionId)
-    if (watcher) {
-      const resource = this.transformIncoming(uriTransformer, _resource)
-      const disposable = watcher.watch(req, resource, opts)
-      this.watchRequests.set(sessionId + req, disposable)
-    }
-  }
+	private onFileChange(uriTransformer: IURITransformer, sessionId: string): Event<IFileChange[] | string> {
 
-  private async unwatch(sessionId: string, req: number): Promise<void> {
-    const id = sessionId + req
-    const disposable = this.watchRequests.get(id)
-    if (disposable) {
-      dispose(disposable)
-      this.watchRequests.delete(id)
-    }
-  }
+		// We want a specific emitter for the given session so that events
+		// from the one session do not end up on the other session. As such
+		// we create a `SessionFileWatcher` and a `Emitter` for that session.
 
-  protected abstract createSessionFileWatcher(
-    uriTransformer: IURITransformer,
-    emitter: Emitter<IFileChange[] | string>,
-  ): ISessionFileWatcher
+		const emitter = new Emitter<IFileChange[] | string>({
+			onWillAddFirstListener: () => {
+				this.sessionToWatcher.set(sessionId, this.createSessionFileWatcher(uriTransformer, emitter));
+			},
+			onDidRemoveLastListener: () => {
+				dispose(this.sessionToWatcher.get(sessionId));
+				this.sessionToWatcher.delete(sessionId);
+			}
+		});
 
-  //#endregion
+		return emitter.event;
+	}
 
-  override dispose(): void {
-    super.dispose()
+	private async watch(uriTransformer: IURITransformer, sessionId: string, req: number, _resource: UriComponents, opts: IWatchOptions): Promise<void> {
+		const watcher = this.sessionToWatcher.get(sessionId);
+		if (watcher) {
+			const resource = this.transformIncoming(uriTransformer, _resource);
+			const disposable = watcher.watch(req, resource, opts);
+			this.watchRequests.set(sessionId + req, disposable);
+		}
+	}
 
-    for (const [, disposable] of this.watchRequests) {
-      disposable.dispose()
-    }
-    this.watchRequests.clear()
+	private async unwatch(sessionId: string, req: number): Promise<void> {
+		const id = sessionId + req;
+		const disposable = this.watchRequests.get(id);
+		if (disposable) {
+			dispose(disposable);
+			this.watchRequests.delete(id);
+		}
+	}
 
-    for (const [, disposable] of this.sessionToWatcher) {
-      disposable.dispose()
-    }
-    this.sessionToWatcher.clear()
-  }
+	protected abstract createSessionFileWatcher(uriTransformer: IURITransformer, emitter: Emitter<IFileChange[] | string>): ISessionFileWatcher;
+
+	//#endregion
+
+	override dispose(): void {
+		super.dispose();
+
+		for (const [, disposable] of this.watchRequests) {
+			disposable.dispose();
+		}
+		this.watchRequests.clear();
+
+		for (const [, disposable] of this.sessionToWatcher) {
+			disposable.dispose();
+		}
+		this.sessionToWatcher.clear();
+	}
 }
 
-export abstract class AbstractSessionFileWatcher
-  extends Disposable
-  implements ISessionFileWatcher
-{
-  private readonly watcherRequests = new Map<number, IDisposable>()
+export abstract class AbstractSessionFileWatcher extends Disposable implements ISessionFileWatcher {
 
-  // To ensure we use one file watcher per session, we keep a
-  // disk file system provider instantiated for this session.
-  // The provider is cheap and only stateful when file watching
-  // starts.
-  //
-  // This is important because we want to ensure that we only
-  // forward events from the watched paths for this session and
-  // not other clients that asked to watch other paths.
-  private readonly fileWatcher = this._register(
-    new DiskFileSystemProvider(this.logService, {
-      watcher: {
-        recursive: this.getRecursiveWatcherOptions(this.environmentService),
-      },
-    }),
-  )
+	private readonly watcherRequests = new Map<number, IDisposable>();
 
-  constructor(
-    private readonly uriTransformer: IURITransformer,
-    sessionEmitter: Emitter<IFileChange[] | string>,
-    private readonly logService: ILogService,
-    private readonly environmentService: IEnvironmentService,
-  ) {
-    super()
+	// To ensure we use one file watcher per session, we keep a
+	// disk file system provider instantiated for this session.
+	// The provider is cheap and only stateful when file watching
+	// starts.
+	//
+	// This is important because we want to ensure that we only
+	// forward events from the watched paths for this session and
+	// not other clients that asked to watch other paths.
+	private readonly fileWatcher = this._register(new DiskFileSystemProvider(this.logService, { watcher: { recursive: this.getRecursiveWatcherOptions(this.environmentService) } }));
 
-    this.registerListeners(sessionEmitter)
-  }
+	constructor(
+		private readonly uriTransformer: IURITransformer,
+		sessionEmitter: Emitter<IFileChange[] | string>,
+		private readonly logService: ILogService,
+		private readonly environmentService: IEnvironmentService
+	) {
+		super();
 
-  private registerListeners(
-    sessionEmitter: Emitter<IFileChange[] | string>,
-  ): void {
-    const localChangeEmitter = this._register(
-      new Emitter<readonly IFileChange[]>(),
-    )
+		this.registerListeners(sessionEmitter);
+	}
 
-    this._register(
-      localChangeEmitter.event((events) => {
-        sessionEmitter.fire(
-          events.map((e) => ({
-            resource: this.uriTransformer.transformOutgoingURI(e.resource),
-            type: e.type,
-            cId: e.cId,
-          })),
-        )
-      }),
-    )
+	private registerListeners(sessionEmitter: Emitter<IFileChange[] | string>): void {
+		const localChangeEmitter = this._register(new Emitter<readonly IFileChange[]>());
 
-    this._register(
-      this.fileWatcher.onDidChangeFile((events) =>
-        localChangeEmitter.fire(events),
-      ),
-    )
-    this._register(
-      this.fileWatcher.onDidWatchError((error) => sessionEmitter.fire(error)),
-    )
-  }
+		this._register(localChangeEmitter.event((events) => {
+			sessionEmitter.fire(
+				events.map(e => ({
+					resource: this.uriTransformer.transformOutgoingURI(e.resource),
+					type: e.type,
+					cId: e.cId
+				}))
+			);
+		}));
 
-  protected getRecursiveWatcherOptions(
-    environmentService: IEnvironmentService,
-  ): IRecursiveWatcherOptions | undefined {
-    return undefined // subclasses can override
-  }
+		this._register(this.fileWatcher.onDidChangeFile(events => localChangeEmitter.fire(events)));
+		this._register(this.fileWatcher.onDidWatchError(error => sessionEmitter.fire(error)));
+	}
 
-  protected getExtraExcludes(
-    environmentService: IEnvironmentService,
-  ): string[] | undefined {
-    return undefined // subclasses can override
-  }
+	protected getRecursiveWatcherOptions(environmentService: IEnvironmentService): IRecursiveWatcherOptions | undefined {
+		return undefined; // subclasses can override
+	}
 
-  watch(req: number, resource: URI, opts: IWatchOptions): IDisposable {
-    const extraExcludes = this.getExtraExcludes(this.environmentService)
-    if (Array.isArray(extraExcludes)) {
-      opts.excludes = [...opts.excludes, ...extraExcludes]
-    }
+	protected getExtraExcludes(environmentService: IEnvironmentService): string[] | undefined {
+		return undefined; // subclasses can override
+	}
 
-    this.watcherRequests.set(req, this.fileWatcher.watch(resource, opts))
+	watch(req: number, resource: URI, opts: IWatchOptions): IDisposable {
+		const extraExcludes = this.getExtraExcludes(this.environmentService);
+		if (Array.isArray(extraExcludes)) {
+			opts.excludes = [...opts.excludes, ...extraExcludes];
+		}
 
-    return toDisposable(() => {
-      dispose(this.watcherRequests.get(req))
-      this.watcherRequests.delete(req)
-    })
-  }
+		this.watcherRequests.set(req, this.fileWatcher.watch(resource, opts));
 
-  override dispose(): void {
-    for (const [, disposable] of this.watcherRequests) {
-      disposable.dispose()
-    }
-    this.watcherRequests.clear()
+		return toDisposable(() => {
+			dispose(this.watcherRequests.get(req));
+			this.watcherRequests.delete(req);
+		});
+	}
 
-    super.dispose()
-  }
+	override dispose(): void {
+		for (const [, disposable] of this.watcherRequests) {
+			disposable.dispose();
+		}
+		this.watcherRequests.clear();
+
+		super.dispose();
+	}
 }

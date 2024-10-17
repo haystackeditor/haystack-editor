@@ -9,13 +9,13 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Disposable, Event } from "vscode"
-import { RemoteSourceProvider } from "./api/git-base"
+import { Disposable, Event } from 'vscode';
+import { RemoteSourceProvider } from './api/git-base';
 
 export interface IRemoteSourceProviderRegistry {
-  readonly onDidAddRemoteSourceProvider: Event<RemoteSourceProvider>
-  readonly onDidRemoveRemoteSourceProvider: Event<RemoteSourceProvider>
+	readonly onDidAddRemoteSourceProvider: Event<RemoteSourceProvider>;
+	readonly onDidRemoveRemoteSourceProvider: Event<RemoteSourceProvider>;
 
-  getRemoteProviders(): RemoteSourceProvider[]
-  registerRemoteSourceProvider(provider: RemoteSourceProvider): Disposable
+	getRemoteProviders(): RemoteSourceProvider[];
+	registerRemoteSourceProvider(provider: RemoteSourceProvider): Disposable;
 }

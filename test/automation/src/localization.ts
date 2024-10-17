@@ -9,17 +9,17 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Code } from "./code"
-import { ILocalizedStrings, ILocaleInfo } from "./driver"
+import { Code } from './code';
+import { ILocalizedStrings, ILocaleInfo } from './driver';
 
 export class Localization {
-  constructor(private code: Code) {}
+	constructor(private code: Code) { }
 
-  async getLocaleInfo(): Promise<ILocaleInfo> {
-    return this.code.getLocaleInfo()
-  }
+	async getLocaleInfo(): Promise<ILocaleInfo> {
+		return this.code.getLocaleInfo();
+	}
 
-  async getLocalizedStrings(): Promise<ILocalizedStrings> {
-    return this.code.getLocalizedStrings()
-  }
+	async getLocalizedStrings(): Promise<ILocalizedStrings> {
+		return this.code.getLocalizedStrings();
+	}
 }

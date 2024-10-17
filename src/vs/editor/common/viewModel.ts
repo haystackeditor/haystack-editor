@@ -65,7 +65,7 @@ export interface IViewModel extends ICursorSimpleModel {
   setViewport(
     startLineNumber: number,
     endLineNumber: number,
-    centeredLineNumber: number,
+    centeredLineNumber: number
   ): void
   visibleLinesStabilized(): void
   setHasFocus(hasFocus: boolean): void
@@ -76,14 +76,14 @@ export interface IViewModel extends ICursorSimpleModel {
   getDecorationsInViewport(visibleRange: Range): ViewModelDecoration[]
   getViewportViewLineRenderingData(
     visibleRange: Range,
-    lineNumber: number,
+    lineNumber: number
   ): ViewLineRenderingData
   getViewLineRenderingData(lineNumber: number): ViewLineRenderingData
   getViewLineData(lineNumber: number): ViewLineData
   getMinimapLinesRenderingData(
     startLineNumber: number,
     endLineNumber: number,
-    needed: boolean[],
+    needed: boolean[]
   ): MinimapLinesRenderingData
   getCompletelyVisibleViewRange(): Range
   getCompletelyVisibleViewRangeAtScrollTop(scrollTop: number): Range
@@ -96,21 +96,21 @@ export interface IViewModel extends ICursorSimpleModel {
   getActiveIndentGuide(
     lineNumber: number,
     minLineNumber: number,
-    maxLineNumber: number,
+    maxLineNumber: number
   ): IActiveIndentGuideInfo
   getLinesIndentGuides(startLineNumber: number, endLineNumber: number): number[]
   getBracketGuidesInRangeByLine(
     startLineNumber: number,
     endLineNumber: number,
     activePosition: IPosition | null,
-    options: BracketGuideOptions,
+    options: BracketGuideOptions
   ): IndentGuide[][]
   getLineMinColumn(lineNumber: number): number
   getLineMaxColumn(lineNumber: number): number
   getLineFirstNonWhitespaceColumn(lineNumber: number): number
   getLineLastNonWhitespaceColumn(lineNumber: number): number
   getAllOverviewRulerDecorations(
-    theme: EditorTheme,
+    theme: EditorTheme
   ): OverviewRulerDecorationsGroup[]
   getValueInRange(range: Range, eol: EndOfLinePreference): string
   getValueLengthInRange(range: Range, eol: EndOfLinePreference): number
@@ -121,16 +121,16 @@ export interface IViewModel extends ICursorSimpleModel {
   deduceModelPositionRelativeToViewPosition(
     viewAnchorPosition: Position,
     deltaOffset: number,
-    lineFeedCnt: number,
+    lineFeedCnt: number
   ): Position
   getPlainTextToCopy(
     modelRanges: Range[],
     emptySelectionClipboard: boolean,
-    forceCRLF: boolean,
+    forceCRLF: boolean
   ): string | string[]
   getRichTextToCopy(
     modelRanges: Range[],
-    emptySelectionClipboard: boolean,
+    emptySelectionClipboard: boolean
   ): { html: string; mode: string } | null
 
   createLineBreaksComputer(): ILineBreaksComputer
@@ -144,7 +144,7 @@ export interface IViewModel extends ICursorSimpleModel {
   setCursorStates(
     source: string | null | undefined,
     reason: CursorChangeReason,
-    states: PartialCursorState[] | null,
+    states: PartialCursorState[] | null
   ): boolean
   getCursorColumnSelectData(): IColumnSelectData
   getCursorAutoClosedCharacters(): Range[]
@@ -154,12 +154,12 @@ export interface IViewModel extends ICursorSimpleModel {
   revealAllCursors(
     source: string | null | undefined,
     revealHorizontal: boolean,
-    minimalReveal?: boolean,
+    minimalReveal?: boolean
   ): void
   revealPrimaryCursor(
     source: string | null | undefined,
     revealHorizontal: boolean,
-    minimalReveal?: boolean,
+    minimalReveal?: boolean
   ): void
   revealTopMostCursor(source: string | null | undefined): void
   revealBottomMostCursor(source: string | null | undefined): void
@@ -168,13 +168,13 @@ export interface IViewModel extends ICursorSimpleModel {
     revealHorizontal: boolean,
     viewRange: Range,
     verticalType: VerticalRevealType,
-    scrollType: ScrollType,
+    scrollType: ScrollType
   ): void
   //#endregion
 
   //#region viewLayout
   changeWhitespace(
-    callback: (accessor: IWhitespaceChangeAccessor) => void,
+    callback: (accessor: IWhitespaceChangeAccessor) => void
   ): void
   //#endregion
 
@@ -205,7 +205,7 @@ export interface IViewLayout {
 
   getLinesViewportData(): IPartialViewLinesViewportData
   getLinesViewportDataAtScrollTop(
-    scrollTop: number,
+    scrollTop: number
   ): IPartialViewLinesViewportData
   getWhitespaces(): IEditorWhitespace[]
 
@@ -215,14 +215,14 @@ export interface IViewLayout {
   getLineNumberAtVerticalOffset(verticalOffset: number): number
   getVerticalOffsetForLineNumber(
     lineNumber: number,
-    includeViewZones?: boolean,
+    includeViewZones?: boolean
   ): number
   getVerticalOffsetAfterLineNumber(
     lineNumber: number,
-    includeViewZones?: boolean,
+    includeViewZones?: boolean
   ): number
   getWhitespaceAtVerticalOffset(
-    verticalOffset: number,
+    verticalOffset: number
   ): IViewWhitespaceViewportData | null
 
   /**
@@ -245,12 +245,12 @@ export interface IWhitespaceChangeAccessor {
     afterLineNumber: number,
     ordinal: number,
     heightInPx: number,
-    minWidth: number,
+    minWidth: number
   ): string
   changeOneWhitespace(
     id: string,
     newAfterLineNumber: number,
-    newHeight: number,
+    newHeight: number
   ): void
   removeWhitespace(id: string): void
 }
@@ -320,7 +320,7 @@ export interface ICoordinatesConverter {
   convertViewRangeToModelRange(viewRange: Range): Range
   validateViewPosition(
     viewPosition: Position,
-    expectedModelPosition: Position,
+    expectedModelPosition: Position
   ): Position
   validateViewRange(viewRange: Range, expectedModelRange: Range): Range
 
@@ -333,20 +333,20 @@ export interface ICoordinatesConverter {
     modelPosition: Position,
     affinity?: PositionAffinity,
     allowZeroLineNumber?: boolean,
-    belowHiddenRanges?: boolean,
+    belowHiddenRanges?: boolean
   ): Position
   /**
    * @param affinity Only has an effect if the range is empty.
    */
   convertModelRangeToViewRange(
     modelRange: Range,
-    affinity?: PositionAffinity,
+    affinity?: PositionAffinity
   ): Range
   modelPositionIsVisible(modelPosition: Position): boolean
   getModelLineViewLineCount(modelLineNumber: number): number
   getViewLineNumberOfModelPosition(
     modelLineNumber: number,
-    modelColumn: number,
+    modelColumn: number
   ): number
 }
 
@@ -402,7 +402,7 @@ export class ViewLineData {
     maxColumn: number,
     startVisibleColumn: number,
     tokens: IViewLineTokens,
-    inlineDecorations: readonly SingleLineInlineDecoration[] | null,
+    inlineDecorations: readonly SingleLineInlineDecoration[] | null
   ) {
     this.content = content
     this.continuesWithWrappedLine = continuesWithWrappedLine
@@ -466,7 +466,7 @@ export class ViewLineRenderingData {
     tokens: IViewLineTokens,
     inlineDecorations: InlineDecoration[],
     tabSize: number,
-    startVisibleColumn: number,
+    startVisibleColumn: number
   ) {
     this.minColumn = minColumn
     this.maxColumn = maxColumn
@@ -475,12 +475,12 @@ export class ViewLineRenderingData {
 
     this.isBasicASCII = ViewLineRenderingData.isBasicASCII(
       content,
-      mightContainNonBasicASCII,
+      mightContainNonBasicASCII
     )
     this.containsRTL = ViewLineRenderingData.containsRTL(
       content,
       this.isBasicASCII,
-      mightContainRTL,
+      mightContainRTL
     )
 
     this.tokens = tokens
@@ -491,7 +491,7 @@ export class ViewLineRenderingData {
 
   public static isBasicASCII(
     lineContent: string,
-    mightContainNonBasicASCII: boolean,
+    mightContainNonBasicASCII: boolean
   ): boolean {
     if (mightContainNonBasicASCII) {
       return strings.isBasicASCII(lineContent)
@@ -502,7 +502,7 @@ export class ViewLineRenderingData {
   public static containsRTL(
     lineContent: string,
     isBasicASCII: boolean,
-    mightContainRTL: boolean,
+    mightContainRTL: boolean
   ): boolean {
     if (!isBasicASCII && mightContainRTL) {
       return strings.containsRTL(lineContent)
@@ -522,7 +522,7 @@ export class InlineDecoration {
   constructor(
     public readonly range: Range,
     public readonly inlineClassName: string,
-    public readonly type: InlineDecorationType,
+    public readonly type: InlineDecorationType
   ) {}
 }
 
@@ -531,7 +531,7 @@ export class SingleLineInlineDecoration {
     public readonly startOffset: number,
     public readonly endOffset: number,
     public readonly inlineClassName: string,
-    public readonly inlineClassNameAffectsLetterSpacing: boolean,
+    public readonly inlineClassNameAffectsLetterSpacing: boolean
   ) {}
 
   toInlineDecoration(lineNumber: number): InlineDecoration {
@@ -540,12 +540,12 @@ export class SingleLineInlineDecoration {
         lineNumber,
         this.startOffset + 1,
         lineNumber,
-        this.endOffset + 1,
+        this.endOffset + 1
       ),
       this.inlineClassName,
       this.inlineClassNameAffectsLetterSpacing
         ? InlineDecorationType.RegularAffectingLetterSpacing
-        : InlineDecorationType.Regular,
+        : InlineDecorationType.Regular
     )
   }
 }
@@ -572,12 +572,12 @@ export class OverviewRulerDecorationsGroup {
      *  - 3*i+1 = startLineNumber
      *  - 3*i+2 = endLineNumber
      */
-    public readonly data: number[],
+    public readonly data: number[]
   ) {}
 
   public static compareByRenderingProps(
     a: OverviewRulerDecorationsGroup,
-    b: OverviewRulerDecorationsGroup,
+    b: OverviewRulerDecorationsGroup
   ): number {
     if (a.zIndex === b.zIndex) {
       if (a.color < b.color) {
@@ -593,7 +593,7 @@ export class OverviewRulerDecorationsGroup {
 
   public static equals(
     a: OverviewRulerDecorationsGroup,
-    b: OverviewRulerDecorationsGroup,
+    b: OverviewRulerDecorationsGroup
   ): boolean {
     return (
       a.color === b.color &&
@@ -604,7 +604,7 @@ export class OverviewRulerDecorationsGroup {
 
   public static equalsArr(
     a: OverviewRulerDecorationsGroup[],
-    b: OverviewRulerDecorationsGroup[],
+    b: OverviewRulerDecorationsGroup[]
   ): boolean {
     return arrays.equals(a, b, OverviewRulerDecorationsGroup.equals)
   }

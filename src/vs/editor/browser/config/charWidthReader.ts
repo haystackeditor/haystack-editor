@@ -9,145 +9,141 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { applyFontInfo } from "vs/editor/browser/config/domFontInfo"
-import { BareFontInfo } from "vs/editor/common/config/fontInfo"
+import { applyFontInfo } from 'vs/editor/browser/config/domFontInfo';
+import { BareFontInfo } from 'vs/editor/common/config/fontInfo';
 
 export const enum CharWidthRequestType {
-  Regular = 0,
-  Italic = 1,
-  Bold = 2,
+	Regular = 0,
+	Italic = 1,
+	Bold = 2
 }
 
 export class CharWidthRequest {
-  public readonly chr: string
-  public readonly type: CharWidthRequestType
-  public width: number
 
-  constructor(chr: string, type: CharWidthRequestType) {
-    this.chr = chr
-    this.type = type
-    this.width = 0
-  }
+	public readonly chr: string;
+	public readonly type: CharWidthRequestType;
+	public width: number;
 
-  public fulfill(width: number) {
-    this.width = width
-  }
+	constructor(chr: string, type: CharWidthRequestType) {
+		this.chr = chr;
+		this.type = type;
+		this.width = 0;
+	}
+
+	public fulfill(width: number) {
+		this.width = width;
+	}
 }
 
 class DomCharWidthReader {
-  private readonly _bareFontInfo: BareFontInfo
-  private readonly _requests: CharWidthRequest[]
 
-  private _container: HTMLElement | null
-  private _testElements: HTMLSpanElement[] | null
+	private readonly _bareFontInfo: BareFontInfo;
+	private readonly _requests: CharWidthRequest[];
 
-  constructor(bareFontInfo: BareFontInfo, requests: CharWidthRequest[]) {
-    this._bareFontInfo = bareFontInfo
-    this._requests = requests
+	private _container: HTMLElement | null;
+	private _testElements: HTMLSpanElement[] | null;
 
-    this._container = null
-    this._testElements = null
-  }
+	constructor(bareFontInfo: BareFontInfo, requests: CharWidthRequest[]) {
+		this._bareFontInfo = bareFontInfo;
+		this._requests = requests;
 
-  public read(targetWindow: Window): void {
-    // Create a test container with all these test elements
-    this._createDomElements()
+		this._container = null;
+		this._testElements = null;
+	}
 
-    // Add the container to the DOM
-    targetWindow.document.body.appendChild(this._container!)
+	public read(targetWindow: Window): void {
+		// Create a test container with all these test elements
+		this._createDomElements();
 
-    // Read character widths
-    this._readFromDomElements()
+		// Add the container to the DOM
+		targetWindow.document.body.appendChild(this._container!);
 
-    // Remove the container from the DOM
-    targetWindow.document.body.removeChild(this._container!)
+		// Read character widths
+		this._readFromDomElements();
 
-    this._container = null
-    this._testElements = null
-  }
+		// Remove the container from the DOM
+		targetWindow.document.body.removeChild(this._container!);
 
-  private _createDomElements(): void {
-    const container = document.createElement("div")
-    container.style.position = "absolute"
-    container.style.top = "-50000px"
-    container.style.width = "50000px"
+		this._container = null;
+		this._testElements = null;
+	}
 
-    const regularDomNode = document.createElement("div")
-    applyFontInfo(regularDomNode, this._bareFontInfo)
-    container.appendChild(regularDomNode)
+	private _createDomElements(): void {
+		const container = document.createElement('div');
+		container.style.position = 'absolute';
+		container.style.top = '-50000px';
+		container.style.width = '50000px';
 
-    const boldDomNode = document.createElement("div")
-    applyFontInfo(boldDomNode, this._bareFontInfo)
-    boldDomNode.style.fontWeight = "bold"
-    container.appendChild(boldDomNode)
+		const regularDomNode = document.createElement('div');
+		applyFontInfo(regularDomNode, this._bareFontInfo);
+		container.appendChild(regularDomNode);
 
-    const italicDomNode = document.createElement("div")
-    applyFontInfo(italicDomNode, this._bareFontInfo)
-    italicDomNode.style.fontStyle = "italic"
-    container.appendChild(italicDomNode)
+		const boldDomNode = document.createElement('div');
+		applyFontInfo(boldDomNode, this._bareFontInfo);
+		boldDomNode.style.fontWeight = 'bold';
+		container.appendChild(boldDomNode);
 
-    const testElements: HTMLSpanElement[] = []
-    for (const request of this._requests) {
-      let parent: HTMLElement
-      if (request.type === CharWidthRequestType.Regular) {
-        parent = regularDomNode
-      }
-      if (request.type === CharWidthRequestType.Bold) {
-        parent = boldDomNode
-      }
-      if (request.type === CharWidthRequestType.Italic) {
-        parent = italicDomNode
-      }
+		const italicDomNode = document.createElement('div');
+		applyFontInfo(italicDomNode, this._bareFontInfo);
+		italicDomNode.style.fontStyle = 'italic';
+		container.appendChild(italicDomNode);
 
-      parent!.appendChild(document.createElement("br"))
+		const testElements: HTMLSpanElement[] = [];
+		for (const request of this._requests) {
 
-      const testElement = document.createElement("span")
-      DomCharWidthReader._render(testElement, request)
-      parent!.appendChild(testElement)
+			let parent: HTMLElement;
+			if (request.type === CharWidthRequestType.Regular) {
+				parent = regularDomNode;
+			}
+			if (request.type === CharWidthRequestType.Bold) {
+				parent = boldDomNode;
+			}
+			if (request.type === CharWidthRequestType.Italic) {
+				parent = italicDomNode;
+			}
 
-      testElements.push(testElement)
-    }
+			parent!.appendChild(document.createElement('br'));
 
-    this._container = container
-    this._testElements = testElements
-  }
+			const testElement = document.createElement('span');
+			DomCharWidthReader._render(testElement, request);
+			parent!.appendChild(testElement);
 
-  private static _render(
-    testElement: HTMLElement,
-    request: CharWidthRequest,
-  ): void {
-    if (request.chr === " ") {
-      let htmlString = "\u00a0"
-      // Repeat character 256 (2^8) times
-      for (let i = 0; i < 8; i++) {
-        htmlString += htmlString
-      }
-      testElement.innerText = htmlString
-    } else {
-      let testString = request.chr
-      // Repeat character 256 (2^8) times
-      for (let i = 0; i < 8; i++) {
-        testString += testString
-      }
-      testElement.textContent = testString
-    }
-  }
+			testElements.push(testElement);
+		}
 
-  private _readFromDomElements(): void {
-    for (let i = 0, len = this._requests.length; i < len; i++) {
-      const request = this._requests[i]
-      const testElement = this._testElements![i]
+		this._container = container;
+		this._testElements = testElements;
+	}
 
-      request.fulfill(testElement.offsetWidth / 256)
-    }
-  }
+	private static _render(testElement: HTMLElement, request: CharWidthRequest): void {
+		if (request.chr === ' ') {
+			let htmlString = '\u00a0';
+			// Repeat character 256 (2^8) times
+			for (let i = 0; i < 8; i++) {
+				htmlString += htmlString;
+			}
+			testElement.innerText = htmlString;
+		} else {
+			let testString = request.chr;
+			// Repeat character 256 (2^8) times
+			for (let i = 0; i < 8; i++) {
+				testString += testString;
+			}
+			testElement.textContent = testString;
+		}
+	}
+
+	private _readFromDomElements(): void {
+		for (let i = 0, len = this._requests.length; i < len; i++) {
+			const request = this._requests[i];
+			const testElement = this._testElements![i];
+
+			request.fulfill(testElement.offsetWidth / 256);
+		}
+	}
 }
 
-export function readCharWidths(
-  targetWindow: Window,
-  bareFontInfo: BareFontInfo,
-  requests: CharWidthRequest[],
-): void {
-  const reader = new DomCharWidthReader(bareFontInfo, requests)
-  reader.read(targetWindow)
+export function readCharWidths(targetWindow: Window, bareFontInfo: BareFontInfo, requests: CharWidthRequest[]): void {
+	const reader = new DomCharWidthReader(bareFontInfo, requests);
+	reader.read(targetWindow);
 }

@@ -5,10 +5,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 export class Vector {
-  constructor(
-    public x: number,
-    public y: number,
-  ) {}
+  constructor(public x: number, public y: number) {}
 
   public static new() {
     return new Vector(0, 0)

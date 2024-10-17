@@ -9,62 +9,64 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { DeferredPromise } from "vs/base/common/async"
-import { Event, Emitter } from "vs/base/common/event"
-import { Disposable } from "vs/base/common/lifecycle"
-import { IDialogArgs, IDialogResult } from "vs/platform/dialogs/common/dialogs"
+import { DeferredPromise } from 'vs/base/common/async';
+import { Event, Emitter } from 'vs/base/common/event';
+import { Disposable } from 'vs/base/common/lifecycle';
+import { IDialogArgs, IDialogResult } from 'vs/platform/dialogs/common/dialogs';
 
 export interface IDialogViewItem {
-  readonly args: IDialogArgs
+	readonly args: IDialogArgs;
 
-  close(result?: IDialogResult | Error): void
+	close(result?: IDialogResult | Error): void;
 }
 
 export interface IDialogHandle {
-  readonly item: IDialogViewItem
-  readonly result: Promise<IDialogResult | undefined>
+	readonly item: IDialogViewItem;
+	readonly result: Promise<IDialogResult | undefined>;
 }
 
 export interface IDialogsModel {
-  readonly onWillShowDialog: Event<void>
-  readonly onDidShowDialog: Event<void>
 
-  readonly dialogs: IDialogViewItem[]
+	readonly onWillShowDialog: Event<void>;
+	readonly onDidShowDialog: Event<void>;
 
-  show(dialog: IDialogArgs): IDialogHandle
+	readonly dialogs: IDialogViewItem[];
+
+	show(dialog: IDialogArgs): IDialogHandle;
 }
 
 export class DialogsModel extends Disposable implements IDialogsModel {
-  readonly dialogs: IDialogViewItem[] = []
 
-  private readonly _onWillShowDialog = this._register(new Emitter<void>())
-  readonly onWillShowDialog = this._onWillShowDialog.event
+	readonly dialogs: IDialogViewItem[] = [];
 
-  private readonly _onDidShowDialog = this._register(new Emitter<void>())
-  readonly onDidShowDialog = this._onDidShowDialog.event
+	private readonly _onWillShowDialog = this._register(new Emitter<void>());
+	readonly onWillShowDialog = this._onWillShowDialog.event;
 
-  show(dialog: IDialogArgs): IDialogHandle {
-    const promise = new DeferredPromise<IDialogResult | undefined>()
+	private readonly _onDidShowDialog = this._register(new Emitter<void>());
+	readonly onDidShowDialog = this._onDidShowDialog.event;
 
-    const item: IDialogViewItem = {
-      args: dialog,
-      close: (result) => {
-        this.dialogs.splice(0, 1)
-        if (result instanceof Error) {
-          promise.error(result)
-        } else {
-          promise.complete(result)
-        }
-        this._onDidShowDialog.fire()
-      },
-    }
+	show(dialog: IDialogArgs): IDialogHandle {
+		const promise = new DeferredPromise<IDialogResult | undefined>();
 
-    this.dialogs.push(item)
-    this._onWillShowDialog.fire()
+		const item: IDialogViewItem = {
+			args: dialog,
+			close: result => {
+				this.dialogs.splice(0, 1);
+				if (result instanceof Error) {
+					promise.error(result);
+				} else {
+					promise.complete(result);
+				}
+				this._onDidShowDialog.fire();
+			}
+		};
 
-    return {
-      item,
-      result: promise.p,
-    }
-  }
+		this.dialogs.push(item);
+		this._onWillShowDialog.fire();
+
+		return {
+			item,
+			result: promise.p
+		};
+	}
 }

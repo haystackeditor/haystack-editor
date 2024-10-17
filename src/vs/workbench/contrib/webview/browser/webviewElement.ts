@@ -96,7 +96,7 @@ namespace WebviewState {
         readonly data?: any
         readonly transferable: Transferable[]
         readonly resolve: (posted: boolean) => void
-      }>,
+      }>
     ) {}
   }
 
@@ -177,7 +177,7 @@ export class WebviewElement
   private readonly _portMappingManager: WebviewPortMappingManager
 
   private readonly _resourceLoadingCts = this._register(
-    new CancellationTokenSource(),
+    new CancellationTokenSource()
   )
 
   private _contextKeyService: IContextKeyService | undefined
@@ -187,7 +187,7 @@ export class WebviewElement
   private readonly _focusDelayer = this._register(new ThrottledDelayer(50))
 
   private readonly _onDidHtmlChange: Emitter<string> = this._register(
-    new Emitter<string>(),
+    new Emitter<string>()
   )
   protected readonly onDidHtmlChange = this._onDidHtmlChange.event
 
@@ -222,7 +222,7 @@ export class WebviewElement
     @IInstantiationService instantiationService: IInstantiationService,
     @IAccessibilityService
     private readonly _accessibilityService: IAccessibilityService,
-    @IHaystackService private readonly _haystackService: IHaystackService,
+    @IHaystackService private readonly _haystackService: IHaystackService
   ) {
     super()
 
@@ -243,25 +243,25 @@ export class WebviewElement
       new WebviewPortMappingManager(
         () => this.extension?.location,
         () => this._content.options.portMapping || [],
-        this._tunnelService,
-      ),
+        this._tunnelService
+      )
     )
 
     this._element = this._createElement(
       initInfo.options,
-      initInfo.contentOptions,
+      initInfo.contentOptions
     )
 
     this._register(
       this.on("no-csp-found", () => {
         this.handleNoCspFound()
-      }),
+      })
     )
 
     this._register(
       this.on("did-click-link", ({ uri }) => {
         this._onDidClickLink.fire(uri)
-      }),
+      })
     )
 
     this._register(
@@ -277,7 +277,7 @@ export class WebviewElement
         })
 
         this._haystackService.forwardPointerEvent(emulatedEvent)
-      }),
+      })
     )
 
     this._register(
@@ -293,44 +293,44 @@ export class WebviewElement
         })
 
         this._haystackService.forwardPointerEvent(emulatedEvent)
-      }),
+      })
     )
 
     this._register(
       this.on("onmessage", ({ message, transfer }) => {
         this._onMessage.fire({ message, transfer })
-      }),
+      })
     )
 
     this._register(
       this.on("did-scroll", ({ scrollYPercentage }) => {
         this._onDidScroll.fire({ scrollYPercentage })
-      }),
+      })
     )
 
     this._register(
       this.on("do-reload", () => {
         this.reload()
-      }),
+      })
     )
 
     this._register(
       this.on("do-update-state", (state) => {
         this.state = state
         this._onDidUpdateState.fire(state)
-      }),
+      })
     )
 
     this._register(
       this.on("did-focus", () => {
         this.handleFocusChange(true)
-      }),
+      })
     )
 
     this._register(
       this.on("did-blur", () => {
         this.handleFocusChange(false)
-      }),
+      })
     )
 
     this._register(
@@ -340,26 +340,22 @@ export class WebviewElement
           return
         }
         this._onDidWheel.fire(event)
-      }),
+      })
     )
 
     this._register(
       this.on("did-find", ({ didFind }) => {
         this._hasFindResult.fire(didFind)
-      }),
+      })
     )
 
     this._register(
       this.on("fatal-error", (e) => {
         notificationService.error(
-          localize(
-            "fatalErrorMessage",
-            "Error loading webview: {0}",
-            e.message,
-          ),
+          localize("fatalErrorMessage", "Error loading webview: {0}", e.message)
         )
         this._onFatalError.fire({ message: e.message })
-      }),
+      })
     )
 
     this._register(
@@ -368,13 +364,13 @@ export class WebviewElement
         // We have to detect keyboard events in the <webview> and dispatch them to our
         // keybinding service because these events do not bubble to the parent window anymore.
         this.handleKeyEvent("keydown", data)
-      }),
+      })
     )
 
     this._register(
       this.on("did-keyup", (data) => {
         this.handleKeyEvent("keyup", data)
-      }),
+      })
     )
 
     this._register(
@@ -403,7 +399,7 @@ export class WebviewElement
             y: elementBox.y + data.clientY,
           }),
         })
-      }),
+      })
     )
 
     this._register(
@@ -425,63 +421,61 @@ export class WebviewElement
             path: entry.path,
           })
         }
-      }),
+      })
     )
 
     this._register(
       this.on("load-localhost", (entry) => {
         this.localLocalhost(entry.id, entry.origin)
-      }),
+      })
     )
 
     this._register(
       Event.runAndSubscribe(webviewThemeDataProvider.onThemeDataChanged, () =>
-        this.style(),
-      ),
+        this.style()
+      )
     )
     this._register(
-      _accessibilityService.onDidChangeReducedMotion(() => this.style()),
+      _accessibilityService.onDidChangeReducedMotion(() => this.style())
     )
     this._register(
-      _accessibilityService.onDidChangeScreenReaderOptimized(() =>
-        this.style(),
-      ),
+      _accessibilityService.onDidChangeScreenReaderOptimized(() => this.style())
     )
     this._register(
       contextMenuService.onDidShowContextMenu(() =>
-        this._send("set-context-menu-visible", { visible: true }),
-      ),
+        this._send("set-context-menu-visible", { visible: true })
+      )
     )
     this._register(
       contextMenuService.onDidHideContextMenu(() =>
-        this._send("set-context-menu-visible", { visible: false }),
-      ),
+        this._send("set-context-menu-visible", { visible: false })
+      )
     )
 
     this._confirmBeforeClose = configurationService.getValue<string>(
-      "window.confirmBeforeClose",
+      "window.confirmBeforeClose"
     )
 
     this._register(
       configurationService.onDidChangeConfiguration((e) => {
         if (e.affectsConfiguration("window.confirmBeforeClose")) {
           this._confirmBeforeClose = configurationService.getValue(
-            "window.confirmBeforeClose",
+            "window.confirmBeforeClose"
           )
           this._send("set-confirm-before-close", this._confirmBeforeClose)
         }
-      }),
+      })
     )
 
     this._register(
       this.on("drag-start", () => {
         this._startBlockingIframeDragEvents()
-      }),
+      })
     )
 
     if (initInfo.options.enableFindWidget) {
       this._webviewFindWidget = this._register(
-        instantiationService.createInstance(WebviewFindWidget, this),
+        instantiationService.createInstance(WebviewFindWidget, this)
       )
     }
   }
@@ -513,7 +507,7 @@ export class WebviewElement
   }
 
   private readonly _onMissingCsp = this._register(
-    new Emitter<ExtensionIdentifier>(),
+    new Emitter<ExtensionIdentifier>()
   )
   public readonly onMissingCsp = this._onMissingCsp.event
 
@@ -524,12 +518,12 @@ export class WebviewElement
   public readonly onDidReload = this._onDidReload.event
 
   private readonly _onMessage = this._register(
-    new Emitter<WebviewMessageReceivedEvent>(),
+    new Emitter<WebviewMessageReceivedEvent>()
   )
   public readonly onMessage = this._onMessage.event
 
   private readonly _onDidScroll = this._register(
-    new Emitter<{ readonly scrollYPercentage: number }>(),
+    new Emitter<{ readonly scrollYPercentage: number }>()
   )
   public readonly onDidScroll = this._onDidScroll.event
 
@@ -537,7 +531,7 @@ export class WebviewElement
   public readonly onDidWheel = this._onDidWheel.event
 
   private readonly _onDidUpdateState = this._register(
-    new Emitter<string | undefined>(),
+    new Emitter<string | undefined>()
   )
   public readonly onDidUpdateState = this._onDidUpdateState.event
 
@@ -548,7 +542,7 @@ export class WebviewElement
   public readonly onDidBlur = this._onDidBlur.event
 
   private readonly _onFatalError = this._register(
-    new Emitter<{ readonly message: string }>(),
+    new Emitter<{ readonly message: string }>()
   )
   public readonly onFatalError = this._onFatalError.event
 
@@ -562,7 +556,7 @@ export class WebviewElement
   private async _send<K extends keyof ToWebviewMessage>(
     channel: K,
     data: ToWebviewMessage[K],
-    _createElement: Transferable[] = [],
+    _createElement: Transferable[] = []
   ): Promise<boolean> {
     if (this._state.type === WebviewState.Type.Initializing) {
       const { promise, resolve } = promiseWithResolvers<boolean>()
@@ -580,7 +574,7 @@ export class WebviewElement
 
   private _createElement(
     options: WebviewOptions,
-    _contentOptions: WebviewContentOptions,
+    _contentOptions: WebviewContentOptions
   ) {
     // Do not start loading the webview yet.
     // Wait the end of the ctor when all listeners have been hooked up.
@@ -593,7 +587,7 @@ export class WebviewElement
       "allow-same-origin",
       "allow-forms",
       "allow-pointer-lock",
-      "allow-downloads",
+      "allow-downloads"
     )
 
     const allowRules = ["cross-origin-isolated", "autoplay"]
@@ -617,7 +611,7 @@ export class WebviewElement
     encodedWebviewOrigin: string,
     extension: WebviewExtensionDescription | undefined,
     options: WebviewOptions,
-    targetWindow: CodeWindow,
+    targetWindow: CodeWindow
   ) {
     // The extensionId and purpose in the URL are used for filtering in js-debug:
     const params: { [key: string]: string } = {
@@ -652,8 +646,8 @@ export class WebviewElement
     this.element!.setAttribute(
       "src",
       `${this.webviewContentEndpoint(
-        encodedWebviewOrigin,
-      )}/${fileName}?${queryString}`,
+        encodedWebviewOrigin
+      )}/${fileName}?${queryString}`
     )
   }
 
@@ -665,7 +659,7 @@ export class WebviewElement
     this._windowId = targetWindow.vscodeWindowId
     this._encodedWebviewOriginPromise = parentOriginHash(
       targetWindow.origin,
-      this.origin,
+      this.origin
     ).then((id) => (this._encodedWebviewOrigin = id))
     this._encodedWebviewOriginPromise.then((encodedWebviewOrigin) => {
       if (!this._disposed) {
@@ -673,7 +667,7 @@ export class WebviewElement
           encodedWebviewOrigin,
           this.extension,
           this._options,
-          targetWindow,
+          targetWindow
         )
       }
     })
@@ -691,7 +685,7 @@ export class WebviewElement
       this._register(
         addDisposableListener(element, eventName, () => {
           this._stopBlockingIframeDragEvents()
-        }),
+        })
       )
     }
 
@@ -699,7 +693,7 @@ export class WebviewElement
       this._register(
         addDisposableListener(node, EventType.DRAG_END, () => {
           this._stopBlockingIframeDragEvents()
-        }),
+        })
       )
     }
 
@@ -719,7 +713,7 @@ export class WebviewElement
           e.origin !== this._webviewContentOrigin(this._encodedWebviewOrigin)
         ) {
           console.log(
-            `Skipped renderer receiving message due to mismatched origins: ${e.origin} ${this._webviewContentOrigin}`,
+            `Skipped renderer receiving message due to mismatched origins: ${e.origin} ${this._webviewContentOrigin}`
           )
           return
         }
@@ -745,14 +739,14 @@ export class WebviewElement
 
           if (this._state.type === WebviewState.Type.Initializing) {
             this._state.pendingMessages.forEach(({ channel, data, resolve }) =>
-              resolve(this.doPostMessage(channel, data)),
+              resolve(this.doPostMessage(channel, data))
             )
           }
           this._state = WebviewState.Ready
 
           subscription.dispose()
         }
-      }),
+      })
     )
   }
 
@@ -773,13 +767,13 @@ export class WebviewElement
       this._environmentService.webviewExternalEndpoint
     if (!webviewExternalEndpoint) {
       throw new Error(
-        `'webviewExternalEndpoint' has not been configured. Webviews will not work!`,
+        `'webviewExternalEndpoint' has not been configured. Webviews will not work!`
       )
     }
 
     const endpoint = webviewExternalEndpoint.replace(
       "{{uuid}}",
-      encodedWebviewOrigin,
+      encodedWebviewOrigin
     )
     if (endpoint[endpoint.length - 1] === "/") {
       return endpoint.slice(0, endpoint.length - 1)
@@ -795,7 +789,7 @@ export class WebviewElement
   private doPostMessage(
     channel: string,
     data?: any,
-    transferable: Transferable[] = [],
+    transferable: Transferable[] = []
   ): boolean {
     if (this.element && this._messagePort) {
       this._messagePort.postMessage({ channel, args: data }, transferable)
@@ -806,7 +800,7 @@ export class WebviewElement
 
   private on<K extends keyof FromWebviewMessage>(
     channel: K,
-    handler: (data: FromWebviewMessage[K], e: MessageEvent) => void,
+    handler: (data: FromWebviewMessage[K], e: MessageEvent) => void
   ): IDisposable {
     let handlers = this._messageHandlers.get(channel)
     if (!handlers) {
@@ -848,7 +842,7 @@ export class WebviewElement
 
       this._telemetryService.publicLog2<typeof payload, Classification>(
         "webviewMissingCsp",
-        payload,
+        payload
       )
     }
   }
@@ -860,7 +854,7 @@ export class WebviewElement
       this.on("did-load", () => {
         this._onDidReload.fire()
         subscription.dispose()
-      }),
+      })
     )
   }
 
@@ -879,7 +873,7 @@ export class WebviewElement
 
     if (areWebviewContentOptionsEqual(options, this._content.options)) {
       this._logService.debug(
-        `Webview(${this.id}): skipping content options update`,
+        `Webview(${this.id}): skipping content options update`
       )
       return
     }
@@ -1011,7 +1005,7 @@ export class WebviewElement
   private async loadResource(
     id: number,
     uri: URI,
-    ifNoneMatch: string | undefined,
+    ifNoneMatch: string | undefined
   ) {
     try {
       const result = await loadLocalResource(
@@ -1022,7 +1016,7 @@ export class WebviewElement
         },
         this._fileService,
         this._logService,
-        this._resourceLoadingCts.token,
+        this._resourceLoadingCts.token
       )
 
       switch (result.type) {
@@ -1039,7 +1033,7 @@ export class WebviewElement
               etag: result.etag,
               mtime: result.mtime,
             },
-            [buffer],
+            [buffer]
           )
         }
         case WebviewResourceResponse.Type.NotModified: {
@@ -1071,7 +1065,7 @@ export class WebviewElement
   }
 
   protected async streamToBuffer(
-    stream: VSBufferReadableStream,
+    stream: VSBufferReadableStream
   ): Promise<ArrayBufferLike> {
     const vsBuffer = await streamToBuffer(stream)
     return vsBuffer.buffer.buffer
@@ -1085,7 +1079,7 @@ export class WebviewElement
     const redirect = resolveAuthority
       ? await this._portMappingManager.getRedirect(
           resolveAuthority.authority,
-          origin,
+          origin
         )
       : undefined
     return this._send("did-load-localhost", {

@@ -43,13 +43,13 @@ export class TextEditorDecorationType {
   constructor(
     proxy: MainThreadTextEditorsShape,
     extension: IExtensionDescription,
-    options: vscode.DecorationRenderOptions,
+    options: vscode.DecorationRenderOptions
   ) {
     const key = TextEditorDecorationType._Keys.nextId()
     proxy.$registerTextEditorDecorationType(
       extension.identifier,
       key,
-      TypeConverters.DecorationRenderOptions.from(options),
+      TypeConverters.DecorationRenderOptions.from(options)
     )
     this.value = Object.freeze({
       key,
@@ -85,7 +85,7 @@ class TextEditorEdit {
 
   constructor(
     document: vscode.TextDocument,
-    options: { undoStopBefore: boolean; undoStopAfter: boolean },
+    options: { undoStopBefore: boolean; undoStopAfter: boolean }
   ) {
     this._document = document
     this._documentVersionId = document.version
@@ -146,7 +146,7 @@ class TextEditorEdit {
   private _pushEdit(
     range: Range,
     text: string | null,
-    forceMoveMarkers: boolean,
+    forceMoveMarkers: boolean
   ): void {
     const validRange = this._document.validateRange(range)
     this._collectedEdits.push({
@@ -184,7 +184,7 @@ export class ExtHostTextEditorOptions {
     proxy: MainThreadTextEditorsShape,
     id: string,
     source: IResolvedTextEditorConfiguration,
-    logService: ILogService,
+    logService: ILogService
   ) {
     this._proxy = proxy
     this._id = id
@@ -234,7 +234,7 @@ export class ExtHostTextEditorOptions {
     this._insertSpaces = source.insertSpaces
     this._cursorStyle = source.cursorStyle
     this._lineNumbers = TypeConverters.TextEditorLineNumbersStyle.to(
-      source.lineNumbers,
+      source.lineNumbers
     )
   }
 
@@ -276,14 +276,14 @@ export class ExtHostTextEditorOptions {
       "setTabSize",
       this._proxy.$trySetOptions(this._id, {
         tabSize: tabSize,
-      }),
+      })
     )
   }
 
   // --- internal: indentSize
 
   private _validateIndentSize(
-    value: number | string,
+    value: number | string
   ): number | "tabSize" | null {
     if (value === "tabSize") {
       return "tabSize"
@@ -321,7 +321,7 @@ export class ExtHostTextEditorOptions {
       "setIndentSize",
       this._proxy.$trySetOptions(this._id, {
         indentSize: indentSize,
-      }),
+      })
     )
   }
 
@@ -348,7 +348,7 @@ export class ExtHostTextEditorOptions {
       "setInsertSpaces",
       this._proxy.$trySetOptions(this._id, {
         insertSpaces: insertSpaces,
-      }),
+      })
     )
   }
 
@@ -364,7 +364,7 @@ export class ExtHostTextEditorOptions {
       "setCursorStyle",
       this._proxy.$trySetOptions(this._id, {
         cursorStyle: value,
-      }),
+      })
     )
   }
 
@@ -380,7 +380,7 @@ export class ExtHostTextEditorOptions {
       "setLineNumbers",
       this._proxy.$trySetOptions(this._id, {
         lineNumbers: TypeConverters.TextEditorLineNumbersStyle.from(value),
-      }),
+      })
     )
   }
 
@@ -451,7 +451,7 @@ export class ExtHostTextEditorOptions {
     if (hasUpdate) {
       this._warnOnError(
         "setOptions",
-        this._proxy.$trySetOptions(this._id, bulkConfigurationUpdate),
+        this._proxy.$trySetOptions(this._id, bulkConfigurationUpdate)
       )
     }
   }
@@ -484,14 +484,14 @@ export class ExtHostTextEditor {
     options: IResolvedTextEditorConfiguration,
     visibleRanges: Range[],
     viewColumn: vscode.ViewColumn | undefined,
-    editRange: IRange | undefined,
+    editRange: IRange | undefined
   ) {
     this._selections = selections
     this._options = new ExtHostTextEditorOptions(
       this._proxy,
       this.id,
       options,
-      _logService,
+      _logService
     )
     this._visibleRanges = visibleRanges
     this._viewColumn = viewColumn
@@ -535,22 +535,22 @@ export class ExtHostTextEditor {
                     that._editRange.endLineNumber - 1,
                     Math.max(
                       selection.start.line,
-                      that._editRange.startLineNumber - 1,
-                    ),
+                      that._editRange.startLineNumber - 1
+                    )
                   ),
-                  selection.start.character,
+                  selection.start.character
                 ),
                 new Position(
                   Math.min(
                     that._editRange.endLineNumber - 1,
                     Math.max(
                       selection.end.line,
-                      that._editRange.startLineNumber - 1,
-                    ),
+                      that._editRange.startLineNumber - 1
+                    )
                   ),
-                  selection.end.character,
-                ),
-              ),
+                  selection.end.character
+                )
+              )
             )
           }
         } else {
@@ -582,22 +582,22 @@ export class ExtHostTextEditor {
                     that._editRange.endLineNumber - 1,
                     Math.max(
                       selection.start.line,
-                      that._editRange.startLineNumber - 1,
-                    ),
+                      that._editRange.startLineNumber - 1
+                    )
                   ),
-                  selection.start.character,
+                  selection.start.character
                 ),
                 new Position(
                   Math.min(
                     that._editRange.endLineNumber - 1,
                     Math.max(
                       selection.end.line,
-                      that._editRange.startLineNumber - 1,
-                    ),
+                      that._editRange.startLineNumber - 1
+                    )
                   ),
-                  selection.end.character,
-                ),
-              ),
+                  selection.end.character
+                )
+              )
             )
           }
         } else {
@@ -636,11 +636,11 @@ export class ExtHostTextEditor {
         options: { undoStopBefore: boolean; undoStopAfter: boolean } = {
           undoStopBefore: true,
           undoStopAfter: true,
-        },
+        }
       ): Promise<boolean> {
         if (that._disposed) {
           return Promise.reject(
-            new Error("TextEditor#edit not possible on closed editors"),
+            new Error("TextEditor#edit not possible on closed editors")
           )
         }
         const edit = new TextEditorEdit(document.value, options)
@@ -654,20 +654,18 @@ export class ExtHostTextEditor {
         options: { undoStopBefore: boolean; undoStopAfter: boolean } = {
           undoStopBefore: true,
           undoStopAfter: true,
-        },
+        }
       ): Promise<boolean> {
         if (that._disposed) {
           return Promise.reject(
-            new Error(
-              "TextEditor#insertSnippet not possible on closed editors",
-            ),
+            new Error("TextEditor#insertSnippet not possible on closed editors")
           )
         }
         let ranges: IRange[]
 
         if (!where || (Array.isArray(where) && where.length === 0)) {
           ranges = that._selections.map((range) =>
-            TypeConverters.Range.from(range),
+            TypeConverters.Range.from(range)
           )
         } else if (where instanceof Position) {
           const { lineNumber, column } = TypeConverters.Position.from(where)
@@ -703,12 +701,12 @@ export class ExtHostTextEditor {
           document.value.version,
           snippet.value,
           ranges,
-          options,
+          options
         )
       },
       setDecorations(
         decorationType: vscode.TextEditorDecorationType,
-        ranges: Range[] | vscode.DecorationOptions[],
+        ranges: Range[] | vscode.DecorationOptions[]
       ): void {
         const willBeEmpty = ranges.length === 0
         if (
@@ -728,7 +726,7 @@ export class ExtHostTextEditor {
             return _proxy.$trySetDecorations(
               id,
               decorationType.key,
-              TypeConverters.fromRangeOrRangeWithMessage(ranges),
+              TypeConverters.fromRangeOrRangeWithMessage(ranges)
             )
           } else {
             const _ranges: number[] = new Array<number>(4 * ranges.length)
@@ -742,7 +740,7 @@ export class ExtHostTextEditor {
             return _proxy.$trySetDecorationsFast(
               id,
               decorationType.key,
-              _ranges,
+              _ranges
             )
           }
         })
@@ -752,8 +750,8 @@ export class ExtHostTextEditor {
           _proxy.$tryRevealRange(
             id,
             TypeConverters.Range.from(range),
-            revealType || TextEditorRevealType.Default,
-          ),
+            revealType || TextEditorRevealType.Default
+          )
         )
       },
       show(column: vscode.ViewColumn) {
@@ -802,7 +800,7 @@ export class ExtHostTextEditor {
   > {
     const selection = this._selections.map(TypeConverters.Selection.from)
     await this._runOnProxy(() =>
-      this._proxy.$trySetSelections(this.id, selection),
+      this._proxy.$trySetSelections(this.id, selection)
     )
     return this.value
   }
@@ -863,11 +861,11 @@ export class ExtHostTextEditor {
             : undefined,
         undoStopBefore: editData.undoStopBefore,
         undoStopAfter: editData.undoStopAfter,
-      },
+      }
     )
   }
   private _runOnProxy(
-    callback: () => Promise<any>,
+    callback: () => Promise<any>
   ): Promise<ExtHostTextEditor | undefined | null> {
     if (this._disposed) {
       this._logService.warn("TextEditor is closed/disposed")
@@ -881,7 +879,7 @@ export class ExtHostTextEditor {
           this._logService.warn(err)
         }
         return null
-      },
+      }
     )
   }
 }

@@ -9,29 +9,29 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IAutoClosingPair } from "vs/editor/common/languages/languageConfiguration"
+import { IAutoClosingPair } from 'vs/editor/common/languages/languageConfiguration';
 
 export const latexAutoClosingPairsRules: IAutoClosingPair[] = [
-  { open: "\\left(", close: "\\right)" },
-  { open: "\\left[", close: "\\right]" },
-  { open: "\\left\\{", close: "\\right\\}" },
-  { open: "\\bigl(", close: "\\bigr)" },
-  { open: "\\bigl[", close: "\\bigr]" },
-  { open: "\\bigl\\{", close: "\\bigr\\}" },
-  { open: "\\Bigl(", close: "\\Bigr)" },
-  { open: "\\Bigl[", close: "\\Bigr]" },
-  { open: "\\Bigl\\{", close: "\\Bigr\\}" },
-  { open: "\\biggl(", close: "\\biggr)" },
-  { open: "\\biggl[", close: "\\biggr]" },
-  { open: "\\biggl\\{", close: "\\biggr\\}" },
-  { open: "\\Biggl(", close: "\\Biggr)" },
-  { open: "\\Biggl[", close: "\\Biggr]" },
-  { open: "\\Biggl\\{", close: "\\Biggr\\}" },
-  { open: "\\(", close: "\\)" },
-  { open: "\\[", close: "\\]" },
-  { open: "\\{", close: "\\}" },
-  { open: "{", close: "}" },
-  { open: "[", close: "]" },
-  { open: "(", close: ")" },
-  { open: "`", close: "'" },
-]
+	{ open: '\\left(', close: '\\right)' },
+	{ open: '\\left[', close: '\\right]' },
+	{ open: '\\left\\{', close: '\\right\\}' },
+	{ open: '\\bigl(', close: '\\bigr)' },
+	{ open: '\\bigl[', close: '\\bigr]' },
+	{ open: '\\bigl\\{', close: '\\bigr\\}' },
+	{ open: '\\Bigl(', close: '\\Bigr)' },
+	{ open: '\\Bigl[', close: '\\Bigr]' },
+	{ open: '\\Bigl\\{', close: '\\Bigr\\}' },
+	{ open: '\\biggl(', close: '\\biggr)' },
+	{ open: '\\biggl[', close: '\\biggr]' },
+	{ open: '\\biggl\\{', close: '\\biggr\\}' },
+	{ open: '\\Biggl(', close: '\\Biggr)' },
+	{ open: '\\Biggl[', close: '\\Biggr]' },
+	{ open: '\\Biggl\\{', close: '\\Biggr\\}' },
+	{ open: '\\(', close: '\\)' },
+	{ open: '\\[', close: '\\]' },
+	{ open: '\\{', close: '\\}' },
+	{ open: '{', close: '}' },
+	{ open: '[', close: ']' },
+	{ open: '(', close: ')' },
+	{ open: '`', close: '\'' },
+];

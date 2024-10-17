@@ -9,447 +9,308 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as nls from "vs/nls"
-import { isObject } from "vs/base/common/types"
-import {
-  IJSONSchema,
-  IJSONSchemaMap,
-  IJSONSchemaSnippet,
-} from "vs/base/common/jsonSchema"
-import { IWorkspaceFolder } from "vs/platform/workspace/common/workspace"
-import {
-  IConfig,
-  IDebuggerContribution,
-  IDebugAdapter,
-  IDebugger,
-  IDebugSession,
-  IAdapterManager,
-  IDebugService,
-  debuggerDisabledMessage,
-  IDebuggerMetadata,
-  DebugConfigurationProviderTriggerKind,
-} from "vs/workbench/contrib/debug/common/debug"
-import { IConfigurationService } from "vs/platform/configuration/common/configuration"
-import { IConfigurationResolverService } from "vs/workbench/services/configurationResolver/common/configurationResolver"
-import * as ConfigurationResolverUtils from "vs/workbench/services/configurationResolver/common/configurationResolverUtils"
-import { ITextResourcePropertiesService } from "vs/editor/common/services/textResourceConfiguration"
-import { URI } from "vs/base/common/uri"
-import { Schemas } from "vs/base/common/network"
-import { isDebuggerMainContribution } from "vs/workbench/contrib/debug/common/debugUtils"
-import { IExtensionDescription } from "vs/platform/extensions/common/extensions"
-import { ITelemetryEndpoint } from "vs/platform/telemetry/common/telemetry"
-import { cleanRemoteAuthority } from "vs/platform/telemetry/common/telemetryUtils"
-import { IWorkbenchEnvironmentService } from "vs/workbench/services/environment/common/environmentService"
-import {
-  ContextKeyExpr,
-  ContextKeyExpression,
-  IContextKeyService,
-} from "vs/platform/contextkey/common/contextkey"
-import { filter } from "vs/base/common/objects"
+import * as nls from 'vs/nls';
+import { isObject } from 'vs/base/common/types';
+import { IJSONSchema, IJSONSchemaMap, IJSONSchemaSnippet } from 'vs/base/common/jsonSchema';
+import { IWorkspaceFolder } from 'vs/platform/workspace/common/workspace';
+import { IConfig, IDebuggerContribution, IDebugAdapter, IDebugger, IDebugSession, IAdapterManager, IDebugService, debuggerDisabledMessage, IDebuggerMetadata, DebugConfigurationProviderTriggerKind } from 'vs/workbench/contrib/debug/common/debug';
+import { IConfigurationService } from 'vs/platform/configuration/common/configuration';
+import { IConfigurationResolverService } from 'vs/workbench/services/configurationResolver/common/configurationResolver';
+import * as ConfigurationResolverUtils from 'vs/workbench/services/configurationResolver/common/configurationResolverUtils';
+import { ITextResourcePropertiesService } from 'vs/editor/common/services/textResourceConfiguration';
+import { URI } from 'vs/base/common/uri';
+import { Schemas } from 'vs/base/common/network';
+import { isDebuggerMainContribution } from 'vs/workbench/contrib/debug/common/debugUtils';
+import { IExtensionDescription } from 'vs/platform/extensions/common/extensions';
+import { ITelemetryEndpoint } from 'vs/platform/telemetry/common/telemetry';
+import { cleanRemoteAuthority } from 'vs/platform/telemetry/common/telemetryUtils';
+import { IWorkbenchEnvironmentService } from 'vs/workbench/services/environment/common/environmentService';
+import { ContextKeyExpr, ContextKeyExpression, IContextKeyService } from 'vs/platform/contextkey/common/contextkey';
+import { filter } from 'vs/base/common/objects';
 
 export class Debugger implements IDebugger, IDebuggerMetadata {
-  private debuggerContribution: IDebuggerContribution
-  private mergedExtensionDescriptions: IExtensionDescription[] = []
-  private mainExtensionDescription: IExtensionDescription | undefined
 
-  private debuggerWhen: ContextKeyExpression | undefined
-  private debuggerHiddenWhen: ContextKeyExpression | undefined
+	private debuggerContribution: IDebuggerContribution;
+	private mergedExtensionDescriptions: IExtensionDescription[] = [];
+	private mainExtensionDescription: IExtensionDescription | undefined;
 
-  constructor(
-    private adapterManager: IAdapterManager,
-    dbgContribution: IDebuggerContribution,
-    extensionDescription: IExtensionDescription,
-    @IConfigurationService
-    private readonly configurationService: IConfigurationService,
-    @ITextResourcePropertiesService
-    private readonly resourcePropertiesService: ITextResourcePropertiesService,
-    @IConfigurationResolverService
-    private readonly configurationResolverService: IConfigurationResolverService,
-    @IWorkbenchEnvironmentService
-    private readonly environmentService: IWorkbenchEnvironmentService,
-    @IDebugService private readonly debugService: IDebugService,
-    @IContextKeyService private readonly contextKeyService: IContextKeyService,
-  ) {
-    this.debuggerContribution = { type: dbgContribution.type }
-    this.merge(dbgContribution, extensionDescription)
+	private debuggerWhen: ContextKeyExpression | undefined;
+	private debuggerHiddenWhen: ContextKeyExpression | undefined;
 
-    this.debuggerWhen =
-      typeof this.debuggerContribution.when === "string"
-        ? ContextKeyExpr.deserialize(this.debuggerContribution.when)
-        : undefined
-    this.debuggerHiddenWhen =
-      typeof this.debuggerContribution.hiddenWhen === "string"
-        ? ContextKeyExpr.deserialize(this.debuggerContribution.hiddenWhen)
-        : undefined
-  }
+	constructor(
+		private adapterManager: IAdapterManager,
+		dbgContribution: IDebuggerContribution,
+		extensionDescription: IExtensionDescription,
+		@IConfigurationService private readonly configurationService: IConfigurationService,
+		@ITextResourcePropertiesService private readonly resourcePropertiesService: ITextResourcePropertiesService,
+		@IConfigurationResolverService private readonly configurationResolverService: IConfigurationResolverService,
+		@IWorkbenchEnvironmentService private readonly environmentService: IWorkbenchEnvironmentService,
+		@IDebugService private readonly debugService: IDebugService,
+		@IContextKeyService private readonly contextKeyService: IContextKeyService,
+	) {
+		this.debuggerContribution = { type: dbgContribution.type };
+		this.merge(dbgContribution, extensionDescription);
 
-  merge(
-    otherDebuggerContribution: IDebuggerContribution,
-    extensionDescription: IExtensionDescription,
-  ): void {
-    /**
-     * Copies all properties of source into destination. The optional parameter "overwrite" allows to control
-     * if existing non-structured properties on the destination should be overwritten or not. Defaults to true (overwrite).
-     */
-    function mixin(
-      destination: any,
-      source: any,
-      overwrite: boolean,
-      level = 0,
-    ): any {
-      if (!isObject(destination)) {
-        return source
-      }
+		this.debuggerWhen = typeof this.debuggerContribution.when === 'string' ? ContextKeyExpr.deserialize(this.debuggerContribution.when) : undefined;
+		this.debuggerHiddenWhen = typeof this.debuggerContribution.hiddenWhen === 'string' ? ContextKeyExpr.deserialize(this.debuggerContribution.hiddenWhen) : undefined;
+	}
 
-      if (isObject(source)) {
-        Object.keys(source).forEach((key) => {
-          if (key !== "__proto__") {
-            if (isObject(destination[key]) && isObject(source[key])) {
-              mixin(destination[key], source[key], overwrite, level + 1)
-            } else {
-              if (key in destination) {
-                if (overwrite) {
-                  if (level === 0 && key === "type") {
-                    // don't merge the 'type' property
-                  } else {
-                    destination[key] = source[key]
-                  }
-                }
-              } else {
-                destination[key] = source[key]
-              }
-            }
-          }
-        })
-      }
+	merge(otherDebuggerContribution: IDebuggerContribution, extensionDescription: IExtensionDescription): void {
 
-      return destination
-    }
+		/**
+		 * Copies all properties of source into destination. The optional parameter "overwrite" allows to control
+		 * if existing non-structured properties on the destination should be overwritten or not. Defaults to true (overwrite).
+		 */
+		function mixin(destination: any, source: any, overwrite: boolean, level = 0): any {
 
-    // only if not already merged
-    if (this.mergedExtensionDescriptions.indexOf(extensionDescription) < 0) {
-      // remember all extensions that have been merged for this debugger
-      this.mergedExtensionDescriptions.push(extensionDescription)
+			if (!isObject(destination)) {
+				return source;
+			}
 
-      // merge new debugger contribution into existing contributions (and don't overwrite values in built-in extensions)
-      mixin(
-        this.debuggerContribution,
-        otherDebuggerContribution,
-        extensionDescription.isBuiltin,
-      )
+			if (isObject(source)) {
+				Object.keys(source).forEach(key => {
+					if (key !== '__proto__') {
+						if (isObject(destination[key]) && isObject(source[key])) {
+							mixin(destination[key], source[key], overwrite, level + 1);
+						} else {
+							if (key in destination) {
+								if (overwrite) {
+									if (level === 0 && key === 'type') {
+										// don't merge the 'type' property
+									} else {
+										destination[key] = source[key];
+									}
+								}
+							} else {
+								destination[key] = source[key];
+							}
+						}
+					}
+				});
+			}
 
-      // remember the extension that is considered the "main" debugger contribution
-      if (isDebuggerMainContribution(otherDebuggerContribution)) {
-        this.mainExtensionDescription = extensionDescription
-      }
-    }
-  }
+			return destination;
+		}
 
-  async startDebugging(
-    configuration: IConfig,
-    parentSessionId: string,
-  ): Promise<boolean> {
-    const parentSession = this.debugService
-      .getModel()
-      .getSession(parentSessionId)
-    return await this.debugService.startDebugging(
-      undefined,
-      configuration,
-      { parentSession },
-      undefined,
-    )
-  }
+		// only if not already merged
+		if (this.mergedExtensionDescriptions.indexOf(extensionDescription) < 0) {
 
-  async createDebugAdapter(session: IDebugSession): Promise<IDebugAdapter> {
-    await this.adapterManager.activateDebuggers(
-      "onDebugAdapterProtocolTracker",
-      this.type,
-    )
-    const da = this.adapterManager.createDebugAdapter(session)
-    if (da) {
-      return Promise.resolve(da)
-    }
-    throw new Error(
-      nls.localize(
-        "cannot.find.da",
-        "Cannot find debug adapter for type '{0}'.",
-        this.type,
-      ),
-    )
-  }
+			// remember all extensions that have been merged for this debugger
+			this.mergedExtensionDescriptions.push(extensionDescription);
 
-  async substituteVariables(
-    folder: IWorkspaceFolder | undefined,
-    config: IConfig,
-  ): Promise<IConfig> {
-    const substitutedConfig = await this.adapterManager.substituteVariables(
-      this.type,
-      folder,
-      config,
-    )
-    return await this.configurationResolverService.resolveWithInteractionReplace(
-      folder,
-      substitutedConfig,
-      "launch",
-      this.variables,
-      substitutedConfig.__configurationTarget,
-    )
-  }
+			// merge new debugger contribution into existing contributions (and don't overwrite values in built-in extensions)
+			mixin(this.debuggerContribution, otherDebuggerContribution, extensionDescription.isBuiltin);
 
-  runInTerminal(
-    args: DebugProtocol.RunInTerminalRequestArguments,
-    sessionId: string,
-  ): Promise<number | undefined> {
-    return this.adapterManager.runInTerminal(this.type, args, sessionId)
-  }
+			// remember the extension that is considered the "main" debugger contribution
+			if (isDebuggerMainContribution(otherDebuggerContribution)) {
+				this.mainExtensionDescription = extensionDescription;
+			}
+		}
+	}
 
-  get label(): string {
-    return this.debuggerContribution.label || this.debuggerContribution.type
-  }
+	async startDebugging(configuration: IConfig, parentSessionId: string): Promise<boolean> {
+		const parentSession = this.debugService.getModel().getSession(parentSessionId);
+		return await this.debugService.startDebugging(undefined, configuration, { parentSession }, undefined);
+	}
 
-  get type(): string {
-    return this.debuggerContribution.type
-  }
+	async createDebugAdapter(session: IDebugSession): Promise<IDebugAdapter> {
+		await this.adapterManager.activateDebuggers('onDebugAdapterProtocolTracker', this.type);
+		const da = this.adapterManager.createDebugAdapter(session);
+		if (da) {
+			return Promise.resolve(da);
+		}
+		throw new Error(nls.localize('cannot.find.da', "Cannot find debug adapter for type '{0}'.", this.type));
+	}
 
-  get variables(): { [key: string]: string } | undefined {
-    return this.debuggerContribution.variables
-  }
+	async substituteVariables(folder: IWorkspaceFolder | undefined, config: IConfig): Promise<IConfig> {
+		const substitutedConfig = await this.adapterManager.substituteVariables(this.type, folder, config);
+		return await this.configurationResolverService.resolveWithInteractionReplace(folder, substitutedConfig, 'launch', this.variables, substitutedConfig.__configurationTarget);
+	}
 
-  get configurationSnippets(): IJSONSchemaSnippet[] | undefined {
-    return this.debuggerContribution.configurationSnippets
-  }
+	runInTerminal(args: DebugProtocol.RunInTerminalRequestArguments, sessionId: string): Promise<number | undefined> {
+		return this.adapterManager.runInTerminal(this.type, args, sessionId);
+	}
 
-  get languages(): string[] | undefined {
-    return this.debuggerContribution.languages
-  }
+	get label(): string {
+		return this.debuggerContribution.label || this.debuggerContribution.type;
+	}
 
-  get when(): ContextKeyExpression | undefined {
-    return this.debuggerWhen
-  }
+	get type(): string {
+		return this.debuggerContribution.type;
+	}
 
-  get hiddenWhen(): ContextKeyExpression | undefined {
-    return this.debuggerHiddenWhen
-  }
+	get variables(): { [key: string]: string } | undefined {
+		return this.debuggerContribution.variables;
+	}
 
-  get enabled() {
-    return (
-      !this.debuggerWhen ||
-      this.contextKeyService.contextMatchesRules(this.debuggerWhen)
-    )
-  }
+	get configurationSnippets(): IJSONSchemaSnippet[] | undefined {
+		return this.debuggerContribution.configurationSnippets;
+	}
 
-  get isHiddenFromDropdown() {
-    if (!this.debuggerHiddenWhen) {
-      return false
-    }
-    return this.contextKeyService.contextMatchesRules(this.debuggerHiddenWhen)
-  }
+	get languages(): string[] | undefined {
+		return this.debuggerContribution.languages;
+	}
 
-  get strings() {
-    return (
-      this.debuggerContribution.strings ??
-      (this.debuggerContribution as any).uiMessages
-    )
-  }
+	get when(): ContextKeyExpression | undefined {
+		return this.debuggerWhen;
+	}
 
-  interestedInLanguage(languageId: string): boolean {
-    return !!(this.languages && this.languages.indexOf(languageId) >= 0)
-  }
+	get hiddenWhen(): ContextKeyExpression | undefined {
+		return this.debuggerHiddenWhen;
+	}
 
-  hasInitialConfiguration(): boolean {
-    return !!this.debuggerContribution.initialConfigurations
-  }
+	get enabled() {
+		return !this.debuggerWhen || this.contextKeyService.contextMatchesRules(this.debuggerWhen);
+	}
 
-  hasDynamicConfigurationProviders(): boolean {
-    return this.debugService
-      .getConfigurationManager()
-      .hasDebugConfigurationProvider(
-        this.type,
-        DebugConfigurationProviderTriggerKind.Dynamic,
-      )
-  }
+	get isHiddenFromDropdown() {
+		if (!this.debuggerHiddenWhen) {
+			return false;
+		}
+		return this.contextKeyService.contextMatchesRules(this.debuggerHiddenWhen);
+	}
 
-  hasConfigurationProvider(): boolean {
-    return this.debugService
-      .getConfigurationManager()
-      .hasDebugConfigurationProvider(this.type)
-  }
+	get strings() {
+		return this.debuggerContribution.strings ?? (this.debuggerContribution as any).uiMessages;
+	}
 
-  getInitialConfigurationContent(initialConfigs?: IConfig[]): Promise<string> {
-    // at this point we got some configs from the package.json and/or from registered DebugConfigurationProviders
-    let initialConfigurations =
-      this.debuggerContribution.initialConfigurations || []
-    if (initialConfigs) {
-      initialConfigurations = initialConfigurations.concat(initialConfigs)
-    }
+	interestedInLanguage(languageId: string): boolean {
+		return !!(this.languages && this.languages.indexOf(languageId) >= 0);
+	}
 
-    const eol =
-      this.resourcePropertiesService.getEOL(
-        URI.from({ scheme: Schemas.untitled, path: "1" }),
-      ) === "\r\n"
-        ? "\r\n"
-        : "\n"
-    const configs = JSON.stringify(initialConfigurations, null, "\t")
-      .split("\n")
-      .map((line) => "\t" + line)
-      .join(eol)
-      .trim()
-    const comment1 = nls.localize(
-      "launch.config.comment1",
-      "Use IntelliSense to learn about possible attributes.",
-    )
-    const comment2 = nls.localize(
-      "launch.config.comment2",
-      "Hover to view descriptions of existing attributes.",
-    )
-    const comment3 = nls.localize(
-      "launch.config.comment3",
-      "For more information, visit: {0}",
-      "https://go.microsoft.com/fwlink/?linkid=830387",
-    )
+	hasInitialConfiguration(): boolean {
+		return !!this.debuggerContribution.initialConfigurations;
+	}
 
-    let content = [
-      "{",
-      `\t// ${comment1}`,
-      `\t// ${comment2}`,
-      `\t// ${comment3}`,
-      `\t"version": "0.2.0",`,
-      `\t"configurations": ${configs}`,
-      "}",
-    ].join(eol)
+	hasDynamicConfigurationProviders(): boolean {
+		return this.debugService.getConfigurationManager().hasDebugConfigurationProvider(this.type, DebugConfigurationProviderTriggerKind.Dynamic);
+	}
 
-    // fix formatting
-    const editorConfig = this.configurationService.getValue<any>()
-    if (editorConfig.editor && editorConfig.editor.insertSpaces) {
-      content = content.replace(
-        new RegExp("\t", "g"),
-        " ".repeat(editorConfig.editor.tabSize),
-      )
-    }
+	hasConfigurationProvider(): boolean {
+		return this.debugService.getConfigurationManager().hasDebugConfigurationProvider(this.type);
+	}
 
-    return Promise.resolve(content)
-  }
+	getInitialConfigurationContent(initialConfigs?: IConfig[]): Promise<string> {
+		// at this point we got some configs from the package.json and/or from registered DebugConfigurationProviders
+		let initialConfigurations = this.debuggerContribution.initialConfigurations || [];
+		if (initialConfigs) {
+			initialConfigurations = initialConfigurations.concat(initialConfigs);
+		}
 
-  getMainExtensionDescriptor(): IExtensionDescription {
-    return this.mainExtensionDescription || this.mergedExtensionDescriptions[0]
-  }
+		const eol = this.resourcePropertiesService.getEOL(URI.from({ scheme: Schemas.untitled, path: '1' })) === '\r\n' ? '\r\n' : '\n';
+		const configs = JSON.stringify(initialConfigurations, null, '\t').split('\n').map(line => '\t' + line).join(eol).trim();
+		const comment1 = nls.localize('launch.config.comment1', "Use IntelliSense to learn about possible attributes.");
+		const comment2 = nls.localize('launch.config.comment2', "Hover to view descriptions of existing attributes.");
+		const comment3 = nls.localize('launch.config.comment3', "For more information, visit: {0}", 'https://go.microsoft.com/fwlink/?linkid=830387');
 
-  getCustomTelemetryEndpoint(): ITelemetryEndpoint | undefined {
-    const aiKey = this.debuggerContribution.aiKey
-    if (!aiKey) {
-      return undefined
-    }
+		let content = [
+			'{',
+			`\t// ${comment1}`,
+			`\t// ${comment2}`,
+			`\t// ${comment3}`,
+			`\t"version": "0.2.0",`,
+			`\t"configurations": ${configs}`,
+			'}'
+		].join(eol);
 
-    const sendErrorTelemtry =
-      cleanRemoteAuthority(this.environmentService.remoteAuthority) !== "other"
-    return {
-      id: `${this.getMainExtensionDescriptor().publisher}.${this.type}`,
-      aiKey,
-      sendErrorTelemetry: sendErrorTelemtry,
-    }
-  }
+		// fix formatting
+		const editorConfig = this.configurationService.getValue<any>();
+		if (editorConfig.editor && editorConfig.editor.insertSpaces) {
+			content = content.replace(new RegExp('\t', 'g'), ' '.repeat(editorConfig.editor.tabSize));
+		}
 
-  getSchemaAttributes(definitions: IJSONSchemaMap): IJSONSchema[] | null {
-    if (!this.debuggerContribution.configurationAttributes) {
-      return null
-    }
+		return Promise.resolve(content);
+	}
 
-    // fill in the default configuration attributes shared by all adapters.
-    return Object.keys(this.debuggerContribution.configurationAttributes).map(
-      (request) => {
-        const definitionId = `${this.type}:${request}`
-        const platformSpecificDefinitionId = `${this.type}:${request}:platform`
-        const attributes: IJSONSchema =
-          this.debuggerContribution.configurationAttributes[request]
-        const defaultRequired = ["name", "type", "request"]
-        attributes.required =
-          attributes.required && attributes.required.length
-            ? defaultRequired.concat(attributes.required)
-            : defaultRequired
-        attributes.additionalProperties = false
-        attributes.type = "object"
-        if (!attributes.properties) {
-          attributes.properties = {}
-        }
-        const properties = attributes.properties
-        properties["type"] = {
-          enum: [this.type],
-          enumDescriptions: [this.label],
-          description: nls.localize("debugType", "Type of configuration."),
-          pattern: "^(?!node2)",
-          deprecationMessage:
-            this.debuggerContribution.deprecated ||
-            (this.enabled ? undefined : debuggerDisabledMessage(this.type)),
-          doNotSuggest: !!this.debuggerContribution.deprecated,
-          errorMessage: nls.localize(
-            "debugTypeNotRecognised",
-            "The debug type is not recognized. Make sure that you have a corresponding debug extension installed and that it is enabled.",
-          ),
-          patternErrorMessage: nls.localize(
-            "node2NotSupported",
-            '"node2" is no longer supported, use "node" instead and set the "protocol" attribute to "inspector".',
-          ),
-        }
-        properties["request"] = {
-          enum: [request],
-          description: nls.localize(
-            "debugRequest",
-            'Request type of configuration. Can be "launch" or "attach".',
-          ),
-        }
-        for (const prop in definitions["common"].properties) {
-          properties[prop] = {
-            $ref: `#/definitions/common/properties/${prop}`,
-          }
-        }
-        Object.keys(properties).forEach((name) => {
-          // Use schema allOf property to get independent error reporting #21113
-          ConfigurationResolverUtils.applyDeprecatedVariableMessage(
-            properties[name],
-          )
-        })
+	getMainExtensionDescriptor(): IExtensionDescription {
+		return this.mainExtensionDescription || this.mergedExtensionDescriptions[0];
+	}
 
-        definitions[definitionId] = { ...attributes }
-        definitions[platformSpecificDefinitionId] = {
-          type: "object",
-          additionalProperties: false,
-          properties: filter(
-            properties,
-            (key) => key !== "type" && key !== "request" && key !== "name",
-          ),
-        }
+	getCustomTelemetryEndpoint(): ITelemetryEndpoint | undefined {
+		const aiKey = this.debuggerContribution.aiKey;
+		if (!aiKey) {
+			return undefined;
+		}
 
-        // Don't add the OS props to the real attributes object so they don't show up in 'definitions'
-        const attributesCopy = { ...attributes }
-        attributesCopy.properties = {
-          ...properties,
-          ...{
-            windows: {
-              $ref: `#/definitions/${platformSpecificDefinitionId}`,
-              description: nls.localize(
-                "debugWindowsConfiguration",
-                "Windows specific launch configuration attributes.",
-              ),
-            },
-            osx: {
-              $ref: `#/definitions/${platformSpecificDefinitionId}`,
-              description: nls.localize(
-                "debugOSXConfiguration",
-                "OS X specific launch configuration attributes.",
-              ),
-            },
-            linux: {
-              $ref: `#/definitions/${platformSpecificDefinitionId}`,
-              description: nls.localize(
-                "debugLinuxConfiguration",
-                "Linux specific launch configuration attributes.",
-              ),
-            },
-          },
-        }
+		const sendErrorTelemtry = cleanRemoteAuthority(this.environmentService.remoteAuthority) !== 'other';
+		return {
+			id: `${this.getMainExtensionDescriptor().publisher}.${this.type}`,
+			aiKey,
+			sendErrorTelemetry: sendErrorTelemtry
+		};
+	}
 
-        return attributesCopy
-      },
-    )
-  }
+	getSchemaAttributes(definitions: IJSONSchemaMap): IJSONSchema[] | null {
+
+		if (!this.debuggerContribution.configurationAttributes) {
+			return null;
+		}
+
+		// fill in the default configuration attributes shared by all adapters.
+		return Object.keys(this.debuggerContribution.configurationAttributes).map(request => {
+			const definitionId = `${this.type}:${request}`;
+			const platformSpecificDefinitionId = `${this.type}:${request}:platform`;
+			const attributes: IJSONSchema = this.debuggerContribution.configurationAttributes[request];
+			const defaultRequired = ['name', 'type', 'request'];
+			attributes.required = attributes.required && attributes.required.length ? defaultRequired.concat(attributes.required) : defaultRequired;
+			attributes.additionalProperties = false;
+			attributes.type = 'object';
+			if (!attributes.properties) {
+				attributes.properties = {};
+			}
+			const properties = attributes.properties;
+			properties['type'] = {
+				enum: [this.type],
+				enumDescriptions: [this.label],
+				description: nls.localize('debugType', "Type of configuration."),
+				pattern: '^(?!node2)',
+				deprecationMessage: this.debuggerContribution.deprecated || (this.enabled ? undefined : debuggerDisabledMessage(this.type)),
+				doNotSuggest: !!this.debuggerContribution.deprecated,
+				errorMessage: nls.localize('debugTypeNotRecognised', "The debug type is not recognized. Make sure that you have a corresponding debug extension installed and that it is enabled."),
+				patternErrorMessage: nls.localize('node2NotSupported', "\"node2\" is no longer supported, use \"node\" instead and set the \"protocol\" attribute to \"inspector\".")
+			};
+			properties['request'] = {
+				enum: [request],
+				description: nls.localize('debugRequest', "Request type of configuration. Can be \"launch\" or \"attach\"."),
+			};
+			for (const prop in definitions['common'].properties) {
+				properties[prop] = {
+					$ref: `#/definitions/common/properties/${prop}`
+				};
+			}
+			Object.keys(properties).forEach(name => {
+				// Use schema allOf property to get independent error reporting #21113
+				ConfigurationResolverUtils.applyDeprecatedVariableMessage(properties[name]);
+			});
+
+			definitions[definitionId] = { ...attributes };
+			definitions[platformSpecificDefinitionId] = {
+				type: 'object',
+				additionalProperties: false,
+				properties: filter(properties, key => key !== 'type' && key !== 'request' && key !== 'name')
+			};
+
+			// Don't add the OS props to the real attributes object so they don't show up in 'definitions'
+			const attributesCopy = { ...attributes };
+			attributesCopy.properties = {
+				...properties,
+				...{
+					windows: {
+						$ref: `#/definitions/${platformSpecificDefinitionId}`,
+						description: nls.localize('debugWindowsConfiguration', "Windows specific launch configuration attributes."),
+					},
+					osx: {
+						$ref: `#/definitions/${platformSpecificDefinitionId}`,
+						description: nls.localize('debugOSXConfiguration', "OS X specific launch configuration attributes."),
+					},
+					linux: {
+						$ref: `#/definitions/${platformSpecificDefinitionId}`,
+						description: nls.localize('debugLinuxConfiguration', "Linux specific launch configuration attributes."),
+					}
+				}
+			};
+
+			return attributesCopy;
+		});
+	}
 }

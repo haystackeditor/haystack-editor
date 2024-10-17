@@ -9,66 +9,49 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { localize, localize2 } from "vs/nls"
-import {
-  Action2,
-  MenuId,
-  registerAction2,
-} from "vs/platform/actions/common/actions"
-import { IConfigurationService } from "vs/platform/configuration/common/configuration"
-import { ContextKeyExpr } from "vs/platform/contextkey/common/contextkey"
-import { Categories } from "vs/platform/action/common/actionCommonCategories"
-import { ServicesAccessor } from "vs/platform/instantiation/common/instantiation"
+import { localize, localize2 } from 'vs/nls';
+import { Action2, MenuId, registerAction2 } from 'vs/platform/actions/common/actions';
+import { IConfigurationService } from 'vs/platform/configuration/common/configuration';
+import { ContextKeyExpr } from 'vs/platform/contextkey/common/contextkey';
+import { Categories } from 'vs/platform/action/common/actionCommonCategories';
+import { ServicesAccessor } from 'vs/platform/instantiation/common/instantiation';
 
 class ToggleRenderWhitespaceAction extends Action2 {
-  static readonly ID = "editor.action.toggleRenderWhitespace"
 
-  constructor() {
-    super({
-      id: ToggleRenderWhitespaceAction.ID,
-      title: {
-        ...localize2("toggleRenderWhitespace", "Toggle Render Whitespace"),
-        mnemonicTitle: localize(
-          {
-            key: "miToggleRenderWhitespace",
-            comment: ["&& denotes a mnemonic"],
-          },
-          "&&Render Whitespace",
-        ),
-      },
-      category: Categories.View,
-      f1: true,
-      toggled: ContextKeyExpr.notEquals(
-        "config.editor.renderWhitespace",
-        "none",
-      ),
-      menu: {
-        id: MenuId.MenubarAppearanceMenu,
-        group: "4_editor",
-        order: 4,
-      },
-    })
-  }
+	static readonly ID = 'editor.action.toggleRenderWhitespace';
 
-  override run(accessor: ServicesAccessor): Promise<void> {
-    const configurationService = accessor.get(IConfigurationService)
+	constructor() {
+		super({
+			id: ToggleRenderWhitespaceAction.ID,
+			title: {
+				...localize2('toggleRenderWhitespace', "Toggle Render Whitespace"),
+				mnemonicTitle: localize({ key: 'miToggleRenderWhitespace', comment: ['&& denotes a mnemonic'] }, "&&Render Whitespace"),
+			},
+			category: Categories.View,
+			f1: true,
+			toggled: ContextKeyExpr.notEquals('config.editor.renderWhitespace', 'none'),
+			menu: {
+				id: MenuId.MenubarAppearanceMenu,
+				group: '4_editor',
+				order: 4
+			}
+		});
+	}
 
-    const renderWhitespace = configurationService.getValue<string>(
-      "editor.renderWhitespace",
-    )
+	override run(accessor: ServicesAccessor): Promise<void> {
+		const configurationService = accessor.get(IConfigurationService);
 
-    let newRenderWhitespace: string
-    if (renderWhitespace === "none") {
-      newRenderWhitespace = "all"
-    } else {
-      newRenderWhitespace = "none"
-    }
+		const renderWhitespace = configurationService.getValue<string>('editor.renderWhitespace');
 
-    return configurationService.updateValue(
-      "editor.renderWhitespace",
-      newRenderWhitespace,
-    )
-  }
+		let newRenderWhitespace: string;
+		if (renderWhitespace === 'none') {
+			newRenderWhitespace = 'all';
+		} else {
+			newRenderWhitespace = 'none';
+		}
+
+		return configurationService.updateValue('editor.renderWhitespace', newRenderWhitespace);
+	}
 }
 
-registerAction2(ToggleRenderWhitespaceAction)
+registerAction2(ToggleRenderWhitespaceAction);

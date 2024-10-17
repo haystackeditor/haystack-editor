@@ -151,7 +151,7 @@ export class OpenEditorsView extends ViewPane {
   static readonly ID = "workbench.explorer.openEditorsView"
   static readonly NAME: ILocalizedString = nls.localize2(
     { key: "openEditors", comment: ["Open is an adjective"] },
-    "Open Editors",
+    "Open Editors"
   )
 
   private dirtyCountElement!: HTMLElement
@@ -186,7 +186,7 @@ export class OpenEditorsView extends ViewPane {
     private readonly workingCopyService: IWorkingCopyService,
     @IFilesConfigurationService
     private readonly filesConfigurationService: IFilesConfigurationService,
-    @IOpenerService openerService: IOpenerService,
+    @IOpenerService openerService: IOpenerService
   ) {
     super(
       options,
@@ -199,12 +199,12 @@ export class OpenEditorsView extends ViewPane {
       openerService,
       themeService,
       telemetryService,
-      hoverService,
+      hoverService
     )
 
     this.structuralRefreshDelay = 0
     this.sortOrder = configurationService.getValue(
-      "explorer.openEditors.sortOrder",
+      "explorer.openEditors.sortOrder"
     )
 
     this.registerUpdateEvents()
@@ -212,15 +212,15 @@ export class OpenEditorsView extends ViewPane {
     // Also handle configuration updates
     this._register(
       this.configurationService.onDidChangeConfiguration((e) =>
-        this.onConfigurationChange(e),
-      ),
+        this.onConfigurationChange(e)
+      )
     )
 
     // Handle dirty counter
     this._register(
       this.workingCopyService.onDidChangeDirty((workingCopy) =>
-        this.updateDirtyIndicator(workingCopy),
-      ),
+        this.updateDirtyIndicator(workingCopy)
+      )
     )
   }
 
@@ -279,21 +279,21 @@ export class OpenEditorsView extends ViewPane {
       this.editorGroupService.onDidAddGroup((group) => {
         addGroupListener(group)
         updateWholeList()
-      }),
+      })
     )
     this._register(
-      this.editorGroupService.onDidMoveGroup(() => updateWholeList()),
+      this.editorGroupService.onDidMoveGroup(() => updateWholeList())
     )
     this._register(
       this.editorGroupService.onDidChangeActiveGroup(() =>
-        this.focusActiveEditor(),
-      ),
+        this.focusActiveEditor()
+      )
     )
     this._register(
       this.editorGroupService.onDidRemoveGroup((group) => {
         groupDisposables.deleteAndDispose(group.id)
         updateWholeList()
-      }),
+      })
     )
   }
 
@@ -302,18 +302,18 @@ export class OpenEditorsView extends ViewPane {
 
     const count = dom.append(
       container,
-      $(".open-editors-dirty-count-container"),
+      $(".open-editors-dirty-count-container")
     )
     this.dirtyCountElement = dom.append(
       count,
-      $(".dirty-count.monaco-count-badge.long"),
+      $(".dirty-count.monaco-count-badge.long")
     )
 
     this.dirtyCountElement.style.backgroundColor =
       asCssVariable(badgeBackground)
     this.dirtyCountElement.style.color = asCssVariable(badgeForeground)
     this.dirtyCountElement.style.border = `1px solid ${asCssVariable(
-      contrastBorder,
+      contrastBorder
     )}`
 
     this.updateDirtyIndicator()
@@ -337,7 +337,7 @@ export class OpenEditorsView extends ViewPane {
     this.dnd = new OpenEditorsDragAndDrop(
       this.sortOrder,
       this.instantiationService,
-      this.editorGroupService,
+      this.editorGroupService
     )
 
     this.listLabels = this.instantiationService.createInstance(ResourceLabels, {
@@ -351,13 +351,13 @@ export class OpenEditorsView extends ViewPane {
       [
         new EditorGroupRenderer(
           this.keybindingService,
-          this.instantiationService,
+          this.instantiationService
         ),
         new OpenEditorRenderer(
           this.listLabels,
           this.instantiationService,
           this.keybindingService,
-          this.configurationService,
+          this.configurationService
         ),
       ],
       {
@@ -370,7 +370,7 @@ export class OpenEditorsView extends ViewPane {
         dnd: this.dnd,
         overrideStyles: this.getLocationBasedColors().listOverrideStyles,
         accessibilityProvider: new OpenEditorsAccessibilityProvider(),
-      },
+      }
     ) as WorkbenchList<OpenEditor | IEditorGroup>
     this._register(this.list)
     this._register(this.listLabels)
@@ -402,13 +402,13 @@ export class OpenEditorsView extends ViewPane {
             if (e instanceof OpenEditor) {
               labelChangeListeners.push(
                 e.editor.onDidChangeLabel(() =>
-                  this.listRefreshScheduler?.schedule(),
-                ),
+                  this.listRefreshScheduler?.schedule()
+                )
               )
             }
           })
         }
-      }, this.structuralRefreshDelay),
+      }, this.structuralRefreshDelay)
     )
 
     this.updateSize()
@@ -421,13 +421,13 @@ export class OpenEditorsView extends ViewPane {
       this.instantiationService.createInstance(ResourceContextKey)
     this._register(this.resourceContext)
     this.groupFocusedContext = OpenEditorsGroupContext.bindTo(
-      this.contextKeyService,
+      this.contextKeyService
     )
     this.dirtyEditorFocusedContext = OpenEditorsDirtyEditorContext.bindTo(
-      this.contextKeyService,
+      this.contextKeyService
     )
     this.readonlyEditorFocusedContext = OpenEditorsReadonlyEditorContext.bindTo(
-      this.contextKeyService,
+      this.contextKeyService
     )
 
     this._register(this.list.onContextMenu((e) => this.onListContextMenu(e)))
@@ -440,7 +440,7 @@ export class OpenEditorsView extends ViewPane {
       if (element instanceof OpenEditor) {
         const resource = element.getResource()
         this.dirtyEditorFocusedContext.set(
-          element.editor.isDirty() && !element.editor.isSaving(),
+          element.editor.isDirty() && !element.editor.isSaving()
         )
         this.readonlyEditorFocusedContext.set(!!element.editor.isReadonly())
         this.resourceContext.set(resource ?? null)
@@ -458,7 +458,7 @@ export class OpenEditorsView extends ViewPane {
               e.element.group,
               e.element.editor,
               EditorCloseMethod.MOUSE,
-              this.editorGroupService.partOptions,
+              this.editorGroupService.partOptions
             )
           ) {
             return
@@ -466,7 +466,7 @@ export class OpenEditorsView extends ViewPane {
 
           e.element.group.closeEditor(e.element.editor, { preserveFocus: true })
         }
-      }),
+      })
     )
     this._register(
       this.list.onDidOpen((e) => {
@@ -493,7 +493,7 @@ export class OpenEditorsView extends ViewPane {
             }
           })
         }
-      }),
+      })
     )
 
     this.listRefreshScheduler.schedule(0)
@@ -503,16 +503,16 @@ export class OpenEditorsView extends ViewPane {
         if (visible && this.needsRefresh) {
           this.listRefreshScheduler?.schedule(0)
         }
-      }),
+      })
     )
 
     const containerModel = this.viewDescriptorService.getViewContainerModel(
-      this.viewDescriptorService.getViewContainerByViewId(this.id)!,
+      this.viewDescriptorService.getViewContainerByViewId(this.id)!
     )!
     this._register(
       containerModel.onDidChangeAllViewDescriptors(() => {
         this.updateSize()
-      }),
+      })
     )
   }
 
@@ -544,8 +544,8 @@ export class OpenEditorsView extends ViewPane {
           editors = editors.sort((first, second) =>
             compareFileNamesDefault(
               first.editor.getName(),
-              second.editor.getName(),
-            ),
+              second.editor.getName()
+            )
           )
         } else if (this.sortOrder === "fullPath") {
           editors = editors.sort((first, second) => {
@@ -555,7 +555,7 @@ export class OpenEditorsView extends ViewPane {
             if (firstResource === undefined && secondResource === undefined) {
               return compareFileNamesDefault(
                 first.editor.getName(),
-                second.editor.getName(),
+                second.editor.getName()
               )
             } else if (firstResource === undefined) {
               return -1
@@ -571,7 +571,7 @@ export class OpenEditorsView extends ViewPane {
               ) {
                 return extUriIgnorePathCase.compare(
                   firstResource,
-                  secondResource,
+                  secondResource
                 )
               } else if (firstScheme !== Schemas.file) {
                 return -1
@@ -580,7 +580,7 @@ export class OpenEditorsView extends ViewPane {
               } else {
                 return extUriIgnorePathCase.compare(
                   firstResource,
-                  secondResource,
+                  secondResource
                 )
               }
             }
@@ -594,11 +594,11 @@ export class OpenEditorsView extends ViewPane {
 
   private getIndex(
     group: IEditorGroup,
-    editor: EditorInput | undefined | null,
+    editor: EditorInput | undefined | null
   ): number {
     if (!editor) {
       return this.elements.findIndex(
-        (e) => !(e instanceof OpenEditor) && e.id === group.id,
+        (e) => !(e instanceof OpenEditor) && e.id === group.id
       )
     }
 
@@ -606,17 +606,13 @@ export class OpenEditorsView extends ViewPane {
       (e) =>
         e instanceof OpenEditor &&
         e.editor === editor &&
-        e.group.id === group.id,
+        e.group.id === group.id
     )
   }
 
   private openEditor(
     element: OpenEditor,
-    options: {
-      preserveFocus?: boolean
-      pinned?: boolean
-      sideBySide?: boolean
-    },
+    options: { preserveFocus?: boolean; pinned?: boolean; sideBySide?: boolean }
   ): void {
     if (element) {
       this.telemetryService.publicLog2<
@@ -639,7 +635,7 @@ export class OpenEditorsView extends ViewPane {
   }
 
   private onListContextMenu(
-    e: IListContextMenuEvent<OpenEditor | IEditorGroup>,
+    e: IListContextMenuEvent<OpenEditor | IEditorGroup>
   ): void {
     if (!e.element) {
       return
@@ -685,7 +681,7 @@ export class OpenEditorsView extends ViewPane {
     if (this.list.length && this.editorGroupService.activeGroup) {
       const index = this.getIndex(
         this.editorGroupService.activeGroup,
-        this.editorGroupService.activeGroup.activeEditor,
+        this.editorGroupService.activeGroup.activeEditor
       )
       if (index >= 0) {
         try {
@@ -713,7 +709,7 @@ export class OpenEditorsView extends ViewPane {
       event.affectsConfiguration("explorer.openEditors.sortOrder")
     ) {
       this.sortOrder = this.configurationService.getValue(
-        "explorer.openEditors.sortOrder",
+        "explorer.openEditors.sortOrder"
       )
       if (this.dnd) {
         this.dnd.sortOrder = this.sortOrder
@@ -741,7 +737,7 @@ export class OpenEditorsView extends ViewPane {
         gotDirty &&
         !(workingCopy.capabilities & WorkingCopyCapabilities.Untitled) &&
         this.filesConfigurationService.hasShortAutoSaveDelay(
-          workingCopy.resource,
+          workingCopy.resource
         )
       ) {
         return // do not indicate dirty of working copies that are auto saved after short delay
@@ -755,7 +751,7 @@ export class OpenEditorsView extends ViewPane {
       this.dirtyCountElement.textContent = nls.localize(
         "dirtyCounter",
         "{0} unsaved",
-        dirty,
+        dirty
       )
       this.dirtyCountElement.classList.remove("hidden")
     }
@@ -766,20 +762,20 @@ export class OpenEditorsView extends ViewPane {
       .map((g) => g.count)
       .reduce(
         (first, second) => first + second,
-        this.showGroups ? this.editorGroupService.groups.length : 0,
+        this.showGroups ? this.editorGroupService.groups.length : 0
       )
   }
 
   private getMaxExpandedBodySize(): number {
     let minVisibleOpenEditors = this.configurationService.getValue<number>(
-      "explorer.openEditors.minVisible",
+      "explorer.openEditors.minVisible"
     )
     // If it's not a number setting it to 0 will result in dynamic resizing.
     if (typeof minVisibleOpenEditors !== "number") {
       minVisibleOpenEditors = OpenEditorsView.DEFAULT_MIN_VISIBLE_OPEN_EDITORS
     }
     const containerModel = this.viewDescriptorService.getViewContainerModel(
-      this.viewDescriptorService.getViewContainerByViewId(this.id)!,
+      this.viewDescriptorService.getViewContainerByViewId(this.id)!
     )!
     if (containerModel.visibleViewDescriptors.length <= 1) {
       return Number.POSITIVE_INFINITY
@@ -793,7 +789,7 @@ export class OpenEditorsView extends ViewPane {
 
   private getMinExpandedBodySize(): number {
     let visibleOpenEditors = this.configurationService.getValue<number>(
-      "explorer.openEditors.visible",
+      "explorer.openEditors.visible"
     )
     if (typeof visibleOpenEditors !== "number") {
       visibleOpenEditors = OpenEditorsView.DEFAULT_VISIBLE_OPEN_EDITORS
@@ -803,11 +799,11 @@ export class OpenEditorsView extends ViewPane {
   }
 
   private computeMinExpandedBodySize(
-    visibleOpenEditors = OpenEditorsView.DEFAULT_VISIBLE_OPEN_EDITORS,
+    visibleOpenEditors = OpenEditorsView.DEFAULT_VISIBLE_OPEN_EDITORS
   ): number {
     const itemsToShow = Math.min(
       Math.max(visibleOpenEditors, 1),
-      this.elementCount,
+      this.elementCount
     )
     return itemsToShow * OpenEditorsDelegate.ITEM_HEIGHT
   }
@@ -823,7 +819,7 @@ export class OpenEditorsView extends ViewPane {
 
     const parentNode = this.list.getHTMLElement()
     const childNodes: HTMLElement[] = [].slice.call(
-      parentNode.querySelectorAll(".open-editor > a"),
+      parentNode.querySelectorAll(".open-editor > a")
     )
 
     return dom.getLargestChildWidth(parentNode, childNodes)
@@ -884,7 +880,7 @@ class EditorGroupRenderer
 
   constructor(
     private keybindingService: IKeybindingService,
-    private instantiationService: IInstantiationService,
+    private instantiationService: IInstantiationService
   ) {
     // noop
   }
@@ -898,17 +894,17 @@ class EditorGroupRenderer
     editorGroupTemplate.root = dom.append(container, $(".editor-group"))
     editorGroupTemplate.name = dom.append(
       editorGroupTemplate.root,
-      $("span.name"),
+      $("span.name")
     )
     editorGroupTemplate.actionBar = new ActionBar(container)
 
     const saveAllInGroupAction = this.instantiationService.createInstance(
       SaveAllInGroupAction,
       SaveAllInGroupAction.ID,
-      SaveAllInGroupAction.LABEL,
+      SaveAllInGroupAction.LABEL
     )
     const saveAllInGroupKey = this.keybindingService.lookupKeybinding(
-      saveAllInGroupAction.id,
+      saveAllInGroupAction.id
     )
     editorGroupTemplate.actionBar.push(saveAllInGroupAction, {
       icon: true,
@@ -919,10 +915,10 @@ class EditorGroupRenderer
     const closeGroupAction = this.instantiationService.createInstance(
       CloseGroupAction,
       CloseGroupAction.ID,
-      CloseGroupAction.LABEL,
+      CloseGroupAction.LABEL
     )
     const closeGroupActionKey = this.keybindingService.lookupKeybinding(
-      closeGroupAction.id,
+      closeGroupAction.id
     )
     editorGroupTemplate.actionBar.push(closeGroupAction, {
       icon: true,
@@ -938,7 +934,7 @@ class EditorGroupRenderer
   renderElement(
     editorGroup: IEditorGroup,
     _index: number,
-    templateData: IEditorGroupTemplateData,
+    templateData: IEditorGroupTemplateData
   ): void {
     templateData.editorGroup = editorGroup
     templateData.name.textContent = editorGroup.label
@@ -958,19 +954,19 @@ class OpenEditorRenderer
   private readonly closeEditorAction = this.instantiationService.createInstance(
     CloseEditorAction,
     CloseEditorAction.ID,
-    CloseEditorAction.LABEL,
+    CloseEditorAction.LABEL
   )
   private readonly unpinEditorAction = this.instantiationService.createInstance(
     UnpinEditorAction,
     UnpinEditorAction.ID,
-    UnpinEditorAction.LABEL,
+    UnpinEditorAction.LABEL
   )
 
   constructor(
     private labels: ResourceLabels,
     private instantiationService: IInstantiationService,
     private keybindingService: IKeybindingService,
-    private configurationService: IConfigurationService,
+    private configurationService: IConfigurationService
   ) {
     // noop
   }
@@ -994,13 +990,13 @@ class OpenEditorRenderer
   renderElement(
     openedEditor: OpenEditor,
     _index: number,
-    templateData: IOpenEditorTemplateData,
+    templateData: IOpenEditorTemplateData
   ): void {
     const editor = openedEditor.editor
     templateData.actionRunner.editor = openedEditor
     templateData.container.classList.toggle(
       "dirty",
-      editor.isDirty() && !editor.isSaving(),
+      editor.isDirty() && !editor.isSaving()
     )
     templateData.container.classList.toggle("sticky", openedEditor.isSticky())
     templateData.root.setResource(
@@ -1014,14 +1010,14 @@ class OpenEditorRenderer
       {
         italic: openedEditor.isPreview(),
         extraClasses: ["open-editor"].concat(
-          openedEditor.editor.getLabelExtraClasses(),
+          openedEditor.editor.getLabelExtraClasses()
         ),
         fileDecorations:
           this.configurationService.getValue<IFilesConfiguration>().explorer
             .decorations,
         title: editor.getTitle(Verbosity.LONG),
         icon: editor.getIcon(),
-      },
+      }
     )
     const editorAction = openedEditor.isSticky()
       ? this.unpinEditorAction
@@ -1058,7 +1054,7 @@ class OpenEditorsDragAndDrop
   constructor(
     sortOrder: "editorOrder" | "alphabetical" | "fullPath",
     private instantiationService: IInstantiationService,
-    private editorGroupService: IEditorGroupsService,
+    private editorGroupService: IEditorGroupsService
   ) {
     this._sortOrder = sortOrder
   }
@@ -1107,7 +1103,7 @@ class OpenEditorsDragAndDrop
       this.instantiationService.invokeFunction(
         fillEditorsDragData,
         editors,
-        originalEvent,
+        originalEvent
       )
     }
   }
@@ -1117,14 +1113,14 @@ class OpenEditorsDragAndDrop
     _targetElement: OpenEditor | IEditorGroup,
     _targetIndex: number,
     targetSector: ListViewTargetSector | undefined,
-    originalEvent: DragEvent,
+    originalEvent: DragEvent
   ): boolean | IListDragOverReaction {
     if (data instanceof NativeDragAndDropData) {
       if (
         !containsDragType(
           originalEvent,
           DataTransfers.FILES,
-          CodeDataTransfers.FILES,
+          CodeDataTransfers.FILES
         )
       ) {
         return false
@@ -1175,7 +1171,7 @@ class OpenEditorsDragAndDrop
     targetElement: OpenEditor | IEditorGroup | undefined,
     _targetIndex: number,
     targetSector: ListViewTargetSector | undefined,
-    originalEvent: DragEvent,
+    originalEvent: DragEvent
   ): void {
     let group =
       targetElement instanceof OpenEditor
@@ -1221,7 +1217,7 @@ class OpenEditorsDragAndDrop
         originalEvent,
         mainWindow,
         () => group.focus(),
-        { index: targetEditorIndex },
+        { index: targetEditorIndex }
       )
     }
   }
@@ -1253,7 +1249,7 @@ registerAction2(
         id: "workbench.action.toggleEditorGroupLayout",
         title: nls.localize2(
           "flipLayout",
-          "Toggle Vertical/Horizontal Editor Layout",
+          "Toggle Vertical/Horizontal Editor Layout"
         ),
         f1: true,
         keybinding: {
@@ -1267,7 +1263,7 @@ registerAction2(
           group: "navigation",
           when: ContextKeyExpr.and(
             ContextKeyExpr.equals("view", OpenEditorsView.ID),
-            MultipleEditorGroupsContext,
+            MultipleEditorGroupsContext
           ),
           order: 10,
         },
@@ -1282,7 +1278,7 @@ registerAction2(
           : GroupOrientation.VERTICAL
       editorGroupService.setGroupOrientation(newOrientation)
     }
-  },
+  }
 )
 
 MenuRegistry.appendMenuItem(MenuId.MenubarLayoutMenu, {
@@ -1293,7 +1289,7 @@ MenuRegistry.appendMenuItem(MenuId.MenubarLayoutMenu, {
       ...nls.localize2("miToggleEditorLayoutWithoutMnemonic", "Flip Layout"),
       mnemonicTitle: nls.localize(
         { key: "miToggleEditorLayout", comment: ["&& denotes a mnemonic"] },
-        "Flip &&Layout",
+        "Flip &&Layout"
       ),
     },
   },
@@ -1321,7 +1317,7 @@ registerAction2(
       const commandService = accessor.get(ICommandService)
       await commandService.executeCommand(SAVE_ALL_COMMAND_ID)
     }
-  },
+  }
 )
 
 registerAction2(
@@ -1346,10 +1342,10 @@ registerAction2(
 
       const closeAll = new CloseAllEditorsAction()
       await instantiationService.invokeFunction((accessor) =>
-        closeAll.run(accessor),
+        closeAll.run(accessor)
       )
     }
-  },
+  }
 )
 
 registerAction2(
@@ -1373,5 +1369,5 @@ registerAction2(
       const commandService = accessor.get(ICommandService)
       await commandService.executeCommand(NEW_UNTITLED_FILE_COMMAND_ID)
     }
-  },
+  }
 )

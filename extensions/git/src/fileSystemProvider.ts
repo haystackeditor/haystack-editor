@@ -9,252 +9,212 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import {
-  workspace,
-  Uri,
-  Disposable,
-  Event,
-  EventEmitter,
-  window,
-  FileSystemProvider,
-  FileChangeEvent,
-  FileStat,
-  FileType,
-  FileChangeType,
-  FileSystemError,
-} from "vscode"
-import { debounce, throttle } from "./decorators"
-import { fromGitUri, toGitUri } from "./uri"
-import { Model, ModelChangeEvent, OriginalResourceChangeEvent } from "./model"
-import {
-  filterEvent,
-  eventToPromise,
-  isDescendant,
-  pathEquals,
-  EmptyDisposable,
-} from "./util"
-import { Repository } from "./repository"
+import { workspace, Uri, Disposable, Event, EventEmitter, window, FileSystemProvider, FileChangeEvent, FileStat, FileType, FileChangeType, FileSystemError } from 'vscode';
+import { debounce, throttle } from './decorators';
+import { fromGitUri, toGitUri } from './uri';
+import { Model, ModelChangeEvent, OriginalResourceChangeEvent } from './model';
+import { filterEvent, eventToPromise, isDescendant, pathEquals, EmptyDisposable } from './util';
+import { Repository } from './repository';
 
 interface CacheRow {
-  uri: Uri
-  timestamp: number
+	uri: Uri;
+	timestamp: number;
 }
 
-const THREE_MINUTES = 1000 * 60 * 3
-const FIVE_MINUTES = 1000 * 60 * 5
+const THREE_MINUTES = 1000 * 60 * 3;
+const FIVE_MINUTES = 1000 * 60 * 5;
 
-function sanitizeRef(
-  ref: string,
-  path: string,
-  repository: Repository,
-): string {
-  if (ref === "~") {
-    const fileUri = Uri.file(path)
-    const uriString = fileUri.toString()
-    const [indexStatus] = repository.indexGroup.resourceStates.filter(
-      (r) => r.resourceUri.toString() === uriString,
-    )
-    return indexStatus ? "" : "HEAD"
-  }
+function sanitizeRef(ref: string, path: string, repository: Repository): string {
+	if (ref === '~') {
+		const fileUri = Uri.file(path);
+		const uriString = fileUri.toString();
+		const [indexStatus] = repository.indexGroup.resourceStates.filter(r => r.resourceUri.toString() === uriString);
+		return indexStatus ? '' : 'HEAD';
+	}
 
-  if (/^~\d$/.test(ref)) {
-    return `:${ref[1]}`
-  }
+	if (/^~\d$/.test(ref)) {
+		return `:${ref[1]}`;
+	}
 
-  return ref
+	return ref;
 }
 
 export class GitFileSystemProvider implements FileSystemProvider {
-  private _onDidChangeFile = new EventEmitter<FileChangeEvent[]>()
-  readonly onDidChangeFile: Event<FileChangeEvent[]> =
-    this._onDidChangeFile.event
 
-  private changedRepositoryRoots = new Set<string>()
-  private cache = new Map<string, CacheRow>()
-  private mtime = new Date().getTime()
-  private disposables: Disposable[] = []
+	private _onDidChangeFile = new EventEmitter<FileChangeEvent[]>();
+	readonly onDidChangeFile: Event<FileChangeEvent[]> = this._onDidChangeFile.event;
 
-  constructor(private model: Model) {
-    this.disposables.push(
-      model.onDidChangeRepository(this.onDidChangeRepository, this),
-      model.onDidChangeOriginalResource(this.onDidChangeOriginalResource, this),
-      workspace.registerFileSystemProvider("git", this, {
-        isReadonly: true,
-        isCaseSensitive: true,
-      }),
-    )
+	private changedRepositoryRoots = new Set<string>();
+	private cache = new Map<string, CacheRow>();
+	private mtime = new Date().getTime();
+	private disposables: Disposable[] = [];
 
-    setInterval(() => this.cleanup(), FIVE_MINUTES)
-  }
+	constructor(private model: Model) {
+		this.disposables.push(
+			model.onDidChangeRepository(this.onDidChangeRepository, this),
+			model.onDidChangeOriginalResource(this.onDidChangeOriginalResource, this),
+			workspace.registerFileSystemProvider('git', this, { isReadonly: true, isCaseSensitive: true }),
+		);
 
-  private onDidChangeRepository({ repository }: ModelChangeEvent): void {
-    this.changedRepositoryRoots.add(repository.root)
-    this.eventuallyFireChangeEvents()
-  }
+		setInterval(() => this.cleanup(), FIVE_MINUTES);
+	}
 
-  private onDidChangeOriginalResource({
-    uri,
-  }: OriginalResourceChangeEvent): void {
-    if (uri.scheme !== "file") {
-      return
-    }
+	private onDidChangeRepository({ repository }: ModelChangeEvent): void {
+		this.changedRepositoryRoots.add(repository.root);
+		this.eventuallyFireChangeEvents();
+	}
 
-    const diffOriginalResourceUri = toGitUri(uri, "~")
-    const quickDiffOriginalResourceUri = toGitUri(uri, "", {
-      replaceFileExtension: true,
-    })
+	private onDidChangeOriginalResource({ uri }: OriginalResourceChangeEvent): void {
+		if (uri.scheme !== 'file') {
+			return;
+		}
 
-    this.mtime = new Date().getTime()
-    this._onDidChangeFile.fire([
-      { type: FileChangeType.Changed, uri: diffOriginalResourceUri },
-      { type: FileChangeType.Changed, uri: quickDiffOriginalResourceUri },
-    ])
-  }
+		const diffOriginalResourceUri = toGitUri(uri, '~',);
+		const quickDiffOriginalResourceUri = toGitUri(uri, '', { replaceFileExtension: true });
 
-  @debounce(1100)
-  private eventuallyFireChangeEvents(): void {
-    this.fireChangeEvents()
-  }
+		this.mtime = new Date().getTime();
+		this._onDidChangeFile.fire([
+			{ type: FileChangeType.Changed, uri: diffOriginalResourceUri },
+			{ type: FileChangeType.Changed, uri: quickDiffOriginalResourceUri }
+		]);
+	}
 
-  @throttle
-  private async fireChangeEvents(): Promise<void> {
-    if (!window.state.focused) {
-      const onDidFocusWindow = filterEvent(
-        window.onDidChangeWindowState,
-        (e) => e.focused,
-      )
-      await eventToPromise(onDidFocusWindow)
-    }
+	@debounce(1100)
+	private eventuallyFireChangeEvents(): void {
+		this.fireChangeEvents();
+	}
 
-    const events: FileChangeEvent[] = []
+	@throttle
+	private async fireChangeEvents(): Promise<void> {
+		if (!window.state.focused) {
+			const onDidFocusWindow = filterEvent(window.onDidChangeWindowState, e => e.focused);
+			await eventToPromise(onDidFocusWindow);
+		}
 
-    for (const { uri } of this.cache.values()) {
-      const fsPath = uri.fsPath
+		const events: FileChangeEvent[] = [];
 
-      for (const root of this.changedRepositoryRoots) {
-        if (isDescendant(root, fsPath)) {
-          events.push({ type: FileChangeType.Changed, uri })
-          break
-        }
-      }
-    }
+		for (const { uri } of this.cache.values()) {
+			const fsPath = uri.fsPath;
 
-    if (events.length > 0) {
-      this.mtime = new Date().getTime()
-      this._onDidChangeFile.fire(events)
-    }
+			for (const root of this.changedRepositoryRoots) {
+				if (isDescendant(root, fsPath)) {
+					events.push({ type: FileChangeType.Changed, uri });
+					break;
+				}
+			}
+		}
 
-    this.changedRepositoryRoots.clear()
-  }
+		if (events.length > 0) {
+			this.mtime = new Date().getTime();
+			this._onDidChangeFile.fire(events);
+		}
 
-  private cleanup(): void {
-    const now = new Date().getTime()
-    const cache = new Map<string, CacheRow>()
+		this.changedRepositoryRoots.clear();
+	}
 
-    for (const row of this.cache.values()) {
-      const { path } = fromGitUri(row.uri)
-      const isOpen = workspace.textDocuments
-        .filter((d) => d.uri.scheme === "file")
-        .some((d) => pathEquals(d.uri.fsPath, path))
+	private cleanup(): void {
+		const now = new Date().getTime();
+		const cache = new Map<string, CacheRow>();
 
-      if (isOpen || now - row.timestamp < THREE_MINUTES) {
-        cache.set(row.uri.toString(), row)
-      } else {
-        // TODO: should fire delete events?
-      }
-    }
+		for (const row of this.cache.values()) {
+			const { path } = fromGitUri(row.uri);
+			const isOpen = workspace.textDocuments
+				.filter(d => d.uri.scheme === 'file')
+				.some(d => pathEquals(d.uri.fsPath, path));
 
-    this.cache = cache
-  }
+			if (isOpen || now - row.timestamp < THREE_MINUTES) {
+				cache.set(row.uri.toString(), row);
+			} else {
+				// TODO: should fire delete events?
+			}
+		}
 
-  watch(): Disposable {
-    return EmptyDisposable
-  }
+		this.cache = cache;
+	}
 
-  async stat(uri: Uri): Promise<FileStat> {
-    await this.model.isInitialized
+	watch(): Disposable {
+		return EmptyDisposable;
+	}
 
-    const { submoduleOf, path, ref } = fromGitUri(uri)
-    const repository = submoduleOf
-      ? this.model.getRepository(submoduleOf)
-      : this.model.getRepository(uri)
-    if (!repository) {
-      throw FileSystemError.FileNotFound()
-    }
+	async stat(uri: Uri): Promise<FileStat> {
+		await this.model.isInitialized;
 
-    let size = 0
-    try {
-      const details = await repository.getObjectDetails(
-        sanitizeRef(ref, path, repository),
-        path,
-      )
-      size = details.size
-    } catch {
-      // noop
-    }
-    return { type: FileType.File, size: size, mtime: this.mtime, ctime: 0 }
-  }
+		const { submoduleOf, path, ref } = fromGitUri(uri);
+		const repository = submoduleOf ? this.model.getRepository(submoduleOf) : this.model.getRepository(uri);
+		if (!repository) {
+			throw FileSystemError.FileNotFound();
+		}
 
-  readDirectory(): Thenable<[string, FileType][]> {
-    throw new Error("Method not implemented.")
-  }
+		let size = 0;
+		try {
+			const details = await repository.getObjectDetails(sanitizeRef(ref, path, repository), path);
+			size = details.size;
+		} catch {
+			// noop
+		}
+		return { type: FileType.File, size: size, mtime: this.mtime, ctime: 0 };
+	}
 
-  createDirectory(): void {
-    throw new Error("Method not implemented.")
-  }
+	readDirectory(): Thenable<[string, FileType][]> {
+		throw new Error('Method not implemented.');
+	}
 
-  async readFile(uri: Uri): Promise<Uint8Array> {
-    await this.model.isInitialized
+	createDirectory(): void {
+		throw new Error('Method not implemented.');
+	}
 
-    const { path, ref, submoduleOf } = fromGitUri(uri)
+	async readFile(uri: Uri): Promise<Uint8Array> {
+		await this.model.isInitialized;
 
-    if (submoduleOf) {
-      const repository = this.model.getRepository(submoduleOf)
+		const { path, ref, submoduleOf } = fromGitUri(uri);
 
-      if (!repository) {
-        throw FileSystemError.FileNotFound()
-      }
+		if (submoduleOf) {
+			const repository = this.model.getRepository(submoduleOf);
 
-      const encoder = new TextEncoder()
+			if (!repository) {
+				throw FileSystemError.FileNotFound();
+			}
 
-      if (ref === "index") {
-        return encoder.encode(await repository.diffIndexWithHEAD(path))
-      } else {
-        return encoder.encode(await repository.diffWithHEAD(path))
-      }
-    }
+			const encoder = new TextEncoder();
 
-    const repository = this.model.getRepository(uri)
+			if (ref === 'index') {
+				return encoder.encode(await repository.diffIndexWithHEAD(path));
+			} else {
+				return encoder.encode(await repository.diffWithHEAD(path));
+			}
+		}
 
-    if (!repository) {
-      throw FileSystemError.FileNotFound()
-    }
+		const repository = this.model.getRepository(uri);
 
-    const timestamp = new Date().getTime()
-    const cacheValue: CacheRow = { uri, timestamp }
+		if (!repository) {
+			throw FileSystemError.FileNotFound();
+		}
 
-    this.cache.set(uri.toString(), cacheValue)
+		const timestamp = new Date().getTime();
+		const cacheValue: CacheRow = { uri, timestamp };
 
-    try {
-      return await repository.buffer(sanitizeRef(ref, path, repository), path)
-    } catch (err) {
-      return new Uint8Array(0)
-    }
-  }
+		this.cache.set(uri.toString(), cacheValue);
 
-  writeFile(): void {
-    throw new Error("Method not implemented.")
-  }
+		try {
+			return await repository.buffer(sanitizeRef(ref, path, repository), path);
+		} catch (err) {
+			return new Uint8Array(0);
+		}
+	}
 
-  delete(): void {
-    throw new Error("Method not implemented.")
-  }
+	writeFile(): void {
+		throw new Error('Method not implemented.');
+	}
 
-  rename(): void {
-    throw new Error("Method not implemented.")
-  }
+	delete(): void {
+		throw new Error('Method not implemented.');
+	}
 
-  dispose(): void {
-    this.disposables.forEach((d) => d.dispose())
-  }
+	rename(): void {
+		throw new Error('Method not implemented.');
+	}
+
+	dispose(): void {
+		this.disposables.forEach(d => d.dispose());
+	}
 }

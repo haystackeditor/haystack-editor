@@ -105,7 +105,7 @@ export interface IWorkbenchOptions {
 
 export class Workbench extends Layout {
   private readonly _onWillShutdown = this._register(
-    new Emitter<WillShutdownEvent>(),
+    new Emitter<WillShutdownEvent>()
   )
   readonly onWillShutdown = this._onWillShutdown.event
 
@@ -116,7 +116,7 @@ export class Workbench extends Layout {
     parent: HTMLElement,
     private readonly options: IWorkbenchOptions | undefined,
     private readonly serviceCollection: ServiceCollection,
-    logService: ILogService,
+    logService: ILogService
   ) {
     super(parent)
 
@@ -140,7 +140,7 @@ export class Workbench extends Layout {
 
     // Install handler for unexpected errors
     setUnexpectedErrorHandler((error) =>
-      this.handleUnexpectedError(error, logService),
+      this.handleUnexpectedError(error, logService)
     )
 
     // Inform user about loading issues from the loader
@@ -170,9 +170,9 @@ export class Workbench extends Layout {
                 localize(
                   "loaderErrorNative",
                   "Failed to load a required file. Please restart the application to try again. Details: {0}",
-                  JSON.stringify(err),
-                ),
-              ),
+                  JSON.stringify(err)
+                )
+              )
             )
           }
           console.error(err)
@@ -222,7 +222,7 @@ export class Workbench extends Layout {
         const hoverService = accessor.get(IHoverService)
         const dialogService = accessor.get(IDialogService)
         const notificationService = accessor.get(
-          INotificationService,
+          INotificationService
         ) as NotificationService
 
         // Default Hover Delegate must be registered before creating any workbench/layout components
@@ -232,8 +232,8 @@ export class Workbench extends Layout {
             WorkbenchHoverDelegate,
             placement,
             enableInstantHover,
-            {},
-          ),
+            {}
+          )
         )
         setBaseLayerHoverDelegate(hoverService)
 
@@ -242,15 +242,15 @@ export class Workbench extends Layout {
 
         // Registries
         Registry.as<IWorkbenchContributionsRegistry>(
-          WorkbenchExtensions.Workbench,
+          WorkbenchExtensions.Workbench
         ).start(accessor)
         Registry.as<IEditorFactoryRegistry>(
-          EditorExtensions.EditorFactory,
+          EditorExtensions.EditorFactory
         ).start(accessor)
 
         // Context Keys
         this._register(
-          instantiationService.createInstance(WorkbenchContextKeysHandler),
+          instantiationService.createInstance(WorkbenchContextKeysHandler)
         )
 
         // Register Listeners
@@ -259,7 +259,7 @@ export class Workbench extends Layout {
           storageService,
           configurationService,
           hostService,
-          dialogService,
+          dialogService
         )
 
         // Render Workbench
@@ -267,7 +267,7 @@ export class Workbench extends Layout {
           instantiationService,
           notificationService,
           storageService,
-          configurationService,
+          configurationService
         )
 
         // Workbench Layout
@@ -289,7 +289,7 @@ export class Workbench extends Layout {
   }
 
   private initServices(
-    serviceCollection: ServiceCollection,
+    serviceCollection: ServiceCollection
   ): IInstantiationService {
     // Layout Service
     serviceCollection.set(IWorkbenchLayoutService, this)
@@ -311,7 +311,7 @@ export class Workbench extends Layout {
 
     const instantiationService = new InstantiationService(
       serviceCollection,
-      true,
+      true
     )
 
     // Wrap up
@@ -338,13 +338,13 @@ export class Workbench extends Layout {
     storageService: IStorageService,
     configurationService: IConfigurationService,
     hostService: IHostService,
-    dialogService: IDialogService,
+    dialogService: IDialogService
   ): void {
     // Configuration changes
     this._register(
       configurationService.onDidChangeConfiguration((e) =>
-        this.updateFontAliasing(e, configurationService),
-      ),
+        this.updateFontAliasing(e, configurationService)
+      )
     )
 
     // Font Info
@@ -354,27 +354,27 @@ export class Workbench extends Layout {
           if (e.reason === WillSaveStateReason.SHUTDOWN) {
             this.storeFontInfo(storageService)
           }
-        }),
+        })
       )
     } else {
       this._register(
         lifecycleService.onWillShutdown(() =>
-          this.storeFontInfo(storageService),
-        ),
+          this.storeFontInfo(storageService)
+        )
       )
     }
 
     // Lifecycle
     this._register(
       lifecycleService.onWillShutdown((event) =>
-        this._onWillShutdown.fire(event),
-      ),
+        this._onWillShutdown.fire(event)
+      )
     )
     this._register(
       lifecycleService.onDidShutdown(() => {
         this._onDidShutdown.fire()
         this.dispose()
-      }),
+      })
     )
 
     // In some environments we do not get enough time to persist state on shutdown.
@@ -387,26 +387,26 @@ export class Workbench extends Layout {
         if (!focus) {
           storageService.flush()
         }
-      }),
+      })
     )
 
     // Dialogs showing/hiding
     this._register(
       dialogService.onWillShowDialog(() =>
-        this.mainContainer.classList.add("modal-dialog-visible"),
-      ),
+        this.mainContainer.classList.add("modal-dialog-visible")
+      )
     )
     this._register(
       dialogService.onDidShowDialog(() =>
-        this.mainContainer.classList.remove("modal-dialog-visible"),
-      ),
+        this.mainContainer.classList.remove("modal-dialog-visible")
+      )
     )
   }
 
   private fontAliasing: "default" | "antialiased" | "none" | "auto" | undefined
   private updateFontAliasing(
     e: IConfigurationChangeEvent | undefined,
-    configurationService: IConfigurationService,
+    configurationService: IConfigurationService
   ) {
     if (!isMacintosh) {
       return // macOS only
@@ -432,7 +432,7 @@ export class Workbench extends Layout {
       "auto",
     ]
     this.mainContainer.classList.remove(
-      ...fontAliasingValues.map((value) => `monaco-font-aliasing-${value}`),
+      ...fontAliasingValues.map((value) => `monaco-font-aliasing-${value}`)
     )
 
     // Add specific
@@ -443,11 +443,11 @@ export class Workbench extends Layout {
 
   private restoreFontInfo(
     storageService: IStorageService,
-    configurationService: IConfigurationService,
+    configurationService: IConfigurationService
   ): void {
     const storedFontInfoRaw = storageService.get(
       "editorFontInfo",
-      StorageScope.APPLICATION,
+      StorageScope.APPLICATION
     )
     if (storedFontInfoRaw) {
       try {
@@ -464,8 +464,8 @@ export class Workbench extends Layout {
       mainWindow,
       BareFontInfo.createFromRawSettings(
         configurationService.getValue("editor"),
-        PixelRatio.getInstance(mainWindow).value,
-      ),
+        PixelRatio.getInstance(mainWindow).value
+      )
     )
   }
 
@@ -476,7 +476,7 @@ export class Workbench extends Layout {
         "editorFontInfo",
         JSON.stringify(serializedFontInfo),
         StorageScope.APPLICATION,
-        StorageTarget.MACHINE,
+        StorageTarget.MACHINE
       )
     }
   }
@@ -485,7 +485,7 @@ export class Workbench extends Layout {
     instantiationService: IInstantiationService,
     notificationService: NotificationService,
     storageService: IStorageService,
-    configurationService: IConfigurationService,
+    configurationService: IConfigurationService
   ): void {
     // ARIA & Signals
     setARIAContainer(this.mainContainer)
@@ -494,8 +494,8 @@ export class Workbench extends Layout {
         instantiationService.createInstance(
           AccessibilityProgressSignalScheduler,
           msDelayTime,
-          msLoopTime,
-        ),
+          msLoopTime
+        )
     )
 
     // State specific classes
@@ -507,10 +507,10 @@ export class Workbench extends Layout {
       isChrome
         ? "chromium"
         : isFirefox
-          ? "firefox"
-          : isSafari
-            ? "safari"
-            : undefined,
+        ? "firefox"
+        : isSafari
+        ? "safari"
+        : undefined,
       ...this.getLayoutClasses(),
       ...(this.options?.extraClasses ? this.options.extraClasses : []),
     ])
@@ -592,7 +592,7 @@ export class Workbench extends Layout {
     const part = document.createElement(
       role === "status"
         ? "footer" /* Use footer element for status bar #98376 */
-        : "div",
+        : "div"
     )
     part.classList.add("part", ...classes)
     part.id = id
@@ -606,32 +606,32 @@ export class Workbench extends Layout {
 
   private createNotificationsHandlers(
     instantiationService: IInstantiationService,
-    notificationService: NotificationService,
+    notificationService: NotificationService
   ): void {
     // Instantiate Notification components
     const notificationsCenter = this._register(
       instantiationService.createInstance(
         NotificationsCenter,
         this.mainContainer,
-        notificationService.model,
-      ),
+        notificationService.model
+      )
     )
     const notificationsToasts = this._register(
       instantiationService.createInstance(
         NotificationsToasts,
         this.mainContainer,
-        notificationService.model,
-      ),
+        notificationService.model
+      )
     )
     this._register(
       instantiationService.createInstance(
         NotificationsAlerts,
-        notificationService.model,
-      ),
+        notificationService.model
+      )
     )
     const notificationsStatus = instantiationService.createInstance(
       NotificationsStatus,
-      notificationService.model,
+      notificationService.model
     )
     this._register(instantiationService.createInstance(NotificationsTelemetry))
 
@@ -640,26 +640,26 @@ export class Workbench extends Layout {
       notificationsCenter.onDidChangeVisibility(() => {
         notificationsStatus.update(
           notificationsCenter.isVisible,
-          notificationsToasts.isVisible,
+          notificationsToasts.isVisible
         )
         notificationsToasts.update(notificationsCenter.isVisible)
-      }),
+      })
     )
 
     this._register(
       notificationsToasts.onDidChangeVisibility(() => {
         notificationsStatus.update(
           notificationsCenter.isVisible,
-          notificationsToasts.isVisible,
+          notificationsToasts.isVisible
         )
-      }),
+      })
     )
 
     // Register Commands
     registerNotificationCommands(
       notificationsCenter,
       notificationsToasts,
-      notificationService.model,
+      notificationService.model
     )
 
     // Register notification accessible view
@@ -670,9 +670,9 @@ export class Workbench extends Layout {
       onDidChangeNotificationsVisibility: Event.map(
         Event.any(
           notificationsToasts.onDidChangeVisibility,
-          notificationsCenter.onDidChangeVisibility,
+          notificationsCenter.onDidChangeVisibility
         ),
-        () => notificationsToasts.isVisible || notificationsCenter.isVisible,
+        () => notificationsToasts.isVisible || notificationsCenter.isVisible
       ),
     })
   }
@@ -705,7 +705,7 @@ export class Workbench extends Layout {
           performance.measure(
             "perf: workbench create & restore",
             "code/didLoadWorkbenchMain",
-            "code/didStartWorkbench",
+            "code/didStartWorkbench"
           )
         }
 
@@ -725,13 +725,13 @@ export class Workbench extends Layout {
               runWhenWindowIdle(
                 mainWindow,
                 () => (lifecycleService.phase = LifecyclePhase.Eventually),
-                2500,
-              ),
+                2500
+              )
             )
-          }, 2500),
+          }, 2500)
         )
         eventuallyPhaseScheduler.schedule()
-      }),
+      })
     )
   }
 }

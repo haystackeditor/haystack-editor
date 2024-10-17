@@ -9,29 +9,31 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as eslint from "eslint"
+import * as eslint from 'eslint';
 
-export = new (class NoAsyncSuite implements eslint.Rule.RuleModule {
-  create(context: eslint.Rule.RuleContext): eslint.Rule.RuleListener {
-    function doesCallSuperDispose(node: any) {
-      if (!node.override) {
-        return
-      }
+export = new class NoAsyncSuite implements eslint.Rule.RuleModule {
 
-      const body = context.getSourceCode().getText(node)
+	create(context: eslint.Rule.RuleContext): eslint.Rule.RuleListener {
+		function doesCallSuperDispose(node: any) {
 
-      if (body.includes("super.dispose")) {
-        return
-      }
+			if (!node.override) {
+				return;
+			}
 
-      context.report({
-        node,
-        message: "dispose() should call super.dispose()",
-      })
-    }
+			const body = context.getSourceCode().getText(node)
 
-    return {
-      ['MethodDefinition[override][key.name="dispose"]']: doesCallSuperDispose,
-    }
-  }
-})()
+			if (body.includes('super.dispose')) {
+				return;
+			}
+
+			context.report({
+				node,
+				message: 'dispose() should call super.dispose()'
+			});
+		}
+
+		return {
+			['MethodDefinition[override][key.name="dispose"]']: doesCallSuperDispose,
+		};
+	}
+};

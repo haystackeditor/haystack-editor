@@ -9,70 +9,56 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { DisposableStore } from "vs/base/common/lifecycle"
-import { getDelayedChannel, ProxyChannel } from "vs/base/parts/ipc/common/ipc"
-import { IFileChange } from "vs/platform/files/common/files"
-import {
-  AbstractUniversalWatcherClient,
-  ILogMessage,
-  IRecursiveWatcher,
-} from "vs/platform/files/common/watcher"
-import { IUtilityProcessWorkerWorkbenchService } from "vs/workbench/services/utilityProcess/electron-sandbox/utilityProcessWorkerWorkbenchService"
+import { DisposableStore } from 'vs/base/common/lifecycle';
+import { getDelayedChannel, ProxyChannel } from 'vs/base/parts/ipc/common/ipc';
+import { IFileChange } from 'vs/platform/files/common/files';
+import { AbstractUniversalWatcherClient, ILogMessage, IRecursiveWatcher } from 'vs/platform/files/common/watcher';
+import { IUtilityProcessWorkerWorkbenchService } from 'vs/workbench/services/utilityProcess/electron-sandbox/utilityProcessWorkerWorkbenchService';
 
 export class UniversalWatcherClient extends AbstractUniversalWatcherClient {
-  constructor(
-    onFileChanges: (changes: IFileChange[]) => void,
-    onLogMessage: (msg: ILogMessage) => void,
-    verboseLogging: boolean,
-    private readonly utilityProcessWorkerWorkbenchService: IUtilityProcessWorkerWorkbenchService,
-  ) {
-    super(onFileChanges, onLogMessage, verboseLogging)
 
-    this.init()
-  }
+	constructor(
+		onFileChanges: (changes: IFileChange[]) => void,
+		onLogMessage: (msg: ILogMessage) => void,
+		verboseLogging: boolean,
+		private readonly utilityProcessWorkerWorkbenchService: IUtilityProcessWorkerWorkbenchService
+	) {
+		super(onFileChanges, onLogMessage, verboseLogging);
 
-  protected override createWatcher(
-    disposables: DisposableStore,
-  ): IRecursiveWatcher {
-    const watcher = ProxyChannel.toService<IRecursiveWatcher>(
-      getDelayedChannel(
-        (async () => {
-          // Acquire universal watcher via utility process worker
-          //
-          // We explicitly do not add the worker as a disposable
-          // because we need to call `stop` on disposal to prevent
-          // a crash on shutdown (see below).
-          //
-          // The utility process worker services ensures to terminate
-          // the process automatically when the window closes or reloads.
-          const { client, onDidTerminate } = disposables.add(
-            await this.utilityProcessWorkerWorkbenchService.createWorker({
-              moduleId: "vs/platform/files/node/watcher/watcherMain",
-              type: "fileWatcher",
-            }),
-          )
+		this.init();
+	}
 
-          // React on unexpected termination of the watcher process
-          // by listening to the `onDidTerminate` event. We do not
-          // consider an exit code of `0` as abnormal termination.
+	protected override createWatcher(disposables: DisposableStore): IRecursiveWatcher {
+		const watcher = ProxyChannel.toService<IRecursiveWatcher>(getDelayedChannel((async () => {
 
-          onDidTerminate.then(({ reason }) => {
-            if (reason?.code === 0) {
-              this.trace(
-                `terminated by itself with code ${reason.code}, signal: ${reason.signal}`,
-              )
-            } else {
-              this.onError(
-                `terminated by itself unexpectedly with code ${reason?.code}, signal: ${reason?.signal} (ETERM)`,
-              )
-            }
-          })
+			// Acquire universal watcher via utility process worker
+			//
+			// We explicitly do not add the worker as a disposable
+			// because we need to call `stop` on disposal to prevent
+			// a crash on shutdown (see below).
+			//
+			// The utility process worker services ensures to terminate
+			// the process automatically when the window closes or reloads.
+			const { client, onDidTerminate } = disposables.add(await this.utilityProcessWorkerWorkbenchService.createWorker({
+				moduleId: 'vs/platform/files/node/watcher/watcherMain',
+				type: 'fileWatcher'
+			}));
 
-          return client.getChannel("watcher")
-        })(),
-      ),
-    )
+			// React on unexpected termination of the watcher process
+			// by listening to the `onDidTerminate` event. We do not
+			// consider an exit code of `0` as abnormal termination.
 
-    return watcher
-  }
+			onDidTerminate.then(({ reason }) => {
+				if (reason?.code === 0) {
+					this.trace(`terminated by itself with code ${reason.code}, signal: ${reason.signal}`);
+				} else {
+					this.onError(`terminated by itself unexpectedly with code ${reason?.code}, signal: ${reason?.signal} (ETERM)`);
+				}
+			});
+
+			return client.getChannel('watcher');
+		})()));
+
+		return watcher;
+	}
 }

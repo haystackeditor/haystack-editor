@@ -9,174 +9,117 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as assert from "assert"
-import { EditorInput } from "vs/workbench/common/editor/editorInput"
-import { DiffEditorInput } from "vs/workbench/common/editor/diffEditorInput"
-import { workbenchInstantiationService } from "vs/workbench/test/browser/workbenchTestServices"
-import {
-  EditorResourceAccessor,
-  isDiffEditorInput,
-  isResourceDiffEditorInput,
-  isResourceSideBySideEditorInput,
-  IUntypedEditorInput,
-} from "vs/workbench/common/editor"
-import { URI } from "vs/base/common/uri"
-import { DisposableStore } from "vs/base/common/lifecycle"
-import { ensureNoDisposablesAreLeakedInTestSuite } from "vs/base/test/common/utils"
+import * as assert from 'assert';
+import { EditorInput } from 'vs/workbench/common/editor/editorInput';
+import { DiffEditorInput } from 'vs/workbench/common/editor/diffEditorInput';
+import { workbenchInstantiationService } from 'vs/workbench/test/browser/workbenchTestServices';
+import { EditorResourceAccessor, isDiffEditorInput, isResourceDiffEditorInput, isResourceSideBySideEditorInput, IUntypedEditorInput } from 'vs/workbench/common/editor';
+import { URI } from 'vs/base/common/uri';
+import { DisposableStore } from 'vs/base/common/lifecycle';
+import { ensureNoDisposablesAreLeakedInTestSuite } from 'vs/base/test/common/utils';
 
-suite("Diff editor input", () => {
-  class MyEditorInput extends EditorInput {
-    constructor(public resource: URI | undefined = undefined) {
-      super()
-    }
+suite('Diff editor input', () => {
 
-    override get typeId(): string {
-      return "myEditorInput"
-    }
-    override resolve(): any {
-      return null
-    }
+	class MyEditorInput extends EditorInput {
 
-    override toUntyped() {
-      return { resource: this.resource, options: { override: this.typeId } }
-    }
+		constructor(public resource: URI | undefined = undefined) {
+			super();
+		}
 
-    override matches(otherInput: EditorInput | IUntypedEditorInput): boolean {
-      if (super.matches(otherInput)) {
-        return true
-      }
+		override get typeId(): string { return 'myEditorInput'; }
+		override resolve(): any { return null; }
 
-      const resource = EditorResourceAccessor.getCanonicalUri(otherInput)
-      return resource?.toString() === this.resource?.toString()
-    }
-  }
+		override toUntyped() {
+			return { resource: this.resource, options: { override: this.typeId } };
+		}
 
-  const disposables = new DisposableStore()
+		override matches(otherInput: EditorInput | IUntypedEditorInput): boolean {
+			if (super.matches(otherInput)) {
+				return true;
+			}
 
-  teardown(() => {
-    disposables.clear()
-  })
+			const resource = EditorResourceAccessor.getCanonicalUri(otherInput);
+			return resource?.toString() === this.resource?.toString();
+		}
+	}
 
-  test("basics", () => {
-    const instantiationService = workbenchInstantiationService(
-      undefined,
-      disposables,
-    )
+	const disposables = new DisposableStore();
 
-    let counter = 0
-    const input = disposables.add(new MyEditorInput())
-    disposables.add(
-      input.onWillDispose(() => {
-        assert(true)
-        counter++
-      }),
-    )
+	teardown(() => {
+		disposables.clear();
+	});
 
-    const otherInput = disposables.add(new MyEditorInput())
-    disposables.add(
-      otherInput.onWillDispose(() => {
-        assert(true)
-        counter++
-      }),
-    )
+	test('basics', () => {
+		const instantiationService = workbenchInstantiationService(undefined, disposables);
 
-    const diffInput = instantiationService.createInstance(
-      DiffEditorInput,
-      "name",
-      "description",
-      input,
-      otherInput,
-      undefined,
-    )
+		let counter = 0;
+		const input = disposables.add(new MyEditorInput());
+		disposables.add(input.onWillDispose(() => {
+			assert(true);
+			counter++;
+		}));
 
-    assert.ok(isDiffEditorInput(diffInput))
-    assert.ok(!isDiffEditorInput(input))
+		const otherInput = disposables.add(new MyEditorInput());
+		disposables.add(otherInput.onWillDispose(() => {
+			assert(true);
+			counter++;
+		}));
 
-    assert.strictEqual(diffInput.original, input)
-    assert.strictEqual(diffInput.modified, otherInput)
-    assert(diffInput.matches(diffInput))
-    assert(!diffInput.matches(otherInput))
+		const diffInput = instantiationService.createInstance(DiffEditorInput, 'name', 'description', input, otherInput, undefined);
 
-    diffInput.dispose()
-    assert.strictEqual(counter, 0)
-  })
+		assert.ok(isDiffEditorInput(diffInput));
+		assert.ok(!isDiffEditorInput(input));
 
-  test("toUntyped", () => {
-    const instantiationService = workbenchInstantiationService(
-      undefined,
-      disposables,
-    )
+		assert.strictEqual(diffInput.original, input);
+		assert.strictEqual(diffInput.modified, otherInput);
+		assert(diffInput.matches(diffInput));
+		assert(!diffInput.matches(otherInput));
 
-    const input = disposables.add(new MyEditorInput(URI.file("foo/bar1")))
-    const otherInput = disposables.add(new MyEditorInput(URI.file("foo/bar2")))
+		diffInput.dispose();
+		assert.strictEqual(counter, 0);
+	});
 
-    const diffInput = instantiationService.createInstance(
-      DiffEditorInput,
-      "name",
-      "description",
-      input,
-      otherInput,
-      undefined,
-    )
+	test('toUntyped', () => {
+		const instantiationService = workbenchInstantiationService(undefined, disposables);
 
-    const untypedDiffInput = diffInput.toUntyped()
-    assert.ok(isResourceDiffEditorInput(untypedDiffInput))
-    assert.ok(!isResourceSideBySideEditorInput(untypedDiffInput))
-    assert.ok(diffInput.matches(untypedDiffInput))
-  })
+		const input = disposables.add(new MyEditorInput(URI.file('foo/bar1')));
+		const otherInput = disposables.add(new MyEditorInput(URI.file('foo/bar2')));
 
-  test("disposes when input inside disposes", function () {
-    const instantiationService = workbenchInstantiationService(
-      undefined,
-      disposables,
-    )
+		const diffInput = instantiationService.createInstance(DiffEditorInput, 'name', 'description', input, otherInput, undefined);
 
-    let counter = 0
-    let input = disposables.add(new MyEditorInput())
-    let otherInput = disposables.add(new MyEditorInput())
+		const untypedDiffInput = diffInput.toUntyped();
+		assert.ok(isResourceDiffEditorInput(untypedDiffInput));
+		assert.ok(!isResourceSideBySideEditorInput(untypedDiffInput));
+		assert.ok(diffInput.matches(untypedDiffInput));
+	});
 
-    const diffInput = disposables.add(
-      instantiationService.createInstance(
-        DiffEditorInput,
-        "name",
-        "description",
-        input,
-        otherInput,
-        undefined,
-      ),
-    )
-    disposables.add(
-      diffInput.onWillDispose(() => {
-        counter++
-        assert(true)
-      }),
-    )
+	test('disposes when input inside disposes', function () {
+		const instantiationService = workbenchInstantiationService(undefined, disposables);
 
-    input.dispose()
+		let counter = 0;
+		let input = disposables.add(new MyEditorInput());
+		let otherInput = disposables.add(new MyEditorInput());
 
-    input = disposables.add(new MyEditorInput())
-    otherInput = disposables.add(new MyEditorInput())
+		const diffInput = disposables.add(instantiationService.createInstance(DiffEditorInput, 'name', 'description', input, otherInput, undefined));
+		disposables.add(diffInput.onWillDispose(() => {
+			counter++;
+			assert(true);
+		}));
 
-    const diffInput2 = disposables.add(
-      instantiationService.createInstance(
-        DiffEditorInput,
-        "name",
-        "description",
-        input,
-        otherInput,
-        undefined,
-      ),
-    )
-    disposables.add(
-      diffInput2.onWillDispose(() => {
-        counter++
-        assert(true)
-      }),
-    )
+		input.dispose();
 
-    otherInput.dispose()
-    assert.strictEqual(counter, 2)
-  })
+		input = disposables.add(new MyEditorInput());
+		otherInput = disposables.add(new MyEditorInput());
 
-  ensureNoDisposablesAreLeakedInTestSuite()
-})
+		const diffInput2 = disposables.add(instantiationService.createInstance(DiffEditorInput, 'name', 'description', input, otherInput, undefined));
+		disposables.add(diffInput2.onWillDispose(() => {
+			counter++;
+			assert(true);
+		}));
+
+		otherInput.dispose();
+		assert.strictEqual(counter, 2);
+	});
+
+	ensureNoDisposablesAreLeakedInTestSuite();
+});

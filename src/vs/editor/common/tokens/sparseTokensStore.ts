@@ -9,295 +9,242 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as arrays from "vs/base/common/arrays"
-import { IRange, Range } from "vs/editor/common/core/range"
-import { LineTokens } from "vs/editor/common/tokens/lineTokens"
-import { SparseMultilineTokens } from "vs/editor/common/tokens/sparseMultilineTokens"
-import { ILanguageIdCodec } from "vs/editor/common/languages"
-import { MetadataConsts } from "vs/editor/common/encodedTokenAttributes"
+import * as arrays from 'vs/base/common/arrays';
+import { IRange, Range } from 'vs/editor/common/core/range';
+import { LineTokens } from 'vs/editor/common/tokens/lineTokens';
+import { SparseMultilineTokens } from 'vs/editor/common/tokens/sparseMultilineTokens';
+import { ILanguageIdCodec } from 'vs/editor/common/languages';
+import { MetadataConsts } from 'vs/editor/common/encodedTokenAttributes';
 
 /**
  * Represents sparse tokens in a text model.
  */
 export class SparseTokensStore {
-  private _pieces: SparseMultilineTokens[]
-  private _isComplete: boolean
-  private readonly _languageIdCodec: ILanguageIdCodec
 
-  constructor(languageIdCodec: ILanguageIdCodec) {
-    this._pieces = []
-    this._isComplete = false
-    this._languageIdCodec = languageIdCodec
-  }
+	private _pieces: SparseMultilineTokens[];
+	private _isComplete: boolean;
+	private readonly _languageIdCodec: ILanguageIdCodec;
 
-  public flush(): void {
-    this._pieces = []
-    this._isComplete = false
-  }
+	constructor(languageIdCodec: ILanguageIdCodec) {
+		this._pieces = [];
+		this._isComplete = false;
+		this._languageIdCodec = languageIdCodec;
+	}
 
-  public isEmpty(): boolean {
-    return this._pieces.length === 0
-  }
+	public flush(): void {
+		this._pieces = [];
+		this._isComplete = false;
+	}
 
-  public set(
-    pieces: SparseMultilineTokens[] | null,
-    isComplete: boolean,
-  ): void {
-    this._pieces = pieces || []
-    this._isComplete = isComplete
-  }
+	public isEmpty(): boolean {
+		return (this._pieces.length === 0);
+	}
 
-  public setPartial(_range: Range, pieces: SparseMultilineTokens[]): Range {
-    // console.log(`setPartial ${_range} ${pieces.map(p => p.toString()).join(', ')}`);
+	public set(pieces: SparseMultilineTokens[] | null, isComplete: boolean): void {
+		this._pieces = pieces || [];
+		this._isComplete = isComplete;
+	}
 
-    let range = _range
-    if (pieces.length > 0) {
-      const _firstRange = pieces[0].getRange()
-      const _lastRange = pieces[pieces.length - 1].getRange()
-      if (!_firstRange || !_lastRange) {
-        return _range
-      }
-      range = _range.plusRange(_firstRange).plusRange(_lastRange)
-    }
+	public setPartial(_range: Range, pieces: SparseMultilineTokens[]): Range {
+		// console.log(`setPartial ${_range} ${pieces.map(p => p.toString()).join(', ')}`);
 
-    let insertPosition: { index: number } | null = null
-    for (let i = 0, len = this._pieces.length; i < len; i++) {
-      const piece = this._pieces[i]
-      if (piece.endLineNumber < range.startLineNumber) {
-        // this piece is before the range
-        continue
-      }
+		let range = _range;
+		if (pieces.length > 0) {
+			const _firstRange = pieces[0].getRange();
+			const _lastRange = pieces[pieces.length - 1].getRange();
+			if (!_firstRange || !_lastRange) {
+				return _range;
+			}
+			range = _range.plusRange(_firstRange).plusRange(_lastRange);
+		}
 
-      if (piece.startLineNumber > range.endLineNumber) {
-        // this piece is after the range, so mark the spot before this piece
-        // as a good insertion position and stop looping
-        insertPosition = insertPosition || { index: i }
-        break
-      }
+		let insertPosition: { index: number } | null = null;
+		for (let i = 0, len = this._pieces.length; i < len; i++) {
+			const piece = this._pieces[i];
+			if (piece.endLineNumber < range.startLineNumber) {
+				// this piece is before the range
+				continue;
+			}
 
-      // this piece might intersect with the range
-      piece.removeTokens(range)
+			if (piece.startLineNumber > range.endLineNumber) {
+				// this piece is after the range, so mark the spot before this piece
+				// as a good insertion position and stop looping
+				insertPosition = insertPosition || { index: i };
+				break;
+			}
 
-      if (piece.isEmpty()) {
-        // remove the piece if it became empty
-        this._pieces.splice(i, 1)
-        i--
-        len--
-        continue
-      }
+			// this piece might intersect with the range
+			piece.removeTokens(range);
 
-      if (piece.endLineNumber < range.startLineNumber) {
-        // after removal, this piece is before the range
-        continue
-      }
+			if (piece.isEmpty()) {
+				// remove the piece if it became empty
+				this._pieces.splice(i, 1);
+				i--;
+				len--;
+				continue;
+			}
 
-      if (piece.startLineNumber > range.endLineNumber) {
-        // after removal, this piece is after the range
-        insertPosition = insertPosition || { index: i }
-        continue
-      }
+			if (piece.endLineNumber < range.startLineNumber) {
+				// after removal, this piece is before the range
+				continue;
+			}
 
-      // after removal, this piece contains the range
-      const [a, b] = piece.split(range)
-      if (a.isEmpty()) {
-        // this piece is actually after the range
-        insertPosition = insertPosition || { index: i }
-        continue
-      }
-      if (b.isEmpty()) {
-        // this piece is actually before the range
-        continue
-      }
-      this._pieces.splice(i, 1, a, b)
-      i++
-      len++
+			if (piece.startLineNumber > range.endLineNumber) {
+				// after removal, this piece is after the range
+				insertPosition = insertPosition || { index: i };
+				continue;
+			}
 
-      insertPosition = insertPosition || { index: i }
-    }
+			// after removal, this piece contains the range
+			const [a, b] = piece.split(range);
+			if (a.isEmpty()) {
+				// this piece is actually after the range
+				insertPosition = insertPosition || { index: i };
+				continue;
+			}
+			if (b.isEmpty()) {
+				// this piece is actually before the range
+				continue;
+			}
+			this._pieces.splice(i, 1, a, b);
+			i++;
+			len++;
 
-    insertPosition = insertPosition || { index: this._pieces.length }
+			insertPosition = insertPosition || { index: i };
+		}
 
-    if (pieces.length > 0) {
-      this._pieces = arrays.arrayInsert(
-        this._pieces,
-        insertPosition.index,
-        pieces,
-      )
-    }
+		insertPosition = insertPosition || { index: this._pieces.length };
 
-    // console.log(`I HAVE ${this._pieces.length} pieces`);
-    // console.log(`${this._pieces.map(p => p.toString()).join('\n')}`);
+		if (pieces.length > 0) {
+			this._pieces = arrays.arrayInsert(this._pieces, insertPosition.index, pieces);
+		}
 
-    return range
-  }
+		// console.log(`I HAVE ${this._pieces.length} pieces`);
+		// console.log(`${this._pieces.map(p => p.toString()).join('\n')}`);
 
-  public isComplete(): boolean {
-    return this._isComplete
-  }
+		return range;
+	}
 
-  public addSparseTokens(lineNumber: number, aTokens: LineTokens): LineTokens {
-    if (aTokens.getLineContent().length === 0) {
-      // Don't do anything for empty lines
-      return aTokens
-    }
+	public isComplete(): boolean {
+		return this._isComplete;
+	}
 
-    const pieces = this._pieces
+	public addSparseTokens(lineNumber: number, aTokens: LineTokens): LineTokens {
+		if (aTokens.getLineContent().length === 0) {
+			// Don't do anything for empty lines
+			return aTokens;
+		}
 
-    if (pieces.length === 0) {
-      return aTokens
-    }
+		const pieces = this._pieces;
 
-    const pieceIndex = SparseTokensStore._findFirstPieceWithLine(
-      pieces,
-      lineNumber,
-    )
-    const bTokens = pieces[pieceIndex].getLineTokens(lineNumber)
+		if (pieces.length === 0) {
+			return aTokens;
+		}
 
-    if (!bTokens) {
-      return aTokens
-    }
+		const pieceIndex = SparseTokensStore._findFirstPieceWithLine(pieces, lineNumber);
+		const bTokens = pieces[pieceIndex].getLineTokens(lineNumber);
 
-    const aLen = aTokens.getCount()
-    const bLen = bTokens.getCount()
+		if (!bTokens) {
+			return aTokens;
+		}
 
-    let aIndex = 0
-    const result: number[] = []
-    let resultLen = 0
-    let lastEndOffset = 0
+		const aLen = aTokens.getCount();
+		const bLen = bTokens.getCount();
 
-    const emitToken = (endOffset: number, metadata: number) => {
-      if (endOffset === lastEndOffset) {
-        return
-      }
-      lastEndOffset = endOffset
-      result[resultLen++] = endOffset
-      result[resultLen++] = metadata
-    }
+		let aIndex = 0;
+		const result: number[] = [];
+		let resultLen = 0;
+		let lastEndOffset = 0;
 
-    for (let bIndex = 0; bIndex < bLen; bIndex++) {
-      const bStartCharacter = bTokens.getStartCharacter(bIndex)
-      const bEndCharacter = bTokens.getEndCharacter(bIndex)
-      const bMetadata = bTokens.getMetadata(bIndex)
+		const emitToken = (endOffset: number, metadata: number) => {
+			if (endOffset === lastEndOffset) {
+				return;
+			}
+			lastEndOffset = endOffset;
+			result[resultLen++] = endOffset;
+			result[resultLen++] = metadata;
+		};
 
-      const bMask =
-        ((bMetadata & MetadataConsts.SEMANTIC_USE_ITALIC
-          ? MetadataConsts.ITALIC_MASK
-          : 0) |
-          (bMetadata & MetadataConsts.SEMANTIC_USE_BOLD
-            ? MetadataConsts.BOLD_MASK
-            : 0) |
-          (bMetadata & MetadataConsts.SEMANTIC_USE_UNDERLINE
-            ? MetadataConsts.UNDERLINE_MASK
-            : 0) |
-          (bMetadata & MetadataConsts.SEMANTIC_USE_STRIKETHROUGH
-            ? MetadataConsts.STRIKETHROUGH_MASK
-            : 0) |
-          (bMetadata & MetadataConsts.SEMANTIC_USE_FOREGROUND
-            ? MetadataConsts.FOREGROUND_MASK
-            : 0) |
-          (bMetadata & MetadataConsts.SEMANTIC_USE_BACKGROUND
-            ? MetadataConsts.BACKGROUND_MASK
-            : 0)) >>>
-        0
-      const aMask = ~bMask >>> 0
+		for (let bIndex = 0; bIndex < bLen; bIndex++) {
+			const bStartCharacter = bTokens.getStartCharacter(bIndex);
+			const bEndCharacter = bTokens.getEndCharacter(bIndex);
+			const bMetadata = bTokens.getMetadata(bIndex);
 
-      // push any token from `a` that is before `b`
-      while (aIndex < aLen && aTokens.getEndOffset(aIndex) <= bStartCharacter) {
-        emitToken(aTokens.getEndOffset(aIndex), aTokens.getMetadata(aIndex))
-        aIndex++
-      }
+			const bMask = (
+				((bMetadata & MetadataConsts.SEMANTIC_USE_ITALIC) ? MetadataConsts.ITALIC_MASK : 0)
+				| ((bMetadata & MetadataConsts.SEMANTIC_USE_BOLD) ? MetadataConsts.BOLD_MASK : 0)
+				| ((bMetadata & MetadataConsts.SEMANTIC_USE_UNDERLINE) ? MetadataConsts.UNDERLINE_MASK : 0)
+				| ((bMetadata & MetadataConsts.SEMANTIC_USE_STRIKETHROUGH) ? MetadataConsts.STRIKETHROUGH_MASK : 0)
+				| ((bMetadata & MetadataConsts.SEMANTIC_USE_FOREGROUND) ? MetadataConsts.FOREGROUND_MASK : 0)
+				| ((bMetadata & MetadataConsts.SEMANTIC_USE_BACKGROUND) ? MetadataConsts.BACKGROUND_MASK : 0)
+			) >>> 0;
+			const aMask = (~bMask) >>> 0;
 
-      // push the token from `a` if it intersects the token from `b`
-      if (aIndex < aLen && aTokens.getStartOffset(aIndex) < bStartCharacter) {
-        emitToken(bStartCharacter, aTokens.getMetadata(aIndex))
-      }
+			// push any token from `a` that is before `b`
+			while (aIndex < aLen && aTokens.getEndOffset(aIndex) <= bStartCharacter) {
+				emitToken(aTokens.getEndOffset(aIndex), aTokens.getMetadata(aIndex));
+				aIndex++;
+			}
 
-      // skip any tokens from `a` that are contained inside `b`
-      while (aIndex < aLen && aTokens.getEndOffset(aIndex) < bEndCharacter) {
-        emitToken(
-          aTokens.getEndOffset(aIndex),
-          (aTokens.getMetadata(aIndex) & aMask) | (bMetadata & bMask),
-        )
-        aIndex++
-      }
+			// push the token from `a` if it intersects the token from `b`
+			if (aIndex < aLen && aTokens.getStartOffset(aIndex) < bStartCharacter) {
+				emitToken(bStartCharacter, aTokens.getMetadata(aIndex));
+			}
 
-      if (aIndex < aLen) {
-        emitToken(
-          bEndCharacter,
-          (aTokens.getMetadata(aIndex) & aMask) | (bMetadata & bMask),
-        )
-        if (aTokens.getEndOffset(aIndex) === bEndCharacter) {
-          // `a` ends exactly at the same spot as `b`!
-          aIndex++
-        }
-      } else {
-        const aMergeIndex = Math.min(Math.max(0, aIndex - 1), aLen - 1)
+			// skip any tokens from `a` that are contained inside `b`
+			while (aIndex < aLen && aTokens.getEndOffset(aIndex) < bEndCharacter) {
+				emitToken(aTokens.getEndOffset(aIndex), (aTokens.getMetadata(aIndex) & aMask) | (bMetadata & bMask));
+				aIndex++;
+			}
 
-        // push the token from `b`
-        emitToken(
-          bEndCharacter,
-          (aTokens.getMetadata(aMergeIndex) & aMask) | (bMetadata & bMask),
-        )
-      }
-    }
+			if (aIndex < aLen) {
+				emitToken(bEndCharacter, (aTokens.getMetadata(aIndex) & aMask) | (bMetadata & bMask));
+				if (aTokens.getEndOffset(aIndex) === bEndCharacter) {
+					// `a` ends exactly at the same spot as `b`!
+					aIndex++;
+				}
+			} else {
+				const aMergeIndex = Math.min(Math.max(0, aIndex - 1), aLen - 1);
 
-    // push the remaining tokens from `a`
-    while (aIndex < aLen) {
-      emitToken(aTokens.getEndOffset(aIndex), aTokens.getMetadata(aIndex))
-      aIndex++
-    }
+				// push the token from `b`
+				emitToken(bEndCharacter, (aTokens.getMetadata(aMergeIndex) & aMask) | (bMetadata & bMask));
+			}
+		}
 
-    return new LineTokens(
-      new Uint32Array(result),
-      aTokens.getLineContent(),
-      this._languageIdCodec,
-    )
-  }
+		// push the remaining tokens from `a`
+		while (aIndex < aLen) {
+			emitToken(aTokens.getEndOffset(aIndex), aTokens.getMetadata(aIndex));
+			aIndex++;
+		}
 
-  private static _findFirstPieceWithLine(
-    pieces: SparseMultilineTokens[],
-    lineNumber: number,
-  ): number {
-    let low = 0
-    let high = pieces.length - 1
+		return new LineTokens(new Uint32Array(result), aTokens.getLineContent(), this._languageIdCodec);
+	}
 
-    while (low < high) {
-      let mid = low + Math.floor((high - low) / 2)
+	private static _findFirstPieceWithLine(pieces: SparseMultilineTokens[], lineNumber: number): number {
+		let low = 0;
+		let high = pieces.length - 1;
 
-      if (pieces[mid].endLineNumber < lineNumber) {
-        low = mid + 1
-      } else if (pieces[mid].startLineNumber > lineNumber) {
-        high = mid - 1
-      } else {
-        while (
-          mid > low &&
-          pieces[mid - 1].startLineNumber <= lineNumber &&
-          lineNumber <= pieces[mid - 1].endLineNumber
-        ) {
-          mid--
-        }
-        return mid
-      }
-    }
+		while (low < high) {
+			let mid = low + Math.floor((high - low) / 2);
 
-    return low
-  }
+			if (pieces[mid].endLineNumber < lineNumber) {
+				low = mid + 1;
+			} else if (pieces[mid].startLineNumber > lineNumber) {
+				high = mid - 1;
+			} else {
+				while (mid > low && pieces[mid - 1].startLineNumber <= lineNumber && lineNumber <= pieces[mid - 1].endLineNumber) {
+					mid--;
+				}
+				return mid;
+			}
+		}
 
-  public acceptEdit(
-    range: IRange,
-    eolCount: number,
-    firstLineLength: number,
-    lastLineLength: number,
-    firstCharCode: number,
-  ): void {
-    for (const piece of this._pieces) {
-      piece.acceptEdit(
-        range,
-        eolCount,
-        firstLineLength,
-        lastLineLength,
-        firstCharCode,
-      )
-    }
-  }
+		return low;
+	}
+
+	public acceptEdit(range: IRange, eolCount: number, firstLineLength: number, lastLineLength: number, firstCharCode: number): void {
+		for (const piece of this._pieces) {
+			piece.acceptEdit(range, eolCount, firstLineLength, lastLineLength, firstCharCode);
+		}
+	}
 }

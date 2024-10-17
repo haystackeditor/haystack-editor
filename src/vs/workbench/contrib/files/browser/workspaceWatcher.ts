@@ -47,7 +47,7 @@ export class WorkspaceWatcher extends Disposable {
   static readonly ID = "workbench.contrib.workspaceWatcher"
 
   private readonly watchedWorkspaces = new ResourceMap<IDisposable>(
-    (resource) => this.uriIdentityService.extUri.getComparisonKey(resource),
+    (resource) => this.uriIdentityService.extUri.getComparisonKey(resource)
   )
 
   constructor(
@@ -62,7 +62,7 @@ export class WorkspaceWatcher extends Disposable {
     @IUriIdentityService
     private readonly uriIdentityService: IUriIdentityService,
     @IHostService private readonly hostService: IHostService,
-    @ITelemetryService private readonly telemetryService: ITelemetryService,
+    @ITelemetryService private readonly telemetryService: ITelemetryService
   ) {
     super()
 
@@ -74,21 +74,21 @@ export class WorkspaceWatcher extends Disposable {
   private registerListeners(): void {
     this._register(
       this.contextService.onDidChangeWorkspaceFolders((e) =>
-        this.onDidChangeWorkspaceFolders(e),
-      ),
+        this.onDidChangeWorkspaceFolders(e)
+      )
     )
     this._register(
       this.contextService.onDidChangeWorkbenchState(() =>
-        this.onDidChangeWorkbenchState(),
-      ),
+        this.onDidChangeWorkbenchState()
+      )
     )
     this._register(
       this.configurationService.onDidChangeConfiguration((e) =>
-        this.onDidChangeConfiguration(e),
-      ),
+        this.onDidChangeConfiguration(e)
+      )
     )
     this._register(
-      this.fileService.onDidWatchError((error) => this.onDidWatchError(error)),
+      this.fileService.onDidWatchError((error) => this.onDidWatchError(error))
     )
   }
 
@@ -129,14 +129,14 @@ export class WorkspaceWatcher extends Disposable {
         Severity.Warning,
         localize(
           "enospcError",
-          "Unable to watch for file changes. Please follow the instructions link to resolve this issue.",
+          "Unable to watch for file changes. Please follow the instructions link to resolve this issue."
         ),
         [
           {
             label: localize("learnMore", "Instructions"),
             run: () =>
               this.openerService.open(
-                URI.parse("https://go.microsoft.com/fwlink/?linkid=867693"),
+                URI.parse("https://go.microsoft.com/fwlink/?linkid=867693")
               ),
           },
         ],
@@ -147,7 +147,7 @@ export class WorkspaceWatcher extends Disposable {
             isSecondary: true,
             scope: NeverShowAgainScope.WORKSPACE,
           },
-        },
+        }
       )
     }
 
@@ -159,7 +159,7 @@ export class WorkspaceWatcher extends Disposable {
         Severity.Warning,
         localize(
           "eshutdownError",
-          "File changes watcher stopped unexpectedly. A reload of the window may enable the watcher again unless the workspace cannot be watched for file changes.",
+          "File changes watcher stopped unexpectedly. A reload of the window may enable the watcher again unless the workspace cannot be watched for file changes."
         ),
         [
           {
@@ -170,7 +170,7 @@ export class WorkspaceWatcher extends Disposable {
         {
           sticky: true,
           priority: NotificationPriority.SILENT, // reduce potential spam since we don't really know how often this fires
-        },
+        }
       )
     }
 
@@ -216,7 +216,7 @@ export class WorkspaceWatcher extends Disposable {
     }
 
     const pathsToWatch = new ResourceMap<URI>((uri) =>
-      this.uriIdentityService.extUri.getComparisonKey(uri),
+      this.uriIdentityService.extUri.getComparisonKey(uri)
     )
 
     // Add the workspace as path to watch
@@ -237,7 +237,7 @@ export class WorkspaceWatcher extends Disposable {
           if (
             this.uriIdentityService.extUri.isEqualOrParent(
               candidate,
-              workspace.uri,
+              workspace.uri
             )
           ) {
             pathsToWatch.set(candidate, candidate)
@@ -256,7 +256,7 @@ export class WorkspaceWatcher extends Disposable {
     const disposables = new DisposableStore()
     for (const [, pathToWatch] of pathsToWatch) {
       disposables.add(
-        this.fileService.watch(pathToWatch, { recursive: true, excludes }),
+        this.fileService.watch(pathToWatch, { recursive: true, excludes })
       )
     }
     this.watchedWorkspaces.set(workspace.uri, disposables)

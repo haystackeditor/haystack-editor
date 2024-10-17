@@ -39,7 +39,7 @@ script:
   - rm -f lib/x86_64-linux-gnu/libglib*
   # - rm -rf Haystack
   - cat > AppRun <<\EOF
-  -  #!/bin/sh
+  - #!/bin/sh
   - HERE="$(dirname "$(readlink -f "${0}")")"
   - export PATH="${HERE}"/usr/bin/:"${HERE}"/usr/sbin/:"${HERE}"/usr/games/:"${HERE}"/bin/:"${HERE}"/sbin/:"${PATH}"
   - export LD_LIBRARY_PATH="${HERE}"/usr/lib/:"${HERE}"/usr/lib32/:"${HERE}"/usr/lib64/:"${HERE}"/lib/:"${HERE}"/lib/i386-linux-gnu/:"${HERE}"/lib/x86_64-linux-gnu/:"${HERE}"/lib32/:"${HERE}"/lib64/:"${LD_LIBRARY_PATH}"
@@ -50,3 +50,4 @@ script:
   - EXEC=$(grep -e '^Exec=.*' "${HERE}"/*.desktop | head -n 1 | cut -d "=" -f 2- | sed -e 's|%.||g')
   - exec ${EXEC} "$@"
   - EOF
+

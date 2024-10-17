@@ -8,14 +8,15 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-import * as assert from "assert"
-import { isMacintosh, isWindows } from "vs/base/common/platform"
-import { ensureNoDisposablesAreLeakedInTestSuite } from "vs/base/test/common/utils"
+import * as assert from 'assert';
+import { isMacintosh, isWindows } from 'vs/base/common/platform';
+import { ensureNoDisposablesAreLeakedInTestSuite } from 'vs/base/test/common/utils';
 
-suite("Browsers", () => {
-  ensureNoDisposablesAreLeakedInTestSuite()
+suite('Browsers', () => {
 
-  test("all", () => {
-    assert(!(isWindows && isMacintosh))
-  })
-})
+	ensureNoDisposablesAreLeakedInTestSuite();
+
+	test('all', () => {
+		assert(!(isWindows && isMacintosh));
+	});
+});

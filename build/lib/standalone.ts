@@ -36,21 +36,21 @@ function writeFile(filePath: string, contents: Buffer | string): void {
 }
 
 export function extractEditor(
-  options: tss.ITreeShakingOptions & { destRoot: string },
+  options: tss.ITreeShakingOptions & { destRoot: string }
 ): void {
   const ts = require("typescript") as typeof import("typescript")
 
   const tsConfig = JSON.parse(
     fs
       .readFileSync(path.join(options.sourcesRoot, "tsconfig.monaco.json"))
-      .toString(),
+      .toString()
   )
   let compilerOptions: { [key: string]: any }
   if (tsConfig.extends) {
     compilerOptions = Object.assign(
       {},
       require(path.join(options.sourcesRoot, tsConfig.extends)).compilerOptions,
-      tsConfig.compilerOptions,
+      tsConfig.compilerOptions
     )
     delete tsConfig.extends
   } else {
@@ -67,13 +67,13 @@ export function extractEditor(
 
   console.log(
     `Running tree shaker with shakeLevel ${tss.toStringShakeLevel(
-      options.shakeLevel,
-    )}`,
+      options.shakeLevel
+    )}`
   )
 
   // Take the extra included .d.ts files from `tsconfig.monaco.json`
   options.typings = (<string[]>tsConfig.include).filter((includedFile) =>
-    /\.d\.ts$/.test(includedFile),
+    /\.d\.ts$/.test(includedFile)
   )
 
   // Add extra .d.ts files from `node_modules/@types/`
@@ -125,7 +125,7 @@ export function extractEditor(
         } else {
           if (
             fs.existsSync(
-              path.join(options.sourcesRoot, importedFilePath + ".js"),
+              path.join(options.sourcesRoot, importedFilePath + ".js")
             )
           ) {
             copyFile(importedFilePath + ".js")
@@ -182,7 +182,7 @@ export function createESMSourcesAndResources2(options: IOptions2): void {
 
     if (file === "tsconfig.json") {
       const tsConfig = JSON.parse(
-        fs.readFileSync(path.join(SRC_FOLDER, file)).toString(),
+        fs.readFileSync(path.join(SRC_FOLDER, file)).toString()
       )
       tsConfig.compilerOptions.module = "es6"
       tsConfig.compilerOptions.outDir = path
@@ -201,7 +201,7 @@ export function createESMSourcesAndResources2(options: IOptions2): void {
       // Transport the files directly
       write(
         getDestAbsoluteFilePath(file),
-        fs.readFileSync(path.join(SRC_FOLDER, file)),
+        fs.readFileSync(path.join(SRC_FOLDER, file))
       )
       continue
     }
@@ -253,7 +253,7 @@ export function createESMSourcesAndResources2(options: IOptions2): void {
         /import ([a-zA-Z0-9]+) = require\(('[^']+')\);/g,
         function (_, m1, m2) {
           return `import * as ${m1} from ${m2};`
-        },
+        }
       )
 
       write(getDestAbsoluteFilePath(file), fileContents)
@@ -278,7 +278,7 @@ export function createESMSourcesAndResources2(options: IOptions2): void {
   function _walkDirRecursive(
     dir: string,
     result: string[],
-    trimPos: number,
+    trimPos: number
   ): void {
     const files = fs.readdirSync(dir)
     for (let i = 0; i < files.length; i++) {
@@ -342,7 +342,7 @@ export function createESMSourcesAndResources2(options: IOptions2): void {
 function transportCSS(
   module: string,
   enqueue: (module: string) => void,
-  write: (path: string, contents: string | Buffer) => void,
+  write: (path: string, contents: string | Buffer) => void
 ): boolean {
   if (!/\.css/.test(module)) {
     return false
@@ -354,14 +354,14 @@ function transportCSS(
 
   const newContents = _rewriteOrInlineUrls(
     fileContents,
-    inlineResources === "base64",
+    inlineResources === "base64"
   )
   write(module, newContents)
   return true
 
   function _rewriteOrInlineUrls(
     contents: string,
-    forceBase64: boolean,
+    forceBase64: boolean
   ): string {
     return _replaceURL(contents, (url) => {
       const fontMatch = url.match(/^(.*).ttf\?(.*)$/)
@@ -398,7 +398,7 @@ function transportCSS(
 
   function _replaceURL(
     contents: string,
-    replacer: (url: string) => string,
+    replacer: (url: string) => string
   ): string {
     // Use ")" as the terminator as quotes are oftentimes not used at all
     return contents.replace(
@@ -434,7 +434,7 @@ function transportCSS(
         }
 
         return "url(" + url + ")"
-      },
+      }
     )
   }
 

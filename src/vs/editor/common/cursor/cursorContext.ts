@@ -9,32 +9,23 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ITextModel } from "vs/editor/common/model"
-import { ICoordinatesConverter } from "vs/editor/common/viewModel"
-import {
-  CursorConfiguration,
-  ICursorSimpleModel,
-} from "vs/editor/common/cursorCommon"
-import { IRange } from "vs/editor/common/core/range"
+import { ITextModel } from 'vs/editor/common/model';
+import { ICoordinatesConverter } from 'vs/editor/common/viewModel';
+import { CursorConfiguration, ICursorSimpleModel } from 'vs/editor/common/cursorCommon';
+import { IRange } from 'vs/editor/common/core/range';
 
 export class CursorContext {
-  _cursorContextBrand: void = undefined
+	_cursorContextBrand: void = undefined;
 
-  public readonly model: ITextModel
-  public readonly viewModel: ICursorSimpleModel
-  public readonly coordinatesConverter: ICoordinatesConverter
-  public readonly cursorConfig: CursorConfiguration
+	public readonly model: ITextModel;
+	public readonly viewModel: ICursorSimpleModel;
+	public readonly coordinatesConverter: ICoordinatesConverter;
+	public readonly cursorConfig: CursorConfiguration;
 
-  constructor(
-    model: ITextModel,
-    public readonly editRange: IRange | undefined,
-    viewModel: ICursorSimpleModel,
-    coordinatesConverter: ICoordinatesConverter,
-    cursorConfig: CursorConfiguration,
-  ) {
-    this.model = model
-    this.viewModel = viewModel
-    this.coordinatesConverter = coordinatesConverter
-    this.cursorConfig = cursorConfig
-  }
+	constructor(model: ITextModel, public readonly editRange: IRange | undefined, viewModel: ICursorSimpleModel, coordinatesConverter: ICoordinatesConverter, cursorConfig: CursorConfiguration) {
+		this.model = model;
+		this.viewModel = viewModel;
+		this.coordinatesConverter = coordinatesConverter;
+		this.cursorConfig = cursorConfig;
+	}
 }

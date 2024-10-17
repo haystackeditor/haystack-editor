@@ -9,63 +9,52 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Memento, MementoObject } from "vs/workbench/common/memento"
-import { IThemeService, Themable } from "vs/platform/theme/common/themeService"
-import {
-  IStorageService,
-  IStorageValueChangeEvent,
-  StorageScope,
-  StorageTarget,
-} from "vs/platform/storage/common/storage"
-import { DisposableStore } from "vs/base/common/lifecycle"
-import { Event } from "vs/base/common/event"
+import { Memento, MementoObject } from 'vs/workbench/common/memento';
+import { IThemeService, Themable } from 'vs/platform/theme/common/themeService';
+import { IStorageService, IStorageValueChangeEvent, StorageScope, StorageTarget } from 'vs/platform/storage/common/storage';
+import { DisposableStore } from 'vs/base/common/lifecycle';
+import { Event } from 'vs/base/common/event';
 
 export class Component extends Themable {
-  private readonly memento: Memento
 
-  constructor(
-    private readonly id: string,
-    themeService: IThemeService,
-    storageService: IStorageService,
-  ) {
-    super(themeService)
+	private readonly memento: Memento;
 
-    this.memento = new Memento(this.id, storageService)
+	constructor(
+		private readonly id: string,
+		themeService: IThemeService,
+		storageService: IStorageService
+	) {
+		super(themeService);
 
-    this._register(
-      storageService.onWillSaveState(() => {
-        // Ask the component to persist state into the memento
-        this.saveState()
+		this.memento = new Memento(this.id, storageService);
 
-        // Then save the memento into storage
-        this.memento.saveMemento()
-      }),
-    )
-  }
+		this._register(storageService.onWillSaveState(() => {
 
-  getId(): string {
-    return this.id
-  }
+			// Ask the component to persist state into the memento
+			this.saveState();
 
-  protected getMemento(
-    scope: StorageScope,
-    target: StorageTarget,
-  ): MementoObject {
-    return this.memento.getMemento(scope, target)
-  }
+			// Then save the memento into storage
+			this.memento.saveMemento();
+		}));
+	}
 
-  protected reloadMemento(scope: StorageScope): void {
-    return this.memento.reloadMemento(scope)
-  }
+	getId(): string {
+		return this.id;
+	}
 
-  protected onDidChangeMementoValue(
-    scope: StorageScope,
-    disposables: DisposableStore,
-  ): Event<IStorageValueChangeEvent> {
-    return this.memento.onDidChangeValue(scope, disposables)
-  }
+	protected getMemento(scope: StorageScope, target: StorageTarget): MementoObject {
+		return this.memento.getMemento(scope, target);
+	}
 
-  protected saveState(): void {
-    // Subclasses to implement for storing state
-  }
+	protected reloadMemento(scope: StorageScope): void {
+		return this.memento.reloadMemento(scope);
+	}
+
+	protected onDidChangeMementoValue(scope: StorageScope, disposables: DisposableStore): Event<IStorageValueChangeEvent> {
+		return this.memento.onDidChangeValue(scope, disposables);
+	}
+
+	protected saveState(): void {
+		// Subclasses to implement for storing state
+	}
 }

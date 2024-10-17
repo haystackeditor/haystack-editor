@@ -9,43 +9,43 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ok } from "vs/base/common/assert"
-import { Schemas } from "vs/base/common/network"
-import { regExpLeadsToEndlessLoop } from "vs/base/common/strings"
-import { URI } from "vs/base/common/uri"
-import { MirrorTextModel } from "vs/editor/common/model/mirrorTextModel"
+import { ok } from "vs/base/common/assert";
+import { Schemas } from "vs/base/common/network";
+import { regExpLeadsToEndlessLoop } from "vs/base/common/strings";
+import { URI } from "vs/base/common/uri";
+import { MirrorTextModel } from "vs/editor/common/model/mirrorTextModel";
 import {
   ensureValidWordDefinition,
   getWordAtText,
-} from "vs/editor/common/core/wordHelper"
-import { MainThreadDocumentsShape } from "vs/workbench/api/common/extHost.protocol"
+} from "vs/editor/common/core/wordHelper";
+import { MainThreadDocumentsShape } from "vs/workbench/api/common/extHost.protocol";
 import {
   EndOfLine,
   Position,
   Range,
-} from "vs/workbench/api/common/extHostTypes"
-import type * as vscode from "vscode"
-import { equals } from "vs/base/common/arrays"
+} from "vs/workbench/api/common/extHostTypes";
+import type * as vscode from "vscode";
+import { equals } from "vs/base/common/arrays";
 
-const _languageId2WordDefinition = new Map<string, RegExp>()
+const _languageId2WordDefinition = new Map<string, RegExp>();
 export function setWordDefinitionFor(
   languageId: string,
-  wordDefinition: RegExp | undefined,
+  wordDefinition: RegExp | undefined
 ): void {
   if (!wordDefinition) {
-    _languageId2WordDefinition.delete(languageId)
+    _languageId2WordDefinition.delete(languageId);
   } else {
-    _languageId2WordDefinition.set(languageId, wordDefinition)
+    _languageId2WordDefinition.set(languageId, wordDefinition);
   }
 }
 
 function getWordDefinitionFor(languageId: string): RegExp | undefined {
-  return _languageId2WordDefinition.get(languageId)
+  return _languageId2WordDefinition.get(languageId);
 }
 
 export class ExtHostDocumentData extends MirrorTextModel {
-  private _document?: vscode.TextDocument
-  private _isDisposed: boolean = false
+  private _document?: vscode.TextDocument;
+  private _isDisposed: boolean = false;
 
   constructor(
     private readonly _proxy: MainThreadDocumentsShape,
@@ -54,9 +54,9 @@ export class ExtHostDocumentData extends MirrorTextModel {
     eol: string,
     versionId: number,
     private _languageId: string,
-    private _isDirty: boolean,
+    private _isDirty: boolean
   ) {
-    super(uri, lines, eol, versionId)
+    super(uri, lines, eol, versionId);
   }
 
   // eslint-disable-next-line local/code-must-use-super-dispose
@@ -64,130 +64,130 @@ export class ExtHostDocumentData extends MirrorTextModel {
     // we don't really dispose documents but let
     // extensions still read from them. some
     // operations, live saving, will now error tho
-    ok(!this._isDisposed)
-    this._isDisposed = true
-    this._isDirty = false
+    ok(!this._isDisposed);
+    this._isDisposed = true;
+    this._isDirty = false;
   }
 
   equalLines(lines: readonly string[]): boolean {
-    return equals(this._lines, lines)
+    return equals(this._lines, lines);
   }
 
   get document(): vscode.TextDocument {
     if (!this._document) {
-      const that = this
+      const that = this;
       this._document = {
         get uri() {
-          return that._uri
+          return that._uri;
         },
         get fileName() {
-          return that._uri.fsPath
+          return that._uri.fsPath;
         },
         get isUntitled() {
-          return that._uri.scheme === Schemas.untitled
+          return that._uri.scheme === Schemas.untitled;
         },
         get languageId() {
-          return that._languageId
+          return that._languageId;
         },
         get version() {
-          return that._versionId
+          return that._versionId;
         },
         get isClosed() {
-          return that._isDisposed
+          return that._isDisposed;
         },
         get isDirty() {
-          return that._isDirty
+          return that._isDirty;
         },
         save() {
-          return that._save()
+          return that._save();
         },
         getText(range?) {
-          return range ? that._getTextInRange(range) : that.getText()
+          return range ? that._getTextInRange(range) : that.getText();
         },
         get eol() {
-          return that._eol === "\n" ? EndOfLine.LF : EndOfLine.CRLF
+          return that._eol === "\n" ? EndOfLine.LF : EndOfLine.CRLF;
         },
         get lineCount() {
-          return that._lines.length
+          return that._lines.length;
         },
         lineAt(lineOrPos: number | vscode.Position) {
-          return that._lineAt(lineOrPos)
+          return that._lineAt(lineOrPos);
         },
         offsetAt(pos) {
-          return that._offsetAt(pos)
+          return that._offsetAt(pos);
         },
         positionAt(offset) {
-          return that._positionAt(offset)
+          return that._positionAt(offset);
         },
         validateRange(ran) {
-          return that._validateRange(ran)
+          return that._validateRange(ran);
         },
         validatePosition(pos) {
-          return that._validatePosition(pos)
+          return that._validatePosition(pos);
         },
         getWordRangeAtPosition(pos, regexp?) {
-          return that._getWordRangeAtPosition(pos, regexp)
+          return that._getWordRangeAtPosition(pos, regexp);
         },
-      }
+      };
     }
-    return Object.freeze(this._document)
+    return Object.freeze(this._document);
   }
 
   _acceptLanguageId(newLanguageId: string): void {
-    ok(!this._isDisposed)
-    this._languageId = newLanguageId
+    ok(!this._isDisposed);
+    this._languageId = newLanguageId;
   }
 
   _acceptIsDirty(isDirty: boolean): void {
-    ok(!this._isDisposed)
-    this._isDirty = isDirty
+    ok(!this._isDisposed);
+    this._isDirty = isDirty;
   }
 
   private _save(): Promise<boolean> {
     if (this._isDisposed) {
-      return Promise.reject(new Error("Document has been closed"))
+      return Promise.reject(new Error("Document has been closed"));
     }
-    return this._proxy.$trySaveDocument(this._uri)
+    return this._proxy.$trySaveDocument(this._uri);
   }
 
   private _getTextInRange(_range: vscode.Range): string {
-    const range = this._validateRange(_range)
+    const range = this._validateRange(_range);
 
     if (range.isEmpty) {
-      return ""
+      return "";
     }
 
     if (range.isSingleLine) {
       return this._lines[range.start.line].substring(
         range.start.character,
-        range.end.character,
-      )
+        range.end.character
+      );
     }
 
     const lineEnding = this._eol,
       startLineIndex = range.start.line,
       endLineIndex = range.end.line,
-      resultLines: string[] = []
+      resultLines: string[] = [];
 
     resultLines.push(
-      this._lines[startLineIndex].substring(range.start.character),
-    )
+      this._lines[startLineIndex].substring(range.start.character)
+    );
     for (let i = startLineIndex + 1; i < endLineIndex; i++) {
-      resultLines.push(this._lines[i])
+      resultLines.push(this._lines[i]);
     }
     resultLines.push(
-      this._lines[endLineIndex].substring(0, range.end.character),
-    )
+      this._lines[endLineIndex].substring(0, range.end.character)
+    );
 
-    return resultLines.join(lineEnding)
+    return resultLines.join(lineEnding);
   }
 
   private _lineAt(lineOrPosition: number | vscode.Position): vscode.TextLine {
-    let line: number | undefined
+    let line: number | undefined;
     if (lineOrPosition instanceof Position) {
-      line = lineOrPosition.line
+      line = lineOrPosition.line;
     } else if (typeof lineOrPosition === "number") {
-      line = lineOrPosition
+      line = lineOrPosition;
     }
 
     if (
@@ -196,161 +196,161 @@ export class ExtHostDocumentData extends MirrorTextModel {
       line >= this._lines.length ||
       Math.floor(line) !== line
     ) {
-      throw new Error("Illegal value for `line`")
+      throw new Error("Illegal value for `line`");
     }
 
     return new ExtHostDocumentLine(
       line,
       this._lines[line],
-      line === this._lines.length - 1,
-    )
+      line === this._lines.length - 1
+    );
   }
 
   private _offsetAt(position: vscode.Position): number {
-    position = this._validatePosition(position)
-    this._ensureLineStarts()
+    position = this._validatePosition(position);
+    this._ensureLineStarts();
     return (
       this._lineStarts!.getPrefixSum(position.line - 1) + position.character
-    )
+    );
   }
 
   private _positionAt(offset: number): vscode.Position {
-    offset = Math.floor(offset)
-    offset = Math.max(0, offset)
+    offset = Math.floor(offset);
+    offset = Math.max(0, offset);
 
-    this._ensureLineStarts()
-    const out = this._lineStarts!.getIndexOf(offset)
+    this._ensureLineStarts();
+    const out = this._lineStarts!.getIndexOf(offset);
 
-    const lineLength = this._lines[out.index].length
+    const lineLength = this._lines[out.index].length;
 
     // Ensure we return a valid position
-    return new Position(out.index, Math.min(out.remainder, lineLength))
+    return new Position(out.index, Math.min(out.remainder, lineLength));
   }
 
   // ---- range math
 
   private _validateRange(range: vscode.Range): vscode.Range {
     if (!(range instanceof Range)) {
-      throw new Error("Invalid argument")
+      throw new Error("Invalid argument");
     }
 
-    const start = this._validatePosition(range.start)
-    const end = this._validatePosition(range.end)
+    const start = this._validatePosition(range.start);
+    const end = this._validatePosition(range.end);
 
     if (start === range.start && end === range.end) {
-      return range
+      return range;
     }
-    return new Range(start.line, start.character, end.line, end.character)
+    return new Range(start.line, start.character, end.line, end.character);
   }
 
   private _validatePosition(position: vscode.Position): vscode.Position {
     if (!(position instanceof Position)) {
-      throw new Error("Invalid argument")
+      throw new Error("Invalid argument");
     }
 
     if (this._lines.length === 0) {
-      return position.with(0, 0)
+      return position.with(0, 0);
     }
 
-    let { line, character } = position
-    let hasChanged = false
+    let { line, character } = position;
+    let hasChanged = false;
 
     if (line < 0) {
-      line = 0
-      character = 0
-      hasChanged = true
+      line = 0;
+      character = 0;
+      hasChanged = true;
     } else if (line >= this._lines.length) {
-      line = this._lines.length - 1
-      character = this._lines[line].length
-      hasChanged = true
+      line = this._lines.length - 1;
+      character = this._lines[line].length;
+      hasChanged = true;
     } else {
-      const maxCharacter = this._lines[line].length
+      const maxCharacter = this._lines[line].length;
       if (character < 0) {
-        character = 0
-        hasChanged = true
+        character = 0;
+        hasChanged = true;
       } else if (character > maxCharacter) {
-        character = maxCharacter
-        hasChanged = true
+        character = maxCharacter;
+        hasChanged = true;
       }
     }
 
     if (!hasChanged) {
-      return position
+      return position;
     }
-    return new Position(line, character)
+    return new Position(line, character);
   }
 
   private _getWordRangeAtPosition(
     _position: vscode.Position,
-    regexp?: RegExp,
+    regexp?: RegExp
   ): vscode.Range | undefined {
-    const position = this._validatePosition(_position)
+    const position = this._validatePosition(_position);
 
     if (!regexp) {
       // use default when custom-regexp isn't provided
-      regexp = getWordDefinitionFor(this._languageId)
+      regexp = getWordDefinitionFor(this._languageId);
     } else if (regExpLeadsToEndlessLoop(regexp)) {
       // use default when custom-regexp is bad
       throw new Error(
-        `[getWordRangeAtPosition]: ignoring custom regexp '${regexp.source}' because it matches the empty string.`,
-      )
+        `[getWordRangeAtPosition]: ignoring custom regexp '${regexp.source}' because it matches the empty string.`
+      );
     }
 
     const wordAtText = getWordAtText(
       position.character + 1,
       ensureValidWordDefinition(regexp),
       this._lines[position.line],
-      0,
-    )
+      0
+    );
 
     if (wordAtText) {
       return new Range(
         position.line,
         wordAtText.startColumn - 1,
         position.line,
-        wordAtText.endColumn - 1,
-      )
+        wordAtText.endColumn - 1
+      );
     }
-    return undefined
+    return undefined;
   }
 }
 
 export class ExtHostDocumentLine implements vscode.TextLine {
-  private readonly _line: number
-  private readonly _text: string
-  private readonly _isLastLine: boolean
+  private readonly _line: number;
+  private readonly _text: string;
+  private readonly _isLastLine: boolean;
 
   constructor(line: number, text: string, isLastLine: boolean) {
-    this._line = line
-    this._text = text
-    this._isLastLine = isLastLine
+    this._line = line;
+    this._text = text;
+    this._isLastLine = isLastLine;
   }
 
   public get lineNumber(): number {
-    return this._line
+    return this._line;
   }
 
   public get text(): string {
-    return this._text
+    return this._text;
   }
 
   public get range(): Range {
-    return new Range(this._line, 0, this._line, this._text.length)
+    return new Range(this._line, 0, this._line, this._text.length);
   }
 
   public get rangeIncludingLineBreak(): Range {
     if (this._isLastLine) {
-      return this.range
+      return this.range;
     }
-    return new Range(this._line, 0, this._line + 1, 0)
+    return new Range(this._line, 0, this._line + 1, 0);
   }
 
   public get firstNonWhitespaceCharacterIndex(): number {
     //TODO@api, rename to 'leadingWhitespaceLength'
-    return /^(\s*)/.exec(this._text)![1].length
+    return /^(\s*)/.exec(this._text)![1].length;
   }
 
   public get isEmptyOrWhitespace(): boolean {
-    return this.firstNonWhitespaceCharacterIndex === this._text.length
+    return this.firstNonWhitespaceCharacterIndex === this._text.length;
   }
 }

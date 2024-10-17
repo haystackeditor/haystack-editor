@@ -56,8 +56,7 @@ export abstract class PaneComposite
     @IThemeService themeService: IThemeService,
     @IContextMenuService protected contextMenuService: IContextMenuService,
     @IExtensionService protected extensionService: IExtensionService,
-    @IWorkspaceContextService
-    protected contextService: IWorkspaceContextService,
+    @IWorkspaceContextService protected contextService: IWorkspaceContextService
   ) {
     super(id, telemetryService, themeService, storageService)
   }
@@ -65,10 +64,10 @@ export abstract class PaneComposite
   override create(parent: HTMLElement): void {
     super.create(parent)
     this.viewPaneContainer = this._register(
-      this.createViewPaneContainer(parent),
+      this.createViewPaneContainer(parent)
     )
     this._register(
-      this.viewPaneContainer.onTitleAreaUpdate(() => this.updateTitleArea()),
+      this.viewPaneContainer.onTitleAreaUpdate(() => this.updateTitleArea())
     )
     this.viewPaneContainer.create(parent)
   }
@@ -145,7 +144,7 @@ export abstract class PaneComposite
     const viewsSubmenuActionIndex = menuActions.findIndex(
       (action) =>
         action instanceof SubmenuItemAction &&
-        action.item.submenu === ViewsSubMenu,
+        action.item.submenu === ViewsSubMenu
     )
     if (viewsSubmenuActionIndex !== -1) {
       const viewsSubmenuAction = <SubmenuItemAction>(
@@ -176,7 +175,7 @@ export abstract class PaneComposite
 
   override getActionViewItem(
     action: IAction,
-    options: IBaseActionViewItemOptions,
+    options: IBaseActionViewItemOptions
   ): IActionViewItem | undefined {
     return this.viewPaneContainer?.getActionViewItem(action, options)
   }
@@ -191,7 +190,7 @@ export abstract class PaneComposite
   }
 
   protected abstract createViewPaneContainer(
-    parent: HTMLElement,
+    parent: HTMLElement
   ): ViewPaneContainer
 }
 
@@ -206,7 +205,7 @@ export class PaneCompositeDescriptor extends CompositeDescriptor<PaneComposite> 
     cssClass?: string,
     order?: number,
     requestedIndex?: number,
-    iconUrl?: URI,
+    iconUrl?: URI
   ): PaneCompositeDescriptor {
     return new PaneCompositeDescriptor(
       ctor as IConstructorSignature<PaneComposite>,
@@ -215,7 +214,7 @@ export class PaneCompositeDescriptor extends CompositeDescriptor<PaneComposite> 
       cssClass,
       order,
       requestedIndex,
-      iconUrl,
+      iconUrl
     )
   }
 
@@ -226,7 +225,7 @@ export class PaneCompositeDescriptor extends CompositeDescriptor<PaneComposite> 
     cssClass?: string,
     order?: number,
     requestedIndex?: number,
-    readonly iconUrl?: URI,
+    readonly iconUrl?: URI
   ) {
     super(ctor, id, name, cssClass, order, requestedIndex)
   }

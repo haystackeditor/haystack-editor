@@ -40,7 +40,7 @@ export function ZoomControls({}: ZoomControlProps) {
   }, [])
 
   const scale = WorkspaceStoreWrapper.useWorkspaceState(
-    (state) => state.canvasScale,
+    (state) => state.canvasScale
   )
 
   return (
@@ -65,11 +65,11 @@ export function ZoomControls({}: ZoomControlProps) {
             Math.abs(roundedScale - scale) < EPSILON
               ? Math.min(MAX_CANVAS_SCALE, Math.round((scale + 0.2) * 10) / 10)
               : roundedScale > scale
-                ? roundedScale
-                : Math.min(MAX_CANVAS_SCALE, roundedScale + 0.2)
+              ? roundedScale
+              : Math.min(MAX_CANVAS_SCALE, roundedScale + 0.2)
           WorkspaceStoreWrapper.getWorkspaceState().setZoomLevel(nextScale)
           WorkspaceStoreWrapper.getWorkspaceState().sendTelemetry(
-            "zoom in 10% button clicked",
+            "zoom in 10% button clicked"
           )
         }}
         ref={zoomInRef}
@@ -87,7 +87,7 @@ export function ZoomControls({}: ZoomControlProps) {
         onClick={() => {
           WorkspaceStoreWrapper.getWorkspaceState().setZoomLevel(1.0)
           WorkspaceStoreWrapper.getWorkspaceState().sendTelemetry(
-            "reset scale clicked",
+            "reset scale clicked"
           )
         }}
       >
@@ -113,11 +113,11 @@ export function ZoomControls({}: ZoomControlProps) {
             Math.abs(roundedScale - scale) < EPSILON
               ? Math.max(MIN_CANVAS_SCALE, Math.round((scale - 0.2) * 10) / 10)
               : roundedScale < scale
-                ? roundedScale
-                : Math.max(MIN_CANVAS_SCALE, roundedScale - 0.2)
+              ? roundedScale
+              : Math.max(MIN_CANVAS_SCALE, roundedScale - 0.2)
           WorkspaceStoreWrapper.getWorkspaceState().setZoomLevel(nextScale)
           WorkspaceStoreWrapper.getWorkspaceState().sendTelemetry(
-            "zoom out 10% button clicked",
+            "zoom out 10% button clicked"
           )
         }}
         ref={zoomOutRef}

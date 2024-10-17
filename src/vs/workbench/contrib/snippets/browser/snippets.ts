@@ -9,37 +9,31 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { createDecorator } from "vs/platform/instantiation/common/instantiation"
-import {
-  SnippetFile,
-  Snippet,
-} from "vs/workbench/contrib/snippets/browser/snippetsFile"
+import { createDecorator } from 'vs/platform/instantiation/common/instantiation';
+import { SnippetFile, Snippet } from 'vs/workbench/contrib/snippets/browser/snippetsFile';
 
-export const ISnippetsService =
-  createDecorator<ISnippetsService>("snippetService")
+export const ISnippetsService = createDecorator<ISnippetsService>('snippetService');
 
 export interface ISnippetGetOptions {
-  includeDisabledSnippets?: boolean
-  includeNoPrefixSnippets?: boolean
-  noRecencySort?: boolean
-  fileTemplateSnippets?: boolean
+	includeDisabledSnippets?: boolean;
+	includeNoPrefixSnippets?: boolean;
+	noRecencySort?: boolean;
+	fileTemplateSnippets?: boolean;
 }
 
 export interface ISnippetsService {
-  readonly _serviceBrand: undefined
 
-  getSnippetFiles(): Promise<Iterable<SnippetFile>>
+	readonly _serviceBrand: undefined;
 
-  isEnabled(snippet: Snippet): boolean
+	getSnippetFiles(): Promise<Iterable<SnippetFile>>;
 
-  updateEnablement(snippet: Snippet, enabled: boolean): void
+	isEnabled(snippet: Snippet): boolean;
 
-  updateUsageTimestamp(snippet: Snippet): void
+	updateEnablement(snippet: Snippet, enabled: boolean): void;
 
-  getSnippets(
-    languageId: string | undefined,
-    opt?: ISnippetGetOptions,
-  ): Promise<Snippet[]>
+	updateUsageTimestamp(snippet: Snippet): void;
 
-  getSnippetsSync(languageId: string, opt?: ISnippetGetOptions): Snippet[]
+	getSnippets(languageId: string | undefined, opt?: ISnippetGetOptions): Promise<Snippet[]>;
+
+	getSnippetsSync(languageId: string, opt?: ISnippetGetOptions): Snippet[];
 }

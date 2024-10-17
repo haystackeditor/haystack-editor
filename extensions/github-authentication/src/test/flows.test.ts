@@ -174,7 +174,7 @@ suite("getFlows", () => {
       assert.strictEqual(
         flows.length,
         testCase.expectedFlows.length,
-        `Unexpected number of flows: ${flows.map((f) => f.label).join(",")}`,
+        `Unexpected number of flows: ${flows.map((f) => f.label).join(",")}`
       )
 
       for (let i = 0; i < flows.length; i++) {

@@ -50,7 +50,7 @@ suite("OpenerService", function () {
     await openerService.open(URI.parse("another:///somepath"))
     assert.strictEqual(
       (editorService.lastInput!.options as ITextEditorOptions)!.selection,
-      undefined,
+      undefined
     )
   })
 
@@ -61,22 +61,22 @@ suite("OpenerService", function () {
     assert.strictEqual(
       (editorService.lastInput!.options as ITextEditorOptions)!.selection!
         .startLineNumber,
-      23,
+      23
     )
     assert.strictEqual(
       (editorService.lastInput!.options as ITextEditorOptions)!.selection!
         .startColumn,
-      1,
+      1
     )
     assert.strictEqual(
       (editorService.lastInput!.options as ITextEditorOptions)!.selection!
         .endLineNumber,
-      undefined,
+      undefined
     )
     assert.strictEqual(
       (editorService.lastInput!.options as ITextEditorOptions)!.selection!
         .endColumn,
-      undefined,
+      undefined
     )
     assert.strictEqual(editorService.lastInput!.resource.fragment, "")
 
@@ -84,34 +84,34 @@ suite("OpenerService", function () {
     assert.strictEqual(
       (editorService.lastInput!.options as ITextEditorOptions)!.selection!
         .startLineNumber,
-      23,
+      23
     )
     assert.strictEqual(
       (editorService.lastInput!.options as ITextEditorOptions)!.selection!
         .startColumn,
-      1,
+      1
     )
 
     await openerService.open(URI.parse("another:///somepath#L23,45"))
     assert.strictEqual(
       (editorService.lastInput!.options as ITextEditorOptions)!.selection!
         .startLineNumber,
-      23,
+      23
     )
     assert.strictEqual(
       (editorService.lastInput!.options as ITextEditorOptions)!.selection!
         .startColumn,
-      45,
+      45
     )
     assert.strictEqual(
       (editorService.lastInput!.options as ITextEditorOptions)!.selection!
         .endLineNumber,
-      undefined,
+      undefined
     )
     assert.strictEqual(
       (editorService.lastInput!.options as ITextEditorOptions)!.selection!
         .endColumn,
-      undefined,
+      undefined
     )
     assert.strictEqual(editorService.lastInput!.resource.fragment, "")
   })
@@ -123,22 +123,22 @@ suite("OpenerService", function () {
     assert.strictEqual(
       (editorService.lastInput!.options as ITextEditorOptions)!.selection!
         .startLineNumber,
-      23,
+      23
     )
     assert.strictEqual(
       (editorService.lastInput!.options as ITextEditorOptions)!.selection!
         .startColumn,
-      1,
+      1
     )
     assert.strictEqual(
       (editorService.lastInput!.options as ITextEditorOptions)!.selection!
         .endLineNumber,
-      undefined,
+      undefined
     )
     assert.strictEqual(
       (editorService.lastInput!.options as ITextEditorOptions)!.selection!
         .endColumn,
-      undefined,
+      undefined
     )
     assert.strictEqual(editorService.lastInput!.resource.fragment, "")
 
@@ -146,22 +146,22 @@ suite("OpenerService", function () {
     assert.strictEqual(
       (editorService.lastInput!.options as ITextEditorOptions)!.selection!
         .startLineNumber,
-      23,
+      23
     )
     assert.strictEqual(
       (editorService.lastInput!.options as ITextEditorOptions)!.selection!
         .startColumn,
-      45,
+      45
     )
     assert.strictEqual(
       (editorService.lastInput!.options as ITextEditorOptions)!.selection!
         .endLineNumber,
-      undefined,
+      undefined
     )
     assert.strictEqual(
       (editorService.lastInput!.options as ITextEditorOptions)!.selection!
         .endColumn,
-      undefined,
+      undefined
     )
     assert.strictEqual(editorService.lastInput!.resource.fragment, "")
   })
@@ -185,7 +185,7 @@ suite("OpenerService", function () {
 
     await openerService.open(
       URI.parse("command:" + id).with({ query: '"123"' }),
-      { allowCommands: true },
+      { allowCommands: true }
     )
     assert.strictEqual(lastCommand!.id, id)
     assert.strictEqual(lastCommand!.args.length, 1)
@@ -199,7 +199,7 @@ suite("OpenerService", function () {
 
     await openerService.open(
       URI.parse("command:" + id).with({ query: "123" }),
-      { allowCommands: true },
+      { allowCommands: true }
     )
     assert.strictEqual(lastCommand!.id, id)
     assert.strictEqual(lastCommand!.args.length, 1)
@@ -207,7 +207,7 @@ suite("OpenerService", function () {
 
     await openerService.open(
       URI.parse("command:" + id).with({ query: JSON.stringify([12, true]) }),
-      { allowCommands: true },
+      { allowCommands: true }
     )
     assert.strictEqual(lastCommand!.id, id)
     assert.strictEqual(lastCommand!.args.length, 2)
@@ -221,14 +221,14 @@ suite("OpenerService", function () {
     store.add(
       openerService.registerValidator({
         shouldOpen: () => Promise.resolve(false),
-      }),
+      })
     )
 
     const httpResult = await openerService.open(
-      URI.parse("https://www.microsoft.com"),
+      URI.parse("https://www.microsoft.com")
     )
     const httpsResult = await openerService.open(
-      URI.parse("https://www.microsoft.com"),
+      URI.parse("https://www.microsoft.com")
     )
     assert.strictEqual(httpResult, false)
     assert.strictEqual(httpsResult, false)
@@ -240,7 +240,7 @@ suite("OpenerService", function () {
     store.add(
       openerService.registerValidator({
         shouldOpen: () => Promise.resolve(true),
-      }),
+      })
     )
 
     let openCount = 0
@@ -250,7 +250,7 @@ suite("OpenerService", function () {
           openCount++
           return Promise.resolve(true)
         },
-      }),
+      })
     )
 
     await openerService.open(URI.parse("http://microsoft.com"))
@@ -269,11 +269,11 @@ suite("OpenerService", function () {
           assert.strictEqual(resource instanceof URI, false)
           return Promise.resolve(false)
         },
-      }),
+      })
     )
     await openerService.open("https://wwww.microsoft.com")
     await openerService.open(
-      'https://www.microsoft.com??params=CountryCode%3DUSA%26Name%3Dvscode"',
+      'https://www.microsoft.com??params=CountryCode%3DUSA%26Name%3Dvscode"'
     )
   })
 
@@ -376,7 +376,7 @@ suite("OpenerService", function () {
 
     try {
       await openerService.resolveExternalUri(
-        URI.parse("file:///Users/user/folder"),
+        URI.parse("file:///Users/user/folder")
       )
       assert.fail("Should not reach here")
     } catch {
@@ -390,11 +390,11 @@ suite("OpenerService", function () {
     })
 
     const result = await openerService.resolveExternalUri(
-      URI.parse("file:///Users/user/folder"),
+      URI.parse("file:///Users/user/folder")
     )
     assert.deepStrictEqual(
       result.resolved.toString(),
-      "file:///Users/user/folder",
+      "file:///Users/user/folder"
     )
     disposable.dispose()
   })

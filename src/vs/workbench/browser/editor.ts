@@ -56,7 +56,7 @@ export interface IEditorPaneRegistry {
    */
   registerEditorPane(
     editorPaneDescriptor: IEditorPaneDescriptor,
-    editorDescriptors: readonly SyncDescriptor<EditorInput>[],
+    editorDescriptors: readonly SyncDescriptor<EditorInput>[]
   ): IDisposable
 
   /**
@@ -83,24 +83,24 @@ export class EditorPaneDescriptor implements IEditorPaneDescriptor {
   static create<Services extends BrandedService[]>(
     ctor: { new (group: IEditorGroup, ...services: Services): EditorPane },
     typeId: string,
-    name: string,
+    name: string
   ): EditorPaneDescriptor {
     return new EditorPaneDescriptor(
       ctor as IConstructorSignature<EditorPane, [IEditorGroup]>,
       typeId,
-      name,
+      name
     )
   }
 
   private constructor(
     private readonly ctor: IConstructorSignature<EditorPane, [IEditorGroup]>,
     readonly typeId: string,
-    readonly name: string,
+    readonly name: string
   ) {}
 
   instantiate(
     instantiationService: IInstantiationService,
-    group: IEditorGroup,
+    group: IEditorGroup
   ): EditorPane {
     EditorPaneDescriptor._onWillInstantiateEditorPane.fire({
       typeId: this.typeId,
@@ -125,7 +125,7 @@ export class EditorPaneRegistry implements IEditorPaneRegistry {
 
   registerEditorPane(
     editorPaneDescriptor: EditorPaneDescriptor,
-    editorDescriptors: readonly SyncDescriptor<EditorInput>[],
+    editorDescriptors: readonly SyncDescriptor<EditorInput>[]
   ): IDisposable {
     this.mapEditorPanesToEditors.set(editorPaneDescriptor, editorDescriptors)
 
@@ -150,7 +150,7 @@ export class EditorPaneRegistry implements IEditorPaneRegistry {
 
   private findEditorPaneDescriptors(
     editor: EditorInput,
-    byInstanceOf?: boolean,
+    byInstanceOf?: boolean
   ): EditorPaneDescriptor[] {
     const matchingEditorPaneDescriptors: EditorPaneDescriptor[] = []
 
@@ -187,7 +187,7 @@ export class EditorPaneRegistry implements IEditorPaneRegistry {
   getEditorPaneByType(typeId: string): EditorPaneDescriptor | undefined {
     return Iterable.find(
       this.mapEditorPanesToEditors.keys(),
-      (editor) => editor.typeId === typeId,
+      (editor) => editor.typeId === typeId
     )
   }
 
@@ -201,7 +201,7 @@ export class EditorPaneRegistry implements IEditorPaneRegistry {
       const editorDescriptors = this.mapEditorPanesToEditors.get(editorPane)
       if (editorDescriptors) {
         editorClasses.push(
-          ...editorDescriptors.map((editorDescriptor) => editorDescriptor.ctor),
+          ...editorDescriptors.map((editorDescriptor) => editorDescriptor.ctor)
         )
       }
     }
@@ -220,7 +220,7 @@ Registry.add(EditorExtensions.EditorPane, new EditorPaneRegistry())
 
 export function whenEditorClosed(
   accessor: ServicesAccessor,
-  resources: URI[],
+  resources: URI[]
 ): Promise<void> {
   const editorService = accessor.get(IEditorService)
   const uriIdentityService = accessor.get(IUriIdentityService)
@@ -237,11 +237,11 @@ export function whenEditorClosed(
 
       let primaryResource = EditorResourceAccessor.getOriginalUri(
         event.editor,
-        { supportSideBySide: SideBySideEditor.PRIMARY },
+        { supportSideBySide: SideBySideEditor.PRIMARY }
       )
       let secondaryResource = EditorResourceAccessor.getOriginalUri(
         event.editor,
-        { supportSideBySide: SideBySideEditor.SECONDARY },
+        { supportSideBySide: SideBySideEditor.SECONDARY }
       )
 
       // Specially handle an editor getting replaced: if the new active editor
@@ -251,11 +251,11 @@ export function whenEditorClosed(
       if (event.context === EditorCloseContext.REPLACE) {
         const newPrimaryResource = EditorResourceAccessor.getOriginalUri(
           editorService.activeEditor,
-          { supportSideBySide: SideBySideEditor.PRIMARY },
+          { supportSideBySide: SideBySideEditor.PRIMARY }
         )
         const newSecondaryResource = EditorResourceAccessor.getOriginalUri(
           editorService.activeEditor,
-          { supportSideBySide: SideBySideEditor.SECONDARY },
+          { supportSideBySide: SideBySideEditor.SECONDARY }
         )
 
         if (
@@ -267,7 +267,7 @@ export function whenEditorClosed(
         if (
           uriIdentityService.extUri.isEqual(
             secondaryResource,
-            newSecondaryResource,
+            newSecondaryResource
           )
         ) {
           secondaryResource = undefined
@@ -296,12 +296,12 @@ export function whenEditorClosed(
             (primaryResource?.scheme === Schemas.untitled &&
               uriIdentityService.extUri.isEqual(
                 resource,
-                primaryResource.with({ scheme: resource.scheme }),
+                primaryResource.with({ scheme: resource.scheme })
               )) ||
             (secondaryResource?.scheme === Schemas.untitled &&
               uriIdentityService.extUri.isEqual(
                 resource,
-                secondaryResource.with({ scheme: resource.scheme }),
+                secondaryResource.with({ scheme: resource.scheme })
               ))
           ) {
             return false
@@ -319,7 +319,7 @@ export function whenEditorClosed(
         // we have to also check if the editors to track for are dirty and if so wait
         // for them to get saved.
         const dirtyResources = resources.filter((resource) =>
-          workingCopyService.isDirty(resource),
+          workingCopyService.isDirty(resource)
         )
         if (dirtyResources.length > 0) {
           await Promises.settled(
@@ -337,17 +337,17 @@ export function whenEditorClosed(
                         !workingCopy.isDirty() &&
                         uriIdentityService.extUri.isEqual(
                           resource,
-                          workingCopy.resource,
+                          workingCopy.resource
                         )
                       ) {
                         listener.dispose()
 
                         return resolve()
                       }
-                    },
+                    }
                   )
-                }),
-            ),
+                })
+            )
           )
         }
 
@@ -367,7 +367,7 @@ export function computeEditorAriaLabel(
   input: EditorInput,
   index: number | undefined,
   group: IEditorGroup | undefined,
-  groupCount: number | undefined,
+  groupCount: number | undefined
 ): string {
   let ariaLabel = input.getAriaLabel()
   if (group && !group.isPinned(input)) {

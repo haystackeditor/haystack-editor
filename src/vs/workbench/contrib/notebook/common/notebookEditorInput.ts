@@ -68,14 +68,14 @@ export class NotebookEditorInput extends AbstractResourceEditorInput {
     resource: URI,
     preferredResource: URI | undefined,
     viewType: string,
-    options: NotebookEditorInputOptions = {},
+    options: NotebookEditorInputOptions = {}
   ) {
     const editor = instantiationService.createInstance(
       NotebookEditorInput,
       resource,
       preferredResource,
       viewType,
-      options,
+      options
     )
     if (preferredResource) {
       editor.setPreferredResource(preferredResource)
@@ -109,7 +109,7 @@ export class NotebookEditorInput extends AbstractResourceEditorInput {
     @ITextResourceConfigurationService
     textResourceConfigurationService: ITextResourceConfigurationService,
     @ICustomEditorLabelService
-    customEditorLabelService: ICustomEditorLabelService,
+    customEditorLabelService: ICustomEditorLabelService
   ) {
     super(
       resource,
@@ -123,7 +123,7 @@ export class NotebookEditorInput extends AbstractResourceEditorInput {
       fileService,
       filesConfigurationService,
       textResourceConfigurationService,
-      customEditorLabelService,
+      customEditorLabelService
     )
     this._defaultDirtyState = !!options.startDirty
 
@@ -138,7 +138,7 @@ export class NotebookEditorInput extends AbstractResourceEditorInput {
         ) {
           this.resolve().catch(onUnexpectedError)
         }
-      },
+      }
     )
 
     this._register(
@@ -161,10 +161,10 @@ export class NotebookEditorInput extends AbstractResourceEditorInput {
           localize(
             "vetoExtHostRestart",
             "Notebook '{0}' could not be saved.",
-            this.resource.path,
-          ),
+            this.resource.path
+          )
         )
-      }),
+      })
     )
   }
 
@@ -249,7 +249,7 @@ export class NotebookEditorInput extends AbstractResourceEditorInput {
 
   override async save(
     group: GroupIdentifier,
-    options?: ISaveOptions,
+    options?: ISaveOptions
   ): Promise<EditorInput | IUntypedEditorInput | undefined> {
     if (this._editorModelReference) {
       if (this.hasCapability(EditorInputCapabilities.Untitled)) {
@@ -266,14 +266,14 @@ export class NotebookEditorInput extends AbstractResourceEditorInput {
 
   override async saveAs(
     group: GroupIdentifier,
-    options?: ISaveOptions,
+    options?: ISaveOptions
   ): Promise<IUntypedEditorInput | undefined> {
     if (!this._editorModelReference) {
       return undefined
     }
 
     const provider = this._notebookService.getContributedNotebookType(
-      this.viewType,
+      this.viewType
     )
 
     if (!provider) {
@@ -283,7 +283,7 @@ export class NotebookEditorInput extends AbstractResourceEditorInput {
     const pathCandidate = this.hasCapability(EditorInputCapabilities.Untitled)
       ? await this._suggestName(
           provider,
-          this.labelService.getUriBasenameLabel(this.resource),
+          this.labelService.getUriBasenameLabel(this.resource)
         )
       : this._editorModelReference.object.resource
     let target: URI | undefined
@@ -292,7 +292,7 @@ export class NotebookEditorInput extends AbstractResourceEditorInput {
     } else {
       target = await this._fileDialogService.pickFileToSave(
         pathCandidate,
-        options?.availableFileSystems,
+        options?.availableFileSystems
       )
       if (!target) {
         return undefined // save cancelled
@@ -318,7 +318,7 @@ export class NotebookEditorInput extends AbstractResourceEditorInput {
         })
         .join(", ")
       throw new Error(
-        `File name ${target} is not supported by ${provider.providerDisplayName}.\n\nPlease make sure the file name matches following patterns:\n${patterns}`,
+        `File name ${target} is not supported by ${provider.providerDisplayName}.\n\nPlease make sure the file name matches following patterns:\n${patterns}`
       )
     }
 
@@ -327,7 +327,7 @@ export class NotebookEditorInput extends AbstractResourceEditorInput {
 
   private async _suggestName(
     provider: NotebookProviderInfo,
-    suggestedFilename: string,
+    suggestedFilename: string
   ) {
     // guess file extensions
     const firstSelector = provider.selectors[0]
@@ -349,7 +349,7 @@ export class NotebookEditorInput extends AbstractResourceEditorInput {
         if (!suggestedFilename.endsWith(fileExt)) {
           return joinPath(
             await this._fileDialogService.defaultFilePath(),
-            suggestedFilename + "." + fileExt,
+            suggestedFilename + "." + fileExt
           )
         }
       }
@@ -357,14 +357,14 @@ export class NotebookEditorInput extends AbstractResourceEditorInput {
 
     return joinPath(
       await this._fileDialogService.defaultFilePath(),
-      suggestedFilename,
+      suggestedFilename
     )
   }
 
   // called when users rename a notebook document
   override async rename(
     group: GroupIdentifier,
-    target: URI,
+    target: URI
   ): Promise<IMoveResult | undefined> {
     if (this._editorModelReference) {
       return {
@@ -377,7 +377,7 @@ export class NotebookEditorInput extends AbstractResourceEditorInput {
 
   override async revert(
     _group: GroupIdentifier,
-    options?: IRevertOptions,
+    options?: IRevertOptions
   ): Promise<void> {
     if (
       this._editorModelReference &&
@@ -389,7 +389,7 @@ export class NotebookEditorInput extends AbstractResourceEditorInput {
 
   override async resolve(
     _options?: IFileLimitedEditorInputOptions,
-    perf?: NotebookPerfMarks,
+    perf?: NotebookPerfMarks
   ): Promise<IResolvedNotebookEditorModel | null> {
     if (!(await this._notebookService.canResolve(this.viewType))) {
       return null
@@ -405,7 +405,7 @@ export class NotebookEditorInput extends AbstractResourceEditorInput {
       const ref = await this._notebookModelResolverService.resolve(
         this.resource,
         this.viewType,
-        this.ensureLimits(_options),
+        this.ensureLimits(_options)
       )
       if (this._editorModelReference) {
         // Re-entrant, double resolve happened. Dispose the addition references and proceed
@@ -423,18 +423,18 @@ export class NotebookEditorInput extends AbstractResourceEditorInput {
       }
       this._register(
         this._editorModelReference.object.onDidChangeDirty(() =>
-          this._onDidChangeDirty.fire(),
-        ),
+          this._onDidChangeDirty.fire()
+        )
       )
       this._register(
         this._editorModelReference.object.onDidChangeReadonly(() =>
-          this._onDidChangeCapabilities.fire(),
-        ),
+          this._onDidChangeCapabilities.fire()
+        )
       )
       this._register(
         this._editorModelReference.object.onDidRevertUntitled(() =>
-          this.dispose(),
-        ),
+          this.dispose()
+        )
       )
       if (this._editorModelReference.object.isDirty()) {
         this._onDidChangeDirty.fire()
@@ -447,7 +447,7 @@ export class NotebookEditorInput extends AbstractResourceEditorInput {
 
     if (this.options._backupId) {
       const info = await this._notebookService.withNotebookDataProvider(
-        this._editorModelReference.object.notebook.viewType,
+        this._editorModelReference.object.notebook.viewType
       )
       if (!(info instanceof SimpleNotebookProviderInfo)) {
         throw new Error("CANNOT open file notebook with this provider")
@@ -455,8 +455,8 @@ export class NotebookEditorInput extends AbstractResourceEditorInput {
 
       const data = await info.serializer.dataToNotebook(
         VSBuffer.fromString(
-          JSON.stringify({ __webview_backup: this.options._backupId }),
-        ),
+          JSON.stringify({ __webview_backup: this.options._backupId })
+        )
       )
       this._editorModelReference.object.notebook.applyEdits(
         [
@@ -471,7 +471,7 @@ export class NotebookEditorInput extends AbstractResourceEditorInput {
         undefined,
         () => undefined,
         undefined,
-        false,
+        false
       )
 
       if (this.options._workingCopy) {
@@ -512,20 +512,20 @@ export interface ICompositeNotebookEditorInput {
 }
 
 export function isCompositeNotebookEditorInput(
-  thing: unknown,
+  thing: unknown
 ): thing is ICompositeNotebookEditorInput {
   return (
     !!thing &&
     typeof thing === "object" &&
     Array.isArray((<ICompositeNotebookEditorInput>thing).editorInputs) &&
     (<ICompositeNotebookEditorInput>thing).editorInputs.every(
-      (input) => input instanceof NotebookEditorInput,
+      (input) => input instanceof NotebookEditorInput
     )
   )
 }
 
 export function isNotebookEditorInput(
-  thing: unknown,
+  thing: unknown
 ): thing is NotebookEditorInput {
   return (
     !!thing && typeof thing === "object" && thing instanceof NotebookEditorInput

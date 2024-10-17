@@ -868,7 +868,7 @@ export interface ICodeEditor extends editorCommon.IEditor {
    * @return The contribution or null if contribution not found.
    */
   getContribution<T extends editorCommon.IEditorContribution>(
-    id: string,
+    id: string
   ): T | null
 
   /**
@@ -893,7 +893,7 @@ export interface ICodeEditor extends editorCommon.IEditor {
   setModel(
     model: ITextModel | null,
     editRange?: IRange,
-    lineNumberOffset?: number,
+    lineNumberOffset?: number
   ): void
 
   /**
@@ -966,7 +966,7 @@ export interface ICodeEditor extends editorCommon.IEditor {
    */
   setScrollLeft(
     newScrollLeft: number,
-    scrollType?: editorCommon.ScrollType,
+    scrollType?: editorCommon.ScrollType
   ): void
   /**
    * Change the scrollTop of the editor's viewport.
@@ -977,7 +977,7 @@ export interface ICodeEditor extends editorCommon.IEditor {
    */
   setScrollPosition(
     position: editorCommon.INewScrollPosition,
-    scrollType?: editorCommon.ScrollType,
+    scrollType?: editorCommon.ScrollType
   ): void
   /**
    * Check if the editor is currently scrolling towards a different scroll position.
@@ -999,7 +999,7 @@ export interface ICodeEditor extends editorCommon.IEditor {
    */
   executeCommand(
     source: string | null | undefined,
-    command: editorCommon.ICommand,
+    command: editorCommon.ICommand
   ): void
 
   /**
@@ -1022,7 +1022,7 @@ export interface ICodeEditor extends editorCommon.IEditor {
   executeEdits(
     source: string | null | undefined,
     edits: IIdentifiedSingleEditOperation[],
-    endCursorState?: ICursorStateComputer | Selection[],
+    endCursorState?: ICursorStateComputer | Selection[]
   ): boolean
 
   /**
@@ -1032,7 +1032,7 @@ export interface ICodeEditor extends editorCommon.IEditor {
    */
   executeCommands(
     source: string | null | undefined,
-    commands: (editorCommon.ICommand | null)[],
+    commands: (editorCommon.ICommand | null)[]
   ): void
 
   /**
@@ -1057,7 +1057,7 @@ export interface ICodeEditor extends editorCommon.IEditor {
    */
   deltaDecorations(
     oldDecorations: string[],
-    newDecorations: IModelDeltaDecoration[],
+    newDecorations: IModelDeltaDecoration[]
   ): string[]
 
   /**
@@ -1071,7 +1071,7 @@ export interface ICodeEditor extends editorCommon.IEditor {
   setDecorationsByType(
     description: string,
     decorationTypeKey: string,
-    ranges: editorCommon.IDecorationOptions[],
+    ranges: editorCommon.IDecorationOptions[]
   ): void
 
   /**
@@ -1229,7 +1229,7 @@ export interface ICodeEditor extends editorCommon.IEditor {
    * Warning: the results of this method are inaccurate for positions that are outside the current editor viewport.
    */
   getScrolledVisiblePosition(
-    position: IPosition,
+    position: IPosition
   ): { top: number; left: number; height: number } | null
 
   /**
@@ -1388,7 +1388,7 @@ export interface IDiffEditor extends editorCommon.IEditor {
   getModel(): editorCommon.IDiffEditorModel | null
 
   createViewModel(
-    model: editorCommon.IDiffEditorModel,
+    model: editorCommon.IDiffEditorModel
   ): editorCommon.IDiffEditorViewModel
 
   /**
@@ -1404,7 +1404,7 @@ export interface IDiffEditor extends editorCommon.IEditor {
       | editorCommon.IDiffEditorModel
       | editorCommon.IDiffEditorViewModel
       | null,
-    editRange?: IRange,
+    editRange?: IRange
   ): void
 
   /**
@@ -1495,7 +1495,7 @@ export function isMergeEditor(thing: unknown): thing is MergeEditor {
  *@internal
  */
 export function isCompositeEditor(
-  thing: unknown,
+  thing: unknown
 ): thing is editorCommon.ICompositeCodeEditor {
   return (
     !!thing &&

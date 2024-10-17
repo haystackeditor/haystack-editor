@@ -9,490 +9,412 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { timeout } from "vs/base/common/async"
-import {
-  CancellationToken,
-  CancellationTokenSource,
-} from "vs/base/common/cancellation"
-import {
-  Disposable,
-  DisposableStore,
-  IDisposable,
-  MutableDisposable,
-} from "vs/base/common/lifecycle"
-import {
-  IKeyMods,
-  IQuickPickDidAcceptEvent,
-  IQuickPickSeparator,
-  IQuickPick,
-  IQuickPickItem,
-  IQuickInputButton,
-} from "vs/platform/quickinput/common/quickInput"
-import {
-  IQuickAccessProvider,
-  IQuickAccessProviderRunOptions,
-} from "vs/platform/quickinput/common/quickAccess"
-import { isFunction } from "vs/base/common/types"
+import { timeout } from 'vs/base/common/async';
+import { CancellationToken, CancellationTokenSource } from 'vs/base/common/cancellation';
+import { Disposable, DisposableStore, IDisposable, MutableDisposable } from 'vs/base/common/lifecycle';
+import { IKeyMods, IQuickPickDidAcceptEvent, IQuickPickSeparator, IQuickPick, IQuickPickItem, IQuickInputButton } from 'vs/platform/quickinput/common/quickInput';
+import { IQuickAccessProvider, IQuickAccessProviderRunOptions } from 'vs/platform/quickinput/common/quickAccess';
+import { isFunction } from 'vs/base/common/types';
 
 export enum TriggerAction {
-  /**
-   * Do nothing after the button was clicked.
-   */
-  NO_ACTION,
 
-  /**
-   * Close the picker.
-   */
-  CLOSE_PICKER,
+	/**
+	 * Do nothing after the button was clicked.
+	 */
+	NO_ACTION,
 
-  /**
-   * Update the results of the picker.
-   */
-  REFRESH_PICKER,
+	/**
+	 * Close the picker.
+	 */
+	CLOSE_PICKER,
 
-  /**
-   * Remove the item from the picker.
-   */
-  REMOVE_ITEM,
+	/**
+	 * Update the results of the picker.
+	 */
+	REFRESH_PICKER,
+
+	/**
+	 * Remove the item from the picker.
+	 */
+	REMOVE_ITEM
 }
 
 export interface IPickerQuickAccessItem extends IQuickPickItem {
-  /**
-   * A method that will be executed when the pick item is accepted from
-   * the picker. The picker will close automatically before running this.
-   *
-   * @param keyMods the state of modifier keys when the item was accepted.
-   * @param event the underlying event that caused the accept to trigger.
-   */
-  accept?(keyMods: IKeyMods, event: IQuickPickDidAcceptEvent): void
 
-  /**
-   * A method that will be executed when a button of the pick item was
-   * clicked on.
-   *
-   * @param buttonIndex index of the button of the item that
-   * was clicked.
-   *
-   * @param the state of modifier keys when the button was triggered.
-   *
-   * @returns a value that indicates what should happen after the trigger
-   * which can be a `Promise` for long running operations.
-   */
-  trigger?(
-    buttonIndex: number,
-    keyMods: IKeyMods,
-  ): TriggerAction | Promise<TriggerAction>
+	/**
+	* A method that will be executed when the pick item is accepted from
+	* the picker. The picker will close automatically before running this.
+	*
+	* @param keyMods the state of modifier keys when the item was accepted.
+	* @param event the underlying event that caused the accept to trigger.
+	*/
+	accept?(keyMods: IKeyMods, event: IQuickPickDidAcceptEvent): void;
+
+	/**
+	 * A method that will be executed when a button of the pick item was
+	 * clicked on.
+	 *
+	 * @param buttonIndex index of the button of the item that
+	 * was clicked.
+	 *
+	 * @param the state of modifier keys when the button was triggered.
+	 *
+	 * @returns a value that indicates what should happen after the trigger
+	 * which can be a `Promise` for long running operations.
+	 */
+	trigger?(buttonIndex: number, keyMods: IKeyMods): TriggerAction | Promise<TriggerAction>;
 }
 
 export interface IPickerQuickAccessSeparator extends IQuickPickSeparator {
-  /**
-   * A method that will be executed when a button of the pick item was
-   * clicked on.
-   *
-   * @param buttonIndex index of the button of the item that
-   * was clicked.
-   *
-   * @param the state of modifier keys when the button was triggered.
-   *
-   * @returns a value that indicates what should happen after the trigger
-   * which can be a `Promise` for long running operations.
-   */
-  trigger?(
-    buttonIndex: number,
-    keyMods: IKeyMods,
-  ): TriggerAction | Promise<TriggerAction>
+	/**
+	 * A method that will be executed when a button of the pick item was
+	 * clicked on.
+	 *
+	 * @param buttonIndex index of the button of the item that
+	 * was clicked.
+	 *
+	 * @param the state of modifier keys when the button was triggered.
+	 *
+	 * @returns a value that indicates what should happen after the trigger
+	 * which can be a `Promise` for long running operations.
+	 */
+	trigger?(buttonIndex: number, keyMods: IKeyMods): TriggerAction | Promise<TriggerAction>;
 }
 
-export interface IPickerQuickAccessProviderOptions<
-  T extends IPickerQuickAccessItem,
-> {
-  /**
-   * Enables support for opening picks in the background via gesture.
-   */
-  readonly canAcceptInBackground?: boolean
+export interface IPickerQuickAccessProviderOptions<T extends IPickerQuickAccessItem> {
 
-  /**
-   * Enables to show a pick entry when no results are returned from a search.
-   */
-  readonly noResultsPick?: T | ((filter: string) => T)
+	/**
+	 * Enables support for opening picks in the background via gesture.
+	 */
+	readonly canAcceptInBackground?: boolean;
 
-  /** Whether to skip trimming the pick filter string */
-  readonly shouldSkipTrimPickFilter?: boolean
+	/**
+	 * Enables to show a pick entry when no results are returned from a search.
+	 */
+	readonly noResultsPick?: T | ((filter: string) => T);
+
+	/** Whether to skip trimming the pick filter string */
+	readonly shouldSkipTrimPickFilter?: boolean;
 }
 
-export type Pick<T> = T | IQuickPickSeparator
-export type PicksWithActive<T> = { items: readonly Pick<T>[]; active?: T }
-export type Picks<T> = readonly Pick<T>[] | PicksWithActive<T>
+export type Pick<T> = T | IQuickPickSeparator;
+export type PicksWithActive<T> = { items: readonly Pick<T>[]; active?: T };
+export type Picks<T> = readonly Pick<T>[] | PicksWithActive<T>;
 export type FastAndSlowPicks<T> = {
-  /**
-   * Picks that will show instantly or after a short delay
-   * based on the `mergeDelay` property to reduce flicker.
-   */
-  readonly picks: Picks<T>
 
-  /**
-   * Picks that will show after they have been resolved.
-   */
-  readonly additionalPicks: Promise<Picks<T>>
+	/**
+	 * Picks that will show instantly or after a short delay
+	 * based on the `mergeDelay` property to reduce flicker.
+	 */
+	readonly picks: Picks<T>;
 
-  /**
-   * A delay in milliseconds to wait before showing the
-   * `picks` to give a chance to merge with `additionalPicks`
-   * for reduced flicker.
-   */
-  readonly mergeDelay?: number
-}
+	/**
+	 * Picks that will show after they have been resolved.
+	 */
+	readonly additionalPicks: Promise<Picks<T>>;
+
+	/**
+	 * A delay in milliseconds to wait before showing the
+	 * `picks` to give a chance to merge with `additionalPicks`
+	 * for reduced flicker.
+	 */
+	readonly mergeDelay?: number;
+};
 
 function isPicksWithActive<T>(obj: unknown): obj is PicksWithActive<T> {
-  const candidate = obj as PicksWithActive<T>
+	const candidate = obj as PicksWithActive<T>;
 
-  return Array.isArray(candidate.items)
+	return Array.isArray(candidate.items);
 }
 
 function isFastAndSlowPicks<T>(obj: unknown): obj is FastAndSlowPicks<T> {
-  const candidate = obj as FastAndSlowPicks<T>
+	const candidate = obj as FastAndSlowPicks<T>;
 
-  return !!candidate.picks && candidate.additionalPicks instanceof Promise
+	return !!candidate.picks && candidate.additionalPicks instanceof Promise;
 }
 
-export abstract class PickerQuickAccessProvider<
-    T extends IPickerQuickAccessItem,
-  >
-  extends Disposable
-  implements IQuickAccessProvider
-{
-  constructor(
-    private prefix: string,
-    protected options?: IPickerQuickAccessProviderOptions<T>,
-  ) {
-    super()
-  }
+export abstract class PickerQuickAccessProvider<T extends IPickerQuickAccessItem> extends Disposable implements IQuickAccessProvider {
 
-  provide(
-    picker: IQuickPick<T>,
-    token: CancellationToken,
-    runOptions?: IQuickAccessProviderRunOptions,
-  ): IDisposable {
-    const disposables = new DisposableStore()
+	constructor(private prefix: string, protected options?: IPickerQuickAccessProviderOptions<T>) {
+		super();
+	}
 
-    // Apply options if any
-    picker.canAcceptInBackground = !!this.options?.canAcceptInBackground
+	provide(picker: IQuickPick<T>, token: CancellationToken, runOptions?: IQuickAccessProviderRunOptions): IDisposable {
+		const disposables = new DisposableStore();
 
-    // Disable filtering & sorting, we control the results
-    picker.matchOnLabel =
-      picker.matchOnDescription =
-      picker.matchOnDetail =
-      picker.sortByLabel =
-        false
+		// Apply options if any
+		picker.canAcceptInBackground = !!this.options?.canAcceptInBackground;
 
-    // Set initial picks and update on type
-    let picksCts: CancellationTokenSource | undefined = undefined
-    const picksDisposable = disposables.add(new MutableDisposable())
-    const updatePickerItems = async () => {
-      const picksDisposables = (picksDisposable.value = new DisposableStore())
+		// Disable filtering & sorting, we control the results
+		picker.matchOnLabel = picker.matchOnDescription = picker.matchOnDetail = picker.sortByLabel = false;
 
-      // Cancel any previous ask for picks and busy
-      picksCts?.dispose(true)
-      picker.busy = false
+		// Set initial picks and update on type
+		let picksCts: CancellationTokenSource | undefined = undefined;
+		const picksDisposable = disposables.add(new MutableDisposable());
+		const updatePickerItems = async () => {
+			const picksDisposables = picksDisposable.value = new DisposableStore();
 
-      // Create new cancellation source for this run
-      picksCts = new CancellationTokenSource(token)
+			// Cancel any previous ask for picks and busy
+			picksCts?.dispose(true);
+			picker.busy = false;
 
-      // Collect picks and support both long running and short or combined
-      const picksToken = picksCts.token
-      let picksFilter = picker.value.substring(this.prefix.length)
+			// Create new cancellation source for this run
+			picksCts = new CancellationTokenSource(token);
 
-      if (!this.options?.shouldSkipTrimPickFilter) {
-        picksFilter = picksFilter.trim()
-      }
+			// Collect picks and support both long running and short or combined
+			const picksToken = picksCts.token;
+			let picksFilter = picker.value.substring(this.prefix.length);
 
-      const providedPicks = this._getPicks(
-        picksFilter,
-        picksDisposables,
-        picksToken,
-        runOptions,
-      )
+			if (!this.options?.shouldSkipTrimPickFilter) {
+				picksFilter = picksFilter.trim();
+			}
 
-      const applyPicks = (picks: Picks<T>, skipEmpty?: boolean): boolean => {
-        let items: readonly Pick<T>[]
-        let activeItem: T | undefined = undefined
+			const providedPicks = this._getPicks(picksFilter, picksDisposables, picksToken, runOptions);
 
-        if (isPicksWithActive(picks)) {
-          items = picks.items
-          activeItem = picks.active
-        } else {
-          items = picks
-        }
+			const applyPicks = (picks: Picks<T>, skipEmpty?: boolean): boolean => {
+				let items: readonly Pick<T>[];
+				let activeItem: T | undefined = undefined;
 
-        if (items.length === 0) {
-          if (skipEmpty) {
-            return false
-          }
+				if (isPicksWithActive(picks)) {
+					items = picks.items;
+					activeItem = picks.active;
+				} else {
+					items = picks;
+				}
 
-          // We show the no results pick if we have no input to prevent completely empty pickers #172613
-          if (
-            (picksFilter.length > 0 || picker.hideInput) &&
-            this.options?.noResultsPick
-          ) {
-            if (isFunction(this.options.noResultsPick)) {
-              items = [this.options.noResultsPick(picksFilter)]
-            } else {
-              items = [this.options.noResultsPick]
-            }
-          }
-        }
+				if (items.length === 0) {
+					if (skipEmpty) {
+						return false;
+					}
 
-        picker.items = items
-        if (activeItem) {
-          picker.activeItems = [activeItem]
-        }
+					// We show the no results pick if we have no input to prevent completely empty pickers #172613
+					if ((picksFilter.length > 0 || picker.hideInput) && this.options?.noResultsPick) {
+						if (isFunction(this.options.noResultsPick)) {
+							items = [this.options.noResultsPick(picksFilter)];
+						} else {
+							items = [this.options.noResultsPick];
+						}
+					}
+				}
 
-        return true
-      }
+				picker.items = items;
+				if (activeItem) {
+					picker.activeItems = [activeItem];
+				}
 
-      const applyFastAndSlowPicks = async (
-        fastAndSlowPicks: FastAndSlowPicks<T>,
-      ): Promise<void> => {
-        let fastPicksApplied = false
-        let slowPicksApplied = false
+				return true;
+			};
 
-        await Promise.all([
-          // Fast Picks: if `mergeDelay` is configured, in order to reduce
-          // amount of flicker, we race against the slow picks over some delay
-          // and then set the fast picks.
-          // If the slow picks are faster, we reduce the flicker by only
-          // setting the items once.
+			const applyFastAndSlowPicks = async (fastAndSlowPicks: FastAndSlowPicks<T>): Promise<void> => {
+				let fastPicksApplied = false;
+				let slowPicksApplied = false;
 
-          (async () => {
-            if (typeof fastAndSlowPicks.mergeDelay === "number") {
-              await timeout(fastAndSlowPicks.mergeDelay)
-              if (picksToken.isCancellationRequested) {
-                return
-              }
-            }
+				await Promise.all([
 
-            if (!slowPicksApplied) {
-              fastPicksApplied = applyPicks(
-                fastAndSlowPicks.picks,
-                true /* skip over empty to reduce flicker */,
-              )
-            }
-          })(),
+					// Fast Picks: if `mergeDelay` is configured, in order to reduce
+					// amount of flicker, we race against the slow picks over some delay
+					// and then set the fast picks.
+					// If the slow picks are faster, we reduce the flicker by only
+					// setting the items once.
 
-          // Slow Picks: we await the slow picks and then set them at
-          // once together with the fast picks, but only if we actually
-          // have additional results.
+					(async () => {
+						if (typeof fastAndSlowPicks.mergeDelay === 'number') {
+							await timeout(fastAndSlowPicks.mergeDelay);
+							if (picksToken.isCancellationRequested) {
+								return;
+							}
+						}
 
-          (async () => {
-            picker.busy = true
-            try {
-              const awaitedAdditionalPicks =
-                await fastAndSlowPicks.additionalPicks
-              if (picksToken.isCancellationRequested) {
-                return
-              }
+						if (!slowPicksApplied) {
+							fastPicksApplied = applyPicks(fastAndSlowPicks.picks, true /* skip over empty to reduce flicker */);
+						}
+					})(),
 
-              let picks: readonly Pick<T>[]
-              let activePick: Pick<T> | undefined = undefined
-              if (isPicksWithActive(fastAndSlowPicks.picks)) {
-                picks = fastAndSlowPicks.picks.items
-                activePick = fastAndSlowPicks.picks.active
-              } else {
-                picks = fastAndSlowPicks.picks
-              }
+					// Slow Picks: we await the slow picks and then set them at
+					// once together with the fast picks, but only if we actually
+					// have additional results.
 
-              let additionalPicks: readonly Pick<T>[]
-              let additionalActivePick: Pick<T> | undefined = undefined
-              if (isPicksWithActive(awaitedAdditionalPicks)) {
-                additionalPicks = awaitedAdditionalPicks.items
-                additionalActivePick = awaitedAdditionalPicks.active
-              } else {
-                additionalPicks = awaitedAdditionalPicks
-              }
+					(async () => {
+						picker.busy = true;
+						try {
+							const awaitedAdditionalPicks = await fastAndSlowPicks.additionalPicks;
+							if (picksToken.isCancellationRequested) {
+								return;
+							}
 
-              if (additionalPicks.length > 0 || !fastPicksApplied) {
-                // If we do not have any activePick or additionalActivePick
-                // we try to preserve the currently active pick from the
-                // fast results. This fixes an issue where the user might
-                // have made a pick active before the additional results
-                // kick in.
-                // See https://github.com/microsoft/vscode/issues/102480
-                let fallbackActivePick: Pick<T> | undefined = undefined
-                if (!activePick && !additionalActivePick) {
-                  const fallbackActivePickCandidate = picker.activeItems[0]
-                  if (
-                    fallbackActivePickCandidate &&
-                    picks.indexOf(fallbackActivePickCandidate) !== -1
-                  ) {
-                    fallbackActivePick = fallbackActivePickCandidate
-                  }
-                }
+							let picks: readonly Pick<T>[];
+							let activePick: Pick<T> | undefined = undefined;
+							if (isPicksWithActive(fastAndSlowPicks.picks)) {
+								picks = fastAndSlowPicks.picks.items;
+								activePick = fastAndSlowPicks.picks.active;
+							} else {
+								picks = fastAndSlowPicks.picks;
+							}
 
-                applyPicks({
-                  items: [...picks, ...additionalPicks],
-                  active:
-                    activePick || additionalActivePick || fallbackActivePick,
-                })
-              }
-            } finally {
-              if (!picksToken.isCancellationRequested) {
-                picker.busy = false
-              }
+							let additionalPicks: readonly Pick<T>[];
+							let additionalActivePick: Pick<T> | undefined = undefined;
+							if (isPicksWithActive(awaitedAdditionalPicks)) {
+								additionalPicks = awaitedAdditionalPicks.items;
+								additionalActivePick = awaitedAdditionalPicks.active;
+							} else {
+								additionalPicks = awaitedAdditionalPicks;
+							}
 
-              slowPicksApplied = true
-            }
-          })(),
-        ])
-      }
+							if (additionalPicks.length > 0 || !fastPicksApplied) {
+								// If we do not have any activePick or additionalActivePick
+								// we try to preserve the currently active pick from the
+								// fast results. This fixes an issue where the user might
+								// have made a pick active before the additional results
+								// kick in.
+								// See https://github.com/microsoft/vscode/issues/102480
+								let fallbackActivePick: Pick<T> | undefined = undefined;
+								if (!activePick && !additionalActivePick) {
+									const fallbackActivePickCandidate = picker.activeItems[0];
+									if (fallbackActivePickCandidate && picks.indexOf(fallbackActivePickCandidate) !== -1) {
+										fallbackActivePick = fallbackActivePickCandidate;
+									}
+								}
 
-      // No Picks
-      if (providedPicks === null) {
-        // Ignore
-      }
+								applyPicks({
+									items: [...picks, ...additionalPicks],
+									active: activePick || additionalActivePick || fallbackActivePick
+								});
+							}
+						} finally {
+							if (!picksToken.isCancellationRequested) {
+								picker.busy = false;
+							}
 
-      // Fast and Slow Picks
-      else if (isFastAndSlowPicks(providedPicks)) {
-        await applyFastAndSlowPicks(providedPicks)
-      }
+							slowPicksApplied = true;
+						}
+					})()
+				]);
+			};
 
-      // Fast Picks
-      else if (!(providedPicks instanceof Promise)) {
-        applyPicks(providedPicks)
-      }
+			// No Picks
+			if (providedPicks === null) {
+				// Ignore
+			}
 
-      // Slow Picks
-      else {
-        picker.busy = true
-        try {
-          const awaitedPicks = await providedPicks
-          if (picksToken.isCancellationRequested) {
-            return
-          }
+			// Fast and Slow Picks
+			else if (isFastAndSlowPicks(providedPicks)) {
+				await applyFastAndSlowPicks(providedPicks);
+			}
 
-          if (isFastAndSlowPicks(awaitedPicks)) {
-            await applyFastAndSlowPicks(awaitedPicks)
-          } else {
-            applyPicks(awaitedPicks)
-          }
-        } finally {
-          if (!picksToken.isCancellationRequested) {
-            picker.busy = false
-          }
-        }
-      }
-    }
-    disposables.add(picker.onDidChangeValue(() => updatePickerItems()))
-    updatePickerItems()
+			// Fast Picks
+			else if (!(providedPicks instanceof Promise)) {
+				applyPicks(providedPicks);
+			}
 
-    // Accept the pick on accept and hide picker
-    disposables.add(
-      picker.onDidAccept((event) => {
-        if (runOptions?.handleAccept) {
-          if (!event.inBackground) {
-            picker.hide() // hide picker unless we accept in background
-          }
-          runOptions.handleAccept?.(picker.activeItems[0])
-          return
-        }
+			// Slow Picks
+			else {
+				picker.busy = true;
+				try {
+					const awaitedPicks = await providedPicks;
+					if (picksToken.isCancellationRequested) {
+						return;
+					}
 
-        const [item] = picker.selectedItems
-        if (typeof item?.accept === "function") {
-          if (!event.inBackground) {
-            picker.hide() // hide picker unless we accept in background
-          }
+					if (isFastAndSlowPicks(awaitedPicks)) {
+						await applyFastAndSlowPicks(awaitedPicks);
+					} else {
+						applyPicks(awaitedPicks);
+					}
+				} finally {
+					if (!picksToken.isCancellationRequested) {
+						picker.busy = false;
+					}
+				}
+			}
+		};
+		disposables.add(picker.onDidChangeValue(() => updatePickerItems()));
+		updatePickerItems();
 
-          item.accept(picker.keyMods, event)
-        }
-      }),
-    )
+		// Accept the pick on accept and hide picker
+		disposables.add(picker.onDidAccept(event => {
+			if (runOptions?.handleAccept) {
+				if (!event.inBackground) {
+					picker.hide(); // hide picker unless we accept in background
+				}
+				runOptions.handleAccept?.(picker.activeItems[0]);
+				return;
+			}
 
-    const buttonTrigger = async (
-      button: IQuickInputButton,
-      item: T | IPickerQuickAccessSeparator,
-    ) => {
-      if (typeof item.trigger !== "function") {
-        return
-      }
+			const [item] = picker.selectedItems;
+			if (typeof item?.accept === 'function') {
+				if (!event.inBackground) {
+					picker.hide(); // hide picker unless we accept in background
+				}
 
-      const buttonIndex = item.buttons?.indexOf(button) ?? -1
-      if (buttonIndex >= 0) {
-        const result = item.trigger(buttonIndex, picker.keyMods)
-        const action = typeof result === "number" ? result : await result
+				item.accept(picker.keyMods, event);
+			}
+		}));
 
-        if (token.isCancellationRequested) {
-          return
-        }
+		const buttonTrigger = async (button: IQuickInputButton, item: T | IPickerQuickAccessSeparator) => {
+			if (typeof item.trigger !== 'function') {
+				return;
+			}
 
-        switch (action) {
-          case TriggerAction.NO_ACTION:
-            break
-          case TriggerAction.CLOSE_PICKER:
-            picker.hide()
-            break
-          case TriggerAction.REFRESH_PICKER:
-            updatePickerItems()
-            break
-          case TriggerAction.REMOVE_ITEM: {
-            const index = picker.items.indexOf(item)
-            if (index !== -1) {
-              const items = picker.items.slice()
-              const removed = items.splice(index, 1)
-              const activeItems = picker.activeItems.filter(
-                (activeItem) => activeItem !== removed[0],
-              )
-              const keepScrollPositionBefore = picker.keepScrollPosition
-              picker.keepScrollPosition = true
-              picker.items = items
-              if (activeItems) {
-                picker.activeItems = activeItems
-              }
-              picker.keepScrollPosition = keepScrollPositionBefore
-            }
-            break
-          }
-        }
-      }
-    }
+			const buttonIndex = item.buttons?.indexOf(button) ?? -1;
+			if (buttonIndex >= 0) {
+				const result = item.trigger(buttonIndex, picker.keyMods);
+				const action = (typeof result === 'number') ? result : await result;
 
-    // Trigger the pick with button index if button triggered
-    disposables.add(
-      picker.onDidTriggerItemButton(({ button, item }) =>
-        buttonTrigger(button, item),
-      ),
-    )
-    disposables.add(
-      picker.onDidTriggerSeparatorButton(({ button, separator }) =>
-        buttonTrigger(button, separator),
-      ),
-    )
+				if (token.isCancellationRequested) {
+					return;
+				}
 
-    return disposables
-  }
+				switch (action) {
+					case TriggerAction.NO_ACTION:
+						break;
+					case TriggerAction.CLOSE_PICKER:
+						picker.hide();
+						break;
+					case TriggerAction.REFRESH_PICKER:
+						updatePickerItems();
+						break;
+					case TriggerAction.REMOVE_ITEM: {
+						const index = picker.items.indexOf(item);
+						if (index !== -1) {
+							const items = picker.items.slice();
+							const removed = items.splice(index, 1);
+							const activeItems = picker.activeItems.filter(activeItem => activeItem !== removed[0]);
+							const keepScrollPositionBefore = picker.keepScrollPosition;
+							picker.keepScrollPosition = true;
+							picker.items = items;
+							if (activeItems) {
+								picker.activeItems = activeItems;
+							}
+							picker.keepScrollPosition = keepScrollPositionBefore;
+						}
+						break;
+					}
+				}
+			}
+		};
 
-  /**
-   * Returns an array of picks and separators as needed. If the picks are resolved
-   * long running, the provided cancellation token should be used to cancel the
-   * operation when the token signals this.
-   *
-   * The implementor is responsible for filtering and sorting the picks given the
-   * provided `filter`.
-   *
-   * @param filter a filter to apply to the picks.
-   * @param disposables can be used to register disposables that should be cleaned
-   * up when the picker closes.
-   * @param token for long running tasks, implementors need to check on cancellation
-   * through this token.
-   * @returns the picks either directly, as promise or combined fast and slow results.
-   * Pickers can return `null` to signal that no change in picks is needed.
-   */
-  protected abstract _getPicks(
-    filter: string,
-    disposables: DisposableStore,
-    token: CancellationToken,
-    runOptions?: IQuickAccessProviderRunOptions,
-  ):
-    | Picks<T>
-    | Promise<Picks<T> | FastAndSlowPicks<T>>
-    | FastAndSlowPicks<T>
-    | null
+		// Trigger the pick with button index if button triggered
+		disposables.add(picker.onDidTriggerItemButton(({ button, item }) => buttonTrigger(button, item)));
+		disposables.add(picker.onDidTriggerSeparatorButton(({ button, separator }) => buttonTrigger(button, separator)));
+
+		return disposables;
+	}
+
+	/**
+	 * Returns an array of picks and separators as needed. If the picks are resolved
+	 * long running, the provided cancellation token should be used to cancel the
+	 * operation when the token signals this.
+	 *
+	 * The implementor is responsible for filtering and sorting the picks given the
+	 * provided `filter`.
+	 *
+	 * @param filter a filter to apply to the picks.
+	 * @param disposables can be used to register disposables that should be cleaned
+	 * up when the picker closes.
+	 * @param token for long running tasks, implementors need to check on cancellation
+	 * through this token.
+	 * @returns the picks either directly, as promise or combined fast and slow results.
+	 * Pickers can return `null` to signal that no change in picks is needed.
+	 */
+	protected abstract _getPicks(filter: string, disposables: DisposableStore, token: CancellationToken, runOptions?: IQuickAccessProviderRunOptions): Picks<T> | Promise<Picks<T> | FastAndSlowPicks<T>> | FastAndSlowPicks<T> | null;
 }

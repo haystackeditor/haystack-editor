@@ -9,17 +9,17 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Event } from "vs/base/common/event"
-import { createDecorator } from "vs/platform/instantiation/common/instantiation"
+import { Event } from 'vs/base/common/event';
+import { createDecorator } from 'vs/platform/instantiation/common/instantiation';
 
-export const IHostColorSchemeService = createDecorator<IHostColorSchemeService>(
-  "hostColorSchemeService",
-)
+export const IHostColorSchemeService = createDecorator<IHostColorSchemeService>('hostColorSchemeService');
 
 export interface IHostColorSchemeService {
-  readonly _serviceBrand: undefined
 
-  readonly dark: boolean
-  readonly highContrast: boolean
-  readonly onDidChangeColorScheme: Event<void>
+	readonly _serviceBrand: undefined;
+
+	readonly dark: boolean;
+	readonly highContrast: boolean;
+	readonly onDidChangeColorScheme: Event<void>;
+
 }

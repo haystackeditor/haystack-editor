@@ -116,7 +116,7 @@ export class WorkbenchToolBar extends ToolBar {
     private readonly _contextMenuService: IContextMenuService,
     @IKeybindingService private readonly _keybindingService: IKeybindingService,
     @ICommandService private readonly _commandService: ICommandService,
-    @ITelemetryService telemetryService: ITelemetryService,
+    @ITelemetryService telemetryService: ITelemetryService
   ) {
     super(container, _contextMenuService, {
       // defaults
@@ -140,8 +140,8 @@ export class WorkbenchToolBar extends ToolBar {
           >("workbenchActionExecuted", {
             id: e.action.id,
             from: telemetrySource,
-          }),
-        ),
+          })
+        )
       )
     }
   }
@@ -149,7 +149,7 @@ export class WorkbenchToolBar extends ToolBar {
   override setActions(
     _primary: readonly IAction[],
     _secondary: readonly IAction[] = [],
-    menuIds?: readonly MenuId[],
+    menuIds?: readonly MenuId[]
   ): void {
     this._sessionDisposables.clear()
     const primary: Array<IAction | undefined> = _primary.slice() // for hiding and overflow we set some items to undefined
@@ -196,7 +196,7 @@ export class WorkbenchToolBar extends ToolBar {
     if (this._options?.overflowBehavior !== undefined) {
       const exemptedIds = intersection(
         new Set(this._options.overflowBehavior.exempted),
-        Iterable.map(primary, (a) => a?.id),
+        Iterable.map(primary, (a) => a?.id)
       )
       const maxItems =
         this._options.overflowBehavior.maxItems - exemptedIds.size
@@ -251,8 +251,8 @@ export class WorkbenchToolBar extends ToolBar {
               createConfigureKeybindingAction(
                 this._commandService,
                 this._keybindingService,
-                action.id,
-              ),
+                action.id
+              )
             )
           }
 
@@ -299,7 +299,7 @@ export class WorkbenchToolBar extends ToolBar {
                   label: localize("hide", "Hide"),
                   enabled: false,
                   run() {},
-                }),
+                })
               )
             }
           }
@@ -317,7 +317,7 @@ export class WorkbenchToolBar extends ToolBar {
                 id: "resetThisMenu",
                 label: localize("resetThisMenu", "Reset Menu"),
                 run: () => this._menuService.resetHiddenStates(menuIds),
-              }),
+              })
             )
           }
 
@@ -337,7 +337,7 @@ export class WorkbenchToolBar extends ToolBar {
             skipTelemetry: typeof this._options?.telemetrySource === "string",
             contextKeyService: this._contextKeyService,
           })
-        }),
+        })
       )
     }
   }
@@ -358,7 +358,7 @@ export interface IToolBarRenderOptions {
   shouldInlineSubmenu?: (
     action: SubmenuAction,
     group: string,
-    groupSize: number,
+    groupSize: number
   ) => boolean
 
   /**
@@ -398,7 +398,7 @@ export class MenuWorkbenchToolBar extends WorkbenchToolBar {
     @IContextMenuService contextMenuService: IContextMenuService,
     @IKeybindingService keybindingService: IKeybindingService,
     @ICommandService commandService: ICommandService,
-    @ITelemetryService telemetryService: ITelemetryService,
+    @ITelemetryService telemetryService: ITelemetryService
   ) {
     super(
       container,
@@ -408,14 +408,14 @@ export class MenuWorkbenchToolBar extends WorkbenchToolBar {
       contextMenuService,
       keybindingService,
       commandService,
-      telemetryService,
+      telemetryService
     )
 
     // update logic
     const menu = this._store.add(
       menuService.createMenu(menuId, contextKeyService, {
         emitEventsForSubmenuChanges: true,
-      }),
+      })
     )
     const updateToolbar = () => {
       const primary: IAction[] = []
@@ -426,11 +426,11 @@ export class MenuWorkbenchToolBar extends WorkbenchToolBar {
         { primary, secondary },
         options?.toolbarOptions?.primaryGroup,
         options?.toolbarOptions?.shouldInlineSubmenu,
-        options?.toolbarOptions?.useSeparatorsInPrimaryActions,
+        options?.toolbarOptions?.useSeparatorsInPrimaryActions
       )
       container.classList.toggle(
         "has-no-actions",
-        primary.length === 0 && secondary.length === 0,
+        primary.length === 0 && secondary.length === 0
       )
       super.setActions(primary, secondary)
     }
@@ -439,7 +439,7 @@ export class MenuWorkbenchToolBar extends WorkbenchToolBar {
       menu.onDidChange(() => {
         updateToolbar()
         this._onDidChangeMenuItems.fire(this)
-      }),
+      })
     )
     updateToolbar()
   }

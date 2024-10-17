@@ -9,253 +9,224 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as DOM from "vs/base/browser/dom"
-import { IKeyboardEvent } from "vs/base/browser/keyboardEvent"
-import { IMouseEvent } from "vs/base/browser/mouseEvent"
-import { DisposableStore } from "vs/base/common/lifecycle"
+import * as DOM from 'vs/base/browser/dom';
+import { IKeyboardEvent } from 'vs/base/browser/keyboardEvent';
+import { IMouseEvent } from 'vs/base/browser/mouseEvent';
+import { DisposableStore } from 'vs/base/common/lifecycle';
 
 export interface IContentActionHandler {
-  callback: (content: string, event: IMouseEvent | IKeyboardEvent) => void
-  readonly disposables: DisposableStore
+	callback: (content: string, event: IMouseEvent | IKeyboardEvent) => void;
+	readonly disposables: DisposableStore;
 }
 
 export interface FormattedTextRenderOptions {
-  readonly className?: string
-  readonly inline?: boolean
-  readonly actionHandler?: IContentActionHandler
-  readonly renderCodeSegments?: boolean
+	readonly className?: string;
+	readonly inline?: boolean;
+	readonly actionHandler?: IContentActionHandler;
+	readonly renderCodeSegments?: boolean;
 }
 
-export function renderText(
-  text: string,
-  options: FormattedTextRenderOptions = {},
-): HTMLElement {
-  const element = createElement(options)
-  element.textContent = text
-  return element
+export function renderText(text: string, options: FormattedTextRenderOptions = {}): HTMLElement {
+	const element = createElement(options);
+	element.textContent = text;
+	return element;
 }
 
-export function renderFormattedText(
-  formattedText: string,
-  options: FormattedTextRenderOptions = {},
-): HTMLElement {
-  const element = createElement(options)
-  _renderFormattedText(
-    element,
-    parseFormattedText(formattedText, !!options.renderCodeSegments),
-    options.actionHandler,
-    options.renderCodeSegments,
-  )
-  return element
+export function renderFormattedText(formattedText: string, options: FormattedTextRenderOptions = {}): HTMLElement {
+	const element = createElement(options);
+	_renderFormattedText(element, parseFormattedText(formattedText, !!options.renderCodeSegments), options.actionHandler, options.renderCodeSegments);
+	return element;
 }
 
-export function createElement(
-  options: FormattedTextRenderOptions,
-): HTMLElement {
-  const tagName = options.inline ? "span" : "div"
-  const element = document.createElement(tagName)
-  if (options.className) {
-    element.className = options.className
-  }
-  return element
+export function createElement(options: FormattedTextRenderOptions): HTMLElement {
+	const tagName = options.inline ? 'span' : 'div';
+	const element = document.createElement(tagName);
+	if (options.className) {
+		element.className = options.className;
+	}
+	return element;
 }
 
 class StringStream {
-  private source: string
-  private index: number
+	private source: string;
+	private index: number;
 
-  constructor(source: string) {
-    this.source = source
-    this.index = 0
-  }
+	constructor(source: string) {
+		this.source = source;
+		this.index = 0;
+	}
 
-  public eos(): boolean {
-    return this.index >= this.source.length
-  }
+	public eos(): boolean {
+		return this.index >= this.source.length;
+	}
 
-  public next(): string {
-    const next = this.peek()
-    this.advance()
-    return next
-  }
+	public next(): string {
+		const next = this.peek();
+		this.advance();
+		return next;
+	}
 
-  public peek(): string {
-    return this.source[this.index]
-  }
+	public peek(): string {
+		return this.source[this.index];
+	}
 
-  public advance(): void {
-    this.index++
-  }
+	public advance(): void {
+		this.index++;
+	}
 }
 
 const enum FormatType {
-  Invalid,
-  Root,
-  Text,
-  Bold,
-  Italics,
-  Action,
-  ActionClose,
-  Code,
-  NewLine,
+	Invalid,
+	Root,
+	Text,
+	Bold,
+	Italics,
+	Action,
+	ActionClose,
+	Code,
+	NewLine
 }
 
 interface IFormatParseTree {
-  type: FormatType
-  content?: string
-  index?: number
-  children?: IFormatParseTree[]
+	type: FormatType;
+	content?: string;
+	index?: number;
+	children?: IFormatParseTree[];
 }
 
-function _renderFormattedText(
-  element: Node,
-  treeNode: IFormatParseTree,
-  actionHandler?: IContentActionHandler,
-  renderCodeSegments?: boolean,
-) {
-  let child: Node | undefined
+function _renderFormattedText(element: Node, treeNode: IFormatParseTree, actionHandler?: IContentActionHandler, renderCodeSegments?: boolean) {
+	let child: Node | undefined;
 
-  if (treeNode.type === FormatType.Text) {
-    child = document.createTextNode(treeNode.content || "")
-  } else if (treeNode.type === FormatType.Bold) {
-    child = document.createElement("b")
-  } else if (treeNode.type === FormatType.Italics) {
-    child = document.createElement("i")
-  } else if (treeNode.type === FormatType.Code && renderCodeSegments) {
-    child = document.createElement("code")
-  } else if (treeNode.type === FormatType.Action && actionHandler) {
-    const a = document.createElement("a")
-    actionHandler.disposables.add(
-      DOM.addStandardDisposableListener(a, "click", (event) => {
-        actionHandler.callback(String(treeNode.index), event)
-      }),
-    )
+	if (treeNode.type === FormatType.Text) {
+		child = document.createTextNode(treeNode.content || '');
+	} else if (treeNode.type === FormatType.Bold) {
+		child = document.createElement('b');
+	} else if (treeNode.type === FormatType.Italics) {
+		child = document.createElement('i');
+	} else if (treeNode.type === FormatType.Code && renderCodeSegments) {
+		child = document.createElement('code');
+	} else if (treeNode.type === FormatType.Action && actionHandler) {
+		const a = document.createElement('a');
+		actionHandler.disposables.add(DOM.addStandardDisposableListener(a, 'click', (event) => {
+			actionHandler.callback(String(treeNode.index), event);
+		}));
 
-    child = a
-  } else if (treeNode.type === FormatType.NewLine) {
-    child = document.createElement("br")
-  } else if (treeNode.type === FormatType.Root) {
-    child = element
-  }
+		child = a;
+	} else if (treeNode.type === FormatType.NewLine) {
+		child = document.createElement('br');
+	} else if (treeNode.type === FormatType.Root) {
+		child = element;
+	}
 
-  if (child && element !== child) {
-    element.appendChild(child)
-  }
+	if (child && element !== child) {
+		element.appendChild(child);
+	}
 
-  if (child && Array.isArray(treeNode.children)) {
-    treeNode.children.forEach((nodeChild) => {
-      _renderFormattedText(child, nodeChild, actionHandler, renderCodeSegments)
-    })
-  }
+	if (child && Array.isArray(treeNode.children)) {
+		treeNode.children.forEach((nodeChild) => {
+			_renderFormattedText(child, nodeChild, actionHandler, renderCodeSegments);
+		});
+	}
 }
 
-function parseFormattedText(
-  content: string,
-  parseCodeSegments: boolean,
-): IFormatParseTree {
-  const root: IFormatParseTree = {
-    type: FormatType.Root,
-    children: [],
-  }
+function parseFormattedText(content: string, parseCodeSegments: boolean): IFormatParseTree {
 
-  let actionViewItemIndex = 0
-  let current = root
-  const stack: IFormatParseTree[] = []
-  const stream = new StringStream(content)
+	const root: IFormatParseTree = {
+		type: FormatType.Root,
+		children: []
+	};
 
-  while (!stream.eos()) {
-    let next = stream.next()
+	let actionViewItemIndex = 0;
+	let current = root;
+	const stack: IFormatParseTree[] = [];
+	const stream = new StringStream(content);
 
-    const isEscapedFormatType =
-      next === "\\" &&
-      formatTagType(stream.peek(), parseCodeSegments) !== FormatType.Invalid
-    if (isEscapedFormatType) {
-      next = stream.next() // unread the backslash if it escapes a format tag type
-    }
+	while (!stream.eos()) {
+		let next = stream.next();
 
-    if (
-      !isEscapedFormatType &&
-      isFormatTag(next, parseCodeSegments) &&
-      next === stream.peek()
-    ) {
-      stream.advance()
+		const isEscapedFormatType = (next === '\\' && formatTagType(stream.peek(), parseCodeSegments) !== FormatType.Invalid);
+		if (isEscapedFormatType) {
+			next = stream.next(); // unread the backslash if it escapes a format tag type
+		}
 
-      if (current.type === FormatType.Text) {
-        current = stack.pop()!
-      }
+		if (!isEscapedFormatType && isFormatTag(next, parseCodeSegments) && next === stream.peek()) {
+			stream.advance();
 
-      const type = formatTagType(next, parseCodeSegments)
-      if (
-        current.type === type ||
-        (current.type === FormatType.Action && type === FormatType.ActionClose)
-      ) {
-        current = stack.pop()!
-      } else {
-        const newCurrent: IFormatParseTree = {
-          type: type,
-          children: [],
-        }
+			if (current.type === FormatType.Text) {
+				current = stack.pop()!;
+			}
 
-        if (type === FormatType.Action) {
-          newCurrent.index = actionViewItemIndex
-          actionViewItemIndex++
-        }
+			const type = formatTagType(next, parseCodeSegments);
+			if (current.type === type || (current.type === FormatType.Action && type === FormatType.ActionClose)) {
+				current = stack.pop()!;
+			} else {
+				const newCurrent: IFormatParseTree = {
+					type: type,
+					children: []
+				};
 
-        current.children!.push(newCurrent)
-        stack.push(current)
-        current = newCurrent
-      }
-    } else if (next === "\n") {
-      if (current.type === FormatType.Text) {
-        current = stack.pop()!
-      }
+				if (type === FormatType.Action) {
+					newCurrent.index = actionViewItemIndex;
+					actionViewItemIndex++;
+				}
 
-      current.children!.push({
-        type: FormatType.NewLine,
-      })
-    } else {
-      if (current.type !== FormatType.Text) {
-        const textCurrent: IFormatParseTree = {
-          type: FormatType.Text,
-          content: next,
-        }
-        current.children!.push(textCurrent)
-        stack.push(current)
-        current = textCurrent
-      } else {
-        current.content += next
-      }
-    }
-  }
+				current.children!.push(newCurrent);
+				stack.push(current);
+				current = newCurrent;
+			}
+		} else if (next === '\n') {
+			if (current.type === FormatType.Text) {
+				current = stack.pop()!;
+			}
 
-  if (current.type === FormatType.Text) {
-    current = stack.pop()!
-  }
+			current.children!.push({
+				type: FormatType.NewLine
+			});
 
-  if (stack.length) {
-    // incorrectly formatted string literal
-  }
+		} else {
+			if (current.type !== FormatType.Text) {
+				const textCurrent: IFormatParseTree = {
+					type: FormatType.Text,
+					content: next
+				};
+				current.children!.push(textCurrent);
+				stack.push(current);
+				current = textCurrent;
 
-  return root
+			} else {
+				current.content += next;
+			}
+		}
+	}
+
+	if (current.type === FormatType.Text) {
+		current = stack.pop()!;
+	}
+
+	if (stack.length) {
+		// incorrectly formatted string literal
+	}
+
+	return root;
 }
 
 function isFormatTag(char: string, supportCodeSegments: boolean): boolean {
-  return formatTagType(char, supportCodeSegments) !== FormatType.Invalid
+	return formatTagType(char, supportCodeSegments) !== FormatType.Invalid;
 }
 
 function formatTagType(char: string, supportCodeSegments: boolean): FormatType {
-  switch (char) {
-    case "*":
-      return FormatType.Bold
-    case "_":
-      return FormatType.Italics
-    case "[":
-      return FormatType.Action
-    case "]":
-      return FormatType.ActionClose
-    case "`":
-      return supportCodeSegments ? FormatType.Code : FormatType.Invalid
-    default:
-      return FormatType.Invalid
-  }
+	switch (char) {
+		case '*':
+			return FormatType.Bold;
+		case '_':
+			return FormatType.Italics;
+		case '[':
+			return FormatType.Action;
+		case ']':
+			return FormatType.ActionClose;
+		case '`':
+			return supportCodeSegments ? FormatType.Code : FormatType.Invalid;
+		default:
+			return FormatType.Invalid;
+	}
 }

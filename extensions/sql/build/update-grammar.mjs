@@ -9,12 +9,6 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscodeGrammarUpdater from "vscode-grammar-updater"
+import * as vscodeGrammarUpdater from 'vscode-grammar-updater';
 
-vscodeGrammarUpdater.update(
-  "microsoft/vscode-mssql",
-  "syntaxes/SQL.plist",
-  "./syntaxes/sql.tmLanguage.json",
-  undefined,
-  "main",
-)
+vscodeGrammarUpdater.update('microsoft/vscode-mssql', 'syntaxes/SQL.plist', './syntaxes/sql.tmLanguage.json', undefined, 'main');

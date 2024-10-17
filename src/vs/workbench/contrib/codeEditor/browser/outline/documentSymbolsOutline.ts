@@ -96,7 +96,7 @@ class DocumentSymbolBreadcrumbsSource
   constructor(
     private readonly _editor: ICodeEditor,
     @ITextResourceConfigurationService
-    private readonly _textResourceConfigurationService: ITextResourceConfigurationService,
+    private readonly _textResourceConfigurationService: ITextResourceConfigurationService
   ) {}
 
   getBreadcrumbElements(): readonly DocumentSymbolItem[] {
@@ -114,7 +114,7 @@ class DocumentSymbolBreadcrumbsSource
 
   private _computeBreadcrumbs(
     model: OutlineModel,
-    position: IPosition,
+    position: IPosition
   ): Array<OutlineGroup | OutlineElement> {
     let item: OutlineGroup | OutlineElement | undefined =
       model.getItemEnclosingPosition(position)
@@ -206,11 +206,11 @@ class DocumentSymbolsOutline implements IOutline<DocumentSymbolItem> {
     private readonly _markerDecorationsService: IMarkerDecorationsService,
     @ITextResourceConfigurationService
     textResourceConfigurationService: ITextResourceConfigurationService,
-    @IInstantiationService instantiationService: IInstantiationService,
+    @IInstantiationService instantiationService: IInstantiationService
   ) {
     this._breadcrumbsDataSource = new DocumentSymbolBreadcrumbsSource(
       _editor,
-      textResourceConfigurationService,
+      textResourceConfigurationService
     )
     const delegate = new DocumentSymbolVirtualDelegate()
     const renderers = [
@@ -235,7 +235,7 @@ class DocumentSymbolsOutline implements IOutline<DocumentSymbolItem> {
     const initialState =
       textResourceConfigurationService.getValue<OutlineConfigCollapseItemsValues>(
         _editor.getModel()?.uri,
-        OutlineConfigKeys.collapseItems,
+        OutlineConfigKeys.collapseItems
       )
     const options = {
       collapseByDefault:
@@ -248,17 +248,17 @@ class DocumentSymbolsOutline implements IOutline<DocumentSymbolItem> {
       keyboardNavigationLabelProvider:
         new DocumentSymbolNavigationLabelProvider(),
       accessibilityProvider: new DocumentSymbolAccessibilityProvider(
-        localize("document", "Document Symbols"),
+        localize("document", "Document Symbols")
       ),
       filter:
         target === OutlineTarget.OutlinePane
           ? instantiationService.createInstance(DocumentSymbolFilter, "outline")
           : target === OutlineTarget.Breadcrumbs
-            ? instantiationService.createInstance(
-                DocumentSymbolFilter,
-                "breadcrumbs",
-              )
-            : undefined,
+          ? instantiationService.createInstance(
+              DocumentSymbolFilter,
+              "breadcrumbs"
+            )
+          : undefined,
     }
 
     this.config = {
@@ -278,14 +278,14 @@ class DocumentSymbolsOutline implements IOutline<DocumentSymbolItem> {
     // update as language, model, providers changes
     this._disposables.add(
       _languageFeaturesService.documentSymbolProvider.onDidChange((_) =>
-        this._createOutline(),
-      ),
+        this._createOutline()
+      )
     )
     this._disposables.add(
-      this._editor.onDidChangeModel((_) => this._createOutline()),
+      this._editor.onDidChangeModel((_) => this._createOutline())
     )
     this._disposables.add(
-      this._editor.onDidChangeModelLanguage((_) => this._createOutline()),
+      this._editor.onDidChangeModelLanguage((_) => this._createOutline())
     )
 
     // update soon'ish as model content change
@@ -298,12 +298,12 @@ class DocumentSymbolsOutline implements IOutline<DocumentSymbolItem> {
           const timeout = _outlineModelService.getDebounceValue(model)
           updateSoon.cancelAndSet(() => this._createOutline(event), timeout)
         }
-      }),
+      })
     )
 
     // stop when editor dies
     this._disposables.add(
-      this._editor.onDidDispose(() => this._outlineDisposables.clear()),
+      this._editor.onDidDispose(() => this._outlineDisposables.clear())
     )
 
     // initial load
@@ -327,7 +327,7 @@ class DocumentSymbolsOutline implements IOutline<DocumentSymbolItem> {
     entry: DocumentSymbolItem,
     options: IEditorOptions,
     sideBySide: boolean,
-    select: boolean,
+    select: boolean
   ): Promise<void> {
     const model = OutlineModel.get(entry)
     if (!model || !(entry instanceof OutlineElement)) {
@@ -342,7 +342,7 @@ class DocumentSymbolsOutline implements IOutline<DocumentSymbolItem> {
       },
       {
         ...options,
-      },
+      }
     )
   }
 
@@ -354,7 +354,7 @@ class DocumentSymbolsOutline implements IOutline<DocumentSymbolItem> {
     const { symbol } = entry
     this._editor.revealRangeInCenterIfOutsideViewport(
       symbol.range,
-      ScrollType.Smooth,
+      ScrollType.Smooth
     )
     const decorationsCollection = this._editor.createDecorationsCollection([
       {
@@ -379,7 +379,7 @@ class DocumentSymbolsOutline implements IOutline<DocumentSymbolItem> {
   }
 
   private async _createOutline(
-    contentChangeEvent?: IModelContentChangedEvent,
+    contentChangeEvent?: IModelContentChangedEvent
   ): Promise<void> {
     this._outlineDisposables.clear()
     if (!contentChangeEvent) {
@@ -404,7 +404,7 @@ class DocumentSymbolsOutline implements IOutline<DocumentSymbolItem> {
     try {
       const model = await this._outlineModelService.getOrCreate(
         buffer,
-        cts.token,
+        cts.token
       )
       if (cts.token.isCancellationRequested) {
         // cancelled -> do nothing
@@ -432,7 +432,7 @@ class DocumentSymbolsOutline implements IOutline<DocumentSymbolItem> {
           newLength -
           contentChangeEvent.changes.reduce(
             (prev, value) => prev + value.rangeLength,
-            0,
+            0
           )
         const oldRatio = oldSize / oldLength
         if (newRatio <= oldRatio * 0.5 || newRatio >= oldRatio * 1.5) {
@@ -441,7 +441,7 @@ class DocumentSymbolsOutline implements IOutline<DocumentSymbolItem> {
           const value = await raceCancellation(
             timeout(2000).then(() => true),
             cts.token,
-            false,
+            false
           )
           if (!value) {
             return
@@ -457,7 +457,7 @@ class DocumentSymbolsOutline implements IOutline<DocumentSymbolItem> {
             this._applyMarkersToOutline(model)
             this._onDidChange.fire({})
           }
-        }),
+        })
       )
       this._outlineDisposables.add(
         this._configurationService.onDidChangeConfiguration((e) => {
@@ -466,10 +466,10 @@ class DocumentSymbolsOutline implements IOutline<DocumentSymbolItem> {
             e.affectsConfiguration("problems.visibility")
           ) {
             const problem = this._configurationService.getValue(
-              "problems.visibility",
+              "problems.visibility"
             )
             const config = this._configurationService.getValue(
-              OutlineConfigKeys.problemsEnabled,
+              OutlineConfigKeys.problemsEnabled
             )
 
             if (!problem || !config) {
@@ -490,11 +490,11 @@ class DocumentSymbolsOutline implements IOutline<DocumentSymbolItem> {
             // breadcrumbs filtering
             this._breadcrumbsDataSource.update(
               model,
-              this._editor.getPosition(),
+              this._editor.getPosition()
             )
             this._onDidChange.fire({})
           }
-        }),
+        })
       )
 
       // feature: toggle icons
@@ -506,7 +506,7 @@ class DocumentSymbolsOutline implements IOutline<DocumentSymbolItem> {
           if (e.affectsConfiguration("outline")) {
             this._onDidChange.fire({})
           }
-        }),
+        })
       )
 
       // feature: update active when cursor changes
@@ -520,12 +520,12 @@ class DocumentSymbolsOutline implements IOutline<DocumentSymbolItem> {
             ) {
               this._breadcrumbsDataSource.update(
                 model,
-                this._editor.getPosition(),
+                this._editor.getPosition()
               )
               this._onDidChange.fire({ affectOnlyActiveElement: true })
             }
           }, 150)
-        }),
+        })
       )
 
       // update properties, send event
@@ -539,14 +539,14 @@ class DocumentSymbolsOutline implements IOutline<DocumentSymbolItem> {
   private _applyMarkersToOutline(model: OutlineModel | undefined): void {
     const problem = this._configurationService.getValue("problems.visibility")
     const config = this._configurationService.getValue(
-      OutlineConfigKeys.problemsEnabled,
+      OutlineConfigKeys.problemsEnabled
     )
     if (!model || !problem || !config) {
       return
     }
     const markers: IOutlineMarker[] = []
     for (const [range, marker] of this._markerDecorationsService.getLiveMarkers(
-      model.uri,
+      model.uri
     )) {
       if (
         marker.severity === MarkerSeverity.Error ||
@@ -591,7 +591,7 @@ class DocumentSymbolsOutlineCreator
   async createOutline(
     pane: IEditorPane,
     target: OutlineTarget,
-    _token: CancellationToken,
+    _token: CancellationToken
   ): Promise<IOutline<DocumentSymbolItem> | undefined> {
     const control = pane.getControl()
     let editor: ICodeEditor | undefined
@@ -611,8 +611,8 @@ class DocumentSymbolsOutlineCreator
           DocumentSymbolsOutline,
           editor,
           target,
-          firstLoadBarrier,
-        ),
+          firstLoadBarrier
+        )
     )
     await firstLoadBarrier.wait()
     return result
@@ -620,8 +620,8 @@ class DocumentSymbolsOutlineCreator
 }
 
 Registry.as<IWorkbenchContributionsRegistry>(
-  WorkbenchExtensions.Workbench,
+  WorkbenchExtensions.Workbench
 ).registerWorkbenchContribution(
   DocumentSymbolsOutlineCreator,
-  LifecyclePhase.Eventually,
+  LifecyclePhase.Eventually
 )

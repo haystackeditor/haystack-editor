@@ -9,12 +9,7 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import {
-  UriParts,
-  IRawURITransformer,
-  URITransformer,
-  IURITransformer,
-} from "vs/base/common/uriIpc"
+import { UriParts, IRawURITransformer, URITransformer, IURITransformer } from 'vs/base/common/uriIpc';
 
 /**
  * ```
@@ -27,57 +22,36 @@ import {
  * ```
  */
 function createRawURITransformer(remoteAuthority: string): IRawURITransformer {
-  return {
-    transformIncoming: (uri: UriParts): UriParts => {
-      if (uri.scheme === "vscode-remote") {
-        return {
-          scheme: "file",
-          path: uri.path,
-          query: uri.query,
-          fragment: uri.fragment,
-        }
-      }
-      if (uri.scheme === "file") {
-        return {
-          scheme: "vscode-local",
-          path: uri.path,
-          query: uri.query,
-          fragment: uri.fragment,
-        }
-      }
-      return uri
-    },
-    transformOutgoing: (uri: UriParts): UriParts => {
-      if (uri.scheme === "file") {
-        return {
-          scheme: "vscode-remote",
-          authority: remoteAuthority,
-          path: uri.path,
-          query: uri.query,
-          fragment: uri.fragment,
-        }
-      }
-      if (uri.scheme === "vscode-local") {
-        return {
-          scheme: "file",
-          path: uri.path,
-          query: uri.query,
-          fragment: uri.fragment,
-        }
-      }
-      return uri
-    },
-    transformOutgoingScheme: (scheme: string): string => {
-      if (scheme === "file") {
-        return "vscode-remote"
-      } else if (scheme === "vscode-local") {
-        return "file"
-      }
-      return scheme
-    },
-  }
+	return {
+		transformIncoming: (uri: UriParts): UriParts => {
+			if (uri.scheme === 'vscode-remote') {
+				return { scheme: 'file', path: uri.path, query: uri.query, fragment: uri.fragment };
+			}
+			if (uri.scheme === 'file') {
+				return { scheme: 'vscode-local', path: uri.path, query: uri.query, fragment: uri.fragment };
+			}
+			return uri;
+		},
+		transformOutgoing: (uri: UriParts): UriParts => {
+			if (uri.scheme === 'file') {
+				return { scheme: 'vscode-remote', authority: remoteAuthority, path: uri.path, query: uri.query, fragment: uri.fragment };
+			}
+			if (uri.scheme === 'vscode-local') {
+				return { scheme: 'file', path: uri.path, query: uri.query, fragment: uri.fragment };
+			}
+			return uri;
+		},
+		transformOutgoingScheme: (scheme: string): string => {
+			if (scheme === 'file') {
+				return 'vscode-remote';
+			} else if (scheme === 'vscode-local') {
+				return 'file';
+			}
+			return scheme;
+		}
+	};
 }
 
 export function createURITransformer(remoteAuthority: string): IURITransformer {
-  return new URITransformer(createRawURITransformer(remoteAuthority))
+	return new URITransformer(createRawURITransformer(remoteAuthority));
 }

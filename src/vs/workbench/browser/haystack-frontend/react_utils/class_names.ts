@@ -5,11 +5,11 @@
  *--------------------------------------------------------------------------------------------*/
 
 export function classNames(classNames: Record<string, boolean>): string {
-  const ret: string[] = []
-  for (const key in classNames) {
-    if (classNames[key]) {
-      ret.push(key)
+    const ret: string[] = []
+    for (const key in classNames) {
+        if (classNames[key]) {
+            ret.push(key)
+        }
     }
-  }
-  return ret.join(" ")
+    return ret.join(' ')
 }

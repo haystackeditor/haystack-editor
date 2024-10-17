@@ -130,7 +130,7 @@ interface IEditorSymbolAnythingQuickPickItem extends IAnythingQuickPickItem {
 }
 
 function isEditorSymbolQuickPickItem(
-  pick?: IAnythingQuickPickItem,
+  pick?: IAnythingQuickPickItem
 ): pick is IEditorSymbolAnythingQuickPickItem {
   const candidate = pick as IEditorSymbolAnythingQuickPickItem | undefined
 
@@ -155,7 +155,7 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
       picker: IQuickPick<IAnythingQuickPickItem> | undefined = undefined
 
       editorViewState = this._register(
-        this.instantiationService.createInstance(PickerEditorState),
+        this.instantiationService.createInstance(PickerEditorState)
       )
 
       scorerCache: FuzzyScorerCache = Object.create(null)
@@ -172,7 +172,7 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
 
       constructor(
         private readonly provider: AnythingQuickAccessProvider,
-        private readonly instantiationService: IInstantiationService,
+        private readonly instantiationService: IInstantiationService
       ) {
         super()
       }
@@ -201,7 +201,7 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
         this.lastGlobalPicks = undefined
         this.editorViewState.reset()
       }
-    })(this, this.instantiationService),
+    })(this, this.instantiationService)
   )
 
   get defaultFilterValue(): DefaultQuickAccessFilterValue | undefined {
@@ -242,7 +242,7 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
     @ILogService private readonly logService: ILogService,
     @ICustomEditorLabelService
     private readonly customEditorLabelService: ICustomEditorLabelService,
-    @IHaystackService private readonly haystackService: IHaystackService,
+    @IHaystackService private readonly haystackService: IHaystackService
   ) {
     super(AnythingQuickAccessProvider.PREFIX, {
       canAcceptInBackground: true,
@@ -275,7 +275,7 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
   override provide(
     picker: IQuickPick<IAnythingQuickPickItem>,
     token: CancellationToken,
-    runOptions?: AnythingQuickAccessProviderRunOptions,
+    runOptions?: AnythingQuickAccessProviderRunOptions
   ): IDisposable {
     const disposables = new DisposableStore()
 
@@ -295,7 +295,7 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
           editorDecorationsDisposable.value =
             this.decorateAndRevealSymbolRange(item)
         }
-      }),
+      })
     )
 
     // Restore view state upon cancellation if we changed it
@@ -307,7 +307,7 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
         if (reason === QuickInputHideReason.Gesture) {
           this.pickState.editorViewState.restore()
         }
-      }),
+      })
     )
 
     // Start picker
@@ -317,13 +317,13 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
   }
 
   private decorateAndRevealSymbolRange(
-    pick: IEditorSymbolAnythingQuickPickItem,
+    pick: IEditorSymbolAnythingQuickPickItem
   ): IDisposable {
     const activeEditor = this.editorService.activeEditor
     if (
       !this.uriIdentityService.extUri.isEqual(
         pick.resource,
-        activeEditor?.resource,
+        activeEditor?.resource
       )
     ) {
       return Disposable.None // active editor needs to be for resource
@@ -340,7 +340,7 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
     // Reveal
     activeEditorControl.revealRangeInCenter(
       pick.range.selection,
-      ScrollType.Smooth,
+      ScrollType.Smooth
     )
 
     // Decorate
@@ -353,7 +353,7 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
     originalFilter: string,
     disposables: DisposableStore,
     token: CancellationToken,
-    runOptions?: AnythingQuickAccessProviderRunOptions,
+    runOptions?: AnythingQuickAccessProviderRunOptions
   ):
     | Picks<IAnythingQuickPickItem>
     | Promise<Picks<IAnythingQuickPickItem>>
@@ -426,7 +426,7 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
         enableEditorSymbolSearch: lastWasFiltering,
       },
       disposables,
-      token,
+      token
     )
   }
 
@@ -436,7 +436,7 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
       enableEditorSymbolSearch: boolean
     },
     disposables: DisposableStore,
-    token: CancellationToken,
+    token: CancellationToken
   ):
     | Picks<IAnythingQuickPickItem>
     | Promise<Picks<IAnythingQuickPickItem>>
@@ -455,7 +455,7 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
       const editorSymbolPicks = this.getEditorSymbolPicks(
         query,
         disposables,
-        token,
+        token
       )
       if (editorSymbolPicks) {
         return editorSymbolPicks
@@ -493,7 +493,7 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
           query,
           true,
           quickPickItemScorerAccessor,
-          this.pickState.scorerCache,
+          this.pickState.scorerCache
         )
         if (!score) {
           continue
@@ -544,7 +544,7 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
           query,
           additionalPicksExcludes,
           configuration.includeSymbols,
-          token,
+          token
         )
         if (options.filter) {
           additionalPicks = additionalPicks.filter((p) => options.filter?.(p))
@@ -560,7 +560,7 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
                 label: configuration.includeSymbols
                   ? localize(
                       "fileAndSymbolResultsSeparator",
-                      "file and symbol results",
+                      "file and symbol results"
                     )
                   : localize("fileResultsSeparator", "file results"),
               },
@@ -578,7 +578,7 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
     query: IPreparedQuery,
     excludes: ResourceMap<boolean>,
     includeSymbols: boolean,
-    token: CancellationToken,
+    token: CancellationToken
   ): Promise<Array<IAnythingQuickPickItem>> {
     // Resolve file and symbol picks (if enabled)
     const [filePicks, symbolPicks] = await Promise.all([
@@ -600,9 +600,9 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
           query,
           true,
           quickPickItemScorerAccessor,
-          this.pickState.scorerCache,
+          this.pickState.scorerCache
         ),
-      AnythingQuickAccessProvider.MAX_RESULTS,
+      AnythingQuickAccessProvider.MAX_RESULTS
     )
 
     // Perform filtering
@@ -620,7 +620,7 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
           query,
           true,
           quickPickItemScorerAccessor,
-          this.pickState.scorerCache,
+          this.pickState.scorerCache
         )
         if (!score) {
           continue
@@ -644,7 +644,7 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
     new QuickPickItemScorerAccessor({ skipDescription: true })
 
   private getEditorHistoryPicks(
-    query: IPreparedQuery,
+    query: IPreparedQuery
   ): Array<IAnythingQuickPickItem> {
     const configuration = this.configuration
 
@@ -683,7 +683,7 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
         query,
         false,
         editorHistoryScorerAccessor,
-        this.pickState.scorerCache,
+        this.pickState.scorerCache
       )
       if (!score) {
         continue // exclude editors not matching query
@@ -710,8 +710,8 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
         query,
         false,
         editorHistoryScorerAccessor,
-        this.pickState.scorerCache,
-      ),
+        this.pickState.scorerCache
+      )
     )
   }
 
@@ -720,9 +720,7 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
   //#region File Search
 
   private readonly fileQueryDelayer = this._register(
-    new ThrottledDelayer<URI[]>(
-      AnythingQuickAccessProvider.TYPING_SEARCH_DELAY,
-    ),
+    new ThrottledDelayer<URI[]>(AnythingQuickAccessProvider.TYPING_SEARCH_DELAY)
   )
 
   private readonly fileQueryBuilder =
@@ -733,18 +731,18 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
       (cacheKey) =>
         this.fileQueryBuilder.file(
           this.contextService.getWorkspace().folders,
-          this.getFileQueryOptions({ cacheKey }),
+          this.getFileQueryOptions({ cacheKey })
         ),
       (query) => this.searchService.fileSearch(query),
       (cacheKey) => this.searchService.clearCache(cacheKey),
-      this.pickState.fileQueryCache,
+      this.pickState.fileQueryCache
     ).load()
   }
 
   private async getFilePicks(
     query: IPreparedQuery,
     excludes: ResourceMap<boolean>,
-    token: CancellationToken,
+    token: CancellationToken
   ): Promise<Array<IAnythingQuickPickItem>> {
     if (!query.normalized) {
       return []
@@ -753,7 +751,7 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
     // Absolute path result
     const absolutePathResult = await this.getAbsolutePathFileResult(
       query,
-      token,
+      token
     )
     if (token.isCancellationRequested) {
       return []
@@ -772,7 +770,7 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
       // may otherwise not properly respect the pick as a result
       const absolutePathPick = this.createAnythingPick(
         absolutePathResult,
-        this.configuration,
+        this.configuration
       )
       absolutePathPick.highlights = {
         label: [{ start: 0, end: absolutePathPick.label.length }],
@@ -806,14 +804,14 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
     return fileMatches
       .filter(
         (resource) =>
-          !excludes.has(resource) && !resource.path.startsWith("/scratchpad/"),
+          !excludes.has(resource) && !resource.path.startsWith("/scratchpad/")
       )
       .map((resource) => this.createAnythingPick(resource, configuration))
   }
 
   private async doFileSearch(
     query: IPreparedQuery,
-    token: CancellationToken,
+    token: CancellationToken
   ): Promise<URI[]> {
     const [fileSearchResults, relativePathFileResults] = await Promise.all([
       // File search: this is a search over all files of the workspace using the provided pattern
@@ -844,7 +842,7 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
 
     return [
       ...fileSearchResults.filter(
-        (result) => !relativePathFileResultsMap.has(result),
+        (result) => !relativePathFileResultsMap.has(result)
       ),
       ...relativePathFileResults,
     ]
@@ -852,7 +850,7 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
 
   private async getFileSearchResults(
     query: IPreparedQuery,
-    token: CancellationToken,
+    token: CancellationToken
   ): Promise<URI[]> {
     // filePattern for search depends on the number of queries in input:
     // - with multiple: only take the first one and let the filter later drop non-matching results
@@ -870,7 +868,7 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
 
     const fileSearchResults = await this.doGetFileSearchResults(
       filePattern,
-      token,
+      token
     )
     if (token.isCancellationRequested) {
       return []
@@ -883,7 +881,7 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
     if (fileSearchResults.limitHit && query.values && query.values.length > 1) {
       const additionalFileSearchResults = await this.doGetFileSearchResults(
         query.original,
-        token,
+        token
       )
       if (token.isCancellationRequested) {
         return []
@@ -910,7 +908,7 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
 
   private doGetFileSearchResults(
     filePattern: string,
-    token: CancellationToken,
+    token: CancellationToken
   ): Promise<ISearchComplete> {
     const start = Date.now()
     return this.searchService
@@ -921,9 +919,9 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
             filePattern,
             cacheKey: this.pickState.fileQueryCache?.cacheKey,
             maxResults: AnythingQuickAccessProvider.MAX_RESULTS,
-          }),
+          })
         ),
-        token,
+        token
       )
       .finally(() => {
         this.logService.trace(`QuickAccess fileSearch ${Date.now() - start}ms`)
@@ -938,7 +936,7 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
     return {
       _reason: "openFileHandler", // used for telemetry - do not change
       extraFileResources: this.instantiationService.invokeFunction(
-        getOutOfWorkspaceEditorResources,
+        getOutOfWorkspaceEditorResources
       ),
       filePattern: input.filePattern || "",
       cacheKey: input.cacheKey,
@@ -949,7 +947,7 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
 
   private async getAbsolutePathFileResult(
     query: IPreparedQuery,
-    token: CancellationToken,
+    token: CancellationToken
   ): Promise<URI | undefined> {
     if (!query.containsPathSeparator) {
       return
@@ -958,14 +956,14 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
     const userHome = await this.pathService.userHome()
     const detildifiedQuery = untildify(
       query.original,
-      userHome.scheme === Schemas.file ? userHome.fsPath : userHome.path,
+      userHome.scheme === Schemas.file ? userHome.fsPath : userHome.path
     )
     if (token.isCancellationRequested) {
       return
     }
 
     const isAbsolutePathQuery = (await this.pathService.path).isAbsolute(
-      detildifiedQuery,
+      detildifiedQuery
     )
     if (token.isCancellationRequested) {
       return
@@ -975,7 +973,7 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
       const resource = toLocalResource(
         await this.pathService.fileURI(detildifiedQuery),
         this.environmentService.remoteAuthority,
-        this.pathService.defaultUriScheme,
+        this.pathService.defaultUriScheme
       )
 
       if (token.isCancellationRequested) {
@@ -996,7 +994,7 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
 
   private async getRelativePathFileResults(
     query: IPreparedQuery,
-    token: CancellationToken,
+    token: CancellationToken
   ): Promise<URI[] | undefined> {
     if (!query.containsPathSeparator) {
       return
@@ -1005,7 +1003,7 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
     // Convert relative paths to absolute paths over all folders of the workspace
     // and return them as results if the absolute paths exist
     const isAbsolutePathQuery = (await this.pathService.path).isAbsolute(
-      query.original,
+      query.original
     )
     if (!isAbsolutePathQuery) {
       const resources: URI[] = []
@@ -1017,7 +1015,7 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
         const resource = toLocalResource(
           folder.toResource(query.original),
           this.environmentService.remoteAuthority,
-          this.pathService.defaultUriScheme,
+          this.pathService.defaultUriScheme
         )
 
         try {
@@ -1040,13 +1038,13 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
   //#region Command Center (if enabled)
 
   private readonly lazyRegistry = new Lazy(() =>
-    Registry.as<IQuickAccessRegistry>(Extensions.Quickaccess),
+    Registry.as<IQuickAccessRegistry>(Extensions.Quickaccess)
   )
 
   private getHelpPicks(
     query: IPreparedQuery,
     token: CancellationToken,
-    runOptions?: AnythingQuickAccessProviderRunOptions,
+    runOptions?: AnythingQuickAccessProviderRunOptions
   ): IAnythingQuickPickItem[] {
     if (query.normalized) {
       return [] // If there's a filter, we don't show the help
@@ -1058,7 +1056,7 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
     const providers: IHelpAnythingQuickPickItem[] = this.lazyRegistry.value
       .getQuickAccessProviders()
       .filter((p) =>
-        p.helpEntries.some((h) => h.commandCenterOrder !== undefined),
+        p.helpEntries.some((h) => h.commandCenterOrder !== undefined)
       )
       .flatMap((provider) =>
         provider.helpEntries
@@ -1086,7 +1084,7 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
                 "helpPickAriaLabel",
                 "{0}, {1}",
                 label,
-                helpEntry.description,
+                helpEntry.description
               ),
               accept: () => {
                 this.quickInputService.quickAccess.show(provider.prefix, {
@@ -1095,7 +1093,7 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
                 })
               },
             }
-          }),
+          })
       )
 
     // TODO: There has to be a better place for this, but it's the first time we are adding a non-quick access provider
@@ -1105,7 +1103,7 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
         label: localize("chat", "Open Quick Chat"),
         commandCenterOrder: 30,
         keybinding: this.keybindingService.lookupKeybinding(
-          ASK_QUICK_QUESTION_ACTION_ID,
+          ASK_QUICK_QUESTION_ACTION_ID
         ),
         accept: () => this.quickChatService.toggle(),
       })
@@ -1119,13 +1117,13 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
   //#region Workspace Symbols (if enabled)
 
   private workspaceSymbolsQuickAccess = this._register(
-    this.instantiationService.createInstance(SymbolsQuickAccessProvider),
+    this.instantiationService.createInstance(SymbolsQuickAccessProvider)
   )
 
   private async getWorkspaceSymbolPicks(
     query: IPreparedQuery,
     includeSymbols: boolean,
-    token: CancellationToken,
+    token: CancellationToken
   ): Promise<Array<IAnythingQuickPickItem>> {
     if (
       !query.normalized || // we need a value for search for
@@ -1143,7 +1141,7 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
         skipSorting: true,
         delay: AnythingQuickAccessProvider.TYPING_SEARCH_DELAY,
       },
-      token,
+      token
     )
   }
 
@@ -1157,10 +1155,10 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
   private getEditorSymbolPicks(
     query: IPreparedQuery,
     disposables: DisposableStore,
-    token: CancellationToken,
+    token: CancellationToken
   ): Promise<Picks<IAnythingQuickPickItem>> | null {
     const filterSegments = query.original.split(
-      GotoSymbolQuickAccessProvider.PREFIX,
+      GotoSymbolQuickAccessProvider.PREFIX
     )
     const filter =
       filterSegments.length > 1
@@ -1187,7 +1185,7 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
     if (
       activeGlobalPick.label.includes(GotoSymbolQuickAccessProvider.PREFIX) ||
       activeGlobalPick.description?.includes(
-        GotoSymbolQuickAccessProvider.PREFIX,
+        GotoSymbolQuickAccessProvider.PREFIX
       )
     ) {
       if (filterSegments.length < 3) {
@@ -1200,7 +1198,7 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
       activeGlobalResource,
       filter,
       disposables,
-      token,
+      token
     )
   }
 
@@ -1209,7 +1207,7 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
     activeGlobalResource: URI,
     filter: string,
     disposables: DisposableStore,
-    token: CancellationToken,
+    token: CancellationToken
   ): Promise<Picks<IAnythingQuickPickItem>> {
     // Bring the editor to front to review symbols to go to
     try {
@@ -1238,9 +1236,7 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
     if (!model) {
       try {
         const modelReference = disposables.add(
-          await this.textModelService.createModelReference(
-            activeGlobalResource,
-          ),
+          await this.textModelService.createModelReference(activeGlobalResource)
         )
         if (token.isCancellationRequested) {
           return []
@@ -1259,7 +1255,7 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
         filter,
         { extraContainerLabel: stripIcons(activeGlobalPick.label) },
         disposables,
-        token,
+        token
       )
     if (token.isCancellationRequested) {
       return []
@@ -1310,7 +1306,7 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
 
   private createAnythingPick(
     resourceOrEditor: URI | EditorInput | IResourceEditorInput,
-    configuration: { openSideBySideDirection: "right" | "down" | undefined },
+    configuration: { openSideBySideDirection: "right" | "down" | undefined }
   ): IAnythingQuickPickItem {
     const isEditorHistoryEntry = !URI.isUri(resourceOrEditor)
 
@@ -1336,7 +1332,7 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
       label = customLabel || basenameOrAuthority(resource)
       description = this.labelService.getUriLabel(
         !!customLabel ? resource : dirname(resource),
-        { relative: true },
+        { relative: true }
       )
       isDirty =
         this.workingCopyService.isDirty(resource) &&
@@ -1352,8 +1348,8 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
         this.languageService,
         resource,
         undefined,
-        icon,
-      ).concat(extraClasses),
+        icon
+      ).concat(extraClasses)
     )
 
     const buttonsValue = new Lazy(() => {
@@ -1373,14 +1369,14 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
                   key: "openToSide",
                   comment: ["Open this file in a new editor"],
                 },
-                "Force open in new editor",
+                "Force open in new editor"
               )
             : localize(
                 {
                   key: "openToBottom",
                   comment: ["Open this file in a split editor on the bottom"],
                 },
-                "Open to the Bottom",
+                "Open to the Bottom"
               ),
       })
 
@@ -1405,7 +1401,7 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
         ? localize(
             "filePickAriaLabelDirty",
             "{0} unsaved changes",
-            labelAndDescription,
+            labelAndDescription
           )
         : labelAndDescription,
       description,
@@ -1456,7 +1452,7 @@ export class AnythingQuickAccessProvider extends PickerQuickAccessProvider<IAnyt
       range?: IRange
       forceOpenSideBySide?: boolean
       forcePinned?: boolean
-    },
+    }
   ): Promise<void> {
     if (URI.isUri(resourceOrEditor)) {
       this.haystackService.createFileEditor(resourceOrEditor, {

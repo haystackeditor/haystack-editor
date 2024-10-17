@@ -116,14 +116,14 @@ export class StickyScrollController
     _languageConfigurationService: ILanguageConfigurationService,
     @ILanguageFeatureDebounceService
     _languageFeatureDebounceService: ILanguageFeatureDebounceService,
-    @IContextKeyService private readonly _contextKeyService: IContextKeyService,
+    @IContextKeyService private readonly _contextKeyService: IContextKeyService
   ) {
     super()
     this._stickyScrollWidget = new StickyScrollWidget(this._editor)
     this._stickyLineCandidateProvider = new StickyLineCandidateProvider(
       this._editor,
       _languageFeaturesService,
-      _languageConfigurationService,
+      _languageConfigurationService
     )
     this._register(this._stickyScrollWidget)
     this._register(this._stickyLineCandidateProvider)
@@ -135,7 +135,7 @@ export class StickyScrollController
     this._register(
       this._editor.onDidChangeConfiguration((e) => {
         this._readConfigurationChange(e)
-      }),
+      })
     )
     this._register(
       dom.addDisposableListener(
@@ -143,8 +143,8 @@ export class StickyScrollController
         dom.EventType.CONTEXT_MENU,
         async (event: MouseEvent) => {
           this._onContextMenu(dom.getWindow(stickyScrollDomNode), event)
-        },
-      ),
+        }
+      )
     )
     this._stickyScrollFocusedContextKey =
       EditorContextKeys.stickyScrollFocused.bindTo(this._contextKeyService)
@@ -166,12 +166,12 @@ export class StickyScrollController
         else {
           this._disposeFocusStickyScrollStore()
         }
-      }),
+      })
     )
     this._register(
       focusTracker.onDidFocus((_) => {
         this.focus()
-      }),
+      })
     )
     this._registerMouseListeners()
     // Suppose that mouse down on the sticky scroll, then do not focus on the sticky scroll because this will be followed by the revealing of a position
@@ -181,8 +181,8 @@ export class StickyScrollController
         dom.EventType.MOUSE_DOWN,
         (e) => {
           this._onMouseDown = true
-        },
-      ),
+        }
+      )
     )
   }
 
@@ -196,7 +196,7 @@ export class StickyScrollController
 
   public static get(editor: ICodeEditor): IStickyScrollController | null {
     return editor.getContribution<StickyScrollController>(
-      StickyScrollController.ID,
+      StickyScrollController.ID
     )
   }
 
@@ -271,14 +271,14 @@ export class StickyScrollController
     this._reveaInEditor(position, () =>
       this._editor.revealLineInCenterIfOutsideViewport(
         position.lineNumber,
-        ScrollType.Smooth,
-      ),
+        ScrollType.Smooth
+      )
     )
   }
 
   private _reveaInEditor(
     position: IPosition,
-    revealFunction: () => void,
+    revealFunction: () => void
   ): void {
     if (this._focused) {
       this._disposeFocusStickyScrollStore()
@@ -295,15 +295,15 @@ export class StickyScrollController
       new ClickLinkGesture(this._editor, {
         extractLineNumberFromMouseEvent: (e) => {
           const position = this._stickyScrollWidget.getEditorPositionFromNode(
-            e.target.element,
+            e.target.element
           )
           return position ? position.lineNumber : 0
         },
-      }),
+      })
     )
 
     const getMouseEventTarget = (
-      mouseEvent: ClickLinkMouseEvent,
+      mouseEvent: ClickLinkMouseEvent
     ): { range: Range; textElement: HTMLElement } | null => {
       if (!this._editor.hasModel()) {
         return null
@@ -334,7 +334,7 @@ export class StickyScrollController
           position.lineNumber,
           position.column,
           position.lineNumber,
-          position.column + mouseTargetElement.innerText.length,
+          position.column + mouseTargetElement.innerText.length
         ),
         textElement: mouseTargetElement,
       }
@@ -358,7 +358,7 @@ export class StickyScrollController
             // shift click
             const lineIndex =
               this._stickyScrollWidget.getLineIndexFromChildDomNode(
-                mouseEvent.target,
+                mouseEvent.target
               )
             if (lineIndex === null) {
               return
@@ -373,25 +373,25 @@ export class StickyScrollController
             // clicked on folding icon
             const lineNumber =
               this._stickyScrollWidget.getLineNumberFromChildDomNode(
-                mouseEvent.target,
+                mouseEvent.target
               )
             this._toggleFoldingRegionForLine(lineNumber)
             return
           }
           const isInStickyLine = this._stickyScrollWidget.isInStickyLine(
-            mouseEvent.target,
+            mouseEvent.target
           )
           if (!isInStickyLine) {
             return
           }
           // normal click
           let position = this._stickyScrollWidget.getEditorPositionFromNode(
-            mouseEvent.target,
+            mouseEvent.target
           )
           if (!position) {
             const lineNumber =
               this._stickyScrollWidget.getLineNumberFromChildDomNode(
-                mouseEvent.target,
+                mouseEvent.target
               )
             if (lineNumber === null) {
               // not hovering a sticky scroll line
@@ -400,8 +400,8 @@ export class StickyScrollController
             position = new Position(lineNumber, 1)
           }
           this._revealPosition(position)
-        },
-      ),
+        }
+      )
     )
     this._register(
       dom.addStandardDisposableListener(
@@ -411,7 +411,7 @@ export class StickyScrollController
           if (mouseEvent.shiftKey) {
             const currentEndForLineIndex =
               this._stickyScrollWidget.getLineIndexFromChildDomNode(
-                mouseEvent.target,
+                mouseEvent.target
               )
             if (
               currentEndForLineIndex === null ||
@@ -428,8 +428,8 @@ export class StickyScrollController
             this._showEndForLine = null
             this._renderStickyScroll()
           }
-        },
-      ),
+        }
+      )
     )
     this._register(
       dom.addDisposableListener(
@@ -440,8 +440,8 @@ export class StickyScrollController
             this._showEndForLine = null
             this._renderStickyScroll()
           }
-        },
-      ),
+        }
+      )
     )
 
     this._register(
@@ -473,7 +473,7 @@ export class StickyScrollController
           this._languageFeaturesService.definitionProvider,
           this._editor.getModel(),
           new Position(range.startLineNumber, range.startColumn + 1),
-          cancellationToken.token,
+          cancellationToken.token
         ).then((candidateDefinitions) => {
           if (cancellationToken.token.isCancellationRequested) {
             return
@@ -488,7 +488,7 @@ export class StickyScrollController
               sessionStore.add(
                 toDisposable(() => {
                   currentHTMLChild.style.textDecoration = "none"
-                }),
+                })
               )
             } else if (!currentHTMLChild) {
               currentHTMLChild = childHTML
@@ -496,19 +496,19 @@ export class StickyScrollController
               sessionStore.add(
                 toDisposable(() => {
                   currentHTMLChild.style.textDecoration = "none"
-                }),
+                })
               )
             }
           } else {
             sessionStore.clear()
           }
         })
-      }),
+      })
     )
     this._register(
       gesture.onCancel(() => {
         sessionStore.clear()
-      }),
+      })
     )
     this._register(
       gesture.onExecute(async (e) => {
@@ -520,7 +520,7 @@ export class StickyScrollController
           return
         }
         const position = this._stickyScrollWidget.getEditorPositionFromNode(
-          e.target.element,
+          e.target.element
         )
         if (!position) {
           // not hovering a sticky scroll line
@@ -542,9 +542,9 @@ export class StickyScrollController
           {
             uri: this._editor.getModel().uri,
             range: this._stickyRangeProjectedOnEditor,
-          },
+          }
         )
-      }),
+      })
     )
   }
 
@@ -594,19 +594,19 @@ export class StickyScrollController
             this._showEndForLine = null
             this._renderStickyScroll()
           }
-        }),
+        })
       )
       this._sessionStore.add(
-        this._editor.onDidLayoutChange(() => this._onDidResize()),
+        this._editor.onDidLayoutChange(() => this._onDidResize())
       )
       this._sessionStore.add(
-        this._editor.onDidChangeModelTokens((e) => this._onTokensChange(e)),
+        this._editor.onDidChangeModelTokens((e) => this._onTokensChange(e))
       )
       this._sessionStore.add(
         this._stickyLineCandidateProvider.onDidChangeStickyScroll(() => {
           this._showEndForLine = null
           this._renderStickyScroll()
-        }),
+        })
       )
       this._enabled = true
     }
@@ -617,7 +617,7 @@ export class StickyScrollController
         this._editor.onDidChangeCursorPosition(() => {
           this._showEndForLine = null
           this._renderStickyScroll(0)
-        }),
+        })
       )
     }
   }
@@ -684,14 +684,14 @@ export class StickyScrollController
         (await FoldingController.get(this._editor)?.getFoldingModel()) ?? null
       this._widgetState = this.findScrollWidgetState()
       this._stickyScrollVisibleContextKey.set(
-        !(this._widgetState.startLineNumbers.length === 0),
+        !(this._widgetState.startLineNumbers.length === 0)
       )
 
       if (!this._focused) {
         this._stickyScrollWidget.setState(
           this._widgetState,
           this._foldingModel,
-          rebuildFromLine,
+          rebuildFromLine
         )
       } else {
         // Suppose that previously the sticky scroll widget had height 0, then if there are visible lines, set the last line as focused
@@ -699,13 +699,13 @@ export class StickyScrollController
           this._stickyScrollWidget.setState(
             this._widgetState,
             this._foldingModel,
-            rebuildFromLine,
+            rebuildFromLine
           )
           this._focusedStickyElementIndex =
             this._stickyScrollWidget.lineNumberCount - 1
           if (this._focusedStickyElementIndex !== -1) {
             this._stickyScrollWidget.focusLineWithIndex(
-              this._focusedStickyElementIndex,
+              this._focusedStickyElementIndex
             )
           }
         } else {
@@ -716,7 +716,7 @@ export class StickyScrollController
           this._stickyScrollWidget.setState(
             this._widgetState,
             this._foldingModel,
-            rebuildFromLine,
+            rebuildFromLine
           )
           // Suppose that after setting the state, there are no sticky lines, set the focused index to -1
           if (this._stickyScrollWidget.lineNumberCount === 0) {
@@ -724,7 +724,7 @@ export class StickyScrollController
           } else {
             const previousFocusedLineNumberExists =
               this._stickyScrollWidget.lineNumbers.includes(
-                focusedStickyElementLineNumber,
+                focusedStickyElementLineNumber
               )
 
             // If the line number is still there, do not change anything
@@ -734,7 +734,7 @@ export class StickyScrollController
                 this._stickyScrollWidget.lineNumberCount - 1
             }
             this._stickyScrollWidget.focusLineWithIndex(
-              this._focusedStickyElementIndex,
+              this._focusedStickyElementIndex
             )
           }
         }
@@ -746,7 +746,7 @@ export class StickyScrollController
     const lineHeight: number = this._editor.getOption(EditorOption.lineHeight)
     const maxNumberStickyLines = Math.min(
       this._maxStickyLines,
-      this._editor.getOption(EditorOption.stickyScroll).maxLineCount,
+      this._editor.getOption(EditorOption.stickyScroll).maxLineCount
     )
     const scrollTop: number = this._editor.getScrollTop()
     let lastLineRelativePosition: number = 0
@@ -757,11 +757,11 @@ export class StickyScrollController
     if (arrayVisibleRanges.length !== 0) {
       const fullVisibleRange = new StickyRange(
         arrayVisibleRanges[0].startLineNumber,
-        arrayVisibleRanges[arrayVisibleRanges.length - 1].endLineNumber,
+        arrayVisibleRanges[arrayVisibleRanges.length - 1].endLineNumber
       )
       const candidateRanges =
         this._stickyLineCandidateProvider.getCandidateStickyLinesIntersecting(
-          fullVisibleRange,
+          fullVisibleRange
         )
       for (const range of candidateRanges) {
         const start = range.startLineNumber
@@ -825,7 +825,7 @@ export class StickyScrollController
       startLineNumbers,
       endLineNumbers,
       lastLineRelativePosition,
-      this._showEndForLine,
+      this._showEndForLine
     )
   }
 

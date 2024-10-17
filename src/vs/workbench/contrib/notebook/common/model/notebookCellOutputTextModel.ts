@@ -9,145 +9,134 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { VSBuffer } from "vs/base/common/buffer"
-import { Emitter } from "vs/base/common/event"
-import { Disposable } from "vs/base/common/lifecycle"
-import {
-  ICellOutput,
-  IOutputDto,
-  IOutputItemDto,
-  compressOutputItemStreams,
-  isTextStreamMime,
-} from "vs/workbench/contrib/notebook/common/notebookCommon"
+import { VSBuffer } from 'vs/base/common/buffer';
+import { Emitter } from 'vs/base/common/event';
+import { Disposable } from 'vs/base/common/lifecycle';
+import { ICellOutput, IOutputDto, IOutputItemDto, compressOutputItemStreams, isTextStreamMime } from 'vs/workbench/contrib/notebook/common/notebookCommon';
 
-export class NotebookCellOutputTextModel
-  extends Disposable
-  implements ICellOutput
-{
-  private _onDidChangeData = this._register(new Emitter<void>())
-  onDidChangeData = this._onDidChangeData.event
+export class NotebookCellOutputTextModel extends Disposable implements ICellOutput {
 
-  get outputs() {
-    return this._rawOutput.outputs || []
-  }
+	private _onDidChangeData = this._register(new Emitter<void>());
+	onDidChangeData = this._onDidChangeData.event;
 
-  get metadata(): Record<string, any> | undefined {
-    return this._rawOutput.metadata
-  }
+	get outputs() {
+		return this._rawOutput.outputs || [];
+	}
 
-  get outputId(): string {
-    return this._rawOutput.outputId
-  }
+	get metadata(): Record<string, any> | undefined {
+		return this._rawOutput.metadata;
+	}
 
-  /**
-   * Alternative output id that's reused when the output is updated.
-   */
-  private _alternativeOutputId: string
+	get outputId(): string {
+		return this._rawOutput.outputId;
+	}
 
-  get alternativeOutputId(): string {
-    return this._alternativeOutputId
-  }
+	/**
+	 * Alternative output id that's reused when the output is updated.
+	 */
+	private _alternativeOutputId: string;
 
-  private _versionId = 0
+	get alternativeOutputId(): string {
+		return this._alternativeOutputId;
+	}
 
-  get versionId() {
-    return this._versionId
-  }
+	private _versionId = 0;
 
-  constructor(private _rawOutput: IOutputDto) {
-    super()
+	get versionId() {
+		return this._versionId;
+	}
 
-    this._alternativeOutputId = this._rawOutput.outputId
-  }
+	constructor(
+		private _rawOutput: IOutputDto
+	) {
+		super();
 
-  replaceData(rawData: IOutputDto) {
-    this.versionedBufferLengths = {}
-    this._rawOutput = rawData
-    this.optimizeOutputItems()
-    this._versionId = this._versionId + 1
-    this._onDidChangeData.fire()
-  }
+		this._alternativeOutputId = this._rawOutput.outputId;
+	}
 
-  appendData(items: IOutputItemDto[]) {
-    this.trackBufferLengths()
-    this._rawOutput.outputs.push(...items)
-    this.optimizeOutputItems()
-    this._versionId = this._versionId + 1
-    this._onDidChangeData.fire()
-  }
+	replaceData(rawData: IOutputDto) {
+		this.versionedBufferLengths = {};
+		this._rawOutput = rawData;
+		this.optimizeOutputItems();
+		this._versionId = this._versionId + 1;
+		this._onDidChangeData.fire();
+	}
 
-  private trackBufferLengths() {
-    this.outputs.forEach((output) => {
-      if (isTextStreamMime(output.mime)) {
-        if (!this.versionedBufferLengths[output.mime]) {
-          this.versionedBufferLengths[output.mime] = {}
-        }
-        this.versionedBufferLengths[output.mime][this.versionId] =
-          output.data.byteLength
-      }
-    })
-  }
+	appendData(items: IOutputItemDto[]) {
+		this.trackBufferLengths();
+		this._rawOutput.outputs.push(...items);
+		this.optimizeOutputItems();
+		this._versionId = this._versionId + 1;
+		this._onDidChangeData.fire();
+	}
 
-  // mime: versionId: buffer length
-  private versionedBufferLengths: Record<string, Record<number, number>> = {}
+	private trackBufferLengths() {
+		this.outputs.forEach(output => {
+			if (isTextStreamMime(output.mime)) {
+				if (!this.versionedBufferLengths[output.mime]) {
+					this.versionedBufferLengths[output.mime] = {};
+				}
+				this.versionedBufferLengths[output.mime][this.versionId] = output.data.byteLength;
+			}
+		});
+	}
 
-  appendedSinceVersion(versionId: number, mime: string): VSBuffer | undefined {
-    const bufferLength = this.versionedBufferLengths[mime]?.[versionId]
-    const output = this.outputs.find((output) => output.mime === mime)
-    if (bufferLength && output) {
-      return output.data.slice(bufferLength)
-    }
+	// mime: versionId: buffer length
+	private versionedBufferLengths: Record<string, Record<number, number>> = {};
 
-    return undefined
-  }
+	appendedSinceVersion(versionId: number, mime: string): VSBuffer | undefined {
+		const bufferLength = this.versionedBufferLengths[mime]?.[versionId];
+		const output = this.outputs.find(output => output.mime === mime);
+		if (bufferLength && output) {
+			return output.data.slice(bufferLength);
+		}
 
-  private optimizeOutputItems() {
-    if (
-      this.outputs.length > 1 &&
-      this.outputs.every((item) => isTextStreamMime(item.mime))
-    ) {
-      // Look for the mimes in the items, and keep track of their order.
-      // Merge the streams into one output item, per mime type.
-      const mimeOutputs = new Map<string, Uint8Array[]>()
-      const mimeTypes: string[] = []
-      this.outputs.forEach((item) => {
-        let items: Uint8Array[]
-        if (mimeOutputs.has(item.mime)) {
-          items = mimeOutputs.get(item.mime)!
-        } else {
-          items = []
-          mimeOutputs.set(item.mime, items)
-          mimeTypes.push(item.mime)
-        }
-        items.push(item.data.buffer)
-      })
-      this.outputs.length = 0
-      mimeTypes.forEach((mime) => {
-        const compressionResult = compressOutputItemStreams(
-          mimeOutputs.get(mime)!,
-        )
-        this.outputs.push({
-          mime,
-          data: compressionResult.data,
-        })
-        if (compressionResult.didCompression) {
-          // we can't rely on knowing buffer lengths if we've erased previous lines
-          this.versionedBufferLengths = {}
-        }
-      })
-    }
-  }
+		return undefined;
+	}
 
-  asDto(): IOutputDto {
-    return {
-      // data: this._data,
-      metadata: this._rawOutput.metadata,
-      outputs: this._rawOutput.outputs,
-      outputId: this._rawOutput.outputId,
-    }
-  }
+	private optimizeOutputItems() {
+		if (this.outputs.length > 1 && this.outputs.every(item => isTextStreamMime(item.mime))) {
+			// Look for the mimes in the items, and keep track of their order.
+			// Merge the streams into one output item, per mime type.
+			const mimeOutputs = new Map<string, Uint8Array[]>();
+			const mimeTypes: string[] = [];
+			this.outputs.forEach(item => {
+				let items: Uint8Array[];
+				if (mimeOutputs.has(item.mime)) {
+					items = mimeOutputs.get(item.mime)!;
+				} else {
+					items = [];
+					mimeOutputs.set(item.mime, items);
+					mimeTypes.push(item.mime);
+				}
+				items.push(item.data.buffer);
+			});
+			this.outputs.length = 0;
+			mimeTypes.forEach(mime => {
+				const compressionResult = compressOutputItemStreams(mimeOutputs.get(mime)!);
+				this.outputs.push({
+					mime,
+					data: compressionResult.data
+				});
+				if (compressionResult.didCompression) {
+					// we can't rely on knowing buffer lengths if we've erased previous lines
+					this.versionedBufferLengths = {};
+				}
+			});
+		}
+	}
 
-  bumpVersion() {
-    this._versionId = this._versionId + 1
-  }
+	asDto(): IOutputDto {
+		return {
+			// data: this._data,
+			metadata: this._rawOutput.metadata,
+			outputs: this._rawOutput.outputs,
+			outputId: this._rawOutput.outputId
+		};
+	}
+
+	bumpVersion() {
+		this._versionId = this._versionId + 1;
+	}
+
 }

@@ -9,26 +9,19 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IEditorPaneService } from "vs/workbench/services/editor/common/editorPaneService"
-import { EditorPaneDescriptor } from "vs/workbench/browser/editor"
-import {
-  InstantiationType,
-  registerSingleton,
-} from "vs/platform/instantiation/common/extensions"
+import { IEditorPaneService } from 'vs/workbench/services/editor/common/editorPaneService';
+import { EditorPaneDescriptor } from 'vs/workbench/browser/editor';
+import { InstantiationType, registerSingleton } from 'vs/platform/instantiation/common/extensions';
 
 export class EditorPaneService implements IEditorPaneService {
-  declare readonly _serviceBrand: undefined
 
-  readonly onWillInstantiateEditorPane =
-    EditorPaneDescriptor.onWillInstantiateEditorPane
+	declare readonly _serviceBrand: undefined;
 
-  didInstantiateEditorPane(typeId: string): boolean {
-    return EditorPaneDescriptor.didInstantiateEditorPane(typeId)
-  }
+	readonly onWillInstantiateEditorPane = EditorPaneDescriptor.onWillInstantiateEditorPane;
+
+	didInstantiateEditorPane(typeId: string): boolean {
+		return EditorPaneDescriptor.didInstantiateEditorPane(typeId);
+	}
 }
 
-registerSingleton(
-  IEditorPaneService,
-  EditorPaneService,
-  InstantiationType.Delayed,
-)
+registerSingleton(IEditorPaneService, EditorPaneService, InstantiationType.Delayed);

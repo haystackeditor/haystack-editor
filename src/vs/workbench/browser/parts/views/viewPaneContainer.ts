@@ -158,11 +158,11 @@ class ViewPaneDropOverlay extends Themable {
     private orientation: Orientation | undefined,
     private bounds: BoundingRect | undefined,
     protected location: ViewContainerLocation,
-    themeService: IThemeService,
+    themeService: IThemeService
   ) {
     super(themeService)
     this.cleanupOverlayScheduler = this._register(
-      new RunOnceScheduler(() => this.dispose(), 300),
+      new RunOnceScheduler(() => this.dispose(), 300)
     )
 
     this.create()
@@ -185,7 +185,7 @@ class ViewPaneDropOverlay extends Themable {
       toDisposable(() => {
         this.paneElement.removeChild(this.container)
         this.paneElement.classList.remove("dragged-over")
-      }),
+      })
     )
 
     // Overlay
@@ -206,7 +206,7 @@ class ViewPaneDropOverlay extends Themable {
       this.getColor(
         this.location === ViewContainerLocation.Panel
           ? PANEL_SECTION_DRAG_AND_DROP_BACKGROUND
-          : SIDE_BAR_DRAG_AND_DROP_BACKGROUND,
+          : SIDE_BAR_DRAG_AND_DROP_BACKGROUND
       ) || ""
 
     // Overlay contrast border (if any)
@@ -241,7 +241,7 @@ class ViewPaneDropOverlay extends Themable {
           // Dispose overlay
           this.dispose()
         },
-      }),
+      })
     )
 
     this._register(
@@ -256,7 +256,7 @@ class ViewPaneDropOverlay extends Themable {
         if (!this.cleanupOverlayScheduler.isScheduled()) {
           this.cleanupOverlayScheduler.schedule()
         }
-      }),
+      })
     )
   }
 
@@ -404,35 +404,35 @@ class ViewContainerMenuActions extends CompositeMenuActions {
     viewContainer: ViewContainer,
     @IViewDescriptorService viewDescriptorService: IViewDescriptorService,
     @IContextKeyService contextKeyService: IContextKeyService,
-    @IMenuService menuService: IMenuService,
+    @IMenuService menuService: IMenuService
   ) {
     const scopedContextKeyService = contextKeyService.createScoped(element)
     scopedContextKeyService.createKey("viewContainer", viewContainer.id)
     const viewContainerLocationKey = scopedContextKeyService.createKey(
       "viewContainerLocation",
       ViewContainerLocationToString(
-        viewDescriptorService.getViewContainerLocation(viewContainer)!,
-      ),
+        viewDescriptorService.getViewContainerLocation(viewContainer)!
+      )
     )
     super(
       MenuId.ViewContainerTitle,
       MenuId.ViewContainerTitleContext,
       { shouldForwardArgs: true, renderShortTitle: true },
       scopedContextKeyService,
-      menuService,
+      menuService
     )
     this._register(scopedContextKeyService)
     this._register(
       Event.filter(
         viewDescriptorService.onDidChangeContainerLocation,
-        (e) => e.viewContainer === viewContainer,
+        (e) => e.viewContainer === viewContainer
       )(() =>
         viewContainerLocationKey.set(
           ViewContainerLocationToString(
-            viewDescriptorService.getViewContainerLocation(viewContainer)!,
-          ),
-        ),
-      ),
+            viewDescriptorService.getViewContainerLocation(viewContainer)!
+          )
+        )
+      )
     )
   }
 }
@@ -457,12 +457,12 @@ export class ViewPaneContainer extends Component implements IViewPaneContainer {
   protected readonly viewContainerModel: IViewContainerModel
 
   private readonly _onTitleAreaUpdate: Emitter<void> = this._register(
-    new Emitter<void>(),
+    new Emitter<void>()
   )
   readonly onTitleAreaUpdate: Event<void> = this._onTitleAreaUpdate.event
 
   private readonly _onDidChangeVisibility = this._register(
-    new Emitter<boolean>(),
+    new Emitter<boolean>()
   )
   readonly onDidChangeVisibility = this._onDidChangeVisibility.event
 
@@ -473,7 +473,7 @@ export class ViewPaneContainer extends Component implements IViewPaneContainer {
   readonly onDidRemoveViews = this._onDidRemoveViews.event
 
   private readonly _onDidChangeViewVisibility = this._register(
-    new Emitter<IView>(),
+    new Emitter<IView>()
   )
   readonly onDidChangeViewVisibility = this._onDidChangeViewVisibility.event
 
@@ -520,7 +520,7 @@ export class ViewPaneContainer extends Component implements IViewPaneContainer {
     @IWorkspaceContextService
     protected contextService: IWorkspaceContextService,
     @IViewDescriptorService
-    protected viewDescriptorService: IViewDescriptorService,
+    protected viewDescriptorService: IViewDescriptorService
   ) {
     super(id, themeService, storageService)
 
@@ -534,7 +534,7 @@ export class ViewPaneContainer extends Component implements IViewPaneContainer {
     this.visibleViewsCountFromCache = this.storageService.getNumber(
       this.visibleViewsStorageId,
       StorageScope.WORKSPACE,
-      undefined,
+      undefined
     )
     this.viewContainerModel =
       this.viewDescriptorService.getViewContainerModel(container)
@@ -551,17 +551,17 @@ export class ViewPaneContainer extends Component implements IViewPaneContainer {
 
     this._register(
       this.paneview.onDidDrop(({ from, to }) =>
-        this.movePane(from as ViewPane, to as ViewPane),
-      ),
+        this.movePane(from as ViewPane, to as ViewPane)
+      )
     )
     this._register(this.paneview.onDidScroll((_) => this.onDidScrollPane()))
     this._register(
-      this.paneview.onDidSashReset((index) => this.onDidSashReset(index)),
+      this.paneview.onDidSashReset((index) => this.onDidSashReset(index))
     )
     this._register(
       addDisposableListener(parent, EventType.CONTEXT_MENU, (e: MouseEvent) =>
-        this.showContextMenu(new StandardMouseEvent(getWindow(parent), e)),
-      ),
+        this.showContextMenu(new StandardMouseEvent(getWindow(parent), e))
+      )
     )
     this._register(Gesture.addTarget(parent))
     this._register(
@@ -569,16 +569,16 @@ export class ViewPaneContainer extends Component implements IViewPaneContainer {
         parent,
         TouchEventType.Contextmenu,
         (e: MouseEvent) =>
-          this.showContextMenu(new StandardMouseEvent(getWindow(parent), e)),
-      ),
+          this.showContextMenu(new StandardMouseEvent(getWindow(parent), e))
+      )
     )
 
     this._menuActions = this._register(
       this.instantiationService.createInstance(
         ViewContainerMenuActions,
         this.paneview.element,
-        this.viewContainer,
-      ),
+        this.viewContainer
+      )
     )
     this._register(this._menuActions.onDidChange(() => this.updateTitleArea()))
 
@@ -645,9 +645,9 @@ export class ViewPaneContainer extends Component implements IViewPaneContainer {
                 undefined,
                 bounds,
                 this.viewDescriptorService.getViewContainerLocation(
-                  this.viewContainer,
+                  this.viewContainer
                 )!,
-                this.themeService,
+                this.themeService
               )
             }
 
@@ -656,11 +656,11 @@ export class ViewPaneContainer extends Component implements IViewPaneContainer {
               dropData.id !== this.viewContainer.id
             ) {
               const container = this.viewDescriptorService.getViewContainerById(
-                dropData.id,
+                dropData.id
               )!
               const viewsToMove =
                 this.viewDescriptorService.getViewContainerModel(
-                  container,
+                  container
                 ).allViewDescriptors
 
               if (
@@ -672,9 +672,9 @@ export class ViewPaneContainer extends Component implements IViewPaneContainer {
                   undefined,
                   bounds,
                   this.viewDescriptorService.getViewContainerLocation(
-                    this.viewContainer,
+                    this.viewContainer
                   )!,
-                  this.themeService,
+                  this.themeService
                 )
               }
             }
@@ -694,7 +694,7 @@ export class ViewPaneContainer extends Component implements IViewPaneContainer {
             toggleDropEffect(
               e.eventData.dataTransfer,
               "move",
-              overlay !== undefined,
+              overlay !== undefined
             )
           }
         },
@@ -712,11 +712,11 @@ export class ViewPaneContainer extends Component implements IViewPaneContainer {
               dropData.id !== this.viewContainer.id
             ) {
               const container = this.viewDescriptorService.getViewContainerById(
-                dropData.id,
+                dropData.id
               )!
               const allViews =
                 this.viewDescriptorService.getViewContainerModel(
-                  container,
+                  container
                 ).allViewDescriptors
               if (!allViews.some((v) => !v.canMoveView)) {
                 viewsToMove.push(...allViews)
@@ -735,7 +735,7 @@ export class ViewPaneContainer extends Component implements IViewPaneContainer {
                   [viewDescriptor],
                   this.viewContainer,
                   undefined,
-                  "dnd",
+                  "dnd"
                 )
               }
             }
@@ -747,7 +747,7 @@ export class ViewPaneContainer extends Component implements IViewPaneContainer {
                 viewsToMove,
                 this.viewContainer,
                 undefined,
-                "dnd",
+                "dnd"
               )
             }
 
@@ -764,29 +764,29 @@ export class ViewPaneContainer extends Component implements IViewPaneContainer {
           overlay?.dispose()
           overlay = undefined
         },
-      }),
+      })
     )
 
     this._register(this.onDidSashChange(() => this.saveViewSizes()))
     this._register(
       this.viewContainerModel.onDidAddVisibleViewDescriptors((added) =>
-        this.onDidAddViewDescriptors(added),
-      ),
+        this.onDidAddViewDescriptors(added)
+      )
     )
     this._register(
       this.viewContainerModel.onDidRemoveVisibleViewDescriptors((removed) =>
-        this.onDidRemoveViewDescriptors(removed),
-      ),
+        this.onDidRemoveViewDescriptors(removed)
+      )
     )
     const addedViews: IAddedViewDescriptorRef[] =
       this.viewContainerModel.visibleViewDescriptors.map(
         (viewDescriptor, index) => {
           const size = this.viewContainerModel.getSize(viewDescriptor.id)
           const collapsed = this.viewContainerModel.isCollapsed(
-            viewDescriptor.id,
+            viewDescriptor.id
           )
           return { viewDescriptor, index, size, collapsed }
-        },
+        }
       )
     if (addedViews.length) {
       this.onDidAddViewDescriptors(addedViews)
@@ -804,14 +804,14 @@ export class ViewPaneContainer extends Component implements IViewPaneContainer {
           if (e.affectsConfiguration(LayoutSettings.ACTIVITY_BAR_LOCATION)) {
             this.updateViewHeaders()
           }
-        }),
+        })
       )
     })
 
     this._register(
       this.viewContainerModel.onDidChangeActiveViewDescriptors(() =>
-        this._onTitleAreaUpdate.fire(),
-      ),
+        this._onTitleAreaUpdate.fire()
+      )
     )
   }
 
@@ -861,7 +861,7 @@ export class ViewPaneContainer extends Component implements IViewPaneContainer {
 
   getActionViewItem(
     action: IAction,
-    options: IBaseActionViewItemOptions,
+    options: IBaseActionViewItemOptions
   ): IActionViewItem | undefined {
     if (this.isViewMergedWithContainer()) {
       return this.paneItems[0].pane.getActionViewItem(action, options)
@@ -928,7 +928,7 @@ export class ViewPaneContainer extends Component implements IViewPaneContainer {
   getOptimalWidth(): number {
     const additionalMargin = 16
     const optimalWidth = Math.max(
-      ...this.panes.map((view) => view.getOptimalWidth() || 0),
+      ...this.panes.map((view) => view.getOptimalWidth() || 0)
     )
     return optimalWidth + additionalMargin
   }
@@ -939,7 +939,7 @@ export class ViewPaneContainer extends Component implements IViewPaneContainer {
       size: number
       index?: number
       disposable: IDisposable
-    }[],
+    }[]
   ): void {
     const wasMerged = this.isViewMergedWithContainer()
 
@@ -977,12 +977,12 @@ export class ViewPaneContainer extends Component implements IViewPaneContainer {
 
   protected createView(
     viewDescriptor: IViewDescriptor,
-    options: IViewletViewOptions,
+    options: IViewletViewOptions
   ): ViewPane {
     return (this.instantiationService as any).createInstance(
       viewDescriptor.ctorDescriptor.ctor,
       ...(viewDescriptor.ctorDescriptor.staticArguments || []),
-      options,
+      options
     ) as ViewPane
   }
 
@@ -997,7 +997,7 @@ export class ViewPaneContainer extends Component implements IViewPaneContainer {
         this.panes.map((view) => ({
           id: view.id,
           size: this.getPaneSize(view),
-        })),
+        }))
       )
     }
   }
@@ -1032,7 +1032,7 @@ export class ViewPaneContainer extends Component implements IViewPaneContainer {
     if (this.dimension) {
       const totalWeight = this.viewContainerModel.visibleViewDescriptors.reduce(
         (totalWeight, { weight }) => totalWeight + (weight || 20),
-        0,
+        0
       )
       for (const viewDescriptor of this.viewContainerModel
         .visibleViewDescriptors) {
@@ -1040,13 +1040,12 @@ export class ViewPaneContainer extends Component implements IViewPaneContainer {
           sizes.set(
             viewDescriptor.id,
             (this.dimension.height * (viewDescriptor.weight || 20)) /
-              totalWeight,
+              totalWeight
           )
         } else {
           sizes.set(
             viewDescriptor.id,
-            (this.dimension.width * (viewDescriptor.weight || 20)) /
-              totalWeight,
+            (this.dimension.width * (viewDescriptor.weight || 20)) / totalWeight
           )
         }
       }
@@ -1060,7 +1059,7 @@ export class ViewPaneContainer extends Component implements IViewPaneContainer {
       this.visibleViewsStorageId,
       this.length,
       StorageScope.WORKSPACE,
-      StorageTarget.MACHINE,
+      StorageTarget.MACHINE
     )
   }
 
@@ -1092,7 +1091,7 @@ export class ViewPaneContainer extends Component implements IViewPaneContainer {
   }
 
   protected onDidAddViewDescriptors(
-    added: IAddedViewDescriptorRef[],
+    added: IAddedViewDescriptorRef[]
   ): ViewPane[] {
     const panesToAdd: {
       pane: ViewPane
@@ -1121,13 +1120,13 @@ export class ViewPaneContainer extends Component implements IViewPaneContainer {
           e.preventDefault()
           this.onContextMenu(
             new StandardMouseEvent(getWindow(pane.draggableElement), e),
-            pane,
+            pane
           )
-        },
+        }
       )
 
       const collapseDisposable = Event.latch(
-        Event.map(pane.onDidChange, () => !pane.isExpanded()),
+        Event.map(pane.onDidChange, () => !pane.isExpanded())
       )((collapsed) => {
         this.viewContainerModel.setCollapsed(viewDescriptor.id, collapsed)
       })
@@ -1138,7 +1137,7 @@ export class ViewPaneContainer extends Component implements IViewPaneContainer {
         index,
         disposable: combinedDisposable(
           contextMenuDisposable,
-          collapseDisposable,
+          collapseDisposable
         ),
       })
     }
@@ -1177,7 +1176,7 @@ export class ViewPaneContainer extends Component implements IViewPaneContainer {
     // Check if view is active
     if (
       this.viewContainerModel.activeViewDescriptors.some(
-        (viewDescriptor) => viewDescriptor.id === viewId,
+        (viewDescriptor) => viewDescriptor.id === viewId
       )
     ) {
       const visible = !this.viewContainerModel.isVisible(viewId)
@@ -1189,7 +1188,7 @@ export class ViewPaneContainer extends Component implements IViewPaneContainer {
     pane: ViewPane,
     size: number,
     disposable: IDisposable,
-    index = this.paneItems.length - 1,
+    index = this.paneItems.length - 1
   ): void {
     const onDidFocus = pane.onDidFocus(() => {
       this._onDidFocusView.fire(pane)
@@ -1203,7 +1202,7 @@ export class ViewPaneContainer extends Component implements IViewPaneContainer {
     })
 
     const onDidChangeVisibility = pane.onDidChangeBodyVisibility(() =>
-      this._onDidChangeViewVisibility.fire(pane),
+      this._onDidChangeViewVisibility.fire(pane)
     )
     const onDidChange = pane.onDidChange(() => {
       if (pane === this.lastFocusedPane && !pane.isExpanded()) {
@@ -1213,26 +1212,26 @@ export class ViewPaneContainer extends Component implements IViewPaneContainer {
 
     const isPanel =
       this.viewDescriptorService.getViewContainerLocation(
-        this.viewContainer,
+        this.viewContainer
       ) === ViewContainerLocation.Panel
     pane.style({
       headerForeground: asCssVariable(
         isPanel
           ? PANEL_SECTION_HEADER_FOREGROUND
-          : SIDE_BAR_SECTION_HEADER_FOREGROUND,
+          : SIDE_BAR_SECTION_HEADER_FOREGROUND
       ),
       headerBackground: asCssVariable(
         isPanel
           ? PANEL_SECTION_HEADER_BACKGROUND
-          : SIDE_BAR_SECTION_HEADER_BACKGROUND,
+          : SIDE_BAR_SECTION_HEADER_BACKGROUND
       ),
       headerBorder: asCssVariable(
-        isPanel ? PANEL_SECTION_HEADER_BORDER : SIDE_BAR_SECTION_HEADER_BORDER,
+        isPanel ? PANEL_SECTION_HEADER_BORDER : SIDE_BAR_SECTION_HEADER_BORDER
       ),
       dropBackground: asCssVariable(
         isPanel
           ? PANEL_SECTION_DRAG_AND_DROP_BACKGROUND
-          : SIDE_BAR_DRAG_AND_DROP_BACKGROUND,
+          : SIDE_BAR_DRAG_AND_DROP_BACKGROUND
       ),
       leftBorder: isPanel ? asCssVariable(PANEL_SECTION_BORDER) : undefined,
     })
@@ -1246,8 +1245,8 @@ export class ViewPaneContainer extends Component implements IViewPaneContainer {
         onDidBlur,
         onDidChangeTitleArea,
         onDidChange,
-        onDidChangeVisibility,
-      ),
+        onDidChangeVisibility
+      )
     )
     const paneItem: IViewPaneItem = { pane, disposable: store }
 
@@ -1262,8 +1261,8 @@ export class ViewPaneContainer extends Component implements IViewPaneContainer {
         () => {
           return { type: "view", id: pane.id }
         },
-        {},
-      ),
+        {}
+      )
     )
 
     store.add(
@@ -1276,7 +1275,7 @@ export class ViewPaneContainer extends Component implements IViewPaneContainer {
               if (dropData.type === "view" && dropData.id !== pane.id) {
                 const oldViewContainer =
                   this.viewDescriptorService.getViewContainerByViewId(
-                    dropData.id,
+                    dropData.id
                   )
                 const viewDescriptor =
                   this.viewDescriptorService.getViewDescriptorById(dropData.id)
@@ -1295,9 +1294,9 @@ export class ViewPaneContainer extends Component implements IViewPaneContainer {
                   this.orientation ?? Orientation.VERTICAL,
                   undefined,
                   this.viewDescriptorService.getViewContainerLocation(
-                    this.viewContainer,
+                    this.viewContainer
                   )!,
-                  this.themeService,
+                  this.themeService
                 )
               }
 
@@ -1310,7 +1309,7 @@ export class ViewPaneContainer extends Component implements IViewPaneContainer {
                   this.viewDescriptorService.getViewContainerById(dropData.id)!
                 const viewsToMove =
                   this.viewDescriptorService.getViewContainerModel(
-                    container,
+                    container
                   ).allViewDescriptors
 
                 if (
@@ -1322,9 +1321,9 @@ export class ViewPaneContainer extends Component implements IViewPaneContainer {
                     this.orientation ?? Orientation.VERTICAL,
                     undefined,
                     this.viewDescriptorService.getViewContainerLocation(
-                      this.viewContainer,
+                      this.viewContainer
                     )!,
-                    this.themeService,
+                    this.themeService
                   )
                 }
               }
@@ -1334,7 +1333,7 @@ export class ViewPaneContainer extends Component implements IViewPaneContainer {
             toggleDropEffect(
               e.eventData.dataTransfer,
               "move",
-              overlay !== undefined,
+              overlay !== undefined
             )
           },
           onDragLeave: (e) => {
@@ -1356,7 +1355,7 @@ export class ViewPaneContainer extends Component implements IViewPaneContainer {
                   this.viewDescriptorService.getViewContainerById(dropData.id)!
                 const allViews =
                   this.viewDescriptorService.getViewContainerModel(
-                    container,
+                    container
                   ).allViewDescriptors
 
                 if (
@@ -1369,7 +1368,7 @@ export class ViewPaneContainer extends Component implements IViewPaneContainer {
               } else if (dropData.type === "view") {
                 const oldViewContainer =
                   this.viewDescriptorService.getViewContainerByViewId(
-                    dropData.id,
+                    dropData.id
                   )
                 const viewDescriptor =
                   this.viewDescriptorService.getViewDescriptorById(dropData.id)
@@ -1392,7 +1391,7 @@ export class ViewPaneContainer extends Component implements IViewPaneContainer {
                   viewsToMove,
                   this.viewContainer,
                   undefined,
-                  "dnd",
+                  "dnd"
                 )
               }
 
@@ -1402,7 +1401,7 @@ export class ViewPaneContainer extends Component implements IViewPaneContainer {
                   overlay.currentDropOperation === DropDirection.RIGHT
                 ) {
                   const fromIndex = this.panes.findIndex(
-                    (p) => p.id === anchorView!.id,
+                    (p) => p.id === anchorView!.id
                   )
                   let toIndex = this.panes.findIndex((p) => p.id === pane.id)
 
@@ -1422,7 +1421,7 @@ export class ViewPaneContainer extends Component implements IViewPaneContainer {
                   overlay.currentDropOperation === DropDirection.LEFT
                 ) {
                   const fromIndex = this.panes.findIndex(
-                    (p) => p.id === anchorView!.id,
+                    (p) => p.id === anchorView!.id
                   )
                   let toIndex = this.panes.findIndex((p) => p.id === pane.id)
 
@@ -1440,10 +1439,10 @@ export class ViewPaneContainer extends Component implements IViewPaneContainer {
                 if (viewsToMove.length > 1) {
                   viewsToMove.slice(1).forEach((view) => {
                     let toIndex = this.panes.findIndex(
-                      (p) => p.id === anchorView!.id,
+                      (p) => p.id === anchorView!.id
                     )
                     const fromIndex = this.panes.findIndex(
-                      (p) => p.id === view.id,
+                      (p) => p.id === view.id
                     )
                     if (fromIndex >= 0 && toIndex >= 0) {
                       if (fromIndex > toIndex) {
@@ -1456,7 +1455,7 @@ export class ViewPaneContainer extends Component implements IViewPaneContainer {
                       ) {
                         this.movePane(
                           this.panes[fromIndex],
-                          this.panes[toIndex],
+                          this.panes[toIndex]
                         )
                         anchorView = view
                       }
@@ -1469,8 +1468,8 @@ export class ViewPaneContainer extends Component implements IViewPaneContainer {
             overlay?.dispose()
             overlay = undefined
           },
-        },
-      ),
+        }
+      )
     )
   }
 
@@ -1649,13 +1648,13 @@ export class ViewPaneContainer extends Component implements IViewPaneContainer {
 }
 
 export abstract class ViewPaneContainerAction<
-  T extends IViewPaneContainer,
+  T extends IViewPaneContainer
 > extends Action2 {
   override readonly desc: Readonly<IAction2Options> & {
     viewPaneContainerId: string
   }
   constructor(
-    desc: Readonly<IAction2Options> & { viewPaneContainerId: string },
+    desc: Readonly<IAction2Options> & { viewPaneContainerId: string }
   ) {
     super(desc)
     this.desc = desc
@@ -1669,7 +1668,7 @@ export abstract class ViewPaneContainerAction<
       return this.runInViewPaneContainer(
         accessor,
         <T>viewPaneContainer,
-        ...args,
+        ...args
       )
     }
   }
@@ -1684,7 +1683,7 @@ export abstract class ViewPaneContainerAction<
 class MoveViewPosition extends Action2 {
   constructor(
     desc: Readonly<IAction2Options>,
-    private readonly offset: number,
+    private readonly offset: number
   ) {
     super(desc)
   }
@@ -1703,7 +1702,7 @@ class MoveViewPosition extends Action2 {
     const model = viewDescriptorService.getViewContainerModel(viewContainer)
 
     const viewDescriptor = model.visibleViewDescriptors.find(
-      (vd) => vd.id === viewId,
+      (vd) => vd.id === viewId
     )!
     const currentIndex = model.visibleViewDescriptors.indexOf(viewDescriptor)
     if (
@@ -1732,10 +1731,10 @@ registerAction2(
             when: FocusedViewContext.notEqualsTo(""),
           },
         },
-        -1,
+        -1
       )
     }
-  },
+  }
 )
 
 registerAction2(
@@ -1751,10 +1750,10 @@ registerAction2(
             when: FocusedViewContext.notEqualsTo(""),
           },
         },
-        -1,
+        -1
       )
     }
-  },
+  }
 )
 
 registerAction2(
@@ -1770,10 +1769,10 @@ registerAction2(
             when: FocusedViewContext.notEqualsTo(""),
           },
         },
-        1,
+        1
       )
     }
-  },
+  }
 )
 
 registerAction2(
@@ -1786,16 +1785,16 @@ registerAction2(
           keybinding: {
             primary: KeyChord(
               KeyMod.CtrlCmd + KeyCode.KeyK,
-              KeyCode.RightArrow,
+              KeyCode.RightArrow
             ),
             weight: KeybindingWeight.WorkbenchContrib + 1,
             when: FocusedViewContext.notEqualsTo(""),
           },
         },
-        1,
+        1
       )
     }
-  },
+  }
 )
 
 registerAction2(
@@ -1809,7 +1808,7 @@ registerAction2(
 
     async run(
       accessor: ServicesAccessor,
-      options: { viewIds: string[]; destinationId: string },
+      options: { viewIds: string[]; destinationId: string }
     ): Promise<void> {
       if (
         !Array.isArray(options?.viewIds) ||
@@ -1821,7 +1820,7 @@ registerAction2(
       const viewDescriptorService = accessor.get(IViewDescriptorService)
 
       const destination = viewDescriptorService.getViewContainerById(
-        options.destinationId,
+        options.destinationId
       )
       if (!destination) {
         return
@@ -1836,12 +1835,12 @@ registerAction2(
             [viewDescriptor],
             destination,
             ViewVisibilityState.Default,
-            this.desc.id,
+            this.desc.id
           )
         }
       }
 
       await accessor.get(IViewsService).openViewContainer(destination.id, true)
     }
-  },
+  }
 )

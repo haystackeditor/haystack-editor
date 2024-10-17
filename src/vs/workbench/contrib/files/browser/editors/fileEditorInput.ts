@@ -150,7 +150,7 @@ export class FileEditorInput
     @ITextResourceConfigurationService
     textResourceConfigurationService: ITextResourceConfigurationService,
     @ICustomEditorLabelService
-    customEditorLabelService: ICustomEditorLabelService,
+    customEditorLabelService: ICustomEditorLabelService
   ) {
     super(
       resource,
@@ -166,7 +166,7 @@ export class FileEditorInput
       fileService,
       filesConfigurationService,
       textResourceConfigurationService,
-      customEditorLabelService,
+      customEditorLabelService
     )
 
     this.model = this.textFileService.files.get(resource)
@@ -194,8 +194,8 @@ export class FileEditorInput
     // Attach to model that matches our resource once created
     this._register(
       this.textFileService.files.onDidCreate((model) =>
-        this.onDidCreateTextFileModel(model),
-      ),
+        this.onDidCreateTextFileModel(model)
+      )
     )
 
     // If a file model already exists, make sure to wire it in
@@ -220,17 +220,17 @@ export class FileEditorInput
 
     // re-emit some events from the model
     this.modelListeners.add(
-      model.onDidChangeDirty(() => this._onDidChangeDirty.fire()),
+      model.onDidChangeDirty(() => this._onDidChangeDirty.fire())
     )
     this.modelListeners.add(
-      model.onDidChangeReadonly(() => this._onDidChangeCapabilities.fire()),
+      model.onDidChangeReadonly(() => this._onDidChangeCapabilities.fire())
     )
 
     // important: treat save errors as potential dirty change because
     // a file that is in save conflict or error will report dirty even
     // if auto save is turned on.
     this.modelListeners.add(
-      model.onDidSaveError(() => this._onDidChangeDirty.fire()),
+      model.onDidSaveError(() => this._onDidChangeDirty.fire())
     )
 
     // remove model association once it gets disposed
@@ -238,7 +238,7 @@ export class FileEditorInput
       Event.once(model.onWillDispose)(() => {
         this.modelListeners.clear()
         this.model = undefined
-      }),
+      })
     )
   }
 
@@ -411,21 +411,21 @@ export class FileEditorInput
   }
 
   override prefersEditorPane<T extends IEditorDescriptor<IEditorPane>>(
-    editorPanes: T[],
+    editorPanes: T[]
   ): T | undefined {
     if (this.forceOpenAs === ForceOpenAs.Binary) {
       return editorPanes.find(
-        (editorPane) => editorPane.typeId === BINARY_FILE_EDITOR_ID,
+        (editorPane) => editorPane.typeId === BINARY_FILE_EDITOR_ID
       )
     }
 
     return editorPanes.find(
-      (editorPane) => editorPane.typeId === TEXT_FILE_EDITOR_ID,
+      (editorPane) => editorPane.typeId === TEXT_FILE_EDITOR_ID
     )
   }
 
   override resolve(
-    options?: IFileEditorInputOptions,
+    options?: IFileEditorInputOptions
   ): Promise<ITextFileEditorModel | BinaryEditorModel> {
     // Resolve as binary
     if (this.forceOpenAs === ForceOpenAs.Binary) {
@@ -437,7 +437,7 @@ export class FileEditorInput
   }
 
   private async doResolveAsText(
-    options?: IFileEditorInputOptions,
+    options?: IFileEditorInputOptions
   ): Promise<ITextFileEditorModel | BinaryEditorModel> {
     try {
       // Unset preferred contents after having applied it once
@@ -471,7 +471,7 @@ export class FileEditorInput
       if (!this.cachedTextFileModelReference) {
         this.cachedTextFileModelReference =
           (await this.textModelService.createModelReference(
-            this.resource,
+            this.resource
           )) as IReference<ITextFileEditorModel>
       }
 
@@ -503,7 +503,7 @@ export class FileEditorInput
     const model = this.instantiationService.createInstance(
       BinaryEditorModel,
       this.preferredResource,
-      this.getName(),
+      this.getName()
     )
     await model.resolve()
 
@@ -516,7 +516,7 @@ export class FileEditorInput
 
   override async rename(
     group: GroupIdentifier,
-    target: URI,
+    target: URI
   ): Promise<IMoveResult> {
     return {
       editor: {
@@ -530,7 +530,7 @@ export class FileEditorInput
   }
 
   override toUntyped(
-    options?: IUntypedEditorOptions,
+    options?: IUntypedEditorOptions
   ): ITextResourceEditorInput {
     const untypedInput: IUntypedFileEditorInput = {
       resource: this.preferredResource,
@@ -560,7 +560,7 @@ export class FileEditorInput
         viewState: findViewStateForEditor(
           this,
           options.preserveViewState,
-          this.editorService,
+          this.editorService
         ),
       }
     }

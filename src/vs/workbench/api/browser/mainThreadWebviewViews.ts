@@ -9,196 +9,139 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CancellationToken } from "vs/base/common/cancellation"
-import { onUnexpectedError } from "vs/base/common/errors"
-import { Disposable, DisposableMap } from "vs/base/common/lifecycle"
-import { generateUuid } from "vs/base/common/uuid"
-import {
-  MainThreadWebviews,
-  reviveWebviewExtension,
-} from "vs/workbench/api/browser/mainThreadWebviews"
-import * as extHostProtocol from "vs/workbench/api/common/extHost.protocol"
-import { IViewBadge } from "vs/workbench/common/views"
-import {
-  IWebviewViewService,
-  WebviewView,
-} from "vs/workbench/contrib/webviewView/browser/webviewViewService"
-import { ITelemetryService } from "vs/platform/telemetry/common/telemetry"
-import { IExtHostContext } from "vs/workbench/services/extensions/common/extHostCustomers"
+import { CancellationToken } from 'vs/base/common/cancellation';
+import { onUnexpectedError } from 'vs/base/common/errors';
+import { Disposable, DisposableMap } from 'vs/base/common/lifecycle';
+import { generateUuid } from 'vs/base/common/uuid';
+import { MainThreadWebviews, reviveWebviewExtension } from 'vs/workbench/api/browser/mainThreadWebviews';
+import * as extHostProtocol from 'vs/workbench/api/common/extHost.protocol';
+import { IViewBadge } from 'vs/workbench/common/views';
+import { IWebviewViewService, WebviewView } from 'vs/workbench/contrib/webviewView/browser/webviewViewService';
+import { ITelemetryService } from 'vs/platform/telemetry/common/telemetry';
+import { IExtHostContext } from 'vs/workbench/services/extensions/common/extHostCustomers';
 
-export class MainThreadWebviewsViews
-  extends Disposable
-  implements extHostProtocol.MainThreadWebviewViewsShape
-{
-  private readonly _proxy: extHostProtocol.ExtHostWebviewViewsShape
 
-  private readonly _webviewViews = this._register(
-    new DisposableMap<string, WebviewView>(),
-  )
-  private readonly _webviewViewProviders = this._register(
-    new DisposableMap<string>(),
-  )
+export class MainThreadWebviewsViews extends Disposable implements extHostProtocol.MainThreadWebviewViewsShape {
 
-  constructor(
-    context: IExtHostContext,
-    private readonly mainThreadWebviews: MainThreadWebviews,
-    @ITelemetryService private readonly _telemetryService: ITelemetryService,
-    @IWebviewViewService
-    private readonly _webviewViewService: IWebviewViewService,
-  ) {
-    super()
+	private readonly _proxy: extHostProtocol.ExtHostWebviewViewsShape;
 
-    this._proxy = context.getProxy(
-      extHostProtocol.ExtHostContext.ExtHostWebviewViews,
-    )
-  }
+	private readonly _webviewViews = this._register(new DisposableMap<string, WebviewView>());
+	private readonly _webviewViewProviders = this._register(new DisposableMap<string>());
 
-  public $setWebviewViewTitle(
-    handle: extHostProtocol.WebviewHandle,
-    value: string | undefined,
-  ): void {
-    const webviewView = this.getWebviewView(handle)
-    webviewView.title = value
-  }
+	constructor(
+		context: IExtHostContext,
+		private readonly mainThreadWebviews: MainThreadWebviews,
+		@ITelemetryService private readonly _telemetryService: ITelemetryService,
+		@IWebviewViewService private readonly _webviewViewService: IWebviewViewService,
+	) {
+		super();
 
-  public $setWebviewViewDescription(
-    handle: extHostProtocol.WebviewHandle,
-    value: string | undefined,
-  ): void {
-    const webviewView = this.getWebviewView(handle)
-    webviewView.description = value
-  }
+		this._proxy = context.getProxy(extHostProtocol.ExtHostContext.ExtHostWebviewViews);
+	}
 
-  public $setWebviewViewBadge(
-    handle: string,
-    badge: IViewBadge | undefined,
-  ): void {
-    const webviewView = this.getWebviewView(handle)
-    webviewView.badge = badge
-  }
+	public $setWebviewViewTitle(handle: extHostProtocol.WebviewHandle, value: string | undefined): void {
+		const webviewView = this.getWebviewView(handle);
+		webviewView.title = value;
+	}
 
-  public $show(
-    handle: extHostProtocol.WebviewHandle,
-    preserveFocus: boolean,
-  ): void {
-    const webviewView = this.getWebviewView(handle)
-    webviewView.show(preserveFocus)
-  }
+	public $setWebviewViewDescription(handle: extHostProtocol.WebviewHandle, value: string | undefined): void {
+		const webviewView = this.getWebviewView(handle);
+		webviewView.description = value;
+	}
 
-  public $registerWebviewViewProvider(
-    extensionData: extHostProtocol.WebviewExtensionDescription,
-    viewType: string,
-    options: {
-      retainContextWhenHidden?: boolean
-      serializeBuffersForPostMessage: boolean
-    },
-  ): void {
-    if (this._webviewViewProviders.has(viewType)) {
-      throw new Error(`View provider for ${viewType} already registered`)
-    }
+	public $setWebviewViewBadge(handle: string, badge: IViewBadge | undefined): void {
+		const webviewView = this.getWebviewView(handle);
+		webviewView.badge = badge;
+	}
 
-    const extension = reviveWebviewExtension(extensionData)
+	public $show(handle: extHostProtocol.WebviewHandle, preserveFocus: boolean): void {
+		const webviewView = this.getWebviewView(handle);
+		webviewView.show(preserveFocus);
+	}
 
-    const registration = this._webviewViewService.register(viewType, {
-      resolve: async (
-        webviewView: WebviewView,
-        cancellation: CancellationToken,
-      ) => {
-        const handle = generateUuid()
+	public $registerWebviewViewProvider(
+		extensionData: extHostProtocol.WebviewExtensionDescription,
+		viewType: string,
+		options: { retainContextWhenHidden?: boolean; serializeBuffersForPostMessage: boolean }
+	): void {
+		if (this._webviewViewProviders.has(viewType)) {
+			throw new Error(`View provider for ${viewType} already registered`);
+		}
 
-        this._webviewViews.set(handle, webviewView)
-        this.mainThreadWebviews.addWebview(handle, webviewView.webview, {
-          serializeBuffersForPostMessage:
-            options.serializeBuffersForPostMessage,
-        })
+		const extension = reviveWebviewExtension(extensionData);
 
-        let state = undefined
-        if (webviewView.webview.state) {
-          try {
-            state = JSON.parse(webviewView.webview.state)
-          } catch (e) {
-            console.error(
-              "Could not load webview state",
-              e,
-              webviewView.webview.state,
-            )
-          }
-        }
+		const registration = this._webviewViewService.register(viewType, {
+			resolve: async (webviewView: WebviewView, cancellation: CancellationToken) => {
+				const handle = generateUuid();
 
-        webviewView.webview.extension = extension
+				this._webviewViews.set(handle, webviewView);
+				this.mainThreadWebviews.addWebview(handle, webviewView.webview, { serializeBuffersForPostMessage: options.serializeBuffersForPostMessage });
 
-        if (options) {
-          webviewView.webview.options = options
-        }
+				let state = undefined;
+				if (webviewView.webview.state) {
+					try {
+						state = JSON.parse(webviewView.webview.state);
+					} catch (e) {
+						console.error('Could not load webview state', e, webviewView.webview.state);
+					}
+				}
 
-        webviewView.onDidChangeVisibility((visible) => {
-          this._proxy.$onDidChangeWebviewViewVisibility(handle, visible)
-        })
+				webviewView.webview.extension = extension;
 
-        webviewView.onDispose(() => {
-          this._proxy.$disposeWebviewView(handle)
-          this._webviewViews.deleteAndDispose(handle)
-        })
+				if (options) {
+					webviewView.webview.options = options;
+				}
 
-        type CreateWebviewViewTelemetry = {
-          extensionId: string
-          id: string
-        }
-        type Classification = {
-          extensionId: {
-            classification: "SystemMetaData"
-            purpose: "FeatureInsight"
-            comment: "Id of the extension"
-          }
-          id: {
-            classification: "SystemMetaData"
-            purpose: "FeatureInsight"
-            comment: "Id of the view"
-          }
-          owner: "digitarald"
-          comment: "Helps to gain insights on what extension contributed views are most popular"
-        }
-        this._telemetryService.publicLog2<
-          CreateWebviewViewTelemetry,
-          Classification
-        >("webviews:createWebviewView", {
-          extensionId: extension.id.value,
-          id: viewType,
-        })
+				webviewView.onDidChangeVisibility(visible => {
+					this._proxy.$onDidChangeWebviewViewVisibility(handle, visible);
+				});
 
-        try {
-          await this._proxy.$resolveWebviewView(
-            handle,
-            viewType,
-            webviewView.title,
-            state,
-            cancellation,
-          )
-        } catch (error) {
-          onUnexpectedError(error)
-          webviewView.webview.setHtml(
-            this.mainThreadWebviews.getWebviewResolvedFailedContent(viewType),
-          )
-        }
-      },
-    })
+				webviewView.onDispose(() => {
+					this._proxy.$disposeWebviewView(handle);
+					this._webviewViews.deleteAndDispose(handle);
+				});
 
-    this._webviewViewProviders.set(viewType, registration)
-  }
+				type CreateWebviewViewTelemetry = {
+					extensionId: string;
+					id: string;
+				};
+				type Classification = {
+					extensionId: { classification: 'SystemMetaData'; purpose: 'FeatureInsight'; comment: 'Id of the extension' };
+					id: { classification: 'SystemMetaData'; purpose: 'FeatureInsight'; comment: 'Id of the view' };
+					owner: 'digitarald';
+					comment: 'Helps to gain insights on what extension contributed views are most popular';
+				};
+				this._telemetryService.publicLog2<CreateWebviewViewTelemetry, Classification>('webviews:createWebviewView', {
+					extensionId: extension.id.value,
+					id: viewType,
+				});
 
-  public $unregisterWebviewViewProvider(viewType: string): void {
-    if (!this._webviewViewProviders.has(viewType)) {
-      throw new Error(`No view provider for ${viewType} registered`)
-    }
+				try {
+					await this._proxy.$resolveWebviewView(handle, viewType, webviewView.title, state, cancellation);
+				} catch (error) {
+					onUnexpectedError(error);
+					webviewView.webview.setHtml(this.mainThreadWebviews.getWebviewResolvedFailedContent(viewType));
+				}
+			}
+		});
 
-    this._webviewViewProviders.deleteAndDispose(viewType)
-  }
+		this._webviewViewProviders.set(viewType, registration);
+	}
 
-  private getWebviewView(handle: string): WebviewView {
-    const webviewView = this._webviewViews.get(handle)
-    if (!webviewView) {
-      throw new Error("unknown webview view")
-    }
-    return webviewView
-  }
+	public $unregisterWebviewViewProvider(viewType: string): void {
+		if (!this._webviewViewProviders.has(viewType)) {
+			throw new Error(`No view provider for ${viewType} registered`);
+		}
+
+		this._webviewViewProviders.deleteAndDispose(viewType);
+	}
+
+	private getWebviewView(handle: string): WebviewView {
+		const webviewView = this._webviewViews.get(handle);
+		if (!webviewView) {
+			throw new Error('unknown webview view');
+		}
+		return webviewView;
+	}
 }
+

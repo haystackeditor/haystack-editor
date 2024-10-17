@@ -8,9 +8,7 @@
   "engines": {
     "vscode": "*"
   },
-  "categories": [
-    "Programming Languages"
-  ],
+  "categories": ["Programming Languages"],
   "contributes": {
     "languages": [
       {

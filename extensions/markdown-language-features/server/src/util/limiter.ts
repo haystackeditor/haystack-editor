@@ -10,13 +10,13 @@
  *--------------------------------------------------------------------------------------------*/
 
 interface ILimitedTaskFactory<T> {
-  factory: ITask<Promise<T>>
-  c: (value: T | Promise<T>) => void
-  e: (error?: unknown) => void
+	factory: ITask<Promise<T>>;
+	c: (value: T | Promise<T>) => void;
+	e: (error?: unknown) => void;
 }
 
 interface ITask<T> {
-  (): T
+	(): T;
 }
 
 /**
@@ -26,53 +26,48 @@ interface ITask<T> {
  * Taken from 'src/vs/base/common/async.ts'
  */
 export class Limiter<T> {
-  private _size = 0
-  private runningPromises: number
-  private readonly maxDegreeOfParalellism: number
-  private readonly outstandingPromises: ILimitedTaskFactory<T>[]
 
-  constructor(maxDegreeOfParalellism: number) {
-    this.maxDegreeOfParalellism = maxDegreeOfParalellism
-    this.outstandingPromises = []
-    this.runningPromises = 0
-  }
+	private _size = 0;
+	private runningPromises: number;
+	private readonly maxDegreeOfParalellism: number;
+	private readonly outstandingPromises: ILimitedTaskFactory<T>[];
 
-  get size(): number {
-    return this._size
-  }
+	constructor(maxDegreeOfParalellism: number) {
+		this.maxDegreeOfParalellism = maxDegreeOfParalellism;
+		this.outstandingPromises = [];
+		this.runningPromises = 0;
+	}
 
-  queue(factory: ITask<Promise<T>>): Promise<T> {
-    this._size++
+	get size(): number {
+		return this._size;
+	}
 
-    return new Promise<T>((c, e) => {
-      this.outstandingPromises.push({ factory, c, e })
-      this.consume()
-    })
-  }
+	queue(factory: ITask<Promise<T>>): Promise<T> {
+		this._size++;
 
-  private consume(): void {
-    while (
-      this.outstandingPromises.length &&
-      this.runningPromises < this.maxDegreeOfParalellism
-    ) {
-      const iLimitedTask = this.outstandingPromises.shift()!
-      this.runningPromises++
+		return new Promise<T>((c, e) => {
+			this.outstandingPromises.push({ factory, c, e });
+			this.consume();
+		});
+	}
 
-      const promise = iLimitedTask.factory()
-      promise.then(iLimitedTask.c, iLimitedTask.e)
-      promise.then(
-        () => this.consumed(),
-        () => this.consumed(),
-      )
-    }
-  }
+	private consume(): void {
+		while (this.outstandingPromises.length && this.runningPromises < this.maxDegreeOfParalellism) {
+			const iLimitedTask = this.outstandingPromises.shift()!;
+			this.runningPromises++;
 
-  private consumed(): void {
-    this._size--
-    this.runningPromises--
+			const promise = iLimitedTask.factory();
+			promise.then(iLimitedTask.c, iLimitedTask.e);
+			promise.then(() => this.consumed(), () => this.consumed());
+		}
+	}
 
-    if (this.outstandingPromises.length > 0) {
-      this.consume()
-    }
-  }
+	private consumed(): void {
+		this._size--;
+		this.runningPromises--;
+
+		if (this.outstandingPromises.length > 0) {
+			this.consume();
+		}
+	}
 }

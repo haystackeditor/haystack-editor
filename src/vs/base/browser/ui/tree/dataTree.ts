@@ -9,218 +9,172 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import {
-  IIdentityProvider,
-  IListVirtualDelegate,
-} from "vs/base/browser/ui/list/list"
-import {
-  AbstractTree,
-  AbstractTreeViewState,
-  IAbstractTreeOptions,
-} from "vs/base/browser/ui/tree/abstractTree"
-import { IList } from "vs/base/browser/ui/tree/indexTreeModel"
-import { ObjectTreeModel } from "vs/base/browser/ui/tree/objectTreeModel"
-import {
-  IDataSource,
-  ITreeElement,
-  ITreeModel,
-  ITreeNode,
-  ITreeRenderer,
-  ITreeSorter,
-  TreeError,
-} from "vs/base/browser/ui/tree/tree"
-import { Iterable } from "vs/base/common/iterator"
+import { IIdentityProvider, IListVirtualDelegate } from 'vs/base/browser/ui/list/list';
+import { AbstractTree, AbstractTreeViewState, IAbstractTreeOptions } from 'vs/base/browser/ui/tree/abstractTree';
+import { IList } from 'vs/base/browser/ui/tree/indexTreeModel';
+import { ObjectTreeModel } from 'vs/base/browser/ui/tree/objectTreeModel';
+import { IDataSource, ITreeElement, ITreeModel, ITreeNode, ITreeRenderer, ITreeSorter, TreeError } from 'vs/base/browser/ui/tree/tree';
+import { Iterable } from 'vs/base/common/iterator';
 
-export interface IDataTreeOptions<T, TFilterData = void>
-  extends IAbstractTreeOptions<T, TFilterData> {
-  readonly sorter?: ITreeSorter<T>
+export interface IDataTreeOptions<T, TFilterData = void> extends IAbstractTreeOptions<T, TFilterData> {
+	readonly sorter?: ITreeSorter<T>;
 }
 
-export class DataTree<TInput, T, TFilterData = void> extends AbstractTree<
-  T | null,
-  TFilterData,
-  T | null
-> {
-  protected declare model: ObjectTreeModel<T, TFilterData>
-  private input: TInput | undefined
+export class DataTree<TInput, T, TFilterData = void> extends AbstractTree<T | null, TFilterData, T | null> {
 
-  private identityProvider: IIdentityProvider<T> | undefined
-  private nodesByIdentity = new Map<string, ITreeNode<T, TFilterData>>()
+	protected declare model: ObjectTreeModel<T, TFilterData>;
+	private input: TInput | undefined;
 
-  constructor(
-    private user: string,
-    container: HTMLElement,
-    delegate: IListVirtualDelegate<T>,
-    renderers: ITreeRenderer<T, TFilterData, any>[],
-    private dataSource: IDataSource<TInput, T>,
-    options: IDataTreeOptions<T, TFilterData> = {},
-  ) {
-    super(
-      user,
-      container,
-      delegate,
-      renderers,
-      options as IDataTreeOptions<T | null, TFilterData>,
-    )
-    this.identityProvider = options.identityProvider
-  }
+	private identityProvider: IIdentityProvider<T> | undefined;
+	private nodesByIdentity = new Map<string, ITreeNode<T, TFilterData>>();
 
-  // Model
+	constructor(
+		private user: string,
+		container: HTMLElement,
+		delegate: IListVirtualDelegate<T>,
+		renderers: ITreeRenderer<T, TFilterData, any>[],
+		private dataSource: IDataSource<TInput, T>,
+		options: IDataTreeOptions<T, TFilterData> = {}
+	) {
+		super(user, container, delegate, renderers, options as IDataTreeOptions<T | null, TFilterData>);
+		this.identityProvider = options.identityProvider;
+	}
 
-  getInput(): TInput | undefined {
-    return this.input
-  }
+	// Model
 
-  setInput(input: TInput | undefined, viewState?: AbstractTreeViewState): void {
-    if (viewState && !this.identityProvider) {
-      throw new TreeError(
-        this.user,
-        "Can't restore tree view state without an identity provider",
-      )
-    }
+	getInput(): TInput | undefined {
+		return this.input;
+	}
 
-    this.input = input
+	setInput(input: TInput | undefined, viewState?: AbstractTreeViewState): void {
+		if (viewState && !this.identityProvider) {
+			throw new TreeError(this.user, 'Can\'t restore tree view state without an identity provider');
+		}
 
-    if (!input) {
-      this.nodesByIdentity.clear()
-      this.model.setChildren(null, Iterable.empty())
-      return
-    }
+		this.input = input;
 
-    if (!viewState) {
-      this._refresh(input)
-      return
-    }
+		if (!input) {
+			this.nodesByIdentity.clear();
+			this.model.setChildren(null, Iterable.empty());
+			return;
+		}
 
-    const focus: T[] = []
-    const selection: T[] = []
+		if (!viewState) {
+			this._refresh(input);
+			return;
+		}
 
-    const isCollapsed = (element: T) => {
-      const id = this.identityProvider!.getId(element).toString()
-      return !viewState.expanded[id]
-    }
+		const focus: T[] = [];
+		const selection: T[] = [];
 
-    const onDidCreateNode = (node: ITreeNode<T, TFilterData>) => {
-      const id = this.identityProvider!.getId(node.element).toString()
+		const isCollapsed = (element: T) => {
+			const id = this.identityProvider!.getId(element).toString();
+			return !viewState.expanded[id];
+		};
 
-      if (viewState.focus.has(id)) {
-        focus.push(node.element)
-      }
+		const onDidCreateNode = (node: ITreeNode<T, TFilterData>) => {
+			const id = this.identityProvider!.getId(node.element).toString();
 
-      if (viewState.selection.has(id)) {
-        selection.push(node.element)
-      }
-    }
+			if (viewState.focus.has(id)) {
+				focus.push(node.element);
+			}
 
-    this._refresh(input, isCollapsed, onDidCreateNode)
-    this.setFocus(focus)
-    this.setSelection(selection)
+			if (viewState.selection.has(id)) {
+				selection.push(node.element);
+			}
+		};
 
-    if (viewState && typeof viewState.scrollTop === "number") {
-      this.scrollTop = viewState.scrollTop
-    }
-  }
+		this._refresh(input, isCollapsed, onDidCreateNode);
+		this.setFocus(focus);
+		this.setSelection(selection);
 
-  updateChildren(element: TInput | T = this.input!): void {
-    if (typeof this.input === "undefined") {
-      throw new TreeError(this.user, "Tree input not set")
-    }
+		if (viewState && typeof viewState.scrollTop === 'number') {
+			this.scrollTop = viewState.scrollTop;
+		}
+	}
 
-    let isCollapsed: ((el: T) => boolean | undefined) | undefined
+	updateChildren(element: TInput | T = this.input!): void {
+		if (typeof this.input === 'undefined') {
+			throw new TreeError(this.user, 'Tree input not set');
+		}
 
-    if (this.identityProvider) {
-      isCollapsed = (element) => {
-        const id = this.identityProvider!.getId(element).toString()
-        const node = this.nodesByIdentity.get(id)
+		let isCollapsed: ((el: T) => boolean | undefined) | undefined;
 
-        if (!node) {
-          return undefined
-        }
+		if (this.identityProvider) {
+			isCollapsed = element => {
+				const id = this.identityProvider!.getId(element).toString();
+				const node = this.nodesByIdentity.get(id);
 
-        return node.collapsed
-      }
-    }
+				if (!node) {
+					return undefined;
+				}
 
-    this._refresh(element, isCollapsed)
-  }
+				return node.collapsed;
+			};
+		}
 
-  resort(element: T | TInput = this.input!, recursive = true): void {
-    this.model.resort((element === this.input ? null : element) as T, recursive)
-  }
+		this._refresh(element, isCollapsed);
+	}
 
-  // View
+	resort(element: T | TInput = this.input!, recursive = true): void {
+		this.model.resort((element === this.input ? null : element) as T, recursive);
+	}
 
-  refresh(element?: T): void {
-    if (element === undefined) {
-      this.view.rerender()
-      return
-    }
+	// View
 
-    this.model.rerender(element)
-  }
+	refresh(element?: T): void {
+		if (element === undefined) {
+			this.view.rerender();
+			return;
+		}
 
-  // Implementation
+		this.model.rerender(element);
+	}
 
-  private _refresh(
-    element: TInput | T,
-    isCollapsed?: (el: T) => boolean | undefined,
-    onDidCreateNode?: (node: ITreeNode<T, TFilterData>) => void,
-  ): void {
-    let onDidDeleteNode: ((node: ITreeNode<T, TFilterData>) => void) | undefined
+	// Implementation
 
-    if (this.identityProvider) {
-      const insertedElements = new Set<string>()
+	private _refresh(element: TInput | T, isCollapsed?: (el: T) => boolean | undefined, onDidCreateNode?: (node: ITreeNode<T, TFilterData>) => void): void {
+		let onDidDeleteNode: ((node: ITreeNode<T, TFilterData>) => void) | undefined;
 
-      const outerOnDidCreateNode = onDidCreateNode
-      onDidCreateNode = (node: ITreeNode<T, TFilterData>) => {
-        const id = this.identityProvider!.getId(node.element).toString()
+		if (this.identityProvider) {
+			const insertedElements = new Set<string>();
 
-        insertedElements.add(id)
-        this.nodesByIdentity.set(id, node)
+			const outerOnDidCreateNode = onDidCreateNode;
+			onDidCreateNode = (node: ITreeNode<T, TFilterData>) => {
+				const id = this.identityProvider!.getId(node.element).toString();
 
-        outerOnDidCreateNode?.(node)
-      }
+				insertedElements.add(id);
+				this.nodesByIdentity.set(id, node);
 
-      onDidDeleteNode = (node: ITreeNode<T, TFilterData>) => {
-        const id = this.identityProvider!.getId(node.element).toString()
+				outerOnDidCreateNode?.(node);
+			};
 
-        if (!insertedElements.has(id)) {
-          this.nodesByIdentity.delete(id)
-        }
-      }
-    }
+			onDidDeleteNode = (node: ITreeNode<T, TFilterData>) => {
+				const id = this.identityProvider!.getId(node.element).toString();
 
-    this.model.setChildren(
-      (element === this.input ? null : element) as T,
-      this.iterate(element, isCollapsed).elements,
-      { onDidCreateNode, onDidDeleteNode },
-    )
-  }
+				if (!insertedElements.has(id)) {
+					this.nodesByIdentity.delete(id);
+				}
+			};
+		}
 
-  private iterate(
-    element: TInput | T,
-    isCollapsed?: (el: T) => boolean | undefined,
-  ): { elements: Iterable<ITreeElement<T>>; size: number } {
-    const children = [...this.dataSource.getChildren(element)]
-    const elements = Iterable.map(children, (element) => {
-      const { elements: children, size } = this.iterate(element, isCollapsed)
-      const collapsible = this.dataSource.hasChildren
-        ? this.dataSource.hasChildren(element)
-        : undefined
-      const collapsed =
-        size === 0 ? undefined : isCollapsed && isCollapsed(element)
+		this.model.setChildren((element === this.input ? null : element) as T, this.iterate(element, isCollapsed).elements, { onDidCreateNode, onDidDeleteNode });
+	}
 
-      return { element, children, collapsible, collapsed }
-    })
+	private iterate(element: TInput | T, isCollapsed?: (el: T) => boolean | undefined): { elements: Iterable<ITreeElement<T>>; size: number } {
+		const children = [...this.dataSource.getChildren(element)];
+		const elements = Iterable.map(children, element => {
+			const { elements: children, size } = this.iterate(element, isCollapsed);
+			const collapsible = this.dataSource.hasChildren ? this.dataSource.hasChildren(element) : undefined;
+			const collapsed = size === 0 ? undefined : (isCollapsed && isCollapsed(element));
 
-    return { elements, size: children.length }
-  }
+			return { element, children, collapsible, collapsed };
+		});
 
-  protected createModel(
-    user: string,
-    view: IList<ITreeNode<T, TFilterData>>,
-    options: IDataTreeOptions<T, TFilterData>,
-  ): ITreeModel<T | null, TFilterData, T | null> {
-    return new ObjectTreeModel(user, view, options)
-  }
+		return { elements, size: children.length };
+	}
+
+	protected createModel(user: string, view: IList<ITreeNode<T, TFilterData>>, options: IDataTreeOptions<T, TFilterData>): ITreeModel<T | null, TFilterData, T | null> {
+		return new ObjectTreeModel(user, view, options);
+	}
 }

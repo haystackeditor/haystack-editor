@@ -65,110 +65,110 @@ suite("Grid", function () {
   test("getRelativeLocation", () => {
     assert.deepStrictEqual(
       getRelativeLocation(Orientation.VERTICAL, [0], Direction.Up),
-      [0],
+      [0]
     )
     assert.deepStrictEqual(
       getRelativeLocation(Orientation.VERTICAL, [0], Direction.Down),
-      [1],
+      [1]
     )
     assert.deepStrictEqual(
       getRelativeLocation(Orientation.VERTICAL, [0], Direction.Left),
-      [0, 0],
+      [0, 0]
     )
     assert.deepStrictEqual(
       getRelativeLocation(Orientation.VERTICAL, [0], Direction.Right),
-      [0, 1],
+      [0, 1]
     )
 
     assert.deepStrictEqual(
       getRelativeLocation(Orientation.HORIZONTAL, [0], Direction.Up),
-      [0, 0],
+      [0, 0]
     )
     assert.deepStrictEqual(
       getRelativeLocation(Orientation.HORIZONTAL, [0], Direction.Down),
-      [0, 1],
+      [0, 1]
     )
     assert.deepStrictEqual(
       getRelativeLocation(Orientation.HORIZONTAL, [0], Direction.Left),
-      [0],
+      [0]
     )
     assert.deepStrictEqual(
       getRelativeLocation(Orientation.HORIZONTAL, [0], Direction.Right),
-      [1],
+      [1]
     )
 
     assert.deepStrictEqual(
       getRelativeLocation(Orientation.VERTICAL, [4], Direction.Up),
-      [4],
+      [4]
     )
     assert.deepStrictEqual(
       getRelativeLocation(Orientation.VERTICAL, [4], Direction.Down),
-      [5],
+      [5]
     )
     assert.deepStrictEqual(
       getRelativeLocation(Orientation.VERTICAL, [4], Direction.Left),
-      [4, 0],
+      [4, 0]
     )
     assert.deepStrictEqual(
       getRelativeLocation(Orientation.VERTICAL, [4], Direction.Right),
-      [4, 1],
+      [4, 1]
     )
 
     assert.deepStrictEqual(
       getRelativeLocation(Orientation.VERTICAL, [0, 0], Direction.Up),
-      [0, 0, 0],
+      [0, 0, 0]
     )
     assert.deepStrictEqual(
       getRelativeLocation(Orientation.VERTICAL, [0, 0], Direction.Down),
-      [0, 0, 1],
+      [0, 0, 1]
     )
     assert.deepStrictEqual(
       getRelativeLocation(Orientation.VERTICAL, [0, 0], Direction.Left),
-      [0, 0],
+      [0, 0]
     )
     assert.deepStrictEqual(
       getRelativeLocation(Orientation.VERTICAL, [0, 0], Direction.Right),
-      [0, 1],
+      [0, 1]
     )
 
     assert.deepStrictEqual(
       getRelativeLocation(Orientation.VERTICAL, [1, 2], Direction.Up),
-      [1, 2, 0],
+      [1, 2, 0]
     )
     assert.deepStrictEqual(
       getRelativeLocation(Orientation.VERTICAL, [1, 2], Direction.Down),
-      [1, 2, 1],
+      [1, 2, 1]
     )
     assert.deepStrictEqual(
       getRelativeLocation(Orientation.VERTICAL, [1, 2], Direction.Left),
-      [1, 2],
+      [1, 2]
     )
     assert.deepStrictEqual(
       getRelativeLocation(Orientation.VERTICAL, [1, 2], Direction.Right),
-      [1, 3],
+      [1, 3]
     )
 
     assert.deepStrictEqual(
       getRelativeLocation(Orientation.VERTICAL, [1, 2, 3], Direction.Up),
-      [1, 2, 3],
+      [1, 2, 3]
     )
     assert.deepStrictEqual(
       getRelativeLocation(Orientation.VERTICAL, [1, 2, 3], Direction.Down),
-      [1, 2, 4],
+      [1, 2, 4]
     )
     assert.deepStrictEqual(
       getRelativeLocation(Orientation.VERTICAL, [1, 2, 3], Direction.Left),
-      [1, 2, 3, 0],
+      [1, 2, 3, 0]
     )
     assert.deepStrictEqual(
       getRelativeLocation(Orientation.VERTICAL, [1, 2, 3], Direction.Right),
-      [1, 2, 3, 1],
+      [1, 2, 3, 1]
     )
   })
 
   test("empty", () => {
     const view1 = store.add(
-      new TestView(100, Number.MAX_VALUE, 100, Number.MAX_VALUE),
+      new TestView(100, Number.MAX_VALUE, 100, Number.MAX_VALUE)
     )
     const gridview = store.add(new Grid(view1))
     container.appendChild(gridview.element)
@@ -179,7 +179,7 @@ suite("Grid", function () {
 
   test("two views vertically", function () {
     const view1 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     const grid = store.add(new Grid(view1))
     container.appendChild(grid.element)
@@ -187,7 +187,7 @@ suite("Grid", function () {
     assert.deepStrictEqual(view1.size, [800, 600])
 
     const view2 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     grid.addView(view2, 200, view1, Direction.Up)
     assert.deepStrictEqual(view1.size, [800, 400])
@@ -196,7 +196,7 @@ suite("Grid", function () {
 
   test("two views horizontally", function () {
     const view1 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     const grid = store.add(new Grid(view1))
     container.appendChild(grid.element)
@@ -205,7 +205,7 @@ suite("Grid", function () {
     assert.deepStrictEqual(view1.size, [800, 600])
 
     const view2 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     grid.addView(view2, 300, view1, Direction.Right)
     assert.deepStrictEqual(view1.size, [500, 600])
@@ -214,7 +214,7 @@ suite("Grid", function () {
 
   test("simple layout", function () {
     const view1 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     const grid = store.add(new Grid(view1))
     container.appendChild(grid.element)
@@ -223,14 +223,14 @@ suite("Grid", function () {
     assert.deepStrictEqual(view1.size, [800, 600])
 
     const view2 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     grid.addView(view2, 200, view1, Direction.Up)
     assert.deepStrictEqual(view1.size, [800, 400])
     assert.deepStrictEqual(view2.size, [800, 200])
 
     const view3 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     grid.addView(view3, 200, view1, Direction.Right)
     assert.deepStrictEqual(view1.size, [600, 400])
@@ -238,7 +238,7 @@ suite("Grid", function () {
     assert.deepStrictEqual(view3.size, [200, 400])
 
     const view4 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     grid.addView(view4, 200, view2, Direction.Left)
     assert.deepStrictEqual(view1.size, [600, 400])
@@ -247,7 +247,7 @@ suite("Grid", function () {
     assert.deepStrictEqual(view4.size, [200, 200])
 
     const view5 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     grid.addView(view5, 100, view1, Direction.Down)
     assert.deepStrictEqual(view1.size, [600, 300])
@@ -259,7 +259,7 @@ suite("Grid", function () {
 
   test("another simple layout with automatic size distribution", function () {
     const view1 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     const grid = store.add(new Grid(view1))
     container.appendChild(grid.element)
@@ -268,14 +268,14 @@ suite("Grid", function () {
     assert.deepStrictEqual(view1.size, [800, 600])
 
     const view2 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     grid.addView(view2, Sizing.Distribute, view1, Direction.Left)
     assert.deepStrictEqual(view1.size, [400, 600])
     assert.deepStrictEqual(view2.size, [400, 600])
 
     const view3 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     grid.addView(view3, Sizing.Distribute, view1, Direction.Right)
     assert.deepStrictEqual(view1.size, [266, 600])
@@ -283,7 +283,7 @@ suite("Grid", function () {
     assert.deepStrictEqual(view3.size, [268, 600])
 
     const view4 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     grid.addView(view4, Sizing.Distribute, view2, Direction.Down)
     assert.deepStrictEqual(view1.size, [266, 600])
@@ -292,7 +292,7 @@ suite("Grid", function () {
     assert.deepStrictEqual(view4.size, [266, 300])
 
     const view5 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     grid.addView(view5, Sizing.Distribute, view3, Direction.Up)
     assert.deepStrictEqual(view1.size, [266, 600])
@@ -302,7 +302,7 @@ suite("Grid", function () {
     assert.deepStrictEqual(view5.size, [268, 300])
 
     const view6 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     grid.addView(view6, Sizing.Distribute, view3, Direction.Down)
     assert.deepStrictEqual(view1.size, [266, 600])
@@ -315,7 +315,7 @@ suite("Grid", function () {
 
   test("another simple layout with split size distribution", function () {
     const view1 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     const grid = store.add(new Grid(view1))
     container.appendChild(grid.element)
@@ -324,14 +324,14 @@ suite("Grid", function () {
     assert.deepStrictEqual(view1.size, [800, 600])
 
     const view2 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     grid.addView(view2, Sizing.Split, view1, Direction.Left)
     assert.deepStrictEqual(view1.size, [400, 600])
     assert.deepStrictEqual(view2.size, [400, 600])
 
     const view3 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     grid.addView(view3, Sizing.Split, view1, Direction.Right)
     assert.deepStrictEqual(view1.size, [200, 600])
@@ -339,7 +339,7 @@ suite("Grid", function () {
     assert.deepStrictEqual(view3.size, [200, 600])
 
     const view4 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     grid.addView(view4, Sizing.Split, view2, Direction.Down)
     assert.deepStrictEqual(view1.size, [200, 600])
@@ -348,7 +348,7 @@ suite("Grid", function () {
     assert.deepStrictEqual(view4.size, [400, 300])
 
     const view5 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     grid.addView(view5, Sizing.Split, view3, Direction.Up)
     assert.deepStrictEqual(view1.size, [200, 600])
@@ -358,7 +358,7 @@ suite("Grid", function () {
     assert.deepStrictEqual(view5.size, [200, 300])
 
     const view6 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     grid.addView(view6, Sizing.Split, view3, Direction.Down)
     assert.deepStrictEqual(view1.size, [200, 600])
@@ -371,7 +371,7 @@ suite("Grid", function () {
 
   test("3/2 layout with split", function () {
     const view1 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     const grid = store.add(new Grid(view1))
     container.appendChild(grid.element)
@@ -380,14 +380,14 @@ suite("Grid", function () {
     assert.deepStrictEqual(view1.size, [800, 600])
 
     const view2 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     grid.addView(view2, Sizing.Split, view1, Direction.Down)
     assert.deepStrictEqual(view1.size, [800, 300])
     assert.deepStrictEqual(view2.size, [800, 300])
 
     const view3 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     grid.addView(view3, Sizing.Split, view2, Direction.Right)
     assert.deepStrictEqual(view1.size, [800, 300])
@@ -395,7 +395,7 @@ suite("Grid", function () {
     assert.deepStrictEqual(view3.size, [400, 300])
 
     const view4 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     grid.addView(view4, Sizing.Split, view1, Direction.Right)
     assert.deepStrictEqual(view1.size, [400, 300])
@@ -404,7 +404,7 @@ suite("Grid", function () {
     assert.deepStrictEqual(view4.size, [400, 300])
 
     const view5 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     grid.addView(view5, Sizing.Split, view1, Direction.Right)
     assert.deepStrictEqual(view1.size, [200, 300])
@@ -416,7 +416,7 @@ suite("Grid", function () {
 
   test("sizing should be correct after branch demotion #50564", function () {
     const view1 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     const grid = store.add(new Grid(view1))
     container.appendChild(grid.element)
@@ -424,17 +424,17 @@ suite("Grid", function () {
     grid.layout(800, 600)
 
     const view2 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     grid.addView(view2, Sizing.Split, view1, Direction.Right)
 
     const view3 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     grid.addView(view3, Sizing.Split, view2, Direction.Down)
 
     const view4 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     grid.addView(view4, Sizing.Split, view2, Direction.Right)
     assert.deepStrictEqual(view1.size, [400, 600])
@@ -450,7 +450,7 @@ suite("Grid", function () {
 
   test("sizing should be correct after branch demotion #50675", function () {
     const view1 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     const grid = store.add(new Grid(view1))
     container.appendChild(grid.element)
@@ -458,17 +458,17 @@ suite("Grid", function () {
     grid.layout(800, 600)
 
     const view2 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     grid.addView(view2, Sizing.Distribute, view1, Direction.Down)
 
     const view3 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     grid.addView(view3, Sizing.Distribute, view2, Direction.Down)
 
     const view4 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     grid.addView(view4, Sizing.Distribute, view3, Direction.Right)
     assert.deepStrictEqual(view1.size, [800, 200])
@@ -484,7 +484,7 @@ suite("Grid", function () {
 
   test("getNeighborViews should work on single view layout", function () {
     const view1 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     const grid = store.add(new Grid(view1))
     container.appendChild(grid.element)
@@ -501,7 +501,7 @@ suite("Grid", function () {
     ])
     assert.deepStrictEqual(
       grid.getNeighborViews(view1, Direction.Right, true),
-      [view1],
+      [view1]
     )
     assert.deepStrictEqual(grid.getNeighborViews(view1, Direction.Down, true), [
       view1,
@@ -513,7 +513,7 @@ suite("Grid", function () {
 
   test("getNeighborViews should work on simple layout", function () {
     const view1 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     const grid = store.add(new Grid(view1))
     container.appendChild(grid.element)
@@ -521,12 +521,12 @@ suite("Grid", function () {
     grid.layout(800, 600)
 
     const view2 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     grid.addView(view2, Sizing.Distribute, view1, Direction.Down)
 
     const view3 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     grid.addView(view3, Sizing.Distribute, view2, Direction.Down)
 
@@ -542,7 +542,7 @@ suite("Grid", function () {
     ])
     assert.deepStrictEqual(
       grid.getNeighborViews(view1, Direction.Right, true),
-      [view1],
+      [view1]
     )
     assert.deepStrictEqual(grid.getNeighborViews(view1, Direction.Down, true), [
       view2,
@@ -563,7 +563,7 @@ suite("Grid", function () {
     ])
     assert.deepStrictEqual(
       grid.getNeighborViews(view2, Direction.Right, true),
-      [view2],
+      [view2]
     )
     assert.deepStrictEqual(grid.getNeighborViews(view2, Direction.Down, true), [
       view3,
@@ -582,7 +582,7 @@ suite("Grid", function () {
     ])
     assert.deepStrictEqual(
       grid.getNeighborViews(view3, Direction.Right, true),
-      [view3],
+      [view3]
     )
     assert.deepStrictEqual(grid.getNeighborViews(view3, Direction.Down, true), [
       view1,
@@ -594,7 +594,7 @@ suite("Grid", function () {
 
   test("getNeighborViews should work on a complex layout", function () {
     const view1 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     const grid = store.add(new Grid(view1))
     container.appendChild(grid.element)
@@ -602,22 +602,22 @@ suite("Grid", function () {
     grid.layout(800, 600)
 
     const view2 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     grid.addView(view2, Sizing.Distribute, view1, Direction.Down)
 
     const view3 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     grid.addView(view3, Sizing.Distribute, view2, Direction.Down)
 
     const view4 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     grid.addView(view4, Sizing.Distribute, view2, Direction.Right)
 
     const view5 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     grid.addView(view5, Sizing.Distribute, view4, Direction.Down)
 
@@ -664,7 +664,7 @@ suite("Grid", function () {
 
   test("getNeighborViews should work on another simple layout", function () {
     const view1 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     const grid = store.add(new Grid(view1))
     container.appendChild(grid.element)
@@ -672,17 +672,17 @@ suite("Grid", function () {
     grid.layout(800, 600)
 
     const view2 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     grid.addView(view2, Sizing.Distribute, view1, Direction.Right)
 
     const view3 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     grid.addView(view3, Sizing.Distribute, view2, Direction.Down)
 
     const view4 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     grid.addView(view4, Sizing.Distribute, view2, Direction.Right)
 
@@ -698,7 +698,7 @@ suite("Grid", function () {
 
   test("getNeighborViews should only return immediate neighbors", function () {
     const view1 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     const grid = store.add(new Grid(view1))
     container.appendChild(grid.element)
@@ -706,17 +706,17 @@ suite("Grid", function () {
     grid.layout(800, 600)
 
     const view2 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     grid.addView(view2, Sizing.Distribute, view1, Direction.Right)
 
     const view3 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     grid.addView(view3, Sizing.Distribute, view2, Direction.Down)
 
     const view4 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     grid.addView(view4, Sizing.Distribute, view2, Direction.Right)
 
@@ -728,7 +728,7 @@ suite("Grid", function () {
 
   test("hiding splitviews and restoring sizes", function () {
     const view1 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     const grid = store.add(new Grid(view1))
     container.appendChild(grid.element)
@@ -736,17 +736,17 @@ suite("Grid", function () {
     grid.layout(800, 600)
 
     const view2 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     grid.addView(view2, Sizing.Distribute, view1, Direction.Right)
 
     const view3 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     grid.addView(view3, Sizing.Distribute, view2, Direction.Down)
 
     const view4 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     grid.addView(view4, Sizing.Distribute, view2, Direction.Right)
 
@@ -790,7 +790,7 @@ suite("Grid", function () {
 
   test("hasMaximizedView", function () {
     const view1 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     const grid = store.add(new Grid(view1))
     container.appendChild(grid.element)
@@ -798,17 +798,17 @@ suite("Grid", function () {
     grid.layout(800, 600)
 
     const view2 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     grid.addView(view2, Sizing.Distribute, view1, Direction.Right)
 
     const view3 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     grid.addView(view3, Sizing.Distribute, view2, Direction.Down)
 
     const view4 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     grid.addView(view4, Sizing.Distribute, view2, Direction.Right)
 
@@ -836,7 +836,7 @@ suite("Grid", function () {
 
   test("Changes to the grid unmaximize the view", function () {
     const view1 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     const grid = store.add(new Grid(view1))
     container.appendChild(grid.element)
@@ -844,17 +844,17 @@ suite("Grid", function () {
     grid.layout(800, 600)
 
     const view2 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     grid.addView(view2, Sizing.Distribute, view1, Direction.Right)
 
     const view3 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     grid.addView(view3, Sizing.Distribute, view2, Direction.Down)
 
     const view4 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
 
     // Adding a view unmaximizes the view
@@ -891,7 +891,7 @@ suite("Grid", function () {
 
   test("Changes to the grid sizing unmaximize the view", function () {
     const view1 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     const grid = store.add(new Grid(view1))
     container.appendChild(grid.element)
@@ -899,17 +899,17 @@ suite("Grid", function () {
     grid.layout(800, 600)
 
     const view2 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     grid.addView(view2, Sizing.Distribute, view1, Direction.Right)
 
     const view3 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     grid.addView(view3, Sizing.Distribute, view2, Direction.Down)
 
     const view4 = store.add(
-      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE),
+      new TestView(50, Number.MAX_VALUE, 50, Number.MAX_VALUE)
     )
     grid.addView(view4, Sizing.Distribute, view2, Direction.Right)
 
@@ -965,7 +965,7 @@ class TestSerializableView extends TestView implements ISerializableView {
     minimumWidth: number,
     maximumWidth: number,
     minimumHeight: number,
-    maximumHeight: number,
+    maximumHeight: number
   ) {
     super(minimumWidth, maximumWidth, minimumHeight, maximumHeight)
   }
@@ -987,8 +987,8 @@ class TestViewDeserializer implements IViewDeserializer<TestSerializableView> {
         50,
         Number.MAX_VALUE,
         50,
-        Number.MAX_VALUE,
-      ),
+        Number.MAX_VALUE
+      )
     )
     this.views.set(json.name, view)
     return view
@@ -1029,8 +1029,8 @@ suite("SerializableGrid", function () {
         50,
         Number.MAX_VALUE,
         50,
-        Number.MAX_VALUE,
-      ),
+        Number.MAX_VALUE
+      )
     )
     const grid = store.add(new SerializableGrid(view1))
     container.appendChild(grid.element)
@@ -1064,8 +1064,8 @@ suite("SerializableGrid", function () {
         50,
         Number.MAX_VALUE,
         50,
-        Number.MAX_VALUE,
-      ),
+        Number.MAX_VALUE
+      )
     )
     const grid = store.add(new SerializableGrid(view1))
     container.appendChild(grid.element)
@@ -1077,8 +1077,8 @@ suite("SerializableGrid", function () {
         50,
         Number.MAX_VALUE,
         50,
-        Number.MAX_VALUE,
-      ),
+        Number.MAX_VALUE
+      )
     )
     grid.addView(view2, 200, view1, Direction.Up)
 
@@ -1088,8 +1088,8 @@ suite("SerializableGrid", function () {
         50,
         Number.MAX_VALUE,
         50,
-        Number.MAX_VALUE,
-      ),
+        Number.MAX_VALUE
+      )
     )
     grid.addView(view3, 200, view1, Direction.Right)
 
@@ -1099,8 +1099,8 @@ suite("SerializableGrid", function () {
         50,
         Number.MAX_VALUE,
         50,
-        Number.MAX_VALUE,
-      ),
+        Number.MAX_VALUE
+      )
     )
     grid.addView(view4, 200, view2, Direction.Left)
 
@@ -1110,8 +1110,8 @@ suite("SerializableGrid", function () {
         50,
         Number.MAX_VALUE,
         50,
-        Number.MAX_VALUE,
-      ),
+        Number.MAX_VALUE
+      )
     )
     grid.addView(view5, 100, view1, Direction.Down)
 
@@ -1158,8 +1158,8 @@ suite("SerializableGrid", function () {
         50,
         Number.MAX_VALUE,
         50,
-        Number.MAX_VALUE,
-      ),
+        Number.MAX_VALUE
+      )
     )
     const grid = store.add(new SerializableGrid(view1))
     container.appendChild(grid.element)
@@ -1182,8 +1182,8 @@ suite("SerializableGrid", function () {
         50,
         Number.MAX_VALUE,
         50,
-        Number.MAX_VALUE,
-      ),
+        Number.MAX_VALUE
+      )
     )
     const grid = store.add(new SerializableGrid(view1))
     container.appendChild(grid.element)
@@ -1196,8 +1196,8 @@ suite("SerializableGrid", function () {
         50,
         Number.MAX_VALUE,
         50,
-        Number.MAX_VALUE,
-      ),
+        Number.MAX_VALUE
+      )
     )
     grid.addView(view2, 200, view1, Direction.Up)
 
@@ -1207,8 +1207,8 @@ suite("SerializableGrid", function () {
         50,
         Number.MAX_VALUE,
         50,
-        Number.MAX_VALUE,
-      ),
+        Number.MAX_VALUE
+      )
     )
     grid.addView(view3, 200, view1, Direction.Right)
 
@@ -1218,8 +1218,8 @@ suite("SerializableGrid", function () {
         50,
         Number.MAX_VALUE,
         50,
-        Number.MAX_VALUE,
-      ),
+        Number.MAX_VALUE
+      )
     )
     grid.addView(view4, 200, view2, Direction.Left)
 
@@ -1229,8 +1229,8 @@ suite("SerializableGrid", function () {
         50,
         Number.MAX_VALUE,
         50,
-        Number.MAX_VALUE,
-      ),
+        Number.MAX_VALUE
+      )
     )
     grid.addView(view5, 100, view1, Direction.Down)
 
@@ -1267,8 +1267,8 @@ suite("SerializableGrid", function () {
         50,
         Number.MAX_VALUE,
         50,
-        Number.MAX_VALUE,
-      ),
+        Number.MAX_VALUE
+      )
     )
     const grid = store.add(new SerializableGrid(view1))
     container.appendChild(grid.element)
@@ -1281,8 +1281,8 @@ suite("SerializableGrid", function () {
         50,
         Number.MAX_VALUE,
         50,
-        Number.MAX_VALUE,
-      ),
+        Number.MAX_VALUE
+      )
     )
     grid.addView(view2, 200, view1, Direction.Up)
 
@@ -1292,8 +1292,8 @@ suite("SerializableGrid", function () {
         50,
         Number.MAX_VALUE,
         50,
-        Number.MAX_VALUE,
-      ),
+        Number.MAX_VALUE
+      )
     )
     grid.addView(view3, 200, view1, Direction.Right)
 
@@ -1303,8 +1303,8 @@ suite("SerializableGrid", function () {
         50,
         Number.MAX_VALUE,
         50,
-        Number.MAX_VALUE,
-      ),
+        Number.MAX_VALUE
+      )
     )
     grid.addView(view4, 200, view2, Direction.Left)
 
@@ -1314,8 +1314,8 @@ suite("SerializableGrid", function () {
         50,
         Number.MAX_VALUE,
         50,
-        Number.MAX_VALUE,
-      ),
+        Number.MAX_VALUE
+      )
     )
     grid.addView(view5, 100, view1, Direction.Down)
 
@@ -1346,8 +1346,8 @@ suite("SerializableGrid", function () {
         50,
         Number.MAX_VALUE,
         50,
-        Number.MAX_VALUE,
-      ),
+        Number.MAX_VALUE
+      )
     )
     const grid = store.add(new SerializableGrid(view1))
     container.appendChild(grid.element)
@@ -1359,8 +1359,8 @@ suite("SerializableGrid", function () {
         50,
         Number.MAX_VALUE,
         50,
-        Number.MAX_VALUE,
-      ),
+        Number.MAX_VALUE
+      )
     )
     grid.addView(view2, Sizing.Split, view1, Direction.Down)
 
@@ -1370,8 +1370,8 @@ suite("SerializableGrid", function () {
         50,
         Number.MAX_VALUE,
         50,
-        Number.MAX_VALUE,
-      ),
+        Number.MAX_VALUE
+      )
     )
     grid.addView(view3, Sizing.Split, view2, Direction.Down)
 
@@ -1381,8 +1381,8 @@ suite("SerializableGrid", function () {
         50,
         Number.MAX_VALUE,
         50,
-        Number.MAX_VALUE,
-      ),
+        Number.MAX_VALUE
+      )
     )
     grid.addView(view4, Sizing.Split, view3, Direction.Right)
 
@@ -1412,8 +1412,8 @@ suite("SerializableGrid", function () {
         50,
         Number.MAX_VALUE,
         50,
-        Number.MAX_VALUE,
-      ),
+        Number.MAX_VALUE
+      )
     )
     const grid = store.add(new SerializableGrid(view1))
     container.appendChild(grid.element)
@@ -1426,8 +1426,8 @@ suite("SerializableGrid", function () {
         50,
         Number.MAX_VALUE,
         50,
-        Number.MAX_VALUE,
-      ),
+        Number.MAX_VALUE
+      )
     )
     grid.addView(view2, Sizing.Split, view1, Direction.Right)
 
@@ -1453,8 +1453,8 @@ suite("SerializableGrid", function () {
         50,
         Number.MAX_VALUE,
         50,
-        Number.MAX_VALUE,
-      ),
+        Number.MAX_VALUE
+      )
     )
     const grid = store.add(new SerializableGrid(view1))
     container.appendChild(grid.element)
@@ -1467,8 +1467,8 @@ suite("SerializableGrid", function () {
         50,
         Number.MAX_VALUE,
         50,
-        Number.MAX_VALUE,
-      ),
+        Number.MAX_VALUE
+      )
     )
     grid.addView(view2, Sizing.Split, view1, Direction.Right)
 
@@ -1478,8 +1478,8 @@ suite("SerializableGrid", function () {
         50,
         Number.MAX_VALUE,
         50,
-        Number.MAX_VALUE,
-      ),
+        Number.MAX_VALUE
+      )
     )
     grid.addView(view3, Sizing.Split, view2, Direction.Down)
 
@@ -1578,7 +1578,7 @@ suite("SerializableGrid", function () {
     })()
 
     const grid = store.add(
-      SerializableGrid.deserialize(serializedGrid, deserializer),
+      SerializableGrid.deserialize(serializedGrid, deserializer)
     )
     assert.strictEqual(views.length, 3)
 
@@ -1625,8 +1625,8 @@ suite("SerializableGrid", function () {
         50,
         Number.MAX_VALUE,
         50,
-        Number.MAX_VALUE,
-      ),
+        Number.MAX_VALUE
+      )
     )
     const grid = store.add(new SerializableGrid(view1))
     container.appendChild(grid.element)
@@ -1638,8 +1638,8 @@ suite("SerializableGrid", function () {
         50,
         Number.MAX_VALUE,
         50,
-        Number.MAX_VALUE,
-      ),
+        Number.MAX_VALUE
+      )
     )
     grid.addView(view2, 200, view1, Direction.Up)
 
@@ -1649,8 +1649,8 @@ suite("SerializableGrid", function () {
         50,
         Number.MAX_VALUE,
         50,
-        Number.MAX_VALUE,
-      ),
+        Number.MAX_VALUE
+      )
     )
     grid.addView(view3, 200, view1, Direction.Right)
 
@@ -1660,8 +1660,8 @@ suite("SerializableGrid", function () {
         50,
         Number.MAX_VALUE,
         50,
-        Number.MAX_VALUE,
-      ),
+        Number.MAX_VALUE
+      )
     )
     grid.addView(view4, 200, view2, Direction.Left)
 
@@ -1671,8 +1671,8 @@ suite("SerializableGrid", function () {
         50,
         Number.MAX_VALUE,
         50,
-        Number.MAX_VALUE,
-      ),
+        Number.MAX_VALUE
+      )
     )
     grid.addView(view5, 100, view1, Direction.Down)
 
@@ -1800,8 +1800,8 @@ suite("SerializableGrid", function () {
         50,
         Number.MAX_VALUE,
         50,
-        Number.MAX_VALUE,
-      ),
+        Number.MAX_VALUE
+      )
     )
     const grid = store.add(new SerializableGrid(view1))
     container.appendChild(grid.element)
@@ -1813,8 +1813,8 @@ suite("SerializableGrid", function () {
         50,
         Number.MAX_VALUE,
         50,
-        Number.MAX_VALUE,
-      ),
+        Number.MAX_VALUE
+      )
     )
     grid.addView(view2, 200, view1, Direction.Up)
 
@@ -1824,8 +1824,8 @@ suite("SerializableGrid", function () {
         50,
         Number.MAX_VALUE,
         50,
-        Number.MAX_VALUE,
-      ),
+        Number.MAX_VALUE
+      )
     )
     grid.addView(view3, 200, view1, Direction.Right)
 
@@ -1835,8 +1835,8 @@ suite("SerializableGrid", function () {
         50,
         Number.MAX_VALUE,
         50,
-        Number.MAX_VALUE,
-      ),
+        Number.MAX_VALUE
+      )
     )
     grid.addView(view4, 200, view2, Direction.Left)
 
@@ -1846,8 +1846,8 @@ suite("SerializableGrid", function () {
         50,
         Number.MAX_VALUE,
         50,
-        Number.MAX_VALUE,
-      ),
+        Number.MAX_VALUE
+      )
     )
     grid.addView(view5, 100, view1, Direction.Down)
 

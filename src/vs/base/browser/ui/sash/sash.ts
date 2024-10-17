@@ -274,26 +274,26 @@ export class Sash extends Disposable {
 
   private _state: SashState = SashState.Enabled
   private readonly onDidEnablementChange = this._register(
-    new Emitter<SashState>(),
+    new Emitter<SashState>()
   )
   private readonly _onDidStart = this._register(new Emitter<ISashEvent>())
   private readonly _onDidChange = this._register(new Emitter<ISashEvent>())
   private readonly _onDidReset = this._register(new Emitter<void>())
   private readonly _onDidEnd = this._register(new Emitter<void>())
   private readonly orthogonalStartSashDisposables = this._register(
-    new DisposableStore(),
+    new DisposableStore()
   )
   private _orthogonalStartSash: Sash | undefined
   private readonly orthogonalStartDragHandleDisposables = this._register(
-    new DisposableStore(),
+    new DisposableStore()
   )
   private _orthogonalStartDragHandle: HTMLElement | undefined
   private readonly orthogonalEndSashDisposables = this._register(
-    new DisposableStore(),
+    new DisposableStore()
   )
   private _orthogonalEndSash: Sash | undefined
   private readonly orthogonalEndDragHandleDisposables = this._register(
-    new DisposableStore(),
+    new DisposableStore()
   )
   private _orthogonalEndDragHandle: HTMLElement | undefined
 
@@ -376,30 +376,30 @@ export class Sash extends Disposable {
         if (state !== SashState.Disabled) {
           this._orthogonalStartDragHandle = append(
             this.el,
-            $(".orthogonal-drag-handle.start"),
+            $(".orthogonal-drag-handle.start")
           )
           this.orthogonalStartDragHandleDisposables.add(
-            toDisposable(() => this._orthogonalStartDragHandle!.remove()),
+            toDisposable(() => this._orthogonalStartDragHandle!.remove())
           )
           this.orthogonalStartDragHandleDisposables
             .add(new DomEmitter(this._orthogonalStartDragHandle, "mouseenter"))
             .event(
               () => Sash.onMouseEnter(sash),
               undefined,
-              this.orthogonalStartDragHandleDisposables,
+              this.orthogonalStartDragHandleDisposables
             )
           this.orthogonalStartDragHandleDisposables
             .add(new DomEmitter(this._orthogonalStartDragHandle, "mouseleave"))
             .event(
               () => Sash.onMouseLeave(sash),
               undefined,
-              this.orthogonalStartDragHandleDisposables,
+              this.orthogonalStartDragHandleDisposables
             )
         }
       }
 
       this.orthogonalStartSashDisposables.add(
-        sash.onDidEnablementChange.event(onChange, this),
+        sash.onDidEnablementChange.event(onChange, this)
       )
       onChange(sash.state)
     }
@@ -431,30 +431,30 @@ export class Sash extends Disposable {
         if (state !== SashState.Disabled) {
           this._orthogonalEndDragHandle = append(
             this.el,
-            $(".orthogonal-drag-handle.end"),
+            $(".orthogonal-drag-handle.end")
           )
           this.orthogonalEndDragHandleDisposables.add(
-            toDisposable(() => this._orthogonalEndDragHandle!.remove()),
+            toDisposable(() => this._orthogonalEndDragHandle!.remove())
           )
           this.orthogonalEndDragHandleDisposables
             .add(new DomEmitter(this._orthogonalEndDragHandle, "mouseenter"))
             .event(
               () => Sash.onMouseEnter(sash),
               undefined,
-              this.orthogonalEndDragHandleDisposables,
+              this.orthogonalEndDragHandleDisposables
             )
           this.orthogonalEndDragHandleDisposables
             .add(new DomEmitter(this._orthogonalEndDragHandle, "mouseleave"))
             .event(
               () => Sash.onMouseLeave(sash),
               undefined,
-              this.orthogonalEndDragHandleDisposables,
+              this.orthogonalEndDragHandleDisposables
             )
         }
       }
 
       this.orthogonalEndSashDisposables.add(
-        sash.onDidEnablementChange.event(onChange, this),
+        sash.onDidEnablementChange.event(onChange, this)
       )
       onChange(sash.state)
     }
@@ -472,7 +472,7 @@ export class Sash extends Disposable {
   constructor(
     container: HTMLElement,
     verticalLayoutProvider: IVerticalSashLayoutProvider,
-    options: IVerticalSashOptions,
+    options: IVerticalSashOptions
   )
 
   /**
@@ -485,12 +485,12 @@ export class Sash extends Disposable {
   constructor(
     container: HTMLElement,
     horizontalLayoutProvider: IHorizontalSashLayoutProvider,
-    options: IHorizontalSashOptions,
+    options: IHorizontalSashOptions
   )
   constructor(
     container: HTMLElement,
     layoutProvider: ISashLayoutProvider,
-    options: ISashOptions,
+    options: ISashOptions
   ) {
     super()
 
@@ -505,37 +505,37 @@ export class Sash extends Disposable {
     }
 
     const onMouseDown = this._register(
-      new DomEmitter(this.el, "mousedown"),
+      new DomEmitter(this.el, "mousedown")
     ).event
     this._register(
       onMouseDown(
         (e) => this.onPointerStart(e, new MouseEventFactory(container)),
-        this,
-      ),
+        this
+      )
     )
     const onMouseDoubleClick = this._register(
-      new DomEmitter(this.el, "dblclick"),
+      new DomEmitter(this.el, "dblclick")
     ).event
     this._register(onMouseDoubleClick(this.onPointerDoublePress, this))
     const onMouseEnter = this._register(
-      new DomEmitter(this.el, "mouseenter"),
+      new DomEmitter(this.el, "mouseenter")
     ).event
     this._register(onMouseEnter(() => Sash.onMouseEnter(this)))
     const onMouseLeave = this._register(
-      new DomEmitter(this.el, "mouseleave"),
+      new DomEmitter(this.el, "mouseleave")
     ).event
     this._register(onMouseLeave(() => Sash.onMouseLeave(this)))
 
     this._register(Gesture.addTarget(this.el))
 
     const onTouchStart = this._register(
-      new DomEmitter(this.el, EventType.Start),
+      new DomEmitter(this.el, EventType.Start)
     ).event
     this._register(
       onTouchStart(
         (e) => this.onPointerStart(e, new GestureEventFactory(this.el)),
-        this,
-      ),
+        this
+      )
     )
     const onTap = this._register(new DomEmitter(this.el, EventType.Tap)).event
 
@@ -551,7 +551,7 @@ export class Sash extends Disposable {
 
         clearTimeout(doubleTapTimeout)
         doubleTapTimeout = setTimeout(() => (doubleTapTimeout = undefined), 250)
-      }, this),
+      }, this)
     )
 
     if (typeof options.size === "number") {
@@ -568,12 +568,12 @@ export class Sash extends Disposable {
         onDidChangeGlobalSize.event((size) => {
           this.size = size
           this.layout()
-        }),
+        })
       )
     }
 
     this._register(
-      onDidChangeHoverDelay.event((delay) => (this.hoverDelay = delay)),
+      onDidChangeHoverDelay.event((delay) => (this.hoverDelay = delay))
     )
 
     this.layoutProvider = layoutProvider
@@ -598,7 +598,7 @@ export class Sash extends Disposable {
 
   private onPointerStart(
     event: PointerEvent,
-    pointerEventFactory: IPointerEventFactory,
+    pointerEventFactory: IPointerEventFactory
   ): void {
     EventHelper.stop(event)
 
@@ -612,7 +612,7 @@ export class Sash extends Disposable {
         ;(event as any).__orthogonalSashEvent = true
         orthogonalSash.onPointerStart(
           event,
-          new OrthogonalPointerEventFactory(pointerEventFactory),
+          new OrthogonalPointerEventFactory(pointerEventFactory)
         )
       }
     }
@@ -621,7 +621,7 @@ export class Sash extends Disposable {
       ;(event as any).__linkedSashEvent = true
       this.linkedSash.onPointerStart(
         event,
-        new OrthogonalPointerEventFactory(pointerEventFactory),
+        new OrthogonalPointerEventFactory(pointerEventFactory)
       )
     }
 
@@ -733,7 +733,7 @@ export class Sash extends Disposable {
 
   private static onMouseEnter(
     sash: Sash,
-    fromLinkedSash: boolean = false,
+    fromLinkedSash: boolean = false
   ): void {
     if (sash.el.classList.contains("active")) {
       sash.hoverDelayer.cancel()
@@ -751,7 +751,7 @@ export class Sash extends Disposable {
 
   private static onMouseLeave(
     sash: Sash,
-    fromLinkedSash: boolean = false,
+    fromLinkedSash: boolean = false
   ): void {
     sash.hoverDelayer.cancel()
     sash.el.classList.remove("hover")

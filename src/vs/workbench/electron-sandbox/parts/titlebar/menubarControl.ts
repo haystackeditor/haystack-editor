@@ -65,7 +65,7 @@ export class NativeMenubarControl extends MenubarControl {
     @IMenubarService private readonly menubarService: IMenubarService,
     @IHostService hostService: IHostService,
     @INativeHostService private readonly nativeHostService: INativeHostService,
-    @ICommandService commandService: ICommandService,
+    @ICommandService commandService: ICommandService
   ) {
     super(
       menuService,
@@ -81,7 +81,7 @@ export class NativeMenubarControl extends MenubarControl {
       environmentService,
       accessibilityService,
       hostService,
-      commandService,
+      commandService
     )
     ;(async () => {
       this.recentlyOpened = await this.workspacesService.getRecentlyOpened()
@@ -99,7 +99,7 @@ export class NativeMenubarControl extends MenubarControl {
       const menu = this.menus[topLevelMenuName]
       if (menu) {
         this.mainMenuDisposables.add(
-          menu.onDidChange(() => this.updateMenubar()),
+          menu.onDidChange(() => this.updateMenubar())
         )
       }
     }
@@ -117,7 +117,7 @@ export class NativeMenubarControl extends MenubarControl {
     if (this.getMenubarMenus(menubarData)) {
       this.menubarService.updateMenubar(
         this.nativeHostService.windowId,
-        menubarData,
+        menubarData
       )
     }
   }
@@ -136,12 +136,12 @@ export class NativeMenubarControl extends MenubarControl {
         createAndFillInContextMenuActions(
           menu,
           { shouldForwardArgs: true },
-          menuActions,
+          menuActions
         )
         this.populateMenuItems(
           menuActions,
           menubarMenu,
-          menubarData.keybindings,
+          menubarData.keybindings
         )
         if (menubarMenu.items.length === 0) {
           return false // Menus are incomplete
@@ -156,7 +156,7 @@ export class NativeMenubarControl extends MenubarControl {
   private populateMenuItems(
     menuActions: readonly IAction[],
     menuToPopulate: IMenubarMenu,
-    keybindings: { [id: string]: IMenubarKeybinding | undefined },
+    keybindings: { [id: string]: IMenubarKeybinding | undefined }
   ) {
     for (const menuItem of menuActions) {
       if (menuItem instanceof Separator) {
@@ -169,7 +169,7 @@ export class NativeMenubarControl extends MenubarControl {
         const title =
           typeof menuItem.item.title === "string"
             ? menuItem.item.title
-            : (menuItem.item.title.mnemonicTitle ?? menuItem.item.title.value)
+            : menuItem.item.title.mnemonicTitle ?? menuItem.item.title.value
 
         if (menuItem instanceof SubmenuItemAction) {
           const submenu = { items: [] }
@@ -188,7 +188,7 @@ export class NativeMenubarControl extends MenubarControl {
         } else {
           if (menuItem.id === OpenRecentAction.ID) {
             const actions = this.getOpenRecentActions().map(
-              this.transformOpenRecentAction,
+              this.transformOpenRecentAction
             )
             menuToPopulate.items.push(...actions)
           }
@@ -221,7 +221,7 @@ export class NativeMenubarControl extends MenubarControl {
   }
 
   private transformOpenRecentAction(
-    action: Separator | IOpenRecentAction,
+    action: Separator | IOpenRecentAction
   ): MenubarMenuItem {
     if (action instanceof Separator) {
       return { id: "vscode.menubar.separator" }

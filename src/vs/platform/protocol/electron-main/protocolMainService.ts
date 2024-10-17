@@ -9,212 +9,167 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { session } from "electron"
-import { Disposable, IDisposable, toDisposable } from "vs/base/common/lifecycle"
-import { COI, FileAccess, Schemas } from "vs/base/common/network"
-import { basename, extname, normalize } from "vs/base/common/path"
-import { isLinux } from "vs/base/common/platform"
-import { TernarySearchTree } from "vs/base/common/ternarySearchTree"
-import { URI } from "vs/base/common/uri"
-import { generateUuid } from "vs/base/common/uuid"
-import { validatedIpcMain } from "vs/base/parts/ipc/electron-main/ipcMain"
-import { INativeEnvironmentService } from "vs/platform/environment/common/environment"
-import { ILogService } from "vs/platform/log/common/log"
-import {
-  IIPCObjectUrl,
-  IProtocolMainService,
-} from "vs/platform/protocol/electron-main/protocol"
-import { IUserDataProfilesService } from "vs/platform/userDataProfile/common/userDataProfile"
+import { session } from 'electron';
+import { Disposable, IDisposable, toDisposable } from 'vs/base/common/lifecycle';
+import { COI, FileAccess, Schemas } from 'vs/base/common/network';
+import { basename, extname, normalize } from 'vs/base/common/path';
+import { isLinux } from 'vs/base/common/platform';
+import { TernarySearchTree } from 'vs/base/common/ternarySearchTree';
+import { URI } from 'vs/base/common/uri';
+import { generateUuid } from 'vs/base/common/uuid';
+import { validatedIpcMain } from 'vs/base/parts/ipc/electron-main/ipcMain';
+import { INativeEnvironmentService } from 'vs/platform/environment/common/environment';
+import { ILogService } from 'vs/platform/log/common/log';
+import { IIPCObjectUrl, IProtocolMainService } from 'vs/platform/protocol/electron-main/protocol';
+import { IUserDataProfilesService } from 'vs/platform/userDataProfile/common/userDataProfile';
 
-type ProtocolCallback = {
-  (result: string | Electron.FilePathWithHeaders | { error: number }): void
-}
+type ProtocolCallback = { (result: string | Electron.FilePathWithHeaders | { error: number }): void };
 
-export class ProtocolMainService
-  extends Disposable
-  implements IProtocolMainService
-{
-  declare readonly _serviceBrand: undefined
+export class ProtocolMainService extends Disposable implements IProtocolMainService {
 
-  private readonly validRoots = TernarySearchTree.forPaths<boolean>(!isLinux)
-  private readonly validExtensions = new Set([
-    ".svg",
-    ".png",
-    ".jpg",
-    ".jpeg",
-    ".gif",
-    ".bmp",
-    ".webp",
-    ".mp4",
-  ]) // https://github.com/microsoft/vscode/issues/119384
+	declare readonly _serviceBrand: undefined;
 
-  constructor(
-    @INativeEnvironmentService
-    private readonly environmentService: INativeEnvironmentService,
-    @IUserDataProfilesService userDataProfilesService: IUserDataProfilesService,
-    @ILogService private readonly logService: ILogService,
-  ) {
-    super()
+	private readonly validRoots = TernarySearchTree.forPaths<boolean>(!isLinux);
+	private readonly validExtensions = new Set(['.svg', '.png', '.jpg', '.jpeg', '.gif', '.bmp', '.webp', '.mp4']); // https://github.com/microsoft/vscode/issues/119384
 
-    // Define an initial set of roots we allow loading from
-    // - appRoot	: all files installed as part of the app
-    // - extensions : all files shipped from extensions
-    // - storage    : all files in global and workspace storage (https://github.com/microsoft/vscode/issues/116735)
-    this.addValidFileRoot(environmentService.appRoot)
-    this.addValidFileRoot(environmentService.extensionsPath)
-    this.addValidFileRoot(
-      userDataProfilesService.defaultProfile.globalStorageHome.with({
-        scheme: Schemas.file,
-      }).fsPath,
-    )
-    this.addValidFileRoot(
-      environmentService.workspaceStorageHome.with({ scheme: Schemas.file })
-        .fsPath,
-    )
+	constructor(
+		@INativeEnvironmentService private readonly environmentService: INativeEnvironmentService,
+		@IUserDataProfilesService userDataProfilesService: IUserDataProfilesService,
+		@ILogService private readonly logService: ILogService
+	) {
+		super();
 
-    // Handle protocols
-    this.handleProtocols()
-  }
+		// Define an initial set of roots we allow loading from
+		// - appRoot	: all files installed as part of the app
+		// - extensions : all files shipped from extensions
+		// - storage    : all files in global and workspace storage (https://github.com/microsoft/vscode/issues/116735)
+		this.addValidFileRoot(environmentService.appRoot);
+		this.addValidFileRoot(environmentService.extensionsPath);
+		this.addValidFileRoot(userDataProfilesService.defaultProfile.globalStorageHome.with({ scheme: Schemas.file }).fsPath);
+		this.addValidFileRoot(environmentService.workspaceStorageHome.with({ scheme: Schemas.file }).fsPath);
 
-  private handleProtocols(): void {
-    const { defaultSession } = session
+		// Handle protocols
+		this.handleProtocols();
+	}
 
-    // Register vscode-file:// handler
-    defaultSession.protocol.registerFileProtocol(
-      Schemas.vscodeFileResource,
-      (request, callback) => this.handleResourceRequest(request, callback),
-    )
+	private handleProtocols(): void {
+		const { defaultSession } = session;
 
-    // Block any file:// access
-    defaultSession.protocol.interceptFileProtocol(
-      Schemas.file,
-      (request, callback) => this.handleFileRequest(request, callback),
-    )
+		// Register vscode-file:// handler
+		defaultSession.protocol.registerFileProtocol(Schemas.vscodeFileResource, (request, callback) => this.handleResourceRequest(request, callback));
 
-    // Cleanup
-    this._register(
-      toDisposable(() => {
-        defaultSession.protocol.unregisterProtocol(Schemas.vscodeFileResource)
-        defaultSession.protocol.uninterceptProtocol(Schemas.file)
-      }),
-    )
-  }
+		// Block any file:// access
+		defaultSession.protocol.interceptFileProtocol(Schemas.file, (request, callback) => this.handleFileRequest(request, callback));
 
-  addValidFileRoot(root: string): IDisposable {
-    // Pass to `normalize` because we later also do the
-    // same for all paths to check against.
-    const normalizedRoot = normalize(root)
+		// Cleanup
+		this._register(toDisposable(() => {
+			defaultSession.protocol.unregisterProtocol(Schemas.vscodeFileResource);
+			defaultSession.protocol.uninterceptProtocol(Schemas.file);
+		}));
+	}
 
-    if (!this.validRoots.get(normalizedRoot)) {
-      this.validRoots.set(normalizedRoot, true)
+	addValidFileRoot(root: string): IDisposable {
 
-      return toDisposable(() => this.validRoots.delete(normalizedRoot))
-    }
+		// Pass to `normalize` because we later also do the
+		// same for all paths to check against.
+		const normalizedRoot = normalize(root);
 
-    return Disposable.None
-  }
+		if (!this.validRoots.get(normalizedRoot)) {
+			this.validRoots.set(normalizedRoot, true);
 
-  //#region file://
+			return toDisposable(() => this.validRoots.delete(normalizedRoot));
+		}
 
-  private handleFileRequest(
-    request: Electron.ProtocolRequest,
-    callback: ProtocolCallback,
-  ) {
-    const uri = URI.parse(request.url)
+		return Disposable.None;
+	}
 
-    this.logService.error(
-      `Refused to load resource ${uri.fsPath} from ${Schemas.file}: protocol (original URL: ${request.url})`,
-    )
+	//#region file://
 
-    return callback({ error: -3 /* ABORTED */ })
-  }
+	private handleFileRequest(request: Electron.ProtocolRequest, callback: ProtocolCallback) {
+		const uri = URI.parse(request.url);
 
-  //#endregion
+		this.logService.error(`Refused to load resource ${uri.fsPath} from ${Schemas.file}: protocol (original URL: ${request.url})`);
 
-  //#region vscode-file://
+		return callback({ error: -3 /* ABORTED */ });
+	}
 
-  private handleResourceRequest(
-    request: Electron.ProtocolRequest,
-    callback: ProtocolCallback,
-  ): void {
-    const path = this.requestToNormalizedFilePath(request)
+	//#endregion
 
-    let headers: Record<string, string> | undefined
-    if (this.environmentService.crossOriginIsolated) {
-      if (
-        basename(path) === "workbench.html" ||
-        basename(path) === "workbench-dev.html"
-      ) {
-        headers = COI.CoopAndCoep
-      } else {
-        headers = COI.getHeadersFromQuery(request.url)
-      }
-    }
+	//#region vscode-file://
 
-    // first check by validRoots
-    if (this.validRoots.findSubstr(path)) {
-      return callback({ path, headers })
-    }
+	private handleResourceRequest(request: Electron.ProtocolRequest, callback: ProtocolCallback): void {
+		const path = this.requestToNormalizedFilePath(request);
 
-    // then check by validExtensions
-    if (this.validExtensions.has(extname(path).toLowerCase())) {
-      return callback({ path })
-    }
+		let headers: Record<string, string> | undefined;
+		if (this.environmentService.crossOriginIsolated) {
+			if (basename(path) === 'workbench.html' || basename(path) === 'workbench-dev.html') {
+				headers = COI.CoopAndCoep;
+			} else {
+				headers = COI.getHeadersFromQuery(request.url);
+			}
+		}
 
-    // finally block to load the resource
-    this.logService.error(
-      `${Schemas.vscodeFileResource}: Refused to load resource ${path} from ${Schemas.vscodeFileResource}: protocol (original URL: ${request.url})`,
-    )
+		// first check by validRoots
+		if (this.validRoots.findSubstr(path)) {
+			return callback({ path, headers });
+		}
 
-    return callback({ error: -3 /* ABORTED */ })
-  }
+		// then check by validExtensions
+		if (this.validExtensions.has(extname(path).toLowerCase())) {
+			return callback({ path });
+		}
 
-  private requestToNormalizedFilePath(
-    request: Electron.ProtocolRequest,
-  ): string {
-    // 1.) Use `URI.parse()` util from us to convert the raw
-    //     URL into our URI.
-    const requestUri = URI.parse(request.url)
+		// finally block to load the resource
+		this.logService.error(`${Schemas.vscodeFileResource}: Refused to load resource ${path} from ${Schemas.vscodeFileResource}: protocol (original URL: ${request.url})`);
 
-    // 2.) Use `FileAccess.asFileUri` to convert back from a
-    //     `vscode-file:` URI to a `file:` URI.
-    const unnormalizedFileUri = FileAccess.uriToFileUri(requestUri)
+		return callback({ error: -3 /* ABORTED */ });
+	}
 
-    // 3.) Strip anything from the URI that could result in
-    //     relative paths (such as "..") by using `normalize`
-    return normalize(unnormalizedFileUri.fsPath)
-  }
+	private requestToNormalizedFilePath(request: Electron.ProtocolRequest): string {
 
-  //#endregion
+		// 1.) Use `URI.parse()` util from us to convert the raw
+		//     URL into our URI.
+		const requestUri = URI.parse(request.url);
 
-  //#region IPC Object URLs
+		// 2.) Use `FileAccess.asFileUri` to convert back from a
+		//     `vscode-file:` URI to a `file:` URI.
+		const unnormalizedFileUri = FileAccess.uriToFileUri(requestUri);
 
-  createIPCObjectUrl<T>(): IIPCObjectUrl<T> {
-    let obj: T | undefined = undefined
+		// 3.) Strip anything from the URI that could result in
+		//     relative paths (such as "..") by using `normalize`
+		return normalize(unnormalizedFileUri.fsPath);
+	}
 
-    // Create unique URI
-    const resource = URI.from({
-      scheme: "vscode", // used for all our IPC communication (vscode:<channel>)
-      path: generateUuid(),
-    })
+	//#endregion
 
-    // Install IPC handler
-    const channel = resource.toString()
-    const handler = async (): Promise<T | undefined> => obj
-    validatedIpcMain.handle(channel, handler)
+	//#region IPC Object URLs
 
-    this.logService.trace(`IPC Object URL: Registered new channel ${channel}.`)
+	createIPCObjectUrl<T>(): IIPCObjectUrl<T> {
+		let obj: T | undefined = undefined;
 
-    return {
-      resource,
-      update: (updatedObj) => (obj = updatedObj),
-      dispose: () => {
-        this.logService.trace(`IPC Object URL: Removed channel ${channel}.`)
+		// Create unique URI
+		const resource = URI.from({
+			scheme: 'vscode', // used for all our IPC communication (vscode:<channel>)
+			path: generateUuid()
+		});
 
-        validatedIpcMain.removeHandler(channel)
-      },
-    }
-  }
+		// Install IPC handler
+		const channel = resource.toString();
+		const handler = async (): Promise<T | undefined> => obj;
+		validatedIpcMain.handle(channel, handler);
 
-  //#endregion
+		this.logService.trace(`IPC Object URL: Registered new channel ${channel}.`);
+
+		return {
+			resource,
+			update: updatedObj => obj = updatedObj,
+			dispose: () => {
+				this.logService.trace(`IPC Object URL: Removed channel ${channel}.`);
+
+				validatedIpcMain.removeHandler(channel);
+			}
+		};
+	}
+
+	//#endregion
 }

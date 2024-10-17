@@ -9,137 +9,115 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IUriIdentityService } from "vs/platform/uriIdentity/common/uriIdentity"
-import { URI } from "vs/base/common/uri"
-import {
-  InstantiationType,
-  registerSingleton,
-} from "vs/platform/instantiation/common/extensions"
-import {
-  IFileService,
-  FileSystemProviderCapabilities,
-  IFileSystemProviderCapabilitiesChangeEvent,
-  IFileSystemProviderRegistrationEvent,
-} from "vs/platform/files/common/files"
-import { ExtUri, IExtUri, normalizePath } from "vs/base/common/resources"
-import { SkipList } from "vs/base/common/skipList"
-import { Event } from "vs/base/common/event"
-import { DisposableStore } from "vs/base/common/lifecycle"
+import { IUriIdentityService } from 'vs/platform/uriIdentity/common/uriIdentity';
+import { URI } from 'vs/base/common/uri';
+import { InstantiationType, registerSingleton } from 'vs/platform/instantiation/common/extensions';
+import { IFileService, FileSystemProviderCapabilities, IFileSystemProviderCapabilitiesChangeEvent, IFileSystemProviderRegistrationEvent } from 'vs/platform/files/common/files';
+import { ExtUri, IExtUri, normalizePath } from 'vs/base/common/resources';
+import { SkipList } from 'vs/base/common/skipList';
+import { Event } from 'vs/base/common/event';
+import { DisposableStore } from 'vs/base/common/lifecycle';
 
 class Entry {
-  static _clock = 0
-  time: number = Entry._clock++
-  constructor(readonly uri: URI) {}
-  touch() {
-    this.time = Entry._clock++
-    return this
-  }
+	static _clock = 0;
+	time: number = Entry._clock++;
+	constructor(readonly uri: URI) { }
+	touch() {
+		this.time = Entry._clock++;
+		return this;
+	}
 }
 
 export class UriIdentityService implements IUriIdentityService {
-  declare readonly _serviceBrand: undefined
 
-  readonly extUri: IExtUri
+	declare readonly _serviceBrand: undefined;
 
-  private readonly _dispooables = new DisposableStore()
-  private readonly _canonicalUris: SkipList<URI, Entry>
-  private readonly _limit = 2 ** 16
+	readonly extUri: IExtUri;
 
-  constructor(@IFileService private readonly _fileService: IFileService) {
-    const schemeIgnoresPathCasingCache = new Map<string, boolean>()
+	private readonly _dispooables = new DisposableStore();
+	private readonly _canonicalUris: SkipList<URI, Entry>;
+	private readonly _limit = 2 ** 16;
 
-    // assume path casing matters unless the file system provider spec'ed the opposite.
-    // for all other cases path casing matters, e.g for
-    // * virtual documents
-    // * in-memory uris
-    // * all kind of "private" schemes
-    const ignorePathCasing = (uri: URI): boolean => {
-      let ignorePathCasing = schemeIgnoresPathCasingCache.get(uri.scheme)
-      if (ignorePathCasing === undefined) {
-        // retrieve once and then case per scheme until a change happens
-        ignorePathCasing =
-          _fileService.hasProvider(uri) &&
-          !this._fileService.hasCapability(
-            uri,
-            FileSystemProviderCapabilities.PathCaseSensitive,
-          )
-        schemeIgnoresPathCasingCache.set(uri.scheme, ignorePathCasing)
-      }
-      return ignorePathCasing
-    }
-    this._dispooables.add(
-      Event.any<
-        | IFileSystemProviderCapabilitiesChangeEvent
-        | IFileSystemProviderRegistrationEvent
-      >(
-        _fileService.onDidChangeFileSystemProviderRegistrations,
-        _fileService.onDidChangeFileSystemProviderCapabilities,
-      )((e) => {
-        // remove from cache
-        schemeIgnoresPathCasingCache.delete(e.scheme)
-      }),
-    )
+	constructor(@IFileService private readonly _fileService: IFileService) {
 
-    this.extUri = new ExtUri(ignorePathCasing)
-    this._canonicalUris = new SkipList(
-      (a, b) => this.extUri.compare(a, b, true),
-      this._limit,
-    )
-  }
+		const schemeIgnoresPathCasingCache = new Map<string, boolean>();
 
-  dispose(): void {
-    this._dispooables.dispose()
-    this._canonicalUris.clear()
-  }
+		// assume path casing matters unless the file system provider spec'ed the opposite.
+		// for all other cases path casing matters, e.g for
+		// * virtual documents
+		// * in-memory uris
+		// * all kind of "private" schemes
+		const ignorePathCasing = (uri: URI): boolean => {
+			let ignorePathCasing = schemeIgnoresPathCasingCache.get(uri.scheme);
+			if (ignorePathCasing === undefined) {
+				// retrieve once and then case per scheme until a change happens
+				ignorePathCasing = _fileService.hasProvider(uri) && !this._fileService.hasCapability(uri, FileSystemProviderCapabilities.PathCaseSensitive);
+				schemeIgnoresPathCasingCache.set(uri.scheme, ignorePathCasing);
+			}
+			return ignorePathCasing;
+		};
+		this._dispooables.add(Event.any<IFileSystemProviderCapabilitiesChangeEvent | IFileSystemProviderRegistrationEvent>(
+			_fileService.onDidChangeFileSystemProviderRegistrations,
+			_fileService.onDidChangeFileSystemProviderCapabilities
+		)(e => {
+			// remove from cache
+			schemeIgnoresPathCasingCache.delete(e.scheme);
+		}));
 
-  asCanonicalUri(uri: URI): URI {
-    // (1) normalize URI
-    if (this._fileService.hasProvider(uri)) {
-      uri = normalizePath(uri)
-    }
+		this.extUri = new ExtUri(ignorePathCasing);
+		this._canonicalUris = new SkipList((a, b) => this.extUri.compare(a, b, true), this._limit);
+	}
 
-    // (2) find the uri in its canonical form or use this uri to define it
-    const item = this._canonicalUris.get(uri)
-    if (item) {
-      return item.touch().uri.with({ fragment: uri.fragment })
-    }
+	dispose(): void {
+		this._dispooables.dispose();
+		this._canonicalUris.clear();
+	}
 
-    // this uri is first and defines the canonical form
-    this._canonicalUris.set(uri, new Entry(uri))
-    this._checkTrim()
+	asCanonicalUri(uri: URI): URI {
 
-    return uri
-  }
+		// (1) normalize URI
+		if (this._fileService.hasProvider(uri)) {
+			uri = normalizePath(uri);
+		}
 
-  private _checkTrim(): void {
-    if (this._canonicalUris.size < this._limit) {
-      return
-    }
+		// (2) find the uri in its canonical form or use this uri to define it
+		const item = this._canonicalUris.get(uri);
+		if (item) {
+			return item.touch().uri.with({ fragment: uri.fragment });
+		}
 
-    // get all entries, sort by time (MRU) and re-initalize
-    // the uri cache and the entry clock. this is an expensive
-    // operation and should happen rarely
-    const entries = [...this._canonicalUris.entries()].sort((a, b) => {
-      if (a[1].time < b[1].time) {
-        return 1
-      } else if (a[1].time > b[1].time) {
-        return -1
-      } else {
-        return 0
-      }
-    })
+		// this uri is first and defines the canonical form
+		this._canonicalUris.set(uri, new Entry(uri));
+		this._checkTrim();
 
-    Entry._clock = 0
-    this._canonicalUris.clear()
-    const newSize = this._limit * 0.5
-    for (let i = 0; i < newSize; i++) {
-      this._canonicalUris.set(entries[i][0], entries[i][1].touch())
-    }
-  }
+		return uri;
+	}
+
+	private _checkTrim(): void {
+		if (this._canonicalUris.size < this._limit) {
+			return;
+		}
+
+		// get all entries, sort by time (MRU) and re-initalize
+		// the uri cache and the entry clock. this is an expensive
+		// operation and should happen rarely
+		const entries = [...this._canonicalUris.entries()].sort((a, b) => {
+			if (a[1].time < b[1].time) {
+				return 1;
+			} else if (a[1].time > b[1].time) {
+				return -1;
+			} else {
+				return 0;
+			}
+		});
+
+		Entry._clock = 0;
+		this._canonicalUris.clear();
+		const newSize = this._limit * 0.5;
+		for (let i = 0; i < newSize; i++) {
+			this._canonicalUris.set(entries[i][0], entries[i][1].touch());
+		}
+	}
 }
 
-registerSingleton(
-  IUriIdentityService,
-  UriIdentityService,
-  InstantiationType.Delayed,
-)
+registerSingleton(IUriIdentityService, UriIdentityService, InstantiationType.Delayed);

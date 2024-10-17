@@ -9,17 +9,17 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-declare module "vscode" {
-  // https://github.com/microsoft/vscode/issues/133935
+declare module 'vscode' {
+	// https://github.com/microsoft/vscode/issues/133935
 
-  export interface SourceControlActionButton {
-    command: Command
-    secondaryCommands?: Command[][]
-    description?: string
-    enabled: boolean
-  }
+	export interface SourceControlActionButton {
+		command: Command;
+		secondaryCommands?: Command[][];
+		description?: string;
+		enabled: boolean;
+	}
 
-  export interface SourceControl {
-    actionButton?: SourceControlActionButton
-  }
+	export interface SourceControl {
+		actionButton?: SourceControlActionButton;
+	}
 }

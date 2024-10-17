@@ -71,7 +71,7 @@ export class NativeTextFileService extends AbstractTextFileService {
     @ILanguageService languageService: ILanguageService,
     @IElevatedFileService elevatedFileService: IElevatedFileService,
     @ILogService logService: ILogService,
-    @IDecorationsService decorationsService: IDecorationsService,
+    @IDecorationsService decorationsService: IDecorationsService
   ) {
     super(
       fileService,
@@ -91,7 +91,7 @@ export class NativeTextFileService extends AbstractTextFileService {
       languageService,
       logService,
       elevatedFileService,
-      decorationsService,
+      decorationsService
     )
 
     this.environmentService = environmentService
@@ -106,8 +106,8 @@ export class NativeTextFileService extends AbstractTextFileService {
         event.join(this.onWillShutdown(), {
           id: "join.textFiles",
           label: localize("join.textFiles", "Saving text files"),
-        }),
-      ),
+        })
+      )
     )
   }
 
@@ -120,20 +120,20 @@ export class NativeTextFileService extends AbstractTextFileService {
     // (https://github.com/microsoft/vscode/issues/116600)
     while (
       (modelsPendingToSave = this.files.models.filter((model) =>
-        model.hasState(TextFileEditorModelState.PENDING_SAVE),
+        model.hasState(TextFileEditorModelState.PENDING_SAVE)
       )).length > 0
     ) {
       await Promises.settled(
         modelsPendingToSave.map((model) =>
-          model.joinState(TextFileEditorModelState.PENDING_SAVE),
-        ),
+          model.joinState(TextFileEditorModelState.PENDING_SAVE)
+        )
       )
     }
   }
 
   override async read(
     resource: URI,
-    options?: IReadTextFileOptions,
+    options?: IReadTextFileOptions
   ): Promise<ITextFileContent> {
     // ensure platform limits are applied
     options = this.ensureLimits(options)
@@ -143,7 +143,7 @@ export class NativeTextFileService extends AbstractTextFileService {
 
   override async readStream(
     resource: URI,
-    options?: IReadTextFileOptions,
+    options?: IReadTextFileOptions
   ): Promise<ITextFileStreamContent> {
     // ensure platform limits are applied
     options = this.ensureLimits(options)
@@ -177,5 +177,5 @@ export class NativeTextFileService extends AbstractTextFileService {
 registerSingleton(
   ITextFileService,
   NativeTextFileService,
-  InstantiationType.Eager,
+  InstantiationType.Eager
 )

@@ -35,7 +35,7 @@ export class StandaloneCodeEditorService extends AbstractCodeEditorService {
 
   constructor(
     @IContextKeyService contextKeyService: IContextKeyService,
-    @IThemeService themeService: IThemeService,
+    @IThemeService themeService: IThemeService
   ) {
     super(themeService)
     this._register(this.onCodeEditorAdd(() => this._checkContextKey()))
@@ -49,7 +49,7 @@ export class StandaloneCodeEditorService extends AbstractCodeEditorService {
           return null
         }
         return this.doOpenEditor(source, input)
-      }),
+      })
     )
   }
 
@@ -74,7 +74,7 @@ export class StandaloneCodeEditorService extends AbstractCodeEditorService {
 
   private doOpenEditor(
     editor: ICodeEditor,
-    input: ITextResourceEditorInput,
+    input: ITextResourceEditorInput
   ): ICodeEditor | null {
     const model = this.findModel(editor, input.resource)
     if (!model) {
@@ -123,5 +123,5 @@ export class StandaloneCodeEditorService extends AbstractCodeEditorService {
 registerSingleton(
   ICodeEditorService,
   StandaloneCodeEditorService,
-  InstantiationType.Eager,
+  InstantiationType.Eager
 )

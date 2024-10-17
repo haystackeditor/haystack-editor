@@ -9,12 +9,9 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from "vscode"
+import * as vscode from 'vscode';
 
-export const defaultNotebookFormat = { major: 4, minor: 2 }
-export const ATTACHMENT_CLEANUP_COMMANDID = "ipynb.cleanInvalidImageAttachment"
+export const defaultNotebookFormat = { major: 4, minor: 2 };
+export const ATTACHMENT_CLEANUP_COMMANDID = 'ipynb.cleanInvalidImageAttachment';
 
-export const JUPYTER_NOTEBOOK_MARKDOWN_SELECTOR: vscode.DocumentSelector = {
-  notebookType: "jupyter-notebook",
-  language: "markdown",
-}
+export const JUPYTER_NOTEBOOK_MARKDOWN_SELECTOR: vscode.DocumentSelector = { notebookType: 'jupyter-notebook', language: 'markdown' };

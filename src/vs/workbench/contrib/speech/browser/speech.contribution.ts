@@ -9,15 +9,8 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import {
-  InstantiationType,
-  registerSingleton,
-} from "vs/platform/instantiation/common/extensions"
-import { ISpeechService } from "vs/workbench/contrib/speech/common/speechService"
-import { SpeechService } from "vs/workbench/contrib/speech/browser/speechService"
+import { InstantiationType, registerSingleton } from 'vs/platform/instantiation/common/extensions';
+import { ISpeechService } from 'vs/workbench/contrib/speech/common/speechService';
+import { SpeechService } from 'vs/workbench/contrib/speech/browser/speechService';
 
-registerSingleton(
-  ISpeechService,
-  SpeechService,
-  InstantiationType.Eager /* Reads Extension Points */,
-)
+registerSingleton(ISpeechService, SpeechService, InstantiationType.Eager /* Reads Extension Points */);

@@ -14,7 +14,7 @@ interface CopilotSettingsEditorProps {}
 export const CopilotSettingsEditor = React.memo(
   function CopilotSettingsEditor({}: CopilotSettingsEditorProps) {
     const openAiSettings = WorkspaceStoreWrapper.useWorkspaceState(
-      (state) => state.openAiSettings,
+      (state) => state.openAiSettings
     )
 
     return (
@@ -76,5 +76,5 @@ export const CopilotSettingsEditor = React.memo(
         </div>
       </div>
     )
-  },
+  }
 )

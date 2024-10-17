@@ -9,482 +9,290 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import {
-  CancellationToken,
-  CancellationTokenSource,
-} from "vs/base/common/cancellation"
-import { isCancellationError } from "vs/base/common/errors"
-import { DisposableStore, IDisposable } from "vs/base/common/lifecycle"
-import { isNative } from "vs/base/common/platform"
-import { URI, UriComponents } from "vs/base/common/uri"
-import { localize } from "vs/nls"
-import { IEnvironmentService } from "vs/platform/environment/common/environment"
-import { IFileService } from "vs/platform/files/common/files"
-import { IInstantiationService } from "vs/platform/instantiation/common/instantiation"
-import { ILabelService } from "vs/platform/label/common/label"
-import { INotificationService } from "vs/platform/notification/common/notification"
-import { IRequestService } from "vs/platform/request/common/request"
-import {
-  WorkspaceTrustRequestOptions,
-  IWorkspaceTrustManagementService,
-  IWorkspaceTrustRequestService,
-} from "vs/platform/workspace/common/workspaceTrust"
-import {
-  IWorkspace,
-  IWorkspaceContextService,
-  WorkbenchState,
-  isUntitledWorkspace,
-  WorkspaceFolder,
-} from "vs/platform/workspace/common/workspace"
-import {
-  extHostNamedCustomer,
-  IExtHostContext,
-} from "vs/workbench/services/extensions/common/extHostCustomers"
-import { checkGlobFileExists } from "vs/workbench/services/extensions/common/workspaceContains"
-import {
-  IFileQueryBuilderOptions,
-  ITextQueryBuilderOptions,
-  QueryBuilder,
-} from "vs/workbench/services/search/common/queryBuilder"
-import {
-  IEditorService,
-  ISaveEditorsResult,
-} from "vs/workbench/services/editor/common/editorService"
-import {
-  IFileMatch,
-  IPatternInfo,
-  ISearchProgressItem,
-  ISearchService,
-} from "vs/workbench/services/search/common/search"
-import { IWorkspaceEditingService } from "vs/workbench/services/workspaces/common/workspaceEditing"
-import {
-  ExtHostContext,
-  ExtHostWorkspaceShape,
-  ITextSearchComplete,
-  IWorkspaceData,
-  MainContext,
-  MainThreadWorkspaceShape,
-} from "../common/extHost.protocol"
-import { IEditSessionIdentityService } from "vs/platform/workspace/common/editSessions"
-import {
-  EditorResourceAccessor,
-  SaveReason,
-  SideBySideEditor,
-} from "vs/workbench/common/editor"
-import { coalesce, firstOrDefault } from "vs/base/common/arrays"
-import { ICanonicalUriService } from "vs/platform/workspace/common/canonicalUri"
+import { CancellationToken, CancellationTokenSource } from 'vs/base/common/cancellation';
+import { isCancellationError } from 'vs/base/common/errors';
+import { DisposableStore, IDisposable } from 'vs/base/common/lifecycle';
+import { isNative } from 'vs/base/common/platform';
+import { URI, UriComponents } from 'vs/base/common/uri';
+import { localize } from 'vs/nls';
+import { IEnvironmentService } from 'vs/platform/environment/common/environment';
+import { IFileService } from 'vs/platform/files/common/files';
+import { IInstantiationService } from 'vs/platform/instantiation/common/instantiation';
+import { ILabelService } from 'vs/platform/label/common/label';
+import { INotificationService } from 'vs/platform/notification/common/notification';
+import { IRequestService } from 'vs/platform/request/common/request';
+import { WorkspaceTrustRequestOptions, IWorkspaceTrustManagementService, IWorkspaceTrustRequestService } from 'vs/platform/workspace/common/workspaceTrust';
+import { IWorkspace, IWorkspaceContextService, WorkbenchState, isUntitledWorkspace, WorkspaceFolder } from 'vs/platform/workspace/common/workspace';
+import { extHostNamedCustomer, IExtHostContext } from 'vs/workbench/services/extensions/common/extHostCustomers';
+import { checkGlobFileExists } from 'vs/workbench/services/extensions/common/workspaceContains';
+import { IFileQueryBuilderOptions, ITextQueryBuilderOptions, QueryBuilder } from 'vs/workbench/services/search/common/queryBuilder';
+import { IEditorService, ISaveEditorsResult } from 'vs/workbench/services/editor/common/editorService';
+import { IFileMatch, IPatternInfo, ISearchProgressItem, ISearchService } from 'vs/workbench/services/search/common/search';
+import { IWorkspaceEditingService } from 'vs/workbench/services/workspaces/common/workspaceEditing';
+import { ExtHostContext, ExtHostWorkspaceShape, ITextSearchComplete, IWorkspaceData, MainContext, MainThreadWorkspaceShape } from '../common/extHost.protocol';
+import { IEditSessionIdentityService } from 'vs/platform/workspace/common/editSessions';
+import { EditorResourceAccessor, SaveReason, SideBySideEditor } from 'vs/workbench/common/editor';
+import { coalesce, firstOrDefault } from 'vs/base/common/arrays';
+import { ICanonicalUriService } from 'vs/platform/workspace/common/canonicalUri';
 
 @extHostNamedCustomer(MainContext.MainThreadWorkspace)
 export class MainThreadWorkspace implements MainThreadWorkspaceShape {
-  private readonly _toDispose = new DisposableStore()
-  private readonly _activeCancelTokens: {
-    [id: number]: CancellationTokenSource
-  } = Object.create(null)
-  private readonly _proxy: ExtHostWorkspaceShape
-  private readonly _queryBuilder =
-    this._instantiationService.createInstance(QueryBuilder)
 
-  constructor(
-    extHostContext: IExtHostContext,
-    @ISearchService private readonly _searchService: ISearchService,
-    @IWorkspaceContextService
-    private readonly _contextService: IWorkspaceContextService,
-    @IEditSessionIdentityService
-    private readonly _editSessionIdentityService: IEditSessionIdentityService,
-    @ICanonicalUriService
-    private readonly _canonicalUriService: ICanonicalUriService,
-    @IEditorService private readonly _editorService: IEditorService,
-    @IWorkspaceEditingService
-    private readonly _workspaceEditingService: IWorkspaceEditingService,
-    @INotificationService
-    private readonly _notificationService: INotificationService,
-    @IRequestService private readonly _requestService: IRequestService,
-    @IInstantiationService
-    private readonly _instantiationService: IInstantiationService,
-    @ILabelService private readonly _labelService: ILabelService,
-    @IEnvironmentService
-    private readonly _environmentService: IEnvironmentService,
-    @IFileService fileService: IFileService,
-    @IWorkspaceTrustManagementService
-    private readonly _workspaceTrustManagementService: IWorkspaceTrustManagementService,
-    @IWorkspaceTrustRequestService
-    private readonly _workspaceTrustRequestService: IWorkspaceTrustRequestService,
-  ) {
-    this._proxy = extHostContext.getProxy(ExtHostContext.ExtHostWorkspace)
-    const workspace = this._contextService.getWorkspace()
-    // The workspace file is provided be a unknown file system provider. It might come
-    // from the extension host. So initialize now knowing that `rootPath` is undefined.
-    if (
-      workspace.configuration &&
-      !isNative &&
-      !fileService.hasProvider(workspace.configuration)
-    ) {
-      this._proxy.$initializeWorkspace(
-        this.getWorkspaceData(workspace),
-        this.isWorkspaceTrusted(),
-      )
-    } else {
-      this._contextService
-        .getCompleteWorkspace()
-        .then((workspace) =>
-          this._proxy.$initializeWorkspace(
-            this.getWorkspaceData(workspace),
-            this.isWorkspaceTrusted(),
-          ),
-        )
-    }
-    this._contextService.onDidChangeWorkspaceFolders(
-      this._onDidChangeWorkspace,
-      this,
-      this._toDispose,
-    )
-    this._contextService.onDidChangeWorkbenchState(
-      this._onDidChangeWorkspace,
-      this,
-      this._toDispose,
-    )
-    this._workspaceTrustManagementService.onDidChangeTrust(
-      this._onDidGrantWorkspaceTrust,
-      this,
-      this._toDispose,
-    )
-  }
+	private readonly _toDispose = new DisposableStore();
+	private readonly _activeCancelTokens: { [id: number]: CancellationTokenSource } = Object.create(null);
+	private readonly _proxy: ExtHostWorkspaceShape;
+	private readonly _queryBuilder = this._instantiationService.createInstance(QueryBuilder);
 
-  dispose(): void {
-    this._toDispose.dispose()
+	constructor(
+		extHostContext: IExtHostContext,
+		@ISearchService private readonly _searchService: ISearchService,
+		@IWorkspaceContextService private readonly _contextService: IWorkspaceContextService,
+		@IEditSessionIdentityService private readonly _editSessionIdentityService: IEditSessionIdentityService,
+		@ICanonicalUriService private readonly _canonicalUriService: ICanonicalUriService,
+		@IEditorService private readonly _editorService: IEditorService,
+		@IWorkspaceEditingService private readonly _workspaceEditingService: IWorkspaceEditingService,
+		@INotificationService private readonly _notificationService: INotificationService,
+		@IRequestService private readonly _requestService: IRequestService,
+		@IInstantiationService private readonly _instantiationService: IInstantiationService,
+		@ILabelService private readonly _labelService: ILabelService,
+		@IEnvironmentService private readonly _environmentService: IEnvironmentService,
+		@IFileService fileService: IFileService,
+		@IWorkspaceTrustManagementService private readonly _workspaceTrustManagementService: IWorkspaceTrustManagementService,
+		@IWorkspaceTrustRequestService private readonly _workspaceTrustRequestService: IWorkspaceTrustRequestService
+	) {
+		this._proxy = extHostContext.getProxy(ExtHostContext.ExtHostWorkspace);
+		const workspace = this._contextService.getWorkspace();
+		// The workspace file is provided be a unknown file system provider. It might come
+		// from the extension host. So initialize now knowing that `rootPath` is undefined.
+		if (workspace.configuration && !isNative && !fileService.hasProvider(workspace.configuration)) {
+			this._proxy.$initializeWorkspace(this.getWorkspaceData(workspace), this.isWorkspaceTrusted());
+		} else {
+			this._contextService.getCompleteWorkspace().then(workspace => this._proxy.$initializeWorkspace(this.getWorkspaceData(workspace), this.isWorkspaceTrusted()));
+		}
+		this._contextService.onDidChangeWorkspaceFolders(this._onDidChangeWorkspace, this, this._toDispose);
+		this._contextService.onDidChangeWorkbenchState(this._onDidChangeWorkspace, this, this._toDispose);
+		this._workspaceTrustManagementService.onDidChangeTrust(this._onDidGrantWorkspaceTrust, this, this._toDispose);
+	}
 
-    for (const requestId in this._activeCancelTokens) {
-      const tokenSource = this._activeCancelTokens[requestId]
-      tokenSource.cancel()
-    }
-  }
+	dispose(): void {
+		this._toDispose.dispose();
 
-  // --- workspace ---
+		for (const requestId in this._activeCancelTokens) {
+			const tokenSource = this._activeCancelTokens[requestId];
+			tokenSource.cancel();
+		}
+	}
 
-  $updateWorkspaceFolders(
-    extensionName: string,
-    index: number,
-    deleteCount: number,
-    foldersToAdd: { uri: UriComponents; name?: string }[],
-  ): Promise<void> {
-    const workspaceFoldersToAdd = foldersToAdd.map((f) => ({
-      uri: URI.revive(f.uri),
-      name: f.name,
-    }))
+	// --- workspace ---
 
-    // Indicate in status message
-    this._notificationService.status(
-      this.getStatusMessage(
-        extensionName,
-        workspaceFoldersToAdd.length,
-        deleteCount,
-      ),
-      { hideAfter: 10 * 1000 /* 10s */ },
-    )
+	$updateWorkspaceFolders(extensionName: string, index: number, deleteCount: number, foldersToAdd: { uri: UriComponents; name?: string }[]): Promise<void> {
+		const workspaceFoldersToAdd = foldersToAdd.map(f => ({ uri: URI.revive(f.uri), name: f.name }));
 
-    return this._workspaceEditingService.updateFolders(
-      index,
-      deleteCount,
-      workspaceFoldersToAdd,
-      true,
-    )
-  }
+		// Indicate in status message
+		this._notificationService.status(this.getStatusMessage(extensionName, workspaceFoldersToAdd.length, deleteCount), { hideAfter: 10 * 1000 /* 10s */ });
 
-  private getStatusMessage(
-    extensionName: string,
-    addCount: number,
-    removeCount: number,
-  ): string {
-    let message: string
+		return this._workspaceEditingService.updateFolders(index, deleteCount, workspaceFoldersToAdd, true);
+	}
 
-    const wantsToAdd = addCount > 0
-    const wantsToDelete = removeCount > 0
+	private getStatusMessage(extensionName: string, addCount: number, removeCount: number): string {
+		let message: string;
 
-    // Add Folders
-    if (wantsToAdd && !wantsToDelete) {
-      if (addCount === 1) {
-        message = localize(
-          "folderStatusMessageAddSingleFolder",
-          "Extension '{0}' added 1 folder to the workspace",
-          extensionName,
-        )
-      } else {
-        message = localize(
-          "folderStatusMessageAddMultipleFolders",
-          "Extension '{0}' added {1} folders to the workspace",
-          extensionName,
-          addCount,
-        )
-      }
-    }
+		const wantsToAdd = addCount > 0;
+		const wantsToDelete = removeCount > 0;
 
-    // Delete Folders
-    else if (wantsToDelete && !wantsToAdd) {
-      if (removeCount === 1) {
-        message = localize(
-          "folderStatusMessageRemoveSingleFolder",
-          "Extension '{0}' removed 1 folder from the workspace",
-          extensionName,
-        )
-      } else {
-        message = localize(
-          "folderStatusMessageRemoveMultipleFolders",
-          "Extension '{0}' removed {1} folders from the workspace",
-          extensionName,
-          removeCount,
-        )
-      }
-    }
+		// Add Folders
+		if (wantsToAdd && !wantsToDelete) {
+			if (addCount === 1) {
+				message = localize('folderStatusMessageAddSingleFolder', "Extension '{0}' added 1 folder to the workspace", extensionName);
+			} else {
+				message = localize('folderStatusMessageAddMultipleFolders', "Extension '{0}' added {1} folders to the workspace", extensionName, addCount);
+			}
+		}
 
-    // Change Folders
-    else {
-      message = localize(
-        "folderStatusChangeFolder",
-        "Extension '{0}' changed folders of the workspace",
-        extensionName,
-      )
-    }
+		// Delete Folders
+		else if (wantsToDelete && !wantsToAdd) {
+			if (removeCount === 1) {
+				message = localize('folderStatusMessageRemoveSingleFolder', "Extension '{0}' removed 1 folder from the workspace", extensionName);
+			} else {
+				message = localize('folderStatusMessageRemoveMultipleFolders', "Extension '{0}' removed {1} folders from the workspace", extensionName, removeCount);
+			}
+		}
 
-    return message
-  }
+		// Change Folders
+		else {
+			message = localize('folderStatusChangeFolder', "Extension '{0}' changed folders of the workspace", extensionName);
+		}
 
-  private _onDidChangeWorkspace(): void {
-    this._proxy.$acceptWorkspaceData(
-      this.getWorkspaceData(this._contextService.getWorkspace()),
-    )
-  }
+		return message;
+	}
 
-  private getWorkspaceData(workspace: IWorkspace): IWorkspaceData | null {
-    if (this._contextService.getWorkbenchState() === WorkbenchState.EMPTY) {
-      return null
-    }
-    return {
-      configuration: workspace.configuration || undefined,
-      isUntitled: workspace.configuration
-        ? isUntitledWorkspace(workspace.configuration, this._environmentService)
-        : false,
-      folders: workspace.folders,
-      id: workspace.id,
-      name: this._labelService.getWorkspaceLabel(workspace),
-      transient: workspace.transient,
-    }
-  }
+	private _onDidChangeWorkspace(): void {
+		this._proxy.$acceptWorkspaceData(this.getWorkspaceData(this._contextService.getWorkspace()));
+	}
 
-  // --- search ---
+	private getWorkspaceData(workspace: IWorkspace): IWorkspaceData | null {
+		if (this._contextService.getWorkbenchState() === WorkbenchState.EMPTY) {
+			return null;
+		}
+		return {
+			configuration: workspace.configuration || undefined,
+			isUntitled: workspace.configuration ? isUntitledWorkspace(workspace.configuration, this._environmentService) : false,
+			folders: workspace.folders,
+			id: workspace.id,
+			name: this._labelService.getWorkspaceLabel(workspace),
+			transient: workspace.transient
+		};
+	}
 
-  $startFileSearch(
-    _includeFolder: UriComponents | null,
-    options: IFileQueryBuilderOptions,
-    token: CancellationToken,
-  ): Promise<UriComponents[] | null> {
-    const includeFolder = URI.revive(_includeFolder)
-    const workspace = this._contextService.getWorkspace()
+	// --- search ---
 
-    const query = this._queryBuilder.file(
-      includeFolder ? [includeFolder] : workspace.folders,
-      options,
-    )
+	$startFileSearch(_includeFolder: UriComponents | null, options: IFileQueryBuilderOptions, token: CancellationToken): Promise<UriComponents[] | null> {
+		const includeFolder = URI.revive(_includeFolder);
+		const workspace = this._contextService.getWorkspace();
 
-    return this._searchService.fileSearch(query, token).then(
-      (result) => {
-        return result.results.map((m) => m.resource)
-      },
-      (err) => {
-        if (!isCancellationError(err)) {
-          return Promise.reject(err)
-        }
-        return null
-      },
-    )
-  }
+		const query = this._queryBuilder.file(
+			includeFolder ? [includeFolder] : workspace.folders,
+			options
+		);
 
-  $startTextSearch(
-    pattern: IPatternInfo,
-    _folder: UriComponents | null,
-    options: ITextQueryBuilderOptions,
-    requestId: number,
-    token: CancellationToken,
-  ): Promise<ITextSearchComplete | null> {
-    const folder = URI.revive(_folder)
-    const workspace = this._contextService.getWorkspace()
-    const folders = folder
-      ? [folder]
-      : workspace.folders.map((folder) => folder.uri)
+		return this._searchService.fileSearch(query, token).then(result => {
+			return result.results.map(m => m.resource);
+		}, err => {
+			if (!isCancellationError(err)) {
+				return Promise.reject(err);
+			}
+			return null;
+		});
+	}
 
-    const query = this._queryBuilder.text(pattern, folders, options)
-    query._reason = "startTextSearch"
+	$startTextSearch(pattern: IPatternInfo, _folder: UriComponents | null, options: ITextQueryBuilderOptions, requestId: number, token: CancellationToken): Promise<ITextSearchComplete | null> {
+		const folder = URI.revive(_folder);
+		const workspace = this._contextService.getWorkspace();
+		const folders = folder ? [folder] : workspace.folders.map(folder => folder.uri);
 
-    const onProgress = (p: ISearchProgressItem) => {
-      if ((<IFileMatch>p).results) {
-        this._proxy.$handleTextSearchResult(<IFileMatch>p, requestId)
-      }
-    }
+		const query = this._queryBuilder.text(pattern, folders, options);
+		query._reason = 'startTextSearch';
 
-    const search = this._searchService
-      .textSearch(query, token, onProgress)
-      .then(
-        (result) => {
-          return { limitHit: result.limitHit }
-        },
-        (err) => {
-          if (!isCancellationError(err)) {
-            return Promise.reject(err)
-          }
+		const onProgress = (p: ISearchProgressItem) => {
+			if ((<IFileMatch>p).results) {
+				this._proxy.$handleTextSearchResult(<IFileMatch>p, requestId);
+			}
+		};
 
-          return null
-        },
-      )
+		const search = this._searchService.textSearch(query, token, onProgress).then(
+			result => {
+				return { limitHit: result.limitHit };
+			},
+			err => {
+				if (!isCancellationError(err)) {
+					return Promise.reject(err);
+				}
 
-    return search
-  }
+				return null;
+			});
 
-  $checkExists(
-    folders: readonly UriComponents[],
-    includes: string[],
-    token: CancellationToken,
-  ): Promise<boolean> {
-    return this._instantiationService.invokeFunction((accessor) =>
-      checkGlobFileExists(accessor, folders, includes, token),
-    )
-  }
+		return search;
+	}
 
-  // --- save & edit resources ---
+	$checkExists(folders: readonly UriComponents[], includes: string[], token: CancellationToken): Promise<boolean> {
+		return this._instantiationService.invokeFunction((accessor) => checkGlobFileExists(accessor, folders, includes, token));
+	}
 
-  async $save(
-    uriComponents: UriComponents,
-    options: { saveAs: boolean },
-  ): Promise<UriComponents | undefined> {
-    const uri = URI.revive(uriComponents)
+	// --- save & edit resources ---
 
-    const editors = [
-      ...this._editorService.findEditors(uri, {
-        supportSideBySide: SideBySideEditor.PRIMARY,
-      }),
-    ]
-    const result = await this._editorService.save(editors, {
-      reason: SaveReason.EXPLICIT,
-      saveAs: options.saveAs,
-      force: !options.saveAs,
-    })
+	async $save(uriComponents: UriComponents, options: { saveAs: boolean }): Promise<UriComponents | undefined> {
+		const uri = URI.revive(uriComponents);
 
-    return firstOrDefault(this._saveResultToUris(result))
-  }
+		const editors = [...this._editorService.findEditors(uri, { supportSideBySide: SideBySideEditor.PRIMARY })];
+		const result = await this._editorService.save(editors, {
+			reason: SaveReason.EXPLICIT,
+			saveAs: options.saveAs,
+			force: !options.saveAs
+		});
 
-  private _saveResultToUris(result: ISaveEditorsResult): URI[] {
-    if (!result.success) {
-      return []
-    }
+		return firstOrDefault(this._saveResultToUris(result));
+	}
 
-    return coalesce(
-      result.editors.map((editor) =>
-        EditorResourceAccessor.getCanonicalUri(editor, {
-          supportSideBySide: SideBySideEditor.PRIMARY,
-        }),
-      ),
-    )
-  }
+	private _saveResultToUris(result: ISaveEditorsResult): URI[] {
+		if (!result.success) {
+			return [];
+		}
 
-  $saveAll(includeUntitled?: boolean): Promise<boolean> {
-    return this._editorService
-      .saveAll({ includeUntitled })
-      .then((res) => res.success)
-  }
+		return coalesce(result.editors.map(editor => EditorResourceAccessor.getCanonicalUri(editor, { supportSideBySide: SideBySideEditor.PRIMARY })));
+	}
 
-  $resolveProxy(url: string): Promise<string | undefined> {
-    return this._requestService.resolveProxy(url)
-  }
+	$saveAll(includeUntitled?: boolean): Promise<boolean> {
+		return this._editorService.saveAll({ includeUntitled }).then(res => res.success);
+	}
 
-  $loadCertificates(): Promise<string[]> {
-    return this._requestService.loadCertificates()
-  }
+	$resolveProxy(url: string): Promise<string | undefined> {
+		return this._requestService.resolveProxy(url);
+	}
 
-  // --- trust ---
+	$loadCertificates(): Promise<string[]> {
+		return this._requestService.loadCertificates();
+	}
 
-  $requestWorkspaceTrust(
-    options?: WorkspaceTrustRequestOptions,
-  ): Promise<boolean | undefined> {
-    return this._workspaceTrustRequestService.requestWorkspaceTrust(options)
-  }
+	// --- trust ---
 
-  private isWorkspaceTrusted(): boolean {
-    return this._workspaceTrustManagementService.isWorkspaceTrusted()
-  }
+	$requestWorkspaceTrust(options?: WorkspaceTrustRequestOptions): Promise<boolean | undefined> {
+		return this._workspaceTrustRequestService.requestWorkspaceTrust(options);
+	}
 
-  private _onDidGrantWorkspaceTrust(): void {
-    this._proxy.$onDidGrantWorkspaceTrust()
-  }
+	private isWorkspaceTrusted(): boolean {
+		return this._workspaceTrustManagementService.isWorkspaceTrusted();
+	}
 
-  // --- edit sessions ---
-  private registeredEditSessionProviders = new Map<number, IDisposable>()
+	private _onDidGrantWorkspaceTrust(): void {
+		this._proxy.$onDidGrantWorkspaceTrust();
+	}
 
-  $registerEditSessionIdentityProvider(handle: number, scheme: string) {
-    const disposable =
-      this._editSessionIdentityService.registerEditSessionIdentityProvider({
-        scheme: scheme,
-        getEditSessionIdentifier: async (
-          workspaceFolder: WorkspaceFolder,
-          token: CancellationToken,
-        ) => {
-          return this._proxy.$getEditSessionIdentifier(
-            workspaceFolder.uri,
-            token,
-          )
-        },
-        provideEditSessionIdentityMatch: async (
-          workspaceFolder: WorkspaceFolder,
-          identity1: string,
-          identity2: string,
-          token: CancellationToken,
-        ) => {
-          return this._proxy.$provideEditSessionIdentityMatch(
-            workspaceFolder.uri,
-            identity1,
-            identity2,
-            token,
-          )
-        },
-      })
+	// --- edit sessions ---
+	private registeredEditSessionProviders = new Map<number, IDisposable>();
 
-    this.registeredEditSessionProviders.set(handle, disposable)
-    this._toDispose.add(disposable)
-  }
+	$registerEditSessionIdentityProvider(handle: number, scheme: string) {
+		const disposable = this._editSessionIdentityService.registerEditSessionIdentityProvider({
+			scheme: scheme,
+			getEditSessionIdentifier: async (workspaceFolder: WorkspaceFolder, token: CancellationToken) => {
+				return this._proxy.$getEditSessionIdentifier(workspaceFolder.uri, token);
+			},
+			provideEditSessionIdentityMatch: async (workspaceFolder: WorkspaceFolder, identity1: string, identity2: string, token: CancellationToken) => {
+				return this._proxy.$provideEditSessionIdentityMatch(workspaceFolder.uri, identity1, identity2, token);
+			}
+		});
 
-  $unregisterEditSessionIdentityProvider(handle: number) {
-    const disposable = this.registeredEditSessionProviders.get(handle)
-    disposable?.dispose()
-    this.registeredEditSessionProviders.delete(handle)
-  }
+		this.registeredEditSessionProviders.set(handle, disposable);
+		this._toDispose.add(disposable);
+	}
 
-  // --- canonical uri identities ---
-  private registeredCanonicalUriProviders = new Map<number, IDisposable>()
+	$unregisterEditSessionIdentityProvider(handle: number) {
+		const disposable = this.registeredEditSessionProviders.get(handle);
+		disposable?.dispose();
+		this.registeredEditSessionProviders.delete(handle);
+	}
 
-  $registerCanonicalUriProvider(handle: number, scheme: string) {
-    const disposable = this._canonicalUriService.registerCanonicalUriProvider({
-      scheme: scheme,
-      provideCanonicalUri: async (
-        uri: UriComponents,
-        targetScheme: string,
-        token: CancellationToken,
-      ) => {
-        const result = await this._proxy.$provideCanonicalUri(
-          uri,
-          targetScheme,
-          token,
-        )
-        if (result) {
-          return URI.revive(result)
-        }
-        return result
-      },
-    })
+	// --- canonical uri identities ---
+	private registeredCanonicalUriProviders = new Map<number, IDisposable>();
 
-    this.registeredCanonicalUriProviders.set(handle, disposable)
-    this._toDispose.add(disposable)
-  }
+	$registerCanonicalUriProvider(handle: number, scheme: string) {
+		const disposable = this._canonicalUriService.registerCanonicalUriProvider({
+			scheme: scheme,
+			provideCanonicalUri: async (uri: UriComponents, targetScheme: string, token: CancellationToken) => {
+				const result = await this._proxy.$provideCanonicalUri(uri, targetScheme, token);
+				if (result) {
+					return URI.revive(result);
+				}
+				return result;
+			}
+		});
 
-  $unregisterCanonicalUriProvider(handle: number) {
-    const disposable = this.registeredCanonicalUriProviders.get(handle)
-    disposable?.dispose()
-    this.registeredCanonicalUriProviders.delete(handle)
-  }
+		this.registeredCanonicalUriProviders.set(handle, disposable);
+		this._toDispose.add(disposable);
+	}
+
+	$unregisterCanonicalUriProvider(handle: number) {
+		const disposable = this.registeredCanonicalUriProviders.get(handle);
+		disposable?.dispose();
+		this.registeredCanonicalUriProviders.delete(handle);
+	}
 }

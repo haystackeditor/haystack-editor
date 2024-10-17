@@ -46,7 +46,7 @@ export class LinesDecorationsOverlay extends DedupOverlay {
   // --- begin event handlers
 
   public override onConfigurationChanged(
-    e: viewEvents.ViewConfigurationChangedEvent,
+    e: viewEvents.ViewConfigurationChangedEvent
   ): boolean {
     const options = this._context.configuration.options
     const layoutInfo = options.get(EditorOption.layoutInfo)
@@ -55,7 +55,7 @@ export class LinesDecorationsOverlay extends DedupOverlay {
     return true
   }
   public override onDecorationsChanged(
-    e: viewEvents.ViewDecorationsChangedEvent,
+    e: viewEvents.ViewDecorationsChangedEvent
   ): boolean {
     return true
   }
@@ -69,12 +69,12 @@ export class LinesDecorationsOverlay extends DedupOverlay {
     return true
   }
   public override onLinesInserted(
-    e: viewEvents.ViewLinesInsertedEvent,
+    e: viewEvents.ViewLinesInsertedEvent
   ): boolean {
     return true
   }
   public override onScrollChanged(
-    e: viewEvents.ViewScrollChangedEvent,
+    e: viewEvents.ViewScrollChangedEvent
   ): boolean {
     return e.scrollTopChanged
   }
@@ -98,7 +98,7 @@ export class LinesDecorationsOverlay extends DedupOverlay {
           d.range.endLineNumber,
           linesDecorationsClassName,
           d.options.linesDecorationsTooltip ?? null,
-          zIndex,
+          zIndex
         )
       }
       const firstLineDecorationClassName =
@@ -109,7 +109,7 @@ export class LinesDecorationsOverlay extends DedupOverlay {
           d.range.startLineNumber,
           firstLineDecorationClassName,
           d.options.linesDecorationsTooltip ?? null,
-          zIndex,
+          zIndex
         )
       }
     }
@@ -122,7 +122,7 @@ export class LinesDecorationsOverlay extends DedupOverlay {
     const toRender = this._render(
       visibleStartLineNumber,
       visibleEndLineNumber,
-      this._getDecorations(ctx),
+      this._getDecorations(ctx)
     )
 
     const left = this._decorationsLeft.toString()

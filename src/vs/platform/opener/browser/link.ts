@@ -105,7 +105,7 @@ export class Link extends Disposable {
     options: ILinkOptions = {},
     @IHoverService private readonly _hoverService: IHoverService,
     @IOpenerService openerService: IOpenerService,
-    @IHaystackService haystackService: IHaystackService,
+    @IHaystackService haystackService: IHaystackService
   ) {
     super()
 
@@ -117,8 +117,8 @@ export class Link extends Disposable {
           tabIndex: _link.tabIndex ?? 0,
           href: _link.href,
         },
-        _link.label,
-      ),
+        _link.label
+      )
     )
 
     this.hoverDelegate =
@@ -131,17 +131,17 @@ export class Link extends Disposable {
     const onKeyPress = this._register(new DomEmitter(this.el, "keypress"))
     const onEnterPress = Event.chain(onKeyPress.event, ($) =>
       $.map((e) => new StandardKeyboardEvent(e)).filter(
-        (e) => e.keyCode === KeyCode.Enter,
-      ),
+        (e) => e.keyCode === KeyCode.Enter
+      )
     )
     const onTap = this._register(
-      new DomEmitter(this.el, TouchEventType.Tap),
+      new DomEmitter(this.el, TouchEventType.Tap)
     ).event
     this._register(Gesture.addTarget(this.el))
     const onOpen = Event.any<EventLike>(
       onClickEmitter.event,
       onEnterPress,
-      onTap,
+      onTap
     )
 
     this._register(
@@ -179,7 +179,7 @@ export class Link extends Disposable {
             openerService.open(this._link.href, { allowCommands: true })
           }
         }
-      }),
+      })
     )
 
     this.enabled = true
@@ -193,8 +193,8 @@ export class Link extends Disposable {
         this._hoverService.setupUpdatableHover(
           this.hoverDelegate,
           this.el,
-          title,
-        ),
+          title
+        )
       )
     } else if (this.hover) {
       this.hover.update(title)

@@ -77,7 +77,7 @@ export interface ITextAreaInputHost {
   deduceModelPosition(
     viewAnchorPosition: Position,
     deltaOffset: number,
-    lineFeedCnt: number,
+    lineFeedCnt: number
   ): Position
 }
 
@@ -201,7 +201,7 @@ export class TextAreaInput extends Disposable {
   public readonly onType: Event<ITypeData> = this._onType.event
 
   private _onCompositionStart = this._register(
-    new Emitter<ICompositionStartEvent>(),
+    new Emitter<ICompositionStartEvent>()
   )
   public readonly onCompositionStart: Event<ICompositionStartEvent> =
     this._onCompositionStart.event
@@ -242,11 +242,11 @@ export class TextAreaInput extends Disposable {
     private readonly _browser: IBrowser,
     @IAccessibilityService
     private readonly _accessibilityService: IAccessibilityService,
-    @ILogService private readonly _logService: ILogService,
+    @ILogService private readonly _logService: ILogService
   ) {
     super()
     this._asyncTriggerCut = this._register(
-      new RunOnceScheduler(() => this._onCut.fire(), 0),
+      new RunOnceScheduler(() => this._onCut.fire(), 0)
     )
     this._textAreaState = TextAreaState.EMPTY
     this._selectionChangeListener = null
@@ -264,14 +264,14 @@ export class TextAreaInput extends Disposable {
             this._asyncFocusGainWriteScreenReaderContent.value = this._register(
               new RunOnceScheduler(
                 () => this.writeNativeTextAreaContent("asyncFocusGain"),
-                0,
-              ),
+                0
+              )
             )
           } else {
             this._asyncFocusGainWriteScreenReaderContent.clear()
           }
-        },
-      ),
+        }
+      )
     )
     this._hasFocus = false
     this._currentComposition = null
@@ -297,14 +297,14 @@ export class TextAreaInput extends Disposable {
 
         lastKeyDown = e
         this._onKeyDown.fire(e)
-      }),
+      })
     )
 
     this._register(
       this._textArea.onKeyUp((_e) => {
         const e = new StandardKeyboardEvent(_e)
         this._onKeyUp.fire(e)
-      }),
+      })
     )
 
     this._register(
@@ -330,7 +330,7 @@ export class TextAreaInput extends Disposable {
           this._textAreaState.selectionStart > 0 &&
           this._textAreaState.value.substr(
             this._textAreaState.selectionStart - 1,
-            1,
+            1
           ) === e.data &&
           (lastKeyDown.code === "ArrowRight" ||
             lastKeyDown.code === "ArrowLeft")
@@ -339,7 +339,7 @@ export class TextAreaInput extends Disposable {
           if (_debugComposition) {
             console.log(
               `[compositionstart] Handling long press case on macOS + arrow key`,
-              e,
+              e
             )
           }
           // Pretend the previous character was composed (in order to get it removed by subsequent compositionupdate events)
@@ -356,7 +356,7 @@ export class TextAreaInput extends Disposable {
         }
 
         this._onCompositionStart.fire({ data: e.data })
-      }),
+      })
     )
 
     this._register(
@@ -376,11 +376,11 @@ export class TextAreaInput extends Disposable {
           // This is not really usable because it doesn't tell us where the edit began and where it ended.
           const newState = TextAreaState.readFromTextArea(
             this._textArea,
-            this._textAreaState,
+            this._textAreaState
           )
           const typeInput = TextAreaState.deduceAndroidCompositionInput(
             this._textAreaState,
-            newState,
+            newState
           )
           this._textAreaState = newState
           this._onType.fire(typeInput)
@@ -390,11 +390,11 @@ export class TextAreaInput extends Disposable {
         const typeInput = currentComposition.handleCompositionUpdate(e.data)
         this._textAreaState = TextAreaState.readFromTextArea(
           this._textArea,
-          this._textAreaState,
+          this._textAreaState
         )
         this._onType.fire(typeInput)
         this._onCompositionUpdate.fire(e)
-      }),
+      })
     )
 
     this._register(
@@ -417,11 +417,11 @@ export class TextAreaInput extends Disposable {
           // This is not really usable because it doesn't tell us where the edit began and where it ended.
           const newState = TextAreaState.readFromTextArea(
             this._textArea,
-            this._textAreaState,
+            this._textAreaState
           )
           const typeInput = TextAreaState.deduceAndroidCompositionInput(
             this._textAreaState,
-            newState,
+            newState
           )
           this._textAreaState = newState
           this._onType.fire(typeInput)
@@ -432,11 +432,11 @@ export class TextAreaInput extends Disposable {
         const typeInput = currentComposition.handleCompositionUpdate(e.data)
         this._textAreaState = TextAreaState.readFromTextArea(
           this._textArea,
-          this._textAreaState,
+          this._textAreaState
         )
         this._onType.fire(typeInput)
         this._onCompositionEnd.fire()
-      }),
+      })
     )
 
     this._register(
@@ -455,12 +455,12 @@ export class TextAreaInput extends Disposable {
 
         const newState = TextAreaState.readFromTextArea(
           this._textArea,
-          this._textAreaState,
+          this._textAreaState
         )
         const typeInput = TextAreaState.deduceInput(
           this._textAreaState,
           newState,
-          /*couldBeEmojiInput*/ this._OS === OperatingSystem.Macintosh,
+          /*couldBeEmojiInput*/ this._OS === OperatingSystem.Macintosh
         )
 
         if (typeInput.replacePrevCharCnt === 0 && typeInput.text.length === 1) {
@@ -483,7 +483,7 @@ export class TextAreaInput extends Disposable {
         ) {
           this._onType.fire(typeInput)
         }
-      }),
+      })
     )
 
     // --- Clipboard operations
@@ -496,13 +496,13 @@ export class TextAreaInput extends Disposable {
 
         this._ensureClipboardGetsEditorSelection(e)
         this._asyncTriggerCut.schedule()
-      }),
+      })
     )
 
     this._register(
       this._textArea.onCopy((e) => {
         this._ensureClipboardGetsEditorSelection(e)
-      }),
+      })
     )
 
     this._register(
@@ -530,7 +530,7 @@ export class TextAreaInput extends Disposable {
           text: text,
           metadata: metadata,
         })
-      }),
+      })
     )
 
     this._register(
@@ -551,12 +551,12 @@ export class TextAreaInput extends Disposable {
             this._asyncFocusGainWriteScreenReaderContent.value =
               new RunOnceScheduler(
                 () => this.writeNativeTextAreaContent("asyncFocusGain"),
-                0,
+                0
               )
           }
           this._asyncFocusGainWriteScreenReaderContent.value.schedule()
         }
-      }),
+      })
     )
     this._register(
       this._textArea.onBlur(() => {
@@ -575,7 +575,7 @@ export class TextAreaInput extends Disposable {
           this._onCompositionEnd.fire()
         }
         this._setHasFocus(false)
-      }),
+      })
     )
     this._register(
       this._textArea.onSyntheticTap(() => {
@@ -592,7 +592,7 @@ export class TextAreaInput extends Disposable {
           // Fire artificial composition end
           this._onCompositionEnd.fire()
         }
-      }),
+      })
     )
   }
 
@@ -683,7 +683,7 @@ export class TextAreaInput extends Disposable {
         const newSelectionStartPosition = this._host.deduceModelPosition(
           _newSelectionStartPosition[0]!,
           _newSelectionStartPosition[1],
-          _newSelectionStartPosition[2],
+          _newSelectionStartPosition[2]
         )
 
         const _newSelectionEndPosition =
@@ -691,18 +691,18 @@ export class TextAreaInput extends Disposable {
         const newSelectionEndPosition = this._host.deduceModelPosition(
           _newSelectionEndPosition[0]!,
           _newSelectionEndPosition[1],
-          _newSelectionEndPosition[2],
+          _newSelectionEndPosition[2]
         )
 
         const newSelection = new Selection(
           newSelectionStartPosition.lineNumber,
           newSelectionStartPosition.column,
           newSelectionEndPosition.lineNumber,
-          newSelectionEndPosition.column,
+          newSelectionEndPosition.column
         )
 
         this._onSelectionChangeRequest.fire(newSelection)
-      },
+      }
     )
   }
 
@@ -759,7 +759,7 @@ export class TextAreaInput extends Disposable {
 
   private _setAndWriteTextAreaState(
     reason: string,
-    textAreaState: TextAreaState,
+    textAreaState: TextAreaState
   ): void {
     if (!this._hasFocus) {
       textAreaState = textAreaState.collapseSelection()
@@ -797,7 +797,7 @@ export class TextAreaInput extends Disposable {
       this._browser.isFirefox
         ? dataToCopy.text.replace(/\r\n/g, "\n")
         : dataToCopy.text,
-      storedMetadata,
+      storedMetadata
     )
 
     e.preventDefault()
@@ -806,7 +806,7 @@ export class TextAreaInput extends Disposable {
         e.clipboardData,
         dataToCopy.text,
         dataToCopy.html,
-        storedMetadata,
+        storedMetadata
       )
     }
   }
@@ -814,7 +814,7 @@ export class TextAreaInput extends Disposable {
 
 export const ClipboardEventUtils = {
   getTextData(
-    clipboardData: DataTransfer,
+    clipboardData: DataTransfer
   ): [string, ClipboardStoredMetadata | null] {
     const text = clipboardData.getData(Mimes.text)
     let metadata: ClipboardStoredMetadata | null = null
@@ -847,7 +847,7 @@ export const ClipboardEventUtils = {
     clipboardData: DataTransfer,
     text: string,
     html: string | null | undefined,
-    metadata: ClipboardStoredMetadata,
+    metadata: ClipboardStoredMetadata
   ): void {
     clipboardData.setData(Mimes.text, text)
     if (typeof html === "string") {
@@ -862,25 +862,25 @@ export class TextAreaWrapper
   implements ICompleteTextAreaWrapper
 {
   public readonly onKeyDown = this._register(
-    new DomEmitter(this._actual, "keydown"),
+    new DomEmitter(this._actual, "keydown")
   ).event
   public readonly onKeyPress = this._register(
-    new DomEmitter(this._actual, "keypress"),
+    new DomEmitter(this._actual, "keypress")
   ).event
   public readonly onKeyUp = this._register(
-    new DomEmitter(this._actual, "keyup"),
+    new DomEmitter(this._actual, "keyup")
   ).event
   public readonly onCompositionStart = this._register(
-    new DomEmitter(this._actual, "compositionstart"),
+    new DomEmitter(this._actual, "compositionstart")
   ).event
   public readonly onCompositionUpdate = this._register(
-    new DomEmitter(this._actual, "compositionupdate"),
+    new DomEmitter(this._actual, "compositionupdate")
   ).event
   public readonly onCompositionEnd = this._register(
-    new DomEmitter(this._actual, "compositionend"),
+    new DomEmitter(this._actual, "compositionend")
   ).event
   public readonly onBeforeInput = this._register(
-    new DomEmitter(this._actual, "beforeinput"),
+    new DomEmitter(this._actual, "beforeinput")
   ).event
   public readonly onInput = <Event<InputEvent>>(
     this._register(new DomEmitter(this._actual, "input")).event
@@ -890,10 +890,10 @@ export class TextAreaWrapper
   public readonly onCopy = this._register(new DomEmitter(this._actual, "copy"))
     .event
   public readonly onPaste = this._register(
-    new DomEmitter(this._actual, "paste"),
+    new DomEmitter(this._actual, "paste")
   ).event
   public readonly onFocus = this._register(
-    new DomEmitter(this._actual, "focus"),
+    new DomEmitter(this._actual, "focus")
   ).event
   public readonly onBlur = this._register(new DomEmitter(this._actual, "blur"))
     .event
@@ -918,8 +918,8 @@ export class TextAreaWrapper
 
     this._register(
       dom.addDisposableListener(this._actual, TextAreaSyntethicEvents.Tap, () =>
-        this._onSyntheticTap.fire(),
-      ),
+        this._onSyntheticTap.fire()
+      )
     )
   }
 
@@ -977,7 +977,7 @@ export class TextAreaWrapper
   public setSelectionRange(
     reason: string,
     selectionStart: number,
-    selectionEnd: number,
+    selectionEnd: number
   ): void {
     const textArea = this._actual
 

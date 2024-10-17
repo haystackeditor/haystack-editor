@@ -38,7 +38,7 @@ import { createActionViewItem } from "vs/platform/actions/browser/menuEntryActio
 export class TemplateData implements IObjectData {
   constructor(
     public readonly viewModel: DocumentDiffItemViewModel,
-    public readonly deltaScrollVertical: (delta: number) => void,
+    public readonly deltaScrollVertical: (delta: number) => void
   ) {}
 
   getId(): unknown {
@@ -55,7 +55,7 @@ export class DiffEditorItemTemplate
   >(this, undefined)
 
   private readonly _collapsed = derived(this, (reader) =>
-    this._viewModel.read(reader)?.collapsed.read(reader),
+    this._viewModel.read(reader)?.collapsed.read(reader)
   )
 
   private readonly _editorContentHeight = observableValue<number>(this, 500)
@@ -106,26 +106,26 @@ export class DiffEditorItemTemplate
       {
         overflowWidgetsDomNode: this._overflowWidgetsDomNode,
       },
-      {},
-    ),
+      {}
+    )
   )
 
   private readonly isModifedFocused = isFocused(this.editor.getModifiedEditor())
   private readonly isOriginalFocused = isFocused(
-    this.editor.getOriginalEditor(),
+    this.editor.getOriginalEditor()
   )
   public readonly isFocused = derived(
     this,
     (reader) =>
-      this.isModifedFocused.read(reader) || this.isOriginalFocused.read(reader),
+      this.isModifedFocused.read(reader) || this.isOriginalFocused.read(reader)
   )
 
   private readonly _resourceLabel = this._workbenchUIElementFactory
     .createResourceLabel
     ? this._register(
         this._workbenchUIElementFactory.createResourceLabel(
-          this._elements.primaryPath,
-        ),
+          this._elements.primaryPath
+        )
       )
     : undefined
 
@@ -133,8 +133,8 @@ export class DiffEditorItemTemplate
     .createResourceLabel
     ? this._register(
         this._workbenchUIElementFactory.createResourceLabel(
-          this._elements.secondaryPath,
-        ),
+          this._elements.secondaryPath
+        )
       )
     : undefined
 
@@ -145,7 +145,7 @@ export class DiffEditorItemTemplate
     private readonly _overflowWidgetsDomNode: HTMLElement,
     private readonly _workbenchUIElementFactory: IWorkbenchUIElementFactory,
     @IInstantiationService
-    private readonly _instantiationService: IInstantiationService,
+    private readonly _instantiationService: IInstantiationService
   ) {
     super()
 
@@ -157,12 +157,12 @@ export class DiffEditorItemTemplate
         btn.icon = this._collapsed.read(reader)
           ? Codicon.chevronRight
           : Codicon.chevronDown
-      }),
+      })
     )
     this._register(
       btn.onDidClick(() => {
         this._viewModel.get()?.collapsed.set(!this._collapsed.get(), undefined)
-      }),
+      })
     )
 
     this._register(
@@ -170,7 +170,7 @@ export class DiffEditorItemTemplate
         this._elements.editor.style.display = this._collapsed.read(reader)
           ? "none"
           : "block"
-      }),
+      })
     )
 
     this._register(
@@ -179,7 +179,7 @@ export class DiffEditorItemTemplate
           .getModifiedEditor()
           .getLayoutInfo().contentWidth
         this._modifiedWidth.set(width, undefined)
-      }),
+      })
     )
 
     this._register(
@@ -188,7 +188,7 @@ export class DiffEditorItemTemplate
           .getOriginalEditor()
           .getLayoutInfo().contentWidth
         this._originalWidth.set(width, undefined)
-      }),
+      })
     )
 
     this._register(
@@ -197,14 +197,14 @@ export class DiffEditorItemTemplate
           this._editorContentHeight.set(e.contentHeight, tx)
           this._modifiedContentWidth.set(
             this.editor.getModifiedEditor().getContentWidth(),
-            tx,
+            tx
           )
           this._originalContentWidth.set(
             this.editor.getOriginalEditor().getContentWidth(),
-            tx,
+            tx
           )
         })
-      }),
+      })
     )
 
     this._register(
@@ -218,14 +218,14 @@ export class DiffEditorItemTemplate
         }
         const delta = e.scrollTop - this._lastScrollTop
         this._data.deltaScrollVertical(delta)
-      }),
+      })
     )
 
     this._register(
       autorun((reader) => {
         const isActive = this._viewModel.read(reader)?.isActive.read(reader)
         this._elements.root.classList.toggle("active", isActive)
-      }),
+      })
     )
 
     this._container.appendChild(this._elements.root)
@@ -239,8 +239,8 @@ export class DiffEditorItemTemplate
         {
           actionRunner: this._register(
             new ActionRunnerWithContext(
-              () => this._viewModel.get()?.modifiedUri,
-            ),
+              () => this._viewModel.get()?.modifiedUri
+            )
           ),
           menuOptions: {
             shouldForwardArgs: true,
@@ -248,8 +248,8 @@ export class DiffEditorItemTemplate
           toolbarOptions: { primaryGroup: (g) => g.startsWith("navigation") },
           actionViewItemProvider: (action, options) =>
             createActionViewItem(_instantiationService, action, options),
-        },
-      ),
+        }
+      )
     )
   }
 
@@ -295,13 +295,13 @@ export class DiffEditorItemTemplate
       this._dataStore.add(
         value.onOptionsDidChange(() => {
           this.editor.updateOptions(updateOptions(value.options ?? {}))
-        }),
+        })
       )
     }
     globalTransaction((tx) => {
       this._resourceLabel?.setUri(
         data.viewModel.modifiedUri ?? data.viewModel.originalUri!,
-        { strikethrough: data.viewModel.modifiedUri === undefined },
+        { strikethrough: data.viewModel.modifiedUri === undefined }
       )
 
       let isRenamed = false
@@ -329,7 +329,7 @@ export class DiffEditorItemTemplate
 
       this._resourceLabel2?.setUri(
         isRenamed ? data.viewModel.originalUri : undefined,
-        { strikethrough: true },
+        { strikethrough: true }
       )
 
       this._dataStore.clear()
@@ -348,7 +348,7 @@ export class DiffEditorItemTemplate
     verticalRange: OffsetRange,
     width: number,
     editorScroll: number,
-    viewPort: OffsetRange,
+    viewPort: OffsetRange
   ): void {
     this._elements.root.style.visibility = "visible"
     this._elements.root.style.top = `${verticalRange.start}px`
@@ -360,7 +360,7 @@ export class DiffEditorItemTemplate
     const maxDelta = verticalRange.length - this._headerHeight
     const delta = Math.max(
       0,
-      Math.min(viewPort.start - verticalRange.start, maxDelta),
+      Math.min(viewPort.start - verticalRange.start, maxDelta)
     )
     this._elements.header.style.transform = `translateY(${delta}px)`
 
@@ -380,7 +380,7 @@ export class DiffEditorItemTemplate
 
     this._elements.header.classList.toggle(
       "shadow",
-      delta > 0 || editorScroll > 0,
+      delta > 0 || editorScroll > 0
     )
     this._elements.header.classList.toggle("collapsed", delta === maxDelta)
   }
@@ -399,6 +399,6 @@ function isFocused(editor: ICodeEditor): IObservable<boolean> {
       store.add(editor.onDidBlurEditorWidget(() => h(false)))
       return store
     },
-    () => editor.hasTextFocus(),
+    () => editor.hasTextFocus()
   )
 }

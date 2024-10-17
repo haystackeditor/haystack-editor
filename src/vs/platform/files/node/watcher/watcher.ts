@@ -9,97 +9,72 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Disposable } from "vs/base/common/lifecycle"
-import {
-  ILogMessage,
-  IUniversalWatcher,
-  IUniversalWatchRequest,
-} from "vs/platform/files/common/watcher"
-import { Emitter, Event } from "vs/base/common/event"
-import { ParcelWatcher } from "vs/platform/files/node/watcher/parcel/parcelWatcher"
-import { NodeJSWatcher } from "vs/platform/files/node/watcher/nodejs/nodejsWatcher"
-import { Promises } from "vs/base/common/async"
-import { computeStats } from "vs/platform/files/node/watcher/watcherStats"
+import { Disposable } from 'vs/base/common/lifecycle';
+import { ILogMessage, IUniversalWatcher, IUniversalWatchRequest } from 'vs/platform/files/common/watcher';
+import { Emitter, Event } from 'vs/base/common/event';
+import { ParcelWatcher } from 'vs/platform/files/node/watcher/parcel/parcelWatcher';
+import { NodeJSWatcher } from 'vs/platform/files/node/watcher/nodejs/nodejsWatcher';
+import { Promises } from 'vs/base/common/async';
+import { computeStats } from 'vs/platform/files/node/watcher/watcherStats';
 
 export class UniversalWatcher extends Disposable implements IUniversalWatcher {
-  private readonly recursiveWatcher = this._register(new ParcelWatcher())
-  private readonly nonRecursiveWatcher = this._register(
-    new NodeJSWatcher(this.recursiveWatcher),
-  )
 
-  readonly onDidChangeFile = Event.any(
-    this.recursiveWatcher.onDidChangeFile,
-    this.nonRecursiveWatcher.onDidChangeFile,
-  )
-  readonly onDidError = Event.any(
-    this.recursiveWatcher.onDidError,
-    this.nonRecursiveWatcher.onDidError,
-  )
+	private readonly recursiveWatcher = this._register(new ParcelWatcher());
+	private readonly nonRecursiveWatcher = this._register(new NodeJSWatcher(this.recursiveWatcher));
 
-  private readonly _onDidLogMessage = this._register(new Emitter<ILogMessage>())
-  readonly onDidLogMessage = Event.any(
-    this._onDidLogMessage.event,
-    this.recursiveWatcher.onDidLogMessage,
-    this.nonRecursiveWatcher.onDidLogMessage,
-  )
+	readonly onDidChangeFile = Event.any(this.recursiveWatcher.onDidChangeFile, this.nonRecursiveWatcher.onDidChangeFile);
+	readonly onDidError = Event.any(this.recursiveWatcher.onDidError, this.nonRecursiveWatcher.onDidError);
 
-  private requests: IUniversalWatchRequest[] = []
+	private readonly _onDidLogMessage = this._register(new Emitter<ILogMessage>());
+	readonly onDidLogMessage = Event.any(this._onDidLogMessage.event, this.recursiveWatcher.onDidLogMessage, this.nonRecursiveWatcher.onDidLogMessage);
 
-  async watch(requests: IUniversalWatchRequest[]): Promise<void> {
-    this.requests = requests
+	private requests: IUniversalWatchRequest[] = [];
 
-    // Watch recursively first to give recursive watchers a chance
-    // to step in for non-recursive watch requests, thus reducing
-    // watcher duplication.
+	async watch(requests: IUniversalWatchRequest[]): Promise<void> {
+		this.requests = requests;
 
-    let error: Error | undefined
-    try {
-      await this.recursiveWatcher.watch(
-        requests.filter((request) => request.recursive),
-      )
-    } catch (e) {
-      error = e
-    }
+		// Watch recursively first to give recursive watchers a chance
+		// to step in for non-recursive watch requests, thus reducing
+		// watcher duplication.
 
-    try {
-      await this.nonRecursiveWatcher.watch(
-        requests.filter((request) => !request.recursive),
-      )
-    } catch (e) {
-      if (!error) {
-        error = e
-      }
-    }
+		let error: Error | undefined;
+		try {
+			await this.recursiveWatcher.watch(requests.filter(request => request.recursive));
+		} catch (e) {
+			error = e;
+		}
 
-    if (error) {
-      throw error
-    }
-  }
+		try {
+			await this.nonRecursiveWatcher.watch(requests.filter(request => !request.recursive));
+		} catch (e) {
+			if (!error) {
+				error = e;
+			}
+		}
 
-  async setVerboseLogging(enabled: boolean): Promise<void> {
-    // Log stats
-    if (enabled && this.requests.length > 0) {
-      this._onDidLogMessage.fire({
-        type: "trace",
-        message: computeStats(
-          this.requests,
-          this.recursiveWatcher,
-          this.nonRecursiveWatcher,
-        ),
-      })
-    }
+		if (error) {
+			throw error;
+		}
+	}
 
-    // Forward to watchers
-    await Promises.settled([
-      this.recursiveWatcher.setVerboseLogging(enabled),
-      this.nonRecursiveWatcher.setVerboseLogging(enabled),
-    ])
-  }
+	async setVerboseLogging(enabled: boolean): Promise<void> {
 
-  async stop(): Promise<void> {
-    await Promises.settled([
-      this.recursiveWatcher.stop(),
-      this.nonRecursiveWatcher.stop(),
-    ])
-  }
+		// Log stats
+		if (enabled && this.requests.length > 0) {
+			this._onDidLogMessage.fire({ type: 'trace', message: computeStats(this.requests, this.recursiveWatcher, this.nonRecursiveWatcher) });
+		}
+
+		// Forward to watchers
+		await Promises.settled([
+			this.recursiveWatcher.setVerboseLogging(enabled),
+			this.nonRecursiveWatcher.setVerboseLogging(enabled)
+		]);
+	}
+
+	async stop(): Promise<void> {
+		await Promises.settled([
+			this.recursiveWatcher.stop(),
+			this.nonRecursiveWatcher.stop()
+		]);
+	}
 }

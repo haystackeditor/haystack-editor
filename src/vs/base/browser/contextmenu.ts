@@ -47,7 +47,7 @@ export interface IContextMenuDelegate {
   getCheckedActionsRepresentation?(action: IAction): "radio" | "checkbox"
   getActionViewItem?(
     action: IAction,
-    options: IActionViewItemOptions,
+    options: IActionViewItemOptions
   ): IActionViewItem | undefined
   getActionsContext?(event?: IContextMenuEvent): unknown
   getKeyBinding?(action: IAction): ResolvedKeybinding | undefined

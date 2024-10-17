@@ -11,7 +11,7 @@ export class Rectangle {
     public x1: number,
     public y1: number,
     public x2: number,
-    public y2: number,
+    public y2: number
   ) {}
 
   static fromPositionAndSize(position: Vector, size: Vector): Rectangle {
@@ -19,7 +19,7 @@ export class Rectangle {
       position.x,
       position.y,
       position.x + size.x,
-      position.y + size.y,
+      position.y + size.y
     )
   }
 
@@ -76,7 +76,7 @@ export class Rectangle {
   public center(): Vector {
     return new Vector(
       this.left + this.width() / 2,
-      this.top + this.height() / 2,
+      this.top + this.height() / 2
     )
   }
 

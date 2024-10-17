@@ -63,7 +63,7 @@ suite("MainThreadDocumentsAndEditors", () => {
   const deltas: IDocumentsAndEditorsDelta[] = []
 
   function myCreateTestCodeEditor(
-    model: ITextModel | undefined,
+    model: ITextModel | undefined
   ): ITestCodeEditor {
     return createTestCodeEditor(model, {
       hasTextFocus: false,
@@ -84,7 +84,7 @@ suite("MainThreadDocumentsAndEditors", () => {
     const notificationService = new TestNotificationService()
     const undoRedoService = new UndoRedoService(
       dialogService,
-      notificationService,
+      notificationService
     )
     const themeService = new TestThemeService()
     modelService = new ModelService(
@@ -92,7 +92,7 @@ suite("MainThreadDocumentsAndEditors", () => {
       new TestTextResourcePropertiesService(configService),
       undoRedoService,
       disposables.add(new LanguageService()),
-      new TestLanguageConfigurationService(),
+      new TestLanguageConfigurationService()
     )
     codeEditorService = new TestCodeEditorService(themeService)
     textFileService = new (class extends mock<ITextFileService>() {
@@ -118,11 +118,11 @@ suite("MainThreadDocumentsAndEditors", () => {
       SingleProxyRPCProtocol(
         new (class extends mock<ExtHostDocumentsAndEditorsShape>() {
           override $acceptDocumentsAndEditorsDelta(
-            delta: IDocumentsAndEditorsDelta,
+            delta: IDocumentsAndEditorsDelta
           ) {
             deltas.push(delta)
           }
-        })(),
+        })()
       ),
       modelService,
       textFileService,
@@ -150,7 +150,7 @@ suite("MainThreadDocumentsAndEditors", () => {
         }
       })(),
       new TestPathService(),
-      new TestHaystackService(),
+      new TestHaystackService()
     )
   })
 

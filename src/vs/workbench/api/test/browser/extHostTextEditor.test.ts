@@ -42,7 +42,7 @@ suite("ExtHostTextEditor", () => {
     "\n",
     1,
     "text",
-    false,
+    false
   )
 
   setup(() => {
@@ -62,7 +62,7 @@ suite("ExtHostTextEditor", () => {
       },
       [],
       1,
-      undefined,
+      undefined
     )
   })
 
@@ -104,7 +104,7 @@ suite("ExtHostTextEditor", () => {
       },
       [],
       1,
-      undefined,
+      undefined
     )
 
     await editor.value.edit((edit) => {})
@@ -161,7 +161,7 @@ suite("ExtHostTextEditorOptions", () => {
         cursorStyle: TextEditorCursorStyle.Line,
         lineNumbers: RenderLineNumbersType.On,
       },
-      new NullLogService(),
+      new NullLogService()
     )
   })
 
@@ -172,7 +172,7 @@ suite("ExtHostTextEditorOptions", () => {
 
   function assertState(
     opts: ExtHostTextEditorOptions,
-    expected: Omit<IResolvedTextEditorConfiguration, "originalIndentSize">,
+    expected: Omit<IResolvedTextEditorConfiguration, "originalIndentSize">
   ): void {
     const actual = {
       tabSize: opts.value.tabSize,

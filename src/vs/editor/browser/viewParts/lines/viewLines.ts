@@ -75,7 +75,7 @@ class HorizontalRevealRangeRequest {
     public readonly endColumn: number,
     public readonly startScrollTop: number,
     public readonly stopScrollTop: number,
-    public readonly scrollType: ScrollType,
+    public readonly scrollType: ScrollType
   ) {
     this.minLineNumber = lineNumber
     this.maxLineNumber = lineNumber
@@ -92,7 +92,7 @@ class HorizontalRevealSelectionsRequest {
     public readonly selections: Selection[],
     public readonly startScrollTop: number,
     public readonly stopScrollTop: number,
-    public readonly scrollType: ScrollType,
+    public readonly scrollType: ScrollType
   ) {
     let minLineNumber = selections[0].startLineNumber
     let maxLineNumber = selections[0].endLineNumber
@@ -149,7 +149,7 @@ export class ViewLines
   constructor(
     context: ViewContext,
     linesContent: FastDomNode<HTMLElement>,
-    private readonly _editRange: IRange | undefined,
+    private readonly _editRange: IRange | undefined
   ) {
     super(context)
     this._linesContent = linesContent
@@ -167,13 +167,13 @@ export class ViewLines
       fontInfo.typicalHalfwidthCharacterWidth
     this._isViewportWrapping = wrappingInfo.isViewportWrapping
     this._revealHorizontalRightPadding = options.get(
-      EditorOption.revealHorizontalRightPadding,
+      EditorOption.revealHorizontalRightPadding
     )
     this._cursorSurroundingLines = options.get(
-      EditorOption.cursorSurroundingLines,
+      EditorOption.cursorSurroundingLines
     )
     this._cursorSurroundingLinesStyle = options.get(
-      EditorOption.cursorSurroundingLinesStyle,
+      EditorOption.cursorSurroundingLinesStyle
     )
     this._canUseLayerHinting = !options.get(EditorOption.disableLayerHinting)
     this._viewLineOptions = new ViewLineOptions(conf, this._context.theme.type)
@@ -198,7 +198,7 @@ export class ViewLines
     // sticky scroll widget
     this._stickyScrollEnabled = options.get(EditorOption.stickyScroll).enabled
     this._maxNumberStickyLines = options.get(
-      EditorOption.stickyScroll,
+      EditorOption.stickyScroll
     ).maxLineCount
   }
 
@@ -223,7 +223,7 @@ export class ViewLines
   // ---- begin view event handlers
 
   public override onConfigurationChanged(
-    e: viewEvents.ViewConfigurationChangedEvent,
+    e: viewEvents.ViewConfigurationChangedEvent
   ): boolean {
     this._visibleLines.onConfigurationChanged(e)
     if (e.hasChanged(EditorOption.wrappingInfo)) {
@@ -239,20 +239,20 @@ export class ViewLines
       fontInfo.typicalHalfwidthCharacterWidth
     this._isViewportWrapping = wrappingInfo.isViewportWrapping
     this._revealHorizontalRightPadding = options.get(
-      EditorOption.revealHorizontalRightPadding,
+      EditorOption.revealHorizontalRightPadding
     )
     this._cursorSurroundingLines = options.get(
-      EditorOption.cursorSurroundingLines,
+      EditorOption.cursorSurroundingLines
     )
     this._cursorSurroundingLinesStyle = options.get(
-      EditorOption.cursorSurroundingLinesStyle,
+      EditorOption.cursorSurroundingLinesStyle
     )
     this._canUseLayerHinting = !options.get(EditorOption.disableLayerHinting)
 
     // sticky scroll
     this._stickyScrollEnabled = options.get(EditorOption.stickyScroll).enabled
     this._maxNumberStickyLines = options.get(
-      EditorOption.stickyScroll,
+      EditorOption.stickyScroll
     ).maxLineCount
 
     applyFontInfo(this.domNode, fontInfo)
@@ -270,7 +270,7 @@ export class ViewLines
 
     const newViewLineOptions = new ViewLineOptions(
       conf,
-      this._context.theme.type,
+      this._context.theme.type
     )
     if (!this._viewLineOptions.equals(newViewLineOptions)) {
       this._viewLineOptions = newViewLineOptions
@@ -291,7 +291,7 @@ export class ViewLines
     return false
   }
   public override onCursorStateChanged(
-    e: viewEvents.ViewCursorStateChangedEvent,
+    e: viewEvents.ViewCursorStateChangedEvent
   ): boolean {
     const rendStartLineNumber = this._visibleLines.getStartLineNumber()
     const rendEndLineNumber = this._visibleLines.getEndLineNumber()
@@ -307,7 +307,7 @@ export class ViewLines
     return r
   }
   public override onDecorationsChanged(
-    e: viewEvents.ViewDecorationsChangedEvent,
+    e: viewEvents.ViewDecorationsChangedEvent
   ): boolean {
     if (true /*e.inlineDecorationsChanged*/) {
       const rendStartLineNumber = this._visibleLines.getStartLineNumber()
@@ -334,12 +334,12 @@ export class ViewLines
     return this._visibleLines.onLinesDeleted(e)
   }
   public override onLinesInserted(
-    e: viewEvents.ViewLinesInsertedEvent,
+    e: viewEvents.ViewLinesInsertedEvent
   ): boolean {
     return this._visibleLines.onLinesInserted(e)
   }
   public override onRevealRangeRequest(
-    e: viewEvents.ViewRevealRangeRequestEvent,
+    e: viewEvents.ViewRevealRangeRequestEvent
   ): boolean {
     // Using the future viewport here in order to handle multiple
     // incoming reveal range requests that might all desire to be animated
@@ -349,7 +349,7 @@ export class ViewLines
       e.minimalReveal,
       e.range,
       e.selections,
-      e.verticalType,
+      e.verticalType
     )
 
     if (e.source === "api" && this._editRange && e.range != null) {
@@ -383,7 +383,7 @@ export class ViewLines
           e.range.endColumn,
           this._context.viewLayout.getCurrentScrollTop(),
           newScrollPosition.scrollTop,
-          e.scrollType,
+          e.scrollType
         )
       } else if (e.selections && e.selections.length > 0) {
         this._horizontalRevealRequest = new HorizontalRevealSelectionsRequest(
@@ -391,7 +391,7 @@ export class ViewLines
           e.selections,
           this._context.viewLayout.getCurrentScrollTop(),
           newScrollPosition.scrollTop,
-          e.scrollType,
+          e.scrollType
         )
       }
     } else {
@@ -400,19 +400,19 @@ export class ViewLines
 
     const scrollTopDelta = Math.abs(
       this._context.viewLayout.getCurrentScrollTop() -
-        newScrollPosition.scrollTop,
+        newScrollPosition.scrollTop
     )
     const scrollType =
       scrollTopDelta <= this._lineHeight ? ScrollType.Immediate : e.scrollType
     this._context.viewModel.viewLayout.setScrollPosition(
       newScrollPosition,
-      scrollType,
+      scrollType
     )
 
     return true
   }
   public override onScrollChanged(
-    e: viewEvents.ViewScrollChangedEvent,
+    e: viewEvents.ViewScrollChangedEvent
   ): boolean {
     if (this._horizontalRevealRequest && e.scrollLeftChanged) {
       // cancel any outstanding horizontal reveal request if someone else scrolls horizontally.
@@ -421,11 +421,11 @@ export class ViewLines
     if (this._horizontalRevealRequest && e.scrollTopChanged) {
       const min = Math.min(
         this._horizontalRevealRequest.startScrollTop,
-        this._horizontalRevealRequest.stopScrollTop,
+        this._horizontalRevealRequest.stopScrollTop
       )
       const max = Math.max(
         this._horizontalRevealRequest.startScrollTop,
-        this._horizontalRevealRequest.stopScrollTop,
+        this._horizontalRevealRequest.stopScrollTop
       )
       if (e.scrollTop < min || e.scrollTop > max) {
         // cancel any outstanding horizontal reveal request if someone else scrolls vertically.
@@ -437,7 +437,7 @@ export class ViewLines
   }
 
   public override onTokensChanged(
-    e: viewEvents.ViewTokensChangedEvent,
+    e: viewEvents.ViewTokensChangedEvent
   ): boolean {
     return this._visibleLines.onTokensChanged(e)
   }
@@ -455,7 +455,7 @@ export class ViewLines
 
   public getPositionFromDOMInfo(
     spanNode: HTMLElement,
-    offset: number,
+    offset: number
   ): Position | null {
     const viewLineDomNode = this._getViewLineDomNode(spanNode)
     if (viewLineDomNode === null) {
@@ -535,7 +535,7 @@ export class ViewLines
 
     const context = new DomReadingContext(
       this.domNode.domNode,
-      this._textRangeRestingSpot,
+      this._textRangeRestingSpot
     )
     const result = this._visibleLines
       .getVisibleLine(lineNumber)
@@ -547,7 +547,7 @@ export class ViewLines
 
   public linesVisibleRangesForRange(
     _range: Range,
-    includeNewLines: boolean,
+    includeNewLines: boolean
   ): LineVisibleRanges[] | null {
     if (this.shouldRender()) {
       // Cannot read from the DOM because it is dirty
@@ -558,7 +558,7 @@ export class ViewLines
     const originalEndLineNumber = _range.endLineNumber
     const range = Range.intersectRanges(
       _range,
-      this._lastRenderedData.getCurrentVisibleRange(),
+      this._lastRenderedData.getCurrentVisibleRange()
     )
     if (!range) {
       return null
@@ -568,14 +568,14 @@ export class ViewLines
     let visibleRangesLen = 0
     const domReadingContext = new DomReadingContext(
       this.domNode.domNode,
-      this._textRangeRestingSpot,
+      this._textRangeRestingSpot
     )
 
     let nextLineModelLineNumber: number = 0
     if (includeNewLines) {
       nextLineModelLineNumber =
         this._context.viewModel.coordinatesConverter.convertViewPositionToModelPosition(
-          new Position(range.startLineNumber, 1),
+          new Position(range.startLineNumber, 1)
         ).lineNumber
     }
 
@@ -602,7 +602,7 @@ export class ViewLines
           lineNumber,
           startColumn,
           endColumn,
-          domReadingContext,
+          domReadingContext
         )
 
       if (!visibleRangesForLine) {
@@ -613,7 +613,7 @@ export class ViewLines
         const currentLineModelLineNumber = nextLineModelLineNumber
         nextLineModelLineNumber =
           this._context.viewModel.coordinatesConverter.convertViewPositionToModelPosition(
-            new Position(lineNumber + 1, 1),
+            new Position(lineNumber + 1, 1)
           ).lineNumber
 
         if (currentLineModelLineNumber !== nextLineModelLineNumber) {
@@ -627,7 +627,7 @@ export class ViewLines
         visibleRangesForLine.outsideRenderedLine,
         lineNumber,
         HorizontalRange.from(visibleRangesForLine.ranges),
-        continuesInNextLine,
+        continuesInNextLine
       )
     }
 
@@ -643,7 +643,7 @@ export class ViewLines
   private _visibleRangesForLineRange(
     lineNumber: number,
     startColumn: number,
-    endColumn: number,
+    endColumn: number
   ): VisibleRanges | null {
     if (this.shouldRender()) {
       // Cannot read from the DOM because it is dirty
@@ -660,7 +660,7 @@ export class ViewLines
 
     const domReadingContext = new DomReadingContext(
       this.domNode.domNode,
-      this._textRangeRestingSpot,
+      this._textRangeRestingSpot
     )
     const result = this._visibleLines
       .getVisibleLine(lineNumber)
@@ -668,7 +668,7 @@ export class ViewLines
         lineNumber,
         startColumn,
         endColumn,
-        domReadingContext,
+        domReadingContext
       )
     this._updateLineWidthsSlowIfDomDidLayout(domReadingContext)
 
@@ -676,19 +676,19 @@ export class ViewLines
   }
 
   public visibleRangeForPosition(
-    position: Position,
+    position: Position
   ): HorizontalPosition | null {
     const visibleRanges = this._visibleRangesForLineRange(
       position.lineNumber,
       position.column,
-      position.column,
+      position.column
     )
     if (!visibleRanges) {
       return null
     }
     return new HorizontalPosition(
       visibleRanges.outsideRenderedLine,
-      visibleRanges.ranges[0].left,
+      visibleRanges.ranges[0].left
     )
   }
 
@@ -716,7 +716,7 @@ export class ViewLines
    * has caused a synchronous layout.
    */
   private _updateLineWidthsSlowIfDomDidLayout(
-    domReadingContext: DomReadingContext,
+    domReadingContext: DomReadingContext
   ): void {
     if (!domReadingContext.didDomLayout) {
       // only proceed if we just did a layout
@@ -751,7 +751,7 @@ export class ViewLines
 
       localMaxLineWidth = Math.max(
         localMaxLineWidth,
-        visibleLine.getWidth(null),
+        visibleLine.getWidth(null)
       )
     }
 
@@ -826,7 +826,7 @@ export class ViewLines
     this._lastRenderedData.setCurrentVisibleRange(viewportData.visibleRange)
     this.domNode.setWidth(this._context.viewLayout.getScrollWidth())
     this.domNode.setHeight(
-      Math.min(this._context.viewLayout.getScrollHeight(), 1000000),
+      Math.min(this._context.viewLayout.getScrollHeight(), 1000000)
     )
 
     // (2) compute horizontal scroll position:
@@ -847,7 +847,7 @@ export class ViewLines
 
         // compute new scroll position
         const newScrollLeft = this._computeScrollLeftToReveal(
-          horizontalRevealRequest,
+          horizontalRevealRequest
         )
 
         if (newScrollLeft) {
@@ -860,7 +860,7 @@ export class ViewLines
             {
               scrollLeft: newScrollLeft.scrollLeft,
             },
-            horizontalRevealRequest.scrollType,
+            horizontalRevealRequest.scrollType
           )
         }
       }
@@ -919,7 +919,7 @@ export class ViewLines
     minimalReveal: boolean,
     range: Range | null,
     selections: Selection[] | null,
-    verticalType: viewEvents.VerticalRevealType,
+    verticalType: viewEvents.VerticalRevealType
   ): number {
     const viewportStartY = viewport.top
     const viewportHeight = viewport.height
@@ -945,11 +945,11 @@ export class ViewLines
     } else if (range) {
       boxIsSingleRange = true
       boxStartY = this._context.viewLayout.getVerticalOffsetForLineNumber(
-        range.startLineNumber,
+        range.startLineNumber
       )
       boxEndY =
         this._context.viewLayout.getVerticalOffsetForLineNumber(
-          range.endLineNumber,
+          range.endLineNumber
         ) + this._lineHeight
 
       // We don't want to scroll horizontally for every cursor movement in a symbol.
@@ -978,7 +978,7 @@ export class ViewLines
     if (!shouldIgnoreScrollOff) {
       const context = Math.min(
         viewportHeight / this._lineHeight / 2,
-        this._cursorSurroundingLines,
+        this._cursorSurroundingLines
       )
       if (this._stickyScrollEnabled) {
         paddingTop =
@@ -1030,7 +1030,7 @@ export class ViewLines
         // We want a gap that is 20% of the viewport, but with a minimum of 5 lines
         const desiredGapAbove = Math.max(
           5 * this._lineHeight,
-          viewportHeight * 0.2,
+          viewportHeight * 0.2
         )
         // Try to scroll just above the box with the desired gap
         const desiredScrollTop = boxStartY - desiredGapAbove
@@ -1062,7 +1062,7 @@ export class ViewLines
         boxStartY,
         boxEndY,
         verticalType === viewEvents.VerticalRevealType.Top,
-        verticalType === viewEvents.VerticalRevealType.Bottom,
+        verticalType === viewEvents.VerticalRevealType.Bottom
       )
     }
 
@@ -1070,11 +1070,11 @@ export class ViewLines
   }
 
   private _computeScrollLeftToReveal(
-    horizontalRevealRequest: HorizontalRevealRequest,
+    horizontalRevealRequest: HorizontalRevealRequest
   ): { scrollLeft: number; maxHorizontalOffset: number } | null {
     const viewport = this._context.viewLayout.getCurrentViewport()
     const layoutInfo = this._context.configuration.options.get(
-      EditorOption.layoutInfo,
+      EditorOption.layoutInfo
     )
     const viewportStartX = viewport.left
     const viewportEndX =
@@ -1086,7 +1086,7 @@ export class ViewLines
       const visibleRanges = this._visibleRangesForLineRange(
         horizontalRevealRequest.lineNumber,
         horizontalRevealRequest.startColumn,
-        horizontalRevealRequest.endColumn,
+        horizontalRevealRequest.endColumn
       )
       if (!visibleRanges) {
         return null
@@ -1095,7 +1095,7 @@ export class ViewLines
         boxStartX = Math.min(boxStartX, Math.round(visibleRange.left))
         boxEndX = Math.max(
           boxEndX,
-          Math.round(visibleRange.left + visibleRange.width),
+          Math.round(visibleRange.left + visibleRange.width)
         )
       }
     } else {
@@ -1106,7 +1106,7 @@ export class ViewLines
         const visibleRanges = this._visibleRangesForLineRange(
           selection.startLineNumber,
           selection.startColumn,
-          selection.endColumn,
+          selection.endColumn
         )
         if (!visibleRanges) {
           return null
@@ -1115,7 +1115,7 @@ export class ViewLines
           boxStartX = Math.min(boxStartX, Math.round(visibleRange.left))
           boxEndX = Math.max(
             boxEndX,
-            Math.round(visibleRange.left + visibleRange.width),
+            Math.round(visibleRange.left + visibleRange.width)
           )
         }
       }
@@ -1137,7 +1137,7 @@ export class ViewLines
       viewportStartX,
       viewportEndX,
       boxStartX,
-      boxEndX,
+      boxEndX
     )
     return {
       scrollLeft: newScrollLeft,
@@ -1151,7 +1151,7 @@ export class ViewLines
     boxStart: number,
     boxEnd: number,
     revealAtStart?: boolean,
-    revealAtEnd?: boolean,
+    revealAtEnd?: boolean
   ): number {
     viewportStart = viewportStart | 0
     viewportEnd = viewportEnd | 0

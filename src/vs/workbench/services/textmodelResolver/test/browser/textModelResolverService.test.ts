@@ -54,7 +54,7 @@ suite("Workbench - TextModelResolverService", () => {
         "test",
         {
           provideTextContent: async function (
-            resource: URI,
+            resource: URI
           ): Promise<ITextModel | null> {
             if (resource.scheme === "test") {
               const modelContent = "Hello Test"
@@ -64,14 +64,14 @@ suite("Workbench - TextModelResolverService", () => {
               return accessor.modelService.createModel(
                 modelContent,
                 languageSelection,
-                resource,
+                resource
               )
             }
 
             return null
           },
-        },
-      ),
+        }
+      )
     )
 
     const resource = URI.from({
@@ -90,14 +90,14 @@ suite("Workbench - TextModelResolverService", () => {
       undefined,
       undefined,
       undefined,
-      undefined,
+      undefined
     )
 
     const model = disposables.add(await input.resolve())
     assert.ok(model)
     assert.strictEqual(
       snapshotToString((model as TextResourceEditorModel).createSnapshot()!),
-      "Hello Test",
+      "Hello Test"
     )
     let disposed = false
     const disposedPromise = new Promise<void>((resolve) => {
@@ -120,18 +120,18 @@ suite("Workbench - TextModelResolverService", () => {
         "utf8",
         undefined,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
     ;(<ITestTextFileEditorModelManager>accessor.textFileService.files).add(
       textModel.resource,
-      textModel,
+      textModel
     )
 
     await textModel.resolve()
 
     const ref = await accessor.textModelResolverService.createModelReference(
-      textModel.resource,
+      textModel.resource
     )
 
     const model = ref.object
@@ -158,12 +158,12 @@ suite("Workbench - TextModelResolverService", () => {
         "utf8",
         undefined,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
     ;(<ITestTextFileEditorModelManager>accessor.textFileService.files).add(
       textModel.resource,
-      textModel,
+      textModel
     )
 
     await textModel.resolve()
@@ -171,7 +171,7 @@ suite("Workbench - TextModelResolverService", () => {
     textModel.updateTextEditorModel(createTextBufferFactory("make dirty"))
 
     const ref = await accessor.textModelResolverService.createModelReference(
-      textModel.resource,
+      textModel.resource
     )
 
     let disposed = false
@@ -197,12 +197,12 @@ suite("Workbench - TextModelResolverService", () => {
         "utf8",
         undefined,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
     ;(<ITestTextFileEditorModelManager>accessor.textFileService.files).add(
       textModel.resource,
-      textModel,
+      textModel
     )
 
     await textModel.resolve()
@@ -210,7 +210,7 @@ suite("Workbench - TextModelResolverService", () => {
     textModel.updateTextEditorModel(createTextBufferFactory("make dirty"))
 
     const ref1 = await accessor.textModelResolverService.createModelReference(
-      textModel.resource,
+      textModel.resource
     )
 
     let disposed = false
@@ -223,7 +223,7 @@ suite("Workbench - TextModelResolverService", () => {
     assert.strictEqual(disposed, false) // not disposed because model still dirty
 
     const ref2 = await accessor.textModelResolverService.createModelReference(
-      textModel.resource,
+      textModel.resource
     )
 
     textModel.revert()
@@ -243,13 +243,13 @@ suite("Workbench - TextModelResolverService", () => {
     const input = disposables.add(
       instantiationService.createInstance(
         UntitledTextEditorInput,
-        untitledModel,
-      ),
+        untitledModel
+      )
     )
 
     await input.resolve()
     const ref = await accessor.textModelResolverService.createModelReference(
-      input.resource,
+      input.resource
     )
     const model = ref.object
     assert.strictEqual(untitledModel, model)
@@ -278,12 +278,12 @@ suite("Workbench - TextModelResolverService", () => {
               accessor.modelService.createModel(
                 modelContent,
                 languageSelection,
-                resource,
-              ),
+                resource
+              )
             )
           },
-        },
-      ),
+        }
+      )
     )
 
     const uri = URI.from({ scheme: "test", authority: null!, path: "thePath" })
@@ -307,11 +307,11 @@ suite("Workbench - TextModelResolverService", () => {
     modelRef1.dispose()
     assert(
       !textModel.isDisposed(),
-      "the text model should still not be disposed",
+      "the text model should still not be disposed"
     )
 
     const p1 = new Promise<void>((resolve) =>
-      disposables.add(textModel.onWillDispose(resolve)),
+      disposables.add(textModel.onWillDispose(resolve))
     )
     modelRef2.dispose()
 

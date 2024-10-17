@@ -9,14 +9,14 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as git from "./git"
+import * as git from './git';
 
 export function getVersion(root: string): string | undefined {
-  let version = process.env["BUILD_SOURCEVERSION"]
+	let version = process.env['BUILD_SOURCEVERSION'];
 
-  if (!version || !/^[0-9a-f]{40}$/i.test(version.trim())) {
-    version = git.getVersion(root)
-  }
+	if (!version || !/^[0-9a-f]{40}$/i.test(version.trim())) {
+		version = git.getVersion(root);
+	}
 
-  return version
+	return version;
 }

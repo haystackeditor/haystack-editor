@@ -42,7 +42,7 @@ export class UserDataProfilesReadonlyService
     @INativeEnvironmentService
     private readonly nativeEnvironmentService: INativeEnvironmentService,
     @IFileService fileService: IFileService,
-    @ILogService logService: ILogService,
+    @ILogService logService: ILogService
   ) {
     super(nativeEnvironmentService, fileService, uriIdentityService, logService)
   }
@@ -63,11 +63,11 @@ export class UserDataProfilesReadonlyService
     const associations =
       this.stateReadonlyService.getItem<StoredProfileAssociations>(
         UserDataProfilesReadonlyService.PROFILE_ASSOCIATIONS_KEY,
-        {},
+        {}
       )
     const migrated = this.stateReadonlyService.getItem<boolean>(
       UserDataProfilesReadonlyService.PROFILE_ASSOCIATIONS_MIGRATION_KEY,
-      false,
+      false
     )
     return migrated
       ? associations
@@ -79,7 +79,7 @@ export class UserDataProfilesReadonlyService
       URI.file(this.nativeEnvironmentService.extensionsPath).with({
         scheme: this.profilesHome.scheme,
       }),
-      "extensions.json",
+      "extensions.json"
     )
   }
 }
@@ -93,19 +93,19 @@ export class UserDataProfilesService
     @IUriIdentityService uriIdentityService: IUriIdentityService,
     @INativeEnvironmentService environmentService: INativeEnvironmentService,
     @IFileService fileService: IFileService,
-    @ILogService logService: ILogService,
+    @ILogService logService: ILogService
   ) {
     super(
       stateService,
       uriIdentityService,
       environmentService,
       fileService,
-      logService,
+      logService
     )
   }
 
   protected override saveStoredProfiles(
-    storedProfiles: StoredUserDataProfile[],
+    storedProfiles: StoredUserDataProfile[]
   ): void {
     if (storedProfiles.length) {
       this.stateService.setItem(
@@ -113,7 +113,7 @@ export class UserDataProfilesService
         storedProfiles.map((profile) => ({
           ...profile,
           location: this.uriIdentityService.extUri.basename(profile.location),
-        })),
+        }))
       )
     } else {
       this.stateService.removeItem(UserDataProfilesService.PROFILES_KEY)
@@ -133,7 +133,7 @@ export class UserDataProfilesService
   }
 
   protected override saveStoredProfileAssociations(
-    storedProfileAssociations: StoredProfileAssociations,
+    storedProfileAssociations: StoredProfileAssociations
   ): void {
     if (
       storedProfileAssociations.emptyWindows ||
@@ -141,11 +141,11 @@ export class UserDataProfilesService
     ) {
       this.stateService.setItem(
         UserDataProfilesService.PROFILE_ASSOCIATIONS_KEY,
-        storedProfileAssociations,
+        storedProfileAssociations
       )
     } else {
       this.stateService.removeItem(
-        UserDataProfilesService.PROFILE_ASSOCIATIONS_KEY,
+        UserDataProfilesService.PROFILE_ASSOCIATIONS_KEY
       )
     }
   }
@@ -163,24 +163,24 @@ export class UserDataProfilesService
             URI.revive(profile).toString()
           return result
         },
-        {},
+        {}
       )
       this.stateService.setItem(
         UserDataProfilesService.PROFILE_ASSOCIATIONS_KEY,
-        <StoredProfileAssociations>{ workspaces },
+        <StoredProfileAssociations>{ workspaces }
       )
     }
     const associations = super.getStoredProfileAssociations()
     if (
       !this.stateService.getItem<boolean>(
         UserDataProfilesService.PROFILE_ASSOCIATIONS_MIGRATION_KEY,
-        false,
+        false
       )
     ) {
       this.saveStoredProfileAssociations(associations)
       this.stateService.setItem(
         UserDataProfilesService.PROFILE_ASSOCIATIONS_MIGRATION_KEY,
-        true,
+        true
       )
     }
     return associations
@@ -195,19 +195,19 @@ export class ServerUserDataProfilesService
     @IUriIdentityService uriIdentityService: IUriIdentityService,
     @INativeEnvironmentService environmentService: INativeEnvironmentService,
     @IFileService fileService: IFileService,
-    @ILogService logService: ILogService,
+    @ILogService logService: ILogService
   ) {
     super(
       new StateService(
         SaveStrategy.IMMEDIATE,
         environmentService,
         logService,
-        fileService,
+        fileService
       ),
       uriIdentityService,
       environmentService,
       fileService,
-      logService,
+      logService
     )
   }
 

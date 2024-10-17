@@ -138,7 +138,7 @@ export class PreferencesService
     @ILabelService private readonly labelService: ILabelService,
     @IRemoteAgentService
     private readonly remoteAgentService: IRemoteAgentService,
-    @ITextEditorService private readonly textEditorService: ITextEditorService,
+    @ITextEditorService private readonly textEditorService: ITextEditorService
   ) {
     super()
     // The default keybindings.json updates based on keyboard layouts, so here we make sure
@@ -152,9 +152,9 @@ export class PreferencesService
         }
         modelService.updateModel(
           model,
-          defaultKeybindingsContents(keybindingService),
+          defaultKeybindingsContents(keybindingService)
         )
-      }),
+      })
     )
   }
 
@@ -200,7 +200,7 @@ export class PreferencesService
       const target = this.getConfigurationTargetFromDefaultSettingsResource(uri)
       const languageSelection = this.languageService.createById("jsonc")
       const model = this._register(
-        this.modelService.createModel("", languageSelection, uri),
+        this.modelService.createModel("", languageSelection, uri)
       )
 
       let defaultSettings: DefaultSettings | undefined
@@ -214,7 +214,7 @@ export class PreferencesService
           defaultSettings = this.getDefaultSettings(target)
           this.modelService.updateModel(
             model,
-            defaultSettings.getContentWithoutMostCommonlyUsed(true),
+            defaultSettings.getContentWithoutMostCommonlyUsed(true)
           )
           defaultSettings._onDidChange.fire()
         }
@@ -225,7 +225,7 @@ export class PreferencesService
         defaultSettings = this.getDefaultSettings(target)
         this.modelService.updateModel(
           model,
-          defaultSettings.getContentWithoutMostCommonlyUsed(true),
+          defaultSettings.getContentWithoutMostCommonlyUsed(true)
         )
       }
 
@@ -236,15 +236,15 @@ export class PreferencesService
       const defaultRawSettingsEditorModel =
         this.instantiationService.createInstance(
           DefaultRawSettingsEditorModel,
-          this.getDefaultSettings(ConfigurationTarget.USER_LOCAL),
+          this.getDefaultSettings(ConfigurationTarget.USER_LOCAL)
         )
       const languageSelection = this.languageService.createById("jsonc")
       const model = this._register(
         this.modelService.createModel(
           defaultRawSettingsEditorModel.content,
           languageSelection,
-          uri,
-        ),
+          uri
+        )
       )
       return model
     }
@@ -253,15 +253,15 @@ export class PreferencesService
       const defaultKeybindingsEditorModel =
         this.instantiationService.createInstance(
           DefaultKeybindingsEditorModel,
-          uri,
+          uri
         )
       const languageSelection = this.languageService.createById("jsonc")
       const model = this._register(
         this.modelService.createModel(
           defaultKeybindingsEditorModel.content,
           languageSelection,
-          uri,
-        ),
+          uri
+        )
       )
       return model
     }
@@ -270,7 +270,7 @@ export class PreferencesService
   }
 
   public async createPreferencesEditorModel(
-    uri: URI,
+    uri: URI
   ): Promise<IPreferencesEditorModel<ISetting> | null> {
     if (this.isDefaultSettingsResource(uri)) {
       return this.createDefaultSettingsEditorModel(uri)
@@ -283,12 +283,12 @@ export class PreferencesService
     ) {
       return this.createEditableSettingsEditorModel(
         ConfigurationTarget.USER_LOCAL,
-        uri,
+        uri
       )
     }
 
     const workspaceSettingsUri = await this.getEditableSettingsURI(
-      ConfigurationTarget.WORKSPACE,
+      ConfigurationTarget.WORKSPACE
     )
     if (
       workspaceSettingsUri &&
@@ -296,19 +296,19 @@ export class PreferencesService
     ) {
       return this.createEditableSettingsEditorModel(
         ConfigurationTarget.WORKSPACE,
-        workspaceSettingsUri,
+        workspaceSettingsUri
       )
     }
 
     if (this.contextService.getWorkbenchState() === WorkbenchState.WORKSPACE) {
       const settingsUri = await this.getEditableSettingsURI(
         ConfigurationTarget.WORKSPACE_FOLDER,
-        uri,
+        uri
       )
       if (settingsUri && settingsUri.toString() === uri.toString()) {
         return this.createEditableSettingsEditorModel(
           ConfigurationTarget.WORKSPACE_FOLDER,
-          uri,
+          uri
         )
       }
     }
@@ -320,7 +320,7 @@ export class PreferencesService
     if (remoteSettingsUri && remoteSettingsUri.toString() === uri.toString()) {
       return this.createEditableSettingsEditorModel(
         ConfigurationTarget.USER_REMOTE,
-        uri,
+        uri
       )
     }
 
@@ -347,7 +347,7 @@ export class PreferencesService
   }
 
   openSettings(
-    options: IOpenSettingsOptions = {},
+    options: IOpenSettingsOptions = {}
   ): Promise<IEditorPane | undefined> {
     options = {
       ...options,
@@ -362,7 +362,7 @@ export class PreferencesService
 
   openLanguageSpecificSettings(
     languageId: string,
-    options: IOpenSettingsOptions = {},
+    options: IOpenSettingsOptions = {}
   ): Promise<IEditorPane | undefined> {
     if (this.shouldOpenJsonByDefault()) {
       options.query = undefined
@@ -379,7 +379,7 @@ export class PreferencesService
 
   private open(
     settingsResource: URI,
-    options: IOpenSettingsOptions,
+    options: IOpenSettingsOptions
   ): Promise<IEditorPane | undefined> {
     options = {
       ...options,
@@ -392,7 +392,7 @@ export class PreferencesService
   }
 
   private async openSettings2(
-    options: IOpenSettingsOptions,
+    options: IOpenSettingsOptions
   ): Promise<IEditorPane> {
     const input = this.createSettingsEditor2Input()
     options = {
@@ -404,7 +404,7 @@ export class PreferencesService
   }
 
   openApplicationSettings(
-    options: IOpenSettingsOptions = {},
+    options: IOpenSettingsOptions = {}
   ): Promise<IEditorPane | undefined> {
     options = {
       ...options,
@@ -412,12 +412,12 @@ export class PreferencesService
     }
     return this.open(
       this.userDataProfilesService.defaultProfile.settingsResource,
-      options,
+      options
     )
   }
 
   openUserSettings(
-    options: IOpenSettingsOptions = {},
+    options: IOpenSettingsOptions = {}
   ): Promise<IEditorPane | undefined> {
     options = {
       ...options,
@@ -427,7 +427,7 @@ export class PreferencesService
   }
 
   async openRemoteSettings(
-    options: IOpenSettingsOptions = {},
+    options: IOpenSettingsOptions = {}
   ): Promise<IEditorPane | undefined> {
     const environment = await this.remoteAgentService.getEnvironment()
     if (environment) {
@@ -442,14 +442,14 @@ export class PreferencesService
   }
 
   openWorkspaceSettings(
-    options: IOpenSettingsOptions = {},
+    options: IOpenSettingsOptions = {}
   ): Promise<IEditorPane | undefined> {
     if (!this.workspaceSettingsResource) {
       this.notificationService.info(
         nls.localize(
           "openFolderFirst",
-          "Open a folder or workspace first to create workspace or folder settings.",
-        ),
+          "Open a folder or workspace first to create workspace or folder settings."
+        )
       )
       return Promise.reject(null)
     }
@@ -462,7 +462,7 @@ export class PreferencesService
   }
 
   async openFolderSettings(
-    options: IOpenSettingsOptions = {},
+    options: IOpenSettingsOptions = {}
   ): Promise<IEditorPane | undefined> {
     options = {
       ...options,
@@ -475,7 +475,7 @@ export class PreferencesService
 
     const folderSettingsUri = await this.getEditableSettingsURI(
       ConfigurationTarget.WORKSPACE_FOLDER,
-      options.folderUri,
+      options.folderUri
     )
     if (!folderSettingsUri) {
       throw new Error(`Invalid folder URI - ${options.folderUri.toString()}`)
@@ -486,7 +486,7 @@ export class PreferencesService
 
   async openGlobalKeybindingSettings(
     textual: boolean,
-    options?: IKeybindingsEditorOptions,
+    options?: IKeybindingsEditorOptions
   ): Promise<void> {
     options = { pinned: true, revealIfOpened: true, ...options }
     if (textual) {
@@ -494,13 +494,13 @@ export class PreferencesService
         "// " +
         nls.localize(
           "emptyKeybindingsHeader",
-          "Place your key bindings in this file to override the defaults",
+          "Place your key bindings in this file to override the defaults"
         ) +
         "\n[\n]"
       const editableKeybindings =
         this.userDataProfileService.currentProfile.keybindingsResource
       const openDefaultKeybindings = !!this.configurationService.getValue(
-        "workbench.settings.openDefaultKeybindings",
+        "workbench.settings.openDefaultKeybindings"
       )
 
       // Create as needed and open in editor
@@ -514,24 +514,24 @@ export class PreferencesService
           this.haystackService.createFileEditor(
             editableKeybindings,
             undefined,
-            options,
+            options
           ),
         ])
       } else {
         await this.haystackService.createFileEditor(
           editableKeybindings,
           undefined,
-          options,
+          options
         )
       }
     } else {
       const editorInput = this.instantiationService.createInstance(
-        KeybindingsEditorInput,
+        KeybindingsEditorInput
       )
       const editor = (await this.haystackService.createModalEditor(
         editorInput,
         undefined,
-        { ...options },
+        { ...options }
       )) as IKeybindingsEditorPane
       if (options.query) {
         editor.search(options.query)
@@ -549,7 +549,7 @@ export class PreferencesService
 
   private async openSettingsJson(
     resource: URI,
-    options: IOpenSettingsOptions,
+    options: IOpenSettingsOptions
   ): Promise<IEditorPane | undefined> {
     const group = options?.openToSide ? SIDE_GROUP : undefined
     const editor = await this.doOpenSettingsJson(resource, options, group)
@@ -558,7 +558,7 @@ export class PreferencesService
         options.revealSetting.key,
         !!options.revealSetting.edit,
         editor,
-        resource,
+        resource
       )
     }
     return editor
@@ -567,13 +567,13 @@ export class PreferencesService
   private async doOpenSettingsJson(
     resource: URI,
     options: ISettingsEditorOptions,
-    group?: SIDE_GROUP_TYPE,
+    group?: SIDE_GROUP_TYPE
   ): Promise<IEditorPane | undefined> {
     const openSplitJSON = !!this.configurationService.getValue(
-      USE_SPLIT_JSON_SETTING,
+      USE_SPLIT_JSON_SETTING
     )
     const openDefaultSettings = !!this.configurationService.getValue(
-      DEFAULT_SETTINGS_EDITOR_SETTING,
+      DEFAULT_SETTINGS_EDITOR_SETTING
     )
     if (openSplitJSON || openDefaultSettings) {
       return this.doOpenSplitJSON(resource, options, group)
@@ -583,12 +583,12 @@ export class PreferencesService
     const editableSettingsEditorInput =
       await this.getOrCreateEditableSettingsEditorInput(
         configurationTarget,
-        resource,
+        resource
       )
     options = { ...options, pinned: true }
     if (editableSettingsEditorInput.resource == null) return undefined
     await this.haystackService.createFileEditor(
-      editableSettingsEditorInput.resource,
+      editableSettingsEditorInput.resource
     )
     return undefined
   }
@@ -596,28 +596,28 @@ export class PreferencesService
   private async doOpenSplitJSON(
     resource: URI,
     options: ISettingsEditorOptions = {},
-    group?: SIDE_GROUP_TYPE,
+    group?: SIDE_GROUP_TYPE
   ): Promise<IEditorPane | undefined> {
     const configurationTarget = options.target ?? ConfigurationTarget.USER
     await this.createSettingsIfNotExists(configurationTarget, resource)
     const preferencesEditorInput = this.createSplitJsonEditorInput(
       configurationTarget,
-      resource,
+      resource
     )
     options = { ...options, pinned: true }
     return this.editorService.openEditor(
       preferencesEditorInput,
       validateSettingsEditorOptions(options),
-      group,
+      group
     )
   }
 
   public createSplitJsonEditorInput(
     configurationTarget: ConfigurationTarget,
-    resource: URI,
+    resource: URI
   ): EditorInput {
     const editableSettingsEditorInput = this.textEditorService.createTextEditor(
-      { resource },
+      { resource }
     )
     const defaultPreferencesEditorInput =
       this.instantiationService.createInstance(
@@ -631,21 +631,21 @@ export class PreferencesService
         undefined,
         undefined,
         undefined,
-        undefined,
+        undefined
       )
     return this.instantiationService.createInstance(
       SideBySideEditorInput,
       editableSettingsEditorInput.getName(),
       undefined,
       defaultPreferencesEditorInput,
-      editableSettingsEditorInput,
+      editableSettingsEditorInput
     )
   }
 
   public createSettings2EditorModel(): Settings2EditorModel {
     return this.instantiationService.createInstance(
       Settings2EditorModel,
-      this.getDefaultSettings(ConfigurationTarget.USER_LOCAL),
+      this.getDefaultSettings(ConfigurationTarget.USER_LOCAL)
     )
   }
 
@@ -653,8 +653,8 @@ export class PreferencesService
     return this.isDefaultWorkspaceSettingsResource(uri)
       ? ConfigurationTarget.WORKSPACE
       : this.isDefaultFolderSettingsResource(uri)
-        ? ConfigurationTarget.WORKSPACE_FOLDER
-        : ConfigurationTarget.USER_LOCAL
+      ? ConfigurationTarget.WORKSPACE_FOLDER
+      : ConfigurationTarget.USER_LOCAL
   }
 
   private isDefaultSettingsResource(uri: URI): boolean {
@@ -690,7 +690,7 @@ export class PreferencesService
   }
 
   private getDefaultSettingsResource(
-    configurationTarget: ConfigurationTarget,
+    configurationTarget: ConfigurationTarget
   ): URI {
     switch (configurationTarget) {
       case ConfigurationTarget.WORKSPACE:
@@ -715,7 +715,7 @@ export class PreferencesService
 
   private async getOrCreateEditableSettingsEditorInput(
     target: ConfigurationTarget,
-    resource: URI,
+    resource: URI
   ): Promise<EditorInput> {
     await this.createSettingsIfNotExists(target, resource)
     return this.textEditorService.createTextEditor({ resource })
@@ -723,7 +723,7 @@ export class PreferencesService
 
   private async createEditableSettingsEditorModel(
     configurationTarget: ConfigurationTarget,
-    settingsUri: URI,
+    settingsUri: URI
   ): Promise<SettingsEditorModel> {
     const workspace = this.contextService.getWorkspace()
     if (
@@ -735,58 +735,58 @@ export class PreferencesService
       return this.instantiationService.createInstance(
         WorkspaceConfigurationEditorModel,
         reference,
-        configurationTarget,
+        configurationTarget
       )
     }
 
-    const reference =
-      await this.textModelResolverService.createModelReference(settingsUri)
+    const reference = await this.textModelResolverService.createModelReference(
+      settingsUri
+    )
     return this.instantiationService.createInstance(
       SettingsEditorModel,
       reference,
-      configurationTarget,
+      configurationTarget
     )
   }
 
   private async createDefaultSettingsEditorModel(
-    defaultSettingsUri: URI,
+    defaultSettingsUri: URI
   ): Promise<DefaultSettingsEditorModel> {
-    const reference =
-      await this.textModelResolverService.createModelReference(
-        defaultSettingsUri,
-      )
+    const reference = await this.textModelResolverService.createModelReference(
+      defaultSettingsUri
+    )
     const target =
       this.getConfigurationTargetFromDefaultSettingsResource(defaultSettingsUri)
     return this.instantiationService.createInstance(
       DefaultSettingsEditorModel,
       defaultSettingsUri,
       reference,
-      this.getDefaultSettings(target),
+      this.getDefaultSettings(target)
     )
   }
 
   private getDefaultSettings(target: ConfigurationTarget): DefaultSettings {
     if (target === ConfigurationTarget.WORKSPACE) {
       this._defaultWorkspaceSettingsContentModel ??= this._register(
-        new DefaultSettings(this.getMostCommonlyUsedSettings(), target),
+        new DefaultSettings(this.getMostCommonlyUsedSettings(), target)
       )
       return this._defaultWorkspaceSettingsContentModel
     }
     if (target === ConfigurationTarget.WORKSPACE_FOLDER) {
       this._defaultFolderSettingsContentModel ??= this._register(
-        new DefaultSettings(this.getMostCommonlyUsedSettings(), target),
+        new DefaultSettings(this.getMostCommonlyUsedSettings(), target)
       )
       return this._defaultFolderSettingsContentModel
     }
     this._defaultUserSettingsContentModel ??= this._register(
-      new DefaultSettings(this.getMostCommonlyUsedSettings(), target),
+      new DefaultSettings(this.getMostCommonlyUsedSettings(), target)
     )
     return this._defaultUserSettingsContentModel
   }
 
   public async getEditableSettingsURI(
     configurationTarget: ConfigurationTarget,
-    resource?: URI,
+    resource?: URI
   ): Promise<URI | null> {
     switch (configurationTarget) {
       case ConfigurationTarget.APPLICATION:
@@ -810,7 +810,7 @@ export class PreferencesService
 
   private async createSettingsIfNotExists(
     target: ConfigurationTarget,
-    resource: URI,
+    resource: URI
   ): Promise<void> {
     if (
       this.contextService.getWorkbenchState() === WorkbenchState.WORKSPACE &&
@@ -826,7 +826,7 @@ export class PreferencesService
         await this.jsonEditingService.write(
           resource,
           [{ path: ["settings"], value: {} }],
-          true,
+          true
         )
       }
       return undefined
@@ -837,7 +837,7 @@ export class PreferencesService
 
   private async createIfNotExists(
     resource: URI,
-    contents: string,
+    contents: string
   ): Promise<void> {
     try {
       await this.textFileService.read(resource, { acceptTextOnly: true })
@@ -855,8 +855,8 @@ export class PreferencesService
               "fail.createSettings",
               "Unable to create '{0}' ({1}).",
               this.labelService.getUriLabel(resource, { relative: true }),
-              getErrorMessage(error2),
-            ),
+              getErrorMessage(error2)
+            )
           )
         }
       } else {
@@ -886,14 +886,15 @@ export class PreferencesService
     settingKey: string,
     edit: boolean,
     editor: IEditorPane,
-    settingsResource: URI,
+    settingsResource: URI
   ): Promise<void> {
     const codeEditor = editor ? getCodeEditor(editor.getControl()) : null
     if (!codeEditor) {
       return
     }
-    const settingsModel =
-      await this.createPreferencesEditorModel(settingsResource)
+    const settingsModel = await this.createPreferencesEditorModel(
+      settingsResource
+    )
     if (!settingsModel) {
       return
     }
@@ -901,7 +902,7 @@ export class PreferencesService
       settingKey,
       edit,
       settingsModel,
-      codeEditor,
+      codeEditor
     )
     if (position) {
       codeEditor.setPosition(position)
@@ -917,14 +918,14 @@ export class PreferencesService
     settingKey: string,
     edit: boolean,
     settingsModel: IPreferencesEditorModel<ISetting>,
-    codeEditor: ICodeEditor,
+    codeEditor: ICodeEditor
   ): Promise<IPosition | null> {
     const model = codeEditor.getModel()
     if (!model) {
       return null
     }
     const schema = Registry.as<IConfigurationRegistry>(
-      Extensions.Configuration,
+      Extensions.Configuration
     ).getConfigurationProperties()[settingKey]
     const isOverrideProperty = OVERRIDE_PROPERTY_REGEX.test(settingKey)
     if (!schema && !isOverrideProperty) {
@@ -951,7 +952,7 @@ export class PreferencesService
         await this.jsonEditingService.write(
           settingsModel.uri!,
           [{ path: key, value: defaultValue }],
-          false,
+          false
         )
         setting = settingsModel.getPreference(settingKey)
       }
@@ -968,7 +969,7 @@ export class PreferencesService
           await CoreEditingCommands.LineBreakInsert.runEditorCommand(
             null,
             codeEditor,
-            null,
+            null
           )
           position = {
             lineNumber: position.lineNumber + 1,
@@ -985,7 +986,7 @@ export class PreferencesService
             await CoreEditingCommands.LineBreakInsert.runEditorCommand(
               null,
               codeEditor,
-              null,
+              null
             )
             position = {
               lineNumber: position.lineNumber,
@@ -1018,5 +1019,5 @@ export class PreferencesService
 registerSingleton(
   IPreferencesService,
   PreferencesService,
-  InstantiationType.Delayed,
+  InstantiationType.Delayed
 )

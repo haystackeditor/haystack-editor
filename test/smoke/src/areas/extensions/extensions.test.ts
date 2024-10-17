@@ -9,27 +9,25 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Application, Logger } from "../../../../automation"
-import { installAllHandlers } from "../../utils"
+import { Application, Logger } from '../../../../automation';
+import { installAllHandlers } from '../../utils';
 
 export function setup(logger: Logger) {
-  describe("Extensions", () => {
-    // Shared before/after handling
-    installAllHandlers(logger)
+	describe('Extensions', () => {
 
-    it("install and enable vscode-smoketest-check extension", async function () {
-      const app = this.app as Application
+		// Shared before/after handling
+		installAllHandlers(logger);
 
-      await app.workbench.extensions.installExtension(
-        "ms-vscode.vscode-smoketest-check",
-        true,
-      )
+		it('install and enable vscode-smoketest-check extension', async function () {
+			const app = this.app as Application;
 
-      // Close extension editor because keybindings dispatch is not working when web views are opened and focused
-      // https://github.com/microsoft/vscode/issues/110276
-      await app.workbench.extensions.closeExtension("vscode-smoketest-check")
+			await app.workbench.extensions.installExtension('ms-vscode.vscode-smoketest-check', true);
 
-      await app.workbench.quickaccess.runCommand("Smoke Test Check")
-    })
-  })
+			// Close extension editor because keybindings dispatch is not working when web views are opened and focused
+			// https://github.com/microsoft/vscode/issues/110276
+			await app.workbench.extensions.closeExtension('vscode-smoketest-check');
+
+			await app.workbench.quickaccess.runCommand('Smoke Test Check');
+		});
+	});
 }

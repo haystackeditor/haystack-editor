@@ -105,15 +105,15 @@ export class TestView implements IView {
     private _minimumWidth: number,
     private _maximumWidth: number,
     private _minimumHeight: number,
-    private _maximumHeight: number,
+    private _maximumHeight: number
   ) {
     assert(
       _minimumWidth <= _maximumWidth,
-      "gridview view minimum width must be <= maximum width",
+      "gridview view minimum width must be <= maximum width"
     )
     assert(
       _minimumHeight <= _maximumHeight,
-      "gridview view minimum height must be <= maximum height",
+      "gridview view minimum height must be <= maximum height"
     )
   }
 

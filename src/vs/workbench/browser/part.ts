@@ -72,7 +72,7 @@ export abstract class Part extends Component implements ISerializableView {
     private options: IPartOptions,
     themeService: IThemeService,
     storageService: IStorageService,
-    protected readonly layoutService: IWorkbenchLayoutService,
+    protected readonly layoutService: IWorkbenchLayoutService
   ) {
     super(id, themeService, storageService)
 
@@ -114,7 +114,7 @@ export abstract class Part extends Component implements ISerializableView {
    */
   protected createTitleArea(
     parent: HTMLElement,
-    options?: object,
+    options?: object
   ): HTMLElement | undefined {
     return undefined
   }
@@ -131,7 +131,7 @@ export abstract class Part extends Component implements ISerializableView {
    */
   protected createContentArea(
     parent: HTMLElement,
-    options?: object,
+    options?: object
   ): HTMLElement | undefined {
     return undefined
   }
@@ -215,7 +215,7 @@ export abstract class Part extends Component implements ISerializableView {
         this.dimension.width,
         this.dimension.height,
         this.contentPosition.top,
-        this.contentPosition.left,
+        this.contentPosition.left
       )
     }
   }
@@ -224,7 +224,7 @@ export abstract class Part extends Component implements ISerializableView {
    */
   protected layoutContents(
     width: number,
-    height: number,
+    height: number
   ): ILayoutContentResult {
     const partLayout = assertIsDefined(this.partLayout)
 
@@ -273,7 +273,7 @@ class PartLayout {
 
   constructor(
     private options: IPartOptions,
-    private contentArea: HTMLElement | undefined,
+    private contentArea: HTMLElement | undefined
   ) {}
 
   layout(width: number, height: number): ILayoutContentResult {
@@ -282,7 +282,7 @@ class PartLayout {
     if (this.options.hasTitle) {
       titleSize = new Dimension(
         width,
-        Math.min(height, PartLayout.TITLE_HEIGHT),
+        Math.min(height, PartLayout.TITLE_HEIGHT)
       )
     } else {
       titleSize = Dimension.None
@@ -293,7 +293,7 @@ class PartLayout {
     if (this.headerVisible) {
       headerSize = new Dimension(
         width,
-        Math.min(height, PartLayout.HEADER_HEIGHT),
+        Math.min(height, PartLayout.HEADER_HEIGHT)
       )
     } else {
       headerSize = Dimension.None
@@ -304,7 +304,7 @@ class PartLayout {
     if (this.footerVisible) {
       footerSize = new Dimension(
         width,
-        Math.min(height, PartLayout.Footer_HEIGHT),
+        Math.min(height, PartLayout.Footer_HEIGHT)
       )
     } else {
       footerSize = Dimension.None
@@ -318,7 +318,7 @@ class PartLayout {
     // Content Size: Width (Fill), Height (Variable)
     const contentSize = new Dimension(
       contentWidth,
-      height - titleSize.height - headerSize.height - footerSize.height,
+      height - titleSize.height - headerSize.height - footerSize.height
     )
 
     // Content
@@ -343,7 +343,7 @@ export interface IMultiWindowPart {
 }
 
 export abstract class MultiWindowParts<
-  T extends IMultiWindowPart,
+  T extends IMultiWindowPart
 > extends Component {
   protected readonly _parts = new Set<T>()
   get parts() {

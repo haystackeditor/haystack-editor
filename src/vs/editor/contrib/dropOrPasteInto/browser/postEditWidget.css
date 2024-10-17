@@ -10,23 +10,23 @@
  *--------------------------------------------------------------------------------------------*/
 
 .post-edit-widget {
-  box-shadow: 0 0 8px 2px var(--vscode-widget-shadow);
-  border: 1px solid var(--vscode-widget-border, transparent);
-  border-radius: 4px;
-  background-color: var(--vscode-editorWidget-background);
-  overflow: hidden;
+	box-shadow: 0 0 8px 2px var(--vscode-widget-shadow);
+	border: 1px solid var(--vscode-widget-border, transparent);
+	border-radius: 4px;
+	background-color: var(--vscode-editorWidget-background);
+	overflow: hidden;
 }
 
 .post-edit-widget .monaco-button {
-  padding: 2px;
-  border: none;
-  border-radius: 0;
+	padding: 2px;
+	border: none;
+	border-radius: 0;
 }
 
 .post-edit-widget .monaco-button:hover {
-  background-color: var(--vscode-button-secondaryHoverBackground) !important;
+	background-color: var(--vscode-button-secondaryHoverBackground) !important;
 }
 
 .post-edit-widget .monaco-button .codicon {
-  margin: 0;
+	margin: 0;
 }

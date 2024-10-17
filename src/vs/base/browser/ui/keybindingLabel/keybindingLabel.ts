@@ -74,7 +74,7 @@ export class KeybindingLabel extends Disposable {
   constructor(
     container: HTMLElement,
     private os: OperatingSystem,
-    options?: KeybindingLabelOptions,
+    options?: KeybindingLabelOptions
   ) {
     super()
 
@@ -91,8 +91,8 @@ export class KeybindingLabel extends Disposable {
       getBaseLayerHoverDelegate().setupUpdatableHover(
         getDefaultHoverDelegate("mouse"),
         this.domNode,
-        "",
-      ),
+        ""
+      )
     )
 
     this.didEverRender = false
@@ -126,22 +126,22 @@ export class KeybindingLabel extends Disposable {
         this.renderChord(
           this.domNode,
           chords[0],
-          this.matches ? this.matches.firstPart : null,
+          this.matches ? this.matches.firstPart : null
         )
       }
       for (let i = 1; i < chords.length; i++) {
         dom.append(
           this.domNode,
-          $("span.monaco-keybinding-key-chord-separator", undefined, " "),
+          $("span.monaco-keybinding-key-chord-separator", undefined, " ")
         )
         this.renderChord(
           this.domNode,
           chords[i],
-          this.matches ? this.matches.chordPart : null,
+          this.matches ? this.matches.chordPart : null
         )
       }
       const title =
-        (this.options.disableTitle ?? false)
+        this.options.disableTitle ?? false
           ? undefined
           : this.keybinding.getAriaLabel() || undefined
       this.hover.update(title)
@@ -161,7 +161,7 @@ export class KeybindingLabel extends Disposable {
   private renderChord(
     parent: HTMLElement,
     chord: ResolvedChord,
-    match: ChordMatches | null,
+    match: ChordMatches | null
   ) {
     const modifierLabels = UILabelProvider.modifierLabels[this.os]
     if (chord.ctrlKey) {
@@ -169,7 +169,7 @@ export class KeybindingLabel extends Disposable {
         parent,
         modifierLabels.ctrlKey,
         Boolean(match?.ctrlKey),
-        modifierLabels.separator,
+        modifierLabels.separator
       )
     }
     if (chord.shiftKey) {
@@ -177,7 +177,7 @@ export class KeybindingLabel extends Disposable {
         parent,
         modifierLabels.shiftKey,
         Boolean(match?.shiftKey),
-        modifierLabels.separator,
+        modifierLabels.separator
       )
     }
     if (chord.altKey) {
@@ -185,7 +185,7 @@ export class KeybindingLabel extends Disposable {
         parent,
         modifierLabels.altKey,
         Boolean(match?.altKey),
-        modifierLabels.separator,
+        modifierLabels.separator
       )
     }
     if (chord.metaKey) {
@@ -193,7 +193,7 @@ export class KeybindingLabel extends Disposable {
         parent,
         modifierLabels.metaKey,
         Boolean(match?.metaKey),
-        modifierLabels.separator,
+        modifierLabels.separator
       )
     }
     const keyLabel = chord.keyLabel
@@ -206,16 +206,16 @@ export class KeybindingLabel extends Disposable {
     parent: HTMLElement,
     label: string,
     highlight: boolean,
-    separator: string,
+    separator: string
   ): void {
     dom.append(
       parent,
-      this.createKeyElement(label, highlight ? ".highlight" : ""),
+      this.createKeyElement(label, highlight ? ".highlight" : "")
     )
     if (separator) {
       dom.append(
         parent,
-        $("span.monaco-keybinding-key-separator", undefined, separator),
+        $("span.monaco-keybinding-key-separator", undefined, separator)
       )
     }
   }
@@ -228,7 +228,7 @@ export class KeybindingLabel extends Disposable {
     const keyElement = $(
       "span.monaco-keybinding-key" + extraClass,
       undefined,
-      label,
+      label
     )
     this.keyElements.add(keyElement)
 
@@ -251,7 +251,7 @@ export class KeybindingLabel extends Disposable {
 
   private static areSame(
     a: Matches | undefined,
-    b: Matches | undefined,
+    b: Matches | undefined
   ): boolean {
     if (a === b || (!a && !b)) {
       return true

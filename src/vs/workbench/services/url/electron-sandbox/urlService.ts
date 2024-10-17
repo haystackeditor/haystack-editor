@@ -9,106 +9,81 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import {
-  IURLService,
-  IURLHandler,
-  IOpenURLOptions,
-} from "vs/platform/url/common/url"
-import { URI, UriComponents } from "vs/base/common/uri"
-import { IMainProcessService } from "vs/platform/ipc/common/mainProcessService"
-import { URLHandlerChannel } from "vs/platform/url/common/urlIpc"
-import { IOpenerService, IOpener } from "vs/platform/opener/common/opener"
-import { matchesScheme } from "vs/base/common/network"
-import { IProductService } from "vs/platform/product/common/productService"
-import {
-  InstantiationType,
-  registerSingleton,
-} from "vs/platform/instantiation/common/extensions"
-import { ProxyChannel } from "vs/base/parts/ipc/common/ipc"
-import { INativeHostService } from "vs/platform/native/common/native"
-import { NativeURLService } from "vs/platform/url/common/urlService"
-import { ILogService } from "vs/platform/log/common/log"
+import { IURLService, IURLHandler, IOpenURLOptions } from 'vs/platform/url/common/url';
+import { URI, UriComponents } from 'vs/base/common/uri';
+import { IMainProcessService } from 'vs/platform/ipc/common/mainProcessService';
+import { URLHandlerChannel } from 'vs/platform/url/common/urlIpc';
+import { IOpenerService, IOpener } from 'vs/platform/opener/common/opener';
+import { matchesScheme } from 'vs/base/common/network';
+import { IProductService } from 'vs/platform/product/common/productService';
+import { InstantiationType, registerSingleton } from 'vs/platform/instantiation/common/extensions';
+import { ProxyChannel } from 'vs/base/parts/ipc/common/ipc';
+import { INativeHostService } from 'vs/platform/native/common/native';
+import { NativeURLService } from 'vs/platform/url/common/urlService';
+import { ILogService } from 'vs/platform/log/common/log';
 
 export interface IRelayOpenURLOptions extends IOpenURLOptions {
-  openToSide?: boolean
-  openExternal?: boolean
+	openToSide?: boolean;
+	openExternal?: boolean;
 }
 
-export class RelayURLService
-  extends NativeURLService
-  implements IURLHandler, IOpener
-{
-  private urlService: IURLService
+export class RelayURLService extends NativeURLService implements IURLHandler, IOpener {
 
-  constructor(
-    @IMainProcessService mainProcessService: IMainProcessService,
-    @IOpenerService openerService: IOpenerService,
-    @INativeHostService private readonly nativeHostService: INativeHostService,
-    @IProductService productService: IProductService,
-    @ILogService private readonly logService: ILogService,
-  ) {
-    super(productService)
+	private urlService: IURLService;
 
-    this.urlService = ProxyChannel.toService<IURLService>(
-      mainProcessService.getChannel("url"),
-    )
+	constructor(
+		@IMainProcessService mainProcessService: IMainProcessService,
+		@IOpenerService openerService: IOpenerService,
+		@INativeHostService private readonly nativeHostService: INativeHostService,
+		@IProductService productService: IProductService,
+		@ILogService private readonly logService: ILogService
+	) {
+		super(productService);
 
-    mainProcessService.registerChannel(
-      "urlHandler",
-      new URLHandlerChannel(this),
-    )
-    openerService.registerOpener(this)
-  }
+		this.urlService = ProxyChannel.toService<IURLService>(mainProcessService.getChannel('url'));
 
-  override create(options?: Partial<UriComponents>): URI {
-    const uri = super.create(options)
+		mainProcessService.registerChannel('urlHandler', new URLHandlerChannel(this));
+		openerService.registerOpener(this);
+	}
 
-    let query = uri.query
-    if (!query) {
-      query = `windowId=${encodeURIComponent(this.nativeHostService.windowId)}`
-    } else {
-      query += `&windowId=${encodeURIComponent(this.nativeHostService.windowId)}`
-    }
+	override create(options?: Partial<UriComponents>): URI {
+		const uri = super.create(options);
 
-    return uri.with({ query })
-  }
+		let query = uri.query;
+		if (!query) {
+			query = `windowId=${encodeURIComponent(this.nativeHostService.windowId)}`;
+		} else {
+			query += `&windowId=${encodeURIComponent(this.nativeHostService.windowId)}`;
+		}
 
-  override async open(
-    resource: URI | string,
-    options?: IRelayOpenURLOptions,
-  ): Promise<boolean> {
-    if (!matchesScheme(resource, this.productService.urlProtocol)) {
-      return false
-    }
+		return uri.with({ query });
+	}
 
-    if (typeof resource === "string") {
-      resource = URI.parse(resource)
-    }
-    return await this.urlService.open(resource, options)
-  }
+	override async open(resource: URI | string, options?: IRelayOpenURLOptions): Promise<boolean> {
 
-  async handleURL(uri: URI, options?: IOpenURLOptions): Promise<boolean> {
-    const result = await super.open(uri, options)
+		if (!matchesScheme(resource, this.productService.urlProtocol)) {
+			return false;
+		}
 
-    if (result) {
-      this.logService.trace(
-        "URLService#handleURL(): handled",
-        uri.toString(true),
-      )
+		if (typeof resource === 'string') {
+			resource = URI.parse(resource);
+		}
+		return await this.urlService.open(resource, options);
+	}
 
-      await this.nativeHostService.focusWindow({
-        force: true /* Application may not be active */,
-        targetWindowId: this.nativeHostService.windowId,
-      })
-    } else {
-      this.logService.trace(
-        "URLService#handleURL(): not handled",
-        uri.toString(true),
-      )
-    }
+	async handleURL(uri: URI, options?: IOpenURLOptions): Promise<boolean> {
+		const result = await super.open(uri, options);
 
-    return result
-  }
+		if (result) {
+			this.logService.trace('URLService#handleURL(): handled', uri.toString(true));
+
+			await this.nativeHostService.focusWindow({ force: true /* Application may not be active */, targetWindowId: this.nativeHostService.windowId });
+		} else {
+			this.logService.trace('URLService#handleURL(): not handled', uri.toString(true));
+		}
+
+		return result;
+	}
 }
 
-registerSingleton(IURLService, RelayURLService, InstantiationType.Eager)
+registerSingleton(IURLService, RelayURLService, InstantiationType.Eager);

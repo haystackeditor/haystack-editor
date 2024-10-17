@@ -26,7 +26,7 @@ export interface IResolvableEditorModel extends IDisposable {
 }
 
 export function isResolvedEditorModel(
-  model: IDisposable | undefined | null,
+  model: IDisposable | undefined | null
 ): model is IResolvableEditorModel {
   const candidate = model as IResolvableEditorModel | undefined | null
 

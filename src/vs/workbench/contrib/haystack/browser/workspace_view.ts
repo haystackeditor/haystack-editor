@@ -30,7 +30,7 @@ export class SavedCanvasWorkspacesView extends ViewPane {
   static readonly ID = "workbench.haystack.savedCanvasWorkspacesView"
   static readonly NAME: ILocalizedString = nls.localize2(
     { key: "savedCanvasWorkspaces", comment: ["saved is an adjective"] },
-    "Saved Canvas Workspaces",
+    "Saved Canvas Workspaces"
   )
 
   constructor(
@@ -44,7 +44,7 @@ export class SavedCanvasWorkspacesView extends ViewPane {
     @IThemeService themeService: IWorkbenchThemeService,
     @ITelemetryService telemetryService: ITelemetryService,
     @IHoverService hoverService: IHoverService,
-    @IOpenerService openerService: IOpenerService,
+    @IOpenerService openerService: IOpenerService
   ) {
     super(
       options,
@@ -57,7 +57,7 @@ export class SavedCanvasWorkspacesView extends ViewPane {
       openerService,
       themeService,
       telemetryService,
-      hoverService,
+      hoverService
     )
   }
 

@@ -85,18 +85,18 @@ export const InQuickInputContextKey = new RawContextKey<boolean>(
   false,
   localize(
     "inQuickInput",
-    "Whether keyboard focus is inside the quick input control",
-  ),
+    "Whether keyboard focus is inside the quick input control"
+  )
 )
 export const inQuickInputContext = ContextKeyExpr.has(
-  inQuickInputContextKeyValue,
+  inQuickInputContextKeyValue
 )
 
 export const quickInputTypeContextKeyValue = "quickInputType"
 export const QuickInputTypeContextKey = new RawContextKey<QuickInputType>(
   quickInputTypeContextKeyValue,
   undefined,
-  localize("quickInputType", "The type of the currently visible quick input"),
+  localize("quickInputType", "The type of the currently visible quick input")
 )
 
 export const endOfQuickInputBoxContextKeyValue = "cursorAtEndOfQuickInputBox"
@@ -105,11 +105,11 @@ export const EndOfQuickInputBoxContextKey = new RawContextKey<boolean>(
   false,
   localize(
     "cursorAtEndOfQuickInputBox",
-    "Whether the cursor in the quick input is at the end of the input box",
-  ),
+    "Whether the cursor in the quick input is at the end of the input box"
+  )
 )
 export const endOfQuickInputBoxContext = ContextKeyExpr.has(
-  endOfQuickInputBoxContextKeyValue,
+  endOfQuickInputBoxContextKeyValue
 )
 
 export interface IQuickInputOptions {
@@ -215,7 +215,7 @@ export type Visibilities = {
 abstract class QuickInput extends Disposable implements IQuickInput {
   protected static readonly noPromptMessage = localize(
     "inputModeEntry",
-    "Press 'Enter' to confirm your input or 'Escape' to cancel",
+    "Press 'Enter' to confirm your input or 'Escape' to cancel"
   )
 
   private _title: string | undefined
@@ -239,13 +239,13 @@ abstract class QuickInput extends Disposable implements IQuickInput {
   private _severity: Severity = Severity.Ignore
   private _lastSeverity: Severity | undefined
   private readonly onDidTriggerButtonEmitter = this._register(
-    new Emitter<IQuickInputButton>(),
+    new Emitter<IQuickInputButton>()
   )
   private readonly onDidHideEmitter = this._register(
-    new Emitter<IQuickInputHideEvent>(),
+    new Emitter<IQuickInputHideEvent>()
   )
   private readonly onWillHideEmitter = this._register(
-    new Emitter<IQuickInputHideEvent>(),
+    new Emitter<IQuickInputHideEvent>()
   )
   private readonly onDisposeEmitter = this._register(new Emitter<void>())
 
@@ -398,7 +398,7 @@ abstract class QuickInput extends Disposable implements IQuickInput {
         if (this.buttons.indexOf(button) !== -1) {
           this.onDidTriggerButtonEmitter.fire(button)
         }
-      }),
+      })
     )
     this.ui.show(this)
 
@@ -487,8 +487,8 @@ abstract class QuickInput extends Disposable implements IQuickInput {
         .filter((button) => button === backButton)
         .map((button, index) =>
           quickInputButtonToAction(button, `id-${index}`, async () =>
-            this.onDidTriggerButtonEmitter.fire(button),
-          ),
+            this.onDidTriggerButtonEmitter.fire(button)
+          )
         )
       this.ui.leftActionBar.push(leftButtons, { icon: true, label: false })
       this.ui.rightActionBar.clear()
@@ -496,8 +496,8 @@ abstract class QuickInput extends Disposable implements IQuickInput {
         .filter((button) => button !== backButton)
         .map((button, index) =>
           quickInputButtonToAction(button, `id-${index}`, async () =>
-            this.onDidTriggerButtonEmitter.fire(button),
-          ),
+            this.onDidTriggerButtonEmitter.fire(button)
+          )
         )
       this.ui.rightActionBar.push(rightButtons, { icon: true, label: false })
     }
@@ -597,20 +597,20 @@ export class QuickPick<T extends IQuickPickItem>
 {
   private static readonly DEFAULT_ARIA_LABEL = localize(
     "quickInputBox.ariaLabel",
-    "Type to narrow down results.",
+    "Type to narrow down results."
   )
 
   private _value = ""
   private _ariaLabel: string | undefined
   private _placeholder: string | undefined
   private readonly onDidChangeValueEmitter = this._register(
-    new Emitter<string>(),
+    new Emitter<string>()
   )
   private readonly onWillAcceptEmitter = this._register(
-    new Emitter<IQuickPickWillAcceptEvent>(),
+    new Emitter<IQuickPickWillAcceptEvent>()
   )
   private readonly onDidAcceptEmitter = this._register(
-    new Emitter<IQuickPickDidAcceptEvent>(),
+    new Emitter<IQuickPickDidAcceptEvent>()
   )
   private readonly onDidCustomEmitter = this._register(new Emitter<void>())
   private _items: Array<T | IQuickPickSeparator> = []
@@ -632,13 +632,13 @@ export class QuickPick<T extends IQuickPickItem>
   private selectedItemsUpdated = false
   private selectedItemsToConfirm: T[] | null = []
   private readonly onDidChangeSelectionEmitter = this._register(
-    new Emitter<T[]>(),
+    new Emitter<T[]>()
   )
   private readonly onDidTriggerItemButtonEmitter = this._register(
-    new Emitter<IQuickPickItemButtonEvent<T>>(),
+    new Emitter<IQuickPickItemButtonEvent<T>>()
   )
   private readonly onDidTriggerSeparatorButtonEmitter = this._register(
-    new Emitter<IQuickPickSeparatorButtonEvent>(),
+    new Emitter<IQuickPickSeparatorButtonEvent>()
   )
   private _valueSelection: Readonly<[number, number]> | undefined
   private valueSelectionUpdated = true
@@ -946,9 +946,9 @@ export class QuickPick<T extends IQuickPickItem>
         this.ui.inputBox.onDidChange((value) => {
           this.doSetValue(
             value,
-            true /* skip update since this originates from the UI */,
+            true /* skip update since this originates from the UI */
           )
-        }),
+        })
       )
       this.visibleDisposables.add(
         this.ui.onDidAccept(() => {
@@ -966,18 +966,18 @@ export class QuickPick<T extends IQuickPickItem>
             this.onDidChangeSelectionEmitter.fire(this.selectedItems)
           }
           this.handleAccept(false)
-        }),
+        })
       )
       this.visibleDisposables.add(
         this.ui.onDidCustom(() => {
           this.onDidCustomEmitter.fire()
-        }),
+        })
       )
       this.visibleDisposables.add(
         this._focusEventBufferer.wrapEvent(
           this.ui.list.onDidChangeFocus,
           // Only fire the last event
-          (_, e) => e,
+          (_, e) => e
         )((focusedItems) => {
           if (this.activeItemsUpdated) {
             return // Expect another event.
@@ -990,7 +990,7 @@ export class QuickPick<T extends IQuickPickItem>
           }
           this._activeItems = focusedItems as T[]
           this.onDidChangeActiveEmitter.fire(focusedItems as T[])
-        }),
+        })
       )
       this.visibleDisposables.add(
         this.ui.list.onDidChangeSelection(({ items: selectedItems, event }) => {
@@ -1011,10 +1011,10 @@ export class QuickPick<T extends IQuickPickItem>
           if (selectedItems.length) {
             this.handleAccept(
               dom.isMouseEvent(event) &&
-                event.button === 1 /* mouse middle click */,
+                event.button === 1 /* mouse middle click */
             )
           }
-        }),
+        })
       )
       this.visibleDisposables.add(
         this.ui.list.onChangedCheckedElements((checkedItems) => {
@@ -1029,19 +1029,19 @@ export class QuickPick<T extends IQuickPickItem>
           }
           this._selectedItems = checkedItems as T[]
           this.onDidChangeSelectionEmitter.fire(checkedItems as T[])
-        }),
+        })
       )
       this.visibleDisposables.add(
         this.ui.list.onButtonTriggered((event) =>
           this.onDidTriggerItemButtonEmitter.fire(
-            event as IQuickPickItemButtonEvent<T>,
-          ),
-        ),
+            event as IQuickPickItemButtonEvent<T>
+          )
+        )
       )
       this.visibleDisposables.add(
         this.ui.list.onSeparatorButtonTriggered((event) =>
-          this.onDidTriggerSeparatorButtonEmitter.fire(event),
-        ),
+          this.onDidTriggerSeparatorButtonEmitter.fire(event)
+        )
       )
       this.visibleDisposables.add(this.registerQuickNavigation())
       this.valueSelectionUpdated = true
@@ -1070,7 +1070,7 @@ export class QuickPick<T extends IQuickPickItem>
         }
 
         const keyboardEvent: StandardKeyboardEvent = new StandardKeyboardEvent(
-          e,
+          e
         )
         const keyCode = keyboardEvent.keyCode
 
@@ -1120,7 +1120,7 @@ export class QuickPick<T extends IQuickPickItem>
           // if the picker remains open because there was no active item
           this._quickNavigate = undefined
         }
-      },
+      }
     )
   }
 
@@ -1156,7 +1156,7 @@ export class QuickPick<T extends IQuickPickItem>
         this._valueSelection && {
           start: this._valueSelection[0],
           end: this._valueSelection[1],
-        },
+        }
       )
     }
     if (this.ui.inputBox.placeholder !== (this.placeholder || "")) {
@@ -1286,7 +1286,7 @@ export class InputBox extends QuickInput implements IInputBox {
   private _password = false
   private _prompt: string | undefined
   private readonly onDidValueChangeEmitter = this._register(
-    new Emitter<string>(),
+    new Emitter<string>()
   )
   private readonly onDidAcceptEmitter = this._register(new Emitter<void>())
 
@@ -1343,7 +1343,7 @@ export class InputBox extends QuickInput implements IInputBox {
       ? localize(
           "inputModeEntryDescription",
           "{0} (Press 'Enter' to confirm or 'Escape' to cancel)",
-          prompt,
+          prompt
         )
       : QuickInput.noPromptMessage
     this.update()
@@ -1362,10 +1362,10 @@ export class InputBox extends QuickInput implements IInputBox {
           }
           this._value = value
           this.onDidValueChangeEmitter.fire(value)
-        }),
+        })
       )
       this.visibleDisposables.add(
-        this.ui.onDidAccept(() => this.onDidAcceptEmitter.fire()),
+        this.ui.onDidAccept(() => this.onDidAcceptEmitter.fire())
       )
       this.valueSelectionUpdated = true
     }
@@ -1397,7 +1397,7 @@ export class InputBox extends QuickInput implements IInputBox {
         this._valueSelection && {
           start: this._valueSelection[0],
           end: this._valueSelection[1],
-        },
+        }
       )
     }
     if (this.ui.inputBox.placeholder !== (this.placeholder || "")) {
@@ -1430,27 +1430,27 @@ export class QuickWidget extends QuickInput implements IQuickWidget {
 export class QuickInputHoverDelegate extends WorkbenchHoverDelegate {
   constructor(
     @IConfigurationService configurationService: IConfigurationService,
-    @IHoverService hoverService: IHoverService,
+    @IHoverService hoverService: IHoverService
   ) {
     super(
       "element",
       false,
       (options) => this.getOverrideOptions(options),
       configurationService,
-      hoverService,
+      hoverService
     )
   }
 
   private getOverrideOptions(
-    options: IHoverDelegateOptions,
+    options: IHoverDelegateOptions
   ): Partial<IHoverOptions> {
     // Only show the hover hint if the content is of a decent size
     const showHoverHint = (
       dom.isHTMLElement(options.content)
-        ? (options.content.textContent ?? "")
+        ? options.content.textContent ?? ""
         : typeof options.content === "string"
-          ? options.content
-          : options.content.value
+        ? options.content
+        : options.content.value
     ).includes("\n")
 
     return {

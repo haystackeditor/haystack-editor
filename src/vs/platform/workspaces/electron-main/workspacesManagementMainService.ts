@@ -9,482 +9,317 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { BrowserWindow } from "electron"
-import { Emitter, Event } from "vs/base/common/event"
-import { parse } from "vs/base/common/json"
-import { Disposable } from "vs/base/common/lifecycle"
-import { Schemas } from "vs/base/common/network"
-import { dirname, join } from "vs/base/common/path"
-import {
-  basename,
-  extUriBiasedIgnorePathCase,
-  joinPath,
-  originalFSPath,
-} from "vs/base/common/resources"
-import { URI } from "vs/base/common/uri"
-import { Promises } from "vs/base/node/pfs"
-import { localize } from "vs/nls"
-import { IBackupMainService } from "vs/platform/backup/electron-main/backup"
-import { IDialogMainService } from "vs/platform/dialogs/electron-main/dialogMainService"
-import { IEnvironmentMainService } from "vs/platform/environment/electron-main/environmentMainService"
-import { createDecorator } from "vs/platform/instantiation/common/instantiation"
-import { ILogService } from "vs/platform/log/common/log"
-import { IUserDataProfilesMainService } from "vs/platform/userDataProfile/electron-main/userDataProfile"
-import { ICodeWindow } from "vs/platform/window/electron-main/window"
-import { findWindowOnWorkspaceOrFolder } from "vs/platform/windows/electron-main/windowsFinder"
-import {
-  isWorkspaceIdentifier,
-  IWorkspaceIdentifier,
-  IResolvedWorkspace,
-  hasWorkspaceFileExtension,
-  UNTITLED_WORKSPACE_NAME,
-  isUntitledWorkspace,
-} from "vs/platform/workspace/common/workspace"
-import {
-  getStoredWorkspaceFolder,
-  IEnterWorkspaceResult,
-  isStoredWorkspaceFolder,
-  IStoredWorkspace,
-  IStoredWorkspaceFolder,
-  IUntitledWorkspaceInfo,
-  IWorkspaceFolderCreationData,
-  toWorkspaceFolders,
-} from "vs/platform/workspaces/common/workspaces"
-import { getWorkspaceIdentifier } from "vs/platform/workspaces/node/workspaces"
+import { BrowserWindow } from 'electron';
+import { Emitter, Event } from 'vs/base/common/event';
+import { parse } from 'vs/base/common/json';
+import { Disposable } from 'vs/base/common/lifecycle';
+import { Schemas } from 'vs/base/common/network';
+import { dirname, join } from 'vs/base/common/path';
+import { basename, extUriBiasedIgnorePathCase, joinPath, originalFSPath } from 'vs/base/common/resources';
+import { URI } from 'vs/base/common/uri';
+import { Promises } from 'vs/base/node/pfs';
+import { localize } from 'vs/nls';
+import { IBackupMainService } from 'vs/platform/backup/electron-main/backup';
+import { IDialogMainService } from 'vs/platform/dialogs/electron-main/dialogMainService';
+import { IEnvironmentMainService } from 'vs/platform/environment/electron-main/environmentMainService';
+import { createDecorator } from 'vs/platform/instantiation/common/instantiation';
+import { ILogService } from 'vs/platform/log/common/log';
+import { IUserDataProfilesMainService } from 'vs/platform/userDataProfile/electron-main/userDataProfile';
+import { ICodeWindow } from 'vs/platform/window/electron-main/window';
+import { findWindowOnWorkspaceOrFolder } from 'vs/platform/windows/electron-main/windowsFinder';
+import { isWorkspaceIdentifier, IWorkspaceIdentifier, IResolvedWorkspace, hasWorkspaceFileExtension, UNTITLED_WORKSPACE_NAME, isUntitledWorkspace } from 'vs/platform/workspace/common/workspace';
+import { getStoredWorkspaceFolder, IEnterWorkspaceResult, isStoredWorkspaceFolder, IStoredWorkspace, IStoredWorkspaceFolder, IUntitledWorkspaceInfo, IWorkspaceFolderCreationData, toWorkspaceFolders } from 'vs/platform/workspaces/common/workspaces';
+import { getWorkspaceIdentifier } from 'vs/platform/workspaces/node/workspaces';
 
-export const IWorkspacesManagementMainService =
-  createDecorator<IWorkspacesManagementMainService>(
-    "workspacesManagementMainService",
-  )
+export const IWorkspacesManagementMainService = createDecorator<IWorkspacesManagementMainService>('workspacesManagementMainService');
 
 export interface IWorkspaceEnteredEvent {
-  readonly window: ICodeWindow
-  readonly workspace: IWorkspaceIdentifier
+	readonly window: ICodeWindow;
+	readonly workspace: IWorkspaceIdentifier;
 }
 
 export interface IWorkspacesManagementMainService {
-  readonly _serviceBrand: undefined
 
-  readonly onDidDeleteUntitledWorkspace: Event<IWorkspaceIdentifier>
-  readonly onDidEnterWorkspace: Event<IWorkspaceEnteredEvent>
+	readonly _serviceBrand: undefined;
 
-  enterWorkspace(
-    intoWindow: ICodeWindow,
-    openedWindows: ICodeWindow[],
-    path: URI,
-  ): Promise<IEnterWorkspaceResult | undefined>
+	readonly onDidDeleteUntitledWorkspace: Event<IWorkspaceIdentifier>;
+	readonly onDidEnterWorkspace: Event<IWorkspaceEnteredEvent>;
 
-  createUntitledWorkspace(
-    folders?: IWorkspaceFolderCreationData[],
-    remoteAuthority?: string,
-  ): Promise<IWorkspaceIdentifier>
+	enterWorkspace(intoWindow: ICodeWindow, openedWindows: ICodeWindow[], path: URI): Promise<IEnterWorkspaceResult | undefined>;
 
-  deleteUntitledWorkspace(workspace: IWorkspaceIdentifier): Promise<void>
+	createUntitledWorkspace(folders?: IWorkspaceFolderCreationData[], remoteAuthority?: string): Promise<IWorkspaceIdentifier>;
 
-  getUntitledWorkspaces(): IUntitledWorkspaceInfo[]
-  isUntitledWorkspace(workspace: IWorkspaceIdentifier): boolean
+	deleteUntitledWorkspace(workspace: IWorkspaceIdentifier): Promise<void>;
 
-  resolveLocalWorkspace(path: URI): Promise<IResolvedWorkspace | undefined>
+	getUntitledWorkspaces(): IUntitledWorkspaceInfo[];
+	isUntitledWorkspace(workspace: IWorkspaceIdentifier): boolean;
 
-  getWorkspaceIdentifier(workspacePath: URI): Promise<IWorkspaceIdentifier>
+	resolveLocalWorkspace(path: URI): Promise<IResolvedWorkspace | undefined>;
+
+	getWorkspaceIdentifier(workspacePath: URI): Promise<IWorkspaceIdentifier>;
 }
 
-export class WorkspacesManagementMainService
-  extends Disposable
-  implements IWorkspacesManagementMainService
-{
-  declare readonly _serviceBrand: undefined
+export class WorkspacesManagementMainService extends Disposable implements IWorkspacesManagementMainService {
 
-  private readonly _onDidDeleteUntitledWorkspace = this._register(
-    new Emitter<IWorkspaceIdentifier>(),
-  )
-  readonly onDidDeleteUntitledWorkspace: Event<IWorkspaceIdentifier> =
-    this._onDidDeleteUntitledWorkspace.event
+	declare readonly _serviceBrand: undefined;
 
-  private readonly _onDidEnterWorkspace = this._register(
-    new Emitter<IWorkspaceEnteredEvent>(),
-  )
-  readonly onDidEnterWorkspace: Event<IWorkspaceEnteredEvent> =
-    this._onDidEnterWorkspace.event
+	private readonly _onDidDeleteUntitledWorkspace = this._register(new Emitter<IWorkspaceIdentifier>());
+	readonly onDidDeleteUntitledWorkspace: Event<IWorkspaceIdentifier> = this._onDidDeleteUntitledWorkspace.event;
 
-  private readonly untitledWorkspacesHome =
-    this.environmentMainService.untitledWorkspacesHome // local URI that contains all untitled workspaces
+	private readonly _onDidEnterWorkspace = this._register(new Emitter<IWorkspaceEnteredEvent>());
+	readonly onDidEnterWorkspace: Event<IWorkspaceEnteredEvent> = this._onDidEnterWorkspace.event;
 
-  private untitledWorkspaces: IUntitledWorkspaceInfo[] = []
+	private readonly untitledWorkspacesHome = this.environmentMainService.untitledWorkspacesHome; // local URI that contains all untitled workspaces
 
-  constructor(
-    @IEnvironmentMainService
-    private readonly environmentMainService: IEnvironmentMainService,
-    @ILogService private readonly logService: ILogService,
-    @IUserDataProfilesMainService
-    private readonly userDataProfilesMainService: IUserDataProfilesMainService,
-    @IBackupMainService private readonly backupMainService: IBackupMainService,
-    @IDialogMainService private readonly dialogMainService: IDialogMainService,
-  ) {
-    super()
-  }
+	private untitledWorkspaces: IUntitledWorkspaceInfo[] = [];
 
-  async initialize(): Promise<void> {
-    // Reset
-    this.untitledWorkspaces = []
+	constructor(
+		@IEnvironmentMainService private readonly environmentMainService: IEnvironmentMainService,
+		@ILogService private readonly logService: ILogService,
+		@IUserDataProfilesMainService private readonly userDataProfilesMainService: IUserDataProfilesMainService,
+		@IBackupMainService private readonly backupMainService: IBackupMainService,
+		@IDialogMainService private readonly dialogMainService: IDialogMainService
+	) {
+		super();
+	}
 
-    // Resolve untitled workspaces
-    try {
-      const untitledWorkspacePaths = (
-        await Promises.readdir(
-          this.untitledWorkspacesHome.with({ scheme: Schemas.file }).fsPath,
-        )
-      ).map((folder) =>
-        joinPath(this.untitledWorkspacesHome, folder, UNTITLED_WORKSPACE_NAME),
-      )
-      for (const untitledWorkspacePath of untitledWorkspacePaths) {
-        const workspace = getWorkspaceIdentifier(untitledWorkspacePath)
-        const resolvedWorkspace = await this.resolveLocalWorkspace(
-          untitledWorkspacePath,
-        )
-        if (!resolvedWorkspace) {
-          await this.deleteUntitledWorkspace(workspace)
-        } else {
-          this.untitledWorkspaces.push({
-            workspace,
-            remoteAuthority: resolvedWorkspace.remoteAuthority,
-          })
-        }
-      }
-    } catch (error) {
-      if (error.code !== "ENOENT") {
-        this.logService.warn(
-          `Unable to read folders in ${this.untitledWorkspacesHome} (${error}).`,
-        )
-      }
-    }
-  }
+	async initialize(): Promise<void> {
 
-  resolveLocalWorkspace(uri: URI): Promise<IResolvedWorkspace | undefined> {
-    return this.doResolveLocalWorkspace(uri, (path) =>
-      Promises.readFile(path, "utf8"),
-    )
-  }
+		// Reset
+		this.untitledWorkspaces = [];
 
-  private doResolveLocalWorkspace(
-    uri: URI,
-    contentsFn: (path: string) => string,
-  ): IResolvedWorkspace | undefined
-  private doResolveLocalWorkspace(
-    uri: URI,
-    contentsFn: (path: string) => Promise<string>,
-  ): Promise<IResolvedWorkspace | undefined>
-  private doResolveLocalWorkspace(
-    uri: URI,
-    contentsFn: (path: string) => string | Promise<string>,
-  ): IResolvedWorkspace | undefined | Promise<IResolvedWorkspace | undefined> {
-    if (!this.isWorkspacePath(uri)) {
-      return undefined // does not look like a valid workspace config file
-    }
+		// Resolve untitled workspaces
+		try {
+			const untitledWorkspacePaths = (await Promises.readdir(this.untitledWorkspacesHome.with({ scheme: Schemas.file }).fsPath)).map(folder => joinPath(this.untitledWorkspacesHome, folder, UNTITLED_WORKSPACE_NAME));
+			for (const untitledWorkspacePath of untitledWorkspacePaths) {
+				const workspace = getWorkspaceIdentifier(untitledWorkspacePath);
+				const resolvedWorkspace = await this.resolveLocalWorkspace(untitledWorkspacePath);
+				if (!resolvedWorkspace) {
+					await this.deleteUntitledWorkspace(workspace);
+				} else {
+					this.untitledWorkspaces.push({ workspace, remoteAuthority: resolvedWorkspace.remoteAuthority });
+				}
+			}
+		} catch (error) {
+			if (error.code !== 'ENOENT') {
+				this.logService.warn(`Unable to read folders in ${this.untitledWorkspacesHome} (${error}).`);
+			}
+		}
+	}
 
-    if (uri.scheme !== Schemas.file) {
-      return undefined
-    }
+	resolveLocalWorkspace(uri: URI): Promise<IResolvedWorkspace | undefined> {
+		return this.doResolveLocalWorkspace(uri, path => Promises.readFile(path, 'utf8'));
+	}
 
-    try {
-      const contents = contentsFn(uri.fsPath)
-      if (contents instanceof Promise) {
-        return contents.then(
-          (value) => this.doResolveWorkspace(uri, value),
-          (error) => undefined /* invalid workspace */,
-        )
-      } else {
-        return this.doResolveWorkspace(uri, contents)
-      }
-    } catch {
-      return undefined // invalid workspace
-    }
-  }
+	private doResolveLocalWorkspace(uri: URI, contentsFn: (path: string) => string): IResolvedWorkspace | undefined;
+	private doResolveLocalWorkspace(uri: URI, contentsFn: (path: string) => Promise<string>): Promise<IResolvedWorkspace | undefined>;
+	private doResolveLocalWorkspace(uri: URI, contentsFn: (path: string) => string | Promise<string>): IResolvedWorkspace | undefined | Promise<IResolvedWorkspace | undefined> {
+		if (!this.isWorkspacePath(uri)) {
+			return undefined; // does not look like a valid workspace config file
+		}
 
-  private isWorkspacePath(uri: URI): boolean {
-    return (
-      isUntitledWorkspace(uri, this.environmentMainService) ||
-      hasWorkspaceFileExtension(uri)
-    )
-  }
+		if (uri.scheme !== Schemas.file) {
+			return undefined;
+		}
 
-  private doResolveWorkspace(
-    path: URI,
-    contents: string,
-  ): IResolvedWorkspace | undefined {
-    try {
-      const workspace = this.doParseStoredWorkspace(path, contents)
-      const workspaceIdentifier = getWorkspaceIdentifier(path)
-      return {
-        id: workspaceIdentifier.id,
-        configPath: workspaceIdentifier.configPath,
-        folders: toWorkspaceFolders(
-          workspace.folders,
-          workspaceIdentifier.configPath,
-          extUriBiasedIgnorePathCase,
-        ),
-        remoteAuthority: workspace.remoteAuthority,
-        transient: workspace.transient,
-      }
-    } catch (error) {
-      this.logService.warn(error.toString())
-    }
+		try {
+			const contents = contentsFn(uri.fsPath);
+			if (contents instanceof Promise) {
+				return contents.then(value => this.doResolveWorkspace(uri, value), error => undefined /* invalid workspace */);
+			} else {
+				return this.doResolveWorkspace(uri, contents);
+			}
+		} catch {
+			return undefined; // invalid workspace
+		}
+	}
 
-    return undefined
-  }
+	private isWorkspacePath(uri: URI): boolean {
+		return isUntitledWorkspace(uri, this.environmentMainService) || hasWorkspaceFileExtension(uri);
+	}
 
-  private doParseStoredWorkspace(
-    path: URI,
-    contents: string,
-  ): IStoredWorkspace {
-    // Parse workspace file
-    const storedWorkspace: IStoredWorkspace = parse(contents) // use fault tolerant parser
+	private doResolveWorkspace(path: URI, contents: string): IResolvedWorkspace | undefined {
+		try {
+			const workspace = this.doParseStoredWorkspace(path, contents);
+			const workspaceIdentifier = getWorkspaceIdentifier(path);
+			return {
+				id: workspaceIdentifier.id,
+				configPath: workspaceIdentifier.configPath,
+				folders: toWorkspaceFolders(workspace.folders, workspaceIdentifier.configPath, extUriBiasedIgnorePathCase),
+				remoteAuthority: workspace.remoteAuthority,
+				transient: workspace.transient
+			};
+		} catch (error) {
+			this.logService.warn(error.toString());
+		}
 
-    // Filter out folders which do not have a path or uri set
-    if (storedWorkspace && Array.isArray(storedWorkspace.folders)) {
-      storedWorkspace.folders = storedWorkspace.folders.filter((folder) =>
-        isStoredWorkspaceFolder(folder),
-      )
-    } else {
-      throw new Error(
-        `${path.toString(true)} looks like an invalid workspace file.`,
-      )
-    }
+		return undefined;
+	}
 
-    return storedWorkspace
-  }
+	private doParseStoredWorkspace(path: URI, contents: string): IStoredWorkspace {
 
-  async createUntitledWorkspace(
-    folders?: IWorkspaceFolderCreationData[],
-    remoteAuthority?: string,
-  ): Promise<IWorkspaceIdentifier> {
-    const { workspace, storedWorkspace } = this.newUntitledWorkspace(
-      folders,
-      remoteAuthority,
-    )
-    const configPath = workspace.configPath.fsPath
+		// Parse workspace file
+		const storedWorkspace: IStoredWorkspace = parse(contents); // use fault tolerant parser
 
-    await Promises.mkdir(dirname(configPath), { recursive: true })
-    await Promises.writeFile(
-      configPath,
-      JSON.stringify(storedWorkspace, null, "\t"),
-    )
+		// Filter out folders which do not have a path or uri set
+		if (storedWorkspace && Array.isArray(storedWorkspace.folders)) {
+			storedWorkspace.folders = storedWorkspace.folders.filter(folder => isStoredWorkspaceFolder(folder));
+		} else {
+			throw new Error(`${path.toString(true)} looks like an invalid workspace file.`);
+		}
 
-    this.untitledWorkspaces.push({ workspace, remoteAuthority })
+		return storedWorkspace;
+	}
 
-    return workspace
-  }
+	async createUntitledWorkspace(folders?: IWorkspaceFolderCreationData[], remoteAuthority?: string): Promise<IWorkspaceIdentifier> {
+		const { workspace, storedWorkspace } = this.newUntitledWorkspace(folders, remoteAuthority);
+		const configPath = workspace.configPath.fsPath;
 
-  private newUntitledWorkspace(
-    folders: IWorkspaceFolderCreationData[] = [],
-    remoteAuthority?: string,
-  ): { workspace: IWorkspaceIdentifier; storedWorkspace: IStoredWorkspace } {
-    const randomId = (Date.now() + Math.round(Math.random() * 1000)).toString()
-    const untitledWorkspaceConfigFolder = joinPath(
-      this.untitledWorkspacesHome,
-      randomId,
-    )
-    const untitledWorkspaceConfigPath = joinPath(
-      untitledWorkspaceConfigFolder,
-      UNTITLED_WORKSPACE_NAME,
-    )
+		await Promises.mkdir(dirname(configPath), { recursive: true });
+		await Promises.writeFile(configPath, JSON.stringify(storedWorkspace, null, '\t'));
 
-    const storedWorkspaceFolder: IStoredWorkspaceFolder[] = []
+		this.untitledWorkspaces.push({ workspace, remoteAuthority });
 
-    for (const folder of folders) {
-      storedWorkspaceFolder.push(
-        getStoredWorkspaceFolder(
-          folder.uri,
-          true,
-          folder.name,
-          untitledWorkspaceConfigFolder,
-          extUriBiasedIgnorePathCase,
-        ),
-      )
-    }
+		return workspace;
+	}
 
-    return {
-      workspace: getWorkspaceIdentifier(untitledWorkspaceConfigPath),
-      storedWorkspace: { folders: storedWorkspaceFolder, remoteAuthority },
-    }
-  }
+	private newUntitledWorkspace(folders: IWorkspaceFolderCreationData[] = [], remoteAuthority?: string): { workspace: IWorkspaceIdentifier; storedWorkspace: IStoredWorkspace } {
+		const randomId = (Date.now() + Math.round(Math.random() * 1000)).toString();
+		const untitledWorkspaceConfigFolder = joinPath(this.untitledWorkspacesHome, randomId);
+		const untitledWorkspaceConfigPath = joinPath(untitledWorkspaceConfigFolder, UNTITLED_WORKSPACE_NAME);
 
-  async getWorkspaceIdentifier(configPath: URI): Promise<IWorkspaceIdentifier> {
-    return getWorkspaceIdentifier(configPath)
-  }
+		const storedWorkspaceFolder: IStoredWorkspaceFolder[] = [];
 
-  isUntitledWorkspace(workspace: IWorkspaceIdentifier): boolean {
-    return isUntitledWorkspace(
-      workspace.configPath,
-      this.environmentMainService,
-    )
-  }
+		for (const folder of folders) {
+			storedWorkspaceFolder.push(getStoredWorkspaceFolder(folder.uri, true, folder.name, untitledWorkspaceConfigFolder, extUriBiasedIgnorePathCase));
+		}
 
-  async deleteUntitledWorkspace(
-    workspace: IWorkspaceIdentifier,
-  ): Promise<void> {
-    if (!this.isUntitledWorkspace(workspace)) {
-      return // only supported for untitled workspaces
-    }
+		return {
+			workspace: getWorkspaceIdentifier(untitledWorkspaceConfigPath),
+			storedWorkspace: { folders: storedWorkspaceFolder, remoteAuthority }
+		};
+	}
 
-    // Delete from disk
-    await this.doDeleteUntitledWorkspace(workspace)
+	async getWorkspaceIdentifier(configPath: URI): Promise<IWorkspaceIdentifier> {
+		return getWorkspaceIdentifier(configPath);
+	}
 
-    // unset workspace from profiles
-    if (this.userDataProfilesMainService.isEnabled()) {
-      this.userDataProfilesMainService.unsetWorkspace(workspace)
-    }
+	isUntitledWorkspace(workspace: IWorkspaceIdentifier): boolean {
+		return isUntitledWorkspace(workspace.configPath, this.environmentMainService);
+	}
 
-    // Event
-    this._onDidDeleteUntitledWorkspace.fire(workspace)
-  }
+	async deleteUntitledWorkspace(workspace: IWorkspaceIdentifier): Promise<void> {
+		if (!this.isUntitledWorkspace(workspace)) {
+			return; // only supported for untitled workspaces
+		}
 
-  private async doDeleteUntitledWorkspace(
-    workspace: IWorkspaceIdentifier,
-  ): Promise<void> {
-    const configPath = originalFSPath(workspace.configPath)
-    try {
-      // Delete Workspace
-      await Promises.rm(dirname(configPath))
+		// Delete from disk
+		await this.doDeleteUntitledWorkspace(workspace);
 
-      // Mark Workspace Storage to be deleted
-      const workspaceStoragePath = join(
-        this.environmentMainService.workspaceStorageHome.with({
-          scheme: Schemas.file,
-        }).fsPath,
-        workspace.id,
-      )
-      if (await Promises.exists(workspaceStoragePath)) {
-        await Promises.writeFile(join(workspaceStoragePath, "obsolete"), "")
-      }
+		// unset workspace from profiles
+		if (this.userDataProfilesMainService.isEnabled()) {
+			this.userDataProfilesMainService.unsetWorkspace(workspace);
+		}
 
-      // Remove from list
-      this.untitledWorkspaces = this.untitledWorkspaces.filter(
-        (untitledWorkspace) => untitledWorkspace.workspace.id !== workspace.id,
-      )
-    } catch (error) {
-      this.logService.warn(
-        `Unable to delete untitled workspace ${configPath} (${error}).`,
-      )
-    }
-  }
+		// Event
+		this._onDidDeleteUntitledWorkspace.fire(workspace);
+	}
 
-  getUntitledWorkspaces(): IUntitledWorkspaceInfo[] {
-    return this.untitledWorkspaces
-  }
+	private async doDeleteUntitledWorkspace(workspace: IWorkspaceIdentifier): Promise<void> {
+		const configPath = originalFSPath(workspace.configPath);
+		try {
 
-  async enterWorkspace(
-    window: ICodeWindow,
-    windows: ICodeWindow[],
-    path: URI,
-  ): Promise<IEnterWorkspaceResult | undefined> {
-    if (!window || !window.win || !window.isReady) {
-      return undefined // return early if the window is not ready or disposed
-    }
+			// Delete Workspace
+			await Promises.rm(dirname(configPath));
 
-    const isValid = await this.isValidTargetWorkspacePath(window, windows, path)
-    if (!isValid) {
-      return undefined // return early if the workspace is not valid
-    }
+			// Mark Workspace Storage to be deleted
+			const workspaceStoragePath = join(this.environmentMainService.workspaceStorageHome.with({ scheme: Schemas.file }).fsPath, workspace.id);
+			if (await Promises.exists(workspaceStoragePath)) {
+				await Promises.writeFile(join(workspaceStoragePath, 'obsolete'), '');
+			}
 
-    const result = await this.doEnterWorkspace(
-      window,
-      getWorkspaceIdentifier(path),
-    )
-    if (!result) {
-      return undefined
-    }
+			// Remove from list
+			this.untitledWorkspaces = this.untitledWorkspaces.filter(untitledWorkspace => untitledWorkspace.workspace.id !== workspace.id);
+		} catch (error) {
+			this.logService.warn(`Unable to delete untitled workspace ${configPath} (${error}).`);
+		}
+	}
 
-    // Emit as event
-    this._onDidEnterWorkspace.fire({ window, workspace: result.workspace })
+	getUntitledWorkspaces(): IUntitledWorkspaceInfo[] {
+		return this.untitledWorkspaces;
+	}
 
-    return result
-  }
+	async enterWorkspace(window: ICodeWindow, windows: ICodeWindow[], path: URI): Promise<IEnterWorkspaceResult | undefined> {
+		if (!window || !window.win || !window.isReady) {
+			return undefined; // return early if the window is not ready or disposed
+		}
 
-  private async isValidTargetWorkspacePath(
-    window: ICodeWindow,
-    windows: ICodeWindow[],
-    workspacePath?: URI,
-  ): Promise<boolean> {
-    if (!workspacePath) {
-      return true
-    }
+		const isValid = await this.isValidTargetWorkspacePath(window, windows, path);
+		if (!isValid) {
+			return undefined; // return early if the workspace is not valid
+		}
 
-    if (
-      isWorkspaceIdentifier(window.openedWorkspace) &&
-      extUriBiasedIgnorePathCase.isEqual(
-        window.openedWorkspace.configPath,
-        workspacePath,
-      )
-    ) {
-      return false // window is already opened on a workspace with that path
-    }
+		const result = await this.doEnterWorkspace(window, getWorkspaceIdentifier(path));
+		if (!result) {
+			return undefined;
+		}
 
-    // Prevent overwriting a workspace that is currently opened in another window
-    if (findWindowOnWorkspaceOrFolder(windows, workspacePath)) {
-      await this.dialogMainService.showMessageBox(
-        {
-          type: "info",
-          buttons: [
-            localize({ key: "ok", comment: ["&& denotes a mnemonic"] }, "&&OK"),
-          ],
-          message: localize(
-            "workspaceOpenedMessage",
-            "Unable to save workspace '{0}'",
-            basename(workspacePath),
-          ),
-          detail: localize(
-            "workspaceOpenedDetail",
-            "The workspace is already opened in another window. Please close that window first and then try again.",
-          ),
-        },
-        BrowserWindow.getFocusedWindow() ?? undefined,
-      )
+		// Emit as event
+		this._onDidEnterWorkspace.fire({ window, workspace: result.workspace });
 
-      return false
-    }
+		return result;
+	}
 
-    return true // OK
-  }
+	private async isValidTargetWorkspacePath(window: ICodeWindow, windows: ICodeWindow[], workspacePath?: URI): Promise<boolean> {
+		if (!workspacePath) {
+			return true;
+		}
 
-  private async doEnterWorkspace(
-    window: ICodeWindow,
-    workspace: IWorkspaceIdentifier,
-  ): Promise<IEnterWorkspaceResult | undefined> {
-    if (!window.config) {
-      return undefined
-    }
+		if (isWorkspaceIdentifier(window.openedWorkspace) && extUriBiasedIgnorePathCase.isEqual(window.openedWorkspace.configPath, workspacePath)) {
+			return false; // window is already opened on a workspace with that path
+		}
 
-    window.focus()
+		// Prevent overwriting a workspace that is currently opened in another window
+		if (findWindowOnWorkspaceOrFolder(windows, workspacePath)) {
+			await this.dialogMainService.showMessageBox({
+				type: 'info',
+				buttons: [localize({ key: 'ok', comment: ['&& denotes a mnemonic'] }, "&&OK")],
+				message: localize('workspaceOpenedMessage', "Unable to save workspace '{0}'", basename(workspacePath)),
+				detail: localize('workspaceOpenedDetail', "The workspace is already opened in another window. Please close that window first and then try again.")
+			}, BrowserWindow.getFocusedWindow() ?? undefined);
 
-    // Register window for backups and migrate current backups over
-    let backupPath: string | undefined
-    if (!window.config.extensionDevelopmentPath) {
-      if (window.config.backupPath) {
-        backupPath = await this.backupMainService.registerWorkspaceBackup(
-          { workspace, remoteAuthority: window.remoteAuthority },
-          window.config.backupPath,
-        )
-      } else {
-        backupPath = this.backupMainService.registerWorkspaceBackup({
-          workspace,
-          remoteAuthority: window.remoteAuthority,
-        })
-      }
-    }
+			return false;
+		}
 
-    // if the window was opened on an untitled workspace, delete it.
-    if (
-      isWorkspaceIdentifier(window.openedWorkspace) &&
-      this.isUntitledWorkspace(window.openedWorkspace)
-    ) {
-      await this.deleteUntitledWorkspace(window.openedWorkspace)
-    }
+		return true; // OK
+	}
 
-    // Update window configuration properly based on transition to workspace
-    window.config.workspace = workspace
-    window.config.backupPath = backupPath
+	private async doEnterWorkspace(window: ICodeWindow, workspace: IWorkspaceIdentifier): Promise<IEnterWorkspaceResult | undefined> {
+		if (!window.config) {
+			return undefined;
+		}
 
-    return { workspace, backupPath }
-  }
+		window.focus();
+
+		// Register window for backups and migrate current backups over
+		let backupPath: string | undefined;
+		if (!window.config.extensionDevelopmentPath) {
+			if (window.config.backupPath) {
+				backupPath = await this.backupMainService.registerWorkspaceBackup({ workspace, remoteAuthority: window.remoteAuthority }, window.config.backupPath);
+			} else {
+				backupPath = this.backupMainService.registerWorkspaceBackup({ workspace, remoteAuthority: window.remoteAuthority });
+			}
+		}
+
+		// if the window was opened on an untitled workspace, delete it.
+		if (isWorkspaceIdentifier(window.openedWorkspace) && this.isUntitledWorkspace(window.openedWorkspace)) {
+			await this.deleteUntitledWorkspace(window.openedWorkspace);
+		}
+
+		// Update window configuration properly based on transition to workspace
+		window.config.workspace = workspace;
+		window.config.backupPath = backupPath;
+
+		return { workspace, backupPath };
+	}
 }

@@ -9,248 +9,222 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { hide, show } from "vs/base/browser/dom"
-import { getProgressAcccessibilitySignalScheduler } from "vs/base/browser/ui/progressbar/progressAccessibilitySignal"
-import { RunOnceScheduler } from "vs/base/common/async"
-import {
-  Disposable,
-  IDisposable,
-  MutableDisposable,
-} from "vs/base/common/lifecycle"
-import { isNumber } from "vs/base/common/types"
-import "vs/css!./progressbar"
+import { hide, show } from 'vs/base/browser/dom';
+import { getProgressAcccessibilitySignalScheduler } from 'vs/base/browser/ui/progressbar/progressAccessibilitySignal';
+import { RunOnceScheduler } from 'vs/base/common/async';
+import { Disposable, IDisposable, MutableDisposable } from 'vs/base/common/lifecycle';
+import { isNumber } from 'vs/base/common/types';
+import 'vs/css!./progressbar';
 
-const CSS_DONE = "done"
-const CSS_ACTIVE = "active"
-const CSS_INFINITE = "infinite"
-const CSS_INFINITE_LONG_RUNNING = "infinite-long-running"
-const CSS_DISCRETE = "discrete"
+const CSS_DONE = 'done';
+const CSS_ACTIVE = 'active';
+const CSS_INFINITE = 'infinite';
+const CSS_INFINITE_LONG_RUNNING = 'infinite-long-running';
+const CSS_DISCRETE = 'discrete';
 
-export interface IProgressBarOptions extends IProgressBarStyles {}
+export interface IProgressBarOptions extends IProgressBarStyles {
+}
 
 export interface IProgressBarStyles {
-  progressBarBackground: string | undefined
+	progressBarBackground: string | undefined;
 }
 
 export const unthemedProgressBarOptions: IProgressBarOptions = {
-  progressBarBackground: undefined,
-}
+	progressBarBackground: undefined
+};
 
 /**
  * A progress bar with support for infinite or discrete progress.
  */
 export class ProgressBar extends Disposable {
-  /**
-   * After a certain time of showing the progress bar, switch
-   * to long-running mode and throttle animations to reduce
-   * the pressure on the GPU process.
-   *
-   * https://github.com/microsoft/vscode/issues/97900
-   * https://github.com/microsoft/vscode/issues/138396
-   */
-  private static readonly LONG_RUNNING_INFINITE_THRESHOLD = 10000
 
-  private static readonly PROGRESS_SIGNAL_DEFAULT_DELAY = 3000
+	/**
+	 * After a certain time of showing the progress bar, switch
+	 * to long-running mode and throttle animations to reduce
+	 * the pressure on the GPU process.
+	 *
+	 * https://github.com/microsoft/vscode/issues/97900
+	 * https://github.com/microsoft/vscode/issues/138396
+	 */
+	private static readonly LONG_RUNNING_INFINITE_THRESHOLD = 10000;
 
-  private workedVal: number
-  private element!: HTMLElement
-  private bit!: HTMLElement
-  private totalWork: number | undefined
-  private showDelayedScheduler: RunOnceScheduler
-  private longRunningScheduler: RunOnceScheduler
-  private readonly progressSignal = this._register(
-    new MutableDisposable<IDisposable>(),
-  )
+	private static readonly PROGRESS_SIGNAL_DEFAULT_DELAY = 3000;
 
-  constructor(container: HTMLElement, options?: IProgressBarOptions) {
-    super()
+	private workedVal: number;
+	private element!: HTMLElement;
+	private bit!: HTMLElement;
+	private totalWork: number | undefined;
+	private showDelayedScheduler: RunOnceScheduler;
+	private longRunningScheduler: RunOnceScheduler;
+	private readonly progressSignal = this._register(new MutableDisposable<IDisposable>());
 
-    this.workedVal = 0
+	constructor(container: HTMLElement, options?: IProgressBarOptions) {
+		super();
 
-    this.showDelayedScheduler = this._register(
-      new RunOnceScheduler(() => show(this.element), 0),
-    )
-    this.longRunningScheduler = this._register(
-      new RunOnceScheduler(
-        () => this.infiniteLongRunning(),
-        ProgressBar.LONG_RUNNING_INFINITE_THRESHOLD,
-      ),
-    )
+		this.workedVal = 0;
 
-    this.create(container, options)
-  }
+		this.showDelayedScheduler = this._register(new RunOnceScheduler(() => show(this.element), 0));
+		this.longRunningScheduler = this._register(new RunOnceScheduler(() => this.infiniteLongRunning(), ProgressBar.LONG_RUNNING_INFINITE_THRESHOLD));
 
-  private create(container: HTMLElement, options?: IProgressBarOptions): void {
-    this.element = document.createElement("div")
-    this.element.classList.add("monaco-progress-container")
-    this.element.setAttribute("role", "progressbar")
-    this.element.setAttribute("aria-valuemin", "0")
-    container.appendChild(this.element)
+		this.create(container, options);
+	}
 
-    this.bit = document.createElement("div")
-    this.bit.classList.add("progress-bit")
-    this.bit.style.backgroundColor = options?.progressBarBackground || "#0E70C0"
-    this.element.appendChild(this.bit)
-  }
+	private create(container: HTMLElement, options?: IProgressBarOptions): void {
+		this.element = document.createElement('div');
+		this.element.classList.add('monaco-progress-container');
+		this.element.setAttribute('role', 'progressbar');
+		this.element.setAttribute('aria-valuemin', '0');
+		container.appendChild(this.element);
 
-  private off(): void {
-    this.bit.style.width = "inherit"
-    this.bit.style.opacity = "1"
-    this.element.classList.remove(
-      CSS_ACTIVE,
-      CSS_INFINITE,
-      CSS_INFINITE_LONG_RUNNING,
-      CSS_DISCRETE,
-    )
+		this.bit = document.createElement('div');
+		this.bit.classList.add('progress-bit');
+		this.bit.style.backgroundColor = options?.progressBarBackground || '#0E70C0';
+		this.element.appendChild(this.bit);
+	}
 
-    this.workedVal = 0
-    this.totalWork = undefined
+	private off(): void {
+		this.bit.style.width = 'inherit';
+		this.bit.style.opacity = '1';
+		this.element.classList.remove(CSS_ACTIVE, CSS_INFINITE, CSS_INFINITE_LONG_RUNNING, CSS_DISCRETE);
 
-    this.longRunningScheduler.cancel()
-    this.progressSignal.clear()
-  }
+		this.workedVal = 0;
+		this.totalWork = undefined;
 
-  /**
-   * Indicates to the progress bar that all work is done.
-   */
-  done(): ProgressBar {
-    return this.doDone(true)
-  }
+		this.longRunningScheduler.cancel();
+		this.progressSignal.clear();
+	}
 
-  /**
-   * Stops the progressbar from showing any progress instantly without fading out.
-   */
-  stop(): ProgressBar {
-    return this.doDone(false)
-  }
+	/**
+	 * Indicates to the progress bar that all work is done.
+	 */
+	done(): ProgressBar {
+		return this.doDone(true);
+	}
 
-  private doDone(delayed: boolean): ProgressBar {
-    this.element.classList.add(CSS_DONE)
+	/**
+	 * Stops the progressbar from showing any progress instantly without fading out.
+	 */
+	stop(): ProgressBar {
+		return this.doDone(false);
+	}
 
-    // discrete: let it grow to 100% width and hide afterwards
-    if (!this.element.classList.contains(CSS_INFINITE)) {
-      this.bit.style.width = "inherit"
+	private doDone(delayed: boolean): ProgressBar {
+		this.element.classList.add(CSS_DONE);
 
-      if (delayed) {
-        setTimeout(() => this.off(), 200)
-      } else {
-        this.off()
-      }
-    }
+		// discrete: let it grow to 100% width and hide afterwards
+		if (!this.element.classList.contains(CSS_INFINITE)) {
+			this.bit.style.width = 'inherit';
 
-    // infinite: let it fade out and hide afterwards
-    else {
-      this.bit.style.opacity = "0"
-      if (delayed) {
-        setTimeout(() => this.off(), 200)
-      } else {
-        this.off()
-      }
-    }
+			if (delayed) {
+				setTimeout(() => this.off(), 200);
+			} else {
+				this.off();
+			}
+		}
 
-    return this
-  }
+		// infinite: let it fade out and hide afterwards
+		else {
+			this.bit.style.opacity = '0';
+			if (delayed) {
+				setTimeout(() => this.off(), 200);
+			} else {
+				this.off();
+			}
+		}
 
-  /**
-   * Use this mode to indicate progress that has no total number of work units.
-   */
-  infinite(): ProgressBar {
-    this.bit.style.width = "2%"
-    this.bit.style.opacity = "1"
+		return this;
+	}
 
-    this.element.classList.remove(
-      CSS_DISCRETE,
-      CSS_DONE,
-      CSS_INFINITE_LONG_RUNNING,
-    )
-    this.element.classList.add(CSS_ACTIVE, CSS_INFINITE)
+	/**
+	 * Use this mode to indicate progress that has no total number of work units.
+	 */
+	infinite(): ProgressBar {
+		this.bit.style.width = '2%';
+		this.bit.style.opacity = '1';
 
-    this.longRunningScheduler.schedule()
+		this.element.classList.remove(CSS_DISCRETE, CSS_DONE, CSS_INFINITE_LONG_RUNNING);
+		this.element.classList.add(CSS_ACTIVE, CSS_INFINITE);
 
-    return this
-  }
+		this.longRunningScheduler.schedule();
 
-  private infiniteLongRunning(): void {
-    this.element.classList.add(CSS_INFINITE_LONG_RUNNING)
-  }
+		return this;
+	}
 
-  /**
-   * Tells the progress bar the total number of work. Use in combination with workedVal() to let
-   * the progress bar show the actual progress based on the work that is done.
-   */
-  total(value: number): ProgressBar {
-    this.workedVal = 0
-    this.totalWork = value
-    this.element.setAttribute("aria-valuemax", value.toString())
+	private infiniteLongRunning(): void {
+		this.element.classList.add(CSS_INFINITE_LONG_RUNNING);
+	}
 
-    return this
-  }
+	/**
+	 * Tells the progress bar the total number of work. Use in combination with workedVal() to let
+	 * the progress bar show the actual progress based on the work that is done.
+	 */
+	total(value: number): ProgressBar {
+		this.workedVal = 0;
+		this.totalWork = value;
+		this.element.setAttribute('aria-valuemax', value.toString());
 
-  /**
-   * Finds out if this progress bar is configured with total work
-   */
-  hasTotal(): boolean {
-    return isNumber(this.totalWork)
-  }
+		return this;
+	}
 
-  /**
-   * Tells the progress bar that an increment of work has been completed.
-   */
-  worked(value: number): ProgressBar {
-    value = Math.max(1, Number(value))
+	/**
+	 * Finds out if this progress bar is configured with total work
+	 */
+	hasTotal(): boolean {
+		return isNumber(this.totalWork);
+	}
 
-    return this.doSetWorked(this.workedVal + value)
-  }
+	/**
+	 * Tells the progress bar that an increment of work has been completed.
+	 */
+	worked(value: number): ProgressBar {
+		value = Math.max(1, Number(value));
 
-  /**
-   * Tells the progress bar the total amount of work that has been completed.
-   */
-  setWorked(value: number): ProgressBar {
-    value = Math.max(1, Number(value))
+		return this.doSetWorked(this.workedVal + value);
+	}
 
-    return this.doSetWorked(value)
-  }
+	/**
+	 * Tells the progress bar the total amount of work that has been completed.
+	 */
+	setWorked(value: number): ProgressBar {
+		value = Math.max(1, Number(value));
 
-  private doSetWorked(value: number): ProgressBar {
-    const totalWork = this.totalWork || 100
+		return this.doSetWorked(value);
+	}
 
-    this.workedVal = value
-    this.workedVal = Math.min(totalWork, this.workedVal)
+	private doSetWorked(value: number): ProgressBar {
+		const totalWork = this.totalWork || 100;
 
-    this.element.classList.remove(
-      CSS_INFINITE,
-      CSS_INFINITE_LONG_RUNNING,
-      CSS_DONE,
-    )
-    this.element.classList.add(CSS_ACTIVE, CSS_DISCRETE)
-    this.element.setAttribute("aria-valuenow", value.toString())
+		this.workedVal = value;
+		this.workedVal = Math.min(totalWork, this.workedVal);
 
-    this.bit.style.width = 100 * (this.workedVal / totalWork) + "%"
+		this.element.classList.remove(CSS_INFINITE, CSS_INFINITE_LONG_RUNNING, CSS_DONE);
+		this.element.classList.add(CSS_ACTIVE, CSS_DISCRETE);
+		this.element.setAttribute('aria-valuenow', value.toString());
 
-    return this
-  }
+		this.bit.style.width = 100 * (this.workedVal / (totalWork)) + '%';
 
-  getContainer(): HTMLElement {
-    return this.element
-  }
+		return this;
+	}
 
-  show(delay?: number): void {
-    this.showDelayedScheduler.cancel()
-    this.progressSignal.value = getProgressAcccessibilitySignalScheduler(
-      ProgressBar.PROGRESS_SIGNAL_DEFAULT_DELAY,
-    )
+	getContainer(): HTMLElement {
+		return this.element;
+	}
 
-    if (typeof delay === "number") {
-      this.showDelayedScheduler.schedule(delay)
-    } else {
-      show(this.element)
-    }
-  }
+	show(delay?: number): void {
+		this.showDelayedScheduler.cancel();
+		this.progressSignal.value = getProgressAcccessibilitySignalScheduler(ProgressBar.PROGRESS_SIGNAL_DEFAULT_DELAY);
 
-  hide(): void {
-    hide(this.element)
+		if (typeof delay === 'number') {
+			this.showDelayedScheduler.schedule(delay);
+		} else {
+			show(this.element);
+		}
+	}
 
-    this.showDelayedScheduler.cancel()
-    this.progressSignal.clear()
-  }
+	hide(): void {
+		hide(this.element);
+
+		this.showDelayedScheduler.cancel();
+		this.progressSignal.clear();
+	}
 }

@@ -84,7 +84,7 @@ export function CanvasTooltip({
     React.useState<HTMLDivElement | null>(null)
   const tooltipRef = React.useCallback(
     (tooltipElement: HTMLDivElement) => setTooltipStateRef(tooltipElement),
-    [],
+    []
   )
 
   if (!show || forceHide || parentElement == null || appBoundingRect == null) {
@@ -95,7 +95,7 @@ export function CanvasTooltip({
     parentElement.getBoundingClientRect(),
     appBoundingRect,
     orientation,
-    tooltipStateRef,
+    tooltipStateRef
   )
 
   return createPortal(
@@ -109,7 +109,7 @@ export function CanvasTooltip({
       {text}
       {shortcut && <span className="shortcut">{` ${shortcut}`}</span>}
     </div>,
-    overlayRef.current!,
+    overlayRef.current!
   )
 }
 
@@ -117,7 +117,7 @@ function getPosition(
   rect: DOMRect,
   appRect: DOMRect,
   orientation: Orientation,
-  tooltipElement: HTMLDivElement | null,
+  tooltipElement: HTMLDivElement | null
 ): { x: number; y: number } {
   let x = rect.left - appRect.left
   let y = rect.top - appRect.top

@@ -9,248 +9,203 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import {
-  ITextAreaInputHost,
-  TextAreaInput,
-  TextAreaWrapper,
-} from "vs/editor/browser/controller/textAreaInput"
-import {
-  ISimpleModel,
-  PagedScreenReaderStrategy,
-  TextAreaState,
-} from "vs/editor/browser/controller/textAreaState"
-import { Position } from "vs/editor/common/core/position"
-import { IRange, Range } from "vs/editor/common/core/range"
-import { EndOfLinePreference } from "vs/editor/common/model"
-import * as dom from "vs/base/browser/dom"
-import * as browser from "vs/base/browser/browser"
-import * as platform from "vs/base/common/platform"
-import { mainWindow } from "vs/base/browser/window"
-import { TestAccessibilityService } from "vs/platform/accessibility/test/common/testAccessibilityService"
-import { NullLogService } from "vs/platform/log/common/log"
+import { ITextAreaInputHost, TextAreaInput, TextAreaWrapper } from 'vs/editor/browser/controller/textAreaInput';
+import { ISimpleModel, PagedScreenReaderStrategy, TextAreaState } from 'vs/editor/browser/controller/textAreaState';
+import { Position } from 'vs/editor/common/core/position';
+import { IRange, Range } from 'vs/editor/common/core/range';
+import { EndOfLinePreference } from 'vs/editor/common/model';
+import * as dom from 'vs/base/browser/dom';
+import * as browser from 'vs/base/browser/browser';
+import * as platform from 'vs/base/common/platform';
+import { mainWindow } from 'vs/base/browser/window';
+import { TestAccessibilityService } from 'vs/platform/accessibility/test/common/testAccessibilityService';
+import { NullLogService } from 'vs/platform/log/common/log';
 
 // To run this test, open imeTester.html
 
 class SingleLineTestModel implements ISimpleModel {
-  private _line: string
 
-  constructor(line: string) {
-    this._line = line
-  }
+	private _line: string;
 
-  _setText(text: string) {
-    this._line = text
-  }
+	constructor(line: string) {
+		this._line = line;
+	}
 
-  getLineMaxColumn(lineNumber: number): number {
-    return this._line.length + 1
-  }
+	_setText(text: string) {
+		this._line = text;
+	}
 
-  getValueInRange(range: IRange, eol: EndOfLinePreference): string {
-    return this._line.substring(range.startColumn - 1, range.endColumn - 1)
-  }
+	getLineMaxColumn(lineNumber: number): number {
+		return this._line.length + 1;
+	}
 
-  getValueLengthInRange(range: Range, eol: EndOfLinePreference): number {
-    return this.getValueInRange(range, eol).length
-  }
+	getValueInRange(range: IRange, eol: EndOfLinePreference): string {
+		return this._line.substring(range.startColumn - 1, range.endColumn - 1);
+	}
 
-  modifyPosition(position: Position, offset: number): Position {
-    const column = Math.min(
-      this.getLineMaxColumn(position.lineNumber),
-      Math.max(1, position.column + offset),
-    )
-    return new Position(position.lineNumber, column)
-  }
+	getValueLengthInRange(range: Range, eol: EndOfLinePreference): number {
+		return this.getValueInRange(range, eol).length;
+	}
 
-  getModelLineContent(lineNumber: number): string {
-    return this._line
-  }
+	modifyPosition(position: Position, offset: number): Position {
+		const column = Math.min(this.getLineMaxColumn(position.lineNumber), Math.max(1, position.column + offset));
+		return new Position(position.lineNumber, column);
+	}
 
-  getLineCount(): number {
-    return 1
-  }
+	getModelLineContent(lineNumber: number): string {
+		return this._line;
+	}
+
+	getLineCount(): number {
+		return 1;
+	}
 }
 
 class TestView {
-  private readonly _model: SingleLineTestModel
 
-  constructor(model: SingleLineTestModel) {
-    this._model = model
-  }
+	private readonly _model: SingleLineTestModel;
 
-  public paint(output: HTMLElement) {
-    dom.clearNode(output)
-    for (let i = 1; i <= this._model.getLineCount(); i++) {
-      const textNode = document.createTextNode(
-        this._model.getModelLineContent(i),
-      )
-      output.appendChild(textNode)
-      const br = document.createElement("br")
-      output.appendChild(br)
-    }
-  }
+	constructor(model: SingleLineTestModel) {
+		this._model = model;
+	}
+
+	public paint(output: HTMLElement) {
+		dom.clearNode(output);
+		for (let i = 1; i <= this._model.getLineCount(); i++) {
+			const textNode = document.createTextNode(this._model.getModelLineContent(i));
+			output.appendChild(textNode);
+			const br = document.createElement('br');
+			output.appendChild(br);
+		}
+	}
 }
 
-function doCreateTest(
-  description: string,
-  inputStr: string,
-  expectedStr: string,
-): HTMLElement {
-  let cursorOffset: number = 0
-  let cursorLength: number = 0
+function doCreateTest(description: string, inputStr: string, expectedStr: string): HTMLElement {
+	let cursorOffset: number = 0;
+	let cursorLength: number = 0;
 
-  const container = document.createElement("div")
-  container.className = "container"
+	const container = document.createElement('div');
+	container.className = 'container';
 
-  const title = document.createElement("div")
-  title.className = "title"
+	const title = document.createElement('div');
+	title.className = 'title';
 
-  const inputStrStrong = document.createElement("strong")
-  inputStrStrong.innerText = inputStr
+	const inputStrStrong = document.createElement('strong');
+	inputStrStrong.innerText = inputStr;
 
-  title.innerText = description + ". Type "
-  title.appendChild(inputStrStrong)
+	title.innerText = description + '. Type ';
+	title.appendChild(inputStrStrong);
 
-  container.appendChild(title)
+	container.appendChild(title);
 
-  const startBtn = document.createElement("button")
-  startBtn.innerText = "Start"
-  container.appendChild(startBtn)
+	const startBtn = document.createElement('button');
+	startBtn.innerText = 'Start';
+	container.appendChild(startBtn);
 
-  const input = document.createElement("textarea")
-  input.setAttribute("rows", "10")
-  input.setAttribute("cols", "40")
-  container.appendChild(input)
 
-  const model = new SingleLineTestModel("some  text")
+	const input = document.createElement('textarea');
+	input.setAttribute('rows', '10');
+	input.setAttribute('cols', '40');
+	container.appendChild(input);
 
-  const textAreaInputHost: ITextAreaInputHost = {
-    getDataToCopy: () => {
-      return {
-        isFromEmptySelection: false,
-        multicursorText: null,
-        text: "",
-        html: undefined,
-        mode: null,
-      }
-    },
-    getScreenReaderContent: (): TextAreaState => {
-      const selection = new Range(
-        1,
-        1 + cursorOffset,
-        1,
-        1 + cursorOffset + cursorLength,
-      )
+	const model = new SingleLineTestModel('some  text');
 
-      return PagedScreenReaderStrategy.fromEditorSelection(
-        model,
-        selection,
-        10,
-        true,
-      )
-    },
-    deduceModelPosition: (
-      viewAnchorPosition: Position,
-      deltaOffset: number,
-      lineFeedCnt: number,
-    ): Position => {
-      return null!
-    },
-  }
+	const textAreaInputHost: ITextAreaInputHost = {
+		getDataToCopy: () => {
+			return {
+				isFromEmptySelection: false,
+				multicursorText: null,
+				text: '',
+				html: undefined,
+				mode: null
+			};
+		},
+		getScreenReaderContent: (): TextAreaState => {
+			const selection = new Range(1, 1 + cursorOffset, 1, 1 + cursorOffset + cursorLength);
 
-  const handler = new TextAreaInput(
-    textAreaInputHost,
-    new TextAreaWrapper(input),
-    platform.OS,
-    {
-      isAndroid: browser.isAndroid,
-      isFirefox: browser.isFirefox,
-      isChrome: browser.isChrome,
-      isSafari: browser.isSafari,
-    },
-    new TestAccessibilityService(),
-    new NullLogService(),
-  )
+			return PagedScreenReaderStrategy.fromEditorSelection(model, selection, 10, true);
+		},
+		deduceModelPosition: (viewAnchorPosition: Position, deltaOffset: number, lineFeedCnt: number): Position => {
+			return null!;
+		}
+	};
 
-  const output = document.createElement("pre")
-  output.className = "output"
-  container.appendChild(output)
+	const handler = new TextAreaInput(textAreaInputHost, new TextAreaWrapper(input), platform.OS, {
+		isAndroid: browser.isAndroid,
+		isFirefox: browser.isFirefox,
+		isChrome: browser.isChrome,
+		isSafari: browser.isSafari,
+	}, new TestAccessibilityService(), new NullLogService());
 
-  const check = document.createElement("pre")
-  check.className = "check"
-  container.appendChild(check)
+	const output = document.createElement('pre');
+	output.className = 'output';
+	container.appendChild(output);
 
-  const br = document.createElement("br")
-  br.style.clear = "both"
-  container.appendChild(br)
+	const check = document.createElement('pre');
+	check.className = 'check';
+	container.appendChild(check);
 
-  const view = new TestView(model)
+	const br = document.createElement('br');
+	br.style.clear = 'both';
+	container.appendChild(br);
 
-  const updatePosition = (off: number, len: number) => {
-    cursorOffset = off
-    cursorLength = len
-    handler.writeNativeTextAreaContent("selection changed")
-    handler.focusTextArea()
-  }
+	const view = new TestView(model);
 
-  const updateModelAndPosition = (text: string, off: number, len: number) => {
-    model._setText(text)
-    updatePosition(off, len)
-    view.paint(output)
+	const updatePosition = (off: number, len: number) => {
+		cursorOffset = off;
+		cursorLength = len;
+		handler.writeNativeTextAreaContent('selection changed');
+		handler.focusTextArea();
+	};
 
-    const expected = "some " + expectedStr + " text"
-    if (text === expected) {
-      check.innerText = "[GOOD]"
-      check.className = "check good"
-    } else {
-      check.innerText = "[BAD]"
-      check.className = "check bad"
-    }
-    check.appendChild(document.createTextNode(expected))
-  }
+	const updateModelAndPosition = (text: string, off: number, len: number) => {
+		model._setText(text);
+		updatePosition(off, len);
+		view.paint(output);
 
-  handler.onType((e) => {
-    console.log(
-      "type text: " + e.text + ", replaceCharCnt: " + e.replacePrevCharCnt,
-    )
-    const text = model.getModelLineContent(1)
-    const preText = text.substring(0, cursorOffset - e.replacePrevCharCnt)
-    const postText = text.substring(cursorOffset + cursorLength)
-    const midText = e.text
+		const expected = 'some ' + expectedStr + ' text';
+		if (text === expected) {
+			check.innerText = '[GOOD]';
+			check.className = 'check good';
+		} else {
+			check.innerText = '[BAD]';
+			check.className = 'check bad';
+		}
+		check.appendChild(document.createTextNode(expected));
+	};
 
-    updateModelAndPosition(
-      preText + midText + postText,
-      (preText + midText).length,
-      0,
-    )
-  })
+	handler.onType((e) => {
+		console.log('type text: ' + e.text + ', replaceCharCnt: ' + e.replacePrevCharCnt);
+		const text = model.getModelLineContent(1);
+		const preText = text.substring(0, cursorOffset - e.replacePrevCharCnt);
+		const postText = text.substring(cursorOffset + cursorLength);
+		const midText = e.text;
 
-  view.paint(output)
+		updateModelAndPosition(preText + midText + postText, (preText + midText).length, 0);
+	});
 
-  startBtn.onclick = function () {
-    updateModelAndPosition("some  text", 5, 0)
-    input.focus()
-  }
+	view.paint(output);
 
-  return container
+	startBtn.onclick = function () {
+		updateModelAndPosition('some  text', 5, 0);
+		input.focus();
+	};
+
+	return container;
 }
 
 const TESTS = [
-  { description: "Japanese IME 1", in: "sennsei [Enter]", out: "せんせい" },
-  {
-    description: "Japanese IME 2",
-    in: "konnichiha [Enter]",
-    out: "こんいちは",
-  },
-  { description: "Japanese IME 3", in: "mikann [Enter]", out: "みかん" },
-  { description: "Korean IME 1", in: "gksrmf [Space]", out: "한글 " },
-  { description: "Chinese IME 1", in: ".,", out: "。，" },
-  { description: "Chinese IME 2", in: "ni [Space] hao [Space]", out: "你好" },
-  { description: "Chinese IME 3", in: "hazni [Space]", out: "哈祝你" },
-  { description: "Mac dead key 1", in: "`.", out: "`." },
-  { description: "Mac hold key 1", in: "e long press and 1", out: "é" },
-]
+	{ description: 'Japanese IME 1', in: 'sennsei [Enter]', out: 'せんせい' },
+	{ description: 'Japanese IME 2', in: 'konnichiha [Enter]', out: 'こんいちは' },
+	{ description: 'Japanese IME 3', in: 'mikann [Enter]', out: 'みかん' },
+	{ description: 'Korean IME 1', in: 'gksrmf [Space]', out: '한글 ' },
+	{ description: 'Chinese IME 1', in: '.,', out: '。，' },
+	{ description: 'Chinese IME 2', in: 'ni [Space] hao [Space]', out: '你好' },
+	{ description: 'Chinese IME 3', in: 'hazni [Space]', out: '哈祝你' },
+	{ description: 'Mac dead key 1', in: '`.', out: '`.' },
+	{ description: 'Mac hold key 1', in: 'e long press and 1', out: 'é' }
+];
 
 TESTS.forEach((t) => {
-  mainWindow.document.body.appendChild(doCreateTest(t.description, t.in, t.out))
-})
+	mainWindow.document.body.appendChild(doCreateTest(t.description, t.in, t.out));
+});

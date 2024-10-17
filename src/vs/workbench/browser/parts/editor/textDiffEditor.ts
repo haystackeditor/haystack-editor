@@ -118,7 +118,7 @@ export class TextDiffEditor
     @IEditorGroupsService editorGroupService: IEditorGroupsService,
     @IFileService fileService: IFileService,
     @IPreferencesService
-    private readonly preferencesService: IPreferencesService,
+    private readonly preferencesService: IPreferencesService
   ) {
     super(
       TextDiffEditor.ID,
@@ -130,7 +130,7 @@ export class TextDiffEditor
       themeService,
       editorService,
       editorGroupService,
-      fileService,
+      fileService
     )
   }
 
@@ -144,15 +144,15 @@ export class TextDiffEditor
 
   protected override createEditorControl(
     parent: HTMLElement,
-    configuration: ICodeEditorOptions,
+    configuration: ICodeEditorOptions
   ): void {
     this.diffEditorControl = this._register(
       this.instantiationService.createInstance(
         DiffEditorWidget,
         parent,
         configuration,
-        {},
-      ),
+        {}
+      )
     )
   }
 
@@ -170,7 +170,7 @@ export class TextDiffEditor
     input: DiffEditorInput,
     options: ITextEditorOptions | undefined,
     context: IEditorOpenContext,
-    token: CancellationToken,
+    token: CancellationToken
   ): Promise<void> {
     if (this._previousViewModel) {
       this._previousViewModel.dispose()
@@ -215,7 +215,7 @@ export class TextDiffEditor
           input,
           options,
           context,
-          control,
+          control
         )
       }
 
@@ -225,7 +225,7 @@ export class TextDiffEditor
         optionsGotApplied = applyTextEditorOptions(
           options,
           control,
-          ScrollType.Immediate,
+          ScrollType.Immediate
         )
       }
 
@@ -240,7 +240,7 @@ export class TextDiffEditor
       // readonly or not that the input did not have.
       control.updateOptions({
         ...this.getReadonlyConfiguration(
-          resolvedDiffEditorModel.modifiedModel?.isReadonly(),
+          resolvedDiffEditorModel.modifiedModel?.isReadonly()
         ),
         originalEditable: !resolvedDiffEditorModel.originalModel?.isReadonly(),
       })
@@ -257,7 +257,7 @@ export class TextDiffEditor
   private async handleSetInputError(
     error: Error,
     input: DiffEditorInput,
-    options: ITextEditorOptions | undefined,
+    options: ITextEditorOptions | undefined
   ): Promise<void> {
     // Handle case where content appears to be binary
     if (this.isFileBinaryError(error)) {
@@ -274,12 +274,12 @@ export class TextDiffEditor
         message = localize(
           "fileTooLargeForHeapErrorWithSize",
           "At least one file is not displayed in the text compare editor because it is very large ({0}).",
-          ByteSize.formatSize(error.size),
+          ByteSize.formatSize(error.size)
         )
       } else {
         message = localize(
           "fileTooLargeForHeapErrorWithoutSize",
-          "At least one file is not displayed in the text compare editor because it is very large.",
+          "At least one file is not displayed in the text compare editor because it is very large."
         )
       }
 
@@ -288,7 +288,7 @@ export class TextDiffEditor
         input,
         options,
         message,
-        this.preferencesService,
+        this.preferencesService
       )
     }
 
@@ -300,7 +300,7 @@ export class TextDiffEditor
     editor: DiffEditorInput,
     options: ITextEditorOptions | undefined,
     context: IEditorOpenContext,
-    control: IDiffEditor,
+    control: IDiffEditor
   ): boolean {
     const editorViewState = this.loadEditorViewState(editor, context)
     if (editorViewState) {
@@ -322,7 +322,7 @@ export class TextDiffEditor
 
   private openAsBinary(
     input: DiffEditorInput,
-    options: ITextEditorOptions | undefined,
+    options: ITextEditorOptions | undefined
   ): void {
     const original = input.original
     const modified = input.modified
@@ -333,12 +333,12 @@ export class TextDiffEditor
       input.getDescription(),
       original,
       modified,
-      true,
+      true
     )
 
     // Forward binary flag to input if supported
     const fileEditorFactory = Registry.as<IEditorFactoryRegistry>(
-      EditorExtensions.EditorFactory,
+      EditorExtensions.EditorFactory
     ).getFileEditorFactory()
     if (fileEditorFactory.isFileEditor(original)) {
       original.setForceOpenAsBinary()
@@ -374,14 +374,14 @@ export class TextDiffEditor
       applyTextEditorOptions(
         options,
         assertIsDefined(this.diffEditorControl),
-        ScrollType.Smooth,
+        ScrollType.Smooth
       )
     }
   }
 
   protected override shouldHandleConfigurationChangeEvent(
     e: ITextResourceConfigurationChangeEvent,
-    resource: URI,
+    resource: URI
   ): boolean {
     if (super.shouldHandleConfigurationChangeEvent(e, resource)) {
       return true
@@ -394,14 +394,14 @@ export class TextDiffEditor
   }
 
   protected override computeConfiguration(
-    configuration: IEditorConfiguration,
+    configuration: IEditorConfiguration
   ): ICodeEditorOptions {
     const editorConfiguration = super.computeConfiguration(configuration)
 
     // Handle diff editor specially by merging in diffEditor configuration
     if (isObject(configuration.diffEditor)) {
       const diffEditorConfiguration: IDiffEditorOptions = deepClone(
-        configuration.diffEditor,
+        configuration.diffEditor
       )
 
       // User settings defines `diffEditor.codeLens`, but here we rename that to `diffEditor.diffCodeLens` to avoid collisions with `editor.codeLens`.
@@ -424,7 +424,7 @@ export class TextDiffEditor
   }
 
   protected override getConfigurationOverrides(
-    configuration: IEditorConfiguration,
+    configuration: IEditorConfiguration
   ): IDiffEditorOptions {
     return {
       ...super.getConfigurationOverrides(configuration),
@@ -476,7 +476,7 @@ export class TextDiffEditor
     if (typeof inputLifecycleElapsed === "number") {
       this.logInputLifecycleTelemetry(
         inputLifecycleElapsed,
-        this.getControl()?.getModel()?.modified?.getLanguageId(),
+        this.getControl()?.getModel()?.modified?.getLanguageId()
       )
     }
 
@@ -486,7 +486,7 @@ export class TextDiffEditor
 
   private logInputLifecycleTelemetry(
     duration: number,
-    languageId: string | undefined,
+    languageId: string | undefined
   ): void {
     let collapseUnchangedRegions = false
     if (this.diffEditorControl instanceof DiffEditorWidget) {
@@ -561,7 +561,7 @@ export class TextDiffEditor
   }
 
   protected override computeEditorViewState(
-    resource: URI,
+    resource: URI
   ): IDiffEditorViewState | undefined {
     if (!this.diffEditorControl) {
       return undefined
@@ -585,7 +585,7 @@ export class TextDiffEditor
   }
 
   protected override toEditorViewStateResource(
-    modelOrInput: IDiffEditorModel | EditorInput,
+    modelOrInput: IDiffEditorModel | EditorInput
   ): URI | undefined {
     let original: URI | undefined
     let modified: URI | undefined
@@ -606,7 +606,7 @@ export class TextDiffEditor
     return URI.from({
       scheme: "diff",
       path: `${multibyteAwareBtoa(original.toString())}${multibyteAwareBtoa(
-        modified.toString(),
+        modified.toString()
       )}`,
     })
   }

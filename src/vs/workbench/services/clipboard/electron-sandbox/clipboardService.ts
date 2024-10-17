@@ -9,97 +9,79 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IClipboardService } from "vs/platform/clipboard/common/clipboardService"
-import { URI } from "vs/base/common/uri"
-import { isMacintosh } from "vs/base/common/platform"
-import {
-  InstantiationType,
-  registerSingleton,
-} from "vs/platform/instantiation/common/extensions"
-import { INativeHostService } from "vs/platform/native/common/native"
-import { VSBuffer } from "vs/base/common/buffer"
+import { IClipboardService } from 'vs/platform/clipboard/common/clipboardService';
+import { URI } from 'vs/base/common/uri';
+import { isMacintosh } from 'vs/base/common/platform';
+import { InstantiationType, registerSingleton } from 'vs/platform/instantiation/common/extensions';
+import { INativeHostService } from 'vs/platform/native/common/native';
+import { VSBuffer } from 'vs/base/common/buffer';
 
 export class NativeClipboardService implements IClipboardService {
-  private static readonly FILE_FORMAT = "code/file-list" // Clipboard format for files
 
-  declare readonly _serviceBrand: undefined
+	private static readonly FILE_FORMAT = 'code/file-list'; // Clipboard format for files
 
-  constructor(
-    @INativeHostService private readonly nativeHostService: INativeHostService,
-  ) {}
+	declare readonly _serviceBrand: undefined;
 
-  async writeText(
-    text: string,
-    type?: "selection" | "clipboard",
-  ): Promise<void> {
-    return this.nativeHostService.writeClipboardText(text, type)
-  }
+	constructor(
+		@INativeHostService private readonly nativeHostService: INativeHostService
+	) { }
 
-  async readText(type?: "selection" | "clipboard"): Promise<string> {
-    return this.nativeHostService.readClipboardText(type)
-  }
+	async writeText(text: string, type?: 'selection' | 'clipboard'): Promise<void> {
+		return this.nativeHostService.writeClipboardText(text, type);
+	}
 
-  async readFindText(): Promise<string> {
-    if (isMacintosh) {
-      return this.nativeHostService.readClipboardFindText()
-    }
+	async readText(type?: 'selection' | 'clipboard'): Promise<string> {
+		return this.nativeHostService.readClipboardText(type);
+	}
 
-    return ""
-  }
+	async readFindText(): Promise<string> {
+		if (isMacintosh) {
+			return this.nativeHostService.readClipboardFindText();
+		}
 
-  async writeFindText(text: string): Promise<void> {
-    if (isMacintosh) {
-      return this.nativeHostService.writeClipboardFindText(text)
-    }
-  }
+		return '';
+	}
 
-  async writeResources(resources: URI[]): Promise<void> {
-    if (resources.length) {
-      return this.nativeHostService.writeClipboardBuffer(
-        NativeClipboardService.FILE_FORMAT,
-        this.resourcesToBuffer(resources),
-      )
-    }
-  }
+	async writeFindText(text: string): Promise<void> {
+		if (isMacintosh) {
+			return this.nativeHostService.writeClipboardFindText(text);
+		}
+	}
 
-  async readResources(): Promise<URI[]> {
-    return this.bufferToResources(
-      await this.nativeHostService.readClipboardBuffer(
-        NativeClipboardService.FILE_FORMAT,
-      ),
-    )
-  }
+	async writeResources(resources: URI[]): Promise<void> {
+		if (resources.length) {
+			return this.nativeHostService.writeClipboardBuffer(NativeClipboardService.FILE_FORMAT, this.resourcesToBuffer(resources));
+		}
+	}
 
-  async hasResources(): Promise<boolean> {
-    return this.nativeHostService.hasClipboard(
-      NativeClipboardService.FILE_FORMAT,
-    )
-  }
+	async readResources(): Promise<URI[]> {
+		return this.bufferToResources(await this.nativeHostService.readClipboardBuffer(NativeClipboardService.FILE_FORMAT));
+	}
 
-  private resourcesToBuffer(resources: URI[]): VSBuffer {
-    return VSBuffer.fromString(resources.map((r) => r.toString()).join("\n"))
-  }
+	async hasResources(): Promise<boolean> {
+		return this.nativeHostService.hasClipboard(NativeClipboardService.FILE_FORMAT);
+	}
 
-  private bufferToResources(buffer: VSBuffer): URI[] {
-    if (!buffer) {
-      return []
-    }
+	private resourcesToBuffer(resources: URI[]): VSBuffer {
+		return VSBuffer.fromString(resources.map(r => r.toString()).join('\n'));
+	}
 
-    const bufferValue = buffer.toString()
-    if (!bufferValue) {
-      return []
-    }
+	private bufferToResources(buffer: VSBuffer): URI[] {
+		if (!buffer) {
+			return [];
+		}
 
-    try {
-      return bufferValue.split("\n").map((f) => URI.parse(f))
-    } catch (error) {
-      return [] // do not trust clipboard data
-    }
-  }
+		const bufferValue = buffer.toString();
+		if (!bufferValue) {
+			return [];
+		}
+
+		try {
+			return bufferValue.split('\n').map(f => URI.parse(f));
+		} catch (error) {
+			return []; // do not trust clipboard data
+		}
+	}
 }
 
-registerSingleton(
-  IClipboardService,
-  NativeClipboardService,
-  InstantiationType.Delayed,
-)
+registerSingleton(IClipboardService, NativeClipboardService, InstantiationType.Delayed);

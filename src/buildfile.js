@@ -55,52 +55,52 @@ exports.base = [
 
 exports.workerExtensionHost = [
   createEditorWorkerModuleDescription(
-    "vs/workbench/api/worker/extensionHostWorker",
+    "vs/workbench/api/worker/extensionHostWorker"
   ),
 ]
 exports.workerNotebook = [
   createEditorWorkerModuleDescription(
-    "vs/workbench/contrib/notebook/common/services/notebookSimpleWorker",
+    "vs/workbench/contrib/notebook/common/services/notebookSimpleWorker"
   ),
 ]
 exports.workerLanguageDetection = [
   createEditorWorkerModuleDescription(
-    "vs/workbench/services/languageDetection/browser/languageDetectionSimpleWorker",
+    "vs/workbench/services/languageDetection/browser/languageDetectionSimpleWorker"
   ),
 ]
 exports.workerLocalFileSearch = [
   createEditorWorkerModuleDescription(
-    "vs/workbench/services/search/worker/localFileSearch",
+    "vs/workbench/services/search/worker/localFileSearch"
   ),
 ]
 exports.workerProfileAnalysis = [
   createEditorWorkerModuleDescription(
-    "vs/platform/profiling/electron-sandbox/profileAnalysisWorker",
+    "vs/platform/profiling/electron-sandbox/profileAnalysisWorker"
   ),
 ]
 
 exports.workbenchDesktop = [
   createEditorWorkerModuleDescription(
-    "vs/workbench/contrib/output/common/outputLinkComputer",
+    "vs/workbench/contrib/output/common/outputLinkComputer"
   ),
   createEditorWorkerModuleDescription(
-    "vs/workbench/services/textMate/browser/backgroundTokenization/worker/textMateTokenizationWorker.worker",
+    "vs/workbench/services/textMate/browser/backgroundTokenization/worker/textMateTokenizationWorker.worker"
   ),
   createModuleDescription("vs/workbench/contrib/debug/node/telemetryApp"),
   createModuleDescription("vs/platform/files/node/watcher/watcherMain"),
   createModuleDescription("vs/platform/terminal/node/ptyHostMain"),
   createModuleDescription("vs/workbench/api/node/extensionHostProcess"),
   createModuleDescription(
-    "vs/workbench/contrib/issue/electron-sandbox/issueReporterMain",
+    "vs/workbench/contrib/issue/electron-sandbox/issueReporterMain"
   ),
 ]
 
 exports.workbenchWeb = [
   createEditorWorkerModuleDescription(
-    "vs/workbench/contrib/output/common/outputLinkComputer",
+    "vs/workbench/contrib/output/common/outputLinkComputer"
   ),
   createEditorWorkerModuleDescription(
-    "vs/workbench/services/textMate/browser/backgroundTokenization/worker/textMateTokenizationWorker.worker",
+    "vs/workbench/services/textMate/browser/backgroundTokenization/worker/textMateTokenizationWorker.worker"
   ),
   createModuleDescription("vs/code/browser/workbench/workbench", [
     "vs/workbench/workbench.web.main",
@@ -109,13 +109,13 @@ exports.workbenchWeb = [
 
 exports.keyboardMaps = [
   createModuleDescription(
-    "vs/workbench/services/keybinding/browser/keyboardLayouts/layout.contribution.linux",
+    "vs/workbench/services/keybinding/browser/keyboardLayouts/layout.contribution.linux"
   ),
   createModuleDescription(
-    "vs/workbench/services/keybinding/browser/keyboardLayouts/layout.contribution.darwin",
+    "vs/workbench/services/keybinding/browser/keyboardLayouts/layout.contribution.darwin"
   ),
   createModuleDescription(
-    "vs/workbench/services/keybinding/browser/keyboardLayouts/layout.contribution.win",
+    "vs/workbench/services/keybinding/browser/keyboardLayouts/layout.contribution.win"
   ),
 ]
 
@@ -125,7 +125,7 @@ exports.code = [
   createModuleDescription("vs/code/node/cliProcessMain", ["vs/code/node/cli"]),
   createModuleDescription("vs/code/node/sharedProcess/sharedProcessMain"),
   createModuleDescription(
-    "vs/code/electron-sandbox/processExplorer/processExplorerMain",
+    "vs/code/electron-sandbox/processExplorer/processExplorerMain"
   ),
 ]
 

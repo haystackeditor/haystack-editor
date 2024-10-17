@@ -9,181 +9,166 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { timeout } from "vs/base/common/async"
-import { CancellationToken } from "vs/base/common/cancellation"
-import { Event, Emitter } from "vs/base/common/event"
-import { Disposable, IDisposable } from "vs/base/common/lifecycle"
-import { URI } from "vs/base/common/uri"
-import {
-  FileChangesEvent,
-  FileChangeType,
-  IFileService,
-} from "vs/platform/files/common/files"
-import { ISaveOptions, IRevertOptions } from "vs/workbench/common/editor"
-import {
-  IWorkingCopy,
-  IWorkingCopyBackup,
-  IWorkingCopySaveEvent,
-  WorkingCopyCapabilities,
-} from "vs/workbench/services/workingCopy/common/workingCopy"
+import { timeout } from 'vs/base/common/async';
+import { CancellationToken } from 'vs/base/common/cancellation';
+import { Event, Emitter } from 'vs/base/common/event';
+import { Disposable, IDisposable } from 'vs/base/common/lifecycle';
+import { URI } from 'vs/base/common/uri';
+import { FileChangesEvent, FileChangeType, IFileService } from 'vs/platform/files/common/files';
+import { ISaveOptions, IRevertOptions } from 'vs/workbench/common/editor';
+import { IWorkingCopy, IWorkingCopyBackup, IWorkingCopySaveEvent, WorkingCopyCapabilities } from 'vs/workbench/services/workingCopy/common/workingCopy';
 
 /**
  * A resource based `IWorkingCopy` is backed by a `URI` from a
  * known file system provider.
  */
 export interface IResourceWorkingCopy extends IWorkingCopy, IDisposable {
-  /**
-   * An event for when the orphaned state of the resource working copy changes.
-   */
-  readonly onDidChangeOrphaned: Event<void>
 
-  /**
-   * Whether the resource working copy is orphaned or not.
-   */
-  isOrphaned(): boolean
+	/**
+	 * An event for when the orphaned state of the resource working copy changes.
+	 */
+	readonly onDidChangeOrphaned: Event<void>;
 
-  /**
-   * An event for when the file working copy has been disposed.
-   */
-  readonly onWillDispose: Event<void>
+	/**
+	 * Whether the resource working copy is orphaned or not.
+	 */
+	isOrphaned(): boolean;
 
-  /**
-   * Whether the file working copy has been disposed or not.
-   */
-  isDisposed(): boolean
+	/**
+	 * An event for when the file working copy has been disposed.
+	 */
+	readonly onWillDispose: Event<void>;
+
+	/**
+	 * Whether the file working copy has been disposed or not.
+	 */
+	isDisposed(): boolean;
 }
 
-export abstract class ResourceWorkingCopy
-  extends Disposable
-  implements IResourceWorkingCopy
-{
-  constructor(
-    readonly resource: URI,
-    @IFileService protected readonly fileService: IFileService,
-  ) {
-    super()
+export abstract class ResourceWorkingCopy extends Disposable implements IResourceWorkingCopy {
 
-    this._register(
-      this.fileService.onDidFilesChange((e) => this.onDidFilesChange(e)),
-    )
-  }
+	constructor(
+		readonly resource: URI,
+		@IFileService protected readonly fileService: IFileService
+	) {
+		super();
 
-  //#region Orphaned Tracking
+		this._register(this.fileService.onDidFilesChange(e => this.onDidFilesChange(e)));
+	}
 
-  private readonly _onDidChangeOrphaned = this._register(new Emitter<void>())
-  readonly onDidChangeOrphaned = this._onDidChangeOrphaned.event
+	//#region Orphaned Tracking
 
-  private orphaned = false
+	private readonly _onDidChangeOrphaned = this._register(new Emitter<void>());
+	readonly onDidChangeOrphaned = this._onDidChangeOrphaned.event;
 
-  isOrphaned(): boolean {
-    return this.orphaned
-  }
+	private orphaned = false;
 
-  private async onDidFilesChange(e: FileChangesEvent): Promise<void> {
-    let fileEventImpactsUs = false
-    let newInOrphanModeGuess: boolean | undefined
+	isOrphaned(): boolean {
+		return this.orphaned;
+	}
 
-    // If we are currently orphaned, we check if the file was added back
-    if (this.orphaned) {
-      const fileWorkingCopyResourceAdded = e.contains(
-        this.resource,
-        FileChangeType.ADDED,
-      )
-      if (fileWorkingCopyResourceAdded) {
-        newInOrphanModeGuess = false
-        fileEventImpactsUs = true
-      }
-    }
+	private async onDidFilesChange(e: FileChangesEvent): Promise<void> {
+		let fileEventImpactsUs = false;
+		let newInOrphanModeGuess: boolean | undefined;
 
-    // Otherwise we check if the file was deleted
-    else {
-      const fileWorkingCopyResourceDeleted = e.contains(
-        this.resource,
-        FileChangeType.DELETED,
-      )
-      if (fileWorkingCopyResourceDeleted) {
-        newInOrphanModeGuess = true
-        fileEventImpactsUs = true
-      }
-    }
+		// If we are currently orphaned, we check if the file was added back
+		if (this.orphaned) {
+			const fileWorkingCopyResourceAdded = e.contains(this.resource, FileChangeType.ADDED);
+			if (fileWorkingCopyResourceAdded) {
+				newInOrphanModeGuess = false;
+				fileEventImpactsUs = true;
+			}
+		}
 
-    if (fileEventImpactsUs && this.orphaned !== newInOrphanModeGuess) {
-      let newInOrphanModeValidated: boolean = false
-      if (newInOrphanModeGuess) {
-        // We have received reports of users seeing delete events even though the file still
-        // exists (network shares issue: https://github.com/microsoft/vscode/issues/13665).
-        // Since we do not want to mark the working copy as orphaned, we have to check if the
-        // file is really gone and not just a faulty file event.
-        await timeout(100, CancellationToken.None)
+		// Otherwise we check if the file was deleted
+		else {
+			const fileWorkingCopyResourceDeleted = e.contains(this.resource, FileChangeType.DELETED);
+			if (fileWorkingCopyResourceDeleted) {
+				newInOrphanModeGuess = true;
+				fileEventImpactsUs = true;
+			}
+		}
 
-        if (this.isDisposed()) {
-          newInOrphanModeValidated = true
-        } else {
-          const exists = await this.fileService.exists(this.resource)
-          newInOrphanModeValidated = !exists
-        }
-      }
+		if (fileEventImpactsUs && this.orphaned !== newInOrphanModeGuess) {
+			let newInOrphanModeValidated: boolean = false;
+			if (newInOrphanModeGuess) {
 
-      if (this.orphaned !== newInOrphanModeValidated && !this.isDisposed()) {
-        this.setOrphaned(newInOrphanModeValidated)
-      }
-    }
-  }
+				// We have received reports of users seeing delete events even though the file still
+				// exists (network shares issue: https://github.com/microsoft/vscode/issues/13665).
+				// Since we do not want to mark the working copy as orphaned, we have to check if the
+				// file is really gone and not just a faulty file event.
+				await timeout(100, CancellationToken.None);
 
-  protected setOrphaned(orphaned: boolean): void {
-    if (this.orphaned !== orphaned) {
-      this.orphaned = orphaned
+				if (this.isDisposed()) {
+					newInOrphanModeValidated = true;
+				} else {
+					const exists = await this.fileService.exists(this.resource);
+					newInOrphanModeValidated = !exists;
+				}
+			}
 
-      this._onDidChangeOrphaned.fire()
-    }
-  }
+			if (this.orphaned !== newInOrphanModeValidated && !this.isDisposed()) {
+				this.setOrphaned(newInOrphanModeValidated);
+			}
+		}
+	}
 
-  //#endregion
+	protected setOrphaned(orphaned: boolean): void {
+		if (this.orphaned !== orphaned) {
+			this.orphaned = orphaned;
 
-  //#region Dispose
+			this._onDidChangeOrphaned.fire();
+		}
+	}
 
-  private readonly _onWillDispose = this._register(new Emitter<void>())
-  readonly onWillDispose = this._onWillDispose.event
+	//#endregion
 
-  isDisposed(): boolean {
-    return this._store.isDisposed
-  }
 
-  override dispose(): void {
-    // State
-    this.orphaned = false
+	//#region Dispose
 
-    // Event
-    this._onWillDispose.fire()
+	private readonly _onWillDispose = this._register(new Emitter<void>());
+	readonly onWillDispose = this._onWillDispose.event;
 
-    super.dispose()
-  }
+	isDisposed(): boolean {
+		return this._store.isDisposed;
+	}
 
-  //#endregion
+	override dispose(): void {
 
-  //#region Modified Tracking
+		// State
+		this.orphaned = false;
 
-  isModified(): boolean {
-    return this.isDirty()
-  }
+		// Event
+		this._onWillDispose.fire();
 
-  //#endregion
+		super.dispose();
+	}
 
-  //#region Abstract
+	//#endregion
 
-  abstract typeId: string
-  abstract name: string
-  abstract capabilities: WorkingCopyCapabilities
+	//#region Modified Tracking
 
-  abstract onDidChangeDirty: Event<void>
-  abstract onDidChangeContent: Event<void>
-  abstract onDidSave: Event<IWorkingCopySaveEvent>
+	isModified(): boolean {
+		return this.isDirty();
+	}
 
-  abstract isDirty(): boolean
+	//#endregion
 
-  abstract backup(token: CancellationToken): Promise<IWorkingCopyBackup>
-  abstract save(options?: ISaveOptions): Promise<boolean>
-  abstract revert(options?: IRevertOptions): Promise<void>
+	//#region Abstract
 
-  //#endregion
+	abstract typeId: string;
+	abstract name: string;
+	abstract capabilities: WorkingCopyCapabilities;
+
+	abstract onDidChangeDirty: Event<void>;
+	abstract onDidChangeContent: Event<void>;
+	abstract onDidSave: Event<IWorkingCopySaveEvent>;
+
+	abstract isDirty(): boolean;
+
+	abstract backup(token: CancellationToken): Promise<IWorkingCopyBackup>;
+	abstract save(options?: ISaveOptions): Promise<boolean>;
+	abstract revert(options?: IRevertOptions): Promise<void>;
+
+	//#endregion
 }

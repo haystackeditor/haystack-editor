@@ -104,7 +104,7 @@ function getLanguageServiceHost(scriptKind: ts.ScriptKind) {
       getDefaultLibFileName: (_options: ts.CompilerOptions) => "es2020.full",
       readFile: (
         path: string,
-        _encoding?: string | undefined,
+        _encoding?: string | undefined
       ): string | undefined => {
         if (path === currentTextDocument.uri) {
           return currentTextDocument.getText()
@@ -132,7 +132,7 @@ function getLanguageServiceHost(scriptKind: ts.ScriptKind) {
   })
   return {
     async getLanguageService(
-      jsDocument: TextDocument,
+      jsDocument: TextDocument
     ): Promise<ts.LanguageService> {
       currentTextDocument = jsDocument
       return jsLanguageService
@@ -154,14 +154,14 @@ const ignoredErrors = [
 export function getJavaScriptMode(
   documentRegions: LanguageModelCache<HTMLDocumentRegions>,
   languageId: "javascript" | "typescript",
-  workspace: Workspace,
+  workspace: Workspace
 ): LanguageMode {
   const jsDocuments = getLanguageModelCache<TextDocument>(10, 60, (document) =>
-    documentRegions.get(document).getEmbeddedDocument(languageId),
+    documentRegions.get(document).getEmbeddedDocument(languageId)
   )
 
   const host = getLanguageServiceHost(
-    languageId === "javascript" ? ts.ScriptKind.JS : ts.ScriptKind.TS,
+    languageId === "javascript" ? ts.ScriptKind.JS : ts.ScriptKind.TS
   )
   const globalSettings: Settings = {}
 
@@ -179,7 +179,7 @@ export function getJavaScriptMode(
     },
     async doValidation(
       document: TextDocument,
-      settings = workspace.settings,
+      settings = workspace.settings
     ): Promise<Diagnostic[]> {
       updateHostSettings(settings)
 
@@ -188,7 +188,7 @@ export function getJavaScriptMode(
       const syntaxDiagnostics: ts.Diagnostic[] =
         languageService.getSyntacticDiagnostics(jsDocument.uri)
       const semanticDiagnostics = languageService.getSemanticDiagnostics(
-        jsDocument.uri,
+        jsDocument.uri
       )
       return syntaxDiagnostics
         .concat(semanticDiagnostics)
@@ -205,7 +205,7 @@ export function getJavaScriptMode(
     async doComplete(
       document: TextDocument,
       position: Position,
-      _documentContext: DocumentContext,
+      _documentContext: DocumentContext
     ): Promise<CompletionList> {
       const jsDocument = jsDocuments.get(document)
       const jsLanguageService = await host.getLanguageService(jsDocument)
@@ -216,14 +216,14 @@ export function getJavaScriptMode(
         {
           includeExternalModuleExports: false,
           includeInsertTextCompletions: false,
-        },
+        }
       )
       if (!completions) {
         return { isIncomplete: false, items: [] }
       }
       const replaceRange = convertRange(
         jsDocument,
-        getWordAtText(jsDocument.getText(), offset, JS_WORD_REGEX),
+        getWordAtText(jsDocument.getText(), offset, JS_WORD_REGEX)
       )
       return {
         isIncomplete: false,
@@ -248,7 +248,7 @@ export function getJavaScriptMode(
     },
     async doResolve(
       document: TextDocument,
-      item: CompletionItem,
+      item: CompletionItem
     ): Promise<CompletionItem> {
       if (isCompletionItemData(item.data)) {
         const jsDocument = jsDocuments.get(document)
@@ -260,7 +260,7 @@ export function getJavaScriptMode(
           undefined,
           undefined,
           undefined,
-          undefined,
+          undefined
         )
         if (details) {
           item.detail = ts.displayPartsToString(details.displayParts)
@@ -272,13 +272,13 @@ export function getJavaScriptMode(
     },
     async doHover(
       document: TextDocument,
-      position: Position,
+      position: Position
     ): Promise<Hover | null> {
       const jsDocument = jsDocuments.get(document)
       const jsLanguageService = await host.getLanguageService(jsDocument)
       const info = jsLanguageService.getQuickInfoAtPosition(
         jsDocument.uri,
-        jsDocument.offsetAt(position),
+        jsDocument.offsetAt(position)
       )
       if (info) {
         const contents = ts.displayPartsToString(info.displayParts)
@@ -291,14 +291,14 @@ export function getJavaScriptMode(
     },
     async doSignatureHelp(
       document: TextDocument,
-      position: Position,
+      position: Position
     ): Promise<SignatureHelp | null> {
       const jsDocument = jsDocuments.get(document)
       const jsLanguageService = await host.getLanguageService(jsDocument)
       const signHelp = jsLanguageService.getSignatureHelpItems(
         jsDocument.uri,
         jsDocument.offsetAt(position),
-        undefined,
+        undefined
       )
       if (signHelp) {
         const ret: SignatureHelp = {
@@ -324,7 +324,7 @@ export function getJavaScriptMode(
             signature.parameters!.push(parameter)
             if (i < a.length - 1) {
               signature.label += ts.displayPartsToString(
-                item.separatorDisplayParts,
+                item.separatorDisplayParts
               )
             }
           })
@@ -338,14 +338,14 @@ export function getJavaScriptMode(
     async doRename(
       document: TextDocument,
       position: Position,
-      newName: string,
+      newName: string
     ) {
       const jsDocument = jsDocuments.get(document)
       const jsLanguageService = await host.getLanguageService(jsDocument)
       const jsDocumentPosition = jsDocument.offsetAt(position)
       const { canRename } = jsLanguageService.getRenameInfo(
         jsDocument.uri,
-        jsDocumentPosition,
+        jsDocumentPosition
       )
       if (!canRename) {
         return null
@@ -354,7 +354,7 @@ export function getJavaScriptMode(
         jsDocument.uri,
         jsDocumentPosition,
         false,
-        false,
+        false
       )
 
       const edits: TextEdit[] = []
@@ -371,14 +371,14 @@ export function getJavaScriptMode(
     },
     async findDocumentHighlight(
       document: TextDocument,
-      position: Position,
+      position: Position
     ): Promise<DocumentHighlight[]> {
       const jsDocument = jsDocuments.get(document)
       const jsLanguageService = await host.getLanguageService(jsDocument)
       const highlights = jsLanguageService.getDocumentHighlights(
         jsDocument.uri,
         jsDocument.offsetAt(position),
-        [jsDocument.uri],
+        [jsDocument.uri]
       )
       const out: DocumentHighlight[] = []
       for (const entry of highlights || []) {
@@ -395,7 +395,7 @@ export function getJavaScriptMode(
       return out
     },
     async findDocumentSymbols(
-      document: TextDocument,
+      document: TextDocument
     ): Promise<SymbolInformation[]> {
       const jsDocument = jsDocuments.get(document)
       const jsLanguageService = await host.getLanguageService(jsDocument)
@@ -405,7 +405,7 @@ export function getJavaScriptMode(
         const existing = Object.create(null)
         const collectSymbols = (
           item: ts.NavigationBarItem,
-          containerLabel?: string,
+          containerLabel?: string
         ) => {
           const sig = item.text + item.kind + item.spans[0].start
           if (item.kind !== "script" && !existing[sig]) {
@@ -437,13 +437,13 @@ export function getJavaScriptMode(
     },
     async findDefinition(
       document: TextDocument,
-      position: Position,
+      position: Position
     ): Promise<Definition | null> {
       const jsDocument = jsDocuments.get(document)
       const jsLanguageService = await host.getLanguageService(jsDocument)
       const definition = jsLanguageService.getDefinitionAtPosition(
         jsDocument.uri,
-        jsDocument.offsetAt(position),
+        jsDocument.offsetAt(position)
       )
       if (definition) {
         return definition
@@ -459,13 +459,13 @@ export function getJavaScriptMode(
     },
     async findReferences(
       document: TextDocument,
-      position: Position,
+      position: Position
     ): Promise<Location[]> {
       const jsDocument = jsDocuments.get(document)
       const jsLanguageService = await host.getLanguageService(jsDocument)
       const references = jsLanguageService.getReferencesAtPosition(
         jsDocument.uri,
-        jsDocument.offsetAt(position),
+        jsDocument.offsetAt(position)
       )
       if (references) {
         return references
@@ -481,24 +481,24 @@ export function getJavaScriptMode(
     },
     async getSelectionRange(
       document: TextDocument,
-      position: Position,
+      position: Position
     ): Promise<SelectionRange> {
       const jsDocument = jsDocuments.get(document)
       const jsLanguageService = await host.getLanguageService(jsDocument)
       function convertSelectionRange(
-        selectionRange: ts.SelectionRange,
+        selectionRange: ts.SelectionRange
       ): SelectionRange {
         const parent = selectionRange.parent
           ? convertSelectionRange(selectionRange.parent)
           : undefined
         return SelectionRange.create(
           convertRange(jsDocument, selectionRange.textSpan),
-          parent,
+          parent
         )
       }
       const range = jsLanguageService.getSmartSelectionRange(
         jsDocument.uri,
-        jsDocument.offsetAt(position),
+        jsDocument.offsetAt(position)
       )
       return convertSelectionRange(range)
     },
@@ -506,7 +506,7 @@ export function getJavaScriptMode(
       document: TextDocument,
       range: Range,
       formatParams: FormattingOptions,
-      settings: Settings = globalSettings,
+      settings: Settings = globalSettings
     ): Promise<TextEdit[]> {
       const jsDocument = documentRegions
         .get(document)
@@ -519,12 +519,12 @@ export function getJavaScriptMode(
       const initialIndentLevel = computeInitialIndent(
         document,
         range,
-        formatParams,
+        formatParams
       )
       const formatSettings = convertOptions(
         formatParams,
         formatterSettings,
-        initialIndentLevel + 1,
+        initialIndentLevel + 1
       )
       const start = jsDocument.offsetAt(range.start)
       let end = jsDocument.offsetAt(range.end)
@@ -535,20 +535,20 @@ export function getJavaScriptMode(
           isWhitespaceOnly(
             jsDocument
               .getText()
-              .substr(end - range.end.character, range.end.character),
+              .substr(end - range.end.character, range.end.character)
           ))
       ) {
         end -= range.end.character
         lastLineRange = Range.create(
           Position.create(range.end.line, 0),
-          range.end,
+          range.end
         )
       }
       const edits = jsLanguageService.getFormattingEditsForRange(
         jsDocument.uri,
         start,
         end,
-        formatSettings,
+        formatSettings
       )
       if (edits) {
         const result = []
@@ -601,7 +601,7 @@ export function getJavaScriptMode(
       jsDocuments.onDocumentRemoved(document)
     },
     async getSemanticTokens(
-      document: TextDocument,
+      document: TextDocument
     ): Promise<SemanticTokenData[]> {
       const jsDocument = jsDocuments.get(document)
       const jsLanguageService = await host.getLanguageService(jsDocument)
@@ -621,7 +621,7 @@ export function getJavaScriptMode(
 
 function convertRange(
   document: TextDocument,
-  span: { start: number | undefined; length: number | undefined },
+  span: { start: number | undefined; length: number | undefined }
 ): Range {
   if (typeof span.start === "undefined") {
     const pos = document.positionAt(0)
@@ -781,7 +781,7 @@ function convertSymbolKind(kind: string): SymbolKind {
 function convertOptions(
   options: FormattingOptions,
   formatSettings: any,
-  initialIndentLevel: number,
+  initialIndentLevel: number
 ): ts.FormatCodeSettings {
   return {
     convertTabsToSpaces: options.insertSpaces,
@@ -791,62 +791,60 @@ function convertOptions(
     newLineCharacter: "\n",
     baseIndentSize: options.tabSize * initialIndentLevel,
     insertSpaceAfterCommaDelimiter: Boolean(
-      !formatSettings || formatSettings.insertSpaceAfterCommaDelimiter,
+      !formatSettings || formatSettings.insertSpaceAfterCommaDelimiter
     ),
     insertSpaceAfterConstructor: Boolean(
-      formatSettings && formatSettings.insertSpaceAfterConstructor,
+      formatSettings && formatSettings.insertSpaceAfterConstructor
     ),
     insertSpaceAfterSemicolonInForStatements: Boolean(
-      !formatSettings ||
-        formatSettings.insertSpaceAfterSemicolonInForStatements,
+      !formatSettings || formatSettings.insertSpaceAfterSemicolonInForStatements
     ),
     insertSpaceBeforeAndAfterBinaryOperators: Boolean(
-      !formatSettings ||
-        formatSettings.insertSpaceBeforeAndAfterBinaryOperators,
+      !formatSettings || formatSettings.insertSpaceBeforeAndAfterBinaryOperators
     ),
     insertSpaceAfterKeywordsInControlFlowStatements: Boolean(
       !formatSettings ||
-        formatSettings.insertSpaceAfterKeywordsInControlFlowStatements,
+        formatSettings.insertSpaceAfterKeywordsInControlFlowStatements
     ),
     insertSpaceAfterFunctionKeywordForAnonymousFunctions: Boolean(
       !formatSettings ||
-        formatSettings.insertSpaceAfterFunctionKeywordForAnonymousFunctions,
+        formatSettings.insertSpaceAfterFunctionKeywordForAnonymousFunctions
     ),
     insertSpaceBeforeFunctionParenthesis: Boolean(
-      formatSettings && formatSettings.insertSpaceBeforeFunctionParenthesis,
+      formatSettings && formatSettings.insertSpaceBeforeFunctionParenthesis
     ),
     insertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis: Boolean(
       formatSettings &&
-        formatSettings.insertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis,
+        formatSettings.insertSpaceAfterOpeningAndBeforeClosingNonemptyParenthesis
     ),
     insertSpaceAfterOpeningAndBeforeClosingNonemptyBrackets: Boolean(
       formatSettings &&
-        formatSettings.insertSpaceAfterOpeningAndBeforeClosingNonemptyBrackets,
+        formatSettings.insertSpaceAfterOpeningAndBeforeClosingNonemptyBrackets
     ),
     insertSpaceAfterOpeningAndBeforeClosingNonemptyBraces: Boolean(
       formatSettings &&
-        formatSettings.insertSpaceAfterOpeningAndBeforeClosingNonemptyBraces,
+        formatSettings.insertSpaceAfterOpeningAndBeforeClosingNonemptyBraces
     ),
     insertSpaceAfterOpeningAndBeforeClosingEmptyBraces: Boolean(
       !formatSettings ||
-        formatSettings.insertSpaceAfterOpeningAndBeforeClosingEmptyBraces,
+        formatSettings.insertSpaceAfterOpeningAndBeforeClosingEmptyBraces
     ),
     insertSpaceAfterOpeningAndBeforeClosingTemplateStringBraces: Boolean(
       formatSettings &&
-        formatSettings.insertSpaceAfterOpeningAndBeforeClosingTemplateStringBraces,
+        formatSettings.insertSpaceAfterOpeningAndBeforeClosingTemplateStringBraces
     ),
     insertSpaceAfterOpeningAndBeforeClosingJsxExpressionBraces: Boolean(
       formatSettings &&
-        formatSettings.insertSpaceAfterOpeningAndBeforeClosingJsxExpressionBraces,
+        formatSettings.insertSpaceAfterOpeningAndBeforeClosingJsxExpressionBraces
     ),
     insertSpaceAfterTypeAssertion: Boolean(
-      formatSettings && formatSettings.insertSpaceAfterTypeAssertion,
+      formatSettings && formatSettings.insertSpaceAfterTypeAssertion
     ),
     placeOpenBraceOnNewLineForControlBlocks: Boolean(
-      formatSettings && formatSettings.placeOpenBraceOnNewLineForFunctions,
+      formatSettings && formatSettings.placeOpenBraceOnNewLineForFunctions
     ),
     placeOpenBraceOnNewLineForFunctions: Boolean(
-      formatSettings && formatSettings.placeOpenBraceOnNewLineForControlBlocks,
+      formatSettings && formatSettings.placeOpenBraceOnNewLineForControlBlocks
     ),
     semicolons: formatSettings?.semicolons,
   }
@@ -855,7 +853,7 @@ function convertOptions(
 function computeInitialIndent(
   document: TextDocument,
   range: Range,
-  options: FormattingOptions,
+  options: FormattingOptions
 ) {
   const lineStart = document.offsetAt(Position.create(range.start.line, 0))
   const content = document.getText()

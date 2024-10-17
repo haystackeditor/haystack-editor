@@ -46,7 +46,7 @@ import { EditorContextKeys } from "vs/editor/common/editorContextKeys"
 //#region Quick Access Proviers
 
 const quickAccessRegistry = Registry.as<IQuickAccessRegistry>(
-  Extensions.Quickaccess,
+  Extensions.Quickaccess
 )
 
 quickAccessRegistry.registerQuickAccessProvider({
@@ -55,13 +55,13 @@ quickAccessRegistry.registerQuickAccessProvider({
   placeholder: localize(
     "helpQuickAccessPlaceholder",
     "Type '{0}' to get help on the actions you can take from here.",
-    HelpQuickAccessProvider.PREFIX,
+    HelpQuickAccessProvider.PREFIX
   ),
   helpEntries: [
     {
       description: localize(
         "helpQuickAccess",
-        "Show all Quick Access Providers",
+        "Show all Quick Access Providers"
       ),
       commandCenterOrder: 70,
       commandCenterLabel: localize("more", "More"),
@@ -75,7 +75,7 @@ quickAccessRegistry.registerQuickAccessProvider({
   contextKey: "inViewsPicker",
   placeholder: localize(
     "viewQuickAccessPlaceholder",
-    "Type the name of a view, output channel or terminal to open.",
+    "Type the name of a view, output channel or terminal to open."
   ),
   helpEntries: [
     {
@@ -91,7 +91,7 @@ quickAccessRegistry.registerQuickAccessProvider({
   contextKey: "inCommandsPicker",
   placeholder: localize(
     "commandsQuickAccessPlaceholder",
-    "Type the name of a command to run.",
+    "Type the name of a command to run."
   ),
   helpEntries: [
     {
@@ -112,7 +112,7 @@ MenuRegistry.appendMenuItem(MenuId.MenubarViewMenu, {
     id: ShowAllCommandsAction.ID,
     title: localize(
       { key: "miCommandPalette", comment: ["&& denotes a mnemonic"] },
-      "&&Command Palette...",
+      "&&Command Palette..."
     ),
   },
   order: 1,
@@ -124,7 +124,7 @@ MenuRegistry.appendMenuItem(MenuId.MenubarHelpMenu, {
     id: ShowAllCommandsAction.ID,
     title: localize(
       { key: "miShowAllCommands", comment: ["&& denotes a mnemonic"] },
-      "Show All Commands",
+      "Show All Commands"
     ),
   },
   order: 2,
@@ -136,7 +136,7 @@ MenuRegistry.appendMenuItem(MenuId.MenubarViewMenu, {
     id: OpenViewPickerAction.ID,
     title: localize(
       { key: "miOpenView", comment: ["&& denotes a mnemonic"] },
-      "&&Open View...",
+      "&&Open View..."
     ),
   },
   order: 2,
@@ -148,7 +148,7 @@ MenuRegistry.appendMenuItem(MenuId.MenubarGoMenu, {
     id: "workbench.action.gotoLine",
     title: localize(
       { key: "miGotoLine", comment: ["&& denotes a mnemonic"] },
-      "Go to &&Line/Column...",
+      "Go to &&Line/Column..."
     ),
   },
   order: 1,
@@ -185,7 +185,7 @@ registerAction2(QuickAccessViewPickerAction)
 const inViewsPickerContextKey = "inViewsPicker"
 const inViewsPickerContext = ContextKeyExpr.and(
   inQuickPickContext,
-  ContextKeyExpr.has(inViewsPickerContextKey),
+  ContextKeyExpr.has(inViewsPickerContextKey)
 )
 const viewPickerKeybinding = QuickAccessViewPickerAction.KEYBINDING
 
@@ -208,7 +208,7 @@ KeybindingsRegistry.registerCommandAndKeybindingRule({
   weight: KeybindingWeight.WorkbenchContrib + 50,
   handler: getQuickNavigateHandler(
     quickAccessNavigatePreviousInViewPickerId,
-    false,
+    false
   ),
   when: inViewsPickerContext,
   primary: viewPickerKeybinding.primary | KeyMod.Shift,

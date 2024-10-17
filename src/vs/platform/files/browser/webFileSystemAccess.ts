@@ -15,38 +15,29 @@
  * Use `supported(window)` to find out if the browser supports this kind of API.
  */
 export namespace WebFileSystemAccess {
-  export function supported(obj: any & Window): boolean {
-    if (typeof obj?.showDirectoryPicker === "function") {
-      return true
-    }
 
-    return false
-  }
+	export function supported(obj: any & Window): boolean {
+		if (typeof obj?.showDirectoryPicker === 'function') {
+			return true;
+		}
 
-  export function isFileSystemHandle(
-    handle: unknown,
-  ): handle is FileSystemHandle {
-    const candidate = handle as FileSystemHandle | undefined
-    if (!candidate) {
-      return false
-    }
+		return false;
+	}
 
-    return (
-      typeof candidate.kind === "string" &&
-      typeof candidate.queryPermission === "function" &&
-      typeof candidate.requestPermission === "function"
-    )
-  }
+	export function isFileSystemHandle(handle: unknown): handle is FileSystemHandle {
+		const candidate = handle as FileSystemHandle | undefined;
+		if (!candidate) {
+			return false;
+		}
 
-  export function isFileSystemFileHandle(
-    handle: FileSystemHandle,
-  ): handle is FileSystemFileHandle {
-    return handle.kind === "file"
-  }
+		return typeof candidate.kind === 'string' && typeof candidate.queryPermission === 'function' && typeof candidate.requestPermission === 'function';
+	}
 
-  export function isFileSystemDirectoryHandle(
-    handle: FileSystemHandle,
-  ): handle is FileSystemDirectoryHandle {
-    return handle.kind === "directory"
-  }
+	export function isFileSystemFileHandle(handle: FileSystemHandle): handle is FileSystemFileHandle {
+		return handle.kind === 'file';
+	}
+
+	export function isFileSystemDirectoryHandle(handle: FileSystemHandle): handle is FileSystemDirectoryHandle {
+		return handle.kind === 'directory';
+	}
 }

@@ -31,8 +31,8 @@ export class ContextViewHandler
   protected readonly contextView = this._register(
     new ContextView(
       this.layoutService.mainContainer,
-      ContextViewDOMPosition.ABSOLUTE,
-    ),
+      ContextViewDOMPosition.ABSOLUTE
+    )
   )
 
   constructor(@ILayoutService private readonly layoutService: ILayoutService) {
@@ -47,7 +47,7 @@ export class ContextViewHandler
   showContextView(
     delegate: IContextViewDelegate,
     container?: HTMLElement,
-    shadowRoot?: boolean,
+    shadowRoot?: boolean
   ): IOpenContextView {
     let domPosition: ContextViewDOMPosition
     if (container) {
@@ -64,7 +64,7 @@ export class ContextViewHandler
 
     this.contextView.setContainer(
       container ?? this.layoutService.activeContainer,
-      domPosition,
+      domPosition
     )
 
     this.contextView.show(delegate)

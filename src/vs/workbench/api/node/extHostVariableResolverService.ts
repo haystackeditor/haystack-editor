@@ -9,11 +9,11 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { homedir } from "os"
-import { ExtHostVariableResolverProviderService } from "vs/workbench/api/common/extHostVariableResolverService"
+import { homedir } from 'os';
+import { ExtHostVariableResolverProviderService } from 'vs/workbench/api/common/extHostVariableResolverService';
 
 export class NodeExtHostVariableResolverProviderService extends ExtHostVariableResolverProviderService {
-  protected override homeDir(): string | undefined {
-    return homedir()
-  }
+	protected override homeDir(): string | undefined {
+		return homedir();
+	}
 }

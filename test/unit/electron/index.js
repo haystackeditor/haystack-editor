@@ -105,7 +105,7 @@ if (crashReporterDirectory) {
 
   if (!path.isAbsolute(crashReporterDirectory)) {
     console.error(
-      `The path '${crashReporterDirectory}' specified for --crash-reporter-directory must be absolute.`,
+      `The path '${crashReporterDirectory}' specified for --crash-reporter-directory must be absolute.`
     )
     app.exit(1)
   }
@@ -115,7 +115,7 @@ if (crashReporterDirectory) {
       mkdirSync(crashReporterDirectory)
     } catch (error) {
       console.error(
-        `The path '${crashReporterDirectory}' specified for --crash-reporter-directory does not seem to exist or cannot be created.`,
+        `The path '${crashReporterDirectory}' specified for --crash-reporter-directory does not seem to exist or cannot be created.`
       )
       app.exit(1)
     }
@@ -124,7 +124,7 @@ if (crashReporterDirectory) {
   // Crashes are stored in the crashDumps directory by default, so we
   // need to change that directory to the provided one
   console.log(
-    `Found --crash-reporter-directory argument. Setting crashDumps directory to be '${crashReporterDirectory}'`,
+    `Found --crash-reporter-directory argument. Setting crashDumps directory to be '${crashReporterDirectory}'`
   )
   app.setPath("crashDumps", crashReporterDirectory)
 
@@ -199,32 +199,32 @@ class IPCRunner extends events.EventEmitter {
       this.emit("end")
     })
     ipcMain.on("suite", (e, suite) =>
-      this.emit("suite", deserializeSuite(suite)),
+      this.emit("suite", deserializeSuite(suite))
     )
     ipcMain.on("suite end", (e, suite) =>
-      this.emit("suite end", deserializeSuite(suite)),
+      this.emit("suite end", deserializeSuite(suite))
     )
     ipcMain.on("test", (e, test) =>
-      this.emit("test", deserializeRunnable(test)),
+      this.emit("test", deserializeRunnable(test))
     )
     ipcMain.on("test end", (e, test) =>
-      this.emit("test end", deserializeRunnable(test)),
+      this.emit("test end", deserializeRunnable(test))
     )
     ipcMain.on("hook", (e, hook) =>
-      this.emit("hook", deserializeRunnable(hook)),
+      this.emit("hook", deserializeRunnable(hook))
     )
     ipcMain.on("hook end", (e, hook) =>
-      this.emit("hook end", deserializeRunnable(hook)),
+      this.emit("hook end", deserializeRunnable(hook))
     )
     ipcMain.on("pass", (e, test) =>
-      this.emit("pass", deserializeRunnable(test)),
+      this.emit("pass", deserializeRunnable(test))
     )
     ipcMain.on("fail", (e, test, err) => {
       this.didFail = true
       this.emit("fail", deserializeRunnable(test), deserializeError(err))
     })
     ipcMain.on("pending", (e, test) =>
-      this.emit("pending", deserializeRunnable(test)),
+      this.emit("pending", deserializeRunnable(test))
     )
 
     ipcMain.handle("startCoverage", async () => {
@@ -236,14 +236,14 @@ class IPCRunner extends events.EventEmitter {
         {
           detailed: true,
           allowTriggeredUpdates: false,
-        },
+        }
       )
     })
 
     const coverageScriptsReported = new Set()
     ipcMain.handle("snapshotCoverage", async (_, test) => {
       const coverage = await win.webContents.debugger.sendCommand(
-        "Profiler.takePreciseCoverage",
+        "Profiler.takePreciseCoverage"
       )
       await Promise.all(
         coverage.result.map(async (r) => {
@@ -251,11 +251,11 @@ class IPCRunner extends events.EventEmitter {
             coverageScriptsReported.add(r.scriptId)
             const src = await win.webContents.debugger.sendCommand(
               "Debugger.getScriptSource",
-              { scriptId: r.scriptId },
+              { scriptId: r.scriptId }
             )
             r.source = src.scriptSource
           }
-        }),
+        })
       )
 
       if (!test) {
@@ -310,7 +310,7 @@ app.on("ready", () => {
         "parts",
         "sandbox",
         "electron-sandbox",
-        "preload.js",
+        "preload.js"
       ), // ensure similar environment as VSCode as tests may depend on this
       additionalArguments: [
         `--vscode-window-config=vscode:test-vscode-window-config`,
@@ -371,7 +371,7 @@ app.on("ready", () => {
       pathname: path.join(__dirname, "renderer.html"),
       protocol: "file:",
       slashes: true,
-    }),
+    })
   )
 
   const runner = new IPCRunner(win)
@@ -398,11 +398,11 @@ app.on("ready", () => {
                 process.env.BUILD_ARTIFACTSTAGINGDIRECTORY,
                 `test-results/${process.platform}-${process.arch}-${args.tfs
                   .toLowerCase()
-                  .replace(/[^\w]/g, "-")}-results.xml`,
+                  .replace(/[^\w]/g, "-")}-results.xml`
               )
             : undefined,
         },
-      }),
+      })
     )
   } else {
     // mocha patches symbols to use windows escape codes, but it seems like

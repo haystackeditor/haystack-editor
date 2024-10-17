@@ -24,7 +24,7 @@ let contextMenuIdPool = 0
 export function popup(
   items: IContextMenuItem[],
   options?: IPopupOptions,
-  onHide?: () => void,
+  onHide?: () => void
 ): void {
   const processedItems: IContextMenuItem[] = []
 
@@ -33,7 +33,7 @@ export function popup(
   const onClickChannelHandler = (
     event: unknown,
     itemId: number,
-    context: IContextMenuEvent,
+    context: IContextMenuEvent
   ) => {
     const item = processedItems[itemId]
     item.click?.(context)
@@ -50,7 +50,7 @@ export function popup(
       ipcRenderer.removeListener(onClickChannel, onClickChannelHandler)
 
       onHide?.()
-    },
+    }
   )
 
   ipcRenderer.send(
@@ -58,13 +58,13 @@ export function popup(
     contextMenuId,
     items.map((item) => createItem(item, processedItems)),
     onClickChannel,
-    options,
+    options
   )
 }
 
 function createItem(
   item: IContextMenuItem,
-  processedItems: IContextMenuItem[],
+  processedItems: IContextMenuItem[]
 ): ISerializableContextMenuItem {
   const serializableItem: ISerializableContextMenuItem = {
     id: processedItems.length,
@@ -81,7 +81,7 @@ function createItem(
   // Submenu
   if (Array.isArray(item.submenu)) {
     serializableItem.submenu = item.submenu.map((submenuItem) =>
-      createItem(submenuItem, processedItems),
+      createItem(submenuItem, processedItems)
     )
   }
 

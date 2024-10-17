@@ -9,16 +9,9 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { NativeWorkingCopyHistoryService } from "vs/workbench/services/workingCopy/common/workingCopyHistoryService"
-import {
-  InstantiationType,
-  registerSingleton,
-} from "vs/platform/instantiation/common/extensions"
-import { IWorkingCopyHistoryService } from "vs/workbench/services/workingCopy/common/workingCopyHistory"
+import { NativeWorkingCopyHistoryService } from 'vs/workbench/services/workingCopy/common/workingCopyHistoryService';
+import { InstantiationType, registerSingleton } from 'vs/platform/instantiation/common/extensions';
+import { IWorkingCopyHistoryService } from 'vs/workbench/services/workingCopy/common/workingCopyHistory';
 
 // Register Service
-registerSingleton(
-  IWorkingCopyHistoryService,
-  NativeWorkingCopyHistoryService,
-  InstantiationType.Delayed,
-)
+registerSingleton(IWorkingCopyHistoryService, NativeWorkingCopyHistoryService, InstantiationType.Delayed);

@@ -40,11 +40,11 @@ export function FeedbackButton({}: FeedbackButtonProps) {
           <button
             onClick={() => {
               WorkspaceStoreWrapper.getWorkspaceState().sendTelemetry(
-                "Email opened",
+                "Email opened"
               )
               WorkspaceStoreWrapper.getWorkspaceState().openUrl(
                 "mailto:akshaysg@haystackeditor.com",
-                true,
+                true
               )
             }}
             className="feedbackListButton"
@@ -54,11 +54,11 @@ export function FeedbackButton({}: FeedbackButtonProps) {
           <button
             onClick={() => {
               WorkspaceStoreWrapper.getWorkspaceState().sendTelemetry(
-                "Twitter link opened",
+                "Twitter link opened"
               )
               WorkspaceStoreWrapper.getWorkspaceState().openUrl(
                 "https://x.com/AkshaySubr42403",
-                true,
+                true
               )
             }}
             className="feedbackListButton"
@@ -68,11 +68,11 @@ export function FeedbackButton({}: FeedbackButtonProps) {
           <button
             onClick={() => {
               WorkspaceStoreWrapper.getWorkspaceState().sendTelemetry(
-                "Youtube link opened",
+                "Youtube link opened"
               )
               WorkspaceStoreWrapper.getWorkspaceState().openUrl(
                 "https://www.youtube.com/@HaystackEditor",
-                true,
+                true
               )
             }}
             className="feedbackListButton"
@@ -82,11 +82,11 @@ export function FeedbackButton({}: FeedbackButtonProps) {
           <button
             onClick={() => {
               WorkspaceStoreWrapper.getWorkspaceState().sendTelemetry(
-                "GitHub feedback opened",
+                "GitHub feedback opened"
               )
               WorkspaceStoreWrapper.getWorkspaceState().openUrl(
                 "https://github.com/AkshaySG14/haystack-public/issues",
-                true,
+                true
               )
             }}
             className="feedbackListButton"
@@ -96,11 +96,11 @@ export function FeedbackButton({}: FeedbackButtonProps) {
           <button
             onClick={() => {
               WorkspaceStoreWrapper.getWorkspaceState().sendTelemetry(
-                "Discord server opened",
+                "Discord server opened"
               )
               WorkspaceStoreWrapper.getWorkspaceState().openUrl(
                 "https://discord.gg/apFrN6ABxc",
-                true,
+                true
               )
             }}
             className="feedbackListButton"
@@ -114,7 +114,7 @@ export function FeedbackButton({}: FeedbackButtonProps) {
         onClick={() => {
           setOpen(!open)
           WorkspaceStoreWrapper.getWorkspaceState().sendTelemetry(
-            "Feedback list opened",
+            "Feedback list opened"
           )
         }}
       >

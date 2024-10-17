@@ -54,7 +54,7 @@
     // Await window configuration from preload
     const timeout = setTimeout(() => {
       console.error(
-        `[resolve window config] Could not resolve window configuration within 10 seconds, but will continue to wait...`,
+        `[resolve window config] Could not resolve window configuration within 10 seconds, but will continue to wait...`
       )
     }, 10000)
     performance.mark("code/willWaitForWindowConfig")
@@ -89,7 +89,7 @@
     let developerDeveloperKeybindingsDisposable
     if (enableDeveloperKeybindings) {
       developerDeveloperKeybindingsDisposable = registerDeveloperKeybindings(
-        disallowReloadKeybinding,
+        disallowReloadKeybinding
       )
     }
 
@@ -139,7 +139,7 @@
             const outLength = "/out/".length
             const truncatedPath = window.location.pathname.substring(
               0,
-              endPosition + outLength,
+              endPosition + outLength
             )
             return `${
               window.location.origin
@@ -149,7 +149,7 @@
           }
           throw new Error(`Invalid script url: ${value}`)
         },
-      },
+      }
     )
 
     // Teach the loader the location of the node modules we use in renderers

@@ -9,18 +9,18 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Disposable } from "vs/base/common/lifecycle"
+import { Disposable } from 'vs/base/common/lifecycle';
 
 export class TextModelPart extends Disposable {
-  private _isDisposed = false
+	private _isDisposed = false;
 
-  public override dispose(): void {
-    super.dispose()
-    this._isDisposed = true
-  }
-  protected assertNotDisposed(): void {
-    if (this._isDisposed) {
-      throw new Error("TextModelPart is disposed!")
-    }
-  }
+	public override dispose(): void {
+		super.dispose();
+		this._isDisposed = true;
+	}
+	protected assertNotDisposed(): void {
+		if (this._isDisposed) {
+			throw new Error('TextModelPart is disposed!');
+		}
+	}
 }

@@ -55,7 +55,7 @@ export class MenuService implements IMenuService {
   constructor(
     @ICommandService private readonly _commandService: ICommandService,
     @IKeybindingService private readonly _keybindingService: IKeybindingService,
-    @IStorageService storageService: IStorageService,
+    @IStorageService storageService: IStorageService
   ) {
     this._hiddenStates = new PersistedMenuHideState(storageService)
   }
@@ -63,7 +63,7 @@ export class MenuService implements IMenuService {
   createMenu(
     id: MenuId,
     contextKeyService: IContextKeyService,
-    options?: IMenuCreateOptions,
+    options?: IMenuCreateOptions
   ): IMenu {
     return new MenuImpl(
       id,
@@ -75,14 +75,14 @@ export class MenuService implements IMenuService {
       },
       this._commandService,
       this._keybindingService,
-      contextKeyService,
+      contextKeyService
     )
   }
 
   getMenuActions(
     id: MenuId,
     contextKeyService: IContextKeyService,
-    options?: IMenuActionOptions,
+    options?: IMenuActionOptions
   ): [string, Array<MenuItemAction | SubmenuItemAction>][] {
     const menu = new MenuImpl(
       id,
@@ -94,7 +94,7 @@ export class MenuService implements IMenuService {
       },
       this._commandService,
       this._keybindingService,
-      contextKeyService,
+      contextKeyService
     )
     const actions = menu.getActions(options)
     menu.dispose()
@@ -128,13 +128,13 @@ class PersistedMenuHideState {
   private _hiddenByDefaultCache = new Map<string, boolean>()
 
   constructor(
-    @IStorageService private readonly _storageService: IStorageService,
+    @IStorageService private readonly _storageService: IStorageService
   ) {
     try {
       const raw = _storageService.get(
         PersistedMenuHideState._key,
         StorageScope.PROFILE,
-        "{}",
+        "{}"
       )
       this._data = JSON.parse(raw)
     } catch (err) {
@@ -145,14 +145,14 @@ class PersistedMenuHideState {
       _storageService.onDidChangeValue(
         StorageScope.PROFILE,
         PersistedMenuHideState._key,
-        this._disposables,
+        this._disposables
       )(() => {
         if (!this._ignoreChangeEvent) {
           try {
             const raw = _storageService.get(
               PersistedMenuHideState._key,
               StorageScope.PROFILE,
-              "{}",
+              "{}"
             )
             this._data = JSON.parse(raw)
           } catch (err) {
@@ -160,7 +160,7 @@ class PersistedMenuHideState {
           }
         }
         this._onDidChange.fire()
-      }),
+      })
     )
   }
 
@@ -238,7 +238,7 @@ class PersistedMenuHideState {
         PersistedMenuHideState._key,
         raw,
         StorageScope.PROFILE,
-        StorageTarget.USER,
+        StorageTarget.USER
       )
     } finally {
       this._ignoreChangeEvent = false
@@ -256,7 +256,7 @@ class MenuInfoSnapshot {
 
   constructor(
     protected readonly _id: MenuId,
-    protected readonly _collectContextKeysForSubmenus: boolean,
+    protected readonly _collectContextKeysForSubmenus: boolean
   ) {
     this.refresh()
   }
@@ -310,7 +310,7 @@ class MenuInfoSnapshot {
       if (item.command.precondition) {
         MenuInfoSnapshot._fillInKbExprKeys(
           item.command.precondition,
-          this._preconditionContextKeys,
+          this._preconditionContextKeys
         )
       }
       // keep toggled keys for event if applicable
@@ -320,7 +320,7 @@ class MenuInfoSnapshot {
             .condition || item.command.toggled
         MenuInfoSnapshot._fillInKbExprKeys(
           toggledExpression,
-          this._toggledContextKeys,
+          this._toggledContextKeys
         )
       }
     } else if (this._collectContextKeysForSubmenus) {
@@ -328,14 +328,14 @@ class MenuInfoSnapshot {
       // menu fires events when context key changes affect submenus
       MenuRegistry.getMenuItems(item.submenu).forEach(
         this._collectContextKeys,
-        this,
+        this
       )
     }
   }
 
   private static _fillInKbExprKeys(
     exp: ContextKeyExpression | undefined,
-    set: Set<string>,
+    set: Set<string>
   ): void {
     if (exp) {
       for (const key of exp.keys()) {
@@ -352,14 +352,14 @@ class MenuInfo extends MenuInfoSnapshot {
     _collectContextKeysForSubmenus: boolean,
     @ICommandService private readonly _commandService: ICommandService,
     @IKeybindingService private readonly _keybindingService: IKeybindingService,
-    @IContextKeyService private readonly _contextKeyService: IContextKeyService,
+    @IContextKeyService private readonly _contextKeyService: IContextKeyService
   ) {
     super(_id, _collectContextKeysForSubmenus)
     this.refresh()
   }
 
   createActionGroups(
-    options: IMenuActionOptions | undefined,
+    options: IMenuActionOptions | undefined
   ): [string, Array<MenuItemAction | SubmenuItemAction>][] {
     const result: [string, Array<MenuItemAction | SubmenuItemAction>][] = []
 
@@ -374,14 +374,14 @@ class MenuInfo extends MenuInfoSnapshot {
             this._hiddenStates.setDefaultState(
               this._id,
               item.command.id,
-              !!item.isHiddenByDefault,
+              !!item.isHiddenByDefault
             )
           }
 
           const menuHide = createMenuHide(
             this._id,
             isMenuItem ? item.command : item,
-            this._hiddenStates,
+            this._hiddenStates
           )
           if (isMenuItem) {
             // MenuItemAction
@@ -389,7 +389,7 @@ class MenuInfo extends MenuInfoSnapshot {
               this._commandService,
               this._keybindingService,
               item.command.id,
-              item.when,
+              item.when
             )
             ;(activeActions ??= []).push(
               new MenuItemAction(
@@ -399,8 +399,8 @@ class MenuInfo extends MenuInfoSnapshot {
                 menuHide,
                 menuKeybinding,
                 this._contextKeyService,
-                this._commandService,
-              ),
+                this._commandService
+              )
             )
           } else {
             // SubmenuItemAction
@@ -410,12 +410,12 @@ class MenuInfo extends MenuInfoSnapshot {
               this._collectContextKeysForSubmenus,
               this._commandService,
               this._keybindingService,
-              this._contextKeyService,
+              this._contextKeyService
             ).createActionGroups(options)
             const submenuActions = Separator.join(...groups.map((g) => g[1]))
             if (submenuActions.length > 0) {
               ;(activeActions ??= []).push(
-                new SubmenuItemAction(item, menuHide, submenuActions),
+                new SubmenuItemAction(item, menuHide, submenuActions)
               )
             }
           }
@@ -429,14 +429,14 @@ class MenuInfo extends MenuInfoSnapshot {
   }
 
   protected override _sort(
-    menuItems: (IMenuItem | ISubmenuItem)[],
+    menuItems: (IMenuItem | ISubmenuItem)[]
   ): (IMenuItem | ISubmenuItem)[] {
     return menuItems.sort(MenuInfo._compareMenuItems)
   }
 
   private static _compareMenuItems(
     a: IMenuItem | ISubmenuItem,
-    b: IMenuItem | ISubmenuItem,
+    b: IMenuItem | ISubmenuItem
   ): number {
     const aGroup = a.group
     const bGroup = b.group
@@ -475,13 +475,13 @@ class MenuInfo extends MenuInfoSnapshot {
     // sort on titles
     return MenuInfo._compareTitles(
       isIMenuItem(a) ? a.command.title : a.title,
-      isIMenuItem(b) ? b.command.title : b.title,
+      isIMenuItem(b) ? b.command.title : b.title
     )
   }
 
   private static _compareTitles(
     a: string | ILocalizedString,
-    b: string | ILocalizedString,
+    b: string | ILocalizedString
   ) {
     const aStr = typeof a === "string" ? a : a.original
     const bStr = typeof b === "string" ? b : b.original
@@ -502,7 +502,7 @@ class MenuImpl implements IMenu {
     options: Required<IMenuCreateOptions>,
     @ICommandService commandService: ICommandService,
     @IKeybindingService keybindingService: IKeybindingService,
-    @IContextKeyService contextKeyService: IContextKeyService,
+    @IContextKeyService contextKeyService: IContextKeyService
   ) {
     this._menuInfo = new MenuInfo(
       id,
@@ -510,7 +510,7 @@ class MenuImpl implements IMenu {
       options.emitEventsForSubmenuChanges,
       commandService,
       keybindingService,
-      contextKeyService,
+      contextKeyService
     )
 
     // Rebuild this menu whenever the menu registry reports an event for this MenuId.
@@ -531,7 +531,7 @@ class MenuImpl implements IMenu {
         if (e.has(id)) {
           rebuildMenuSoon.schedule()
         }
-      }),
+      })
     )
 
     // When context keys or storage state changes we need to check if the menu also has changed. However,
@@ -566,13 +566,13 @@ class MenuImpl implements IMenu {
       lazyListener.add(
         contextKeyService.onDidChangeContext((e) => {
           const isStructuralChange = e.affectsSome(
-            this._menuInfo.structureContextKeys,
+            this._menuInfo.structureContextKeys
           )
           const isEnablementChange = e.affectsSome(
-            this._menuInfo.preconditionContextKeys,
+            this._menuInfo.preconditionContextKeys
           )
           const isToggleChange = e.affectsSome(
-            this._menuInfo.toggledContextKeys,
+            this._menuInfo.toggledContextKeys
           )
           if (isStructuralChange || isEnablementChange || isToggleChange) {
             this._onDidChange.fire({
@@ -582,7 +582,7 @@ class MenuImpl implements IMenu {
               isToggleChange,
             })
           }
-        }),
+        })
       )
       lazyListener.add(
         hiddenStates.onDidChange((e) => {
@@ -592,7 +592,7 @@ class MenuImpl implements IMenu {
             isEnablementChange: false,
             isToggleChange: false,
           })
-        }),
+        })
       )
     }
 
@@ -607,7 +607,7 @@ class MenuImpl implements IMenu {
   }
 
   getActions(
-    options?: IMenuActionOptions | undefined,
+    options?: IMenuActionOptions | undefined
   ): [string, (MenuItemAction | SubmenuItemAction)[]][] {
     return this._menuInfo.createActionGroups(options)
   }
@@ -621,7 +621,7 @@ class MenuImpl implements IMenu {
 function createMenuHide(
   menu: MenuId,
   command: ICommandAction | ISubmenuItem,
-  states: PersistedMenuHideState,
+  states: PersistedMenuHideState
 ): IMenuItemHide {
   const id = isISubmenuItem(command) ? command.submenu.id : command.id
   const title =
@@ -660,7 +660,7 @@ export function createConfigureKeybindingAction(
   keybindingService: IKeybindingService,
   commandId: string,
   when: ContextKeyExpression | undefined = undefined,
-  enabled = true,
+  enabled = true
 ): IAction {
   return toAction({
     id: `configureKeybinding/${commandId}`,
@@ -673,7 +673,7 @@ export function createConfigureKeybindingAction(
       const whenValue = !hasKeybinding && when ? when.serialize() : undefined
       commandService.executeCommand(
         "workbench.action.openGlobalKeybindings",
-        `@command:${commandId}` + (whenValue ? ` +when:${whenValue}` : ""),
+        `@command:${commandId}` + (whenValue ? ` +when:${whenValue}` : "")
       )
     },
   })

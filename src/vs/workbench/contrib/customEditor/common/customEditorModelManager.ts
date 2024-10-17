@@ -9,94 +9,79 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { createSingleCallFunction } from "vs/base/common/functional"
-import { IReference } from "vs/base/common/lifecycle"
-import { URI } from "vs/base/common/uri"
-import {
-  ICustomEditorModel,
-  ICustomEditorModelManager,
-} from "vs/workbench/contrib/customEditor/common/customEditor"
+import { createSingleCallFunction } from 'vs/base/common/functional';
+import { IReference } from 'vs/base/common/lifecycle';
+import { URI } from 'vs/base/common/uri';
+import { ICustomEditorModel, ICustomEditorModelManager } from 'vs/workbench/contrib/customEditor/common/customEditor';
 
 export class CustomEditorModelManager implements ICustomEditorModelManager {
-  private readonly _references = new Map<
-    string,
-    {
-      readonly viewType: string
-      readonly model: Promise<ICustomEditorModel>
-      counter: number
-    }
-  >()
 
-  public async getAllModels(resource: URI): Promise<ICustomEditorModel[]> {
-    const keyStart = `${resource.toString()}@@@`
-    const models = []
-    for (const [key, entry] of this._references) {
-      if (key.startsWith(keyStart) && entry.model) {
-        models.push(await entry.model)
-      }
-    }
-    return models
-  }
-  public async get(
-    resource: URI,
-    viewType: string,
-  ): Promise<ICustomEditorModel | undefined> {
-    const key = this.key(resource, viewType)
-    const entry = this._references.get(key)
-    return entry?.model
-  }
+	private readonly _references = new Map<string, {
+		readonly viewType: string;
+		readonly model: Promise<ICustomEditorModel>;
+		counter: number;
+	}>();
 
-  public tryRetain(
-    resource: URI,
-    viewType: string,
-  ): Promise<IReference<ICustomEditorModel>> | undefined {
-    const key = this.key(resource, viewType)
+	public async getAllModels(resource: URI): Promise<ICustomEditorModel[]> {
+		const keyStart = `${resource.toString()}@@@`;
+		const models = [];
+		for (const [key, entry] of this._references) {
+			if (key.startsWith(keyStart) && entry.model) {
+				models.push(await entry.model);
+			}
+		}
+		return models;
+	}
+	public async get(resource: URI, viewType: string): Promise<ICustomEditorModel | undefined> {
+		const key = this.key(resource, viewType);
+		const entry = this._references.get(key);
+		return entry?.model;
+	}
 
-    const entry = this._references.get(key)
-    if (!entry) {
-      return undefined
-    }
+	public tryRetain(resource: URI, viewType: string): Promise<IReference<ICustomEditorModel>> | undefined {
+		const key = this.key(resource, viewType);
 
-    entry.counter++
+		const entry = this._references.get(key);
+		if (!entry) {
+			return undefined;
+		}
 
-    return entry.model.then((model) => {
-      return {
-        object: model,
-        dispose: createSingleCallFunction(() => {
-          if (--entry.counter <= 0) {
-            entry.model.then((x) => x.dispose())
-            this._references.delete(key)
-          }
-        }),
-      }
-    })
-  }
+		entry.counter++;
 
-  public add(
-    resource: URI,
-    viewType: string,
-    model: Promise<ICustomEditorModel>,
-  ): Promise<IReference<ICustomEditorModel>> {
-    const key = this.key(resource, viewType)
-    const existing = this._references.get(key)
-    if (existing) {
-      throw new Error("Model already exists")
-    }
+		return entry.model.then(model => {
+			return {
+				object: model,
+				dispose: createSingleCallFunction(() => {
+					if (--entry.counter <= 0) {
+						entry.model.then(x => x.dispose());
+						this._references.delete(key);
+					}
+				}),
+			};
+		});
+	}
 
-    this._references.set(key, { viewType, model, counter: 0 })
-    return this.tryRetain(resource, viewType)!
-  }
+	public add(resource: URI, viewType: string, model: Promise<ICustomEditorModel>): Promise<IReference<ICustomEditorModel>> {
+		const key = this.key(resource, viewType);
+		const existing = this._references.get(key);
+		if (existing) {
+			throw new Error('Model already exists');
+		}
 
-  public disposeAllModelsForView(viewType: string): void {
-    for (const [key, value] of this._references) {
-      if (value.viewType === viewType) {
-        value.model.then((x) => x.dispose())
-        this._references.delete(key)
-      }
-    }
-  }
+		this._references.set(key, { viewType, model, counter: 0 });
+		return this.tryRetain(resource, viewType)!;
+	}
 
-  private key(resource: URI, viewType: string): string {
-    return `${resource.toString()}@@@${viewType}`
-  }
+	public disposeAllModelsForView(viewType: string): void {
+		for (const [key, value] of this._references) {
+			if (value.viewType === viewType) {
+				value.model.then(x => x.dispose());
+				this._references.delete(key);
+			}
+		}
+	}
+
+	private key(resource: URI, viewType: string): string {
+		return `${resource.toString()}@@@${viewType}`;
+	}
 }

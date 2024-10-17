@@ -51,7 +51,7 @@
 .mainToolbarButton {
   color: var(--vscode-button-foreground);
   background: transparent;
-  border: none;
+	border: none;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -69,6 +69,7 @@
   &.selected {
     background-color: var(--vscode-list-activeSelectionBackground);
   }
+
 }
 
 .reactOverlay {

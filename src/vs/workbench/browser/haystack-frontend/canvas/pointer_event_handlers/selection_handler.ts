@@ -69,9 +69,9 @@ export class SelectionHandler implements PointerEventHandler {
         this.domMouseDownPos.x,
         this.domMouseDownPos.y,
         event.viewportX,
-        event.viewportY,
+        event.viewportY
       ),
-      /* onlyAdd */ event.nativeEvent.shiftKey,
+      /* onlyAdd */ event.nativeEvent.shiftKey
     )
   }
 

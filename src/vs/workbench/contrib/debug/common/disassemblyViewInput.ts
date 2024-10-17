@@ -9,51 +9,43 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { EditorInput } from "vs/workbench/common/editor/editorInput"
-import { localize } from "vs/nls"
-import { ThemeIcon } from "vs/base/common/themables"
-import { Codicon } from "vs/base/common/codicons"
-import { registerIcon } from "vs/platform/theme/common/iconRegistry"
+import { EditorInput } from 'vs/workbench/common/editor/editorInput';
+import { localize } from 'vs/nls';
+import { ThemeIcon } from 'vs/base/common/themables';
+import { Codicon } from 'vs/base/common/codicons';
+import { registerIcon } from 'vs/platform/theme/common/iconRegistry';
 
-const DisassemblyEditorIcon = registerIcon(
-  "disassembly-editor-label-icon",
-  Codicon.debug,
-  localize(
-    "disassemblyEditorLabelIcon",
-    "Icon of the disassembly editor label.",
-  ),
-)
+const DisassemblyEditorIcon = registerIcon('disassembly-editor-label-icon', Codicon.debug, localize('disassemblyEditorLabelIcon', 'Icon of the disassembly editor label.'));
 
 export class DisassemblyViewInput extends EditorInput {
-  static readonly ID = "debug.disassemblyView.input"
 
-  override get typeId(): string {
-    return DisassemblyViewInput.ID
-  }
+	static readonly ID = 'debug.disassemblyView.input';
 
-  static _instance: DisassemblyViewInput
-  static get instance() {
-    if (
-      !DisassemblyViewInput._instance ||
-      DisassemblyViewInput._instance.isDisposed()
-    ) {
-      DisassemblyViewInput._instance = new DisassemblyViewInput()
-    }
+	override get typeId(): string {
+		return DisassemblyViewInput.ID;
+	}
 
-    return DisassemblyViewInput._instance
-  }
+	static _instance: DisassemblyViewInput;
+	static get instance() {
+		if (!DisassemblyViewInput._instance || DisassemblyViewInput._instance.isDisposed()) {
+			DisassemblyViewInput._instance = new DisassemblyViewInput();
+		}
 
-  readonly resource = undefined
+		return DisassemblyViewInput._instance;
+	}
 
-  override getName(): string {
-    return localize("disassemblyInputName", "Disassembly")
-  }
+	readonly resource = undefined;
 
-  override getIcon(): ThemeIcon {
-    return DisassemblyEditorIcon
-  }
+	override getName(): string {
+		return localize('disassemblyInputName', "Disassembly");
+	}
 
-  override matches(other: unknown): boolean {
-    return other instanceof DisassemblyViewInput
-  }
+	override getIcon(): ThemeIcon {
+		return DisassemblyEditorIcon;
+	}
+
+	override matches(other: unknown): boolean {
+		return other instanceof DisassemblyViewInput;
+	}
+
 }

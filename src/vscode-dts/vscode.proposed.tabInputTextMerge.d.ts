@@ -11,26 +11,21 @@
 
 // https://github.com/microsoft/vscode/issues/153213
 
-declare module "vscode" {
-  export class TabInputTextMerge {
-    readonly base: Uri
-    readonly input1: Uri
-    readonly input2: Uri
-    readonly result: Uri
+declare module 'vscode' {
 
-    constructor(base: Uri, input1: Uri, input2: Uri, result: Uri)
-  }
+	export class TabInputTextMerge {
 
-  export interface Tab {
-    readonly input:
-      | TabInputText
-      | TabInputTextDiff
-      | TabInputTextMerge
-      | TabInputCustom
-      | TabInputWebview
-      | TabInputNotebook
-      | TabInputNotebookDiff
-      | TabInputTerminal
-      | unknown
-  }
+		readonly base: Uri;
+		readonly input1: Uri;
+		readonly input2: Uri;
+		readonly result: Uri;
+
+		constructor(base: Uri, input1: Uri, input2: Uri, result: Uri);
+	}
+
+	export interface Tab {
+
+		readonly input: TabInputText | TabInputTextDiff | TabInputTextMerge | TabInputCustom | TabInputWebview | TabInputNotebook | TabInputNotebookDiff | TabInputTerminal | unknown;
+
+	}
 }

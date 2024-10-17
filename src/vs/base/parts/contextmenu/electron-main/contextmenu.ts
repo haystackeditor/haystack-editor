@@ -26,7 +26,7 @@ export function registerContextMenuListener(): void {
       contextMenuId: number,
       items: ISerializableContextMenuItem[],
       onClickChannel: string,
-      options?: IPopupOptions,
+      options?: IPopupOptions
     ) => {
       const menu = createMenu(event, onClickChannel, items)
 
@@ -43,14 +43,14 @@ export function registerContextMenuListener(): void {
           }
         },
       })
-    },
+    }
   )
 }
 
 function createMenu(
   event: IpcMainEvent,
   onClickChannel: string,
-  items: ISerializableContextMenuItem[],
+  items: ISerializableContextMenuItem[]
 ): Menu {
   const menu = new Menu()
 

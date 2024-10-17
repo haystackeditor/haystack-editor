@@ -182,7 +182,7 @@ export class BrowserTitleService
     @IInstantiationService
     protected readonly instantiationService: IInstantiationService,
     @IStorageService storageService: IStorageService,
-    @IThemeService themeService: IThemeService,
+    @IThemeService themeService: IThemeService
   ) {
     super("workbench.titleService", themeService, storageService)
 
@@ -213,8 +213,8 @@ export class BrowserTitleService
           run(): void {
             that.getPartByDocument(getActiveDocument()).focus()
           }
-        },
-      ),
+        }
+      )
     )
   }
 
@@ -222,7 +222,7 @@ export class BrowserTitleService
 
   createAuxiliaryTitlebarPart(
     container: HTMLElement,
-    editorGroupsContainer: IEditorGroupsContainer,
+    editorGroupsContainer: IEditorGroupsContainer
   ): IAuxiliaryTitlebarPart {
     const titlebarPartContainer = document.createElement("div")
     titlebarPartContainer.classList.add("part", "titlebar")
@@ -234,15 +234,15 @@ export class BrowserTitleService
 
     const titlebarPart = this.doCreateAuxiliaryTitlebarPart(
       titlebarPartContainer,
-      editorGroupsContainer,
+      editorGroupsContainer
     )
     disposables.add(this.registerPart(titlebarPart))
 
     disposables.add(
       Event.runAndSubscribe(
         titlebarPart.onDidChange,
-        () => (titlebarPartContainer.style.height = `${titlebarPart.height}px`),
-      ),
+        () => (titlebarPartContainer.style.height = `${titlebarPart.height}px`)
+      )
     )
     titlebarPart.create(titlebarPartContainer)
 
@@ -261,13 +261,13 @@ export class BrowserTitleService
 
   protected doCreateAuxiliaryTitlebarPart(
     container: HTMLElement,
-    editorGroupsContainer: IEditorGroupsContainer,
+    editorGroupsContainer: IEditorGroupsContainer
   ): BrowserTitlebarPart & IAuxiliaryTitlebarPart {
     return this.instantiationService.createInstance(
       AuxiliaryBrowserTitlebarPart,
       container,
       editorGroupsContainer,
-      this.mainPart,
+      this.mainPart
     )
   }
 
@@ -350,29 +350,29 @@ export class BrowserTitlebarPart extends Part implements ITitlebarPart {
 
   private actionToolBar!: WorkbenchToolBar
   private readonly actionToolBarDisposable = this._register(
-    new DisposableStore(),
+    new DisposableStore()
   )
   private readonly editorActionsChangeDisposable = this._register(
-    new DisposableStore(),
+    new DisposableStore()
   )
   private actionToolBarElement!: HTMLElement
 
   private layoutToolbarMenu: IMenu | undefined
   private readonly editorToolbarMenuDisposables = this._register(
-    new DisposableStore(),
+    new DisposableStore()
   )
   private readonly layoutToolbarMenuDisposables = this._register(
-    new DisposableStore(),
+    new DisposableStore()
   )
   private readonly activityToolbarDisposables = this._register(
-    new DisposableStore(),
+    new DisposableStore()
   )
 
   private readonly hoverDelegate: IHoverDelegate
 
   private readonly titleDisposables = this._register(new DisposableStore())
   private titleBarStyle: TitlebarStyle = getTitleBarStyle(
-    this.configurationService,
+    this.configurationService
   )
 
   private isInactive: boolean = false
@@ -404,14 +404,14 @@ export class BrowserTitlebarPart extends Part implements ITitlebarPart {
     private readonly editorGroupService: IEditorGroupsService,
     @IEditorService editorService: IEditorService,
     @IMenuService private readonly menuService: IMenuService,
-    @IKeybindingService private readonly keybindingService: IKeybindingService,
+    @IKeybindingService private readonly keybindingService: IKeybindingService
   ) {
     super(id, { hasTitle: false }, themeService, storageService, layoutService)
 
     this.isAuxiliary = editorGroupsContainer !== "main"
     this.editorService = editorService.createScoped(
       editorGroupsContainer,
-      this._store,
+      this._store
     )
     this.editorGroupsContainer =
       editorGroupsContainer === "main"
@@ -422,8 +422,8 @@ export class BrowserTitlebarPart extends Part implements ITitlebarPart {
       instantiationService.createInstance(
         WindowTitle,
         targetWindow,
-        editorGroupsContainer,
-      ),
+        editorGroupsContainer
+      )
     )
 
     this.hoverDelegate = this._register(createInstantHoverDelegate())
@@ -434,23 +434,23 @@ export class BrowserTitlebarPart extends Part implements ITitlebarPart {
   private registerListeners(targetWindowId: number): void {
     this._register(
       this.hostService.onDidChangeFocus((focused) =>
-        focused ? this.onFocus() : this.onBlur(),
-      ),
+        focused ? this.onFocus() : this.onBlur()
+      )
     )
     this._register(
       this.hostService.onDidChangeActiveWindow((windowId) =>
-        windowId === targetWindowId ? this.onFocus() : this.onBlur(),
-      ),
+        windowId === targetWindowId ? this.onFocus() : this.onBlur()
+      )
     )
     this._register(
       this.configurationService.onDidChangeConfiguration((e) =>
-        this.onConfigurationChanged(e),
-      ),
+        this.onConfigurationChanged(e)
+      )
     )
     this._register(
       this.editorGroupService.onDidChangeEditorPartOptions((e) =>
-        this.onEditorPartConfigurationChange(e),
-      ),
+        this.onEditorPartConfigurationChange(e)
+      )
     )
   }
 
@@ -508,10 +508,10 @@ export class BrowserTitlebarPart extends Part implements ITitlebarPart {
       this.actionToolBar
     ) {
       const affectsLayoutControl = event.affectsConfiguration(
-        LayoutSettings.LAYOUT_ACTIONS,
+        LayoutSettings.LAYOUT_ACTIONS
       )
       const affectsActivityControl = event.affectsConfiguration(
-        LayoutSettings.ACTIVITY_BAR_LOCATION,
+        LayoutSettings.ACTIVITY_BAR_LOCATION
       )
 
       if (affectsLayoutControl || affectsActivityControl) {
@@ -538,7 +538,7 @@ export class BrowserTitlebarPart extends Part implements ITitlebarPart {
     }
 
     this.customMenubar = this._register(
-      this.instantiationService.createInstance(CustomMenubarControl),
+      this.instantiationService.createInstance(CustomMenubarControl)
     )
 
     this.menubar = append(this.leftContent, $("div.menubar"))
@@ -546,8 +546,8 @@ export class BrowserTitlebarPart extends Part implements ITitlebarPart {
 
     this._register(
       this.customMenubar.onVisibilityChange((e) =>
-        this.onMenubarVisibilityChanged(e),
-      ),
+        this.onMenubarVisibilityChanged(e)
+      )
     )
 
     this.customMenubar.create(this.menubar)
@@ -568,7 +568,7 @@ export class BrowserTitlebarPart extends Part implements ITitlebarPart {
       if (this.lastLayoutDimensions) {
         this.layout(
           this.lastLayoutDimensions.width,
-          this.lastLayoutDimensions.height,
+          this.lastLayoutDimensions.height
         )
       }
 
@@ -638,7 +638,7 @@ export class BrowserTitlebarPart extends Part implements ITitlebarPart {
     if (hasCustomTitlebar(this.configurationService, this.titleBarStyle)) {
       this.actionToolBarElement = append(
         this.rightContent,
-        $("div.action-toolbar-container"),
+        $("div.action-toolbar-container")
       )
       this.createActionToolBar()
       this.createActionToolBarMenus()
@@ -660,13 +660,13 @@ export class BrowserTitlebarPart extends Part implements ITitlebarPart {
         primaryControlLocation === "left"
           ? this.leftContent
           : this.rightContent,
-        $("div.window-controls-container.primary"),
+        $("div.window-controls-container.primary")
       )
       append(
         primaryControlLocation === "left"
           ? this.rightContent
           : this.leftContent,
-        $("div.window-controls-container.secondary"),
+        $("div.window-controls-container.secondary")
       )
     }
 
@@ -695,8 +695,8 @@ export class BrowserTitlebarPart extends Part implements ITitlebarPart {
             }
 
             this.onContextMenu(e, targetMenu)
-          },
-        ),
+          }
+        )
       )
 
       if (isMacintosh) {
@@ -708,14 +708,14 @@ export class BrowserTitlebarPart extends Part implements ITitlebarPart {
               if (e.metaKey) {
                 EventHelper.stop(
                   e,
-                  true /* stop bubbling to prevent command center from opening */,
+                  true /* stop bubbling to prevent command center from opening */
                 )
 
                 this.onContextMenu(e, MenuId.TitleBarTitleContext)
               }
             },
-            true /* capture phase to prevent command center from opening */,
-          ),
+            true /* capture phase to prevent command center from opening */
+          )
         )
       }
     }
@@ -734,7 +734,7 @@ export class BrowserTitlebarPart extends Part implements ITitlebarPart {
       this.titleDisposables.add(
         this.windowTitle.onDidChange(() => {
           this.title.innerText = this.windowTitle.value
-        }),
+        })
       )
     }
 
@@ -743,7 +743,7 @@ export class BrowserTitlebarPart extends Part implements ITitlebarPart {
       const commandCenter = this.instantiationService.createInstance(
         CommandCenterControl,
         this.windowTitle,
-        this.hoverDelegate,
+        this.hoverDelegate
       )
       reset(this.title, commandCenter.element)
       this.titleDisposables.add(commandCenter)
@@ -752,7 +752,7 @@ export class BrowserTitlebarPart extends Part implements ITitlebarPart {
 
   private actionViewItemProvider(
     action: IAction,
-    options: IBaseActionViewItemOptions,
+    options: IBaseActionViewItemOptions
   ): IActionViewItem | undefined {
     // --- Activity Actions
     if (!this.isAuxiliary) {
@@ -760,14 +760,14 @@ export class BrowserTitlebarPart extends Part implements ITitlebarPart {
         return this.instantiationService.createInstance(
           SimpleGlobalActivityActionViewItem,
           { position: () => HoverPosition.BELOW },
-          options,
+          options
         )
       }
       if (action.id === ACCOUNTS_ACTIVITY_ID) {
         return this.instantiationService.createInstance(
           SimpleAccountActivityActionViewItem,
           { position: () => HoverPosition.BELOW },
-          options,
+          options
         )
       }
     }
@@ -797,7 +797,7 @@ export class BrowserTitlebarPart extends Part implements ITitlebarPart {
 
     return this.keybindingService.lookupKeybinding(
       action.id,
-      editorPaneAwareContextKeyService,
+      editorPaneAwareContextKeyService
     )
   }
 
@@ -830,15 +830,15 @@ export class BrowserTitlebarPart extends Part implements ITitlebarPart {
           actionViewItemProvider: (action, options) =>
             this.actionViewItemProvider(action, options),
           hoverDelegate: this.hoverDelegate,
-        },
-      ),
+        }
+      )
     )
 
     if (this.editorActionsEnabled) {
       this.actionToolBarDisposable.add(
         this.editorGroupsContainer.onDidChangeActiveGroup(() =>
-          this.createActionToolBarMenus({ editorActions: true }),
-        ),
+          this.createActionToolBarMenus({ editorActions: true })
+        )
       )
     }
   }
@@ -850,7 +850,7 @@ export class BrowserTitlebarPart extends Part implements ITitlebarPart {
           editorActions?: boolean
           layoutActions?: boolean
           activityActions?: boolean
-        } = true,
+        } = true
   ) {
     if (update === true) {
       update = {
@@ -870,14 +870,14 @@ export class BrowserTitlebarPart extends Part implements ITitlebarPart {
         const activeGroup = this.editorGroupsContainer.activeGroup
         if (activeGroup) {
           const editorActions = activeGroup.createEditorActions(
-            this.editorActionsChangeDisposable,
+            this.editorActionsChangeDisposable
           )
 
           actions.primary.push(...editorActions.actions.primary)
           actions.secondary.push(...editorActions.actions.secondary)
 
           this.editorActionsChangeDisposable.add(
-            editorActions.onDidChange(() => updateToolBarActions()),
+            editorActions.onDidChange(() => updateToolBarActions())
           )
         }
       }
@@ -888,7 +888,7 @@ export class BrowserTitlebarPart extends Part implements ITitlebarPart {
           this.layoutToolbarMenu,
           {},
           actions,
-          () => !this.editorActionsEnabled, // Layout Actions in overflow menu when editor actions enabled in title bar
+          () => !this.editorActionsEnabled // Layout Actions in overflow menu when editor actions enabled in title bar
         )
       }
 
@@ -902,7 +902,7 @@ export class BrowserTitlebarPart extends Part implements ITitlebarPart {
 
       this.actionToolBar.setActions(
         prepareActions(actions.primary),
-        prepareActions(actions.secondary),
+        prepareActions(actions.secondary)
       )
     }
 
@@ -922,7 +922,7 @@ export class BrowserTitlebarPart extends Part implements ITitlebarPart {
         }
 
         this.actionToolBar.actionRunner = new EditorCommandsContextActionRunner(
-          context,
+          context
         )
         this.actionToolBar.context = context
         this.editorToolbarMenuDisposables.add(this.actionToolBar.actionRunner)
@@ -940,12 +940,12 @@ export class BrowserTitlebarPart extends Part implements ITitlebarPart {
       if (this.layoutControlEnabled) {
         this.layoutToolbarMenu = this.menuService.createMenu(
           MenuId.LayoutControlMenu,
-          this.contextKeyService,
+          this.contextKeyService
         )
 
         this.layoutToolbarMenuDisposables.add(this.layoutToolbarMenu)
         this.layoutToolbarMenuDisposables.add(
-          this.layoutToolbarMenu.onDidChange(() => updateToolBarActions()),
+          this.layoutToolbarMenu.onDidChange(() => updateToolBarActions())
         )
       } else {
         this.layoutToolbarMenu = undefined
@@ -959,8 +959,8 @@ export class BrowserTitlebarPart extends Part implements ITitlebarPart {
           this.storageService.onDidChangeValue(
             StorageScope.PROFILE,
             AccountsActivityActionViewItem.ACCOUNTS_VISIBILITY_PREFERENCE_KEY,
-            this._store,
-          )(() => updateToolBarActions()),
+            this._store
+          )(() => updateToolBarActions())
         )
       }
     }
@@ -998,7 +998,7 @@ export class BrowserTitlebarPart extends Part implements ITitlebarPart {
             return color.isOpaque()
               ? color
               : color.makeOpaque(WORKBENCH_BACKGROUND(theme))
-          },
+          }
         ) || ""
       this.element.style.backgroundColor = titleBackground
 
@@ -1015,7 +1015,7 @@ export class BrowserTitlebarPart extends Part implements ITitlebarPart {
       const titleForeground = this.getColor(
         this.isInactive
           ? TITLE_BAR_INACTIVE_FOREGROUND
-          : TITLE_BAR_ACTIVE_FOREGROUND,
+          : TITLE_BAR_ACTIVE_FOREGROUND
       )
       this.element.style.color = titleForeground || ""
 
@@ -1050,7 +1050,7 @@ export class BrowserTitlebarPart extends Part implements ITitlebarPart {
     return (
       !this.isAuxiliary &&
       this.configurationService.getValue<boolean>(
-        LayoutSettings.LAYOUT_ACTIONS,
+        LayoutSettings.LAYOUT_ACTIONS
       ) !== false
     )
   }
@@ -1058,7 +1058,7 @@ export class BrowserTitlebarPart extends Part implements ITitlebarPart {
   protected get isCommandCenterVisible() {
     return (
       this.configurationService.getValue<boolean>(
-        LayoutSettings.COMMAND_CENTER,
+        LayoutSettings.COMMAND_CENTER
       ) !== false
     )
   }
@@ -1076,7 +1076,7 @@ export class BrowserTitlebarPart extends Part implements ITitlebarPart {
   private get activityActionsEnabled(): boolean {
     const activityBarPosition =
       this.configurationService.getValue<ActivityBarPosition>(
-        LayoutSettings.ACTIVITY_BAR_LOCATION,
+        LayoutSettings.ACTIVITY_BAR_LOCATION
       )
     return (
       !this.isAuxiliary &&
@@ -1141,7 +1141,7 @@ export class BrowserTitlebarPart extends Part implements ITitlebarPart {
     } else {
       ;(
         this.element.querySelector(
-          '[tabindex]:not([tabindex="-1"])',
+          '[tabindex]:not([tabindex="-1"])'
         ) as HTMLElement
       ).focus()
     }
@@ -1175,7 +1175,7 @@ export class MainBrowserTitlebarPart extends BrowserTitlebarPart {
     @IEditorGroupsService editorGroupService: IEditorGroupsService,
     @IEditorService editorService: IEditorService,
     @IMenuService menuService: IMenuService,
-    @IKeybindingService keybindingService: IKeybindingService,
+    @IKeybindingService keybindingService: IKeybindingService
   ) {
     super(
       Parts.TITLEBAR_PART,
@@ -1193,7 +1193,7 @@ export class MainBrowserTitlebarPart extends BrowserTitlebarPart {
       editorGroupService,
       editorService,
       menuService,
-      keybindingService,
+      keybindingService
     )
   }
 }
@@ -1230,7 +1230,7 @@ export class AuxiliaryBrowserTitlebarPart
     @IEditorGroupsService editorGroupService: IEditorGroupsService,
     @IEditorService editorService: IEditorService,
     @IMenuService menuService: IMenuService,
-    @IKeybindingService keybindingService: IKeybindingService,
+    @IKeybindingService keybindingService: IKeybindingService
   ) {
     const id = AuxiliaryBrowserTitlebarPart.COUNTER++
     super(
@@ -1249,7 +1249,7 @@ export class AuxiliaryBrowserTitlebarPart
       editorGroupService,
       editorService,
       menuService,
-      keybindingService,
+      keybindingService
     )
   }
 

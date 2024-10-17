@@ -30,7 +30,7 @@ if (
     product = configuration.product
   } else {
     throw new Error(
-      "Sandbox: unable to resolve product configuration from preload script.",
+      "Sandbox: unable to resolve product configuration from preload script."
     )
   }
 }

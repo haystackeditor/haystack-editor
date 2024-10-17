@@ -120,7 +120,7 @@ export class ActivitybarPart extends Part {
   //#endregion
 
   private readonly compositeBar = this._register(
-    new MutableDisposable<PaneCompositeBar>(),
+    new MutableDisposable<PaneCompositeBar>()
   )
   private content: HTMLElement | undefined
 
@@ -130,14 +130,14 @@ export class ActivitybarPart extends Part {
     private readonly instantiationService: IInstantiationService,
     @IWorkbenchLayoutService layoutService: IWorkbenchLayoutService,
     @IThemeService themeService: IThemeService,
-    @IStorageService storageService: IStorageService,
+    @IStorageService storageService: IStorageService
   ) {
     super(
       Parts.ACTIVITYBAR_PART,
       { hasTitle: false },
       themeService,
       storageService,
-      layoutService,
+      layoutService
     )
   }
 
@@ -164,13 +164,13 @@ export class ActivitybarPart extends Part {
         recomputeSizes: false,
         fillExtraContextMenuActions: (
           actions,
-          e?: MouseEvent | GestureEvent,
+          e?: MouseEvent | GestureEvent
         ) => {},
         compositeSize: 52,
         colors: (theme: IColorTheme) => ({
           activeForegroundColor: theme.getColor(ACTIVITY_BAR_FOREGROUND),
           inactiveForegroundColor: theme.getColor(
-            ACTIVITY_BAR_INACTIVE_FOREGROUND,
+            ACTIVITY_BAR_INACTIVE_FOREGROUND
           ),
           activeBorderColor: theme.getColor(ACTIVITY_BAR_ACTIVE_BORDER),
           activeBackground: theme.getColor(ACTIVITY_BAR_ACTIVE_BACKGROUND),
@@ -185,7 +185,7 @@ export class ActivitybarPart extends Part {
       },
       Parts.ACTIVITYBAR_PART,
       this.paneCompositePart,
-      true,
+      true
     )
   }
 
@@ -296,7 +296,7 @@ export class ActivityBarCompositeBar extends PaneCompositeBar {
   private readonly globalCompositeBar: GlobalCompositeBar | undefined
 
   private readonly keyboardNavigationDisposables = this._register(
-    new DisposableStore(),
+    new DisposableStore()
   )
 
   constructor(
@@ -314,7 +314,7 @@ export class ActivityBarCompositeBar extends PaneCompositeBar {
     @IConfigurationService
     private readonly configurationService: IConfigurationService,
     @IMenuService private readonly menuService: IMenuService,
-    @IWorkbenchLayoutService layoutService: IWorkbenchLayoutService,
+    @IWorkbenchLayoutService layoutService: IWorkbenchLayoutService
   ) {
     super(
       {
@@ -332,7 +332,7 @@ export class ActivityBarCompositeBar extends PaneCompositeBar {
       viewDescriptorService,
       contextKeyService,
       environmentService,
-      layoutService,
+      layoutService
     )
 
     if (showGlobalActivities) {
@@ -341,8 +341,8 @@ export class ActivityBarCompositeBar extends PaneCompositeBar {
           GlobalCompositeBar,
           () => this.getContextMenuActions(),
           (theme: IColorTheme) => this.options.colors(theme),
-          this.options.activityHoverOptions,
-        ),
+          this.options.activityHoverOptions
+        )
       )
     }
 
@@ -356,13 +356,13 @@ export class ActivityBarCompositeBar extends PaneCompositeBar {
             this.uninstallMenubar()
           }
         }
-      }),
+      })
     )
   }
 
   private fillContextMenuActions(
     actions: IAction[],
-    e?: MouseEvent | GestureEvent,
+    e?: MouseEvent | GestureEvent
   ) {
     // Menu
     const menuBarVisibility = getMenuBarVisibility(this.configurationService)
@@ -380,11 +380,11 @@ export class ActivityBarCompositeBar extends PaneCompositeBar {
             run: () =>
               this.configurationService.updateValue(
                 "window.menuBarVisibility",
-                menuBarVisibility === "compact" ? "toggle" : "compact",
+                menuBarVisibility === "compact" ? "toggle" : "compact"
               ),
           }),
           new Separator(),
-        ],
+        ]
       )
     }
 
@@ -398,11 +398,11 @@ export class ActivityBarCompositeBar extends PaneCompositeBar {
               run: () =>
                 this.configurationService.updateValue(
                   "window.menuBarVisibility",
-                  "toggle",
+                  "toggle"
                 ),
             }),
             new Separator(),
-          ],
+          ]
         )
       }
     }
@@ -441,7 +441,7 @@ export class ActivityBarCompositeBar extends PaneCompositeBar {
 
     // Menubar: install a custom menu bar depending on configuration
     this.menuBar = this._register(
-      this.instantiationService.createInstance(CustomMenubarControl),
+      this.instantiationService.createInstance(CustomMenubarControl)
     )
     this.menuBar.create(this.menuBarContainer)
   }
@@ -463,8 +463,8 @@ export class ActivityBarCompositeBar extends PaneCompositeBar {
             ) {
               this.focus()
             }
-          },
-        ),
+          }
+        )
       )
     }
 
@@ -487,8 +487,8 @@ export class ActivityBarCompositeBar extends PaneCompositeBar {
             ) {
               this.menuBar?.toggleFocus()
             }
-          },
-        ),
+          }
+        )
       )
     }
 
@@ -506,8 +506,8 @@ export class ActivityBarCompositeBar extends PaneCompositeBar {
             ) {
               this.focus(this.getVisiblePaneCompositeIds().length - 1)
             }
-          },
-        ),
+          }
+        )
       )
     }
   }
@@ -555,27 +555,27 @@ export class ActivityBarCompositeBar extends PaneCompositeBar {
   getActivityBarContextMenuActions(): IAction[] {
     const activityBarPositionMenu = this.menuService.createMenu(
       MenuId.ActivityBarPositionMenu,
-      this.contextKeyService,
+      this.contextKeyService
     )
     const positionActions: IAction[] = []
     createAndFillInContextMenuActions(
       activityBarPositionMenu,
       { shouldForwardArgs: true, renderShortTitle: true },
-      { primary: [], secondary: positionActions },
+      { primary: [], secondary: positionActions }
     )
     activityBarPositionMenu.dispose()
     return [
       new SubmenuAction(
         "workbench.action.panel.position",
         localize("activity bar position", "Activity Bar Position"),
-        positionActions,
+        positionActions
       ),
       toAction({
         id: ToggleSidebarPositionAction.ID,
         label: ToggleSidebarPositionAction.getLabel(this.layoutService),
         run: () =>
           this.instantiationService.invokeFunction((accessor) =>
-            new ToggleSidebarPositionAction().run(accessor),
+            new ToggleSidebarPositionAction().run(accessor)
           ),
       }),
     ]
@@ -590,18 +590,18 @@ registerAction2(
         title: {
           ...localize2(
             "positionActivityBarDefault",
-            "Move Activity Bar to Side",
+            "Move Activity Bar to Side"
           ),
           mnemonicTitle: localize(
             { key: "miDefaultActivityBar", comment: ["&& denotes a mnemonic"] },
-            "&&Default",
+            "&&Default"
           ),
         },
         shortTitle: localize("default", "Default"),
         category: Categories.View,
         toggled: ContextKeyExpr.equals(
           `config.${LayoutSettings.ACTIVITY_BAR_LOCATION}`,
-          ActivityBarPosition.DEFAULT,
+          ActivityBarPosition.DEFAULT
         ),
         menu: [
           {
@@ -612,7 +612,7 @@ registerAction2(
             id: MenuId.CommandPalette,
             when: ContextKeyExpr.notEquals(
               `config.${LayoutSettings.ACTIVITY_BAR_LOCATION}`,
-              ActivityBarPosition.DEFAULT,
+              ActivityBarPosition.DEFAULT
             ),
           },
         ],
@@ -622,10 +622,10 @@ registerAction2(
       const configurationService = accessor.get(IConfigurationService)
       configurationService.updateValue(
         LayoutSettings.ACTIVITY_BAR_LOCATION,
-        ActivityBarPosition.DEFAULT,
+        ActivityBarPosition.DEFAULT
       )
     }
-  },
+  }
 )
 
 registerAction2(
@@ -637,14 +637,14 @@ registerAction2(
           ...localize2("positionActivityBarTop", "Move Activity Bar to Top"),
           mnemonicTitle: localize(
             { key: "miTopActivityBar", comment: ["&& denotes a mnemonic"] },
-            "&&Top",
+            "&&Top"
           ),
         },
         shortTitle: localize("top", "Top"),
         category: Categories.View,
         toggled: ContextKeyExpr.equals(
           `config.${LayoutSettings.ACTIVITY_BAR_LOCATION}`,
-          ActivityBarPosition.TOP,
+          ActivityBarPosition.TOP
         ),
         menu: [
           {
@@ -655,7 +655,7 @@ registerAction2(
             id: MenuId.CommandPalette,
             when: ContextKeyExpr.notEquals(
               `config.${LayoutSettings.ACTIVITY_BAR_LOCATION}`,
-              ActivityBarPosition.TOP,
+              ActivityBarPosition.TOP
             ),
           },
         ],
@@ -665,10 +665,10 @@ registerAction2(
       const configurationService = accessor.get(IConfigurationService)
       configurationService.updateValue(
         LayoutSettings.ACTIVITY_BAR_LOCATION,
-        ActivityBarPosition.TOP,
+        ActivityBarPosition.TOP
       )
     }
-  },
+  }
 )
 
 registerAction2(
@@ -679,18 +679,18 @@ registerAction2(
         title: {
           ...localize2(
             "positionActivityBarBottom",
-            "Move Activity Bar to Bottom",
+            "Move Activity Bar to Bottom"
           ),
           mnemonicTitle: localize(
             { key: "miBottomActivityBar", comment: ["&& denotes a mnemonic"] },
-            "&&Bottom",
+            "&&Bottom"
           ),
         },
         shortTitle: localize("bottom", "Bottom"),
         category: Categories.View,
         toggled: ContextKeyExpr.equals(
           `config.${LayoutSettings.ACTIVITY_BAR_LOCATION}`,
-          ActivityBarPosition.BOTTOM,
+          ActivityBarPosition.BOTTOM
         ),
         menu: [
           {
@@ -701,7 +701,7 @@ registerAction2(
             id: MenuId.CommandPalette,
             when: ContextKeyExpr.notEquals(
               `config.${LayoutSettings.ACTIVITY_BAR_LOCATION}`,
-              ActivityBarPosition.BOTTOM,
+              ActivityBarPosition.BOTTOM
             ),
           },
         ],
@@ -711,10 +711,10 @@ registerAction2(
       const configurationService = accessor.get(IConfigurationService)
       configurationService.updateValue(
         LayoutSettings.ACTIVITY_BAR_LOCATION,
-        ActivityBarPosition.BOTTOM,
+        ActivityBarPosition.BOTTOM
       )
     }
-  },
+  }
 )
 
 registerAction2(
@@ -726,14 +726,14 @@ registerAction2(
           ...localize2("hideActivityBar", "Hide Activity Bar"),
           mnemonicTitle: localize(
             { key: "miHideActivityBar", comment: ["&& denotes a mnemonic"] },
-            "&&Hidden",
+            "&&Hidden"
           ),
         },
         shortTitle: localize("hide", "Hidden"),
         category: Categories.View,
         toggled: ContextKeyExpr.equals(
           `config.${LayoutSettings.ACTIVITY_BAR_LOCATION}`,
-          ActivityBarPosition.HIDDEN,
+          ActivityBarPosition.HIDDEN
         ),
         menu: [
           {
@@ -744,7 +744,7 @@ registerAction2(
             id: MenuId.CommandPalette,
             when: ContextKeyExpr.notEquals(
               `config.${LayoutSettings.ACTIVITY_BAR_LOCATION}`,
-              ActivityBarPosition.HIDDEN,
+              ActivityBarPosition.HIDDEN
             ),
           },
         ],
@@ -754,10 +754,10 @@ registerAction2(
       const configurationService = accessor.get(IConfigurationService)
       configurationService.updateValue(
         LayoutSettings.ACTIVITY_BAR_LOCATION,
-        ActivityBarPosition.HIDDEN,
+        ActivityBarPosition.HIDDEN
       )
     }
-  },
+  }
 )
 
 MenuRegistry.appendMenuItem(MenuId.MenubarAppearanceMenu, {
@@ -772,7 +772,7 @@ MenuRegistry.appendMenuItem(MenuId.ViewContainerTitleContext, {
   title: localize("positionActivituBar", "Activity Bar Position"),
   when: ContextKeyExpr.equals(
     "viewContainerLocation",
-    ViewContainerLocationToString(ViewContainerLocation.Sidebar),
+    ViewContainerLocationToString(ViewContainerLocation.Sidebar)
   ),
   group: "3_workbench_layout_move",
   order: 1,
@@ -783,7 +783,7 @@ MenuRegistry.appendMenuItem(MenuId.ViewTitleContext, {
   title: localize("positionActivituBar", "Activity Bar Position"),
   when: ContextKeyExpr.equals(
     "viewLocation",
-    ViewContainerLocationToString(ViewContainerLocation.Sidebar),
+    ViewContainerLocationToString(ViewContainerLocation.Sidebar)
   ),
   group: "3_workbench_layout_move",
   order: 1,
@@ -792,7 +792,7 @@ MenuRegistry.appendMenuItem(MenuId.ViewTitleContext, {
 class SwitchSideBarViewAction extends Action2 {
   constructor(
     desc: Readonly<IAction2Options>,
-    private readonly offset: number,
+    private readonly offset: number
   ) {
     super(desc)
   }
@@ -801,11 +801,11 @@ class SwitchSideBarViewAction extends Action2 {
     const paneCompositeService = accessor.get(IPaneCompositePartService)
 
     const visibleViewletIds = paneCompositeService.getVisiblePaneCompositeIds(
-      ViewContainerLocation.Sidebar,
+      ViewContainerLocation.Sidebar
     )
 
     const activeViewlet = paneCompositeService.getActivePaneComposite(
-      ViewContainerLocation.Sidebar,
+      ViewContainerLocation.Sidebar
     )
     if (!activeViewlet) {
       return
@@ -825,7 +825,7 @@ class SwitchSideBarViewAction extends Action2 {
     await paneCompositeService.openPaneComposite(
       targetViewletId,
       ViewContainerLocation.Sidebar,
-      true,
+      true
     )
   }
 }
@@ -838,15 +838,15 @@ registerAction2(
           id: "workbench.action.previousSideBarView",
           title: localize2(
             "previousSideBarView",
-            "Previous Primary Side Bar View",
+            "Previous Primary Side Bar View"
           ),
           category: Categories.View,
           f1: true,
         },
-        -1,
+        -1
       )
     }
-  },
+  }
 )
 
 registerAction2(
@@ -859,10 +859,10 @@ registerAction2(
           category: Categories.View,
           f1: true,
         },
-        1,
+        1
       )
     }
-  },
+  }
 )
 
 registerAction2(
@@ -880,12 +880,12 @@ registerAction2(
       const layoutService = accessor.get(IWorkbenchLayoutService)
       layoutService.focusPart(Parts.ACTIVITYBAR_PART)
     }
-  },
+  }
 )
 
 registerThemingParticipant((theme, collector) => {
   const activityBarActiveBorderColor = theme.getColor(
-    ACTIVITY_BAR_ACTIVE_BORDER,
+    ACTIVITY_BAR_ACTIVE_BORDER
   )
   if (activityBarActiveBorderColor) {
     collector.addRule(`
@@ -896,7 +896,7 @@ registerThemingParticipant((theme, collector) => {
   }
 
   const activityBarActiveFocusBorderColor = theme.getColor(
-    ACTIVITY_BAR_ACTIVE_FOCUS_BORDER,
+    ACTIVITY_BAR_ACTIVE_FOCUS_BORDER
   )
   if (activityBarActiveFocusBorderColor) {
     collector.addRule(`
@@ -912,7 +912,7 @@ registerThemingParticipant((theme, collector) => {
   }
 
   const activityBarActiveBackgroundColor = theme.getColor(
-    ACTIVITY_BAR_ACTIVE_BACKGROUND,
+    ACTIVITY_BAR_ACTIVE_BACKGROUND
   )
   if (activityBarActiveBackgroundColor) {
     collector.addRule(`

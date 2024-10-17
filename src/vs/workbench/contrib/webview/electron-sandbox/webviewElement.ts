@@ -71,7 +71,7 @@ export class ElectronWebviewElement extends WebviewElement {
     @INativeHostService private readonly _nativeHostService: INativeHostService,
     @IInstantiationService instantiationService: IInstantiationService,
     @IAccessibilityService accessibilityService: IAccessibilityService,
-    @IHaystackService haystackService: IHaystackService,
+    @IHaystackService haystackService: IHaystackService
   ) {
     super(
       initInfo,
@@ -87,17 +87,17 @@ export class ElectronWebviewElement extends WebviewElement {
       tunnelService,
       instantiationService,
       accessibilityService,
-      haystackService,
+      haystackService
     )
 
     this._webviewKeyboardHandler = new WindowIgnoreMenuShortcutsManager(
       configurationService,
       mainProcessService,
-      _nativeHostService,
+      _nativeHostService
     )
 
     this._webviewMainService = ProxyChannel.toService<IWebviewManagerService>(
-      mainProcessService.getChannel("webview"),
+      mainProcessService.getChannel("webview")
     )
 
     if (initInfo.options.enableFindWidget) {
@@ -107,13 +107,13 @@ export class ElectronWebviewElement extends WebviewElement {
             this.stopFind(false)
             this._cachedHtmlContent = newContent
           }
-        }),
+        })
       )
 
       this._register(
         this._webviewMainService.onFoundInFrame((result) => {
           this._hasFindResult.fire(result.matches > 0)
-        }),
+        })
       )
     }
   }
@@ -130,7 +130,7 @@ export class ElectronWebviewElement extends WebviewElement {
   }
 
   protected override streamToBuffer(
-    stream: VSBufferReadableStream,
+    stream: VSBufferReadableStream
   ): Promise<ArrayBufferLike> {
     // Join buffers from stream without using the Node.js backing pool.
     // This lets us transfer the resulting buffer to the webview.
@@ -139,7 +139,7 @@ export class ElectronWebviewElement extends WebviewElement {
       (buffers: readonly VSBuffer[]) => {
         const totalLength = buffers.reduce(
           (prev, curr) => prev + curr.byteLength,
-          0,
+          0
         )
         const ret = new ArrayBuffer(totalLength)
         const view = new Uint8Array(ret)
@@ -149,7 +149,7 @@ export class ElectronWebviewElement extends WebviewElement {
           offset += element.byteLength
         }
         return ret
-      },
+      }
     )
   }
 
@@ -178,7 +178,7 @@ export class ElectronWebviewElement extends WebviewElement {
         { windowId: this._nativeHostService.windowId },
         this.id,
         value,
-        options,
+        options
       )
     }
   }
@@ -201,7 +201,7 @@ export class ElectronWebviewElement extends WebviewElement {
         { windowId: this._nativeHostService.windowId },
         this.id,
         value,
-        options,
+        options
       )
     })
   }
@@ -217,7 +217,7 @@ export class ElectronWebviewElement extends WebviewElement {
       this.id,
       {
         keepSelection,
-      },
+      }
     )
     this._onDidStopFind.fire()
   }

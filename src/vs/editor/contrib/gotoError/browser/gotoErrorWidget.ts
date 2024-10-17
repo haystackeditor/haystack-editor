@@ -9,575 +9,411 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as dom from "vs/base/browser/dom"
-import { ScrollableElement } from "vs/base/browser/ui/scrollbar/scrollableElement"
-import { IAction } from "vs/base/common/actions"
-import { isNonEmptyArray } from "vs/base/common/arrays"
-import { Color } from "vs/base/common/color"
-import { Emitter, Event } from "vs/base/common/event"
-import { DisposableStore, dispose } from "vs/base/common/lifecycle"
-import { basename } from "vs/base/common/resources"
-import { ScrollbarVisibility } from "vs/base/common/scrollable"
-import { splitLines } from "vs/base/common/strings"
-import "vs/css!./media/gotoErrorWidget"
-import { ICodeEditor } from "vs/editor/browser/editorBrowser"
-import { EditorOption } from "vs/editor/common/config/editorOptions"
-import { Range } from "vs/editor/common/core/range"
-import { ScrollType } from "vs/editor/common/editorCommon"
-import {
-  peekViewTitleForeground,
-  peekViewTitleInfoForeground,
-  PeekViewWidget,
-} from "vs/editor/contrib/peekView/browser/peekView"
-import * as nls from "vs/nls"
-import { createAndFillInActionBarActions } from "vs/platform/actions/browser/menuEntryActionViewItem"
-import { IMenuService, MenuId } from "vs/platform/actions/common/actions"
-import { IContextKeyService } from "vs/platform/contextkey/common/contextkey"
-import { IInstantiationService } from "vs/platform/instantiation/common/instantiation"
-import { ILabelService } from "vs/platform/label/common/label"
-import {
-  IMarker,
-  IRelatedInformation,
-  MarkerSeverity,
-} from "vs/platform/markers/common/markers"
-import { IOpenerService } from "vs/platform/opener/common/opener"
-import { SeverityIcon } from "vs/platform/severityIcon/browser/severityIcon"
-import {
-  contrastBorder,
-  editorBackground,
-  editorErrorBorder,
-  editorErrorForeground,
-  editorInfoBorder,
-  editorInfoForeground,
-  editorWarningBorder,
-  editorWarningForeground,
-  oneOf,
-  registerColor,
-  transparent,
-} from "vs/platform/theme/common/colorRegistry"
-import {
-  IColorTheme,
-  IThemeService,
-} from "vs/platform/theme/common/themeService"
+import * as dom from 'vs/base/browser/dom';
+import { ScrollableElement } from 'vs/base/browser/ui/scrollbar/scrollableElement';
+import { IAction } from 'vs/base/common/actions';
+import { isNonEmptyArray } from 'vs/base/common/arrays';
+import { Color } from 'vs/base/common/color';
+import { Emitter, Event } from 'vs/base/common/event';
+import { DisposableStore, dispose } from 'vs/base/common/lifecycle';
+import { basename } from 'vs/base/common/resources';
+import { ScrollbarVisibility } from 'vs/base/common/scrollable';
+import { splitLines } from 'vs/base/common/strings';
+import 'vs/css!./media/gotoErrorWidget';
+import { ICodeEditor } from 'vs/editor/browser/editorBrowser';
+import { EditorOption } from 'vs/editor/common/config/editorOptions';
+import { Range } from 'vs/editor/common/core/range';
+import { ScrollType } from 'vs/editor/common/editorCommon';
+import { peekViewTitleForeground, peekViewTitleInfoForeground, PeekViewWidget } from 'vs/editor/contrib/peekView/browser/peekView';
+import * as nls from 'vs/nls';
+import { createAndFillInActionBarActions } from 'vs/platform/actions/browser/menuEntryActionViewItem';
+import { IMenuService, MenuId } from 'vs/platform/actions/common/actions';
+import { IContextKeyService } from 'vs/platform/contextkey/common/contextkey';
+import { IInstantiationService } from 'vs/platform/instantiation/common/instantiation';
+import { ILabelService } from 'vs/platform/label/common/label';
+import { IMarker, IRelatedInformation, MarkerSeverity } from 'vs/platform/markers/common/markers';
+import { IOpenerService } from 'vs/platform/opener/common/opener';
+import { SeverityIcon } from 'vs/platform/severityIcon/browser/severityIcon';
+import { contrastBorder, editorBackground, editorErrorBorder, editorErrorForeground, editorInfoBorder, editorInfoForeground, editorWarningBorder, editorWarningForeground, oneOf, registerColor, transparent } from 'vs/platform/theme/common/colorRegistry';
+import { IColorTheme, IThemeService } from 'vs/platform/theme/common/themeService';
 
 class MessageWidget {
-  private _lines: number = 0
-  private _longestLineLength: number = 0
 
-  private readonly _editor: ICodeEditor
-  private readonly _messageBlock: HTMLDivElement
-  private readonly _relatedBlock: HTMLDivElement
-  private readonly _scrollable: ScrollableElement
-  private readonly _relatedDiagnostics = new WeakMap<
-    HTMLElement,
-    IRelatedInformation
-  >()
-  private readonly _disposables: DisposableStore = new DisposableStore()
+	private _lines: number = 0;
+	private _longestLineLength: number = 0;
 
-  private _codeLink?: HTMLElement
+	private readonly _editor: ICodeEditor;
+	private readonly _messageBlock: HTMLDivElement;
+	private readonly _relatedBlock: HTMLDivElement;
+	private readonly _scrollable: ScrollableElement;
+	private readonly _relatedDiagnostics = new WeakMap<HTMLElement, IRelatedInformation>();
+	private readonly _disposables: DisposableStore = new DisposableStore();
 
-  constructor(
-    parent: HTMLElement,
-    editor: ICodeEditor,
-    onRelatedInformation: (related: IRelatedInformation) => void,
-    private readonly _openerService: IOpenerService,
-    private readonly _labelService: ILabelService,
-  ) {
-    this._editor = editor
+	private _codeLink?: HTMLElement;
 
-    const domNode = document.createElement("div")
-    domNode.className = "descriptioncontainer"
+	constructor(
+		parent: HTMLElement,
+		editor: ICodeEditor,
+		onRelatedInformation: (related: IRelatedInformation) => void,
+		private readonly _openerService: IOpenerService,
+		private readonly _labelService: ILabelService
+	) {
+		this._editor = editor;
 
-    this._messageBlock = document.createElement("div")
-    this._messageBlock.classList.add("message")
-    this._messageBlock.setAttribute("aria-live", "assertive")
-    this._messageBlock.setAttribute("role", "alert")
-    domNode.appendChild(this._messageBlock)
+		const domNode = document.createElement('div');
+		domNode.className = 'descriptioncontainer';
 
-    this._relatedBlock = document.createElement("div")
-    domNode.appendChild(this._relatedBlock)
-    this._disposables.add(
-      dom.addStandardDisposableListener(
-        this._relatedBlock,
-        "click",
-        (event) => {
-          event.preventDefault()
-          const related = this._relatedDiagnostics.get(event.target)
-          if (related) {
-            onRelatedInformation(related)
-          }
-        },
-      ),
-    )
+		this._messageBlock = document.createElement('div');
+		this._messageBlock.classList.add('message');
+		this._messageBlock.setAttribute('aria-live', 'assertive');
+		this._messageBlock.setAttribute('role', 'alert');
+		domNode.appendChild(this._messageBlock);
 
-    this._scrollable = new ScrollableElement(domNode, {
-      horizontal: ScrollbarVisibility.Auto,
-      vertical: ScrollbarVisibility.Auto,
-      useShadows: false,
-      horizontalScrollbarSize: 6,
-      verticalScrollbarSize: 6,
-    })
-    parent.appendChild(this._scrollable.getDomNode())
-    this._disposables.add(
-      this._scrollable.onScroll((e) => {
-        domNode.style.left = `-${e.scrollLeft}px`
-        domNode.style.top = `-${e.scrollTop}px`
-      }),
-    )
-    this._disposables.add(this._scrollable)
-  }
+		this._relatedBlock = document.createElement('div');
+		domNode.appendChild(this._relatedBlock);
+		this._disposables.add(dom.addStandardDisposableListener(this._relatedBlock, 'click', event => {
+			event.preventDefault();
+			const related = this._relatedDiagnostics.get(event.target);
+			if (related) {
+				onRelatedInformation(related);
+			}
+		}));
 
-  dispose(): void {
-    dispose(this._disposables)
-  }
+		this._scrollable = new ScrollableElement(domNode, {
+			horizontal: ScrollbarVisibility.Auto,
+			vertical: ScrollbarVisibility.Auto,
+			useShadows: false,
+			horizontalScrollbarSize: 6,
+			verticalScrollbarSize: 6
+		});
+		parent.appendChild(this._scrollable.getDomNode());
+		this._disposables.add(this._scrollable.onScroll(e => {
+			domNode.style.left = `-${e.scrollLeft}px`;
+			domNode.style.top = `-${e.scrollTop}px`;
+		}));
+		this._disposables.add(this._scrollable);
+	}
 
-  update(marker: IMarker): void {
-    const { source, message, relatedInformation, code } = marker
-    let sourceAndCodeLength = (source?.length || 0) + "()".length
-    if (code) {
-      if (typeof code === "string") {
-        sourceAndCodeLength += code.length
-      } else {
-        sourceAndCodeLength += code.value.length
-      }
-    }
+	dispose(): void {
+		dispose(this._disposables);
+	}
 
-    const lines = splitLines(message)
-    this._lines = lines.length
-    this._longestLineLength = 0
-    for (const line of lines) {
-      this._longestLineLength = Math.max(
-        line.length + sourceAndCodeLength,
-        this._longestLineLength,
-      )
-    }
+	update(marker: IMarker): void {
+		const { source, message, relatedInformation, code } = marker;
+		let sourceAndCodeLength = (source?.length || 0) + '()'.length;
+		if (code) {
+			if (typeof code === 'string') {
+				sourceAndCodeLength += code.length;
+			} else {
+				sourceAndCodeLength += code.value.length;
+			}
+		}
 
-    dom.clearNode(this._messageBlock)
-    this._messageBlock.setAttribute("aria-label", this.getAriaLabel(marker))
-    this._editor.applyFontInfo(this._messageBlock)
-    let lastLineElement = this._messageBlock
-    for (const line of lines) {
-      lastLineElement = document.createElement("div")
-      lastLineElement.innerText = line
-      if (line === "") {
-        lastLineElement.style.height = this._messageBlock.style.lineHeight
-      }
-      this._messageBlock.appendChild(lastLineElement)
-    }
-    if (source || code) {
-      const detailsElement = document.createElement("span")
-      detailsElement.classList.add("details")
-      lastLineElement.appendChild(detailsElement)
-      if (source) {
-        const sourceElement = document.createElement("span")
-        sourceElement.innerText = source
-        sourceElement.classList.add("source")
-        detailsElement.appendChild(sourceElement)
-      }
-      if (code) {
-        if (typeof code === "string") {
-          const codeElement = document.createElement("span")
-          codeElement.innerText = `(${code})`
-          codeElement.classList.add("code")
-          detailsElement.appendChild(codeElement)
-        } else {
-          this._codeLink = dom.$("a.code-link")
-          this._codeLink.setAttribute("href", `${code.target.toString()}`)
+		const lines = splitLines(message);
+		this._lines = lines.length;
+		this._longestLineLength = 0;
+		for (const line of lines) {
+			this._longestLineLength = Math.max(line.length + sourceAndCodeLength, this._longestLineLength);
+		}
 
-          this._codeLink.onclick = (e) => {
-            this._openerService.open(code.target, { allowCommands: true })
-            e.preventDefault()
-            e.stopPropagation()
-          }
+		dom.clearNode(this._messageBlock);
+		this._messageBlock.setAttribute('aria-label', this.getAriaLabel(marker));
+		this._editor.applyFontInfo(this._messageBlock);
+		let lastLineElement = this._messageBlock;
+		for (const line of lines) {
+			lastLineElement = document.createElement('div');
+			lastLineElement.innerText = line;
+			if (line === '') {
+				lastLineElement.style.height = this._messageBlock.style.lineHeight;
+			}
+			this._messageBlock.appendChild(lastLineElement);
+		}
+		if (source || code) {
+			const detailsElement = document.createElement('span');
+			detailsElement.classList.add('details');
+			lastLineElement.appendChild(detailsElement);
+			if (source) {
+				const sourceElement = document.createElement('span');
+				sourceElement.innerText = source;
+				sourceElement.classList.add('source');
+				detailsElement.appendChild(sourceElement);
+			}
+			if (code) {
+				if (typeof code === 'string') {
+					const codeElement = document.createElement('span');
+					codeElement.innerText = `(${code})`;
+					codeElement.classList.add('code');
+					detailsElement.appendChild(codeElement);
+				} else {
+					this._codeLink = dom.$('a.code-link');
+					this._codeLink.setAttribute('href', `${code.target.toString()}`);
 
-          const codeElement = dom.append(this._codeLink, dom.$("span"))
-          codeElement.innerText = code.value
-          detailsElement.appendChild(this._codeLink)
-        }
-      }
-    }
+					this._codeLink.onclick = (e) => {
+						this._openerService.open(code.target, { allowCommands: true });
+						e.preventDefault();
+						e.stopPropagation();
+					};
 
-    dom.clearNode(this._relatedBlock)
-    this._editor.applyFontInfo(this._relatedBlock)
-    if (isNonEmptyArray(relatedInformation)) {
-      const relatedInformationNode = this._relatedBlock.appendChild(
-        document.createElement("div"),
-      )
-      relatedInformationNode.style.paddingTop = `${Math.floor(this._editor.getOption(EditorOption.lineHeight) * 0.66)}px`
-      this._lines += 1
+					const codeElement = dom.append(this._codeLink, dom.$('span'));
+					codeElement.innerText = code.value;
+					detailsElement.appendChild(this._codeLink);
+				}
+			}
+		}
 
-      for (const related of relatedInformation) {
-        const container = document.createElement("div")
+		dom.clearNode(this._relatedBlock);
+		this._editor.applyFontInfo(this._relatedBlock);
+		if (isNonEmptyArray(relatedInformation)) {
+			const relatedInformationNode = this._relatedBlock.appendChild(document.createElement('div'));
+			relatedInformationNode.style.paddingTop = `${Math.floor(this._editor.getOption(EditorOption.lineHeight) * 0.66)}px`;
+			this._lines += 1;
 
-        const relatedResource = document.createElement("a")
-        relatedResource.classList.add("filename")
-        relatedResource.innerText = `${this._labelService.getUriBasenameLabel(related.resource)}(${related.startLineNumber}, ${related.startColumn}): `
-        relatedResource.title = this._labelService.getUriLabel(related.resource)
-        this._relatedDiagnostics.set(relatedResource, related)
+			for (const related of relatedInformation) {
 
-        const relatedMessage = document.createElement("span")
-        relatedMessage.innerText = related.message
+				const container = document.createElement('div');
 
-        container.appendChild(relatedResource)
-        container.appendChild(relatedMessage)
+				const relatedResource = document.createElement('a');
+				relatedResource.classList.add('filename');
+				relatedResource.innerText = `${this._labelService.getUriBasenameLabel(related.resource)}(${related.startLineNumber}, ${related.startColumn}): `;
+				relatedResource.title = this._labelService.getUriLabel(related.resource);
+				this._relatedDiagnostics.set(relatedResource, related);
 
-        this._lines += 1
-        relatedInformationNode.appendChild(container)
-      }
-    }
+				const relatedMessage = document.createElement('span');
+				relatedMessage.innerText = related.message;
 
-    const fontInfo = this._editor.getOption(EditorOption.fontInfo)
-    const scrollWidth = Math.ceil(
-      fontInfo.typicalFullwidthCharacterWidth * this._longestLineLength * 0.75,
-    )
-    const scrollHeight = fontInfo.lineHeight * this._lines
-    this._scrollable.setScrollDimensions({ scrollWidth, scrollHeight })
-  }
+				container.appendChild(relatedResource);
+				container.appendChild(relatedMessage);
 
-  layout(height: number, width: number): void {
-    this._scrollable.getDomNode().style.height = `${height}px`
-    this._scrollable.getDomNode().style.width = `${width}px`
-    this._scrollable.setScrollDimensions({ width, height })
-  }
+				this._lines += 1;
+				relatedInformationNode.appendChild(container);
+			}
+		}
 
-  getHeightInLines(): number {
-    return Math.min(17, this._lines)
-  }
+		const fontInfo = this._editor.getOption(EditorOption.fontInfo);
+		const scrollWidth = Math.ceil(fontInfo.typicalFullwidthCharacterWidth * this._longestLineLength * 0.75);
+		const scrollHeight = fontInfo.lineHeight * this._lines;
+		this._scrollable.setScrollDimensions({ scrollWidth, scrollHeight });
+	}
 
-  private getAriaLabel(marker: IMarker): string {
-    let severityLabel = ""
-    switch (marker.severity) {
-      case MarkerSeverity.Error:
-        severityLabel = nls.localize("Error", "Error")
-        break
-      case MarkerSeverity.Warning:
-        severityLabel = nls.localize("Warning", "Warning")
-        break
-      case MarkerSeverity.Info:
-        severityLabel = nls.localize("Info", "Info")
-        break
-      case MarkerSeverity.Hint:
-        severityLabel = nls.localize("Hint", "Hint")
-        break
-    }
+	layout(height: number, width: number): void {
+		this._scrollable.getDomNode().style.height = `${height}px`;
+		this._scrollable.getDomNode().style.width = `${width}px`;
+		this._scrollable.setScrollDimensions({ width, height });
+	}
 
-    let ariaLabel = nls.localize(
-      "marker aria",
-      "{0} at {1}. ",
-      severityLabel,
-      marker.startLineNumber + ":" + marker.startColumn,
-    )
-    const model = this._editor.getModel()
-    if (
-      model &&
-      marker.startLineNumber <= model.getLineCount() &&
-      marker.startLineNumber >= 1
-    ) {
-      const lineContent = model.getLineContent(marker.startLineNumber)
-      ariaLabel = `${lineContent}, ${ariaLabel}`
-    }
-    return ariaLabel
-  }
+	getHeightInLines(): number {
+		return Math.min(17, this._lines);
+	}
+
+	private getAriaLabel(marker: IMarker): string {
+		let severityLabel = '';
+		switch (marker.severity) {
+			case MarkerSeverity.Error:
+				severityLabel = nls.localize('Error', "Error");
+				break;
+			case MarkerSeverity.Warning:
+				severityLabel = nls.localize('Warning', "Warning");
+				break;
+			case MarkerSeverity.Info:
+				severityLabel = nls.localize('Info', "Info");
+				break;
+			case MarkerSeverity.Hint:
+				severityLabel = nls.localize('Hint', "Hint");
+				break;
+		}
+
+		let ariaLabel = nls.localize('marker aria', "{0} at {1}. ", severityLabel, marker.startLineNumber + ':' + marker.startColumn);
+		const model = this._editor.getModel();
+		if (model && (marker.startLineNumber <= model.getLineCount()) && (marker.startLineNumber >= 1)) {
+			const lineContent = model.getLineContent(marker.startLineNumber);
+			ariaLabel = `${lineContent}, ${ariaLabel}`;
+		}
+		return ariaLabel;
+	}
 }
 
 export class MarkerNavigationWidget extends PeekViewWidget {
-  static readonly TitleMenu = new MenuId("gotoErrorTitleMenu")
 
-  private _parentContainer!: HTMLElement
-  private _container!: HTMLElement
-  private _icon!: HTMLElement
-  private _message!: MessageWidget
-  private readonly _callOnDispose = new DisposableStore()
-  private _severity: MarkerSeverity
-  private _backgroundColor?: Color
-  private readonly _onDidSelectRelatedInformation =
-    new Emitter<IRelatedInformation>()
-  private _heightInPixel!: number
+	static readonly TitleMenu = new MenuId('gotoErrorTitleMenu');
 
-  readonly onDidSelectRelatedInformation: Event<IRelatedInformation> =
-    this._onDidSelectRelatedInformation.event
+	private _parentContainer!: HTMLElement;
+	private _container!: HTMLElement;
+	private _icon!: HTMLElement;
+	private _message!: MessageWidget;
+	private readonly _callOnDispose = new DisposableStore();
+	private _severity: MarkerSeverity;
+	private _backgroundColor?: Color;
+	private readonly _onDidSelectRelatedInformation = new Emitter<IRelatedInformation>();
+	private _heightInPixel!: number;
 
-  constructor(
-    editor: ICodeEditor,
-    @IThemeService private readonly _themeService: IThemeService,
-    @IOpenerService private readonly _openerService: IOpenerService,
-    @IMenuService private readonly _menuService: IMenuService,
-    @IInstantiationService instantiationService: IInstantiationService,
-    @IContextKeyService private readonly _contextKeyService: IContextKeyService,
-    @ILabelService private readonly _labelService: ILabelService,
-  ) {
-    super(
-      editor,
-      { showArrow: true, showFrame: true, isAccessible: true, frameWidth: 1 },
-      instantiationService,
-    )
-    this._severity = MarkerSeverity.Warning
-    this._backgroundColor = Color.white
+	readonly onDidSelectRelatedInformation: Event<IRelatedInformation> = this._onDidSelectRelatedInformation.event;
 
-    this._applyTheme(_themeService.getColorTheme())
-    this._callOnDispose.add(
-      _themeService.onDidColorThemeChange(this._applyTheme.bind(this)),
-    )
+	constructor(
+		editor: ICodeEditor,
+		@IThemeService private readonly _themeService: IThemeService,
+		@IOpenerService private readonly _openerService: IOpenerService,
+		@IMenuService private readonly _menuService: IMenuService,
+		@IInstantiationService instantiationService: IInstantiationService,
+		@IContextKeyService private readonly _contextKeyService: IContextKeyService,
+		@ILabelService private readonly _labelService: ILabelService
+	) {
+		super(editor, { showArrow: true, showFrame: true, isAccessible: true, frameWidth: 1 }, instantiationService);
+		this._severity = MarkerSeverity.Warning;
+		this._backgroundColor = Color.white;
 
-    this.create()
-  }
+		this._applyTheme(_themeService.getColorTheme());
+		this._callOnDispose.add(_themeService.onDidColorThemeChange(this._applyTheme.bind(this)));
 
-  private _applyTheme(theme: IColorTheme) {
-    this._backgroundColor = theme.getColor(editorMarkerNavigationBackground)
-    let colorId = editorMarkerNavigationError
-    let headerBackground = editorMarkerNavigationErrorHeader
+		this.create();
+	}
 
-    if (this._severity === MarkerSeverity.Warning) {
-      colorId = editorMarkerNavigationWarning
-      headerBackground = editorMarkerNavigationWarningHeader
-    } else if (this._severity === MarkerSeverity.Info) {
-      colorId = editorMarkerNavigationInfo
-      headerBackground = editorMarkerNavigationInfoHeader
-    }
+	private _applyTheme(theme: IColorTheme) {
+		this._backgroundColor = theme.getColor(editorMarkerNavigationBackground);
+		let colorId = editorMarkerNavigationError;
+		let headerBackground = editorMarkerNavigationErrorHeader;
 
-    const frameColor = theme.getColor(colorId)
-    const headerBg = theme.getColor(headerBackground)
+		if (this._severity === MarkerSeverity.Warning) {
+			colorId = editorMarkerNavigationWarning;
+			headerBackground = editorMarkerNavigationWarningHeader;
+		} else if (this._severity === MarkerSeverity.Info) {
+			colorId = editorMarkerNavigationInfo;
+			headerBackground = editorMarkerNavigationInfoHeader;
+		}
 
-    this.style({
-      arrowColor: frameColor,
-      frameColor: frameColor,
-      headerBackgroundColor: headerBg,
-      primaryHeadingColor: theme.getColor(peekViewTitleForeground),
-      secondaryHeadingColor: theme.getColor(peekViewTitleInfoForeground),
-    }) // style() will trigger _applyStyles
-  }
+		const frameColor = theme.getColor(colorId);
+		const headerBg = theme.getColor(headerBackground);
 
-  protected override _applyStyles(): void {
-    if (this._parentContainer) {
-      this._parentContainer.style.backgroundColor = this._backgroundColor
-        ? this._backgroundColor.toString()
-        : ""
-    }
-    super._applyStyles()
-  }
+		this.style({
+			arrowColor: frameColor,
+			frameColor: frameColor,
+			headerBackgroundColor: headerBg,
+			primaryHeadingColor: theme.getColor(peekViewTitleForeground),
+			secondaryHeadingColor: theme.getColor(peekViewTitleInfoForeground)
+		}); // style() will trigger _applyStyles
+	}
 
-  override dispose(): void {
-    this._callOnDispose.dispose()
-    super.dispose()
-  }
+	protected override _applyStyles(): void {
+		if (this._parentContainer) {
+			this._parentContainer.style.backgroundColor = this._backgroundColor ? this._backgroundColor.toString() : '';
+		}
+		super._applyStyles();
+	}
 
-  focus(): void {
-    this._parentContainer.focus()
-  }
+	override dispose(): void {
+		this._callOnDispose.dispose();
+		super.dispose();
+	}
 
-  protected override _fillHead(container: HTMLElement): void {
-    super._fillHead(container)
+	focus(): void {
+		this._parentContainer.focus();
+	}
 
-    this._disposables.add(
-      this._actionbarWidget!.actionRunner.onWillRun((e) => this.editor.focus()),
-    )
+	protected override _fillHead(container: HTMLElement): void {
+		super._fillHead(container);
 
-    const actions: IAction[] = []
-    const menu = this._menuService.createMenu(
-      MarkerNavigationWidget.TitleMenu,
-      this._contextKeyService,
-    )
-    createAndFillInActionBarActions(menu, undefined, actions)
-    this._actionbarWidget!.push(actions, { label: false, icon: true, index: 0 })
-    menu.dispose()
-  }
+		this._disposables.add(this._actionbarWidget!.actionRunner.onWillRun(e => this.editor.focus()));
 
-  protected override _fillTitleIcon(container: HTMLElement): void {
-    this._icon = dom.append(container, dom.$(""))
-  }
+		const actions: IAction[] = [];
+		const menu = this._menuService.createMenu(MarkerNavigationWidget.TitleMenu, this._contextKeyService);
+		createAndFillInActionBarActions(menu, undefined, actions);
+		this._actionbarWidget!.push(actions, { label: false, icon: true, index: 0 });
+		menu.dispose();
+	}
 
-  protected _fillBody(container: HTMLElement): void {
-    this._parentContainer = container
-    container.classList.add("marker-widget")
-    this._parentContainer.tabIndex = 0
-    this._parentContainer.setAttribute("role", "tooltip")
+	protected override _fillTitleIcon(container: HTMLElement): void {
+		this._icon = dom.append(container, dom.$(''));
+	}
 
-    this._container = document.createElement("div")
-    container.appendChild(this._container)
+	protected _fillBody(container: HTMLElement): void {
+		this._parentContainer = container;
+		container.classList.add('marker-widget');
+		this._parentContainer.tabIndex = 0;
+		this._parentContainer.setAttribute('role', 'tooltip');
 
-    this._message = new MessageWidget(
-      this._container,
-      this.editor,
-      (related) => this._onDidSelectRelatedInformation.fire(related),
-      this._openerService,
-      this._labelService,
-    )
-    this._disposables.add(this._message)
-  }
+		this._container = document.createElement('div');
+		container.appendChild(this._container);
 
-  override show(): void {
-    throw new Error("call showAtMarker")
-  }
+		this._message = new MessageWidget(this._container, this.editor, related => this._onDidSelectRelatedInformation.fire(related), this._openerService, this._labelService);
+		this._disposables.add(this._message);
+	}
 
-  showAtMarker(marker: IMarker, markerIdx: number, markerCount: number): void {
-    // update:
-    // * title
-    // * message
-    this._container.classList.remove("stale")
-    this._message.update(marker)
+	override show(): void {
+		throw new Error('call showAtMarker');
+	}
 
-    // update frame color (only applied on 'show')
-    this._severity = marker.severity
-    this._applyTheme(this._themeService.getColorTheme())
+	showAtMarker(marker: IMarker, markerIdx: number, markerCount: number): void {
+		// update:
+		// * title
+		// * message
+		this._container.classList.remove('stale');
+		this._message.update(marker);
 
-    // show
-    const range = Range.lift(marker)
-    const editorPosition = this.editor.getPosition()
-    const position =
-      editorPosition && range.containsPosition(editorPosition)
-        ? editorPosition
-        : range.getStartPosition()
-    super.show(position, this.computeRequiredHeight())
+		// update frame color (only applied on 'show')
+		this._severity = marker.severity;
+		this._applyTheme(this._themeService.getColorTheme());
 
-    const model = this.editor.getModel()
-    if (model) {
-      const detail =
-        markerCount > 1
-          ? nls.localize(
-              "problems",
-              "{0} of {1} problems",
-              markerIdx,
-              markerCount,
-            )
-          : nls.localize("change", "{0} of {1} problem", markerIdx, markerCount)
-      this.setTitle(basename(model.uri), detail)
-    }
-    this._icon.className = `codicon ${SeverityIcon.className(MarkerSeverity.toSeverity(this._severity))}`
+		// show
+		const range = Range.lift(marker);
+		const editorPosition = this.editor.getPosition();
+		const position = editorPosition && range.containsPosition(editorPosition) ? editorPosition : range.getStartPosition();
+		super.show(position, this.computeRequiredHeight());
 
-    this.editor.revealPositionNearTop(position, ScrollType.Smooth)
-    this.editor.focus()
-  }
+		const model = this.editor.getModel();
+		if (model) {
+			const detail = markerCount > 1
+				? nls.localize('problems', "{0} of {1} problems", markerIdx, markerCount)
+				: nls.localize('change', "{0} of {1} problem", markerIdx, markerCount);
+			this.setTitle(basename(model.uri), detail);
+		}
+		this._icon.className = `codicon ${SeverityIcon.className(MarkerSeverity.toSeverity(this._severity))}`;
 
-  updateMarker(marker: IMarker): void {
-    this._container.classList.remove("stale")
-    this._message.update(marker)
-  }
+		this.editor.revealPositionNearTop(position, ScrollType.Smooth);
+		this.editor.focus();
+	}
 
-  showStale() {
-    this._container.classList.add("stale")
-    this._relayout()
-  }
+	updateMarker(marker: IMarker): void {
+		this._container.classList.remove('stale');
+		this._message.update(marker);
+	}
 
-  protected override _doLayoutBody(
-    heightInPixel: number,
-    widthInPixel: number,
-  ): void {
-    super._doLayoutBody(heightInPixel, widthInPixel)
-    this._heightInPixel = heightInPixel
-    this._message.layout(heightInPixel, widthInPixel)
-    this._container.style.height = `${heightInPixel}px`
-  }
+	showStale() {
+		this._container.classList.add('stale');
+		this._relayout();
+	}
 
-  protected override _onWidth(widthInPixel: number): void {
-    this._message.layout(this._heightInPixel, widthInPixel)
-  }
+	protected override _doLayoutBody(heightInPixel: number, widthInPixel: number): void {
+		super._doLayoutBody(heightInPixel, widthInPixel);
+		this._heightInPixel = heightInPixel;
+		this._message.layout(heightInPixel, widthInPixel);
+		this._container.style.height = `${heightInPixel}px`;
+	}
 
-  protected override _relayout(): void {
-    super._relayout(this.computeRequiredHeight())
-  }
+	protected override _onWidth(widthInPixel: number): void {
+		this._message.layout(this._heightInPixel, widthInPixel);
+	}
 
-  private computeRequiredHeight() {
-    return 3 + this._message.getHeightInLines()
-  }
+	protected override _relayout(): void {
+		super._relayout(this.computeRequiredHeight());
+	}
+
+	private computeRequiredHeight() {
+		return 3 + this._message.getHeightInLines();
+	}
 }
 
 // theming
 
-const errorDefault = oneOf(editorErrorForeground, editorErrorBorder)
-const warningDefault = oneOf(editorWarningForeground, editorWarningBorder)
-const infoDefault = oneOf(editorInfoForeground, editorInfoBorder)
+const errorDefault = oneOf(editorErrorForeground, editorErrorBorder);
+const warningDefault = oneOf(editorWarningForeground, editorWarningBorder);
+const infoDefault = oneOf(editorInfoForeground, editorInfoBorder);
 
-const editorMarkerNavigationError = registerColor(
-  "editorMarkerNavigationError.background",
-  {
-    dark: errorDefault,
-    light: errorDefault,
-    hcDark: contrastBorder,
-    hcLight: contrastBorder,
-  },
-  nls.localize(
-    "editorMarkerNavigationError",
-    "Editor marker navigation widget error color.",
-  ),
-)
-const editorMarkerNavigationErrorHeader = registerColor(
-  "editorMarkerNavigationError.headerBackground",
-  {
-    dark: transparent(editorMarkerNavigationError, 0.1),
-    light: transparent(editorMarkerNavigationError, 0.1),
-    hcDark: null,
-    hcLight: null,
-  },
-  nls.localize(
-    "editorMarkerNavigationErrorHeaderBackground",
-    "Editor marker navigation widget error heading background.",
-  ),
-)
+const editorMarkerNavigationError = registerColor('editorMarkerNavigationError.background', { dark: errorDefault, light: errorDefault, hcDark: contrastBorder, hcLight: contrastBorder }, nls.localize('editorMarkerNavigationError', 'Editor marker navigation widget error color.'));
+const editorMarkerNavigationErrorHeader = registerColor('editorMarkerNavigationError.headerBackground', { dark: transparent(editorMarkerNavigationError, .1), light: transparent(editorMarkerNavigationError, .1), hcDark: null, hcLight: null }, nls.localize('editorMarkerNavigationErrorHeaderBackground', 'Editor marker navigation widget error heading background.'));
 
-const editorMarkerNavigationWarning = registerColor(
-  "editorMarkerNavigationWarning.background",
-  {
-    dark: warningDefault,
-    light: warningDefault,
-    hcDark: contrastBorder,
-    hcLight: contrastBorder,
-  },
-  nls.localize(
-    "editorMarkerNavigationWarning",
-    "Editor marker navigation widget warning color.",
-  ),
-)
-const editorMarkerNavigationWarningHeader = registerColor(
-  "editorMarkerNavigationWarning.headerBackground",
-  {
-    dark: transparent(editorMarkerNavigationWarning, 0.1),
-    light: transparent(editorMarkerNavigationWarning, 0.1),
-    hcDark: "#0C141F",
-    hcLight: transparent(editorMarkerNavigationWarning, 0.2),
-  },
-  nls.localize(
-    "editorMarkerNavigationWarningBackground",
-    "Editor marker navigation widget warning heading background.",
-  ),
-)
+const editorMarkerNavigationWarning = registerColor('editorMarkerNavigationWarning.background', { dark: warningDefault, light: warningDefault, hcDark: contrastBorder, hcLight: contrastBorder }, nls.localize('editorMarkerNavigationWarning', 'Editor marker navigation widget warning color.'));
+const editorMarkerNavigationWarningHeader = registerColor('editorMarkerNavigationWarning.headerBackground', { dark: transparent(editorMarkerNavigationWarning, .1), light: transparent(editorMarkerNavigationWarning, .1), hcDark: '#0C141F', hcLight: transparent(editorMarkerNavigationWarning, .2) }, nls.localize('editorMarkerNavigationWarningBackground', 'Editor marker navigation widget warning heading background.'));
 
-const editorMarkerNavigationInfo = registerColor(
-  "editorMarkerNavigationInfo.background",
-  {
-    dark: infoDefault,
-    light: infoDefault,
-    hcDark: contrastBorder,
-    hcLight: contrastBorder,
-  },
-  nls.localize(
-    "editorMarkerNavigationInfo",
-    "Editor marker navigation widget info color.",
-  ),
-)
-const editorMarkerNavigationInfoHeader = registerColor(
-  "editorMarkerNavigationInfo.headerBackground",
-  {
-    dark: transparent(editorMarkerNavigationInfo, 0.1),
-    light: transparent(editorMarkerNavigationInfo, 0.1),
-    hcDark: null,
-    hcLight: null,
-  },
-  nls.localize(
-    "editorMarkerNavigationInfoHeaderBackground",
-    "Editor marker navigation widget info heading background.",
-  ),
-)
+const editorMarkerNavigationInfo = registerColor('editorMarkerNavigationInfo.background', { dark: infoDefault, light: infoDefault, hcDark: contrastBorder, hcLight: contrastBorder }, nls.localize('editorMarkerNavigationInfo', 'Editor marker navigation widget info color.'));
+const editorMarkerNavigationInfoHeader = registerColor('editorMarkerNavigationInfo.headerBackground', { dark: transparent(editorMarkerNavigationInfo, .1), light: transparent(editorMarkerNavigationInfo, .1), hcDark: null, hcLight: null }, nls.localize('editorMarkerNavigationInfoHeaderBackground', 'Editor marker navigation widget info heading background.'));
 
-const editorMarkerNavigationBackground = registerColor(
-  "editorMarkerNavigation.background",
-  {
-    dark: editorBackground,
-    light: editorBackground,
-    hcDark: editorBackground,
-    hcLight: editorBackground,
-  },
-  nls.localize(
-    "editorMarkerNavigationBackground",
-    "Editor marker navigation widget background.",
-  ),
-)
+const editorMarkerNavigationBackground = registerColor('editorMarkerNavigation.background', { dark: editorBackground, light: editorBackground, hcDark: editorBackground, hcLight: editorBackground }, nls.localize('editorMarkerNavigationBackground', 'Editor marker navigation widget background.'));

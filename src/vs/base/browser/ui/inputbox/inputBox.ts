@@ -137,7 +137,7 @@ export class InputBox extends Widget {
   constructor(
     container: HTMLElement,
     contextViewProvider: IContextViewProvider | undefined,
-    options: IInputOptions,
+    options: IInputOptions
   ) {
     super()
 
@@ -164,10 +164,10 @@ export class InputBox extends Widget {
     this.input.setAttribute("spellcheck", "false")
 
     this.onfocus(this.input, () =>
-      this.element.classList.add("synthetic-focus"),
+      this.element.classList.add("synthetic-focus")
     )
     this.onblur(this.input, () =>
-      this.element.classList.remove("synthetic-focus"),
+      this.element.classList.remove("synthetic-focus")
     )
 
     if (this.options.flexibleHeight) {
@@ -195,24 +195,24 @@ export class InputBox extends Widget {
       // from ScrollableElement to DOM
       this._register(
         this.scrollableElement.onScroll(
-          (e) => (this.input.scrollTop = e.scrollTop),
-        ),
+          (e) => (this.input.scrollTop = e.scrollTop)
+        )
       )
 
       const onSelectionChange = this._register(
-        new DomEmitter(container.ownerDocument, "selectionchange"),
+        new DomEmitter(container.ownerDocument, "selectionchange")
       )
       const onAnchoredSelectionChange = Event.filter(
         onSelectionChange.event,
         () => {
           const selection = container.ownerDocument.getSelection()
           return selection?.anchorNode === wrapper
-        },
+        }
       )
 
       // from DOM to ScrollableElement
       this._register(
-        onAnchoredSelectionChange(this.updateScrollDimensions, this),
+        onAnchoredSelectionChange(this.updateScrollDimensions, this)
       )
       this._register(this.onDidHeightChange(this.updateScrollDimensions, this))
     } else {
@@ -275,8 +275,8 @@ export class InputBox extends Widget {
         getBaseLayerHoverDelegate().setupUpdatableHover(
           getDefaultHoverDelegate("mouse"),
           this.input,
-          tooltip,
-        ),
+          tooltip
+        )
       )
     } else {
       this.hover.update(tooltip)
@@ -457,7 +457,7 @@ export class InputBox extends Widget {
     const styles = this.stylesForType(this.message.type)
     this.element.style.border = `1px solid ${dom.asCssValueWithDefault(
       styles.border,
-      "transparent",
+      "transparent"
     )}`
 
     if (this.message.content && (this.hasFocus() || force)) {
@@ -591,19 +591,19 @@ export class InputBox extends Widget {
       alertText = nls.localize(
         "alertErrorMessage",
         "Error: {0}",
-        this.message.content,
+        this.message.content
       )
     } else if (this.message.type === MessageType.WARNING) {
       alertText = nls.localize(
         "alertWarningMessage",
         "Warning: {0}",
-        this.message.content,
+        this.message.content
       )
     } else {
       alertText = nls.localize(
         "alertInfoMessage",
         "Info: {0}",
-        this.message.content,
+        this.message.content
       )
     }
 
@@ -670,7 +670,7 @@ export class InputBox extends Widget {
     // there's always a border, even if the color is not set.
     this.element.style.border = `1px solid ${dom.asCssValueWithDefault(
       border,
-      "transparent",
+      "transparent"
     )}`
   }
 
@@ -734,7 +734,7 @@ export class HistoryInputBox
   constructor(
     container: HTMLElement,
     contextViewProvider: IContextViewProvider | undefined,
-    options: IHistoryInputOptions,
+    options: IHistoryInputOptions
   ) {
     const NLS_PLACEHOLDER_HISTORY_HINT_SUFFIX_NO_PARENS = nls.localize(
       {
@@ -744,7 +744,7 @@ export class HistoryInputBox
         ],
       },
       " or {0} for history",
-      `\u21C5`,
+      `\u21C5`
     )
     const NLS_PLACEHOLDER_HISTORY_HINT_SUFFIX_IN_PARENS = nls.localize(
       {
@@ -754,7 +754,7 @@ export class HistoryInputBox
         ],
       },
       " ({0} for history)",
-      `\u21C5`,
+      `\u21C5`
     )
 
     super(container, contextViewProvider, options)
@@ -766,10 +766,10 @@ export class HistoryInputBox
         options.showHistoryHint &&
         options.showHistoryHint() &&
         !this.placeholder.endsWith(
-          NLS_PLACEHOLDER_HISTORY_HINT_SUFFIX_NO_PARENS,
+          NLS_PLACEHOLDER_HISTORY_HINT_SUFFIX_NO_PARENS
         ) &&
         !this.placeholder.endsWith(
-          NLS_PLACEHOLDER_HISTORY_HINT_SUFFIX_IN_PARENS,
+          NLS_PLACEHOLDER_HISTORY_HINT_SUFFIX_IN_PARENS
         ) &&
         this.history.getHistory().length
       ) {
@@ -797,7 +797,7 @@ export class HistoryInputBox
             addSuffix()
           }
         })
-      },
+      }
     )
     this.observer.observe(this.input, { attributeFilter: ["class"] })
 
@@ -809,7 +809,7 @@ export class HistoryInputBox
         } else {
           const revertedPlaceholder = this.placeholder.slice(
             0,
-            this.placeholder.length - historyHint.length,
+            this.placeholder.length - historyHint.length
           )
           if (options.showPlaceholderOnFocus) {
             this.placeholder = revertedPlaceholder
@@ -880,7 +880,7 @@ export class HistoryInputBox
 
     this.value = next ?? ""
     aria.status(
-      this.value ? this.value : nls.localize("clearedInput", "Cleared Input"),
+      this.value ? this.value : nls.localize("clearedInput", "Cleared Input")
     )
   }
 

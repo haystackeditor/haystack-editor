@@ -9,7 +9,7 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { NativeParsedArgs } from "vs/platform/environment/common/argv"
+import { NativeParsedArgs } from 'vs/platform/environment/common/argv';
 
 /**
  * Returns the user data path to use with some rules:
@@ -17,7 +17,4 @@ import { NativeParsedArgs } from "vs/platform/environment/common/argv"
  * - respect VSCODE_APPDATA environment variable
  * - respect --user-data-dir CLI argument
  */
-export function getUserDataPath(
-  args: NativeParsedArgs,
-  productName: string,
-): string
+export function getUserDataPath(args: NativeParsedArgs, productName: string): string;

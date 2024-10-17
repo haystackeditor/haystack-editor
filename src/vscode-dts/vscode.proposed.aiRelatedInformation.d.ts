@@ -9,66 +9,47 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-declare module "vscode" {
-  // https://github.com/microsoft/vscode/issues/190909
+declare module 'vscode' {
 
-  export enum RelatedInformationType {
-    SymbolInformation = 1,
-    CommandInformation = 2,
-    SearchInformation = 3,
-    SettingInformation = 4,
-  }
+	// https://github.com/microsoft/vscode/issues/190909
 
-  interface RelatedInformationBaseResult {
-    type: RelatedInformationType
-    weight: number
-  }
+	export enum RelatedInformationType {
+		SymbolInformation = 1,
+		CommandInformation = 2,
+		SearchInformation = 3,
+		SettingInformation = 4
+	}
 
-  // TODO: Symbols and Search
+	interface RelatedInformationBaseResult {
+		type: RelatedInformationType;
+		weight: number;
+	}
 
-  export interface CommandInformationResult
-    extends RelatedInformationBaseResult {
-    type: RelatedInformationType.CommandInformation
-    command: string
-  }
+	// TODO: Symbols and Search
 
-  export interface SettingInformationResult
-    extends RelatedInformationBaseResult {
-    type: RelatedInformationType.SettingInformation
-    setting: string
-  }
+	export interface CommandInformationResult extends RelatedInformationBaseResult {
+		type: RelatedInformationType.CommandInformation;
+		command: string;
+	}
 
-  export type RelatedInformationResult =
-    | CommandInformationResult
-    | SettingInformationResult
+	export interface SettingInformationResult extends RelatedInformationBaseResult {
+		type: RelatedInformationType.SettingInformation;
+		setting: string;
+	}
 
-  export interface RelatedInformationProvider {
-    provideRelatedInformation(
-      query: string,
-      token: CancellationToken,
-    ): ProviderResult<RelatedInformationResult[]>
-  }
+	export type RelatedInformationResult = CommandInformationResult | SettingInformationResult;
 
-  export interface EmbeddingVectorProvider {
-    provideEmbeddingVector(
-      strings: string[],
-      token: CancellationToken,
-    ): ProviderResult<number[][]>
-  }
+	export interface RelatedInformationProvider {
+		provideRelatedInformation(query: string, token: CancellationToken): ProviderResult<RelatedInformationResult[]>;
+	}
 
-  export namespace ai {
-    export function getRelatedInformation(
-      query: string,
-      types: RelatedInformationType[],
-      token: CancellationToken,
-    ): Thenable<RelatedInformationResult[]>
-    export function registerRelatedInformationProvider(
-      type: RelatedInformationType,
-      provider: RelatedInformationProvider,
-    ): Disposable
-    export function registerEmbeddingVectorProvider(
-      model: string,
-      provider: EmbeddingVectorProvider,
-    ): Disposable
-  }
+	export interface EmbeddingVectorProvider {
+		provideEmbeddingVector(strings: string[], token: CancellationToken): ProviderResult<number[][]>;
+	}
+
+	export namespace ai {
+		export function getRelatedInformation(query: string, types: RelatedInformationType[], token: CancellationToken): Thenable<RelatedInformationResult[]>;
+		export function registerRelatedInformationProvider(type: RelatedInformationType, provider: RelatedInformationProvider): Disposable;
+		export function registerEmbeddingVectorProvider(model: string, provider: EmbeddingVectorProvider): Disposable;
+	}
 }

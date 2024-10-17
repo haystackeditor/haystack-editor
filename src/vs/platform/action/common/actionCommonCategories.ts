@@ -26,6 +26,6 @@ export const Categories = Object.freeze({
         "A developer on Code itself or someone diagnosing issues in Code",
       ],
     },
-    "Developer",
+    "Developer"
   ),
 })

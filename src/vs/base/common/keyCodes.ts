@@ -516,7 +516,7 @@ for (let i = 0; i <= KeyCode.MAX_VALUE; i++) {
     number,
     string,
     string,
-    string,
+    string
   ]
   const mappings: IMappingEntry[] = [
     // immutable, scanCode, scanCodeStr, keyCode, keyCodeStr, eventKeyCode, vkey, usUserSettingsLabel, generalUserSettingsLabel
@@ -2525,14 +2525,14 @@ for (let i = 0; i <= KeyCode.MAX_VALUE; i++) {
       seenKeyCode[keyCode] = true
       if (!keyCodeStr) {
         throw new Error(
-          `String representation missing for key code ${keyCode} around scan code ${scanCodeStr}`,
+          `String representation missing for key code ${keyCode} around scan code ${scanCodeStr}`
         )
       }
       uiMap.define(keyCode, keyCodeStr)
       userSettingsUSMap.define(keyCode, usUserSettingsLabel || keyCodeStr)
       userSettingsGeneralMap.define(
         keyCode,
-        generalUserSettingsLabel || usUserSettingsLabel || keyCodeStr,
+        generalUserSettingsLabel || usUserSettingsLabel || keyCodeStr
       )
     }
     if (eventKeyCode) {

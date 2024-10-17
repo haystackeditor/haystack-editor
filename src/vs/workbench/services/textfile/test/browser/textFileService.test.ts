@@ -33,7 +33,7 @@ suite("Files - TextFileService", () => {
     instantiationService = workbenchInstantiationService(undefined, disposables)
     accessor = instantiationService.createInstance(TestServiceAccessor)
     disposables.add(
-      <ITestTextFileEditorModelManager>accessor.textFileService.files,
+      <ITestTextFileEditorModelManager>accessor.textFileService.files
     )
   })
 
@@ -49,12 +49,12 @@ suite("Files - TextFileService", () => {
         "utf8",
         undefined,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
     ;(<ITestTextFileEditorModelManager>accessor.textFileService.files).add(
       model.resource,
-      model,
+      model
     )
 
     await model.resolve()
@@ -65,7 +65,7 @@ suite("Files - TextFileService", () => {
     assert.ok(accessor.textFileService.isDirty(model.resource))
 
     const untitled = disposables.add(
-      await accessor.textFileService.untitled.resolve(),
+      await accessor.textFileService.untitled.resolve()
     )
 
     assert.ok(!accessor.textFileService.isDirty(untitled.resource))
@@ -82,12 +82,12 @@ suite("Files - TextFileService", () => {
         "utf8",
         undefined,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
     ;(<ITestTextFileEditorModelManager>accessor.textFileService.files).add(
       model.resource,
-      model,
+      model
     )
 
     await model.resolve()
@@ -107,12 +107,12 @@ suite("Files - TextFileService", () => {
         "utf8",
         undefined,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
     ;(<ITestTextFileEditorModelManager>accessor.textFileService.files).add(
       model.resource,
-      model,
+      model
     )
 
     await model.resolve()
@@ -132,12 +132,12 @@ suite("Files - TextFileService", () => {
         "utf8",
         undefined,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
     ;(<ITestTextFileEditorModelManager>accessor.textFileService.files).add(
       model.resource,
-      model,
+      model
     )
     accessor.fileDialogService.setPickFileToSave(model.resource)
 
@@ -158,12 +158,12 @@ suite("Files - TextFileService", () => {
         "utf8",
         undefined,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
     ;(<ITestTextFileEditorModelManager>accessor.textFileService.files).add(
       model.resource,
-      model,
+      model
     )
     accessor.fileDialogService.setPickFileToSave(model.resource)
 
@@ -183,12 +183,12 @@ suite("Files - TextFileService", () => {
         "utf8",
         undefined,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
     ;(<ITestTextFileEditorModelManager>accessor.textFileService.files).add(
       model.resource,
-      model,
+      model
     )
 
     await model.resolve()
@@ -202,11 +202,11 @@ suite("Files - TextFileService", () => {
         participate: async (files) => {
           assert.strictEqual(
             files[0].target.toString(),
-            model.resource.toString(),
+            model.resource.toString()
           )
           eventCounter++
         },
-      }),
+      })
     )
 
     disposables.add(
@@ -214,10 +214,10 @@ suite("Files - TextFileService", () => {
         assert.strictEqual(e.operation, FileOperation.CREATE)
         assert.strictEqual(
           e.files[0].target.toString(),
-          model.resource.toString(),
+          model.resource.toString()
         )
         eventCounter++
-      }),
+      })
     )
 
     await accessor.textFileService.create([
@@ -233,12 +233,12 @@ suite("Files - TextFileService", () => {
       accessor.languageService.registerLanguage({
         id: "plumbus0",
         extensions: [".one", ".two"],
-      }),
+      })
     )
 
     const suggested = accessor.textFileService.suggestFilename(
       "shleem",
-      "Untitled-1",
+      "Untitled-1"
     )
     assert.strictEqual(suggested, "Untitled-1")
   })
@@ -249,12 +249,12 @@ suite("Files - TextFileService", () => {
         id: "plumbus1",
         extensions: [".shleem", ".gazorpazorp"],
         filenames: ["plumbus"],
-      }),
+      })
     )
 
     const suggested = accessor.textFileService.suggestFilename(
       "plumbus1",
-      "Untitled-1",
+      "Untitled-1"
     )
     assert.strictEqual(suggested, "Untitled-1.shleem")
   })
@@ -264,12 +264,12 @@ suite("Files - TextFileService", () => {
       accessor.languageService.registerLanguage({
         id: "plumbus2",
         extensions: [".shleem", ".gazorpazorp"],
-      }),
+      })
     )
 
     const suggested = accessor.textFileService.suggestFilename(
       "plumbus2",
-      "Untitled-1.gazorpazorp",
+      "Untitled-1.gazorpazorp"
     )
     assert.strictEqual(suggested, "Untitled-1.gazorpazorp")
   })
@@ -279,12 +279,12 @@ suite("Files - TextFileService", () => {
       accessor.languageService.registerLanguage({
         id: "plumbus2",
         extensions: [".shleem", ".gazorpazorp"],
-      }),
+      })
     )
 
     const suggested = accessor.textFileService.suggestFilename(
       "plumbus2",
-      "Untitled-1.foobar",
+      "Untitled-1.foobar"
     )
     assert.strictEqual(suggested, "Untitled-1.shleem")
   })
@@ -294,12 +294,12 @@ suite("Files - TextFileService", () => {
       accessor.languageService.registerLanguage({
         id: "plumbus2",
         filenames: ["plumbus", "shleem", "gazorpazorp"],
-      }),
+      })
     )
 
     const suggested = accessor.textFileService.suggestFilename(
       "plumbus2",
-      "Untitled-1",
+      "Untitled-1"
     )
     assert.strictEqual(suggested, "plumbus")
   })
@@ -309,12 +309,12 @@ suite("Files - TextFileService", () => {
       accessor.languageService.registerLanguage({
         id: "plumbus2",
         filenames: ["plumbus", "shleem", "gazorpazorp"],
-      }),
+      })
     )
 
     const suggested = accessor.textFileService.suggestFilename(
       "plumbus2",
-      "gazorpazorp",
+      "gazorpazorp"
     )
     assert.strictEqual(suggested, "gazorpazorp")
   })
@@ -324,12 +324,12 @@ suite("Files - TextFileService", () => {
       accessor.languageService.registerLanguage({
         id: "plumbus2",
         filenames: ["plumbus", "shleem", "gazorpazorp"],
-      }),
+      })
     )
 
     const suggested = accessor.textFileService.suggestFilename(
       "plumbus2",
-      "foobar",
+      "foobar"
     )
     assert.strictEqual(suggested, "plumbus")
   })

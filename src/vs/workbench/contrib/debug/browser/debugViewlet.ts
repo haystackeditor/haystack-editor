@@ -90,7 +90,7 @@ export class DebugViewPaneContainer extends ViewPaneContainer {
   private paneListeners = new Map<string, IDisposable>()
 
   private readonly stopActionViewItemDisposables = this._register(
-    new DisposableStore(),
+    new DisposableStore()
   )
 
   constructor(
@@ -108,7 +108,7 @@ export class DebugViewPaneContainer extends ViewPaneContainer {
     @IContextViewService
     private readonly contextViewService: IContextViewService,
     @IContextKeyService private readonly contextKeyService: IContextKeyService,
-    @IViewDescriptorService viewDescriptorService: IViewDescriptorService,
+    @IViewDescriptorService viewDescriptorService: IViewDescriptorService
   ) {
     super(
       VIEWLET_ID,
@@ -122,14 +122,14 @@ export class DebugViewPaneContainer extends ViewPaneContainer {
       themeService,
       storageService,
       contextService,
-      viewDescriptorService,
+      viewDescriptorService
     )
 
     // When there are potential updates to the docked debug toolbar we need to update it
     this._register(
       this.debugService.onDidChangeState((state) =>
-        this.onDebugServiceStateChange(state),
-      ),
+        this.onDebugServiceStateChange(state)
+      )
     )
 
     this._register(
@@ -137,13 +137,13 @@ export class DebugViewPaneContainer extends ViewPaneContainer {
         if (e.affectsSome(new Set([CONTEXT_DEBUG_UX_KEY, "inDebugMode"]))) {
           this.updateTitleArea()
         }
-      }),
+      })
     )
 
     this._register(
       this.contextService.onDidChangeWorkbenchState(() =>
-        this.updateTitleArea(),
-      ),
+        this.updateTitleArea()
+      )
     )
     this._register(
       this.configurationService.onDidChangeConfiguration((e) => {
@@ -153,7 +153,7 @@ export class DebugViewPaneContainer extends ViewPaneContainer {
         ) {
           this.updateTitleArea()
         }
-      }),
+      })
     )
   }
 
@@ -174,14 +174,14 @@ export class DebugViewPaneContainer extends ViewPaneContainer {
 
   override getActionViewItem(
     action: IAction,
-    options: IBaseActionViewItemOptions,
+    options: IBaseActionViewItemOptions
   ): IActionViewItem | undefined {
     if (action.id === DEBUG_START_COMMAND_ID) {
       this.startDebugActionViewItem = this.instantiationService.createInstance(
         StartDebugActionViewItem,
         null,
         action,
-        options,
+        options
       )
       return this.startDebugActionViewItem
     }
@@ -191,7 +191,7 @@ export class DebugViewPaneContainer extends ViewPaneContainer {
         undefined,
         this.debugService,
         this.contextViewService,
-        this.configurationService,
+        this.configurationService
       )
     }
 
@@ -202,8 +202,8 @@ export class DebugViewPaneContainer extends ViewPaneContainer {
           action as MenuItemAction,
           this.stopActionViewItemDisposables,
           accessor,
-          { hoverDelegate: options.hoverDelegate },
-        ),
+          { hoverDelegate: options.hoverDelegate }
+        )
       )
       if (item) {
         return item
@@ -231,9 +231,9 @@ export class DebugViewPaneContainer extends ViewPaneContainer {
         { location: VIEWLET_ID },
         (_progress) => {
           return new Promise<void>(
-            (resolve) => (this.progressResolve = resolve),
+            (resolve) => (this.progressResolve = resolve)
           )
-        },
+        }
       )
     }
   }
@@ -244,7 +244,7 @@ export class DebugViewPaneContainer extends ViewPaneContainer {
       size: number
       index?: number
       disposable: IDisposable
-    }[],
+    }[]
   ): void {
     super.addPanes(panes)
 
@@ -256,7 +256,7 @@ export class DebugViewPaneContainer extends ViewPaneContainer {
       } else {
         this.paneListeners.set(
           pane.id,
-          pane.onDidChange(() => this.updateBreakpointsMaxSize()),
+          pane.onDidChange(() => this.updateBreakpointsMaxSize())
         )
       }
     }
@@ -274,7 +274,7 @@ export class DebugViewPaneContainer extends ViewPaneContainer {
     if (this.breakpointView) {
       // We need to update the breakpoints view since all other views are collapsed #25384
       const allOtherCollapsed = this.panes.every(
-        (view) => !view.isExpanded() || view === this.breakpointView,
+        (view) => !view.isExpanded() || view === this.breakpointView
       )
       this.breakpointView.maximumBodySize = allOtherCollapsed
         ? Number.POSITIVE_INFINITY
@@ -290,18 +290,18 @@ MenuRegistry.appendMenuItem(MenuId.ViewContainerTitle, {
     WorkbenchStateContext.notEqualsTo("empty"),
     ContextKeyExpr.or(
       CONTEXT_DEBUG_STATE.isEqualTo("inactive"),
-      ContextKeyExpr.notEquals("config.debug.toolBarLocation", "docked"),
+      ContextKeyExpr.notEquals("config.debug.toolBarLocation", "docked")
     ),
     ContextKeyExpr.or(
       ContextKeyExpr.not("config.debug.hideLauncherWhileDebugging"),
-      ContextKeyExpr.not("inDebugMode"),
-    ),
+      ContextKeyExpr.not("inDebugMode")
+    )
   ),
   order: 10,
   group: "navigation",
   command: {
     precondition: CONTEXT_DEBUG_STATE.notEqualsTo(
-      getStateLabel(State.Initializing),
+      getStateLabel(State.Initializing)
     ),
     id: DEBUG_START_COMMAND_ID,
     title: DEBUG_START_LABEL,
@@ -318,13 +318,13 @@ registerAction2(
           original: "Open 'launch.json'",
           mnemonicTitle: nls.localize(
             { key: "miOpenConfigurations", comment: ["&& denotes a mnemonic"] },
-            "Open &&Configurations",
+            "Open &&Configurations"
           ),
         },
         metadata: {
           description: nls.localize2(
             "openLaunchConfigDescription",
-            "Opens the file used to configure how your program is debugged",
+            "Opens the file used to configure how your program is debugged"
           ),
         },
         f1: true,
@@ -343,9 +343,9 @@ registerAction2(
                 CONTEXT_DEBUG_STATE.isEqualTo("inactive"),
                 ContextKeyExpr.notEquals(
                   "config.debug.toolBarLocation",
-                  "docked",
-                ),
-              ),
+                  "docked"
+                )
+              )
             ),
           },
           {
@@ -355,7 +355,7 @@ registerAction2(
             when: ContextKeyExpr.and(
               ContextKeyExpr.equals("viewContainer", VIEWLET_ID),
               CONTEXT_DEBUG_STATE.notEqualsTo("inactive"),
-              ContextKeyExpr.equals("config.debug.toolBarLocation", "docked"),
+              ContextKeyExpr.equals("config.debug.toolBarLocation", "docked")
             ),
           },
           {
@@ -395,7 +395,7 @@ registerAction2(
                   "User picks a workspace folder or a workspace configuration file here. Workspace configuration files can contain settings and thus a launch.json configuration can be written into one.",
                 ],
               },
-              "Select a workspace folder to create a launch.json file in or add it to the workspace config file",
+              "Select a workspace folder to create a launch.json file in or add it to the workspace config file"
             ),
           })
           if (picked) {
@@ -408,7 +408,7 @@ registerAction2(
         await launch.openConfigFile({ preserveFocus: false })
       }
     }
-  },
+  }
 )
 
 registerAction2(
@@ -424,7 +424,7 @@ registerAction2(
             group: "3_toggleRepl",
             order: 30,
             when: ContextKeyExpr.and(
-              ContextKeyExpr.equals("viewContainer", VIEWLET_ID),
+              ContextKeyExpr.equals("viewContainer", VIEWLET_ID)
             ),
           },
         ],
@@ -439,7 +439,7 @@ registerAction2(
         await viewsService.openView(REPL_VIEW_ID)
       }
     }
-  },
+  }
 )
 
 MenuRegistry.appendMenuItem(MenuId.ViewContainerTitle, {
@@ -448,8 +448,8 @@ MenuRegistry.appendMenuItem(MenuId.ViewContainerTitle, {
     CONTEXT_DEBUG_STATE.notEqualsTo("inactive"),
     ContextKeyExpr.or(
       ContextKeyExpr.equals("config.debug.toolBarLocation", "docked"),
-      ContextKeyExpr.has("config.debug.hideLauncherWhileDebugging"),
-    ),
+      ContextKeyExpr.has("config.debug.hideLauncherWhileDebugging")
+    )
   ),
   order: 10,
   command: {

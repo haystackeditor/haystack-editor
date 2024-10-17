@@ -95,7 +95,7 @@ class ViewZoneDelegate implements IViewZone {
     onDomNodeTop: (top: number) => void,
     onComputedHeight: (height: number) => void,
     showInHiddenAreas: boolean | undefined,
-    ordinal: number | undefined,
+    ordinal: number | undefined
   ) {
     this.domNode = domNode
     this.afterLineNumber = afterLineNumber
@@ -171,7 +171,7 @@ class Arrow {
     dom.removeCSSRulesContainingSelector(this._ruleName)
     dom.createCSSRule(
       `.monaco-editor ${this._ruleName}`,
-      `border-style: solid; border-color: transparent; border-bottom-color: ${this._color}; border-width: ${this._height}px; bottom: -${this._height}px !important; margin-left: -${this._height}px; `,
+      `border-style: solid; border-color: transparent; border-bottom-color: ${this._color}; border-width: ${this._height}px; bottom: -${this._height}px !important; margin-left: -${this._height}px; `
     )
   }
 
@@ -229,7 +229,7 @@ export abstract class ZoneWidget implements IHorizontalSashLayoutProvider {
         this.domNode.style.left = this._getLeft(info) + "px"
         // TODO: Reconsider whether this is correct.
         // this._onWidth(width);
-      }),
+      })
     )
   }
 
@@ -350,7 +350,7 @@ export abstract class ZoneWidget implements IHorizontalSashLayoutProvider {
 
   updatePositionAndHeight(
     rangeOrPos: IRange | IPosition,
-    heightInLines?: number,
+    heightInLines?: number
   ): void {
     if (this._viewZone) {
       rangeOrPos = Range.isIRange(rangeOrPos)
@@ -425,7 +425,7 @@ export abstract class ZoneWidget implements IHorizontalSashLayoutProvider {
     if (!this.options.allowUnlimitedHeight) {
       const maxHeightInLines = Math.max(
         12,
-        (this.editor.getLayoutInfo().height / lineHeight) * 0.8,
+        (this.editor.getLayoutInfo().height / lineHeight) * 0.8
       )
       heightInLines = Math.min(heightInLines, maxHeightInLines)
     }
@@ -463,12 +463,12 @@ export abstract class ZoneWidget implements IHorizontalSashLayoutProvider {
         (top: number) => this._onViewZoneTop(top),
         (height: number) => this._onViewZoneHeight(height),
         this.options.showInHiddenAreas,
-        this.options.ordinal,
+        this.options.ordinal
       )
       this._viewZone.id = accessor.addZone(this._viewZone)
       this._overlayWidget = new OverlayWidgetDelegate(
         WIDGET_ID + this._viewZone.id,
-        this.domNode,
+        this.domNode
       )
       this.editor.addOverlayWidget(this._overlayWidget)
     })
@@ -499,7 +499,7 @@ export abstract class ZoneWidget implements IHorizontalSashLayoutProvider {
     const model = this.editor.getModel()
     if (model) {
       const range = model.validateRange(
-        new Range(where.startLineNumber, 1, where.endLineNumber + 1, 1),
+        new Range(where.startLineNumber, 1, where.endLineNumber + 1, 1)
       )
       const editRange = this.editor.getEditRange()
       const revealRange = editRange
@@ -507,7 +507,7 @@ export abstract class ZoneWidget implements IHorizontalSashLayoutProvider {
         : range
       this.revealRange(
         revealRange,
-        range.startLineNumber === model.getLineCount(),
+        range.startLineNumber === model.getLineCount()
       )
     }
   }
@@ -560,7 +560,7 @@ export abstract class ZoneWidget implements IHorizontalSashLayoutProvider {
       return
     }
     this._resizeSash = this._disposables.add(
-      new Sash(this.domNode, this, { orientation: Orientation.HORIZONTAL }),
+      new Sash(this.domNode, this, { orientation: Orientation.HORIZONTAL })
     )
 
     if (!this.options.isResizeable) {
@@ -576,13 +576,13 @@ export abstract class ZoneWidget implements IHorizontalSashLayoutProvider {
             heightInLines: this._viewZone.heightInLines,
           }
         }
-      }),
+      })
     )
 
     this._disposables.add(
       this._resizeSash.onDidEnd(() => {
         data = undefined
-      }),
+      })
     )
 
     this._disposables.add(
@@ -599,7 +599,7 @@ export abstract class ZoneWidget implements IHorizontalSashLayoutProvider {
             this._relayout(newHeightInLines)
           }
         }
-      }),
+      })
     )
   }
 

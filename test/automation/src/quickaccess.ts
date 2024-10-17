@@ -9,293 +9,241 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Editors } from "./editors"
-import { Code } from "./code"
-import { QuickInput } from "./quickinput"
-import { basename, isAbsolute } from "path"
+import { Editors } from './editors';
+import { Code } from './code';
+import { QuickInput } from './quickinput';
+import { basename, isAbsolute } from 'path';
 
 enum QuickAccessKind {
-  Files = 1,
-  Commands,
-  Symbols,
+	Files = 1,
+	Commands,
+	Symbols
 }
 
 export class QuickAccess {
-  constructor(
-    private code: Code,
-    private editors: Editors,
-    private quickInput: QuickInput,
-  ) {}
 
-  async openFileQuickAccessAndWait(
-    searchValue: string,
-    expectedFirstElementNameOrExpectedResultCount: string | number,
-  ): Promise<void> {
-    // make sure the file quick access is not "polluted"
-    // with entries from the editor history when opening
-    await this.runCommand("workbench.action.clearEditorHistory")
+	constructor(private code: Code, private editors: Editors, private quickInput: QuickInput) { }
 
-    const PollingStrategy = {
-      Stop: true,
-      Continue: false,
-    }
+	async openFileQuickAccessAndWait(searchValue: string, expectedFirstElementNameOrExpectedResultCount: string | number): Promise<void> {
 
-    let retries = 0
-    let success = false
+		// make sure the file quick access is not "polluted"
+		// with entries from the editor history when opening
+		await this.runCommand('workbench.action.clearEditorHistory');
 
-    while (++retries < 10) {
-      let retry = false
+		const PollingStrategy = {
+			Stop: true,
+			Continue: false
+		};
 
-      try {
-        await this.openQuickAccessWithRetry(QuickAccessKind.Files, searchValue)
-        await this.quickInput.waitForQuickInputElements((elementNames) => {
-          this.code.logger.log(
-            "QuickAccess: resulting elements: ",
-            elementNames,
-          )
+		let retries = 0;
+		let success = false;
 
-          // Quick access seems to be still running -> retry
-          if (elementNames.length === 0) {
-            this.code.logger.log(
-              "QuickAccess: file search returned 0 elements, will continue polling...",
-            )
+		while (++retries < 10) {
+			let retry = false;
 
-            return PollingStrategy.Continue
-          }
+			try {
+				await this.openQuickAccessWithRetry(QuickAccessKind.Files, searchValue);
+				await this.quickInput.waitForQuickInputElements(elementNames => {
+					this.code.logger.log('QuickAccess: resulting elements: ', elementNames);
 
-          // Quick access does not seem healthy/ready -> retry
-          const firstElementName = elementNames[0]
-          if (firstElementName === "No matching results") {
-            this.code.logger.log(
-              `QuickAccess: file search returned "No matching results", will retry...`,
-            )
+					// Quick access seems to be still running -> retry
+					if (elementNames.length === 0) {
+						this.code.logger.log('QuickAccess: file search returned 0 elements, will continue polling...');
 
-            retry = true
+						return PollingStrategy.Continue;
+					}
 
-            return PollingStrategy.Stop
-          }
+					// Quick access does not seem healthy/ready -> retry
+					const firstElementName = elementNames[0];
+					if (firstElementName === 'No matching results') {
+						this.code.logger.log(`QuickAccess: file search returned "No matching results", will retry...`);
 
-          // Expected: number of results
-          if (
-            typeof expectedFirstElementNameOrExpectedResultCount === "number"
-          ) {
-            if (
-              elementNames.length ===
-              expectedFirstElementNameOrExpectedResultCount
-            ) {
-              success = true
+						retry = true;
 
-              return PollingStrategy.Stop
-            }
+						return PollingStrategy.Stop;
+					}
 
-            this.code.logger.log(
-              `QuickAccess: file search returned ${elementNames.length} results but was expecting ${expectedFirstElementNameOrExpectedResultCount}, will retry...`,
-            )
+					// Expected: number of results
+					if (typeof expectedFirstElementNameOrExpectedResultCount === 'number') {
+						if (elementNames.length === expectedFirstElementNameOrExpectedResultCount) {
+							success = true;
 
-            retry = true
+							return PollingStrategy.Stop;
+						}
 
-            return PollingStrategy.Stop
-          }
+						this.code.logger.log(`QuickAccess: file search returned ${elementNames.length} results but was expecting ${expectedFirstElementNameOrExpectedResultCount}, will retry...`);
 
-          // Expected: string
-          else {
-            if (
-              firstElementName === expectedFirstElementNameOrExpectedResultCount
-            ) {
-              success = true
+						retry = true;
 
-              return PollingStrategy.Stop
-            }
+						return PollingStrategy.Stop;
+					}
 
-            this.code.logger.log(
-              `QuickAccess: file search returned ${firstElementName} as first result but was expecting ${expectedFirstElementNameOrExpectedResultCount}, will retry...`,
-            )
+					// Expected: string
+					else {
+						if (firstElementName === expectedFirstElementNameOrExpectedResultCount) {
+							success = true;
 
-            retry = true
+							return PollingStrategy.Stop;
+						}
 
-            return PollingStrategy.Stop
-          }
-        })
-      } catch (error) {
-        this.code.logger.log(
-          `QuickAccess: file search waitForQuickInputElements threw an error ${error}, will retry...`,
-        )
+						this.code.logger.log(`QuickAccess: file search returned ${firstElementName} as first result but was expecting ${expectedFirstElementNameOrExpectedResultCount}, will retry...`);
 
-        retry = true
-      }
+						retry = true;
 
-      if (!retry) {
-        break
-      }
+						return PollingStrategy.Stop;
+					}
+				});
+			} catch (error) {
+				this.code.logger.log(`QuickAccess: file search waitForQuickInputElements threw an error ${error}, will retry...`);
 
-      await this.quickInput.closeQuickInput()
-    }
+				retry = true;
+			}
 
-    if (!success) {
-      if (typeof expectedFirstElementNameOrExpectedResultCount === "string") {
-        throw new Error(
-          `Quick open file search was unable to find '${expectedFirstElementNameOrExpectedResultCount}' after 10 attempts, giving up.`,
-        )
-      } else {
-        throw new Error(
-          `Quick open file search was unable to find ${expectedFirstElementNameOrExpectedResultCount} result items after 10 attempts, giving up.`,
-        )
-      }
-    }
-  }
+			if (!retry) {
+				break;
+			}
 
-  async openFile(path: string): Promise<void> {
-    if (!isAbsolute(path)) {
-      // we require absolute paths to get a single
-      // result back that is unique and avoid hitting
-      // the search process to reduce chances of
-      // search needing longer.
-      throw new Error("QuickAccess.openFile requires an absolute path")
-    }
+			await this.quickInput.closeQuickInput();
+		}
 
-    const fileName = basename(path)
+		if (!success) {
+			if (typeof expectedFirstElementNameOrExpectedResultCount === 'string') {
+				throw new Error(`Quick open file search was unable to find '${expectedFirstElementNameOrExpectedResultCount}' after 10 attempts, giving up.`);
+			} else {
+				throw new Error(`Quick open file search was unable to find ${expectedFirstElementNameOrExpectedResultCount} result items after 10 attempts, giving up.`);
+			}
+		}
+	}
 
-    // quick access shows files with the basename of the path
-    await this.openFileQuickAccessAndWait(path, basename(path))
+	async openFile(path: string): Promise<void> {
+		if (!isAbsolute(path)) {
+			// we require absolute paths to get a single
+			// result back that is unique and avoid hitting
+			// the search process to reduce chances of
+			// search needing longer.
+			throw new Error('QuickAccess.openFile requires an absolute path');
+		}
 
-    // open first element
-    await this.quickInput.selectQuickInputElement(0)
+		const fileName = basename(path);
 
-    // wait for editor being focused
-    await this.editors.waitForActiveTab(fileName)
-    await this.editors.selectTab(fileName)
-  }
+		// quick access shows files with the basename of the path
+		await this.openFileQuickAccessAndWait(path, basename(path));
 
-  private async openQuickAccessWithRetry(
-    kind: QuickAccessKind,
-    value?: string,
-  ): Promise<void> {
-    let retries = 0
+		// open first element
+		await this.quickInput.selectQuickInputElement(0);
 
-    // Other parts of code might steal focus away from quickinput :(
-    while (retries < 5) {
-      // Open via keybinding
-      switch (kind) {
-        case QuickAccessKind.Files:
-          await this.code.dispatchKeybinding(
-            process.platform === "darwin" ? "cmd+p" : "ctrl+p",
-          )
-          break
-        case QuickAccessKind.Symbols:
-          await this.code.dispatchKeybinding(
-            process.platform === "darwin" ? "cmd+shift+o" : "ctrl+shift+o",
-          )
-          break
-        case QuickAccessKind.Commands:
-          await this.code.dispatchKeybinding(
-            process.platform === "darwin" ? "cmd+shift+p" : "ctrl+shift+p",
-          )
-          break
-      }
+		// wait for editor being focused
+		await this.editors.waitForActiveTab(fileName);
+		await this.editors.selectTab(fileName);
+	}
 
-      // Await for quick input widget opened
-      try {
-        await this.quickInput.waitForQuickInputOpened(10)
-        break
-      } catch (err) {
-        if (++retries > 5) {
-          throw new Error(
-            `QuickAccess.openQuickAccessWithRetry(kind: ${kind}) failed: ${err}`,
-          )
-        }
+	private async openQuickAccessWithRetry(kind: QuickAccessKind, value?: string): Promise<void> {
+		let retries = 0;
 
-        // Retry
-        await this.code.dispatchKeybinding("escape")
-      }
-    }
+		// Other parts of code might steal focus away from quickinput :(
+		while (retries < 5) {
 
-    // Type value if any
-    if (value) {
-      await this.quickInput.type(value)
-    }
-  }
+			// Open via keybinding
+			switch (kind) {
+				case QuickAccessKind.Files:
+					await this.code.dispatchKeybinding(process.platform === 'darwin' ? 'cmd+p' : 'ctrl+p');
+					break;
+				case QuickAccessKind.Symbols:
+					await this.code.dispatchKeybinding(process.platform === 'darwin' ? 'cmd+shift+o' : 'ctrl+shift+o');
+					break;
+				case QuickAccessKind.Commands:
+					await this.code.dispatchKeybinding(process.platform === 'darwin' ? 'cmd+shift+p' : 'ctrl+shift+p');
+					break;
+			}
 
-  async runCommand(
-    commandId: string,
-    options?: { keepOpen?: boolean; exactLabelMatch?: boolean },
-  ): Promise<void> {
-    const keepOpen = options?.keepOpen
-    const exactLabelMatch = options?.exactLabelMatch
+			// Await for quick input widget opened
+			try {
+				await this.quickInput.waitForQuickInputOpened(10);
+				break;
+			} catch (err) {
+				if (++retries > 5) {
+					throw new Error(`QuickAccess.openQuickAccessWithRetry(kind: ${kind}) failed: ${err}`);
+				}
 
-    const openCommandPalletteAndTypeCommand = async (): Promise<boolean> => {
-      // open commands picker
-      await this.openQuickAccessWithRetry(
-        QuickAccessKind.Commands,
-        `>${commandId}`,
-      )
+				// Retry
+				await this.code.dispatchKeybinding('escape');
+			}
+		}
 
-      // wait for best choice to be focused
-      await this.quickInput.waitForQuickInputElementFocused()
+		// Type value if any
+		if (value) {
+			await this.quickInput.type(value);
+		}
+	}
 
-      // Retry for as long as the command not found
-      const text = await this.quickInput.waitForQuickInputElementText()
+	async runCommand(commandId: string, options?: { keepOpen?: boolean; exactLabelMatch?: boolean }): Promise<void> {
+		const keepOpen = options?.keepOpen;
+		const exactLabelMatch = options?.exactLabelMatch;
 
-      if (
-        text === "No matching commands" ||
-        (exactLabelMatch && text !== commandId)
-      ) {
-        return false
-      }
+		const openCommandPalletteAndTypeCommand = async (): Promise<boolean> => {
+			// open commands picker
+			await this.openQuickAccessWithRetry(QuickAccessKind.Commands, `>${commandId}`);
 
-      return true
-    }
+			// wait for best choice to be focused
+			await this.quickInput.waitForQuickInputElementFocused();
 
-    let hasCommandFound = await openCommandPalletteAndTypeCommand()
+			// Retry for as long as the command not found
+			const text = await this.quickInput.waitForQuickInputElementText();
 
-    if (!hasCommandFound) {
-      this.code.logger.log(`QuickAccess: No matching commands, will retry...`)
-      await this.quickInput.closeQuickInput()
+			if (text === 'No matching commands' || (exactLabelMatch && text !== commandId)) {
+				return false;
+			}
 
-      let retries = 0
-      while (++retries < 5) {
-        hasCommandFound = await openCommandPalletteAndTypeCommand()
-        if (hasCommandFound) {
-          break
-        } else {
-          this.code.logger.log(
-            `QuickAccess: No matching commands, will retry...`,
-          )
-          await this.quickInput.closeQuickInput()
-          await this.code.wait(1000)
-        }
-      }
+			return true;
+		};
 
-      if (!hasCommandFound) {
-        throw new Error(
-          `QuickAccess.runCommand(commandId: ${commandId}) failed to find command.`,
-        )
-      }
-    }
+		let hasCommandFound = await openCommandPalletteAndTypeCommand();
 
-    // wait and click on best choice
-    await this.quickInput.selectQuickInputElement(0, keepOpen)
-  }
+		if (!hasCommandFound) {
 
-  async openQuickOutline(): Promise<void> {
-    let retries = 0
+			this.code.logger.log(`QuickAccess: No matching commands, will retry...`);
+			await this.quickInput.closeQuickInput();
 
-    while (++retries < 10) {
-      // open quick outline via keybinding
-      await this.openQuickAccessWithRetry(QuickAccessKind.Symbols)
+			let retries = 0;
+			while (++retries < 5) {
+				hasCommandFound = await openCommandPalletteAndTypeCommand();
+				if (hasCommandFound) {
+					break;
+				} else {
+					this.code.logger.log(`QuickAccess: No matching commands, will retry...`);
+					await this.quickInput.closeQuickInput();
+					await this.code.wait(1000);
+				}
+			}
 
-      const text = await this.quickInput.waitForQuickInputElementText()
+			if (!hasCommandFound) {
+				throw new Error(`QuickAccess.runCommand(commandId: ${commandId}) failed to find command.`);
+			}
+		}
 
-      // Retry for as long as no symbols are found
-      if (text === "No symbol information for the file") {
-        this.code.logger.log(
-          `QuickAccess: openQuickOutline indicated 'No symbol information for the file', will retry...`,
-        )
+		// wait and click on best choice
+		await this.quickInput.selectQuickInputElement(0, keepOpen);
+	}
 
-        // close and retry
-        await this.quickInput.closeQuickInput()
+	async openQuickOutline(): Promise<void> {
+		let retries = 0;
 
-        continue
-      }
-    }
-  }
+		while (++retries < 10) {
+
+			// open quick outline via keybinding
+			await this.openQuickAccessWithRetry(QuickAccessKind.Symbols);
+
+			const text = await this.quickInput.waitForQuickInputElementText();
+
+			// Retry for as long as no symbols are found
+			if (text === 'No symbol information for the file') {
+				this.code.logger.log(`QuickAccess: openQuickOutline indicated 'No symbol information for the file', will retry...`);
+
+				// close and retry
+				await this.quickInput.closeQuickInput();
+
+				continue;
+			}
+		}
+	}
 }

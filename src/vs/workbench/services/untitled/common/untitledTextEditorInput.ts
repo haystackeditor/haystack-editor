@@ -81,7 +81,7 @@ export class UntitledTextEditorInput
     @ITextResourceConfigurationService
     textResourceConfigurationService: ITextResourceConfigurationService,
     @ICustomEditorLabelService
-    customEditorLabelService: ICustomEditorLabelService,
+    customEditorLabelService: ICustomEditorLabelService
   ) {
     super(
       model.resource,
@@ -97,15 +97,15 @@ export class UntitledTextEditorInput
       fileService,
       filesConfigurationService,
       textResourceConfigurationService,
-      customEditorLabelService,
+      customEditorLabelService
     )
 
     this.registerModelListeners(model)
 
     this._register(
       this.textFileService.untitled.onDidCreate((model) =>
-        this.onDidCreateUntitledModel(model),
-      ),
+        this.onDidCreateUntitledModel(model)
+      )
     )
   }
 
@@ -114,10 +114,10 @@ export class UntitledTextEditorInput
 
     // re-emit some events from the model
     this.modelDisposables.add(
-      model.onDidChangeDirty(() => this._onDidChangeDirty.fire()),
+      model.onDidChangeDirty(() => this._onDidChangeDirty.fire())
     )
     this.modelDisposables.add(
-      model.onDidChangeName(() => this._onDidChangeLabel.fire()),
+      model.onDidChangeName(() => this._onDidChangeLabel.fire())
     )
 
     // a reverted untitled text editor model renders this input disposed
@@ -181,7 +181,7 @@ export class UntitledTextEditorInput
 
   setEncoding(
     encoding: string,
-    mode: EncodingMode /* ignored, we only have Encode */,
+    mode: EncodingMode /* ignored, we only have Encode */
   ): Promise<void> {
     return this.model.setEncoding(encoding)
   }
@@ -208,7 +208,7 @@ export class UntitledTextEditorInput
         // Acquire a model reference
         this.cachedUntitledTextEditorModelReference =
           (await this.textModelService.createModelReference(
-            this.resource,
+            this.resource
           )) as IReference<IUntitledTextEditorModel>
       })()
     }
@@ -226,7 +226,7 @@ export class UntitledTextEditorInput
   }
 
   override toUntyped(
-    options?: IUntypedEditorOptions,
+    options?: IUntypedEditorOptions
   ): IUntitledTextResourceEditorInput {
     const untypedInput: IUntitledTextResourceEditorInput & {
       resource: URI | undefined
@@ -236,7 +236,7 @@ export class UntitledTextEditorInput
         ? toLocalResource(
             this.model.resource,
             this.environmentService.remoteAuthority,
-            this.pathService.defaultUriScheme,
+            this.pathService.defaultUriScheme
           )
         : this.resource,
       forceUntitled: true,
@@ -254,7 +254,7 @@ export class UntitledTextEditorInput
       untypedInput.options.viewState = findViewStateForEditor(
         this,
         options.preserveViewState,
-        this.editorService,
+        this.editorService
       )
 
       if (

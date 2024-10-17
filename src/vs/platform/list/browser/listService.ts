@@ -180,7 +180,7 @@ export class ListService implements IListService {
 
   register(
     widget: WorkbenchListWidget,
-    extraContextKeys?: IContextKey<boolean>[],
+    extraContextKeys?: IContextKey<boolean>[]
   ): IDisposable {
     if (!this._hasCreatedStyleController) {
       this._hasCreatedStyleController = true
@@ -205,14 +205,14 @@ export class ListService implements IListService {
     return combinedDisposable(
       widget.onDidFocus(() => this.setLastFocusedList(widget)),
       toDisposable(() =>
-        this.lists.splice(this.lists.indexOf(registeredList), 1),
+        this.lists.splice(this.lists.indexOf(registeredList), 1)
       ),
       widget.onDidDispose(() => {
         this.lists = this.lists.filter((l) => l !== registeredList)
         if (this._lastFocusedWidget === widget) {
           this.setLastFocusedList(undefined)
         }
-      }),
+      })
     )
   }
 
@@ -226,67 +226,67 @@ export const RawWorkbenchListScrollAtBoundaryContextKey = new RawContextKey<
 >("listScrollAtBoundary", "none")
 export const WorkbenchListScrollAtTopContextKey = ContextKeyExpr.or(
   RawWorkbenchListScrollAtBoundaryContextKey.isEqualTo("top"),
-  RawWorkbenchListScrollAtBoundaryContextKey.isEqualTo("both"),
+  RawWorkbenchListScrollAtBoundaryContextKey.isEqualTo("both")
 )
 export const WorkbenchListScrollAtBottomContextKey = ContextKeyExpr.or(
   RawWorkbenchListScrollAtBoundaryContextKey.isEqualTo("bottom"),
-  RawWorkbenchListScrollAtBoundaryContextKey.isEqualTo("both"),
+  RawWorkbenchListScrollAtBoundaryContextKey.isEqualTo("both")
 )
 
 export const RawWorkbenchListFocusContextKey = new RawContextKey<boolean>(
   "listFocus",
-  true,
+  true
 )
 export const WorkbenchTreeStickyScrollFocused = new RawContextKey<boolean>(
   "treestickyScrollFocused",
-  false,
+  false
 )
 export const WorkbenchListSupportsMultiSelectContextKey =
   new RawContextKey<boolean>("listSupportsMultiselect", true)
 export const WorkbenchListFocusContextKey = ContextKeyExpr.and(
   RawWorkbenchListFocusContextKey,
   ContextKeyExpr.not(InputFocusedContextKey),
-  WorkbenchTreeStickyScrollFocused.negate(),
+  WorkbenchTreeStickyScrollFocused.negate()
 )
 export const WorkbenchListHasSelectionOrFocus = new RawContextKey<boolean>(
   "listHasSelectionOrFocus",
-  false,
+  false
 )
 export const WorkbenchListDoubleSelection = new RawContextKey<boolean>(
   "listDoubleSelection",
-  false,
+  false
 )
 export const WorkbenchListMultiSelection = new RawContextKey<boolean>(
   "listMultiSelection",
-  false,
+  false
 )
 export const WorkbenchListSelectionNavigation = new RawContextKey<boolean>(
   "listSelectionNavigation",
-  false,
+  false
 )
 export const WorkbenchListSupportsFind = new RawContextKey<boolean>(
   "listSupportsFind",
-  true,
+  true
 )
 export const WorkbenchTreeElementCanCollapse = new RawContextKey<boolean>(
   "treeElementCanCollapse",
-  false,
+  false
 )
 export const WorkbenchTreeElementHasParent = new RawContextKey<boolean>(
   "treeElementHasParent",
-  false,
+  false
 )
 export const WorkbenchTreeElementCanExpand = new RawContextKey<boolean>(
   "treeElementCanExpand",
-  false,
+  false
 )
 export const WorkbenchTreeElementHasChild = new RawContextKey<boolean>(
   "treeElementHasChild",
-  false,
+  false
 )
 export const WorkbenchTreeFindOpen = new RawContextKey<boolean>(
   "treeFindOpen",
-  false,
+  false
 )
 const WorkbenchListTypeNavigationModeKey = "listTypeNavigationMode"
 
@@ -298,7 +298,7 @@ const WorkbenchListAutomaticKeyboardNavigationLegacyKey =
 
 function createScopedContextKeyService(
   contextKeyService: IContextKeyService,
-  widget: ListWidget,
+  widget: ListWidget
 ): IScopedContextKeyService {
   const result = contextKeyService.createScoped(widget.getHTMLElement())
   RawWorkbenchListFocusContextKey.bindTo(result)
@@ -314,7 +314,7 @@ type IScrollObservarable =
 
 function createScrollObserver(
   contextKeyService: IContextKeyService,
-  widget: IScrollObservarable,
+  widget: IScrollObservarable
 ): IDisposable {
   const listScrollAt =
     RawWorkbenchListScrollAtBoundaryContextKey.bindTo(contextKeyService)
@@ -359,7 +359,7 @@ const treeStickyScroll = "workbench.tree.enableStickyScroll"
 const treeStickyScrollMaxElements = "workbench.tree.stickyScrollMaxItemCount"
 
 function useAltAsMultipleSelectionModifier(
-  configurationService: IConfigurationService,
+  configurationService: IConfigurationService
 ): boolean {
   return configurationService.getValue(multiSelectModifierSettingKey) === "alt"
 }
@@ -386,12 +386,12 @@ class MultipleSelectionController<T>
           this.useAltAsMultipleSelectionModifier =
             useAltAsMultipleSelectionModifier(this.configurationService)
         }
-      }),
+      })
     )
   }
 
   isSelectionSingleChangeEvent(
-    event: IListMouseEvent<T> | IListTouchEvent<T>,
+    event: IListMouseEvent<T> | IListTouchEvent<T>
   ): boolean {
     if (this.useAltAsMultipleSelectionModifier) {
       return event.browserEvent.altKey
@@ -401,7 +401,7 @@ class MultipleSelectionController<T>
   }
 
   isSelectionRangeChangeEvent(
-    event: IListMouseEvent<T> | IListTouchEvent<T>,
+    event: IListMouseEvent<T> | IListTouchEvent<T>
   ): boolean {
     return isSelectionRangeChangeEvent(event)
   }
@@ -409,7 +409,7 @@ class MultipleSelectionController<T>
 
 function toWorkbenchListOptions<T>(
   accessor: ServicesAccessor,
-  options: IListOptions<T>,
+  options: IListOptions<T>
 ): [IListOptions<T>, IDisposable] {
   const configurationService = accessor.get(IConfigurationService)
   const keybindingService = accessor.get(IKeybindingService)
@@ -423,13 +423,13 @@ function toWorkbenchListOptions<T>(
       },
     },
     smoothScrolling: Boolean(
-      configurationService.getValue(listSmoothScrolling),
+      configurationService.getValue(listSmoothScrolling)
     ),
     mouseWheelScrollSensitivity: configurationService.getValue<number>(
-      mouseWheelScrollSensitivityKey,
+      mouseWheelScrollSensitivityKey
     ),
     fastScrollSensitivity: configurationService.getValue<number>(
-      fastScrollSensitivityKey,
+      fastScrollSensitivityKey
     ),
     multipleSelectionController:
       options.multipleSelectionController ??
@@ -475,7 +475,7 @@ export class WorkbenchList<T> extends List<T> {
     @IContextKeyService contextKeyService: IContextKeyService,
     @IListService listService: IListService,
     @IConfigurationService configurationService: IConfigurationService,
-    @IInstantiationService instantiationService: IInstantiationService,
+    @IInstantiationService instantiationService: IInstantiationService
   ) {
     const horizontalScrolling =
       typeof options.horizontalScrolling !== "undefined"
@@ -494,7 +494,7 @@ export class WorkbenchList<T> extends List<T> {
 
     this.contextKeyService = createScopedContextKeyService(
       contextKeyService,
-      this,
+      this
     )
 
     this.disposables.add(createScrollObserver(this.contextKeyService, this))
@@ -504,18 +504,18 @@ export class WorkbenchList<T> extends List<T> {
     this.listSupportsMultiSelect.set(options.multipleSelectionSupport !== false)
 
     const listSelectionNavigation = WorkbenchListSelectionNavigation.bindTo(
-      this.contextKeyService,
+      this.contextKeyService
     )
     listSelectionNavigation.set(Boolean(options.selectionNavigation))
 
     this.listHasSelectionOrFocus = WorkbenchListHasSelectionOrFocus.bindTo(
-      this.contextKeyService,
+      this.contextKeyService
     )
     this.listDoubleSelection = WorkbenchListDoubleSelection.bindTo(
-      this.contextKeyService,
+      this.contextKeyService
     )
     this.listMultiSelection = WorkbenchListMultiSelection.bindTo(
-      this.contextKeyService,
+      this.contextKeyService
     )
     this.horizontalScrolling = options.horizontalScrolling
 
@@ -534,12 +534,12 @@ export class WorkbenchList<T> extends List<T> {
 
         this.contextKeyService.bufferChangeEvents(() => {
           this.listHasSelectionOrFocus.set(
-            selection.length > 0 || focus.length > 0,
+            selection.length > 0 || focus.length > 0
           )
           this.listMultiSelection.set(selection.length > 1)
           this.listDoubleSelection.set(selection.length === 2)
         })
-      }),
+      })
     )
     this.disposables.add(
       this.onDidChangeFocus(() => {
@@ -547,9 +547,9 @@ export class WorkbenchList<T> extends List<T> {
         const focus = this.getFocus()
 
         this.listHasSelectionOrFocus.set(
-          selection.length > 0 || focus.length > 0,
+          selection.length > 0 || focus.length > 0
         )
-      }),
+      })
     )
     this.disposables.add(
       configurationService.onDidChangeConfiguration((e) => {
@@ -565,39 +565,39 @@ export class WorkbenchList<T> extends List<T> {
           this.horizontalScrolling === undefined
         ) {
           const horizontalScrolling = Boolean(
-            configurationService.getValue(horizontalScrollingKey),
+            configurationService.getValue(horizontalScrollingKey)
           )
           options = { ...options, horizontalScrolling }
         }
         if (e.affectsConfiguration(scrollByPageKey)) {
           const scrollByPage = Boolean(
-            configurationService.getValue(scrollByPageKey),
+            configurationService.getValue(scrollByPageKey)
           )
           options = { ...options, scrollByPage }
         }
         if (e.affectsConfiguration(listSmoothScrolling)) {
           const smoothScrolling = Boolean(
-            configurationService.getValue(listSmoothScrolling),
+            configurationService.getValue(listSmoothScrolling)
           )
           options = { ...options, smoothScrolling }
         }
         if (e.affectsConfiguration(mouseWheelScrollSensitivityKey)) {
           const mouseWheelScrollSensitivity =
             configurationService.getValue<number>(
-              mouseWheelScrollSensitivityKey,
+              mouseWheelScrollSensitivityKey
             )
           options = { ...options, mouseWheelScrollSensitivity }
         }
         if (e.affectsConfiguration(fastScrollSensitivityKey)) {
           const fastScrollSensitivity = configurationService.getValue<number>(
-            fastScrollSensitivityKey,
+            fastScrollSensitivityKey
           )
           options = { ...options, fastScrollSensitivity }
         }
         if (Object.keys(options).length > 0) {
           this.updateOptions(options)
         }
-      }),
+      })
     )
 
     this.navigator = new ListResourceNavigator(this, {
@@ -655,7 +655,7 @@ export class WorkbenchPagedList<T> extends PagedList<T> {
     @IContextKeyService contextKeyService: IContextKeyService,
     @IListService listService: IListService,
     @IConfigurationService configurationService: IConfigurationService,
-    @IInstantiationService instantiationService: IInstantiationService,
+    @IInstantiationService instantiationService: IInstantiationService
   ) {
     const horizontalScrolling =
       typeof options.horizontalScrolling !== "undefined"
@@ -674,11 +674,11 @@ export class WorkbenchPagedList<T> extends PagedList<T> {
 
     this.contextKeyService = createScopedContextKeyService(
       contextKeyService,
-      this,
+      this
     )
 
     this.disposables.add(
-      createScrollObserver(this.contextKeyService, this.widget),
+      createScrollObserver(this.contextKeyService, this.widget)
     )
 
     this.horizontalScrolling = options.horizontalScrolling
@@ -688,7 +688,7 @@ export class WorkbenchPagedList<T> extends PagedList<T> {
     this.listSupportsMultiSelect.set(options.multipleSelectionSupport !== false)
 
     const listSelectionNavigation = WorkbenchListSelectionNavigation.bindTo(
-      this.contextKeyService,
+      this.contextKeyService
     )
     listSelectionNavigation.set(Boolean(options.selectionNavigation))
 
@@ -714,39 +714,39 @@ export class WorkbenchPagedList<T> extends PagedList<T> {
           this.horizontalScrolling === undefined
         ) {
           const horizontalScrolling = Boolean(
-            configurationService.getValue(horizontalScrollingKey),
+            configurationService.getValue(horizontalScrollingKey)
           )
           options = { ...options, horizontalScrolling }
         }
         if (e.affectsConfiguration(scrollByPageKey)) {
           const scrollByPage = Boolean(
-            configurationService.getValue(scrollByPageKey),
+            configurationService.getValue(scrollByPageKey)
           )
           options = { ...options, scrollByPage }
         }
         if (e.affectsConfiguration(listSmoothScrolling)) {
           const smoothScrolling = Boolean(
-            configurationService.getValue(listSmoothScrolling),
+            configurationService.getValue(listSmoothScrolling)
           )
           options = { ...options, smoothScrolling }
         }
         if (e.affectsConfiguration(mouseWheelScrollSensitivityKey)) {
           const mouseWheelScrollSensitivity =
             configurationService.getValue<number>(
-              mouseWheelScrollSensitivityKey,
+              mouseWheelScrollSensitivityKey
             )
           options = { ...options, mouseWheelScrollSensitivity }
         }
         if (e.affectsConfiguration(fastScrollSensitivityKey)) {
           const fastScrollSensitivity = configurationService.getValue<number>(
-            fastScrollSensitivityKey,
+            fastScrollSensitivityKey
           )
           options = { ...options, fastScrollSensitivity }
         }
         if (Object.keys(options).length > 0) {
           this.updateOptions(options)
         }
-      }),
+      })
     )
 
     this.navigator = new ListResourceNavigator(this, {
@@ -816,7 +816,7 @@ export class WorkbenchTable<TRow> extends Table<TRow> {
     @IContextKeyService contextKeyService: IContextKeyService,
     @IListService listService: IListService,
     @IConfigurationService configurationService: IConfigurationService,
-    @IInstantiationService instantiationService: IInstantiationService,
+    @IInstantiationService instantiationService: IInstantiationService
   ) {
     const horizontalScrolling =
       typeof options.horizontalScrolling !== "undefined"
@@ -835,7 +835,7 @@ export class WorkbenchTable<TRow> extends Table<TRow> {
 
     this.contextKeyService = createScopedContextKeyService(
       contextKeyService,
-      this,
+      this
     )
 
     this.disposables.add(createScrollObserver(this.contextKeyService, this))
@@ -845,18 +845,18 @@ export class WorkbenchTable<TRow> extends Table<TRow> {
     this.listSupportsMultiSelect.set(options.multipleSelectionSupport !== false)
 
     const listSelectionNavigation = WorkbenchListSelectionNavigation.bindTo(
-      this.contextKeyService,
+      this.contextKeyService
     )
     listSelectionNavigation.set(Boolean(options.selectionNavigation))
 
     this.listHasSelectionOrFocus = WorkbenchListHasSelectionOrFocus.bindTo(
-      this.contextKeyService,
+      this.contextKeyService
     )
     this.listDoubleSelection = WorkbenchListDoubleSelection.bindTo(
-      this.contextKeyService,
+      this.contextKeyService
     )
     this.listMultiSelection = WorkbenchListMultiSelection.bindTo(
-      this.contextKeyService,
+      this.contextKeyService
     )
     this.horizontalScrolling = options.horizontalScrolling
 
@@ -875,12 +875,12 @@ export class WorkbenchTable<TRow> extends Table<TRow> {
 
         this.contextKeyService.bufferChangeEvents(() => {
           this.listHasSelectionOrFocus.set(
-            selection.length > 0 || focus.length > 0,
+            selection.length > 0 || focus.length > 0
           )
           this.listMultiSelection.set(selection.length > 1)
           this.listDoubleSelection.set(selection.length === 2)
         })
-      }),
+      })
     )
     this.disposables.add(
       this.onDidChangeFocus(() => {
@@ -888,9 +888,9 @@ export class WorkbenchTable<TRow> extends Table<TRow> {
         const focus = this.getFocus()
 
         this.listHasSelectionOrFocus.set(
-          selection.length > 0 || focus.length > 0,
+          selection.length > 0 || focus.length > 0
         )
-      }),
+      })
     )
     this.disposables.add(
       configurationService.onDidChangeConfiguration((e) => {
@@ -906,39 +906,39 @@ export class WorkbenchTable<TRow> extends Table<TRow> {
           this.horizontalScrolling === undefined
         ) {
           const horizontalScrolling = Boolean(
-            configurationService.getValue(horizontalScrollingKey),
+            configurationService.getValue(horizontalScrollingKey)
           )
           options = { ...options, horizontalScrolling }
         }
         if (e.affectsConfiguration(scrollByPageKey)) {
           const scrollByPage = Boolean(
-            configurationService.getValue(scrollByPageKey),
+            configurationService.getValue(scrollByPageKey)
           )
           options = { ...options, scrollByPage }
         }
         if (e.affectsConfiguration(listSmoothScrolling)) {
           const smoothScrolling = Boolean(
-            configurationService.getValue(listSmoothScrolling),
+            configurationService.getValue(listSmoothScrolling)
           )
           options = { ...options, smoothScrolling }
         }
         if (e.affectsConfiguration(mouseWheelScrollSensitivityKey)) {
           const mouseWheelScrollSensitivity =
             configurationService.getValue<number>(
-              mouseWheelScrollSensitivityKey,
+              mouseWheelScrollSensitivityKey
             )
           options = { ...options, mouseWheelScrollSensitivity }
         }
         if (e.affectsConfiguration(fastScrollSensitivityKey)) {
           const fastScrollSensitivity = configurationService.getValue<number>(
-            fastScrollSensitivityKey,
+            fastScrollSensitivityKey
           )
           options = { ...options, fastScrollSensitivity }
         }
         if (Object.keys(options).length > 0) {
           this.updateOptions(options)
         }
-      }),
+      })
     )
 
     this.navigator = new TableResourceNavigator(this, {
@@ -1002,7 +1002,7 @@ export interface SelectionKeyboardEvent extends KeyboardEvent {
 export function getSelectionKeyboardEvent(
   typeArg = "keydown",
   preserveFocus?: boolean,
-  pinned?: boolean,
+  pinned?: boolean
 ): SelectionKeyboardEvent {
   const e = new KeyboardEvent(typeArg)
   ;(<SelectionKeyboardEvent>e).preserveFocus = preserveFocus
@@ -1016,32 +1016,32 @@ abstract class ResourceNavigator<T> extends Disposable {
   private openOnSingleClick: boolean
 
   private readonly _onDidOpen = this._register(
-    new Emitter<IOpenEvent<T | undefined>>(),
+    new Emitter<IOpenEvent<T | undefined>>()
   )
   readonly onDidOpen: Event<IOpenEvent<T | undefined>> = this._onDidOpen.event
 
   constructor(
     protected readonly widget: ListWidget,
-    options?: IResourceNavigatorOptions,
+    options?: IResourceNavigatorOptions
   ) {
     super()
 
     this._register(
       Event.filter(this.widget.onDidChangeSelection, (e) =>
-        isKeyboardEvent(e.browserEvent),
-      )((e) => this.onSelectionFromKeyboard(e)),
+        isKeyboardEvent(e.browserEvent)
+      )((e) => this.onSelectionFromKeyboard(e))
     )
     this._register(
       this.widget.onPointer(
         (e: { browserEvent: MouseEvent; element: T | undefined }) =>
-          this.onPointer(e.element, e.browserEvent),
-      ),
+          this.onPointer(e.element, e.browserEvent)
+      )
     )
     this._register(
       this.widget.onMouseDblClick(
         (e: { browserEvent: MouseEvent; element: T | undefined }) =>
-          this.onMouseDblClick(e.element, e.browserEvent),
-      ),
+          this.onMouseDblClick(e.element, e.browserEvent)
+      )
     )
 
     if (
@@ -1058,7 +1058,7 @@ abstract class ResourceNavigator<T> extends Disposable {
               options?.configurationService!.getValue(openModeSettingKey) !==
               "doubleClick"
           }
-        }),
+        })
       )
     } else {
       this.openOnSingleClick = options?.openOnSingleClick ?? true
@@ -1086,7 +1086,7 @@ abstract class ResourceNavigator<T> extends Disposable {
       preserveFocus,
       pinned,
       sideBySide,
-      event.browserEvent,
+      event.browserEvent
     )
   }
 
@@ -1112,7 +1112,7 @@ abstract class ResourceNavigator<T> extends Disposable {
 
   private onMouseDblClick(
     element: T | undefined,
-    browserEvent?: MouseEvent,
+    browserEvent?: MouseEvent
   ): void {
     if (!browserEvent) {
       return
@@ -1143,7 +1143,7 @@ abstract class ResourceNavigator<T> extends Disposable {
     preserveFocus: boolean,
     pinned: boolean,
     sideBySide: boolean,
-    browserEvent?: UIEvent,
+    browserEvent?: UIEvent
   ): void {
     if (!element) {
       return
@@ -1169,7 +1169,7 @@ class ListResourceNavigator<T> extends ResourceNavigator<T> {
 
   constructor(
     widget: List<T> | PagedList<T>,
-    options: IResourceNavigatorOptions,
+    options: IResourceNavigatorOptions
   ) {
     super(widget, options)
     this.widget = widget
@@ -1207,7 +1207,7 @@ class TreeResourceNavigator<T, TFilterData> extends ResourceNavigator<T> {
       | DataTree<any, T, TFilterData>
       | AsyncDataTree<any, T, TFilterData>
       | CompressibleAsyncDataTree<any, T, TFilterData>,
-    options: IResourceNavigatorOptions,
+    options: IResourceNavigatorOptions
   ) {
     super(widget, options)
   }
@@ -1218,7 +1218,7 @@ class TreeResourceNavigator<T, TFilterData> extends ResourceNavigator<T> {
 }
 
 function createKeyboardNavigationEventFilter(
-  keybindingService: IKeybindingService,
+  keybindingService: IKeybindingService
 ): IKeyboardNavigationEventFilter {
   let inMultiChord = false
 
@@ -1254,7 +1254,7 @@ export interface IWorkbenchObjectTreeOptions<T, TFilterData>
 
 export class WorkbenchObjectTree<
   T extends NonNullable<any>,
-  TFilterData = void,
+  TFilterData = void
 > extends ObjectTree<T, TFilterData> {
   private internals: WorkbenchTreeInternals<any, T, TFilterData>
   get contextKeyService(): IContextKeyService {
@@ -1276,7 +1276,7 @@ export class WorkbenchObjectTree<
     @IInstantiationService instantiationService: IInstantiationService,
     @IContextKeyService contextKeyService: IContextKeyService,
     @IListService listService: IListService,
-    @IConfigurationService configurationService: IConfigurationService,
+    @IConfigurationService configurationService: IConfigurationService
   ) {
     const {
       options: treeOptions,
@@ -1284,7 +1284,7 @@ export class WorkbenchObjectTree<
       disposable,
     } = instantiationService.invokeFunction(
       workbenchTreeDataPreamble,
-      options as any,
+      options as any
     )
     super(user, container, delegate, renderers, treeOptions)
     this.disposables.add(disposable)
@@ -1295,7 +1295,7 @@ export class WorkbenchObjectTree<
       options.overrideStyles,
       contextKeyService,
       listService,
-      configurationService,
+      configurationService
     )
     this.disposables.add(this.internals)
   }
@@ -1321,7 +1321,7 @@ export interface IWorkbenchCompressibleObjectTreeOptions<T, TFilterData>
 
 export class WorkbenchCompressibleObjectTree<
   T extends NonNullable<any>,
-  TFilterData = void,
+  TFilterData = void
 > extends CompressibleObjectTree<T, TFilterData> {
   private internals: WorkbenchTreeInternals<any, T, TFilterData>
   get contextKeyService(): IContextKeyService {
@@ -1343,7 +1343,7 @@ export class WorkbenchCompressibleObjectTree<
     @IInstantiationService instantiationService: IInstantiationService,
     @IContextKeyService contextKeyService: IContextKeyService,
     @IListService listService: IListService,
-    @IConfigurationService configurationService: IConfigurationService,
+    @IConfigurationService configurationService: IConfigurationService
   ) {
     const {
       options: treeOptions,
@@ -1351,7 +1351,7 @@ export class WorkbenchCompressibleObjectTree<
       disposable,
     } = instantiationService.invokeFunction(
       workbenchTreeDataPreamble,
-      options as any,
+      options as any
     )
     super(user, container, delegate, renderers, treeOptions)
     this.disposables.add(disposable)
@@ -1362,13 +1362,13 @@ export class WorkbenchCompressibleObjectTree<
       options.overrideStyles,
       contextKeyService,
       listService,
-      configurationService,
+      configurationService
     )
     this.disposables.add(this.internals)
   }
 
   override updateOptions(
-    options: IWorkbenchCompressibleObjectTreeOptionsUpdate = {},
+    options: IWorkbenchCompressibleObjectTreeOptionsUpdate = {}
   ): void {
     super.updateOptions(options)
 
@@ -1419,7 +1419,7 @@ export class WorkbenchDataTree<TInput, T, TFilterData = void> extends DataTree<
     @IInstantiationService instantiationService: IInstantiationService,
     @IContextKeyService contextKeyService: IContextKeyService,
     @IListService listService: IListService,
-    @IConfigurationService configurationService: IConfigurationService,
+    @IConfigurationService configurationService: IConfigurationService
   ) {
     const {
       options: treeOptions,
@@ -1427,7 +1427,7 @@ export class WorkbenchDataTree<TInput, T, TFilterData = void> extends DataTree<
       disposable,
     } = instantiationService.invokeFunction(
       workbenchTreeDataPreamble,
-      options as any,
+      options as any
     )
     super(user, container, delegate, renderers, dataSource, treeOptions)
     this.disposables.add(disposable)
@@ -1438,7 +1438,7 @@ export class WorkbenchDataTree<TInput, T, TFilterData = void> extends DataTree<
       options.overrideStyles,
       contextKeyService,
       listService,
-      configurationService,
+      configurationService
     )
     this.disposables.add(this.internals)
   }
@@ -1470,7 +1470,7 @@ export interface IWorkbenchAsyncDataTreeOptions<T, TFilterData>
 export class WorkbenchAsyncDataTree<
   TInput,
   T,
-  TFilterData = void,
+  TFilterData = void
 > extends AsyncDataTree<TInput, T, TFilterData> {
   private internals: WorkbenchTreeInternals<TInput, T, TFilterData>
   get contextKeyService(): IContextKeyService {
@@ -1493,7 +1493,7 @@ export class WorkbenchAsyncDataTree<
     @IInstantiationService instantiationService: IInstantiationService,
     @IContextKeyService contextKeyService: IContextKeyService,
     @IListService listService: IListService,
-    @IConfigurationService configurationService: IConfigurationService,
+    @IConfigurationService configurationService: IConfigurationService
   ) {
     const {
       options: treeOptions,
@@ -1501,7 +1501,7 @@ export class WorkbenchAsyncDataTree<
       disposable,
     } = instantiationService.invokeFunction(
       workbenchTreeDataPreamble,
-      options as any,
+      options as any
     )
     super(user, container, delegate, renderers, dataSource, treeOptions)
     this.disposables.add(disposable)
@@ -1512,13 +1512,13 @@ export class WorkbenchAsyncDataTree<
       options.overrideStyles,
       contextKeyService,
       listService,
-      configurationService,
+      configurationService
     )
     this.disposables.add(this.internals)
   }
 
   override updateOptions(
-    options: IWorkbenchAsyncDataTreeOptionsUpdate = {},
+    options: IWorkbenchAsyncDataTreeOptionsUpdate = {}
   ): void {
     super.updateOptions(options)
 
@@ -1541,7 +1541,7 @@ export interface IWorkbenchCompressibleAsyncDataTreeOptions<T, TFilterData>
 export class WorkbenchCompressibleAsyncDataTree<
   TInput,
   T,
-  TFilterData = void,
+  TFilterData = void
 > extends CompressibleAsyncDataTree<TInput, T, TFilterData> {
   private internals: WorkbenchTreeInternals<TInput, T, TFilterData>
   get contextKeyService(): IContextKeyService {
@@ -1565,7 +1565,7 @@ export class WorkbenchCompressibleAsyncDataTree<
     @IInstantiationService instantiationService: IInstantiationService,
     @IContextKeyService contextKeyService: IContextKeyService,
     @IListService listService: IListService,
-    @IConfigurationService configurationService: IConfigurationService,
+    @IConfigurationService configurationService: IConfigurationService
   ) {
     const {
       options: treeOptions,
@@ -1573,7 +1573,7 @@ export class WorkbenchCompressibleAsyncDataTree<
       disposable,
     } = instantiationService.invokeFunction(
       workbenchTreeDataPreamble,
-      options as any,
+      options as any
     )
     super(
       user,
@@ -1582,7 +1582,7 @@ export class WorkbenchCompressibleAsyncDataTree<
       compressionDelegate,
       renderers,
       dataSource,
-      treeOptions,
+      treeOptions
     )
     this.disposables.add(disposable)
     this.internals = new WorkbenchTreeInternals(
@@ -1592,13 +1592,13 @@ export class WorkbenchCompressibleAsyncDataTree<
       options.overrideStyles,
       contextKeyService,
       listService,
-      configurationService,
+      configurationService
     )
     this.disposables.add(this.internals)
   }
 
   override updateOptions(
-    options: ICompressibleAsyncDataTreeOptionsUpdate,
+    options: ICompressibleAsyncDataTreeOptionsUpdate
   ): void {
     super.updateOptions(options)
     this.internals.updateOptions(options)
@@ -1607,7 +1607,7 @@ export class WorkbenchCompressibleAsyncDataTree<
 
 function getDefaultTreeFindMode(configurationService: IConfigurationService) {
   const value = configurationService.getValue<"highlight" | "filter">(
-    defaultFindModeSettingKey,
+    defaultFindModeSettingKey
   )
 
   if (value === "highlight") {
@@ -1630,10 +1630,10 @@ function getDefaultTreeFindMode(configurationService: IConfigurationService) {
 }
 
 function getDefaultTreeFindMatchType(
-  configurationService: IConfigurationService,
+  configurationService: IConfigurationService
 ) {
   const value = configurationService.getValue<"fuzzy" | "contiguous">(
-    defaultFindMatchTypeSettingKey,
+    defaultFindMatchTypeSettingKey
   )
 
   if (value === "fuzzy") {
@@ -1649,10 +1649,10 @@ function workbenchTreeDataPreamble<
   TFilterData,
   TOptions extends
     | IAbstractTreeOptions<T, TFilterData>
-    | IAsyncDataTreeOptions<T, TFilterData>,
+    | IAsyncDataTreeOptions<T, TFilterData>
 >(
   accessor: ServicesAccessor,
-  options: TOptions,
+  options: TOptions
 ): {
   options: TOptions
   getTypeNavigationMode: () => TypeNavigationMode | undefined
@@ -1677,7 +1677,7 @@ function workbenchTreeDataPreamble<
 
     // also check the deprecated context key to set the mode to 'trigger'
     const modeBoolean = contextKeyService.getContextKeyValue<boolean>(
-      WorkbenchListAutomaticKeyboardNavigationLegacyKey,
+      WorkbenchListAutomaticKeyboardNavigationLegacyKey
     )
 
     if (modeBoolean === false) {
@@ -1686,7 +1686,7 @@ function workbenchTreeDataPreamble<
 
     // finally, check the setting
     const configString = configurationService.getValue<"automatic" | "trigger">(
-      typeNavigationModeSettingKey,
+      typeNavigationModeSettingKey
     )
 
     if (configString === "automatic") {
@@ -1709,7 +1709,7 @@ function workbenchTreeDataPreamble<
     options.renderIndentGuides !== undefined
       ? options.renderIndentGuides
       : configurationService.getValue<RenderIndentGuides>(
-          treeRenderIndentGuidesKey,
+          treeRenderIndentGuidesKey
         )
 
   return {
@@ -1725,7 +1725,7 @@ function workbenchTreeDataPreamble<
           : undefined,
       renderIndentGuides,
       smoothScrolling: Boolean(
-        configurationService.getValue(listSmoothScrolling),
+        configurationService.getValue(listSmoothScrolling)
       ),
       defaultFindMode: getDefaultTreeFindMode(configurationService),
       defaultFindMatchType: getDefaultTreeFindMatchType(configurationService),
@@ -1736,15 +1736,15 @@ function workbenchTreeDataPreamble<
       expandOnlyOnTwistieClick:
         options.expandOnlyOnTwistieClick ??
         configurationService.getValue<"singleClick" | "doubleClick">(
-          treeExpandMode,
+          treeExpandMode
         ) === "doubleClick",
       contextViewProvider: contextViewService as IContextViewProvider,
       findWidgetStyles: defaultFindWidgetStyles,
       enableStickyScroll: Boolean(
-        configurationService.getValue(treeStickyScroll),
+        configurationService.getValue(treeStickyScroll)
       ),
       stickyScrollMaxItemCount: Number(
-        configurationService.getValue(treeStickyScrollMaxElements),
+        configurationService.getValue(treeStickyScrollMaxElements)
       ),
     } as TOptions,
   }
@@ -1793,11 +1793,11 @@ class WorkbenchTreeInternals<TInput, T, TFilterData> {
     overrideStyles: IStyleOverride<IListStyles> | undefined,
     @IContextKeyService contextKeyService: IContextKeyService,
     @IListService listService: IListService,
-    @IConfigurationService configurationService: IConfigurationService,
+    @IConfigurationService configurationService: IConfigurationService
   ) {
     this.contextKeyService = createScopedContextKeyService(
       contextKeyService,
-      tree,
+      tree
     )
 
     this.disposables.push(createScrollObserver(this.contextKeyService, tree))
@@ -1807,41 +1807,41 @@ class WorkbenchTreeInternals<TInput, T, TFilterData> {
     this.listSupportsMultiSelect.set(options.multipleSelectionSupport !== false)
 
     const listSelectionNavigation = WorkbenchListSelectionNavigation.bindTo(
-      this.contextKeyService,
+      this.contextKeyService
     )
     listSelectionNavigation.set(Boolean(options.selectionNavigation))
 
     this.listSupportFindWidget = WorkbenchListSupportsFind.bindTo(
-      this.contextKeyService,
+      this.contextKeyService
     )
     this.listSupportFindWidget.set(options.findWidgetEnabled ?? true)
 
     this.hasSelectionOrFocus = WorkbenchListHasSelectionOrFocus.bindTo(
-      this.contextKeyService,
+      this.contextKeyService
     )
     this.hasDoubleSelection = WorkbenchListDoubleSelection.bindTo(
-      this.contextKeyService,
+      this.contextKeyService
     )
     this.hasMultiSelection = WorkbenchListMultiSelection.bindTo(
-      this.contextKeyService,
+      this.contextKeyService
     )
 
     this.treeElementCanCollapse = WorkbenchTreeElementCanCollapse.bindTo(
-      this.contextKeyService,
+      this.contextKeyService
     )
     this.treeElementHasParent = WorkbenchTreeElementHasParent.bindTo(
-      this.contextKeyService,
+      this.contextKeyService
     )
     this.treeElementCanExpand = WorkbenchTreeElementCanExpand.bindTo(
-      this.contextKeyService,
+      this.contextKeyService
     )
     this.treeElementHasChild = WorkbenchTreeElementHasChild.bindTo(
-      this.contextKeyService,
+      this.contextKeyService
     )
 
     this.treeFindOpen = WorkbenchTreeFindOpen.bindTo(this.contextKeyService)
     this.treeStickyScrollFocused = WorkbenchTreeStickyScrollFocused.bindTo(
-      this.contextKeyService,
+      this.contextKeyService
     )
 
     this._useAltAsMultipleSelectionModifier =
@@ -1866,7 +1866,7 @@ class WorkbenchTreeInternals<TInput, T, TFilterData> {
     const interestingContextKeys = new Set()
     interestingContextKeys.add(WorkbenchListTypeNavigationModeKey)
     interestingContextKeys.add(
-      WorkbenchListAutomaticKeyboardNavigationLegacyKey,
+      WorkbenchListAutomaticKeyboardNavigationLegacyKey
     )
 
     this.disposables.push(
@@ -1892,10 +1892,10 @@ class WorkbenchTreeInternals<TInput, T, TFilterData> {
       tree.onDidChangeCollapseState(updateCollapseContextKeys),
       tree.onDidChangeModel(updateCollapseContextKeys),
       tree.onDidChangeFindOpenState((enabled) =>
-        this.treeFindOpen.set(enabled),
+        this.treeFindOpen.set(enabled)
       ),
       tree.onDidChangeStickyScrollFocused((focused) =>
-        this.treeStickyScrollFocused.set(focused),
+        this.treeStickyScrollFocused.set(focused)
       ),
       configurationService.onDidChangeConfiguration((e) => {
         let newOptions: IAbstractTreeOptionsUpdate = {}
@@ -1913,13 +1913,13 @@ class WorkbenchTreeInternals<TInput, T, TFilterData> {
         ) {
           const renderIndentGuides =
             configurationService.getValue<RenderIndentGuides>(
-              treeRenderIndentGuidesKey,
+              treeRenderIndentGuidesKey
             )
           newOptions = { ...newOptions, renderIndentGuides }
         }
         if (e.affectsConfiguration(listSmoothScrolling)) {
           const smoothScrolling = Boolean(
-            configurationService.getValue(listSmoothScrolling),
+            configurationService.getValue(listSmoothScrolling)
           )
           newOptions = { ...newOptions, smoothScrolling }
         }
@@ -1947,13 +1947,13 @@ class WorkbenchTreeInternals<TInput, T, TFilterData> {
           options.horizontalScrolling === undefined
         ) {
           const horizontalScrolling = Boolean(
-            configurationService.getValue(horizontalScrollingKey),
+            configurationService.getValue(horizontalScrollingKey)
           )
           newOptions = { ...newOptions, horizontalScrolling }
         }
         if (e.affectsConfiguration(scrollByPageKey)) {
           const scrollByPage = Boolean(
-            configurationService.getValue(scrollByPageKey),
+            configurationService.getValue(scrollByPageKey)
           )
           newOptions = { ...newOptions, scrollByPage }
         }
@@ -1965,7 +1965,7 @@ class WorkbenchTreeInternals<TInput, T, TFilterData> {
             ...newOptions,
             expandOnlyOnTwistieClick:
               configurationService.getValue<"singleClick" | "doubleClick">(
-                treeExpandMode,
+                treeExpandMode
               ) === "doubleClick",
           }
         }
@@ -1977,20 +1977,20 @@ class WorkbenchTreeInternals<TInput, T, TFilterData> {
         if (e.affectsConfiguration(treeStickyScrollMaxElements)) {
           const stickyScrollMaxItemCount = Math.max(
             1,
-            configurationService.getValue<number>(treeStickyScrollMaxElements),
+            configurationService.getValue<number>(treeStickyScrollMaxElements)
           )
           newOptions = { ...newOptions, stickyScrollMaxItemCount }
         }
         if (e.affectsConfiguration(mouseWheelScrollSensitivityKey)) {
           const mouseWheelScrollSensitivity =
             configurationService.getValue<number>(
-              mouseWheelScrollSensitivityKey,
+              mouseWheelScrollSensitivityKey
             )
           newOptions = { ...newOptions, mouseWheelScrollSensitivity }
         }
         if (e.affectsConfiguration(fastScrollSensitivityKey)) {
           const fastScrollSensitivity = configurationService.getValue<number>(
-            fastScrollSensitivityKey,
+            fastScrollSensitivityKey
           )
           newOptions = { ...newOptions, fastScrollSensitivity }
         }
@@ -2002,7 +2002,7 @@ class WorkbenchTreeInternals<TInput, T, TFilterData> {
         if (e.affectsSome(interestingContextKeys)) {
           tree.updateOptions({ typeNavigationMode: getTypeNavigationMode() })
         }
-      }),
+      })
     )
 
     this.navigator = new TreeResourceNavigator(tree, {
@@ -2024,7 +2024,7 @@ class WorkbenchTreeInternals<TInput, T, TFilterData> {
 
   updateStyleOverrides(overrideStyles?: IStyleOverride<IListStyles>): void {
     this.tree.style(
-      overrideStyles ? getListStyles(overrideStyles) : defaultListStyles,
+      overrideStyles ? getListStyles(overrideStyles) : defaultListStyles
     )
   }
 
@@ -2034,7 +2034,7 @@ class WorkbenchTreeInternals<TInput, T, TFilterData> {
 }
 
 const configurationRegistry = Registry.as<IConfigurationRegistry>(
-  ConfigurationExtensions.Configuration,
+  ConfigurationExtensions.Configuration
 )
 
 configurationRegistry.registerConfiguration({
@@ -2049,11 +2049,11 @@ configurationRegistry.registerConfiguration({
       markdownEnumDescriptions: [
         localize(
           "multiSelectModifier.ctrlCmd",
-          "Maps to `Control` on Windows and Linux and to `Command` on macOS.",
+          "Maps to `Control` on Windows and Linux and to `Command` on macOS."
         ),
         localize(
           "multiSelectModifier.alt",
-          "Maps to `Alt` on Windows and Linux and to `Option` on macOS.",
+          "Maps to `Alt` on Windows and Linux and to `Option` on macOS."
         ),
       ],
       default: "ctrlCmd",
@@ -2065,7 +2065,7 @@ configurationRegistry.registerConfiguration({
             "- `Control` and `Command` refer to the modifier keys Ctrl or Cmd on the keyboard and can be localized.",
           ],
         },
-        "The modifier to be used to add an item in trees and lists to a multi-selection with the mouse (for example in the explorer, open editors and scm view). The 'Open to Side' mouse gestures - if supported - will adapt such that they do not conflict with the multiselect modifier.",
+        "The modifier to be used to add an item in trees and lists to a multi-selection with the mouse (for example in the explorer, open editors and scm view). The 'Open to Side' mouse gestures - if supported - will adapt such that they do not conflict with the multiselect modifier."
       ),
     },
     [openModeSettingKey]: {
@@ -2079,7 +2079,7 @@ configurationRegistry.registerConfiguration({
             "`singleClick` and `doubleClick` refers to a value the setting can take and should not be localized.",
           ],
         },
-        "Controls how to open items in trees and lists using the mouse (if supported). Note that some trees and lists might choose to ignore this setting if it is not applicable.",
+        "Controls how to open items in trees and lists using the mouse (if supported). Note that some trees and lists might choose to ignore this setting if it is not applicable."
       ),
     },
     [horizontalScrollingKey]: {
@@ -2087,7 +2087,7 @@ configurationRegistry.registerConfiguration({
       default: false,
       description: localize(
         "horizontalScrolling setting",
-        "Controls whether lists and trees support horizontal scrolling in the workbench. Warning: turning on this setting has a performance implication.",
+        "Controls whether lists and trees support horizontal scrolling in the workbench. Warning: turning on this setting has a performance implication."
       ),
     },
     [scrollByPageKey]: {
@@ -2095,7 +2095,7 @@ configurationRegistry.registerConfiguration({
       default: false,
       description: localize(
         "list.scrollByPage",
-        "Controls whether clicks in the scrollbar scroll page by page.",
+        "Controls whether clicks in the scrollbar scroll page by page."
       ),
     },
     [treeIndentKey]: {
@@ -2105,7 +2105,7 @@ configurationRegistry.registerConfiguration({
       maximum: 40,
       description: localize(
         "tree indent setting",
-        "Controls tree indentation in pixels.",
+        "Controls tree indentation in pixels."
       ),
     },
     [treeRenderIndentGuidesKey]: {
@@ -2114,7 +2114,7 @@ configurationRegistry.registerConfiguration({
       default: "onHover",
       description: localize(
         "render tree indent guides",
-        "Controls whether the tree should render indent guides.",
+        "Controls whether the tree should render indent guides."
       ),
     },
     [listSmoothScrolling]: {
@@ -2122,7 +2122,7 @@ configurationRegistry.registerConfiguration({
       default: false,
       description: localize(
         "list smoothScrolling setting",
-        "Controls whether lists and trees have smooth scrolling.",
+        "Controls whether lists and trees have smooth scrolling."
       ),
     },
     [mouseWheelScrollSensitivityKey]: {
@@ -2130,7 +2130,7 @@ configurationRegistry.registerConfiguration({
       default: 1,
       markdownDescription: localize(
         "Mouse Wheel Scroll Sensitivity",
-        "A multiplier to be used on the `deltaX` and `deltaY` of mouse wheel scroll events.",
+        "A multiplier to be used on the `deltaX` and `deltaY` of mouse wheel scroll events."
       ),
     },
     [fastScrollSensitivityKey]: {
@@ -2138,7 +2138,7 @@ configurationRegistry.registerConfiguration({
       default: 5,
       markdownDescription: localize(
         "Fast Scroll Sensitivity",
-        "Scrolling speed multiplier when pressing `Alt`.",
+        "Scrolling speed multiplier when pressing `Alt`."
       ),
     },
     [defaultFindModeSettingKey]: {
@@ -2147,17 +2147,17 @@ configurationRegistry.registerConfiguration({
       enumDescriptions: [
         localize(
           "defaultFindModeSettingKey.highlight",
-          "Highlight elements when searching. Further up and down navigation will traverse only the highlighted elements.",
+          "Highlight elements when searching. Further up and down navigation will traverse only the highlighted elements."
         ),
         localize(
           "defaultFindModeSettingKey.filter",
-          "Filter elements when searching.",
+          "Filter elements when searching."
         ),
       ],
       default: "highlight",
       description: localize(
         "defaultFindModeSettingKey",
-        "Controls the default find mode for lists and trees in the workbench.",
+        "Controls the default find mode for lists and trees in the workbench."
       ),
     },
     [keyboardNavigationSettingKey]: {
@@ -2166,26 +2166,26 @@ configurationRegistry.registerConfiguration({
       enumDescriptions: [
         localize(
           "keyboardNavigationSettingKey.simple",
-          "Simple keyboard navigation focuses elements which match the keyboard input. Matching is done only on prefixes.",
+          "Simple keyboard navigation focuses elements which match the keyboard input. Matching is done only on prefixes."
         ),
         localize(
           "keyboardNavigationSettingKey.highlight",
-          "Highlight keyboard navigation highlights elements which match the keyboard input. Further up and down navigation will traverse only the highlighted elements.",
+          "Highlight keyboard navigation highlights elements which match the keyboard input. Further up and down navigation will traverse only the highlighted elements."
         ),
         localize(
           "keyboardNavigationSettingKey.filter",
-          "Filter keyboard navigation will filter out and hide all the elements which do not match the keyboard input.",
+          "Filter keyboard navigation will filter out and hide all the elements which do not match the keyboard input."
         ),
       ],
       default: "highlight",
       description: localize(
         "keyboardNavigationSettingKey",
-        "Controls the keyboard navigation style for lists and trees in the workbench. Can be simple, highlight and filter.",
+        "Controls the keyboard navigation style for lists and trees in the workbench. Can be simple, highlight and filter."
       ),
       deprecated: true,
       deprecationMessage: localize(
         "keyboardNavigationSettingKeyDeprecated",
-        "Please use 'workbench.list.defaultFindMode' and	'workbench.list.typeNavigationMode' instead.",
+        "Please use 'workbench.list.defaultFindMode' and	'workbench.list.typeNavigationMode' instead."
       ),
     },
     [defaultFindMatchTypeSettingKey]: {
@@ -2194,17 +2194,17 @@ configurationRegistry.registerConfiguration({
       enumDescriptions: [
         localize(
           "defaultFindMatchTypeSettingKey.fuzzy",
-          "Use fuzzy matching when searching.",
+          "Use fuzzy matching when searching."
         ),
         localize(
           "defaultFindMatchTypeSettingKey.contiguous",
-          "Use contiguous matching when searching.",
+          "Use contiguous matching when searching."
         ),
       ],
       default: "fuzzy",
       description: localize(
         "defaultFindMatchTypeSettingKey",
-        "Controls the type of matching used when searching lists and trees in the workbench.",
+        "Controls the type of matching used when searching lists and trees in the workbench."
       ),
     },
     [treeExpandMode]: {
@@ -2213,7 +2213,7 @@ configurationRegistry.registerConfiguration({
       default: "singleClick",
       description: localize(
         "expand mode",
-        "Controls how tree folders are expanded when clicking the folder names. Note that some trees and lists might choose to ignore this setting if it is not applicable.",
+        "Controls how tree folders are expanded when clicking the folder names. Note that some trees and lists might choose to ignore this setting if it is not applicable."
       ),
     },
     [treeStickyScroll]: {
@@ -2221,7 +2221,7 @@ configurationRegistry.registerConfiguration({
       default: true,
       description: localize(
         "sticky scroll",
-        "Controls whether sticky scrolling is enabled in trees.",
+        "Controls whether sticky scrolling is enabled in trees."
       ),
     },
     [treeStickyScrollMaxElements]: {
@@ -2231,7 +2231,7 @@ configurationRegistry.registerConfiguration({
       markdownDescription: localize(
         "sticky scroll maximum items",
         "Controls the number of sticky elements displayed in the tree when {0} is enabled.",
-        "`#workbench.tree.enableStickyScroll#`",
+        "`#workbench.tree.enableStickyScroll#`"
       ),
     },
     [typeNavigationModeSettingKey]: {
@@ -2240,7 +2240,7 @@ configurationRegistry.registerConfiguration({
       default: "automatic",
       markdownDescription: localize(
         "typeNavigationMode2",
-        "Controls how type navigation works in lists and trees in the workbench. When set to `trigger`, type navigation begins once the `list.triggerTypeNavigation` command is run.",
+        "Controls how type navigation works in lists and trees in the workbench. When set to `trigger`, type navigation begins once the `list.triggerTypeNavigation` command is run."
       ),
     },
   },

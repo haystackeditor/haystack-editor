@@ -9,6 +9,7 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
+
 .monaco-editor.vs .valueSetReplacement {
-  outline: solid 2px var(--vscode-editorBracketMatch-border);
+	outline: solid 2px var(--vscode-editorBracketMatch-border);
 }

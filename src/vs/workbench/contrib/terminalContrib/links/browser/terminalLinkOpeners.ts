@@ -46,7 +46,7 @@ import { IRange } from "vs/editor/common/core/range"
 
 export class TerminalLocalFileLinkOpener implements ITerminalLinkOpener {
   constructor(
-    @IHaystackService private readonly _haystackService: IHaystackService,
+    @IHaystackService private readonly _haystackService: IHaystackService
   ) {}
 
   async open(link: ITerminalSimpleLink): Promise<void> {
@@ -83,7 +83,7 @@ export class TerminalLocalFileLinkOpener implements ITerminalLinkOpener {
       {
         pinned: true,
         revealIfOpened: true,
-      },
+      }
     )
   }
 }
@@ -92,13 +92,13 @@ export class TerminalLocalFolderInWorkspaceLinkOpener
   implements ITerminalLinkOpener
 {
   constructor(
-    @ICommandService private readonly _commandService: ICommandService,
+    @ICommandService private readonly _commandService: ICommandService
   ) {}
 
   async open(link: ITerminalSimpleLink): Promise<void> {
     if (!link.uri) {
       throw new Error(
-        "Tried to open folder in workspace link without a resolved URI",
+        "Tried to open folder in workspace link without a resolved URI"
       )
     }
     await this._commandService.executeCommand("revealInExplorer", link.uri)
@@ -113,7 +113,7 @@ export class TerminalLocalFolderOutsideWorkspaceLinkOpener
   async open(link: ITerminalSimpleLink): Promise<void> {
     if (!link.uri) {
       throw new Error(
-        "Tried to open folder in workspace link without a resolved URI",
+        "Tried to open folder in workspace link without a resolved URI"
       )
     }
     this._hostService.openWindow([{ folderUri: link.uri }], {
@@ -141,7 +141,7 @@ export class TerminalSearchLinkOpener implements ITerminalLinkOpener {
     @IWorkspaceContextService
     private readonly _workspaceContextService: IWorkspaceContextService,
     @IWorkbenchEnvironmentService
-    private readonly _workbenchEnvironmentService: IWorkbenchEnvironmentService,
+    private readonly _workbenchEnvironmentService: IWorkbenchEnvironmentService
   ) {}
 
   async open(link: ITerminalSimpleLink): Promise<void> {
@@ -158,7 +158,7 @@ export class TerminalSearchLinkOpener implements ITerminalLinkOpener {
     if (link.contextLine) {
       const parsedLinks = detectLinks(link.contextLine, this._getOS())
       const matchingParsedLink = parsedLinks.find(
-        (parsedLink) => parsedLink.suffix && link.text === parsedLink.path.text,
+        (parsedLink) => parsedLink.suffix && link.text === parsedLink.path.text
       )
       if (matchingParsedLink) {
         if (matchingParsedLink.suffix?.row !== undefined) {
@@ -204,7 +204,7 @@ export class TerminalSearchLinkOpener implements ITerminalLinkOpener {
           link.bufferRange.start.y,
           text,
           osPath,
-          this._logService,
+          this._logService
         )?.[0] || text
     }
 
@@ -226,7 +226,7 @@ export class TerminalSearchLinkOpener implements ITerminalLinkOpener {
   }
 
   private async _getExactMatch(
-    sanitizedLink: string,
+    sanitizedLink: string
   ): Promise<IResourceMatch | undefined> {
     // Make the link relative to the cwd if it isn't absolute
     const os = this._getOS()
@@ -275,8 +275,8 @@ export class TerminalSearchLinkOpener implements ITerminalLinkOpener {
           {
             filePattern: sanitizedLink,
             maxResults: 2,
-          },
-        ),
+          }
+        )
       )
       if (results.results.length > 0) {
         if (results.results.length === 1) {
@@ -294,12 +294,12 @@ export class TerminalSearchLinkOpener implements ITerminalLinkOpener {
               this._workspaceContextService.getWorkspace().folders,
               {
                 filePattern: `**/${sanitizedLink}`,
-              },
-            ),
+              }
+            )
           )
           // Find an exact match if it exists
           const exactMatches = results.results.filter((e) =>
-            e.resource.toString().endsWith(sanitizedLink),
+            e.resource.toString().endsWith(sanitizedLink)
           )
           if (exactMatches.length === 1) {
             resourceMatch = { uri: exactMatches[0].resource }
@@ -312,7 +312,7 @@ export class TerminalSearchLinkOpener implements ITerminalLinkOpener {
 
   private async _tryOpenExactLink(
     text: string,
-    link: ITerminalSimpleLink,
+    link: ITerminalSimpleLink
   ): Promise<boolean> {
     const sanitizedLink = text.replace(/:\d+(:\d+)?$/, "")
     try {
@@ -350,7 +350,7 @@ export class TerminalUrlLinkOpener implements ITerminalLinkOpener {
     private readonly _isRemote: boolean,
     @IOpenerService private readonly _openerService: IOpenerService,
     @IConfigurationService
-    private readonly _configurationService: IConfigurationService,
+    private readonly _configurationService: IConfigurationService
   ) {}
 
   async open(link: ITerminalSimpleLink): Promise<void> {

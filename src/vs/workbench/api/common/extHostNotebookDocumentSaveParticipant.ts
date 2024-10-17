@@ -9,135 +9,94 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CancellationToken } from "vs/base/common/cancellation"
-import { AsyncEmitter, Event } from "vs/base/common/event"
-import { URI, UriComponents } from "vs/base/common/uri"
-import { IExtensionDescription } from "vs/platform/extensions/common/extensions"
-import { ILogService } from "vs/platform/log/common/log"
-import {
-  ExtHostNotebookDocumentSaveParticipantShape,
-  IWorkspaceEditDto,
-  MainThreadBulkEditsShape,
-} from "vs/workbench/api/common/extHost.protocol"
-import { ExtHostNotebookController } from "vs/workbench/api/common/extHostNotebook"
-import {
-  TextDocumentSaveReason,
-  WorkspaceEdit as WorksapceEditConverter,
-} from "vs/workbench/api/common/extHostTypeConverters"
-import { WorkspaceEdit } from "vs/workbench/api/common/extHostTypes"
-import { SaveReason } from "vs/workbench/common/editor"
-import { SerializableObjectWithBuffers } from "vs/workbench/services/extensions/common/proxyIdentifier"
-import { NotebookDocumentWillSaveEvent } from "vscode"
+import { CancellationToken } from 'vs/base/common/cancellation';
+import { AsyncEmitter, Event } from 'vs/base/common/event';
+import { URI, UriComponents } from 'vs/base/common/uri';
+import { IExtensionDescription } from 'vs/platform/extensions/common/extensions';
+import { ILogService } from 'vs/platform/log/common/log';
+import { ExtHostNotebookDocumentSaveParticipantShape, IWorkspaceEditDto, MainThreadBulkEditsShape } from 'vs/workbench/api/common/extHost.protocol';
+import { ExtHostNotebookController } from 'vs/workbench/api/common/extHostNotebook';
+import { TextDocumentSaveReason, WorkspaceEdit as WorksapceEditConverter } from 'vs/workbench/api/common/extHostTypeConverters';
+import { WorkspaceEdit } from 'vs/workbench/api/common/extHostTypes';
+import { SaveReason } from 'vs/workbench/common/editor';
+import { SerializableObjectWithBuffers } from 'vs/workbench/services/extensions/common/proxyIdentifier';
+import { NotebookDocumentWillSaveEvent } from 'vscode';
 
 interface IExtensionListener<E> {
-  extension: IExtensionDescription
-  (e: E): any
+	extension: IExtensionDescription;
+	(e: E): any;
 }
 
-export class ExtHostNotebookDocumentSaveParticipant
-  implements ExtHostNotebookDocumentSaveParticipantShape
-{
-  private readonly _onWillSaveNotebookDocumentEvent =
-    new AsyncEmitter<NotebookDocumentWillSaveEvent>()
+export class ExtHostNotebookDocumentSaveParticipant implements ExtHostNotebookDocumentSaveParticipantShape {
 
-  constructor(
-    private readonly _logService: ILogService,
-    private readonly _notebooksAndEditors: ExtHostNotebookController,
-    private readonly _mainThreadBulkEdits: MainThreadBulkEditsShape,
-    private readonly _thresholds: { timeout: number; errors: number } = {
-      timeout: 1500,
-      errors: 3,
-    },
-  ) {}
+	private readonly _onWillSaveNotebookDocumentEvent = new AsyncEmitter<NotebookDocumentWillSaveEvent>();
 
-  dispose(): void {}
+	constructor(
+		private readonly _logService: ILogService,
+		private readonly _notebooksAndEditors: ExtHostNotebookController,
+		private readonly _mainThreadBulkEdits: MainThreadBulkEditsShape,
+		private readonly _thresholds: { timeout: number; errors: number } = { timeout: 1500, errors: 3 }) {
 
-  getOnWillSaveNotebookDocumentEvent(
-    extension: IExtensionDescription,
-  ): Event<NotebookDocumentWillSaveEvent> {
-    return (listener, thisArg, disposables) => {
-      const wrappedListener: IExtensionListener<NotebookDocumentWillSaveEvent> =
-        function wrapped(e) {
-          listener.call(thisArg, e)
-        }
-      wrappedListener.extension = extension
-      return this._onWillSaveNotebookDocumentEvent.event(
-        wrappedListener,
-        undefined,
-        disposables,
-      )
-    }
-  }
+	}
 
-  async $participateInSave(
-    resource: UriComponents,
-    reason: SaveReason,
-    token: CancellationToken,
-  ): Promise<boolean> {
-    const revivedUri = URI.revive(resource)
-    const document = this._notebooksAndEditors.getNotebookDocument(revivedUri)
+	dispose(): void {
+	}
 
-    if (!document) {
-      throw new Error("Unable to resolve notebook document")
-    }
+	getOnWillSaveNotebookDocumentEvent(extension: IExtensionDescription): Event<NotebookDocumentWillSaveEvent> {
+		return (listener, thisArg, disposables) => {
+			const wrappedListener: IExtensionListener<NotebookDocumentWillSaveEvent> = function wrapped(e) { listener.call(thisArg, e); };
+			wrappedListener.extension = extension;
+			return this._onWillSaveNotebookDocumentEvent.event(wrappedListener, undefined, disposables);
+		};
+	}
 
-    const edits: WorkspaceEdit[] = []
+	async $participateInSave(resource: UriComponents, reason: SaveReason, token: CancellationToken): Promise<boolean> {
+		const revivedUri = URI.revive(resource);
+		const document = this._notebooksAndEditors.getNotebookDocument(revivedUri);
 
-    await this._onWillSaveNotebookDocumentEvent.fireAsync(
-      {
-        notebook: document.apiNotebook,
-        reason: TextDocumentSaveReason.to(reason),
-      },
-      token,
-      async (thenable: Promise<unknown>, listener) => {
-        const now = Date.now()
-        const data = await await Promise.resolve(thenable)
-        if (Date.now() - now > this._thresholds.timeout) {
-          this._logService.warn(
-            "onWillSaveNotebookDocument-listener from extension",
-            (<IExtensionListener<NotebookDocumentWillSaveEvent>>listener)
-              .extension.identifier,
-          )
-        }
+		if (!document) {
+			throw new Error('Unable to resolve notebook document');
+		}
 
-        if (token.isCancellationRequested) {
-          return
-        }
+		const edits: WorkspaceEdit[] = [];
 
-        if (data) {
-          if (data instanceof WorkspaceEdit) {
-            edits.push(data)
-          } else {
-            // ignore invalid data
-            this._logService.warn(
-              "onWillSaveNotebookDocument-listener from extension",
-              (<IExtensionListener<NotebookDocumentWillSaveEvent>>listener)
-                .extension.identifier,
-              "ignored due to invalid data",
-            )
-          }
-        }
+		await this._onWillSaveNotebookDocumentEvent.fireAsync({ notebook: document.apiNotebook, reason: TextDocumentSaveReason.to(reason) }, token, async (thenable: Promise<unknown>, listener) => {
+			const now = Date.now();
+			const data = await await Promise.resolve(thenable);
+			if (Date.now() - now > this._thresholds.timeout) {
+				this._logService.warn('onWillSaveNotebookDocument-listener from extension', (<IExtensionListener<NotebookDocumentWillSaveEvent>>listener).extension.identifier);
+			}
 
-        return
-      },
-    )
+			if (token.isCancellationRequested) {
+				return;
+			}
 
-    if (token.isCancellationRequested) {
-      return false
-    }
+			if (data) {
+				if (data instanceof WorkspaceEdit) {
+					edits.push(data);
+				} else {
+					// ignore invalid data
+					this._logService.warn('onWillSaveNotebookDocument-listener from extension', (<IExtensionListener<NotebookDocumentWillSaveEvent>>listener).extension.identifier, 'ignored due to invalid data');
+				}
+			}
 
-    if (edits.length === 0) {
-      return true
-    }
+			return;
+		});
 
-    const dto: IWorkspaceEditDto = { edits: [] }
-    for (const edit of edits) {
-      const { edits } = WorksapceEditConverter.from(edit)
-      dto.edits = dto.edits.concat(edits)
-    }
+		if (token.isCancellationRequested) {
+			return false;
+		}
 
-    return this._mainThreadBulkEdits.$tryApplyWorkspaceEdit(
-      new SerializableObjectWithBuffers(dto),
-    )
-  }
+		if (edits.length === 0) {
+			return true;
+		}
+
+		const dto: IWorkspaceEditDto = { edits: [] };
+		for (const edit of edits) {
+			const { edits } = WorksapceEditConverter.from(edit);
+			dto.edits = dto.edits.concat(edits);
+		}
+
+		return this._mainThreadBulkEdits.$tryApplyWorkspaceEdit(new SerializableObjectWithBuffers(dto));
+	}
 }

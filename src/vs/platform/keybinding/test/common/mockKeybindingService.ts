@@ -69,7 +69,7 @@ export class MockContextKeyService implements IContextKeyService {
   }
   public createKey<T extends ContextKeyValue = ContextKeyValue>(
     key: string,
-    defaultValue: T | undefined,
+    defaultValue: T | undefined
   ): IContextKey<T> {
     const ret = new MockKeybindingContextKey(defaultValue)
     this._keys.set(key, ret)
@@ -139,14 +139,14 @@ export class MockKeybindingService implements IKeybindingService {
   }
 
   public resolveKeyboardEvent(
-    keyboardEvent: IKeyboardEvent,
+    keyboardEvent: IKeyboardEvent
   ): ResolvedKeybinding {
     const chord = new KeyCodeChord(
       keyboardEvent.ctrlKey,
       keyboardEvent.shiftKey,
       keyboardEvent.altKey,
       keyboardEvent.metaKey,
-      keyboardEvent.keyCode,
+      keyboardEvent.keyCode
     )
     return this.resolveKeybinding(chord.toKeybinding())[0]
   }
@@ -169,19 +169,19 @@ export class MockKeybindingService implements IKeybindingService {
 
   public softDispatch(
     keybinding: IKeyboardEvent,
-    target: IContextKeyServiceTarget,
+    target: IContextKeyServiceTarget
   ): ResolutionResult {
     return NoMatchingKb
   }
 
   public dispatchByUserSettingsLabel(
     userSettingsLabel: string,
-    target: IContextKeyServiceTarget,
+    target: IContextKeyServiceTarget
   ): void {}
 
   public dispatchEvent(
     e: IKeyboardEvent,
-    target: IContextKeyServiceTarget,
+    target: IContextKeyServiceTarget
   ): boolean {
     return false
   }

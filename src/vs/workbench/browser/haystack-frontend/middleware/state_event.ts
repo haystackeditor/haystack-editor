@@ -55,7 +55,7 @@ export type StateEvent =
 export function convertStateToEvent(
   state: string,
   previousData: any,
-  currentData: any,
+  currentData: any
 ): StateEvent | null {
   switch (state) {
     case "idToEditorMap": {

@@ -9,45 +9,33 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from "vscode"
-import { PackageDocument } from "./packageDocumentHelper"
-import { ExtensionLinter } from "./extensionLinter"
+import * as vscode from 'vscode';
+import { PackageDocument } from './packageDocumentHelper';
+import { ExtensionLinter } from './extensionLinter';
 
 export function activate(context: vscode.ExtensionContext) {
-  //package.json suggestions
-  context.subscriptions.push(registerPackageDocumentCompletions())
 
-  //package.json code actions for lint warnings
-  context.subscriptions.push(registerCodeActionsProvider())
+	//package.json suggestions
+	context.subscriptions.push(registerPackageDocumentCompletions());
 
-  context.subscriptions.push(new ExtensionLinter())
+	//package.json code actions for lint warnings
+	context.subscriptions.push(registerCodeActionsProvider());
+
+	context.subscriptions.push(new ExtensionLinter());
 }
 
 function registerPackageDocumentCompletions(): vscode.Disposable {
-  return vscode.languages.registerCompletionItemProvider(
-    { language: "json", pattern: "**/package.json" },
-    {
-      provideCompletionItems(document, position, token) {
-        return new PackageDocument(document).provideCompletionItems(
-          position,
-          token,
-        )
-      },
-    },
-  )
+	return vscode.languages.registerCompletionItemProvider({ language: 'json', pattern: '**/package.json' }, {
+		provideCompletionItems(document, position, token) {
+			return new PackageDocument(document).provideCompletionItems(position, token);
+		}
+	});
 }
 
 function registerCodeActionsProvider(): vscode.Disposable {
-  return vscode.languages.registerCodeActionsProvider(
-    { language: "json", pattern: "**/package.json" },
-    {
-      provideCodeActions(document, range, context, token) {
-        return new PackageDocument(document).provideCodeActions(
-          range,
-          context,
-          token,
-        )
-      },
-    },
-  )
+	return vscode.languages.registerCodeActionsProvider({ language: 'json', pattern: '**/package.json' }, {
+		provideCodeActions(document, range, context, token) {
+			return new PackageDocument(document).provideCodeActions(range, context, token);
+		}
+	});
 }

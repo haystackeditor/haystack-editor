@@ -31,7 +31,7 @@ import { SavedCanvasWorkspacesView } from "vs/workbench/contrib/haystack/browser
 const canvasWorkspacesViewIcon = registerIcon(
   "canvas-workspaces-view-icon",
   Codicon.bookmark,
-  localize("canvasWorkspacesIcon", "View icon of the canvas workspaces view"),
+  localize("canvasWorkspacesIcon", "View icon of the canvas workspaces view")
 )
 
 const viewsRegistry = Registry.as<IViewsRegistry>(Extensions.ViewsRegistry)
@@ -47,7 +47,7 @@ export class HaystackCanvasWorkspacesViewPaneContainer extends ViewPaneContainer
     @IConfigurationService configurationService: IConfigurationService,
     @IExtensionService extensionService: IExtensionService,
     @IWorkspaceContextService contextService: IWorkspaceContextService,
-    @IViewDescriptorService viewDescriptorService: IViewDescriptorService,
+    @IViewDescriptorService viewDescriptorService: IViewDescriptorService
   ) {
     super(
       CANVAS_WORKSPACES_VIEWLET_ID,
@@ -61,7 +61,7 @@ export class HaystackCanvasWorkspacesViewPaneContainer extends ViewPaneContainer
       themeService,
       storageService,
       contextService,
-      viewDescriptorService,
+      viewDescriptorService
     )
 
     this.registerViews()
@@ -99,14 +99,14 @@ export class HaystackCanvasWorkspacesViewPaneContainer extends ViewPaneContainer
 
   protected override createView(
     viewDescriptor: IViewDescriptor,
-    options: IViewletViewOptions,
+    options: IViewletViewOptions
   ): ViewPane {
     if (viewDescriptor.id === SavedCanvasWorkspacesView.ID) {
       return this.instantiationService.createInstance(
         SavedCanvasWorkspacesView,
         {
           ...options,
-        },
+        }
       )
     }
     return super.createView(viewDescriptor, options)
@@ -134,7 +134,7 @@ export class HaystackCanvasWorkspacesViewPaneContainer extends ViewPaneContainer
 }
 
 const viewContainerRegistry = Registry.as<IViewContainersRegistry>(
-  Extensions.ViewContainersRegistry,
+  Extensions.ViewContainersRegistry
 )
 
 const viewContainer = viewContainerRegistry.registerViewContainer(
@@ -142,7 +142,7 @@ const viewContainer = viewContainerRegistry.registerViewContainer(
     id: CANVAS_WORKSPACES_VIEWLET_ID,
     title: nls.localize2("canvas workspaces", "Canvas Workspaces"),
     ctorDescriptor: new SyncDescriptor(
-      HaystackCanvasWorkspacesViewPaneContainer,
+      HaystackCanvasWorkspacesViewPaneContainer
     ),
     icon: canvasWorkspacesViewIcon,
     alwaysUseContainerInfo: true,
@@ -151,12 +151,12 @@ const viewContainer = viewContainerRegistry.registerViewContainer(
       id: CANVAS_WORKSPACES_VIEWLET_ID,
       mnemonicTitle: nls.localize(
         { key: "miCanvasWorkspaces", comment: ["&& denotes a mnemonic"] },
-        "&&CanvasWorkspaces",
+        "&&CanvasWorkspaces"
       ),
       keybindings: { primary: KeyMod.CtrlCmd | KeyMod.Shift | KeyCode.KeyC },
       order: 1,
     },
   },
   ViewContainerLocation.Sidebar,
-  { isDefault: true },
+  { isDefault: true }
 )

@@ -170,54 +170,54 @@ import { UserDataSyncLogService } from "vs/platform/userDataSync/common/userData
 registerSingleton(
   IUserDataSyncLogService,
   UserDataSyncLogService,
-  InstantiationType.Delayed,
+  InstantiationType.Delayed
 )
 registerSingleton(
   IIgnoredExtensionsManagementService,
   IgnoredExtensionsManagementService,
-  InstantiationType.Delayed,
+  InstantiationType.Delayed
 )
 registerSingleton(
   IGlobalExtensionEnablementService,
   GlobalExtensionEnablementService,
-  InstantiationType.Delayed,
+  InstantiationType.Delayed
 )
 registerSingleton(
   IExtensionStorageService,
   ExtensionStorageService,
-  InstantiationType.Delayed,
+  InstantiationType.Delayed
 )
 registerSingleton(
   IExtensionGalleryService,
   ExtensionGalleryService,
-  InstantiationType.Delayed,
+  InstantiationType.Delayed
 )
 registerSingleton(
   IContextViewService,
   ContextViewService,
-  InstantiationType.Delayed,
+  InstantiationType.Delayed
 )
 registerSingleton(IListService, ListService, InstantiationType.Delayed)
 registerSingleton(
   IEditorWorkerService,
   EditorWorkerService,
-  InstantiationType.Eager /* registers link detection and word based suggestions for any document */,
+  InstantiationType.Eager /* registers link detection and word based suggestions for any document */
 )
 registerSingleton(
   IMarkerDecorationsService,
   MarkerDecorationsService,
-  InstantiationType.Delayed,
+  InstantiationType.Delayed
 )
 registerSingleton(IMarkerService, MarkerService, InstantiationType.Delayed)
 registerSingleton(
   IContextKeyService,
   ContextKeyService,
-  InstantiationType.Delayed,
+  InstantiationType.Delayed
 )
 registerSingleton(
   ITextResourceConfigurationService,
   TextResourceConfigurationService,
-  InstantiationType.Delayed,
+  InstantiationType.Delayed
 )
 registerSingleton(IDownloadService, DownloadService, InstantiationType.Delayed)
 registerSingleton(IOpenerService, OpenerService, InstantiationType.Delayed)

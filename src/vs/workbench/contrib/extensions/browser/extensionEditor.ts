@@ -176,7 +176,7 @@ import { IHoverService } from "vs/platform/hover/browser/hover"
 
 class NavBar extends Disposable {
   private _onChange = this._register(
-    new Emitter<{ id: string | null; focus: boolean }>(),
+    new Emitter<{ id: string | null; focus: boolean }>()
   )
   get onChange(): Event<{ id: string | null; focus: boolean }> {
     return this._onChange.event
@@ -199,7 +199,7 @@ class NavBar extends Disposable {
 
   push(id: string, label: string, tooltip: string): void {
     const action = new Action(id, label, undefined, true, () =>
-      this.update(id, true),
+      this.update(id, true)
     )
 
     action.tooltip = tooltip
@@ -270,7 +270,7 @@ const enum WebviewIndex {
 
 const CONTEXT_SHOW_PRE_RELEASE_VERSION = new RawContextKey<boolean>(
   "showPreReleaseVersion",
-  false,
+  false
 )
 
 abstract class ExtensionWithDifferentGalleryVersionWidget extends ExtensionWidget {
@@ -300,8 +300,8 @@ class VersionWidget extends ExtensionWithDifferentGalleryVersionWidget {
       hoverService.setupUpdatableHover(
         getDefaultHoverDelegate("mouse"),
         this.element,
-        localize("extension version", "Extension Version"),
-      ),
+        localize("extension version", "Extension Version")
+      )
     )
     this.render()
   }
@@ -319,7 +319,7 @@ export class ExtensionEditor extends EditorPane {
   static readonly ID: string = "workbench.editor.extension"
 
   private readonly _scopedContextKeyService = this._register(
-    new MutableDisposable<IScopedContextKeyService>(),
+    new MutableDisposable<IScopedContextKeyService>()
   )
   private template: IExtensionEditorTemplate | undefined
 
@@ -371,14 +371,14 @@ export class ExtensionEditor extends EditorPane {
     @IViewsService private readonly viewsService: IViewsService,
     @IUriIdentityService
     private readonly uriIdentityService: IUriIdentityService,
-    @IHoverService private readonly hoverService: IHoverService,
+    @IHoverService private readonly hoverService: IHoverService
   ) {
     super(
       ExtensionEditor.ID,
       group,
       telemetryService,
       themeService,
-      storageService,
+      storageService
     )
     this.extensionReadme = null
     this.extensionChangelog = null
@@ -396,7 +396,7 @@ export class ExtensionEditor extends EditorPane {
     this._scopedContextKeyService.value.createKey("inExtensionEditor", true)
     this.showPreReleaseVersionContextKey =
       CONTEXT_SHOW_PRE_RELEASE_VERSION.bindTo(
-        this._scopedContextKeyService.value,
+        this._scopedContextKeyService.value
       )
 
     root.tabIndex = 0 // this is required for the focus tracker on the editor
@@ -407,26 +407,26 @@ export class ExtensionEditor extends EditorPane {
     const iconContainer = append(header, $(".icon-container"))
     const icon = append(
       iconContainer,
-      $<HTMLImageElement>("img.icon", { draggable: false, alt: "" }),
+      $<HTMLImageElement>("img.icon", { draggable: false, alt: "" })
     )
     const remoteBadge = this.instantiationService.createInstance(
       RemoteBadgeWidget,
       iconContainer,
-      true,
+      true
     )
 
     const details = append(header, $(".details"))
     const title = append(details, $(".title"))
     const name = append(
       title,
-      $("span.name.clickable", { role: "heading", tabIndex: 0 }),
+      $("span.name.clickable", { role: "heading", tabIndex: 0 })
     )
     this._register(
       this.hoverService.setupUpdatableHover(
         getDefaultHoverDelegate("mouse"),
         name,
-        localize("name", "Extension name"),
-      ),
+        localize("name", "Extension name")
+      )
     )
     const versionWidget = new VersionWidget(title, this.hoverService)
 
@@ -435,8 +435,8 @@ export class ExtensionEditor extends EditorPane {
       this.hoverService.setupUpdatableHover(
         getDefaultHoverDelegate("mouse"),
         preview,
-        localize("preview", "Preview"),
-      ),
+        localize("preview", "Preview")
+      )
     )
     preview.textContent = localize("preview", "Preview")
 
@@ -446,67 +446,67 @@ export class ExtensionEditor extends EditorPane {
     const subtitle = append(details, $(".subtitle"))
     const publisher = append(
       append(subtitle, $(".subtitle-entry")),
-      $(".publisher.clickable", { tabIndex: 0 }),
+      $(".publisher.clickable", { tabIndex: 0 })
     )
     this._register(
       this.hoverService.setupUpdatableHover(
         getDefaultHoverDelegate("mouse"),
         publisher,
-        localize("publisher", "Publisher"),
-      ),
+        localize("publisher", "Publisher")
+      )
     )
     publisher.setAttribute("role", "button")
     const publisherDisplayName = append(publisher, $(".publisher-name"))
     const verifiedPublisherWidget = this.instantiationService.createInstance(
       VerifiedPublisherWidget,
       append(publisher, $(".verified-publisher")),
-      false,
+      false
     )
 
     const resource = append(
       append(subtitle, $(".subtitle-entry.resource")),
-      $("", { tabIndex: 0 }),
+      $("", { tabIndex: 0 })
     )
     resource.setAttribute("role", "button")
 
     const installCount = append(
       append(subtitle, $(".subtitle-entry")),
-      $("span.install", { tabIndex: 0 }),
+      $("span.install", { tabIndex: 0 })
     )
     this._register(
       this.hoverService.setupUpdatableHover(
         getDefaultHoverDelegate("mouse"),
         installCount,
-        localize("install count", "Install count"),
-      ),
+        localize("install count", "Install count")
+      )
     )
     const installCountWidget = this.instantiationService.createInstance(
       InstallCountWidget,
       installCount,
-      false,
+      false
     )
 
     const rating = append(
       append(subtitle, $(".subtitle-entry")),
-      $("span.rating.clickable", { tabIndex: 0 }),
+      $("span.rating.clickable", { tabIndex: 0 })
     )
     this._register(
       this.hoverService.setupUpdatableHover(
         getDefaultHoverDelegate("mouse"),
         rating,
-        localize("rating", "Rating"),
-      ),
+        localize("rating", "Rating")
+      )
     )
     rating.setAttribute("role", "link") // #132645
     const ratingsWidget = this.instantiationService.createInstance(
       RatingsWidget,
       rating,
-      false,
+      false
     )
 
     const sponsorWidget = this.instantiationService.createInstance(
       SponsorWidget,
-      append(subtitle, $(".subtitle-entry")),
+      append(subtitle, $(".subtitle-entry"))
     )
 
     const widgets: ExtensionWidget[] = [
@@ -521,7 +521,7 @@ export class ExtensionEditor extends EditorPane {
     const description = append(details, $(".description"))
 
     const installAction = this.instantiationService.createInstance(
-      InstallDropdownAction,
+      InstallDropdownAction
     )
     const actions = [
       this.instantiationService.createInstance(ExtensionRuntimeStateAction),
@@ -536,10 +536,10 @@ export class ExtensionEditor extends EditorPane {
             this.instantiationService.createInstance(
               ToggleAutoUpdateForExtensionAction,
               true,
-              [true, "onlyEnabledExtensions"],
+              [true, "onlyEnabledExtensions"]
             ),
           ],
-        ],
+        ]
       ),
       this.instantiationService.createInstance(SetColorThemeAction),
       this.instantiationService.createInstance(SetFileIconThemeAction),
@@ -562,30 +562,30 @@ export class ExtensionEditor extends EditorPane {
           [
             this.instantiationService.createInstance(
               MigrateDeprecatedExtensionAction,
-              false,
+              false
             ),
             this.instantiationService.createInstance(UninstallAction),
             this.instantiationService.createInstance(
-              InstallAnotherVersionAction,
+              InstallAnotherVersionAction
             ),
           ],
-        ],
+        ]
       ),
       this.instantiationService.createInstance(TogglePreReleaseExtensionAction),
       this.instantiationService.createInstance(
         ToggleAutoUpdateForExtensionAction,
         false,
-        [false, "onlySelectedExtensions"],
+        [false, "onlySelectedExtensions"]
       ),
       new ExtensionEditorManageExtensionAction(
         this.scopedContextKeyService || this.contextKeyService,
-        this.instantiationService,
+        this.instantiationService
       ),
     ]
 
     const actionsAndStatusContainer = append(
       details,
-      $(".actions-status-container"),
+      $(".actions-status-container")
     )
     const extensionActionBar = this._register(
       new ActionBar(actionsAndStatusContainer, {
@@ -603,7 +603,7 @@ export class ExtensionEditor extends EditorPane {
                 menuActionsOrProvider: { getActions: () => action.menuActions },
                 menuActionClassNames: (action.class || "").split(" "),
               },
-              this.contextMenuService,
+              this.contextMenuService
             )
           }
           if (action instanceof ToggleAutoUpdateForExtensionAction) {
@@ -617,7 +617,7 @@ export class ExtensionEditor extends EditorPane {
           return undefined
         },
         focusOnlyEnabledItems: true,
-      }),
+      })
     )
 
     extensionActionBar.push(actions, { icon: true, label: true })
@@ -626,24 +626,24 @@ export class ExtensionEditor extends EditorPane {
     this._register(
       Event.any(
         ...actions.map((a) =>
-          Event.filter(a.onDidChange, (e) => e.enabled !== undefined),
-        ),
+          Event.filter(a.onDidChange, (e) => e.enabled !== undefined)
+        )
       )(() => {
         extensionActionBar.setFocusable(false)
         extensionActionBar.setFocusable(true)
-      }),
+      })
     )
 
     const otherExtensionContainers: IExtensionContainer[] = []
     const extensionStatusAction = this.instantiationService.createInstance(
-      ExtensionStatusAction,
+      ExtensionStatusAction
     )
     const extensionStatusWidget = this._register(
       this.instantiationService.createInstance(
         ExtensionStatusWidget,
         append(actionsAndStatusContainer, $(".status")),
-        extensionStatusAction,
-      ),
+        extensionStatusAction
+      )
     )
 
     otherExtensionContainers.push(
@@ -652,27 +652,27 @@ export class ExtensionEditor extends EditorPane {
         render() {
           actionsAndStatusContainer.classList.toggle(
             "list-layout",
-            this.extension?.state === ExtensionState.Installed,
+            this.extension?.state === ExtensionState.Installed
           )
         }
-      })(),
+      })()
     )
 
     const recommendationWidget = this.instantiationService.createInstance(
       ExtensionRecommendationWidget,
-      append(details, $(".recommendation")),
+      append(details, $(".recommendation"))
     )
     widgets.push(recommendationWidget)
 
     this._register(
       Event.any(
         extensionStatusWidget.onDidRender,
-        recommendationWidget.onDidRender,
+        recommendationWidget.onDidRender
       )(() => {
         if (this.dimension) {
           this.layout(this.dimension)
         }
-      }),
+      })
     )
 
     const extensionContainers: ExtensionContainers =
@@ -691,7 +691,7 @@ export class ExtensionEditor extends EditorPane {
     }
 
     const onError = Event.chain(extensionActionBar.onDidRun, ($) =>
-      $.map(({ error }) => error).filter((error) => !!error),
+      $.map(({ error }) => error).filter((error) => !!error)
     )
 
     this._register(onError(this.onError, this))
@@ -735,7 +735,7 @@ export class ExtensionEditor extends EditorPane {
     input: ExtensionsInput,
     options: IExtensionEditorOptions | undefined,
     context: IEditorOpenContext,
-    token: CancellationToken,
+    token: CancellationToken
   ): Promise<void> {
     await super.setInput(input, options, context, token)
     this.updatePreReleaseVersionContext()
@@ -743,7 +743,7 @@ export class ExtensionEditor extends EditorPane {
       await this.render(
         input.extension,
         this.template,
-        !!options?.preserveFocus,
+        !!options?.preserveFocus
       )
     }
   }
@@ -760,7 +760,7 @@ export class ExtensionEditor extends EditorPane {
       this.render(
         (this.input as ExtensionsInput).extension,
         this.template,
-        !!options?.preserveFocus,
+        !!options?.preserveFocus
       )
     }
   }
@@ -791,7 +791,7 @@ export class ExtensionEditor extends EditorPane {
 
   private async getGalleryVersionToShow(
     extension: IExtension,
-    preRelease?: boolean,
+    preRelease?: boolean
   ): Promise<IGalleryExtension | null> {
     if (extension.resourceExtension) {
       return null
@@ -821,7 +821,7 @@ export class ExtensionEditor extends EditorPane {
               hasPreRelease: extension.hasPreReleaseVersion,
             },
           ],
-          CancellationToken.None,
+          CancellationToken.None
         )
       )[0] || null
     )
@@ -830,18 +830,18 @@ export class ExtensionEditor extends EditorPane {
   private async render(
     extension: IExtension,
     template: IExtensionEditorTemplate,
-    preserveFocus: boolean,
+    preserveFocus: boolean
   ): Promise<void> {
     this.activeElement = null
     this.transientDisposables.clear()
 
     const token = this.transientDisposables.add(
-      new CancellationTokenSource(),
+      new CancellationTokenSource()
     ).token
 
     const gallery = await this.getGalleryVersionToShow(
       extension,
-      (this.options as IExtensionEditorOptions)?.showPreReleaseVersion,
+      (this.options as IExtensionEditorOptions)?.showPreReleaseVersion
     )
     if (token.isCancellationRequested) {
       return
@@ -850,17 +850,17 @@ export class ExtensionEditor extends EditorPane {
     this.extensionReadme = new Cache(() =>
       gallery
         ? this.extensionGalleryService.getReadme(gallery, token)
-        : extension.getReadme(token),
+        : extension.getReadme(token)
     )
     this.extensionChangelog = new Cache(() =>
       gallery
         ? this.extensionGalleryService.getChangelog(gallery, token)
-        : extension.getChangelog(token),
+        : extension.getChangelog(token)
     )
     this.extensionManifest = new Cache(() =>
       gallery
         ? this.extensionGalleryService.getManifest(gallery, token)
-        : extension.getManifest(token),
+        : extension.getManifest(token)
     )
 
     template.extension = extension
@@ -872,8 +872,8 @@ export class ExtensionEditor extends EditorPane {
         template.icon,
         "error",
         () => (template.icon.src = extension.iconUrlFallback),
-        { once: true },
-      ),
+        { once: true }
+      )
     )
     template.icon.src = extension.iconUrl
 
@@ -890,7 +890,7 @@ export class ExtensionEditor extends EditorPane {
     template.publisherDisplayName.textContent = extension.publisherDisplayName
     template.publisher.parentElement?.classList.toggle(
       "hide",
-      !!extension.resourceExtension || extension.local?.source === "resource",
+      !!extension.resourceExtension || extension.local?.source === "resource"
     )
 
     const location =
@@ -909,20 +909,20 @@ export class ExtensionEditor extends EditorPane {
             template.resource,
             this.uriIdentityService.extUri.relativePath(
               workspaceFolder.uri,
-              location,
-            ),
-          ),
+              location
+            )
+          )
         )
         template.resource.textContent = localize(
           "workspace extension",
-          "Workspace Extension",
+          "Workspace Extension"
         )
         this.transientDisposables.add(
           onClick(template.resource, () => {
             this.viewsService
               .openView(EXPLORER_VIEW_ID, true)
               .then(() => this.explorerService.select(location, true))
-          }),
+          })
         )
       } else {
         template.resource.parentElement?.classList.remove("clickable")
@@ -930,19 +930,19 @@ export class ExtensionEditor extends EditorPane {
           this.hoverService.setupUpdatableHover(
             getDefaultHoverDelegate("mouse"),
             template.resource,
-            location.path,
-          ),
+            location.path
+          )
         )
         template.resource.textContent = localize(
           "local extension",
-          "Local Extension",
+          "Local Extension"
         )
       }
     }
 
     template.installCount.parentElement?.classList.toggle(
       "hide",
-      !extension.url,
+      !extension.url
     )
     template.rating.parentElement?.classList.toggle("hide", !extension.url)
     template.rating.classList.toggle("clickable", !!extension.url)
@@ -950,15 +950,15 @@ export class ExtensionEditor extends EditorPane {
     if (extension.url) {
       this.transientDisposables.add(
         onClick(template.name, () =>
-          this.openerService.open(URI.parse(extension.url!)),
-        ),
+          this.openerService.open(URI.parse(extension.url!))
+        )
       )
       this.transientDisposables.add(
         onClick(template.rating, () =>
           this.openerService.open(
-            URI.parse(`${extension.url}&ssr=false#review-details`),
-          ),
-        ),
+            URI.parse(`${extension.url}&ssr=false#review-details`)
+          )
+        )
       )
       this.transientDisposables.add(
         onClick(template.publisher, () => {
@@ -966,12 +966,12 @@ export class ExtensionEditor extends EditorPane {
             .openPaneComposite(VIEWLET_ID, ViewContainerLocation.Sidebar, true)
             .then(
               (viewlet) =>
-                viewlet?.getViewPaneContainer() as IExtensionsViewPaneContainer,
+                viewlet?.getViewPaneContainer() as IExtensionsViewPaneContainer
             )
             .then((viewlet) =>
-              viewlet.search(`publisher:"${extension.publisherDisplayName}"`),
+              viewlet.search(`publisher:"${extension.publisherDisplayName}"`)
             )
-        }),
+        })
       )
     }
 
@@ -1015,7 +1015,7 @@ export class ExtensionEditor extends EditorPane {
     extension: IExtension,
     manifest: IExtensionManifest | null,
     template: IExtensionEditorTemplate,
-    preserveFocus: boolean,
+    preserveFocus: boolean
   ): void {
     template.content.innerText = ""
     template.navbar.clear()
@@ -1030,8 +1030,8 @@ export class ExtensionEditor extends EditorPane {
       localize("details", "Details"),
       localize(
         "detailstooltip",
-        "Extension details, rendered from the extension's 'README.md' file",
-      ),
+        "Extension details, rendered from the extension's 'README.md' file"
+      )
     )
     if (manifest) {
       template.navbar.push(
@@ -1039,8 +1039,8 @@ export class ExtensionEditor extends EditorPane {
         localize("features", "Features"),
         localize(
           "featurestooltip",
-          "Lists features contributed by this extension",
-        ),
+          "Lists features contributed by this extension"
+        )
       )
     }
     if (extension.hasChangelog()) {
@@ -1049,8 +1049,8 @@ export class ExtensionEditor extends EditorPane {
         localize("changelog", "Changelog"),
         localize(
           "changelogtooltip",
-          "Extension update history, rendered from the extension's 'CHANGELOG.md' file",
-        ),
+          "Extension update history, rendered from the extension's 'CHANGELOG.md' file"
+        )
       )
     }
     if (extension.dependencies.length) {
@@ -1059,8 +1059,8 @@ export class ExtensionEditor extends EditorPane {
         localize("dependencies", "Dependencies"),
         localize(
           "dependenciestooltip",
-          "Lists extensions this extension depends on",
-        ),
+          "Lists extensions this extension depends on"
+        )
       )
     }
     if (
@@ -1073,8 +1073,8 @@ export class ExtensionEditor extends EditorPane {
         localize("extensionpack", "Extension Pack"),
         localize(
           "extensionpacktooltip",
-          "Lists extensions those will be installed together with this extension",
-        ),
+          "Lists extensions those will be installed together with this extension"
+        )
       )
     }
 
@@ -1085,13 +1085,13 @@ export class ExtensionEditor extends EditorPane {
       this.onNavbarChange(
         extension,
         { id: template.navbar.currentId, focus: !preserveFocus },
-        template,
+        template
       )
     }
     template.navbar.onChange(
       (e) => this.onNavbarChange(extension, e, template),
       this,
-      this.transientDisposables,
+      this.transientDisposables
     )
   }
 
@@ -1128,7 +1128,7 @@ export class ExtensionEditor extends EditorPane {
   private onNavbarChange(
     extension: IExtension,
     { id, focus }: { id: string | null; focus: boolean },
-    template: IExtensionEditorTemplate,
+    template: IExtensionEditorTemplate
   ): void {
     this.contentDisposables.clear()
     template.content.innerText = ""
@@ -1152,7 +1152,7 @@ export class ExtensionEditor extends EditorPane {
     id: string,
     extension: IExtension,
     template: IExtensionEditorTemplate,
-    token: CancellationToken,
+    token: CancellationToken
   ): Promise<IActiveElement | null> {
     switch (id) {
       case ExtensionEditorTab.Readme:
@@ -1176,14 +1176,14 @@ export class ExtensionEditor extends EditorPane {
     container: HTMLElement,
     webviewIndex: WebviewIndex,
     title: string,
-    token: CancellationToken,
+    token: CancellationToken
   ): Promise<IActiveElement | null> {
     try {
       const body = await this.renderMarkdown(
         extension,
         cacheResult,
         container,
-        token,
+        token
       )
       if (token.isCancellationRequested) {
         return Promise.resolve(null)
@@ -1199,7 +1199,7 @@ export class ExtensionEditor extends EditorPane {
           },
           contentOptions: {},
           extension: undefined,
-        }),
+        })
       )
 
       if (this.input != null) {
@@ -1217,16 +1217,16 @@ export class ExtensionEditor extends EditorPane {
       webview.claim(this, this.window, undefined)
 
       this.contentDisposables.add(
-        webview.onDidFocus(() => this._onDidFocus?.fire()),
+        webview.onDidFocus(() => this._onDidFocus?.fire())
       )
 
       this.contentDisposables.add(
         webview.onDidScroll(() =>
           this.initialScrollProgress.set(
             webviewIndex,
-            webview.initialScrollProgress,
-          ),
-        ),
+            webview.initialScrollProgress
+          )
+        )
       )
 
       const removeLayoutParticipant = arrays.insert(this.layoutParticipants, {
@@ -1240,7 +1240,7 @@ export class ExtensionEditor extends EditorPane {
       this.contentDisposables.add(
         toDisposable(() => {
           isDisposed = true
-        }),
+        })
       )
 
       this.contentDisposables.add(
@@ -1249,13 +1249,13 @@ export class ExtensionEditor extends EditorPane {
           const body = await this.renderMarkdown(
             extension,
             cacheResult,
-            container,
+            container
           )
           if (!isDisposed) {
             // Make sure we weren't disposed of in the meantime
             webview.setHtml(body)
           }
-        }),
+        })
       )
 
       this.contentDisposables.add(
@@ -1277,7 +1277,7 @@ export class ExtensionEditor extends EditorPane {
           ) {
             this.openerService.open(link, { allowCommands: true })
           }
-        }),
+        })
       )
 
       return webview
@@ -1292,7 +1292,7 @@ export class ExtensionEditor extends EditorPane {
     extension: IExtension,
     cacheResult: CacheResult<string>,
     container: HTMLElement,
-    token?: CancellationToken,
+    token?: CancellationToken
   ): Promise<string> {
     const contents = await this.loadContents(() => cacheResult, container)
     if (token?.isCancellationRequested) {
@@ -1305,7 +1305,7 @@ export class ExtensionEditor extends EditorPane {
       this.languageService,
       extension.type !== ExtensionType.System,
       false,
-      token,
+      token
     )
     if (token?.isCancellationRequested) {
       return ""
@@ -1382,23 +1382,23 @@ export class ExtensionEditor extends EditorPane {
   private async openDetails(
     extension: IExtension,
     template: IExtensionEditorTemplate,
-    token: CancellationToken,
+    token: CancellationToken
   ): Promise<IActiveElement | null> {
     const details = append(template.content, $(".details"))
     const readmeContainer = append(details, $(".readme-container"))
     const additionalDetailsContainer = append(
       details,
-      $(".additional-details-container"),
+      $(".additional-details-container")
     )
 
     const layout = () =>
       details.classList.toggle(
         "narrow",
-        this.dimension && this.dimension.width < 500,
+        this.dimension && this.dimension.width < 500
       )
     layout()
     this.contentDisposables.add(
-      toDisposable(arrays.insert(this.layoutParticipants, { layout })),
+      toDisposable(arrays.insert(this.layoutParticipants, { layout }))
     )
 
     let activeElement: IActiveElement | null = null
@@ -1412,7 +1412,7 @@ export class ExtensionEditor extends EditorPane {
         extension,
         manifest,
         readmeContainer,
-        token,
+        token
       )
     } else {
       activeElement = await this.openMarkdown(
@@ -1422,7 +1422,7 @@ export class ExtensionEditor extends EditorPane {
         readmeContainer,
         WebviewIndex.Readme,
         localize("Readme title", "Readme"),
-        token,
+        token
       )
     }
 
@@ -1432,7 +1432,7 @@ export class ExtensionEditor extends EditorPane {
 
   private shallRenderAsExtensionPack(manifest: IExtensionManifest): boolean {
     return !!manifest.categories?.some(
-      (category) => category.toLowerCase() === "extension packs",
+      (category) => category.toLowerCase() === "extension packs"
     )
   }
 
@@ -1440,7 +1440,7 @@ export class ExtensionEditor extends EditorPane {
     extension: IExtension,
     manifest: IExtensionManifest,
     container: HTMLElement,
-    token: CancellationToken,
+    token: CancellationToken
   ): Promise<IActiveElement | null> {
     if (token.isCancellationRequested) {
       return Promise.resolve(null)
@@ -1448,14 +1448,14 @@ export class ExtensionEditor extends EditorPane {
 
     const extensionPackReadme = append(
       container,
-      $("div", { class: "extension-pack-readme" }),
+      $("div", { class: "extension-pack-readme" })
     )
     extensionPackReadme.style.margin = "0 auto"
     extensionPackReadme.style.maxWidth = "882px"
 
     const extensionPack = append(
       extensionPackReadme,
-      $("div", { class: "extension-pack" }),
+      $("div", { class: "extension-pack" })
     )
     if (manifest.extensionPack!.length <= 3) {
       extensionPackReadme.classList.add("one-row")
@@ -1471,11 +1471,11 @@ export class ExtensionEditor extends EditorPane {
     extensionPackHeader.textContent = localize(
       "extension pack",
       "Extension Pack ({0})",
-      manifest.extensionPack!.length,
+      manifest.extensionPack!.length
     )
     const extensionPackContent = append(
       extensionPack,
-      $("div", { class: "extension-pack-content" }),
+      $("div", { class: "extension-pack-content" })
     )
     extensionPackContent.setAttribute("tabindex", "0")
     append(extensionPack, $("div.footer"))
@@ -1490,7 +1490,7 @@ export class ExtensionEditor extends EditorPane {
         readmeContent,
         WebviewIndex.Readme,
         localize("Readme title", "Readme"),
-        token,
+        token
       ),
     ])
 
@@ -1499,7 +1499,7 @@ export class ExtensionEditor extends EditorPane {
 
   private renderAdditionalDetails(
     container: HTMLElement,
-    extension: IExtension,
+    extension: IExtension
   ): void {
     const content = $("div", {
       class: "additional-details-content",
@@ -1523,20 +1523,20 @@ export class ExtensionEditor extends EditorPane {
 
   private renderCategories(
     container: HTMLElement,
-    extension: IExtension,
+    extension: IExtension
   ): void {
     if (extension.categories.length) {
       const categoriesContainer = append(
         container,
-        $(".categories-container.additional-details-element"),
+        $(".categories-container.additional-details-element")
       )
       append(
         categoriesContainer,
         $(
           ".additional-details-title",
           undefined,
-          localize("categories", "Categories"),
-        ),
+          localize("categories", "Categories")
+        )
       )
       const categoriesElement = append(categoriesContainer, $(".categories"))
       for (const category of extension.categories) {
@@ -1544,22 +1544,22 @@ export class ExtensionEditor extends EditorPane {
           onClick(
             append(
               categoriesElement,
-              $("span.category", { tabindex: "0" }, category),
+              $("span.category", { tabindex: "0" }, category)
             ),
             () => {
               this.paneCompositeService
                 .openPaneComposite(
                   VIEWLET_ID,
                   ViewContainerLocation.Sidebar,
-                  true,
+                  true
                 )
                 .then(
                   (viewlet) =>
-                    viewlet?.getViewPaneContainer() as IExtensionsViewPaneContainer,
+                    viewlet?.getViewPaneContainer() as IExtensionsViewPaneContainer
                 )
                 .then((viewlet) => viewlet.search(`@category:"${category}"`))
-            },
-          ),
+            }
+          )
         )
       }
     }
@@ -1567,7 +1567,7 @@ export class ExtensionEditor extends EditorPane {
 
   private renderExtensionResources(
     container: HTMLElement,
-    extension: IExtension,
+    extension: IExtension
   ): void {
     const resources: [string, URI][] = []
     if (extension.url) {
@@ -1612,34 +1612,34 @@ export class ExtensionEditor extends EditorPane {
     if (resources.length || extension.publisherSponsorLink) {
       const extensionResourcesContainer = append(
         container,
-        $(".resources-container.additional-details-element"),
+        $(".resources-container.additional-details-element")
       )
       append(
         extensionResourcesContainer,
         $(
           ".additional-details-title",
           undefined,
-          localize("resources", "Resources"),
-        ),
+          localize("resources", "Resources")
+        )
       )
       const resourcesElement = append(
         extensionResourcesContainer,
-        $(".resources"),
+        $(".resources")
       )
       for (const [label, uri] of resources) {
         const resource = append(
           resourcesElement,
-          $("a.resource", { tabindex: "0" }, label),
+          $("a.resource", { tabindex: "0" }, label)
         )
         this.transientDisposables.add(
-          onClick(resource, () => this.openerService.open(uri)),
+          onClick(resource, () => this.openerService.open(uri))
         )
         this.transientDisposables.add(
           this.hoverService.setupUpdatableHover(
             getDefaultHoverDelegate("mouse"),
             resource,
-            uri.toString(),
-          ),
+            uri.toString()
+          )
         )
       }
     }
@@ -1649,24 +1649,24 @@ export class ExtensionEditor extends EditorPane {
     const gallery = extension.gallery
     const moreInfoContainer = append(
       container,
-      $(".more-info-container.additional-details-element"),
+      $(".more-info-container.additional-details-element")
     )
     append(
       moreInfoContainer,
       $(
         ".additional-details-title",
         undefined,
-        localize("Marketplace Info", "More Info"),
-      ),
+        localize("Marketplace Info", "More Info")
+      )
     )
     const moreInfo = append(moreInfoContainer, $(".more-info"))
     const toDateString = (date: Date) =>
       `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(
         2,
-        "0",
+        "0"
       )}-${String(date.getDate()).padStart(2, "0")}, ${date.toLocaleTimeString(
         language,
-        { hourCycle: "h23" },
+        { hourCycle: "h23" }
       )}`
     if (gallery) {
       append(
@@ -1675,14 +1675,14 @@ export class ExtensionEditor extends EditorPane {
           ".more-info-entry",
           undefined,
           $("div", undefined, localize("published", "Published")),
-          $("div", undefined, toDateString(new Date(gallery.releaseDate))),
+          $("div", undefined, toDateString(new Date(gallery.releaseDate)))
         ),
         $(
           ".more-info-entry",
           undefined,
           $("div", undefined, localize("last released", "Last released")),
-          $("div", undefined, toDateString(new Date(gallery.lastUpdated))),
-        ),
+          $("div", undefined, toDateString(new Date(gallery.lastUpdated)))
+        )
       )
     }
     if (extension.local && extension.local.installedTimestamp) {
@@ -1695,9 +1695,9 @@ export class ExtensionEditor extends EditorPane {
           $(
             "div",
             undefined,
-            toDateString(new Date(extension.local.installedTimestamp)),
-          ),
-        ),
+            toDateString(new Date(extension.local.installedTimestamp))
+          )
+        )
       )
     }
     append(
@@ -1706,15 +1706,15 @@ export class ExtensionEditor extends EditorPane {
         ".more-info-entry",
         undefined,
         $("div", undefined, localize("id", "Identifier")),
-        $("code", undefined, extension.identifier.id),
-      ),
+        $("code", undefined, extension.identifier.id)
+      )
     )
   }
 
   private openChangelog(
     extension: IExtension,
     template: IExtensionEditorTemplate,
-    token: CancellationToken,
+    token: CancellationToken
   ): Promise<IActiveElement | null> {
     return this.openMarkdown(
       extension,
@@ -1723,17 +1723,17 @@ export class ExtensionEditor extends EditorPane {
       template.content,
       WebviewIndex.Changelog,
       localize("Changelog title", "Changelog"),
-      token,
+      token
     )
   }
 
   private async openFeatures(
     template: IExtensionEditorTemplate,
-    token: CancellationToken,
+    token: CancellationToken
   ): Promise<IActiveElement | null> {
     const manifest = await this.loadContents(
       () => this.extensionManifest!.get(),
-      template.content,
+      template.content
     )
     if (token.isCancellationRequested) {
       return null
@@ -1746,13 +1746,13 @@ export class ExtensionEditor extends EditorPane {
       this.instantiationService.createInstance(
         ExtensionFeaturesTab,
         manifest,
-        (<IExtensionEditorOptions | undefined>this.options)?.feature,
-      ),
+        (<IExtensionEditorOptions | undefined>this.options)?.feature
+      )
     )
     const layout = () =>
       extensionFeaturesTab.layout(
         template.content.clientHeight,
-        template.content.clientWidth,
+        template.content.clientWidth
       )
     const removeLayoutParticipant = arrays.insert(this.layoutParticipants, {
       layout,
@@ -1766,7 +1766,7 @@ export class ExtensionEditor extends EditorPane {
   private openExtensionDependencies(
     extension: IExtension,
     template: IExtensionEditorTemplate,
-    token: CancellationToken,
+    token: CancellationToken
   ): Promise<IActiveElement | null> {
     if (token.isCancellationRequested) {
       return Promise.resolve(null)
@@ -1775,7 +1775,7 @@ export class ExtensionEditor extends EditorPane {
     if (arrays.isFalsyOrEmpty(extension.dependencies)) {
       append(template.content, $("p.nocontent")).textContent = localize(
         "noDependencies",
-        "No Dependencies",
+        "No Dependencies"
       )
       return Promise.resolve(template.content)
     }
@@ -1791,12 +1791,12 @@ export class ExtensionEditor extends EditorPane {
         extension,
         null,
         (extension) => extension.dependencies || [],
-        this.extensionsWorkbenchService,
+        this.extensionsWorkbenchService
       ),
       content,
       {
         listBackground: editorBackground,
-      },
+      }
     )
     const layout = () => {
       scrollableContent.scanDomNode()
@@ -1820,14 +1820,14 @@ export class ExtensionEditor extends EditorPane {
   private async openExtensionPack(
     extension: IExtension,
     template: IExtensionEditorTemplate,
-    token: CancellationToken,
+    token: CancellationToken
   ): Promise<IActiveElement | null> {
     if (token.isCancellationRequested) {
       return Promise.resolve(null)
     }
     const manifest = await this.loadContents(
       () => this.extensionManifest!.get(),
-      template.content,
+      template.content
     )
     if (token.isCancellationRequested) {
       return null
@@ -1841,7 +1841,7 @@ export class ExtensionEditor extends EditorPane {
   private async renderExtensionPack(
     manifest: IExtensionManifest,
     parent: HTMLElement,
-    token: CancellationToken,
+    token: CancellationToken
   ): Promise<IActiveElement | null> {
     if (token.isCancellationRequested) {
       return null
@@ -1856,11 +1856,11 @@ export class ExtensionEditor extends EditorPane {
     const extensionsGridView = this.instantiationService.createInstance(
       ExtensionsGridView,
       content,
-      new Delegate(),
+      new Delegate()
     )
     const extensions: IExtension[] = await getExtensions(
       manifest.extensionPack!,
-      this.extensionsWorkbenchService,
+      this.extensionsWorkbenchService
     )
     extensionsGridView.setExtensions(extensions)
     scrollableContent.scanDomNode()
@@ -1871,8 +1871,8 @@ export class ExtensionEditor extends EditorPane {
       toDisposable(
         arrays.insert(this.layoutParticipants, {
           layout: () => scrollableContent.scanDomNode(),
-        }),
-      ),
+        })
+      )
     )
 
     return content
@@ -1880,7 +1880,7 @@ export class ExtensionEditor extends EditorPane {
 
   private loadContents<T>(
     loadingTask: () => CacheResult<T>,
-    container: HTMLElement,
+    container: HTMLElement
   ): Promise<T> {
     container.classList.add("loading")
 
@@ -1907,7 +1907,7 @@ export class ExtensionEditor extends EditorPane {
 
 const contextKeyExpr = ContextKeyExpr.and(
   ContextKeyExpr.equals("activeEditor", ExtensionEditor.ID),
-  EditorContextKeys.focus.toNegated(),
+  EditorContextKeys.focus.toNegated()
 )
 registerAction2(
   class ShowExtensionEditorFindAction extends Action2 {
@@ -1926,7 +1926,7 @@ registerAction2(
       const extensionEditor = getExtensionEditor(accessor)
       extensionEditor?.showFind()
     }
-  },
+  }
 )
 
 registerAction2(
@@ -1938,7 +1938,7 @@ registerAction2(
         keybinding: {
           when: ContextKeyExpr.and(
             contextKeyExpr,
-            KEYBINDING_CONTEXT_WEBVIEW_FIND_WIDGET_FOCUSED,
+            KEYBINDING_CONTEXT_WEBVIEW_FIND_WIDGET_FOCUSED
           ),
           primary: KeyCode.Enter,
           weight: KeybindingWeight.EditorContrib,
@@ -1949,7 +1949,7 @@ registerAction2(
       const extensionEditor = getExtensionEditor(accessor)
       extensionEditor?.runFindAction(false)
     }
-  },
+  }
 )
 
 registerAction2(
@@ -1961,7 +1961,7 @@ registerAction2(
         keybinding: {
           when: ContextKeyExpr.and(
             contextKeyExpr,
-            KEYBINDING_CONTEXT_WEBVIEW_FIND_WIDGET_FOCUSED,
+            KEYBINDING_CONTEXT_WEBVIEW_FIND_WIDGET_FOCUSED
           ),
           primary: KeyMod.Shift | KeyCode.Enter,
           weight: KeybindingWeight.EditorContrib,
@@ -1972,7 +1972,7 @@ registerAction2(
       const extensionEditor = getExtensionEditor(accessor)
       extensionEditor?.runFindAction(true)
     }
-  },
+  }
 )
 
 registerThemingParticipant(
@@ -1980,10 +1980,10 @@ registerThemingParticipant(
     const link = theme.getColor(textLinkForeground)
     if (link) {
       collector.addRule(
-        `.monaco-workbench .extension-editor .content .details .additional-details-container .resources-container a.resource { color: ${link}; }`,
+        `.monaco-workbench .extension-editor .content .details .additional-details-container .resources-container a.resource { color: ${link}; }`
       )
       collector.addRule(
-        `.monaco-workbench .extension-editor .content .feature-contributions a { color: ${link}; }`,
+        `.monaco-workbench .extension-editor .content .feature-contributions a { color: ${link}; }`
       )
     }
 
@@ -1998,27 +1998,27 @@ registerThemingParticipant(
     const buttonHoverBackgroundColor = theme.getColor(buttonHoverBackground)
     if (buttonHoverBackgroundColor) {
       collector.addRule(
-        `.monaco-workbench .extension-editor .content > .details > .additional-details-container .categories-container > .categories > .category:hover { background-color: ${buttonHoverBackgroundColor}; border-color: ${buttonHoverBackgroundColor}; }`,
+        `.monaco-workbench .extension-editor .content > .details > .additional-details-container .categories-container > .categories > .category:hover { background-color: ${buttonHoverBackgroundColor}; border-color: ${buttonHoverBackgroundColor}; }`
       )
       collector.addRule(
-        `.monaco-workbench .extension-editor .content > .details > .additional-details-container .tags-container > .tags > .tag:hover { background-color: ${buttonHoverBackgroundColor}; border-color: ${buttonHoverBackgroundColor}; }`,
+        `.monaco-workbench .extension-editor .content > .details > .additional-details-container .tags-container > .tags > .tag:hover { background-color: ${buttonHoverBackgroundColor}; border-color: ${buttonHoverBackgroundColor}; }`
       )
     }
 
     const buttonForegroundColor = theme.getColor(buttonForeground)
     if (buttonForegroundColor) {
       collector.addRule(
-        `.monaco-workbench .extension-editor .content > .details > .additional-details-container .categories-container > .categories > .category:hover { color: ${buttonForegroundColor}; }`,
+        `.monaco-workbench .extension-editor .content > .details > .additional-details-container .categories-container > .categories > .category:hover { color: ${buttonForegroundColor}; }`
       )
       collector.addRule(
-        `.monaco-workbench .extension-editor .content > .details > .additional-details-container .tags-container > .tags > .tag:hover { color: ${buttonForegroundColor}; }`,
+        `.monaco-workbench .extension-editor .content > .details > .additional-details-container .tags-container > .tags > .tag:hover { color: ${buttonForegroundColor}; }`
       )
     }
-  },
+  }
 )
 
 function getExtensionEditor(
-  accessor: ServicesAccessor,
+  accessor: ServicesAccessor
 ): ExtensionEditor | null {
   const activeEditorPane = accessor.get(IEditorService).activeEditorPane
   if (activeEditorPane instanceof ExtensionEditor) {

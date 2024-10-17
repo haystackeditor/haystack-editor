@@ -43,7 +43,7 @@ suite("TextDiffEditorModel", () => {
         "test",
         {
           provideTextContent: async function (
-            resource: URI,
+            resource: URI
           ): Promise<ITextModel | null> {
             if (resource.scheme === "test") {
               const modelContent = "Hello Test"
@@ -54,15 +54,15 @@ suite("TextDiffEditorModel", () => {
                 accessor.modelService.createModel(
                   modelContent,
                   languageSelection,
-                  resource,
-                ),
+                  resource
+                )
               )
             }
 
             return null
           },
-        },
-      ),
+        }
+      )
     )
 
     const input = disposables.add(
@@ -77,8 +77,8 @@ suite("TextDiffEditorModel", () => {
         undefined,
         undefined,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
     const otherInput = disposables.add(
       instantiationService.createInstance(
@@ -92,8 +92,8 @@ suite("TextDiffEditorModel", () => {
         undefined,
         undefined,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
     const diffInput = disposables.add(
       instantiationService.createInstance(
@@ -102,12 +102,12 @@ suite("TextDiffEditorModel", () => {
         "description",
         input,
         otherInput,
-        undefined,
-      ),
+        undefined
+      )
     )
 
     let model = disposables.add(
-      (await diffInput.resolve()) as TextDiffEditorModel,
+      (await diffInput.resolve()) as TextDiffEditorModel
     )
 
     assert(model)

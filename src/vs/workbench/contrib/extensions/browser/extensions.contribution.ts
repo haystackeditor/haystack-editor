@@ -230,28 +230,28 @@ import { IUriIdentityService } from "vs/platform/uriIdentity/common/uriIdentity"
 registerSingleton(
   IExtensionsWorkbenchService,
   ExtensionsWorkbenchService,
-  InstantiationType.Eager /* Auto updates extensions */,
+  InstantiationType.Eager /* Auto updates extensions */
 )
 registerSingleton(
   IExtensionRecommendationNotificationService,
   ExtensionRecommendationNotificationService,
-  InstantiationType.Delayed,
+  InstantiationType.Delayed
 )
 registerSingleton(
   IExtensionRecommendationsService,
   ExtensionRecommendationsService,
-  InstantiationType.Eager /* Prompts recommendations in the background */,
+  InstantiationType.Eager /* Prompts recommendations in the background */
 )
 
 // Quick Access
 Registry.as<IQuickAccessRegistry>(
-  Extensions.Quickaccess,
+  Extensions.Quickaccess
 ).registerQuickAccessProvider({
   ctor: ManageExtensionsQuickAccessProvider,
   prefix: ManageExtensionsQuickAccessProvider.PREFIX,
   placeholder: localize(
     "manageExtensionsQuickAccessPlaceholder",
-    "Press Enter to manage extensions.",
+    "Press Enter to manage extensions."
   ),
   helpEntries: [
     { description: localize("manageExtensionsHelp", "Manage Extensions") },
@@ -260,18 +260,18 @@ Registry.as<IQuickAccessRegistry>(
 
 // Editor
 Registry.as<IEditorPaneRegistry>(
-  EditorExtensions.EditorPane,
+  EditorExtensions.EditorPane
 ).registerEditorPane(
   EditorPaneDescriptor.create(
     ExtensionEditor,
     ExtensionEditor.ID,
-    localize("extension", "Extension"),
+    localize("extension", "Extension")
   ),
-  [new SyncDescriptor(ExtensionsInput)],
+  [new SyncDescriptor(ExtensionsInput)]
 )
 
 Registry.as<IViewContainersRegistry>(
-  ViewContainerExtensions.ViewContainersRegistry,
+  ViewContainerExtensions.ViewContainersRegistry
 ).registerViewContainer(
   {
     id: VIEWLET_ID,
@@ -280,7 +280,7 @@ Registry.as<IViewContainersRegistry>(
       id: VIEWLET_ID,
       mnemonicTitle: localize(
         { key: "miViewExtensions", comment: ["&& denotes a mnemonic"] },
-        "E&&xtensions",
+        "E&&xtensions"
       ),
       keybindings: { primary: KeyMod.CtrlCmd | KeyMod.Shift | KeyCode.KeyX },
       order: 4,
@@ -291,11 +291,11 @@ Registry.as<IViewContainersRegistry>(
     rejectAddedViews: true,
     alwaysUseContainerInfo: true,
   },
-  ViewContainerLocation.Sidebar,
+  ViewContainerLocation.Sidebar
 )
 
 Registry.as<IConfigurationRegistry>(
-  ConfigurationExtensions.Configuration,
+  ConfigurationExtensions.Configuration
 ).registerConfiguration({
   ...extensionsConfigurationNodeBase,
   properties: {
@@ -310,24 +310,24 @@ Registry.as<IConfigurationRegistry>(
       enumDescriptions: [
         localize(
           "extensions.autoUpdate.true",
-          "Download and install updates automatically for all extensions except for those updates are ignored.",
+          "Download and install updates automatically for all extensions except for those updates are ignored."
         ),
         localize(
           "extensions.autoUpdate.enabled",
-          "Download and install updates automatically only for enabled extensions except for those updates are ignored. Disabled extensions are not updated automatically.",
+          "Download and install updates automatically only for enabled extensions except for those updates are ignored. Disabled extensions are not updated automatically."
         ),
         localize(
           "extensions.autoUpdate.selected",
-          "Download and install updates automatically only for selected extensions.",
+          "Download and install updates automatically only for selected extensions."
         ),
         localize(
           "extensions.autoUpdate.false",
-          "Extensions are not automatically updated.",
+          "Extensions are not automatically updated."
         ),
       ],
       description: localize(
         "extensions.autoUpdate",
-        "Controls the automatic update behavior of extensions. The updates are fetched from a Microsoft online service.",
+        "Controls the automatic update behavior of extensions. The updates are fetched from a Microsoft online service."
       ),
       default: true,
       scope: ConfigurationScope.APPLICATION,
@@ -337,7 +337,7 @@ Registry.as<IConfigurationRegistry>(
       type: "boolean",
       description: localize(
         "extensionsCheckUpdates",
-        "When enabled, automatically checks extensions for updates. If an extension has an update, it is marked as outdated in the Extensions view. The updates are fetched from a Microsoft online service.",
+        "When enabled, automatically checks extensions for updates. If an extension has an update, it is marked as outdated in the Extensions view. The updates are fetched from a Microsoft online service."
       ),
       default: true,
       scope: ConfigurationScope.APPLICATION,
@@ -347,7 +347,7 @@ Registry.as<IConfigurationRegistry>(
       type: "boolean",
       description: localize(
         "extensionsIgnoreRecommendations",
-        "When enabled, the notifications for extension recommendations will not be shown.",
+        "When enabled, the notifications for extension recommendations will not be shown."
       ),
       default: false,
     },
@@ -355,7 +355,7 @@ Registry.as<IConfigurationRegistry>(
       type: "boolean",
       deprecationMessage: localize(
         "extensionsShowRecommendationsOnlyOnDemand_Deprecated",
-        "This setting is deprecated. Use extensions.ignoreRecommendations setting to control recommendation notifications. Use Extensions view's visibility actions to hide Recommended view by default.",
+        "This setting is deprecated. Use extensions.ignoreRecommendations setting to control recommendation notifications. Use Extensions view's visibility actions to hide Recommended view by default."
       ),
       default: false,
       tags: ["usesOnlineServices"],
@@ -364,7 +364,7 @@ Registry.as<IConfigurationRegistry>(
       type: "boolean",
       description: localize(
         "extensionsCloseExtensionDetailsOnViewChange",
-        "When enabled, editors with extension details will be automatically closed upon navigating away from the Extensions View.",
+        "When enabled, editors with extension details will be automatically closed upon navigating away from the Extensions View."
       ),
       default: false,
     },
@@ -375,7 +375,7 @@ Registry.as<IConfigurationRegistry>(
       },
       description: localize(
         "handleUriConfirmedExtensions",
-        "When an extension is listed here, a confirmation prompt will not be shown when that extension handles a URI.",
+        "When an extension is listed here, a confirmation prompt will not be shown when that extension handles a URI."
       ),
       default: [],
       scope: ConfigurationScope.APPLICATION,
@@ -386,20 +386,20 @@ Registry.as<IConfigurationRegistry>(
       enumDescriptions: [
         localize(
           "extensionsWebWorker.true",
-          "The Web Worker Extension Host will always be launched.",
+          "The Web Worker Extension Host will always be launched."
         ),
         localize(
           "extensionsWebWorker.false",
-          "The Web Worker Extension Host will never be launched.",
+          "The Web Worker Extension Host will never be launched."
         ),
         localize(
           "extensionsWebWorker.auto",
-          "The Web Worker Extension Host will be launched when a web extension needs it.",
+          "The Web Worker Extension Host will be launched when a web extension needs it."
         ),
       ],
       description: localize(
         "extensionsWebWorker",
-        "Enable web worker extension host.",
+        "Enable web worker extension host."
       ),
       default: "auto",
     },
@@ -407,7 +407,7 @@ Registry.as<IConfigurationRegistry>(
       type: "object",
       markdownDescription: localize(
         "extensions.supportVirtualWorkspaces",
-        "Override the virtual workspaces support of an extension.",
+        "Override the virtual workspaces support of an extension."
       ),
       patternProperties: {
         "([a-z0-9A-Z][a-z0-9-A-Z]*)\\.([a-z0-9A-Z][a-z0-9-A-Z]*)$": {
@@ -429,7 +429,7 @@ Registry.as<IConfigurationRegistry>(
       type: "object",
       markdownDescription: localize(
         "extensions.affinity",
-        "Configure an extension to execute in a different extension host process.",
+        "Configure an extension to execute in a different extension host process."
       ),
       patternProperties: {
         "([a-z0-9A-Z][a-z0-9-A-Z]*)\\.([a-z0-9A-Z][a-z0-9-A-Z]*)$": {
@@ -452,7 +452,7 @@ Registry.as<IConfigurationRegistry>(
       scope: ConfigurationScope.APPLICATION,
       markdownDescription: localize(
         "extensions.supportUntrustedWorkspaces",
-        "Override the untrusted workspace support of an extension. Extensions using `true` will always be enabled. Extensions using `limited` will always be enabled, and the extension will hide functionality that requires trust. Extensions using `false` will only be enabled only when the workspace is trusted.",
+        "Override the untrusted workspace support of an extension. Extensions using `true` will always be enabled. Extensions using `limited` will always be enabled, and the extension will hide functionality that requires trust. Extensions using `false` will only be enabled only when the workspace is trusted."
       ),
       patternProperties: {
         "([a-z0-9A-Z][a-z0-9-A-Z]*)\\.([a-z0-9A-Z][a-z0-9-A-Z]*)$": {
@@ -464,27 +464,27 @@ Registry.as<IConfigurationRegistry>(
               enumDescriptions: [
                 localize(
                   "extensions.supportUntrustedWorkspaces.true",
-                  "Extension will always be enabled.",
+                  "Extension will always be enabled."
                 ),
                 localize(
                   "extensions.supportUntrustedWorkspaces.false",
-                  "Extension will only be enabled only when the workspace is trusted.",
+                  "Extension will only be enabled only when the workspace is trusted."
                 ),
                 localize(
                   "extensions.supportUntrustedWorkspaces.limited",
-                  "Extension will always be enabled, and the extension will hide functionality requiring trust.",
+                  "Extension will always be enabled, and the extension will hide functionality requiring trust."
                 ),
               ],
               description: localize(
                 "extensions.supportUntrustedWorkspaces.supported",
-                "Defines the untrusted workspace support setting for the extension.",
+                "Defines the untrusted workspace support setting for the extension."
               ),
             },
             version: {
               type: "string",
               description: localize(
                 "extensions.supportUntrustedWorkspaces.version",
-                "Defines the version of the extension for which the override should be applied. If not specified, the override will be applied independent of the extension version.",
+                "Defines the version of the extension for which the override should be applied. If not specified, the override will be applied independent of the extension version."
               ),
             },
           },
@@ -495,7 +495,7 @@ Registry.as<IConfigurationRegistry>(
       type: "boolean",
       description: localize(
         "extensionsDeferredStartupFinishedActivation",
-        "When enabled, extensions which declare the `onStartupFinished` activation event will be activated after a timeout.",
+        "When enabled, extensions which declare the `onStartupFinished` activation event will be activated after a timeout."
       ),
       default: false,
     },
@@ -503,7 +503,7 @@ Registry.as<IConfigurationRegistry>(
       type: "boolean",
       description: localize(
         "extensionsInQuickAccess",
-        "When enabled, extensions can be searched for via Quick Access and report issues from there.",
+        "When enabled, extensions can be searched for via Quick Access and report issues from there."
       ),
       default: true,
     },
@@ -515,7 +515,7 @@ const jsonRegistry = <jsonContributionRegistry.IJSONContributionRegistry>(
 )
 jsonRegistry.registerSchema(
   ExtensionsConfigurationSchemaId,
-  ExtensionsConfigurationSchema,
+  ExtensionsConfigurationSchema
 )
 
 // Register Commands
@@ -526,20 +526,20 @@ CommandsRegistry.registerCommand(
     extensionId: string,
     tab?: ExtensionEditorTab,
     preserveFocus?: boolean,
-    feature?: string,
+    feature?: string
   ) => {
     const extensionService = accessor.get(IExtensionsWorkbenchService)
     const extension = extensionService.local.find((e) =>
-      areSameExtensions(e.identifier, { id: extensionId }),
+      areSameExtensions(e.identifier, { id: extensionId })
     )
     if (extension) {
       extensionService.open(extension, { tab, preserveFocus, feature })
     } else {
       throw new Error(
-        localize("notFound", "Extension '{0}' not found.", extensionId),
+        localize("notFound", "Extension '{0}' not found.", extensionId)
       )
     }
-  },
+  }
 )
 
 CommandsRegistry.registerCommand(
@@ -550,14 +550,14 @@ CommandsRegistry.registerCommand(
     tab?: ExtensionEditorTab,
     preserveFocus?: boolean,
     feature?: string,
-    sideByside?: boolean,
+    sideByside?: boolean
   ) => {
     const extensionService = accessor.get(IExtensionsWorkbenchService)
     const commandService = accessor.get(ICommandService)
 
     const [extension] = await extensionService.getExtensions(
       [{ id: extensionId }],
-      CancellationToken.None,
+      CancellationToken.None
     )
     if (extension) {
       return extensionService.open(extension, {
@@ -573,9 +573,9 @@ CommandsRegistry.registerCommand(
       extensionId,
       tab,
       preserveFocus,
-      feature,
+      feature
     )
-  },
+  }
 )
 
 CommandsRegistry.registerCommand({
@@ -583,14 +583,14 @@ CommandsRegistry.registerCommand({
   metadata: {
     description: localize(
       "workbench.extensions.installExtension.description",
-      "Install the given extension",
+      "Install the given extension"
     ),
     args: [
       {
         name: "extensionIdOrVSIXUri",
         description: localize(
           "workbench.extensions.installExtension.arg.decription",
-          "Extension id or VSIX resource uri",
+          "Extension id or VSIX resource uri"
         ),
         constraint: (value: any) =>
           typeof value === "string" || value instanceof URI,
@@ -608,7 +608,7 @@ CommandsRegistry.registerCommand({
               type: "boolean",
               description: localize(
                 "workbench.extensions.installExtension.option.installOnlyNewlyAddedFromExtensionPackVSIX",
-                "When enabled, VS Code installs only newly added extensions from the extension pack VSIX. This option is considered only while installing a VSIX.",
+                "When enabled, VS Code installs only newly added extensions from the extension pack VSIX. This option is considered only while installing a VSIX."
               ),
               default: false,
             },
@@ -616,7 +616,7 @@ CommandsRegistry.registerCommand({
               type: "boolean",
               description: localize(
                 "workbench.extensions.installExtension.option.installPreReleaseVersion",
-                "When enabled, VS Code installs the pre-release version of the extension if available.",
+                "When enabled, VS Code installs the pre-release version of the extension if available."
               ),
               default: false,
             },
@@ -624,7 +624,7 @@ CommandsRegistry.registerCommand({
               type: "boolean",
               description: localize(
                 "workbench.extensions.installExtension.option.donotSync",
-                "When enabled, VS Code do not sync this extension when Settings Sync is on.",
+                "When enabled, VS Code do not sync this extension when Settings Sync is on."
               ),
               default: false,
             },
@@ -632,14 +632,14 @@ CommandsRegistry.registerCommand({
               type: ["string", "object"],
               description: localize(
                 "workbench.extensions.installExtension.option.justification",
-                "Justification for installing the extension. This is a string or an object that can be used to pass any information to the installation handlers. i.e. `{reason: 'This extension wants to open a URI', action: 'Open URI'}` will show a message box with the reason and action upon install.",
+                "Justification for installing the extension. This is a string or an object that can be used to pass any information to the installation handlers. i.e. `{reason: 'This extension wants to open a URI', action: 'Open URI'}` will show a message box with the reason and action upon install."
               ),
             },
             enable: {
               type: "boolean",
               description: localize(
                 "workbench.extensions.installExtension.option.enable",
-                "When enabled, the extension will be enabled if it is installed but disabled. If the extension is already enabled, this has no effect.",
+                "When enabled, the extension will be enabled if it is installed but disabled. If the extension is already enabled, this has no effect."
               ),
               default: false,
             },
@@ -647,7 +647,7 @@ CommandsRegistry.registerCommand({
               type: "object",
               description: localize(
                 "workbench.extensions.installExtension.option.context",
-                "Context for the installation. This is a JSON object that can be used to pass any information to the installation handlers. i.e. `{skipWalkthrough: true}` will skip opening the walkthrough upon install.",
+                "Context for the installation. This is a JSON object that can be used to pass any information to the installation handlers. i.e. `{skipWalkthrough: true}` will skip opening the walkthrough upon install."
               ),
             },
           },
@@ -665,29 +665,29 @@ CommandsRegistry.registerCommand({
       justification?: string | { reason: string; action: string }
       enable?: boolean
       context?: IStringDictionary<any>
-    },
+    }
   ) => {
     const extensionsWorkbenchService = accessor.get(IExtensionsWorkbenchService)
     const extensionManagementService = accessor.get(
-      IWorkbenchExtensionManagementService,
+      IWorkbenchExtensionManagementService
     )
     const extensionGalleryService = accessor.get(IExtensionGalleryService)
     try {
       if (typeof arg === "string") {
         const [id, version] = getIdAndVersion(arg)
         const extension = extensionsWorkbenchService.local.find((e) =>
-          areSameExtensions(e.identifier, { id, uuid: version }),
+          areSameExtensions(e.identifier, { id, uuid: version })
         )
         if (
           extension?.enablementState === EnablementState.DisabledByExtensionKind
         ) {
           const [gallery] = await extensionGalleryService.getExtensions(
             [{ id, preRelease: options?.installPreReleaseVersion }],
-            CancellationToken.None,
+            CancellationToken.None
           )
           if (!gallery) {
             throw new Error(
-              localize("notFound", "Extension '{0}' not found.", arg),
+              localize("notFound", "Extension '{0}' not found.", arg)
             )
           }
           await extensionManagementService.installFromGallery(gallery, {
@@ -719,7 +719,7 @@ CommandsRegistry.registerCommand({
                 ? true
                 : undefined /* do not allow syncing extensions automatically while installing through the command */,
             },
-            ProgressLocation.Notification,
+            ProgressLocation.Notification
           )
         }
       } else {
@@ -741,13 +741,13 @@ CommandsRegistry.registerCommand({
   metadata: {
     description: localize(
       "workbench.extensions.uninstallExtension.description",
-      "Uninstall the given extension",
+      "Uninstall the given extension"
     ),
     args: [
       {
         name: localize(
           "workbench.extensions.uninstallExtension.arg.name",
-          "Id of the extension to uninstall",
+          "Id of the extension to uninstall"
         ),
         schema: {
           type: "string",
@@ -762,15 +762,15 @@ CommandsRegistry.registerCommand({
     const extensionManagementService = accessor.get(IExtensionManagementService)
     const installed = await extensionManagementService.getInstalled()
     const [extensionToUninstall] = installed.filter((e) =>
-      areSameExtensions(e.identifier, { id }),
+      areSameExtensions(e.identifier, { id })
     )
     if (!extensionToUninstall) {
       throw new Error(
         localize(
           "notInstalled",
           "Extension '{0}' is not installed. Make sure you use the full extension ID, including the publisher, e.g.: ms-dotnettools.csharp.",
-          id,
-        ),
+          id
+        )
       )
     }
     if (extensionToUninstall.isBuiltin) {
@@ -778,8 +778,8 @@ CommandsRegistry.registerCommand({
         localize(
           "builtin",
           "Extension '{0}' is a Built-in extension and cannot be installed",
-          id,
-        ),
+          id
+        )
       )
     }
 
@@ -797,13 +797,13 @@ CommandsRegistry.registerCommand({
   metadata: {
     description: localize(
       "workbench.extensions.search.description",
-      "Search for a specific extension",
+      "Search for a specific extension"
     ),
     args: [
       {
         name: localize(
           "workbench.extensions.search.arg.name",
-          "Query to use in search",
+          "Query to use in search"
         ),
         schema: { type: "string" },
       },
@@ -814,7 +814,7 @@ CommandsRegistry.registerCommand({
     const viewlet = await paneCompositeService.openPaneComposite(
       VIEWLET_ID,
       ViewContainerLocation.Sidebar,
-      true,
+      true
     )
 
     if (!viewlet) {
@@ -822,7 +822,7 @@ CommandsRegistry.registerCommand({
     }
 
     ;(viewlet.getViewPaneContainer() as IExtensionsViewPaneContainer).search(
-      query,
+      query
     )
     viewlet.focus()
   },
@@ -830,7 +830,7 @@ CommandsRegistry.registerCommand({
 
 function overrideActionForActiveExtensionEditorWebview(
   command: MultiCommand | undefined,
-  f: (webview: IWebview) => void,
+  f: (webview: IWebview) => void
 ) {
   command?.addImplementation(105, "extensions-editor", (accessor) => {
     const editorService = accessor.get(IEditorService)
@@ -846,27 +846,27 @@ function overrideActionForActiveExtensionEditorWebview(
 }
 
 overrideActionForActiveExtensionEditorWebview(CopyAction, (webview) =>
-  webview.copy(),
+  webview.copy()
 )
 overrideActionForActiveExtensionEditorWebview(CutAction, (webview) =>
-  webview.cut(),
+  webview.cut()
 )
 overrideActionForActiveExtensionEditorWebview(PasteAction, (webview) =>
-  webview.paste(),
+  webview.paste()
 )
 
 // Contexts
 export const CONTEXT_HAS_LOCAL_SERVER = new RawContextKey<boolean>(
   "hasLocalServer",
-  false,
+  false
 )
 export const CONTEXT_HAS_REMOTE_SERVER = new RawContextKey<boolean>(
   "hasRemoteServer",
-  false,
+  false
 )
 export const CONTEXT_HAS_WEB_SERVER = new RawContextKey<boolean>(
   "hasWebServer",
-  false,
+  false
 )
 
 async function runAction(action: IAction): Promise<void> {
@@ -902,7 +902,7 @@ class ExtensionsContributions
     @IInstantiationService
     private readonly instantiationService: IInstantiationService,
     @IDialogService private readonly dialogService: IDialogService,
-    @ICommandService private readonly commandService: ICommandService,
+    @ICommandService private readonly commandService: ICommandService
   ) {
     super()
     const hasGalleryContext = CONTEXT_HAS_GALLERY.bindTo(contextKeyService)
@@ -939,19 +939,19 @@ class ExtensionsContributions
       this.extensionManagementServerService.webExtensionManagementServer
     ) {
       Registry.as<IQuickAccessRegistry>(
-        Extensions.Quickaccess,
+        Extensions.Quickaccess
       ).registerQuickAccessProvider({
         ctor: InstallExtensionQuickAccessProvider,
         prefix: InstallExtensionQuickAccessProvider.PREFIX,
         placeholder: localize(
           "installExtensionQuickAccessPlaceholder",
-          "Type the name of an extension to install or search.",
+          "Type the name of an extension to install or search."
         ),
         helpEntries: [
           {
             description: localize(
               "installExtensionQuickAccessHelp",
-              "Install or Search Extensions",
+              "Install or Search Extensions"
             ),
           },
         ],
@@ -970,12 +970,12 @@ class ExtensionsContributions
               key: "miPreferencesExtensions",
               comment: ["&& denotes a mnemonic"],
             },
-            "&&Extensions",
+            "&&Extensions"
           ),
         },
         group: "2_configuration",
         order: 3,
-      }),
+      })
     )
     this._register(
       MenuRegistry.appendMenuItem(MenuId.GlobalActivity, {
@@ -985,7 +985,7 @@ class ExtensionsContributions
         },
         group: "2_configuration",
         order: 3,
-      }),
+      })
     )
 
     this.registerExtensionAction({
@@ -1011,8 +1011,8 @@ class ExtensionsContributions
           ContextKeyExpr.or(
             CONTEXT_HAS_LOCAL_SERVER,
             CONTEXT_HAS_REMOTE_SERVER,
-            CONTEXT_HAS_WEB_SERVER,
-          ),
+            CONTEXT_HAS_WEB_SERVER
+          )
         ),
       },
       run: async (accessor: ServicesAccessor) => {
@@ -1033,7 +1033,7 @@ class ExtensionsContributions
           id: MenuId.EditorTitle,
           when: ContextKeyExpr.and(
             CONTEXT_KEYBINDINGS_EDITOR,
-            CONTEXT_HAS_GALLERY,
+            CONTEXT_HAS_GALLERY
           ),
           group: "2_keyboard_discover_actions",
         },
@@ -1041,15 +1041,15 @@ class ExtensionsContributions
       menuTitles: {
         [MenuId.EditorTitle.id]: localize(
           "importKeyboardShortcutsFroms",
-          "Migrate Keyboard Shortcuts from...",
+          "Migrate Keyboard Shortcuts from..."
         ),
       },
       run: () =>
         runAction(
           this.instantiationService.createInstance(
             SearchExtensionsAction,
-            "@recommended:keymaps ",
-          ),
+            "@recommended:keymaps "
+          )
         ),
     })
 
@@ -1065,8 +1065,8 @@ class ExtensionsContributions
         runAction(
           this.instantiationService.createInstance(
             SearchExtensionsAction,
-            "@recommended:languages ",
-          ),
+            "@recommended:languages "
+          )
         ),
     })
 
@@ -1082,15 +1082,15 @@ class ExtensionsContributions
             ContextKeyExpr.or(
               CONTEXT_HAS_LOCAL_SERVER,
               CONTEXT_HAS_REMOTE_SERVER,
-              CONTEXT_HAS_WEB_SERVER,
-            ),
+              CONTEXT_HAS_WEB_SERVER
+            )
           ),
         },
         {
           id: MenuId.ViewContainerTitle,
           when: ContextKeyExpr.and(
             ContextKeyExpr.equals("viewContainer", VIEWLET_ID),
-            CONTEXT_HAS_GALLERY,
+            CONTEXT_HAS_GALLERY
           ),
           group: "1_updates",
           order: 1,
@@ -1103,29 +1103,29 @@ class ExtensionsContributions
           return runAction(
             this.instantiationService.createInstance(
               SearchExtensionsAction,
-              "@outdated ",
-            ),
+              "@outdated "
+            )
           )
         } else {
           return this.dialogService.info(
-            localize("noUpdatesAvailable", "All extensions are up to date."),
+            localize("noUpdatesAvailable", "All extensions are up to date.")
           )
         }
       },
     })
 
     const autoUpdateExtensionsSubMenu = new MenuId(
-      "autoUpdateExtensionsSubMenu",
+      "autoUpdateExtensionsSubMenu"
     )
     MenuRegistry.appendMenuItem(MenuId.ViewContainerTitle, {
       submenu: autoUpdateExtensionsSubMenu,
       title: localize(
         "configure auto updating extensions",
-        "Auto Update Extensions",
+        "Auto Update Extensions"
       ),
       when: ContextKeyExpr.and(
         ContextKeyExpr.equals("viewContainer", VIEWLET_ID),
-        CONTEXT_HAS_GALLERY,
+        CONTEXT_HAS_GALLERY
       ),
       group: "1_updates",
       order: 5,
@@ -1138,12 +1138,12 @@ class ExtensionsContributions
         ContextKeyExpr.has(`config.${AutoUpdateConfigurationKey}`),
         ContextKeyExpr.notEquals(
           `config.${AutoUpdateConfigurationKey}`,
-          "onlyEnabledExtensions",
+          "onlyEnabledExtensions"
         ),
         ContextKeyExpr.notEquals(
           `config.${AutoUpdateConfigurationKey}`,
-          "onlySelectedExtensions",
-        ),
+          "onlySelectedExtensions"
+        )
       ),
       menu: [
         {
@@ -1161,11 +1161,11 @@ class ExtensionsContributions
       id: "configureExtensionsAutoUpdate.enabled",
       title: localize(
         "configureExtensionsAutoUpdate.enabled",
-        "Enabled Extensions",
+        "Enabled Extensions"
       ),
       toggled: ContextKeyExpr.equals(
         `config.${AutoUpdateConfigurationKey}`,
-        "onlyEnabledExtensions",
+        "onlyEnabledExtensions"
       ),
       menu: [
         {
@@ -1183,11 +1183,11 @@ class ExtensionsContributions
       id: "configureExtensionsAutoUpdate.selected",
       title: localize(
         "configureExtensionsAutoUpdate.selected",
-        "Selected Extensions",
+        "Selected Extensions"
       ),
       toggled: ContextKeyExpr.equals(
         `config.${AutoUpdateConfigurationKey}`,
-        "onlySelectedExtensions",
+        "onlySelectedExtensions"
       ),
       menu: [
         {
@@ -1206,7 +1206,7 @@ class ExtensionsContributions
       title: localize("configureExtensionsAutoUpdate.none", "None"),
       toggled: ContextKeyExpr.equals(
         `config.${AutoUpdateConfigurationKey}`,
-        false,
+        false
       ),
       menu: [
         {
@@ -1233,8 +1233,8 @@ class ExtensionsContributions
             ContextKeyExpr.or(
               CONTEXT_HAS_LOCAL_SERVER,
               CONTEXT_HAS_REMOTE_SERVER,
-              CONTEXT_HAS_WEB_SERVER,
-            ),
+              CONTEXT_HAS_WEB_SERVER
+            )
           ),
         },
         {
@@ -1243,13 +1243,13 @@ class ExtensionsContributions
             ContextKeyExpr.equals("viewContainer", VIEWLET_ID),
             ContextKeyExpr.or(
               ContextKeyExpr.has(
-                `config.${AutoUpdateConfigurationKey}`,
+                `config.${AutoUpdateConfigurationKey}`
               ).negate(),
               ContextKeyExpr.equals(
                 `config.${AutoUpdateConfigurationKey}`,
-                "onlyEnabledExtensions",
-              ),
-            ),
+                "onlyEnabledExtensions"
+              )
+            )
           ),
           group: "1_updates",
           order: 2,
@@ -1269,7 +1269,7 @@ class ExtensionsContributions
           if (result.error) {
             const extension: IExtension | undefined = outdated.find(
               (extension) =>
-                areSameExtensions(extension.identifier, result.identifier),
+                areSameExtensions(extension.identifier, result.identifier)
             )
             if (extension) {
               runAction(
@@ -1278,8 +1278,8 @@ class ExtensionsContributions
                   extension,
                   extension.latestVersion,
                   InstallOperation.Update,
-                  result.error,
-                ),
+                  result.error
+                )
               )
             }
           }
@@ -1291,7 +1291,7 @@ class ExtensionsContributions
       id: "workbench.extensions.action.disableAutoUpdate",
       title: localize2(
         "disableAutoUpdate",
-        "Disable Auto Update for All Extensions",
+        "Disable Auto Update for All Extensions"
       ),
       category: ExtensionsLocalizedLabel,
       f1: true,
@@ -1306,7 +1306,7 @@ class ExtensionsContributions
       id: "workbench.extensions.action.enableAutoUpdate",
       title: localize2(
         "enableAutoUpdate",
-        "Enable Auto Update for All Extensions",
+        "Enable Auto Update for All Extensions"
       ),
       category: ExtensionsLocalizedLabel,
       f1: true,
@@ -1327,7 +1327,7 @@ class ExtensionsContributions
           when: ContextKeyExpr.or(
             CONTEXT_HAS_LOCAL_SERVER,
             CONTEXT_HAS_REMOTE_SERVER,
-            CONTEXT_HAS_WEB_SERVER,
+            CONTEXT_HAS_WEB_SERVER
           ),
         },
         {
@@ -1342,12 +1342,12 @@ class ExtensionsContributions
           (e) =>
             !!e.local &&
             this.extensionEnablementService.canChangeEnablement(e.local) &&
-            !this.extensionEnablementService.isEnabled(e.local),
+            !this.extensionEnablementService.isEnabled(e.local)
         )
         if (extensionsToEnable.length) {
           await this.extensionsWorkbenchService.setEnablement(
             extensionsToEnable,
-            EnablementState.EnabledGlobally,
+            EnablementState.EnabledGlobally
           )
         }
       },
@@ -1357,7 +1357,7 @@ class ExtensionsContributions
       id: "workbench.extensions.action.enableAllWorkspace",
       title: localize2(
         "enableAllWorkspace",
-        "Enable All Extensions for this Workspace",
+        "Enable All Extensions for this Workspace"
       ),
       category: ExtensionsLocalizedLabel,
       menu: {
@@ -1367,8 +1367,8 @@ class ExtensionsContributions
           ContextKeyExpr.or(
             CONTEXT_HAS_LOCAL_SERVER,
             CONTEXT_HAS_REMOTE_SERVER,
-            CONTEXT_HAS_WEB_SERVER,
-          ),
+            CONTEXT_HAS_WEB_SERVER
+          )
         ),
       },
       run: async () => {
@@ -1376,12 +1376,12 @@ class ExtensionsContributions
           (e) =>
             !!e.local &&
             this.extensionEnablementService.canChangeEnablement(e.local) &&
-            !this.extensionEnablementService.isEnabled(e.local),
+            !this.extensionEnablementService.isEnabled(e.local)
         )
         if (extensionsToEnable.length) {
           await this.extensionsWorkbenchService.setEnablement(
             extensionsToEnable,
-            EnablementState.EnabledWorkspace,
+            EnablementState.EnabledWorkspace
           )
         }
       },
@@ -1397,7 +1397,7 @@ class ExtensionsContributions
           when: ContextKeyExpr.or(
             CONTEXT_HAS_LOCAL_SERVER,
             CONTEXT_HAS_REMOTE_SERVER,
-            CONTEXT_HAS_WEB_SERVER,
+            CONTEXT_HAS_WEB_SERVER
           ),
         },
         {
@@ -1414,12 +1414,12 @@ class ExtensionsContributions
               !e.isBuiltin &&
               !!e.local &&
               this.extensionEnablementService.isEnabled(e.local) &&
-              this.extensionEnablementService.canChangeEnablement(e.local),
+              this.extensionEnablementService.canChangeEnablement(e.local)
           )
         if (extensionsToDisable.length) {
           await this.extensionsWorkbenchService.setEnablement(
             extensionsToDisable,
-            EnablementState.DisabledGlobally,
+            EnablementState.DisabledGlobally
           )
         }
       },
@@ -1429,7 +1429,7 @@ class ExtensionsContributions
       id: "workbench.extensions.action.disableAllWorkspace",
       title: localize2(
         "disableAllWorkspace",
-        "Disable All Installed Extensions for this Workspace",
+        "Disable All Installed Extensions for this Workspace"
       ),
       category: ExtensionsLocalizedLabel,
       menu: {
@@ -1439,8 +1439,8 @@ class ExtensionsContributions
           ContextKeyExpr.or(
             CONTEXT_HAS_LOCAL_SERVER,
             CONTEXT_HAS_REMOTE_SERVER,
-            CONTEXT_HAS_WEB_SERVER,
-          ),
+            CONTEXT_HAS_WEB_SERVER
+          )
         ),
       },
       run: async () => {
@@ -1450,12 +1450,12 @@ class ExtensionsContributions
               !e.isBuiltin &&
               !!e.local &&
               this.extensionEnablementService.isEnabled(e.local) &&
-              this.extensionEnablementService.canChangeEnablement(e.local),
+              this.extensionEnablementService.canChangeEnablement(e.local)
           )
         if (extensionsToDisable.length) {
           await this.extensionsWorkbenchService.setEnablement(
             extensionsToDisable,
-            EnablementState.DisabledWorkspace,
+            EnablementState.DisabledWorkspace
           )
         }
       },
@@ -1470,7 +1470,7 @@ class ExtensionsContributions
           id: MenuId.CommandPalette,
           when: ContextKeyExpr.or(
             CONTEXT_HAS_LOCAL_SERVER,
-            CONTEXT_HAS_REMOTE_SERVER,
+            CONTEXT_HAS_REMOTE_SERVER
           ),
         },
         {
@@ -1479,8 +1479,8 @@ class ExtensionsContributions
             ContextKeyExpr.equals("viewContainer", VIEWLET_ID),
             ContextKeyExpr.or(
               CONTEXT_HAS_LOCAL_SERVER,
-              CONTEXT_HAS_REMOTE_SERVER,
-            ),
+              CONTEXT_HAS_REMOTE_SERVER
+            )
           ),
           group: "3_install",
           order: 1,
@@ -1497,14 +1497,14 @@ class ExtensionsContributions
           openLabel: mnemonicButtonLabel(
             localize(
               { key: "installButton", comment: ["&& denotes a mnemonic"] },
-              "&&Install",
-            ),
+              "&&Install"
+            )
           ),
         })
         if (vsixPaths) {
           await commandService.executeCommand(
             INSTALL_EXTENSION_FROM_VSIX_COMMAND_ID,
-            vsixPaths,
+            vsixPaths
           )
         }
       },
@@ -1521,15 +1521,15 @@ class ExtensionsContributions
             ResourceContextKey.Extension.isEqualTo(".vsix"),
             ContextKeyExpr.or(
               CONTEXT_HAS_LOCAL_SERVER,
-              CONTEXT_HAS_REMOTE_SERVER,
-            ),
+              CONTEXT_HAS_REMOTE_SERVER
+            )
           ),
         },
       ],
       run: async (accessor: ServicesAccessor, resources: URI[] | URI) => {
         const extensionService = accessor.get(IExtensionService)
         const extensionsWorkbenchService = accessor.get(
-          IExtensionsWorkbenchService,
+          IExtensionsWorkbenchService
         )
         const hostService = accessor.get(IHostService)
         const notificationService = accessor.get(INotificationService)
@@ -1537,33 +1537,33 @@ class ExtensionsContributions
         const extensions = Array.isArray(resources) ? resources : [resources]
         await Promises.settled(
           extensions.map(
-            async (vsix) => await extensionsWorkbenchService.install(vsix),
-          ),
+            async (vsix) => await extensionsWorkbenchService.install(vsix)
+          )
         ).then(async (extensions) => {
           for (const extension of extensions) {
             const requireReload = !(
               extension.local &&
               extensionService.canAddExtension(
-                toExtensionDescription(extension.local),
+                toExtensionDescription(extension.local)
               )
             )
             const message = requireReload
               ? localize(
                   "InstallVSIXAction.successReload",
                   "Completed installing {0} extension from VSIX. Please reload Visual Studio Code to enable it.",
-                  extension.displayName || extension.name,
+                  extension.displayName || extension.name
                 )
               : localize(
                   "InstallVSIXAction.success",
                   "Completed installing {0} extension from VSIX.",
-                  extension.displayName || extension.name,
+                  extension.displayName || extension.name
                 )
             const actions = requireReload
               ? [
                   {
                     label: localize(
                       "InstallVSIXAction.reloadNow",
-                      "Reload Now",
+                      "Reload Now"
                     ),
                     run: () => hostService.reload(),
                   },
@@ -1579,7 +1579,7 @@ class ExtensionsContributions
       id: "workbench.extensions.action.installExtensionFromLocation",
       title: localize2(
         "installExtensionFromLocation",
-        "Install Extension from Location...",
+        "Install Extension from Location..."
       ),
       category: Categories.Developer,
       menu: [
@@ -1587,42 +1587,42 @@ class ExtensionsContributions
           id: MenuId.CommandPalette,
           when: ContextKeyExpr.or(
             CONTEXT_HAS_WEB_SERVER,
-            CONTEXT_HAS_LOCAL_SERVER,
+            CONTEXT_HAS_LOCAL_SERVER
           ),
         },
       ],
       run: async (accessor: ServicesAccessor) => {
         const extensionManagementService = accessor.get(
-          IWorkbenchExtensionManagementService,
+          IWorkbenchExtensionManagementService
         )
         if (isWeb) {
           return new Promise<void>((c, e) => {
             const quickInputService = accessor.get(IQuickInputService)
             const disposables = new DisposableStore()
             const quickPick = disposables.add(
-              quickInputService.createQuickPick(),
+              quickInputService.createQuickPick()
             )
             quickPick.title = localize(
               "installFromLocation",
-              "Install Extension from Location",
+              "Install Extension from Location"
             )
             quickPick.customButton = true
             quickPick.customLabel = localize("install button", "Install")
             quickPick.placeholder = localize(
               "installFromLocationPlaceHolder",
-              "Location of the web extension",
+              "Location of the web extension"
             )
             quickPick.ignoreFocusOut = true
             disposables.add(
               Event.any(
                 quickPick.onDidAccept,
-                quickPick.onDidCustom,
+                quickPick.onDidCustom
               )(async () => {
                 quickPick.hide()
                 if (quickPick.value) {
                   try {
                     await extensionManagementService.installFromLocation(
-                      URI.parse(quickPick.value),
+                      URI.parse(quickPick.value)
                     )
                   } catch (error) {
                     e(error)
@@ -1630,7 +1630,7 @@ class ExtensionsContributions
                   }
                 }
                 c()
-              }),
+              })
             )
             disposables.add(quickPick.onDidHide(() => disposables.dispose()))
             quickPick.show()
@@ -1643,12 +1643,12 @@ class ExtensionsContributions
             canSelectMany: false,
             title: localize(
               "installFromLocation",
-              "Install Extension from Location",
+              "Install Extension from Location"
             ),
           })
           if (extensionLocation?.[0]) {
             await extensionManagementService.installFromLocation(
-              extensionLocation[0],
+              extensionLocation[0]
             )
           }
         }
@@ -1688,8 +1688,8 @@ class ExtensionsContributions
         runAction(
           this.instantiationService.createInstance(
             SearchExtensionsAction,
-            "@featured ",
-          ),
+            "@featured "
+          )
         ),
     })
 
@@ -1712,15 +1712,15 @@ class ExtensionsContributions
       menuTitles: {
         [extensionsFilterSubMenu.id]: localize(
           "most popular filter",
-          "Most Popular",
+          "Most Popular"
         ),
       },
       run: () =>
         runAction(
           this.instantiationService.createInstance(
             SearchExtensionsAction,
-            "@popular ",
-          ),
+            "@popular "
+          )
         ),
     })
 
@@ -1728,7 +1728,7 @@ class ExtensionsContributions
       id: "workbench.extensions.action.showRecommendedExtensions",
       title: localize2(
         "showRecommendedExtensions",
-        "Show Recommended Extensions",
+        "Show Recommended Extensions"
       ),
       category: ExtensionsLocalizedLabel,
       menu: [
@@ -1746,15 +1746,15 @@ class ExtensionsContributions
       menuTitles: {
         [extensionsFilterSubMenu.id]: localize(
           "most popular recommended",
-          "Recommended",
+          "Recommended"
         ),
       },
       run: () =>
         runAction(
           this.instantiationService.createInstance(
             SearchExtensionsAction,
-            "@recommended ",
-          ),
+            "@recommended "
+          )
         ),
     })
 
@@ -1762,7 +1762,7 @@ class ExtensionsContributions
       id: "workbench.extensions.action.recentlyPublishedExtensions",
       title: localize2(
         "recentlyPublishedExtensions",
-        "Show Recently Published Extensions",
+        "Show Recently Published Extensions"
       ),
       category: ExtensionsLocalizedLabel,
       menu: [
@@ -1780,20 +1780,20 @@ class ExtensionsContributions
       menuTitles: {
         [extensionsFilterSubMenu.id]: localize(
           "recently published filter",
-          "Recently Published",
+          "Recently Published"
         ),
       },
       run: () =>
         runAction(
           this.instantiationService.createInstance(
             SearchExtensionsAction,
-            "@recentlyPublished ",
-          ),
+            "@recentlyPublished "
+          )
         ),
     })
 
     const extensionsCategoryFilterSubMenu = new MenuId(
-      "extensionsCategoryFilterSubMenu",
+      "extensionsCategoryFilterSubMenu"
     )
     MenuRegistry.appendMenuItem(extensionsFilterSubMenu, {
       submenu: extensionsCategoryFilterSubMenu,
@@ -1818,8 +1818,8 @@ class ExtensionsContributions
           runAction(
             this.instantiationService.createInstance(
               SearchExtensionsAction,
-              `@category:"${category.toLowerCase()}"`,
-            ),
+              `@category:"${category.toLowerCase()}"`
+            )
           ),
       })
     })
@@ -1834,7 +1834,7 @@ class ExtensionsContributions
           when: ContextKeyExpr.or(
             CONTEXT_HAS_LOCAL_SERVER,
             CONTEXT_HAS_REMOTE_SERVER,
-            CONTEXT_HAS_WEB_SERVER,
+            CONTEXT_HAS_WEB_SERVER
           ),
         },
         {
@@ -1850,8 +1850,8 @@ class ExtensionsContributions
         runAction(
           this.instantiationService.createInstance(
             SearchExtensionsAction,
-            "@builtin ",
-          ),
+            "@builtin "
+          )
         ),
     })
 
@@ -1872,15 +1872,15 @@ class ExtensionsContributions
       menuTitles: {
         [extensionsFilterSubMenu.id]: localize(
           "extension updates filter",
-          "Updates",
+          "Updates"
         ),
       },
       run: () =>
         runAction(
           this.instantiationService.createInstance(
             SearchExtensionsAction,
-            "@updates",
-          ),
+            "@updates"
+          )
         ),
     })
 
@@ -1888,7 +1888,7 @@ class ExtensionsContributions
       id: LIST_WORKSPACE_UNSUPPORTED_EXTENSIONS_COMMAND_ID,
       title: localize2(
         "showWorkspaceUnsupportedExtensions",
-        "Show Extensions Unsupported By Workspace",
+        "Show Extensions Unsupported By Workspace"
       ),
       category: ExtensionsLocalizedLabel,
       menu: [
@@ -1896,7 +1896,7 @@ class ExtensionsContributions
           id: MenuId.CommandPalette,
           when: ContextKeyExpr.or(
             CONTEXT_HAS_LOCAL_SERVER,
-            CONTEXT_HAS_REMOTE_SERVER,
+            CONTEXT_HAS_REMOTE_SERVER
           ),
         },
         {
@@ -1905,22 +1905,22 @@ class ExtensionsContributions
           order: 5,
           when: ContextKeyExpr.or(
             CONTEXT_HAS_LOCAL_SERVER,
-            CONTEXT_HAS_REMOTE_SERVER,
+            CONTEXT_HAS_REMOTE_SERVER
           ),
         },
       ],
       menuTitles: {
         [extensionsFilterSubMenu.id]: localize(
           "workspace unsupported filter",
-          "Workspace Unsupported",
+          "Workspace Unsupported"
         ),
       },
       run: () =>
         runAction(
           this.instantiationService.createInstance(
             SearchExtensionsAction,
-            "@workspaceUnsupported",
-          ),
+            "@workspaceUnsupported"
+          )
         ),
     })
 
@@ -1934,7 +1934,7 @@ class ExtensionsContributions
           when: ContextKeyExpr.or(
             CONTEXT_HAS_LOCAL_SERVER,
             CONTEXT_HAS_REMOTE_SERVER,
-            CONTEXT_HAS_WEB_SERVER,
+            CONTEXT_HAS_WEB_SERVER
           ),
         },
         {
@@ -1950,8 +1950,8 @@ class ExtensionsContributions
         runAction(
           this.instantiationService.createInstance(
             SearchExtensionsAction,
-            "@enabled ",
-          ),
+            "@enabled "
+          )
         ),
     })
 
@@ -1965,7 +1965,7 @@ class ExtensionsContributions
           when: ContextKeyExpr.or(
             CONTEXT_HAS_LOCAL_SERVER,
             CONTEXT_HAS_REMOTE_SERVER,
-            CONTEXT_HAS_WEB_SERVER,
+            CONTEXT_HAS_WEB_SERVER
           ),
         },
         {
@@ -1981,8 +1981,8 @@ class ExtensionsContributions
         runAction(
           this.instantiationService.createInstance(
             SearchExtensionsAction,
-            "@disabled ",
-          ),
+            "@disabled "
+          )
         ),
     })
 
@@ -1991,7 +1991,7 @@ class ExtensionsContributions
       submenu: extensionsSortSubMenu,
       title: localize("sorty by", "Sort By"),
       when: ContextKeyExpr.and(
-        ContextKeyExpr.or(CONTEXT_HAS_GALLERY, DefaultViewsContext),
+        ContextKeyExpr.or(CONTEXT_HAS_GALLERY, DefaultViewsContext)
       ),
       group: "4_sort",
       order: 1,
@@ -2023,7 +2023,7 @@ class ExtensionsContributions
         precondition: ContextKeyExpr.and(
           SearchMarketplaceExtensionsContext.negate(),
           RecommendedExtensionsContext.negate(),
-          BuiltInExtensionsContext.negate(),
+          BuiltInExtensionsContext.negate()
         ),
       },
     ].map(({ id, title, precondition }, index) => {
@@ -2043,15 +2043,15 @@ class ExtensionsContributions
           const viewlet = await this.paneCompositeService.openPaneComposite(
             VIEWLET_ID,
             ViewContainerLocation.Sidebar,
-            true,
+            true
           )
           const extensionsViewPaneContainer =
             viewlet?.getViewPaneContainer() as IExtensionsViewPaneContainer
           const currentQuery = Query.parse(
-            extensionsViewPaneContainer.searchValue || "",
+            extensionsViewPaneContainer.searchValue || ""
           )
           extensionsViewPaneContainer.search(
-            new Query(currentQuery.value, id).toString(),
+            new Query(currentQuery.value, id).toString()
           )
           extensionsViewPaneContainer.focus()
         },
@@ -2062,7 +2062,7 @@ class ExtensionsContributions
       id: "workbench.extensions.action.clearExtensionsSearchResults",
       title: localize2(
         "clearExtensionsSearchResults",
-        "Clear Extensions Search Results",
+        "Clear Extensions Search Results"
       ),
       category: ExtensionsLocalizedLabel,
       icon: clearSearchResultsIcon,
@@ -2112,7 +2112,7 @@ class ExtensionsContributions
       id: "workbench.extensions.action.installWorkspaceRecommendedExtensions",
       title: localize(
         "installWorkspaceRecommendedExtensions",
-        "Install Workspace Recommended Extensions",
+        "Install Workspace Recommended Extensions"
       ),
       icon: installWorkspaceRecommendedIcon,
       menu: {
@@ -2125,7 +2125,7 @@ class ExtensionsContributions
         const view = accessor
           .get(IViewsService)
           .getActiveViewWithId(
-            WORKSPACE_RECOMMENDATIONS_VIEW_ID,
+            WORKSPACE_RECOMMENDATIONS_VIEW_ID
           ) as IWorkspaceRecommendedExtensionsView
         return view.installWorkspaceRecommendations()
       },
@@ -2144,7 +2144,7 @@ class ExtensionsContributions
           id: MenuId.ViewTitle,
           when: ContextKeyExpr.equals(
             "view",
-            WORKSPACE_RECOMMENDATIONS_VIEW_ID,
+            WORKSPACE_RECOMMENDATIONS_VIEW_ID
           ),
           group: "navigation",
           order: 2,
@@ -2155,8 +2155,8 @@ class ExtensionsContributions
           this.instantiationService.createInstance(
             ConfigureWorkspaceFolderRecommendedExtensionsAction,
             ConfigureWorkspaceFolderRecommendedExtensionsAction.ID,
-            ConfigureWorkspaceFolderRecommendedExtensionsAction.LABEL,
-          ),
+            ConfigureWorkspaceFolderRecommendedExtensionsAction.LABEL
+          )
         ),
     })
 
@@ -2174,8 +2174,8 @@ class ExtensionsContributions
           ContextKeyExpr.or(
             CONTEXT_HAS_LOCAL_SERVER,
             CONTEXT_HAS_REMOTE_SERVER,
-            CONTEXT_HAS_WEB_SERVER,
-          ),
+            CONTEXT_HAS_WEB_SERVER
+          )
         ),
       },
       run: () =>
@@ -2183,8 +2183,8 @@ class ExtensionsContributions
           this.instantiationService.createInstance(
             InstallSpecificVersionOfExtensionAction,
             InstallSpecificVersionOfExtensionAction.ID,
-            InstallSpecificVersionOfExtensionAction.LABEL,
-          ),
+            InstallSpecificVersionOfExtensionAction.LABEL
+          )
         ),
     })
 
@@ -2199,10 +2199,7 @@ class ExtensionsContributions
         id: MenuId.CommandPalette,
         when: ContextKeyExpr.and(
           CONTEXT_HAS_GALLERY,
-          ContextKeyExpr.or(
-            CONTEXT_HAS_LOCAL_SERVER,
-            CONTEXT_HAS_REMOTE_SERVER,
-          ),
+          ContextKeyExpr.or(CONTEXT_HAS_LOCAL_SERVER, CONTEXT_HAS_REMOTE_SERVER)
         ),
       },
       run: () =>
@@ -2210,8 +2207,8 @@ class ExtensionsContributions
           this.instantiationService.createInstance(
             ReinstallAction,
             ReinstallAction.ID,
-            ReinstallAction.LABEL,
-          ),
+            ReinstallAction.LABEL
+          )
         ),
     })
   }
@@ -2228,16 +2225,16 @@ class ExtensionsContributions
         when: ContextKeyExpr.and(
           ContextKeyExpr.not("inExtensionEditor"),
           ContextKeyExpr.equals("extensionStatus", "installed"),
-          ContextKeyExpr.has("extensionHasColorThemes"),
+          ContextKeyExpr.has("extensionHasColorThemes")
         ),
       },
       run: async (accessor: ServicesAccessor, extensionId: string) => {
         const extensionWorkbenchService = accessor.get(
-          IExtensionsWorkbenchService,
+          IExtensionsWorkbenchService
         )
         const instantiationService = accessor.get(IInstantiationService)
         const extension = extensionWorkbenchService.local.find((e) =>
-          areSameExtensions(e.identifier, { id: extensionId }),
+          areSameExtensions(e.identifier, { id: extensionId })
         )
         if (extension) {
           const action =
@@ -2258,20 +2255,20 @@ class ExtensionsContributions
         when: ContextKeyExpr.and(
           ContextKeyExpr.not("inExtensionEditor"),
           ContextKeyExpr.equals("extensionStatus", "installed"),
-          ContextKeyExpr.has("extensionHasFileIconThemes"),
+          ContextKeyExpr.has("extensionHasFileIconThemes")
         ),
       },
       run: async (accessor: ServicesAccessor, extensionId: string) => {
         const extensionWorkbenchService = accessor.get(
-          IExtensionsWorkbenchService,
+          IExtensionsWorkbenchService
         )
         const instantiationService = accessor.get(IInstantiationService)
         const extension = extensionWorkbenchService.local.find((e) =>
-          areSameExtensions(e.identifier, { id: extensionId }),
+          areSameExtensions(e.identifier, { id: extensionId })
         )
         if (extension) {
           const action = instantiationService.createInstance(
-            SetFileIconThemeAction,
+            SetFileIconThemeAction
           )
           action.extension = extension
           return action.run()
@@ -2289,20 +2286,20 @@ class ExtensionsContributions
         when: ContextKeyExpr.and(
           ContextKeyExpr.not("inExtensionEditor"),
           ContextKeyExpr.equals("extensionStatus", "installed"),
-          ContextKeyExpr.has("extensionHasProductIconThemes"),
+          ContextKeyExpr.has("extensionHasProductIconThemes")
         ),
       },
       run: async (accessor: ServicesAccessor, extensionId: string) => {
         const extensionWorkbenchService = accessor.get(
-          IExtensionsWorkbenchService,
+          IExtensionsWorkbenchService
         )
         const instantiationService = accessor.get(IInstantiationService)
         const extension = extensionWorkbenchService.local.find((e) =>
-          areSameExtensions(e.identifier, { id: extensionId }),
+          areSameExtensions(e.identifier, { id: extensionId })
         )
         if (extension) {
           const action = instantiationService.createInstance(
-            SetProductIconThemeAction,
+            SetProductIconThemeAction
           )
           action.extension = extension
           return action.run()
@@ -2321,17 +2318,17 @@ class ExtensionsContributions
           ContextKeyExpr.has("inExtensionEditor"),
           ContextKeyExpr.has("galleryExtensionHasPreReleaseVersion"),
           ContextKeyExpr.not("showPreReleaseVersion"),
-          ContextKeyExpr.not("isBuiltinExtension"),
+          ContextKeyExpr.not("isBuiltinExtension")
         ),
       },
       run: async (accessor: ServicesAccessor, extensionId: string) => {
         const extensionWorkbenchService = accessor.get(
-          IExtensionsWorkbenchService,
+          IExtensionsWorkbenchService
         )
         const extension = (
           await extensionWorkbenchService.getExtensions(
             [{ id: extensionId }],
-            CancellationToken.None,
+            CancellationToken.None
           )
         )[0]
         extensionWorkbenchService.open(extension, {
@@ -2352,17 +2349,17 @@ class ExtensionsContributions
           ContextKeyExpr.has("galleryExtensionHasPreReleaseVersion"),
           ContextKeyExpr.has("extensionHasReleaseVersion"),
           ContextKeyExpr.has("showPreReleaseVersion"),
-          ContextKeyExpr.not("isBuiltinExtension"),
+          ContextKeyExpr.not("isBuiltinExtension")
         ),
       },
       run: async (accessor: ServicesAccessor, extensionId: string) => {
         const extensionWorkbenchService = accessor.get(
-          IExtensionsWorkbenchService,
+          IExtensionsWorkbenchService
         )
         const extension = (
           await extensionWorkbenchService.getExtensions(
             [{ id: extensionId }],
-            CancellationToken.None,
+            CancellationToken.None
           )
         )[0]
         extensionWorkbenchService.open(extension, {
@@ -2386,28 +2383,25 @@ class ExtensionsContributions
           ContextKeyExpr.or(
             ContextKeyExpr.equals(
               `config.${AutoUpdateConfigurationKey}`,
-              "onlySelectedExtensions",
+              "onlySelectedExtensions"
             ),
-            ContextKeyExpr.equals(
-              `config.${AutoUpdateConfigurationKey}`,
-              false,
-            ),
-          ),
+            ContextKeyExpr.equals(`config.${AutoUpdateConfigurationKey}`, false)
+          )
         ),
       },
       run: async (accessor: ServicesAccessor, id: string) => {
         const instantiationService = accessor.get(IInstantiationService)
         const extensionWorkbenchService = accessor.get(
-          IExtensionsWorkbenchService,
+          IExtensionsWorkbenchService
         )
         const extension = extensionWorkbenchService.local.find((e) =>
-          areSameExtensions(e.identifier, { id }),
+          areSameExtensions(e.identifier, { id })
         )
         if (extension) {
           const action = instantiationService.createInstance(
             ToggleAutoUpdateForExtensionAction,
             false,
-            [],
+            []
           )
           action.extension = extension
           return action.run()
@@ -2432,26 +2426,23 @@ class ExtensionsContributions
           ContextKeyExpr.or(
             ContextKeyExpr.equals(
               `config.${AutoUpdateConfigurationKey}`,
-              "onlySelectedExtensions",
+              "onlySelectedExtensions"
             ),
-            ContextKeyExpr.equals(
-              `config.${AutoUpdateConfigurationKey}`,
-              false,
-            ),
-          ),
+            ContextKeyExpr.equals(`config.${AutoUpdateConfigurationKey}`, false)
+          )
         ),
       },
       run: async (accessor: ServicesAccessor, id: string) => {
         const instantiationService = accessor.get(IInstantiationService)
         const extensionWorkbenchService = accessor.get(
-          IExtensionsWorkbenchService,
+          IExtensionsWorkbenchService
         )
         const extension = extensionWorkbenchService.local.find((e) =>
-          areSameExtensions(e.identifier, { id }),
+          areSameExtensions(e.identifier, { id })
         )
         if (extension) {
           const action = instantiationService.createInstance(
-            ToggleAutoUpdatesForPublisherAction,
+            ToggleAutoUpdatesForPublisherAction
           )
           action.extension = extension
           return action.run()
@@ -2473,20 +2464,20 @@ class ExtensionsContributions
           ContextKeyExpr.not("installedExtensionIsOptedToPreRelease"),
           ContextKeyExpr.not("inExtensionEditor"),
           ContextKeyExpr.equals("extensionStatus", "installed"),
-          ContextKeyExpr.not("isBuiltinExtension"),
+          ContextKeyExpr.not("isBuiltinExtension")
         ),
       },
       run: async (accessor: ServicesAccessor, id: string) => {
         const instantiationService = accessor.get(IInstantiationService)
         const extensionWorkbenchService = accessor.get(
-          IExtensionsWorkbenchService,
+          IExtensionsWorkbenchService
         )
         const extension = extensionWorkbenchService.local.find((e) =>
-          areSameExtensions(e.identifier, { id }),
+          areSameExtensions(e.identifier, { id })
         )
         if (extension) {
           const action = instantiationService.createInstance(
-            TogglePreReleaseExtensionAction,
+            TogglePreReleaseExtensionAction
           )
           action.extension = extension
           return action.run()
@@ -2508,20 +2499,20 @@ class ExtensionsContributions
           ContextKeyExpr.has("installedExtensionIsOptedToPreRelease"),
           ContextKeyExpr.not("inExtensionEditor"),
           ContextKeyExpr.equals("extensionStatus", "installed"),
-          ContextKeyExpr.not("isBuiltinExtension"),
+          ContextKeyExpr.not("isBuiltinExtension")
         ),
       },
       run: async (accessor: ServicesAccessor, id: string) => {
         const instantiationService = accessor.get(IInstantiationService)
         const extensionWorkbenchService = accessor.get(
-          IExtensionsWorkbenchService,
+          IExtensionsWorkbenchService
         )
         const extension = extensionWorkbenchService.local.find((e) =>
-          areSameExtensions(e.identifier, { id }),
+          areSameExtensions(e.identifier, { id })
         )
         if (extension) {
           const action = instantiationService.createInstance(
-            TogglePreReleaseExtensionAction,
+            TogglePreReleaseExtensionAction
           )
           action.extension = extension
           return action.run()
@@ -2539,18 +2530,18 @@ class ExtensionsContributions
         when: ContextKeyExpr.and(
           ContextKeyExpr.not("inExtensionEditor"),
           ContextKeyExpr.has("canSetLanguage"),
-          ContextKeyExpr.has("isActiveLanguagePackExtension"),
+          ContextKeyExpr.has("isActiveLanguagePackExtension")
         ),
       },
       run: async (accessor: ServicesAccessor, extensionId: string) => {
         const instantiationService = accessor.get(IInstantiationService)
         const extensionsWorkbenchService = accessor.get(
-          IExtensionsWorkbenchService,
+          IExtensionsWorkbenchService
         )
         const extension = (
           await extensionsWorkbenchService.getExtensions(
             [{ id: extensionId }],
-            CancellationToken.None,
+            CancellationToken.None
           )
         )[0]
         const action = instantiationService.createInstance(ClearLanguageAction)
@@ -2570,41 +2561,41 @@ class ExtensionsContributions
         const clipboardService = accessor.get(IClipboardService)
         const extension =
           this.extensionsWorkbenchService.local.filter((e) =>
-            areSameExtensions(e.identifier, { id: extensionId }),
+            areSameExtensions(e.identifier, { id: extensionId })
           )[0] ||
           (
             await this.extensionsWorkbenchService.getExtensions(
               [{ id: extensionId }],
-              CancellationToken.None,
+              CancellationToken.None
             )
           )[0]
         if (extension) {
           const name = localize(
             "extensionInfoName",
             "Name: {0}",
-            extension.displayName,
+            extension.displayName
           )
           const id = localize("extensionInfoId", "Id: {0}", extensionId)
           const description = localize(
             "extensionInfoDescription",
             "Description: {0}",
-            extension.description,
+            extension.description
           )
           const verision = localize(
             "extensionInfoVersion",
             "Version: {0}",
-            extension.version,
+            extension.version
           )
           const publisher = localize(
             "extensionInfoPublisher",
             "Publisher: {0}",
-            extension.publisherDisplayName,
+            extension.publisherDisplayName
           )
           const link = extension.url
             ? localize(
                 "extensionInfoVSMarketplaceLink",
                 "VS Marketplace Link: {0}",
-                `${extension.url}`,
+                `${extension.url}`
               )
             : null
           const clipboardStr = `${name}\n${id}\n${description}\n${verision}\n${publisher}${
@@ -2619,7 +2610,7 @@ class ExtensionsContributions
       id: "workbench.extensions.action.copyExtensionId",
       title: localize2(
         "workbench.extensions.action.copyExtensionId",
-        "Copy Extension ID",
+        "Copy Extension ID"
       ),
       menu: {
         id: MenuId.ExtensionContext,
@@ -2633,14 +2624,14 @@ class ExtensionsContributions
       id: "workbench.extensions.action.configure",
       title: localize2(
         "workbench.extensions.action.configure",
-        "Extension Settings",
+        "Extension Settings"
       ),
       menu: {
         id: MenuId.ExtensionContext,
         group: "2_configure",
         when: ContextKeyExpr.and(
           ContextKeyExpr.equals("extensionStatus", "installed"),
-          ContextKeyExpr.has("extensionHasConfiguration"),
+          ContextKeyExpr.has("extensionHasConfiguration")
         ),
         order: 1,
       },
@@ -2654,14 +2645,14 @@ class ExtensionsContributions
       id: "workbench.extensions.action.configureKeybindings",
       title: localize2(
         "workbench.extensions.action.configureKeybindings",
-        "Extension Keyboard Shortcuts",
+        "Extension Keyboard Shortcuts"
       ),
       menu: {
         id: MenuId.ExtensionContext,
         group: "2_configure",
         when: ContextKeyExpr.and(
           ContextKeyExpr.equals("extensionStatus", "installed"),
-          ContextKeyExpr.has("extensionHasKeybindings"),
+          ContextKeyExpr.has("extensionHasKeybindings")
         ),
         order: 2,
       },
@@ -2675,7 +2666,7 @@ class ExtensionsContributions
       id: "workbench.extensions.action.toggleApplyToAllProfiles",
       title: localize2(
         "workbench.extensions.action.toggleApplyToAllProfiles",
-        "Apply Extension to all Profiles",
+        "Apply Extension to all Profiles"
       ),
       toggled: ContextKeyExpr.has("isApplicationScopedExtension"),
       menu: {
@@ -2685,27 +2676,27 @@ class ExtensionsContributions
           ContextKeyExpr.equals("extensionStatus", "installed"),
           ContextKeyExpr.has("isDefaultApplicationScopedExtension").negate(),
           ContextKeyExpr.has("isBuiltinExtension").negate(),
-          ContextKeyExpr.equals("isWorkspaceScopedExtension", false),
+          ContextKeyExpr.equals("isWorkspaceScopedExtension", false)
         ),
         order: 3,
       },
       run: async (
         accessor: ServicesAccessor,
         _: string,
-        extensionArg: IExtensionArg,
+        extensionArg: IExtensionArg
       ) => {
         const uriIdentityService = accessor.get(IUriIdentityService)
         const extension = extensionArg.location
           ? this.extensionsWorkbenchService.installed.find((e) =>
               uriIdentityService.extUri.isEqual(
                 e.local?.location,
-                extensionArg.location,
-              ),
+                extensionArg.location
+              )
             )
           : undefined
         if (extension) {
           return this.extensionsWorkbenchService.toggleApplyExtensionToAllProfiles(
-            extension,
+            extension
           )
         }
       },
@@ -2715,24 +2706,24 @@ class ExtensionsContributions
       id: TOGGLE_IGNORE_EXTENSION_ACTION_ID,
       title: localize2(
         "workbench.extensions.action.toggleIgnoreExtension",
-        "Sync This Extension",
+        "Sync This Extension"
       ),
       menu: {
         id: MenuId.ExtensionContext,
         group: "2_configure",
         when: ContextKeyExpr.and(
           CONTEXT_SYNC_ENABLEMENT,
-          ContextKeyExpr.equals("isWorkspaceScopedExtension", false),
+          ContextKeyExpr.equals("isWorkspaceScopedExtension", false)
         ),
         order: 4,
       },
       run: async (accessor: ServicesAccessor, id: string) => {
         const extension = this.extensionsWorkbenchService.local.find((e) =>
-          areSameExtensions({ id }, e.identifier),
+          areSameExtensions({ id }, e.identifier)
         )
         if (extension) {
           return this.extensionsWorkbenchService.toggleExtensionIgnoredToSync(
-            extension,
+            extension
           )
         }
       },
@@ -2742,7 +2733,7 @@ class ExtensionsContributions
       id: "workbench.extensions.action.ignoreRecommendation",
       title: localize2(
         "workbench.extensions.action.ignoreRecommendation",
-        "Ignore Recommendation",
+        "Ignore Recommendation"
       ),
       menu: {
         id: MenuId.ExtensionContext,
@@ -2760,7 +2751,7 @@ class ExtensionsContributions
       id: "workbench.extensions.action.undoIgnoredRecommendation",
       title: localize2(
         "workbench.extensions.action.undoIgnoredRecommendation",
-        "Undo Ignored Recommendation",
+        "Undo Ignored Recommendation"
       ),
       menu: {
         id: MenuId.ExtensionContext,
@@ -2778,7 +2769,7 @@ class ExtensionsContributions
       id: "workbench.extensions.action.addExtensionToWorkspaceRecommendations",
       title: localize2(
         "workbench.extensions.action.addExtensionToWorkspaceRecommendations",
-        "Add to Workspace Recommendations",
+        "Add to Workspace Recommendations"
       ),
       menu: {
         id: MenuId.ExtensionContext,
@@ -2788,7 +2779,7 @@ class ExtensionsContributions
           ContextKeyExpr.has("isBuiltinExtension").negate(),
           ContextKeyExpr.has("isExtensionWorkspaceRecommended").negate(),
           ContextKeyExpr.has("isUserIgnoredRecommendation").negate(),
-          ContextKeyExpr.notEquals("extensionSource", "resource"),
+          ContextKeyExpr.notEquals("extensionSource", "resource")
         ),
         order: 2,
       },
@@ -2802,7 +2793,7 @@ class ExtensionsContributions
       id: "workbench.extensions.action.removeExtensionFromWorkspaceRecommendations",
       title: localize2(
         "workbench.extensions.action.removeExtensionFromWorkspaceRecommendations",
-        "Remove from Workspace Recommendations",
+        "Remove from Workspace Recommendations"
       ),
       menu: {
         id: MenuId.ExtensionContext,
@@ -2810,7 +2801,7 @@ class ExtensionsContributions
         when: ContextKeyExpr.and(
           WorkbenchStateContext.notEqualsTo("empty"),
           ContextKeyExpr.has("isBuiltinExtension").negate(),
-          ContextKeyExpr.has("isExtensionWorkspaceRecommended"),
+          ContextKeyExpr.has("isExtensionWorkspaceRecommended")
         ),
         order: 2,
       },
@@ -2824,20 +2815,20 @@ class ExtensionsContributions
       id: "workbench.extensions.action.addToWorkspaceRecommendations",
       title: localize2(
         "workbench.extensions.action.addToWorkspaceRecommendations",
-        "Add Extension to Workspace Recommendations",
+        "Add Extension to Workspace Recommendations"
       ),
       category: localize("extensions", "Extensions"),
       menu: {
         id: MenuId.CommandPalette,
         when: ContextKeyExpr.and(
           WorkbenchStateContext.isEqualTo("workspace"),
-          ContextKeyExpr.equals("resourceScheme", Schemas.extension),
+          ContextKeyExpr.equals("resourceScheme", Schemas.extension)
         ),
       },
       async run(accessor: ServicesAccessor): Promise<any> {
         const editorService = accessor.get(IEditorService)
         const workspaceExtensionsConfigService = accessor.get(
-          IWorkspaceExtensionsConfigService,
+          IWorkspaceExtensionsConfigService
         )
         if (!(editorService.activeEditor instanceof ExtensionsInput)) {
           return
@@ -2857,19 +2848,19 @@ class ExtensionsContributions
       id: "workbench.extensions.action.addToWorkspaceFolderRecommendations",
       title: localize2(
         "workbench.extensions.action.addToWorkspaceFolderRecommendations",
-        "Add Extension to Workspace Folder Recommendations",
+        "Add Extension to Workspace Folder Recommendations"
       ),
       category: localize("extensions", "Extensions"),
       menu: {
         id: MenuId.CommandPalette,
         when: ContextKeyExpr.and(
           WorkbenchStateContext.isEqualTo("folder"),
-          ContextKeyExpr.equals("resourceScheme", Schemas.extension),
+          ContextKeyExpr.equals("resourceScheme", Schemas.extension)
         ),
       },
       run: () =>
         this.commandService.executeCommand(
-          "workbench.extensions.action.addToWorkspaceRecommendations",
+          "workbench.extensions.action.addToWorkspaceRecommendations"
         ),
     })
 
@@ -2877,20 +2868,20 @@ class ExtensionsContributions
       id: "workbench.extensions.action.addToWorkspaceIgnoredRecommendations",
       title: localize2(
         "workbench.extensions.action.addToWorkspaceIgnoredRecommendations",
-        "Add Extension to Workspace Ignored Recommendations",
+        "Add Extension to Workspace Ignored Recommendations"
       ),
       category: localize("extensions", "Extensions"),
       menu: {
         id: MenuId.CommandPalette,
         when: ContextKeyExpr.and(
           WorkbenchStateContext.isEqualTo("workspace"),
-          ContextKeyExpr.equals("resourceScheme", Schemas.extension),
+          ContextKeyExpr.equals("resourceScheme", Schemas.extension)
         ),
       },
       async run(accessor: ServicesAccessor): Promise<any> {
         const editorService = accessor.get(IEditorService)
         const workspaceExtensionsConfigService = accessor.get(
-          IWorkspaceExtensionsConfigService,
+          IWorkspaceExtensionsConfigService
         )
         if (!(editorService.activeEditor instanceof ExtensionsInput)) {
           return
@@ -2903,7 +2894,7 @@ class ExtensionsContributions
           return
         }
         await workspaceExtensionsConfigService.toggleUnwantedRecommendation(
-          extensionId,
+          extensionId
         )
       },
     })
@@ -2912,19 +2903,19 @@ class ExtensionsContributions
       id: "workbench.extensions.action.addToWorkspaceFolderIgnoredRecommendations",
       title: localize2(
         "workbench.extensions.action.addToWorkspaceFolderIgnoredRecommendations",
-        "Add Extension to Workspace Folder Ignored Recommendations",
+        "Add Extension to Workspace Folder Ignored Recommendations"
       ),
       category: localize("extensions", "Extensions"),
       menu: {
         id: MenuId.CommandPalette,
         when: ContextKeyExpr.and(
           WorkbenchStateContext.isEqualTo("folder"),
-          ContextKeyExpr.equals("resourceScheme", Schemas.extension),
+          ContextKeyExpr.equals("resourceScheme", Schemas.extension)
         ),
       },
       run: () =>
         this.commandService.executeCommand(
-          "workbench.extensions.action.addToWorkspaceIgnoredRecommendations",
+          "workbench.extensions.action.addToWorkspaceIgnoredRecommendations"
         ),
     })
 
@@ -2944,14 +2935,14 @@ class ExtensionsContributions
           this.instantiationService.createInstance(
             ConfigureWorkspaceRecommendedExtensionsAction,
             ConfigureWorkspaceRecommendedExtensionsAction.ID,
-            ConfigureWorkspaceRecommendedExtensionsAction.LABEL,
-          ),
+            ConfigureWorkspaceRecommendedExtensionsAction.LABEL
+          )
         ),
     })
   }
 
   private registerExtensionAction(
-    extensionActionOptions: IExtensionActionOptions,
+    extensionActionOptions: IExtensionActionOptions
   ): IDisposable {
     const menus = extensionActionOptions.menu
       ? Array.isArray(extensionActionOptions.menu)
@@ -2992,8 +2983,8 @@ class ExtensionsContributions
           run(accessor: ServicesAccessor, ...args: any[]): Promise<any> {
             return extensionActionOptions.run(accessor, ...args)
           }
-        },
-      ),
+        }
+      )
     )
     if (menusWithTitles.length) {
       disposables.add(MenuRegistry.appendMenuItems(menusWithTitles))
@@ -3006,66 +2997,66 @@ class ExtensionStorageCleaner implements IWorkbenchContribution {
   constructor(
     @IExtensionManagementService
     extensionManagementService: IExtensionManagementService,
-    @IStorageService storageService: IStorageService,
+    @IStorageService storageService: IStorageService
   ) {
     ExtensionStorageService.removeOutdatedExtensionVersions(
       extensionManagementService,
-      storageService,
+      storageService
     )
   }
 }
 
 const workbenchRegistry = Registry.as<IWorkbenchContributionsRegistry>(
-  WorkbenchExtensions.Workbench,
+  WorkbenchExtensions.Workbench
 )
 workbenchRegistry.registerWorkbenchContribution(
   ExtensionsContributions,
-  LifecyclePhase.Restored,
+  LifecyclePhase.Restored
 )
 workbenchRegistry.registerWorkbenchContribution(
   StatusUpdater,
-  LifecyclePhase.Eventually,
+  LifecyclePhase.Eventually
 )
 workbenchRegistry.registerWorkbenchContribution(
   MaliciousExtensionChecker,
-  LifecyclePhase.Eventually,
+  LifecyclePhase.Eventually
 )
 workbenchRegistry.registerWorkbenchContribution(
   KeymapExtensions,
-  LifecyclePhase.Restored,
+  LifecyclePhase.Restored
 )
 workbenchRegistry.registerWorkbenchContribution(
   ExtensionsViewletViewsContribution,
-  LifecyclePhase.Restored,
+  LifecyclePhase.Restored
 )
 workbenchRegistry.registerWorkbenchContribution(
   ExtensionActivationProgress,
-  LifecyclePhase.Eventually,
+  LifecyclePhase.Eventually
 )
 workbenchRegistry.registerWorkbenchContribution(
   ExtensionDependencyChecker,
-  LifecyclePhase.Eventually,
+  LifecyclePhase.Eventually
 )
 workbenchRegistry.registerWorkbenchContribution(
   ExtensionEnablementWorkspaceTrustTransitionParticipant,
-  LifecyclePhase.Restored,
+  LifecyclePhase.Restored
 )
 workbenchRegistry.registerWorkbenchContribution(
   ExtensionsCompletionItemsProvider,
-  LifecyclePhase.Restored,
+  LifecyclePhase.Restored
 )
 workbenchRegistry.registerWorkbenchContribution(
   UnsupportedExtensionsMigrationContrib,
-  LifecyclePhase.Eventually,
+  LifecyclePhase.Eventually
 )
 workbenchRegistry.registerWorkbenchContribution(
   DeprecatedExtensionsChecker,
-  LifecyclePhase.Eventually,
+  LifecyclePhase.Eventually
 )
 if (isWeb) {
   workbenchRegistry.registerWorkbenchContribution(
     ExtensionStorageCleaner,
-    LifecyclePhase.Eventually,
+    LifecyclePhase.Eventually
   )
 }
 

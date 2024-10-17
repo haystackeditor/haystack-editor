@@ -9,80 +9,56 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import {
-  AbstractPolicyService,
-  IPolicyService,
-  PolicyDefinition,
-} from "vs/platform/policy/common/policy"
-import { IStringDictionary } from "vs/base/common/collections"
-import { Throttler } from "vs/base/common/async"
-import type { PolicyUpdate, Watcher } from "@vscode/policy-watcher"
-import { MutableDisposable } from "vs/base/common/lifecycle"
-import { ILogService } from "vs/platform/log/common/log"
+import { AbstractPolicyService, IPolicyService, PolicyDefinition } from 'vs/platform/policy/common/policy';
+import { IStringDictionary } from 'vs/base/common/collections';
+import { Throttler } from 'vs/base/common/async';
+import type { PolicyUpdate, Watcher } from '@vscode/policy-watcher';
+import { MutableDisposable } from 'vs/base/common/lifecycle';
+import { ILogService } from 'vs/platform/log/common/log';
 
-export class NativePolicyService
-  extends AbstractPolicyService
-  implements IPolicyService
-{
-  private throttler = new Throttler()
-  private readonly watcher = this._register(new MutableDisposable<Watcher>())
+export class NativePolicyService extends AbstractPolicyService implements IPolicyService {
 
-  constructor(
-    @ILogService private readonly logService: ILogService,
-    private readonly productName: string,
-  ) {
-    super()
-  }
+	private throttler = new Throttler();
+	private readonly watcher = this._register(new MutableDisposable<Watcher>());
 
-  protected async _updatePolicyDefinitions(
-    policyDefinitions: IStringDictionary<PolicyDefinition>,
-  ): Promise<void> {
-    this.logService.trace(
-      `NativePolicyService#_updatePolicyDefinitions - Found ${Object.keys(policyDefinitions).length} policy definitions`,
-    )
+	constructor(
+		@ILogService private readonly logService: ILogService,
+		private readonly productName: string
+	) {
+		super();
+	}
 
-    const { createWatcher } = await import("@vscode/policy-watcher")
+	protected async _updatePolicyDefinitions(policyDefinitions: IStringDictionary<PolicyDefinition>): Promise<void> {
+		this.logService.trace(`NativePolicyService#_updatePolicyDefinitions - Found ${Object.keys(policyDefinitions).length} policy definitions`);
 
-    await this.throttler.queue(
-      () =>
-        new Promise<void>((c, e) => {
-          try {
-            this.watcher.value = createWatcher(
-              this.productName,
-              policyDefinitions,
-              (update) => {
-                this._onDidPolicyChange(update)
-                c()
-              },
-            )
-          } catch (err) {
-            this.logService.error(
-              `NativePolicyService#_updatePolicyDefinitions - Error creating watcher:`,
-              err,
-            )
-            e(err)
-          }
-        }),
-    )
-  }
+		const { createWatcher } = await import('@vscode/policy-watcher');
 
-  private _onDidPolicyChange(
-    update: PolicyUpdate<IStringDictionary<PolicyDefinition>>,
-  ): void {
-    this.logService.trace(
-      `NativePolicyService#_onDidPolicyChange - Updated policy values: ${JSON.stringify(update)}`,
-    )
+		await this.throttler.queue(() => new Promise<void>((c, e) => {
+			try {
+				this.watcher.value = createWatcher(this.productName, policyDefinitions, update => {
+					this._onDidPolicyChange(update);
+					c();
+				});
+			} catch (err) {
+				this.logService.error(`NativePolicyService#_updatePolicyDefinitions - Error creating watcher:`, err);
+				e(err);
+			}
+		}));
+	}
 
-    for (const key in update) {
-      const value = update[key] as any
+	private _onDidPolicyChange(update: PolicyUpdate<IStringDictionary<PolicyDefinition>>): void {
+		this.logService.trace(`NativePolicyService#_onDidPolicyChange - Updated policy values: ${JSON.stringify(update)}`);
 
-      if (value === undefined) {
-        this.policies.delete(key)
-      } else {
-        this.policies.set(key, value)
-      }
-    }
+		for (const key in update) {
+			const value = update[key] as any;
 
-    this._onDidChange.fire(Object.keys(update))
-  }
+			if (value === undefined) {
+				this.policies.delete(key);
+			} else {
+				this.policies.set(key, value);
+			}
+		}
+
+		this._onDidChange.fire(Object.keys(update));
+	}
 }

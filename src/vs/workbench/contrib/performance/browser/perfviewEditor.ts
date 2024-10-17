@@ -65,12 +65,12 @@ export class PerfviewContrib {
   constructor(
     @IInstantiationService
     private readonly _instaService: IInstantiationService,
-    @ITextModelService textModelResolverService: ITextModelService,
+    @ITextModelService textModelResolverService: ITextModelService
   ) {
     this._registration =
       textModelResolverService.registerTextModelContentProvider(
         "perf",
-        _instaService.createInstance(PerfModelContentProvider),
+        _instaService.createInstance(PerfModelContentProvider)
       )
   }
 
@@ -105,7 +105,7 @@ export class PerfviewInput extends TextResourceEditorInput {
     @ITextResourceConfigurationService
     textResourceConfigurationService: ITextResourceConfigurationService,
     @ICustomEditorLabelService
-    customEditorLabelService: ICustomEditorLabelService,
+    customEditorLabelService: ICustomEditorLabelService
   ) {
     super(
       PerfviewContrib.get().getInputUri(),
@@ -125,7 +125,7 @@ export class PerfviewInput extends TextResourceEditorInput {
       labelService,
       filesConfigurationService,
       textResourceConfigurationService,
-      customEditorLabelService,
+      customEditorLabelService
     )
   }
 }
@@ -142,7 +142,7 @@ class PerfModelContentProvider implements ITextModelContentProvider {
     @ITimerService private readonly _timerService: ITimerService,
     @IExtensionService private readonly _extensionService: IExtensionService,
     @IProductService private readonly _productService: IProductService,
-    @ITerminalService private readonly _terminalService: ITerminalService,
+    @ITerminalService private readonly _terminalService: ITerminalService
   ) {}
 
   provideTextContent(resource: URI): Promise<ITextModel> {
@@ -156,19 +156,19 @@ class PerfModelContentProvider implements ITextModelContentProvider {
       this._modelDisposables.push(
         langId.onDidChange((e) => {
           this._model?.setLanguage(e)
-        }),
+        })
       )
       this._modelDisposables.push(
         this._extensionService.onDidChangeExtensionsStatus(
           this._updateModel,
-          this,
-        ),
+          this
+        )
       )
 
       writeTransientState(
         this._model,
         { wordWrapOverride: "off" },
-        this._editorService,
+        this._editorService
       )
     }
     this._updateModel()
@@ -197,7 +197,7 @@ class PerfModelContentProvider implements ITextModelContentProvider {
           this._timerService
             .getPerformanceMarks()
             .find((e) => e[0] === "renderer")?.[1]
-            .filter((e) => e.name.startsWith("code/terminal/")),
+            .filter((e) => e.name.startsWith("code/terminal/"))
         )
         md.blank()
         this._addWorkbenchContributionsPerfMarksTable(md)
@@ -223,12 +223,12 @@ class PerfModelContentProvider implements ITextModelContentProvider {
     md.li(
       `${this._productService.nameShort}: ${this._productService.version} (${
         this._productService.commit || "0000000"
-      })`,
+      })`
     )
     md.li(`OS: ${metrics.platform}(${metrics.release})`)
     if (metrics.cpus) {
       md.li(
-        `CPUs: ${metrics.cpus.model}(${metrics.cpus.count} x ${metrics.cpus.speed})`,
+        `CPUs: ${metrics.cpus.model}(${metrics.cpus.count} x ${metrics.cpus.speed})`
       )
     }
     if (
@@ -238,7 +238,7 @@ class PerfModelContentProvider implements ITextModelContentProvider {
       md.li(
         `Memory(System): ${(metrics.totalmem / ByteSize.GB).toFixed(2)} GB(${(
           metrics.freemem / ByteSize.GB
-        ).toFixed(2)}GB free)`,
+        ).toFixed(2)}GB free)`
       )
     }
     if (metrics.meminfo) {
@@ -249,7 +249,7 @@ class PerfModelContentProvider implements ITextModelContentProvider {
           metrics.meminfo.privateBytes / ByteSize.KB
         ).toFixed(2)}MB private, ${(
           metrics.meminfo.sharedBytes / ByteSize.KB
-        ).toFixed(2)}MB shared)`,
+        ).toFixed(2)}MB shared)`
       )
     }
     md.li(`VM(likelihood): ${metrics.isVMLikelyhood}%`)
@@ -262,7 +262,7 @@ class PerfModelContentProvider implements ITextModelContentProvider {
   private _addSummaryTable(md: MarkdownBuilder, stats?: LoaderStats): void {
     const metrics = this._timerService.startupMetrics
     const contribTimings = Registry.as<IWorkbenchContributionsRegistry>(
-      WorkbenchExtensions.Workbench,
+      WorkbenchExtensions.Workbench
     ).timings
 
     const table: Array<Array<string | number | undefined>> = []
@@ -471,7 +471,7 @@ class PerfModelContentProvider implements ITextModelContentProvider {
           "Event",
           "By",
         ],
-        table,
+        table
       )
     }
   }
@@ -479,7 +479,7 @@ class PerfModelContentProvider implements ITextModelContentProvider {
   private _addPerfMarksTable(
     name: string | undefined,
     md: MarkdownBuilder,
-    marks: readonly perf.PerformanceMark[] | undefined,
+    marks: readonly perf.PerformanceMark[] | undefined
   ): void {
     if (!marks) {
       return
@@ -508,19 +508,19 @@ class PerfModelContentProvider implements ITextModelContentProvider {
     md.heading(2, "Workbench Contributions Blocking Restore")
 
     const timings = Registry.as<IWorkbenchContributionsRegistry>(
-      WorkbenchExtensions.Workbench,
+      WorkbenchExtensions.Workbench
     ).timings
     md.li(
       `Total (LifecyclePhase.Starting): ${
         timings.get(LifecyclePhase.Starting)?.length
       } (${timings
         .get(LifecyclePhase.Starting)
-        ?.reduce((p, c) => p + c[1], 0)}ms)`,
+        ?.reduce((p, c) => p + c[1], 0)}ms)`
     )
     md.li(
       `Total (LifecyclePhase.Ready): ${
         timings.get(LifecyclePhase.Ready)?.length
-      } (${timings.get(LifecyclePhase.Ready)?.reduce((p, c) => p + c[1], 0)}ms)`,
+      } (${timings.get(LifecyclePhase.Ready)?.reduce((p, c) => p + c[1], 0)}ms)`
     )
     md.blank()
 
@@ -532,7 +532,7 @@ class PerfModelContentProvider implements ITextModelContentProvider {
           e.name.startsWith("code/willCreateWorkbenchContribution/1") ||
           e.name.startsWith("code/didCreateWorkbenchContribution/1") ||
           e.name.startsWith("code/willCreateWorkbenchContribution/2") ||
-          e.name.startsWith("code/didCreateWorkbenchContribution/2"),
+          e.name.startsWith("code/didCreateWorkbenchContribution/2")
       )
     this._addPerfMarksTable(undefined, md, marks)
   }
@@ -637,7 +637,7 @@ class MarkdownBuilder {
 
   table(
     header: string[],
-    rows: Array<Array<{ toString(): string } | undefined>>,
+    rows: Array<Array<{ toString(): string } | undefined>>
   ) {
     this.value += LoaderStats.toMarkdownTable(header, rows)
   }

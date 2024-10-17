@@ -9,67 +9,49 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import {
-  InstantiationType,
-  registerSingleton,
-} from "vs/platform/instantiation/common/extensions"
-import {
-  IUserDataSyncEnablementService,
-  SyncResource,
-} from "vs/platform/userDataSync/common/userDataSync"
-import { UserDataSyncEnablementService } from "vs/workbench/services/userDataSync/browser/userDataSyncEnablementService"
+import { InstantiationType, registerSingleton } from 'vs/platform/instantiation/common/extensions';
+import { IUserDataSyncEnablementService, SyncResource } from 'vs/platform/userDataSync/common/userDataSync';
+import { UserDataSyncEnablementService } from 'vs/workbench/services/userDataSync/browser/userDataSyncEnablementService';
 
-export class WebUserDataSyncEnablementService
-  extends UserDataSyncEnablementService
-  implements IUserDataSyncEnablementService
-{
-  private enabled: boolean | undefined = undefined
+export class WebUserDataSyncEnablementService extends UserDataSyncEnablementService implements IUserDataSyncEnablementService {
 
-  override canToggleEnablement(): boolean {
-    return this.isTrusted() && super.canToggleEnablement()
-  }
+	private enabled: boolean | undefined = undefined;
 
-  override isEnabled(): boolean {
-    if (!this.isTrusted()) {
-      return false
-    }
-    if (this.enabled === undefined) {
-      this.enabled =
-        this.workbenchEnvironmentService.options?.settingsSyncOptions?.enabled
-    }
-    if (this.enabled === undefined) {
-      this.enabled = super.isEnabled()
-    }
-    return this.enabled
-  }
+	override canToggleEnablement(): boolean {
+		return this.isTrusted() && super.canToggleEnablement();
+	}
 
-  override setEnablement(enabled: boolean) {
-    if (enabled && !this.canToggleEnablement()) {
-      return
-    }
-    if (this.enabled !== enabled) {
-      this.enabled = enabled
-      super.setEnablement(enabled)
-    }
-  }
+	override isEnabled(): boolean {
+		if (!this.isTrusted()) {
+			return false;
+		}
+		if (this.enabled === undefined) {
+			this.enabled = this.workbenchEnvironmentService.options?.settingsSyncOptions?.enabled;
+		}
+		if (this.enabled === undefined) {
+			this.enabled = super.isEnabled();
+		}
+		return this.enabled;
+	}
 
-  override getResourceSyncStateVersion(
-    resource: SyncResource,
-  ): string | undefined {
-    return resource === SyncResource.Extensions
-      ? this.workbenchEnvironmentService.options?.settingsSyncOptions
-          ?.extensionsSyncStateVersion
-      : undefined
-  }
+	override setEnablement(enabled: boolean) {
+		if (enabled && !this.canToggleEnablement()) {
+			return;
+		}
+		if (this.enabled !== enabled) {
+			this.enabled = enabled;
+			super.setEnablement(enabled);
+		}
+	}
 
-  private isTrusted(): boolean {
-    return !!this.workbenchEnvironmentService.options?.workspaceProvider
-      ?.trusted
-  }
+	override getResourceSyncStateVersion(resource: SyncResource): string | undefined {
+		return resource === SyncResource.Extensions ? this.workbenchEnvironmentService.options?.settingsSyncOptions?.extensionsSyncStateVersion : undefined;
+	}
+
+	private isTrusted(): boolean {
+		return !!this.workbenchEnvironmentService.options?.workspaceProvider?.trusted;
+	}
+
 }
 
-registerSingleton(
-  IUserDataSyncEnablementService,
-  WebUserDataSyncEnablementService,
-  InstantiationType.Delayed,
-)
+registerSingleton(IUserDataSyncEnablementService, WebUserDataSyncEnablementService, InstantiationType.Delayed);

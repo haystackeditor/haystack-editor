@@ -48,7 +48,7 @@ export interface Event<T> {
   (
     listener: (e: T) => any,
     thisArgs?: any,
-    disposables?: IDisposable[] | DisposableStore,
+    disposables?: IDisposable[] | DisposableStore
   ): IDisposable
 }
 
@@ -63,7 +63,7 @@ export namespace Event {
       options.onDidAddListener = () => {
         if (++count === 2) {
           console.warn(
-            "snapshotted emitter LIKELY used public and SHOULD HAVE BEEN created with DisposableStore. snapshotted here",
+            "snapshotted emitter LIKELY used public and SHOULD HAVE BEEN created with DisposableStore. snapshotted here"
           )
           stack.print()
         }
@@ -90,7 +90,7 @@ export namespace Event {
    */
   export function defer(
     event: Event<unknown>,
-    disposable?: DisposableStore,
+    disposable?: DisposableStore
   ): Event<void> {
     return debounce<unknown, void>(
       event,
@@ -99,7 +99,7 @@ export namespace Event {
       undefined,
       true,
       undefined,
-      disposable,
+      disposable
     )
   }
 
@@ -126,7 +126,7 @@ export namespace Event {
           return listener.call(thisArgs, e)
         },
         null,
-        disposables,
+        disposables
       )
 
       if (didFire) {
@@ -152,12 +152,12 @@ export namespace Event {
   export function map<I, O>(
     event: Event<I>,
     map: (i: I) => O,
-    disposable?: DisposableStore,
+    disposable?: DisposableStore
   ): Event<O> {
     return snapshot(
       (listener, thisArgs = null, disposables?) =>
         event((i) => listener.call(thisArgs, map(i)), null, disposables),
-      disposable,
+      disposable
     )
   }
 
@@ -175,7 +175,7 @@ export namespace Event {
   export function forEach<I>(
     event: Event<I>,
     each: (i: I) => void,
-    disposable?: DisposableStore,
+    disposable?: DisposableStore
   ): Event<I> {
     return snapshot(
       (listener, thisArgs = null, disposables?) =>
@@ -185,9 +185,9 @@ export namespace Event {
             listener.call(thisArgs, i)
           },
           null,
-          disposables,
+          disposables
         ),
-      disposable,
+      disposable
     )
   }
 
@@ -206,31 +206,31 @@ export namespace Event {
   export function filter<T, U>(
     event: Event<T | U>,
     filter: (e: T | U) => e is T,
-    disposable?: DisposableStore,
+    disposable?: DisposableStore
   ): Event<T>
   export function filter<T>(
     event: Event<T>,
     filter: (e: T) => boolean,
-    disposable?: DisposableStore,
+    disposable?: DisposableStore
   ): Event<T>
   export function filter<T, R>(
     event: Event<T | R>,
     filter: (e: T | R) => e is R,
-    disposable?: DisposableStore,
+    disposable?: DisposableStore
   ): Event<R>
   export function filter<T>(
     event: Event<T>,
     filter: (e: T) => boolean,
-    disposable?: DisposableStore,
+    disposable?: DisposableStore
   ): Event<T> {
     return snapshot(
       (listener, thisArgs = null, disposables?) =>
         event(
           (e) => filter(e) && listener.call(thisArgs, e),
           null,
-          disposables,
+          disposables
         ),
-      disposable,
+      disposable
     )
   }
 
@@ -249,7 +249,7 @@ export namespace Event {
   export function any<T>(...events: Event<T>[]): Event<T> {
     return (listener, thisArgs = null, disposables?) => {
       const disposable = combinedDisposable(
-        ...events.map((event) => event((e) => listener.call(thisArgs, e))),
+        ...events.map((event) => event((e) => listener.call(thisArgs, e)))
       )
       return addAndReturnDisposable(disposable, disposables)
     }
@@ -264,7 +264,7 @@ export namespace Event {
     event: Event<I>,
     merge: (last: O | undefined, event: I) => O,
     initial?: O,
-    disposable?: DisposableStore,
+    disposable?: DisposableStore
   ): Event<O> {
     let output: O | undefined = initial
 
@@ -274,13 +274,13 @@ export namespace Event {
         output = merge(output, e)
         return output
       },
-      disposable,
+      disposable
     )
   }
 
   function snapshot<T>(
     event: Event<T>,
-    disposable: DisposableStore | undefined,
+    disposable: DisposableStore | undefined
   ): Event<T> {
     let listener: IDisposable | undefined
 
@@ -310,7 +310,7 @@ export namespace Event {
    */
   function addAndReturnDisposable<T extends IDisposable>(
     d: T,
-    store: DisposableStore | IDisposable[] | undefined,
+    store: DisposableStore | IDisposable[] | undefined
   ): T {
     if (store instanceof Array) {
       store.push(d)
@@ -345,7 +345,7 @@ export namespace Event {
     leading?: boolean,
     flushOnListenerRemove?: boolean,
     leakWarningThreshold?: number,
-    disposable?: DisposableStore,
+    disposable?: DisposableStore
   ): Event<T>
   export function debounce<I, O>(
     event: Event<I>,
@@ -354,7 +354,7 @@ export namespace Event {
     leading?: boolean,
     flushOnListenerRemove?: boolean,
     leakWarningThreshold?: number,
-    disposable?: DisposableStore,
+    disposable?: DisposableStore
   ): Event<O>
   export function debounce<I, O>(
     event: Event<I>,
@@ -363,7 +363,7 @@ export namespace Event {
     leading = false,
     flushOnListenerRemove = false,
     leakWarningThreshold?: number,
-    disposable?: DisposableStore,
+    disposable?: DisposableStore
   ): Event<O> {
     let subscription: IDisposable
     let output: O | undefined = undefined
@@ -436,7 +436,7 @@ export namespace Event {
   export function accumulate<T>(
     event: Event<T>,
     delay: number = 0,
-    disposable?: DisposableStore,
+    disposable?: DisposableStore
   ): Event<T[]> {
     return Event.debounce<T, T[]>(
       event,
@@ -451,7 +451,7 @@ export namespace Event {
       undefined,
       true,
       undefined,
-      disposable,
+      disposable
     )
   }
 
@@ -476,7 +476,7 @@ export namespace Event {
   export function latch<T>(
     event: Event<T>,
     equals: (a: T, b: T) => boolean = (a, b) => a === b,
-    disposable?: DisposableStore,
+    disposable?: DisposableStore
   ): Event<T> {
     let firstCall = true
     let cache: T
@@ -489,7 +489,7 @@ export namespace Event {
         cache = value
         return shouldEmit
       },
-      disposable,
+      disposable
     )
   }
 
@@ -513,7 +513,7 @@ export namespace Event {
   export function split<T, U>(
     event: Event<T | U>,
     isT: (e: T | U) => e is T,
-    disposable?: DisposableStore,
+    disposable?: DisposableStore
   ): [Event<T>, Event<U>] {
     return [
       Event.filter(event, isT, disposable),
@@ -545,7 +545,7 @@ export namespace Event {
     event: Event<T>,
     flushAfterTimeout = false,
     _buffer: T[] = [],
-    disposable?: DisposableStore,
+    disposable?: DisposableStore
   ): Event<T> {
     let buffer: T[] | null = _buffer.slice()
 
@@ -620,7 +620,7 @@ export namespace Event {
    */
   export function chain<T, R>(
     event: Event<T>,
-    sythensize: ($: IChainableSythensis<T>) => IChainableSythensis<R>,
+    sythensize: ($: IChainableSythensis<T>) => IChainableSythensis<R>
   ): Event<R> {
     const fn: Event<R> = (listener, thisArgs, disposables) => {
       const cs = sythensize(new ChainableSynthesis()) as ChainableSynthesis
@@ -632,7 +632,7 @@ export namespace Event {
           }
         },
         undefined,
-        disposables,
+        disposables
       )
     }
 
@@ -664,7 +664,7 @@ export namespace Event {
 
     reduce<R>(
       merge: (last: R | undefined, event: any) => R,
-      initial?: R | undefined,
+      initial?: R | undefined
     ): this {
       let last = initial
       this.steps.push((v) => {
@@ -675,7 +675,7 @@ export namespace Event {
     }
 
     latch(
-      equals: (a: any, b: any) => boolean = (a, b) => a === b,
+      equals: (a: any, b: any) => boolean = (a, b) => a === b
     ): ChainableSynthesis {
       let firstCall = true
       let cache: any
@@ -708,10 +708,10 @@ export namespace Event {
     filter(fn: (e: T) => boolean): IChainableSythensis<T>
     reduce<R>(
       merge: (last: R, event: T) => R,
-      initial: R,
+      initial: R
     ): IChainableSythensis<R>
     reduce<R>(
-      merge: (last: R | undefined, event: T) => R,
+      merge: (last: R | undefined, event: T) => R
     ): IChainableSythensis<R>
     latch(equals?: (a: T, b: T) => boolean): IChainableSythensis<T>
   }
@@ -727,7 +727,7 @@ export namespace Event {
   export function fromNodeEventEmitter<T>(
     emitter: NodeEventEmitter,
     eventName: string,
-    map: (...args: any[]) => T = (id) => id,
+    map: (...args: any[]) => T = (id) => id
   ): Event<T> {
     const fn = (...args: any[]) => result.fire(map(...args))
     const onFirstListenerAdd = () => emitter.on(eventName, fn)
@@ -751,7 +751,7 @@ export namespace Event {
   export function fromDOMEventEmitter<T>(
     emitter: DOMEventEmitter,
     eventName: string,
-    map: (...args: any[]) => T = (id) => id,
+    map: (...args: any[]) => T = (id) => id
   ): Event<T> {
     const fn = (...args: any[]) => result.fire(map(...args))
     const onFirstListenerAdd = () => emitter.addEventListener(eventName, fn)
@@ -786,7 +786,7 @@ export namespace Event {
         },
         () => {
           result.fire(undefined)
-        },
+        }
       )
       .finally(() => {
         result.dispose()
@@ -807,16 +807,16 @@ export namespace Event {
   export function runAndSubscribe<T>(
     event: Event<T>,
     handler: (e: T) => any,
-    initial: T,
+    initial: T
+  ): IDisposable
+  export function runAndSubscribe<T>(
+    event: Event<T>,
+    handler: (e: T | undefined) => any
   ): IDisposable
   export function runAndSubscribe<T>(
     event: Event<T>,
     handler: (e: T | undefined) => any,
-  ): IDisposable
-  export function runAndSubscribe<T>(
-    event: Event<T>,
-    handler: (e: T | undefined) => any,
-    initial?: T,
+    initial?: T
   ): IDisposable {
     handler(initial)
     return event((e) => handler(e))
@@ -830,7 +830,7 @@ export namespace Event {
 
     constructor(
       readonly _observable: IObservable<T, any>,
-      store: DisposableStore | undefined,
+      store: DisposableStore | undefined
     ) {
       const options: EmitterOptions = {
         onWillAddFirstListener: () => {
@@ -860,7 +860,7 @@ export namespace Event {
 
     handleChange<T, TChange>(
       _observable: IObservable<T, TChange>,
-      _change: TChange,
+      _change: TChange
     ): void {
       // assert(_observable === this.obs);
       this._hasChanged = true
@@ -885,7 +885,7 @@ export namespace Event {
    */
   export function fromObservable<T>(
     obs: IObservable<T, any>,
-    store?: DisposableStore,
+    store?: DisposableStore
   ): Event<T> {
     const observer = new EmitterObserver(obs, store)
     return observer.emitter.event
@@ -895,7 +895,7 @@ export namespace Event {
    * Each listener is attached to the observable directly.
    */
   export function fromObservableLight(
-    observable: IObservable<any>,
+    observable: IObservable<any>
   ): Event<void> {
     return (listener, thisArgs, disposables) => {
       let count = 0
@@ -1035,7 +1035,7 @@ class LeakageMonitor {
   constructor(
     private readonly _errorHandler: (err: Error) => void,
     readonly threshold: number,
-    readonly name: string = Math.random().toString(18).slice(2, 5),
+    readonly name: string = Math.random().toString(18).slice(2, 5)
   ) {}
 
   dispose(): void {
@@ -1138,7 +1138,7 @@ type ListenerOrListeners<T> =
 
 const forEachListener = <T>(
   listeners: ListenerOrListeners<T>,
-  fn: (c: ListenerContainer<T>) => void,
+  fn: (c: ListenerContainer<T>) => void
 ) => {
   if (listeners instanceof UniqueContainer) {
     fn(listeners)
@@ -1156,7 +1156,7 @@ const _listenerFinalizers = _enableListenerGCedWarning
   ? new FinalizationRegistry((heldValue) => {
       if (typeof heldValue === "string") {
         console.warn(
-          "[LEAKING LISTENER] GC'ed a listener that was NOT yet disposed. This is where is was created:",
+          "[LEAKING LISTENER] GC'ed a listener that was NOT yet disposed. This is where is was created:"
         )
         console.warn(heldValue)
       }
@@ -1224,7 +1224,7 @@ export class Emitter<T> {
       _globalLeakWarningThreshold > 0 || this._options?.leakWarningThreshold
         ? new LeakageMonitor(
             options?.onListenerError ?? onUnexpectedError,
-            this._options?.leakWarningThreshold ?? _globalLeakWarningThreshold,
+            this._options?.leakWarningThreshold ?? _globalLeakWarningThreshold
           )
         : undefined
     this._perfMon = this._options?._profName
@@ -1276,7 +1276,7 @@ export class Emitter<T> {
     this._event ??= (
       callback: (e: T) => any,
       thisArgs?: any,
-      disposables?: IDisposable[] | DisposableStore,
+      disposables?: IDisposable[] | DisposableStore
     ) => {
       if (this._leakageMon && this._size > this._leakageMon.threshold ** 2) {
         const message = `[${this._leakageMon.name}] REFUSES to accept new listeners because it exceeded its threshold by far (${this._size} vs ${this._leakageMon.threshold})`
@@ -1288,7 +1288,7 @@ export class Emitter<T> {
         ]
         const error = new ListenerRefusalError(
           `${message}. HINT: Stack shows most frequent listener (${tuple[1]}-times)`,
-          tuple[0],
+          tuple[0]
         )
         const errorHandler = this._options?.onListenerError || onUnexpectedError
         errorHandler(error)
@@ -1404,7 +1404,7 @@ export class Emitter<T> {
 
   private _deliver(
     listener: undefined | UniqueContainer<(value: T) => void>,
-    value: T,
+    value: T
   ) {
     if (!listener) {
       return
@@ -1522,7 +1522,7 @@ export class AsyncEmitter<T extends IWaitUntil> extends Emitter<T> {
   async fireAsync(
     data: IWaitUntilData<T>,
     token: CancellationToken,
-    promiseJoin?: (p: Promise<unknown>, listener: Function) => Promise<unknown>,
+    promiseJoin?: (p: Promise<unknown>, listener: Function) => Promise<unknown>
   ): Promise<void> {
     if (!this._listeners) {
       return
@@ -1533,7 +1533,7 @@ export class AsyncEmitter<T extends IWaitUntil> extends Emitter<T> {
     }
 
     forEachListener(this._listeners, (listener) =>
-      this._asyncDeliveryQueue!.push([listener.value, data]),
+      this._asyncDeliveryQueue!.push([listener.value, data])
     )
 
     while (
@@ -1633,7 +1633,7 @@ export class DebounceEmitter<T> extends PauseableEmitter<T> {
   private _handle: any | undefined
 
   constructor(
-    options: EmitterOptions & { merge: (input: T[]) => T; delay?: number },
+    options: EmitterOptions & { merge: (input: T[]) => T; delay?: number }
   ) {
     super(options)
     this._delay = options.delay ?? 100
@@ -1784,11 +1784,11 @@ export class DynamicListEventMultiplexer<TItem, TEventType>
     items: TItem[],
     onAddItem: Event<TItem>,
     onRemoveItem: Event<TItem>,
-    getEvent: (item: TItem) => Event<TEventType>,
+    getEvent: (item: TItem) => Event<TEventType>
   ) {
     const multiplexer = this._store.add(new EventMultiplexer<TEventType>())
     const itemListeners = this._store.add(
-      new DisposableMap<TItem, IDisposable>(),
+      new DisposableMap<TItem, IDisposable>()
     )
 
     function addItem(instance: TItem) {
@@ -1804,14 +1804,14 @@ export class DynamicListEventMultiplexer<TItem, TEventType>
     this._store.add(
       onAddItem((instance) => {
         addItem(instance)
-      }),
+      })
     )
 
     // Removed items
     this._store.add(
       onRemoveItem((instance) => {
         itemListeners.deleteAndDispose(instance)
-      }),
+      })
     )
 
     this.event = multiplexer.event
@@ -1848,17 +1848,17 @@ export class EventBufferer {
   wrapEvent<T>(event: Event<T>): Event<T>
   wrapEvent<T>(
     event: Event<T>,
-    reduce: (last: T | undefined, event: T) => T,
+    reduce: (last: T | undefined, event: T) => T
   ): Event<T>
   wrapEvent<T, O>(
     event: Event<T>,
     reduce: (last: O | undefined, event: T) => O,
-    initial: O,
+    initial: O
   ): Event<O>
   wrapEvent<T, O>(
     event: Event<T>,
     reduce?: (last: T | O | undefined, event: T) => T | O,
-    initial?: O,
+    initial?: O
   ): Event<O | T> {
     return (listener, thisArgs?, disposables?) => {
       return event(
@@ -1906,17 +1906,17 @@ export class EventBufferer {
               reduceData.reducedResult ??= initial
                 ? reduceData.items!.reduce(
                     reduce as (last: O | undefined, event: T) => O,
-                    initial,
+                    initial
                   )
                 : reduceData.items!.reduce(
-                    reduce as (last: T | undefined, event: T) => T,
+                    reduce as (last: T | undefined, event: T) => T
                   )
               listener.call(thisArgs, reduceData.reducedResult)
             })
           }
         },
         undefined,
-        disposables,
+        disposables
       )
     }
   }

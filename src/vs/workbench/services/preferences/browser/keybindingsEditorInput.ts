@@ -9,73 +9,62 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Codicon } from "vs/base/common/codicons"
-import { OS } from "vs/base/common/platform"
-import { ThemeIcon } from "vs/base/common/themables"
-import * as nls from "vs/nls"
-import { IInstantiationService } from "vs/platform/instantiation/common/instantiation"
-import { registerIcon } from "vs/platform/theme/common/iconRegistry"
-import { IUntypedEditorInput } from "vs/workbench/common/editor"
-import { EditorInput } from "vs/workbench/common/editor/editorInput"
-import { KeybindingsEditorModel } from "vs/workbench/services/preferences/browser/keybindingsEditorModel"
+import { Codicon } from 'vs/base/common/codicons';
+import { OS } from 'vs/base/common/platform';
+import { ThemeIcon } from 'vs/base/common/themables';
+import * as nls from 'vs/nls';
+import { IInstantiationService } from 'vs/platform/instantiation/common/instantiation';
+import { registerIcon } from 'vs/platform/theme/common/iconRegistry';
+import { IUntypedEditorInput } from 'vs/workbench/common/editor';
+import { EditorInput } from 'vs/workbench/common/editor/editorInput';
+import { KeybindingsEditorModel } from 'vs/workbench/services/preferences/browser/keybindingsEditorModel';
 
 export interface IKeybindingsEditorSearchOptions {
-  searchValue: string
-  recordKeybindings: boolean
-  sortByPrecedence: boolean
+	searchValue: string;
+	recordKeybindings: boolean;
+	sortByPrecedence: boolean;
 }
 
-const KeybindingsEditorIcon = registerIcon(
-  "keybindings-editor-label-icon",
-  Codicon.keyboard,
-  nls.localize(
-    "keybindingsEditorLabelIcon",
-    "Icon of the keybindings editor label.",
-  ),
-)
+const KeybindingsEditorIcon = registerIcon('keybindings-editor-label-icon', Codicon.keyboard, nls.localize('keybindingsEditorLabelIcon', 'Icon of the keybindings editor label.'));
 
 export class KeybindingsEditorInput extends EditorInput {
-  static readonly ID: string = "workbench.input.keybindings"
-  readonly keybindingsModel: KeybindingsEditorModel
 
-  searchOptions: IKeybindingsEditorSearchOptions | null = null
+	static readonly ID: string = 'workbench.input.keybindings';
+	readonly keybindingsModel: KeybindingsEditorModel;
 
-  readonly resource = undefined
+	searchOptions: IKeybindingsEditorSearchOptions | null = null;
 
-  constructor(
-    @IInstantiationService instantiationService: IInstantiationService,
-  ) {
-    super()
+	readonly resource = undefined;
 
-    this.keybindingsModel = instantiationService.createInstance(
-      KeybindingsEditorModel,
-      OS,
-    )
-  }
+	constructor(@IInstantiationService instantiationService: IInstantiationService) {
+		super();
 
-  override get typeId(): string {
-    return KeybindingsEditorInput.ID
-  }
+		this.keybindingsModel = instantiationService.createInstance(KeybindingsEditorModel, OS);
+	}
 
-  override getName(): string {
-    return nls.localize("keybindingsInputName", "Keyboard Shortcuts")
-  }
+	override get typeId(): string {
+		return KeybindingsEditorInput.ID;
+	}
 
-  override getIcon(): ThemeIcon {
-    return KeybindingsEditorIcon
-  }
+	override getName(): string {
+		return nls.localize('keybindingsInputName', "Keyboard Shortcuts");
+	}
 
-  override async resolve(): Promise<KeybindingsEditorModel> {
-    return this.keybindingsModel
-  }
+	override getIcon(): ThemeIcon {
+		return KeybindingsEditorIcon;
+	}
 
-  override matches(otherInput: EditorInput | IUntypedEditorInput): boolean {
-    return otherInput instanceof KeybindingsEditorInput
-  }
+	override async resolve(): Promise<KeybindingsEditorModel> {
+		return this.keybindingsModel;
+	}
 
-  override dispose(): void {
-    this.keybindingsModel.dispose()
+	override matches(otherInput: EditorInput | IUntypedEditorInput): boolean {
+		return otherInput instanceof KeybindingsEditorInput;
+	}
 
-    super.dispose()
-  }
+	override dispose(): void {
+		this.keybindingsModel.dispose();
+
+		super.dispose();
+	}
 }

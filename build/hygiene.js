@@ -9,13 +9,13 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-const filter = require("gulp-filter")
-const es = require("event-stream")
-const VinylFile = require("vinyl")
-const vfs = require("vinyl-fs")
-const path = require("path")
-const fs = require("fs")
-const pall = require("p-all")
+const filter = require("gulp-filter");
+const es = require("event-stream");
+const VinylFile = require("vinyl");
+const vfs = require("vinyl-fs");
+const path = require("path");
+const fs = require("fs");
+const pall = require("p-all");
 
 const {
   all,
@@ -25,64 +25,64 @@ const {
   tsFormattingFilter,
   eslintFilter,
   stylelintFilter,
-} = require("./filters")
+} = require("./filters");
 
 const copyrightHeaderLines = [
   "/*---------------------------------------------------------------------------------------------",
   " *  Copyright (c) Microsoft Corporation. All rights reserved.",
   " *  Licensed under the MIT License. See code-license.txt in the project root for license information.",
   " *--------------------------------------------------------------------------------------------*/",
-]
+];
 
 function hygiene(some, linting = true) {
-  const gulpeslint = require("gulp-eslint")
-  const gulpstylelint = require("./stylelint")
-  const formatter = require("./lib/formatter")
+  const gulpeslint = require("gulp-eslint");
+  const gulpstylelint = require("./stylelint");
+  const formatter = require("./lib/formatter");
 
-  let errorCount = 0
+  let errorCount = 0;
 
   const productJson = es.through(function (file) {
-    const product = JSON.parse(file.contents.toString("utf8"))
+    const product = JSON.parse(file.contents.toString("utf8"));
 
     if (product.extensionsGallery) {
-      console.error(`product.json: Contains 'extensionsGallery'`)
-      errorCount++
+      console.error(`product.json: Contains 'extensionsGallery'`);
+      errorCount++;
     }
 
-    this.emit("data", file)
-  })
+    this.emit("data", file);
+  });
 
   const unicode = es.through(function (file) {
-    const lines = file.contents.toString("utf8").split(/\r\n|\r|\n/)
-    file.__lines = lines
+    const lines = file.contents.toString("utf8").split(/\r\n|\r|\n/);
+    file.__lines = lines;
     const allowInComments = lines.some((line) =>
       /allow-any-unicode-comment-file/.test(line),
-    )
-    let skipNext = false
+    );
+    let skipNext = false;
     lines.forEach((line, i) => {
       if (/allow-any-unicode-next-line/.test(line)) {
-        skipNext = true
-        return
+        skipNext = true;
+        return;
       }
       if (skipNext) {
-        skipNext = false
-        return
+        skipNext = false;
+        return;
       }
       // If unicode is allowed in comments, trim the comment from the line
       if (allowInComments) {
         if (line.match(/\s+(\*)/)) {
           // Naive multi-line comment check
-          line = ""
+          line = "";
         } else {
-          const index = line.indexOf("//")
-          line = index === -1 ? line : line.substring(0, index)
+          const index = line.indexOf("//");
+          line = index === -1 ? line : line.substring(0, index);
         }
       }
       // Please do not add symbols that resemble ASCII letters!
       const m =
         /([^\t\n\r\x20-\x7E⊃⊇✔︎✓🎯⚠️🛑🔴🚗🚙🚕🎉✨❗⇧⌥⌘×÷¦⋯…↑↓￫→←↔⟷·•●◆▼⟪⟫┌└├⏎↩√φ]+)/g.exec(
           line,
-        )
+        );
       if (m) {
         console.error(
           file.relative +
@@ -91,18 +91,18 @@ function hygiene(some, linting = true) {
             }" (charCode: ${m[0].charCodeAt(
               0,
             )}). To suppress, use // allow-any-unicode-next-line`,
-        )
-        errorCount++
+        );
+        errorCount++;
       }
-    })
+    });
 
-    this.emit("data", file)
-  })
+    this.emit("data", file);
+  });
 
   const indentation = es.through(function (file) {
     const lines =
-      file.__lines || file.contents.toString("utf8").split(/\r\n|\r|\n/)
-    file.__lines = lines
+      file.__lines || file.contents.toString("utf8").split(/\r\n|\r|\n/);
+    file.__lines = lines;
 
     lines.forEach((line, i) => {
       if (/^\s*$/.test(line)) {
@@ -114,64 +114,64 @@ function hygiene(some, linting = true) {
       } else {
         console.error(
           file.relative + "(" + (i + 1) + ",1): Bad whitespace indentation",
-        )
-        errorCount++
+        );
+        errorCount++;
       }
-    })
+    });
 
-    this.emit("data", file)
-  })
+    this.emit("data", file);
+  });
 
   const copyrights = es.through(function (file) {
-    const lines = file.__lines
+    const lines = file.__lines;
 
     for (let i = 0; i < copyrightHeaderLines.length; i++) {
       if (lines[i] !== copyrightHeaderLines[i]) {
-        console.error(file.relative + ": Missing or bad copyright statement")
-        errorCount++
-        break
+        console.error(file.relative + ": Missing or bad copyright statement");
+        errorCount++;
+        break;
       }
     }
 
-    this.emit("data", file)
-  })
+    this.emit("data", file);
+  });
 
   const formatting = es.map(function (file, cb) {
     try {
-      const rawInput = file.contents.toString("utf8")
-      const rawOutput = formatter.format(file.path, rawInput)
+      const rawInput = file.contents.toString("utf8");
+      const rawOutput = formatter.format(file.path, rawInput);
 
-      const original = rawInput.replace(/\r\n/gm, "\n")
-      const formatted = rawOutput.replace(/\r\n/gm, "\n")
+      const original = rawInput.replace(/\r\n/gm, "\n");
+      const formatted = rawOutput.replace(/\r\n/gm, "\n");
       if (original !== formatted) {
         console.error(
           `File not formatted. Run the 'Format Document' command to fix it:`,
           file.relative,
-        )
-        errorCount++
+        );
+        errorCount++;
       }
-      cb(null, file)
+      cb(null, file);
     } catch (err) {
-      cb(err)
+      cb(err);
     }
-  })
+  });
 
-  let input
+  let input;
 
   if (Array.isArray(some) || typeof some === "string" || !some) {
-    const options = { base: ".", follow: true, allowEmpty: true }
+    const options = { base: ".", follow: true, allowEmpty: true };
     if (some) {
-      input = vfs.src(some, options).pipe(filter(all)) // split this up to not unnecessarily filter all a second time
+      input = vfs.src(some, options).pipe(filter(all)); // split this up to not unnecessarily filter all a second time
     } else {
-      input = vfs.src(all, options)
+      input = vfs.src(all, options);
     }
   } else {
-    input = some
+    input = some;
   }
 
-  const productJsonFilter = filter("product.json", { restore: true })
-  const snapshotFilter = filter(["**", "!**/*.snap", "!**/*.snap.actual"])
-  const unicodeFilterStream = filter(unicodeFilter, { restore: true })
+  const productJsonFilter = filter("product.json", { restore: true });
+  const snapshotFilter = filter(["**", "!**/*.snap", "!**/*.snap.actual"]);
+  const unicodeFilterStream = filter(unicodeFilter, { restore: true });
 
   const result = input
     .pipe(filter((f) => !f.stat.isDirectory()))
@@ -185,9 +185,9 @@ function hygiene(some, linting = true) {
     .pipe(filter(indentationFilter))
     .pipe(indentation)
     .pipe(filter(copyrightFilter))
-    .pipe(copyrights)
+    .pipe(copyrights);
 
-  const streams = [result.pipe(filter(tsFormattingFilter)).pipe(formatting)]
+  const streams = [result.pipe(filter(tsFormattingFilter)).pipe(formatting)];
 
   if (linting) {
     streams.push(
@@ -201,70 +201,70 @@ function hygiene(some, linting = true) {
         .pipe(gulpeslint.formatEach("compact"))
         .pipe(
           gulpeslint.results((results) => {
-            errorCount += results.warningCount
-            errorCount += results.errorCount
+            errorCount += results.warningCount;
+            errorCount += results.errorCount;
           }),
         ),
-    )
+    );
 
     streams.push(
       result.pipe(filter(stylelintFilter)).pipe(
         gulpstylelint((message, isError) => {
           if (isError) {
-            console.error(message)
-            errorCount++
+            console.error(message);
+            errorCount++;
           } else {
-            console.warn(message)
+            console.warn(message);
           }
         }),
       ),
-    )
+    );
   }
 
-  let count = 0
+  let count = 0;
   return es.merge(...streams).pipe(
     es.through(
       function (data) {
-        count++
+        count++;
         if (process.env["TRAVIS"] && count % 10 === 0) {
-          process.stdout.write(".")
+          process.stdout.write(".");
         }
-        this.emit("data", data)
+        this.emit("data", data);
       },
       function () {
-        process.stdout.write("\n")
+        process.stdout.write("\n");
         if (errorCount > 0) {
           this.emit(
             "error",
             "Hygiene failed with " +
               errorCount +
               ` errors. Check 'build / gulpfile.hygiene.js'.`,
-          )
+          );
         } else {
-          this.emit("end")
+          this.emit("end");
         }
       },
     ),
-  )
+  );
 }
 
-module.exports.hygiene = hygiene
+module.exports.hygiene = hygiene;
 
 function createGitIndexVinyls(paths) {
-  const cp = require("child_process")
-  const repositoryPath = process.cwd()
+  const cp = require("child_process");
+  const repositoryPath = process.cwd();
 
   const fns = paths.map(
     (relativePath) => () =>
       new Promise((c, e) => {
-        const fullPath = path.join(repositoryPath, relativePath)
+        const fullPath = path.join(repositoryPath, relativePath);
 
         fs.stat(fullPath, (err, stat) => {
           if (err && err.code === "ENOENT") {
             // ignore deletions
-            return c(null)
+            return c(null);
           } else if (err) {
-            return e(err)
+            return e(err);
           }
 
           cp.exec(
@@ -274,7 +274,7 @@ function createGitIndexVinyls(paths) {
             { maxBuffer: stat.size, encoding: "buffer" },
             (err, out) => {
               if (err) {
-                return e(err)
+                return e(err);
               }
 
               c(
@@ -284,46 +284,46 @@ function createGitIndexVinyls(paths) {
                   contents: out,
                   stat,
                 }),
-              )
+              );
             },
-          )
-        })
+          );
+        });
       }),
-  )
+  );
 
-  return pall(fns, { concurrency: 4 }).then((r) => r.filter((p) => !!p))
+  return pall(fns, { concurrency: 4 }).then((r) => r.filter((p) => !!p));
 }
 
 // this allows us to run hygiene as a git pre-commit hook
 if (require.main === module) {
-  const cp = require("child_process")
+  const cp = require("child_process");
 
   process.on("unhandledRejection", (reason, p) => {
-    console.log("Unhandled Rejection at: Promise", p, "reason:", reason)
-    process.exit(1)
-  })
+    console.log("Unhandled Rejection at: Promise", p, "reason:", reason);
+    process.exit(1);
+  });
 
   if (process.argv.length > 2) {
     hygiene(process.argv.slice(2)).on("error", (err) => {
-      console.error()
-      console.error(err)
-      process.exit(1)
-    })
+      console.error();
+      console.error(err);
+      process.exit(1);
+    });
   } else {
     cp.exec(
       "git diff --cached --name-only",
       { maxBuffer: 2000 * 1024 },
       (err, out) => {
         if (err) {
-          console.error()
-          console.error(err)
-          process.exit(1)
+          console.error();
+          console.error(err);
+          process.exit(1);
         }
 
-        const some = out.split(/\r?\n/).filter((l) => !!l)
+        const some = out.split(/\r?\n/).filter((l) => !!l);
 
         if (some.length > 0) {
-          console.log("Reading git index versions...")
+          console.log("Reading git index versions...");
 
           createGitIndexVinyls(some)
             .then(
@@ -335,12 +335,12 @@ if (require.main === module) {
                 ),
             )
             .catch((err) => {
-              console.error()
-              console.error(err)
-              process.exit(1)
-            })
+              console.error();
+              console.error(err);
+              process.exit(1);
+            });
         }
       },
-    )
+    );
   }
 }

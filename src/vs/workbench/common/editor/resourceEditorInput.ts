@@ -76,7 +76,7 @@ export abstract class AbstractResourceEditorInput
     @ITextResourceConfigurationService
     protected readonly textResourceConfigurationService: ITextResourceConfigurationService,
     @ICustomEditorLabelService
-    protected readonly customEditorLabelService: ICustomEditorLabelService,
+    protected readonly customEditorLabelService: ICustomEditorLabelService
   ) {
     super(isGhost, xPosition, yPosition, width, height)
 
@@ -89,21 +89,21 @@ export abstract class AbstractResourceEditorInput
     // Clear our labels on certain label related events
     this._register(
       this.labelService.onDidChangeFormatters((e) =>
-        this.onLabelEvent(e.scheme),
-      ),
+        this.onLabelEvent(e.scheme)
+      )
     )
     this._register(
       this.fileService.onDidChangeFileSystemProviderRegistrations((e) =>
-        this.onLabelEvent(e.scheme),
-      ),
+        this.onLabelEvent(e.scheme)
+      )
     )
     this._register(
       this.fileService.onDidChangeFileSystemProviderCapabilities((e) =>
-        this.onLabelEvent(e.scheme),
-      ),
+        this.onLabelEvent(e.scheme)
+      )
     )
     this._register(
-      this.customEditorLabelService.onDidChange(() => this.updateLabel()),
+      this.customEditorLabelService.onDidChange(() => this.updateLabel())
     )
   }
 
@@ -162,7 +162,7 @@ export abstract class AbstractResourceEditorInput
   private get shortDescription(): string {
     if (typeof this._shortDescription !== "string") {
       this._shortDescription = this.labelService.getUriBasenameLabel(
-        dirname(this._preferredResource),
+        dirname(this._preferredResource)
       )
     }
 
@@ -174,7 +174,7 @@ export abstract class AbstractResourceEditorInput
     if (typeof this._mediumDescription !== "string") {
       this._mediumDescription = this.labelService.getUriLabel(
         dirname(this._preferredResource),
-        { relative: true },
+        { relative: true }
       )
     }
 
@@ -185,7 +185,7 @@ export abstract class AbstractResourceEditorInput
   private get longDescription(): string {
     if (typeof this._longDescription !== "string") {
       this._longDescription = this.labelService.getUriLabel(
-        dirname(this._preferredResource),
+        dirname(this._preferredResource)
       )
     }
 
@@ -206,7 +206,7 @@ export abstract class AbstractResourceEditorInput
     if (typeof this._mediumTitle !== "string") {
       this._mediumTitle = this.labelService.getUriLabel(
         this._preferredResource,
-        { relative: true },
+        { relative: true }
       )
     }
 
@@ -239,7 +239,7 @@ export abstract class AbstractResourceEditorInput
   }
 
   protected ensureLimits(
-    options?: IFileLimitedEditorInputOptions,
+    options?: IFileLimitedEditorInputOptions
   ): IFileReadLimits | undefined {
     if (options?.limits) {
       return options.limits // respect passed in limits if any
@@ -257,7 +257,7 @@ export abstract class AbstractResourceEditorInput
       this.textResourceConfigurationService.inspect<number>(
         this.resource,
         null,
-        "workbench.editorLargeFileConfirmation",
+        "workbench.editorLargeFileConfirmation"
       )
     if (isConfigured(configuredSizeLimitMb)) {
       configuredSizeLimit = configuredSizeLimitMb.value * ByteSize.MB // normalize to MB

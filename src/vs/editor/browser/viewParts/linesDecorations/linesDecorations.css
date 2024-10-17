@@ -9,9 +9,9 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 .monaco-editor .lines-decorations {
-  position: absolute;
-  top: 0;
-  background: white;
+	position: absolute;
+	top: 0;
+	background: white;
 }
 
 /*
@@ -19,6 +19,6 @@
 	cldr = core lines decorations rendering (div)
 */
 .monaco-editor .margin-view-overlays .cldr {
-  position: absolute;
-  height: 100%;
+	position: absolute;
+	height: 100%;
 }

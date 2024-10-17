@@ -24,7 +24,7 @@ import { ICursorSelectionChangedEvent } from "vs/editor/common/cursorEvents"
 
 function hasModifier(
   e: { ctrlKey: boolean; shiftKey: boolean; altKey: boolean; metaKey: boolean },
-  modifier: "ctrlKey" | "shiftKey" | "altKey" | "metaKey",
+  modifier: "ctrlKey" | "shiftKey" | "altKey" | "metaKey"
 ): boolean {
   return !!e[modifier]
 }
@@ -51,7 +51,7 @@ export class ClickLinkMouseEvent {
     this.hasTriggerModifier = hasModifier(source.event, opts.triggerModifier)
     this.hasSideBySideModifier = hasModifier(
       source.event,
-      opts.triggerSideBySideModifier,
+      opts.triggerSideBySideModifier
     )
     this.isNoneOrSingleMouseDown = source.event.detail <= 1
   }
@@ -83,7 +83,7 @@ export class ClickLinkOptions {
     triggerKey: KeyCode,
     triggerModifier: TriggerModifier,
     triggerSideBySideKey: KeyCode,
-    triggerSideBySideModifier: TriggerModifier,
+    triggerSideBySideModifier: TriggerModifier
   ) {
     this.triggerKey = triggerKey
     this.triggerModifier = triggerModifier
@@ -102,7 +102,7 @@ export class ClickLinkOptions {
 }
 
 function createOptions(
-  multiCursorModifier: "altKey" | "ctrlKey" | "metaKey",
+  multiCursorModifier: "altKey" | "ctrlKey" | "metaKey"
 ): ClickLinkOptions {
   if (multiCursorModifier === "altKey") {
     if (platform.isMacintosh) {
@@ -110,7 +110,7 @@ function createOptions(
         KeyCode.Meta,
         "metaKey",
         KeyCode.Alt,
-        "altKey",
+        "altKey"
       )
     }
     return new ClickLinkOptions(KeyCode.Ctrl, "ctrlKey", KeyCode.Alt, "altKey")
@@ -133,25 +133,25 @@ export class ClickLinkGesture extends Disposable {
   private readonly _onMouseMoveOrRelevantKeyDown: Emitter<
     [ClickLinkMouseEvent, ClickLinkKeyboardEvent | null]
   > = this._register(
-    new Emitter<[ClickLinkMouseEvent, ClickLinkKeyboardEvent | null]>(),
+    new Emitter<[ClickLinkMouseEvent, ClickLinkKeyboardEvent | null]>()
   )
   public readonly onMouseMoveOrRelevantKeyDown: Event<
     [ClickLinkMouseEvent, ClickLinkKeyboardEvent | null]
   > = this._onMouseMoveOrRelevantKeyDown.event
 
   private readonly _onExecute: Emitter<ClickLinkMouseEvent> = this._register(
-    new Emitter<ClickLinkMouseEvent>(),
+    new Emitter<ClickLinkMouseEvent>()
   )
   public readonly onExecute: Event<ClickLinkMouseEvent> = this._onExecute.event
 
   private readonly _onCancel: Emitter<void> = this._register(
-    new Emitter<void>(),
+    new Emitter<void>()
   )
   public readonly onCancel: Event<void> = this._onCancel.event
 
   private readonly _editor: ICodeEditor
   private readonly _extractLineNumberFromMouseEvent: (
-    e: ClickLinkMouseEvent,
+    e: ClickLinkMouseEvent
   ) => number
   private _opts: ClickLinkOptions
 
@@ -167,7 +167,7 @@ export class ClickLinkGesture extends Disposable {
       opts?.extractLineNumberFromMouseEvent ??
       ((e) => (e.target.position ? e.target.position.lineNumber : 0))
     this._opts = createOptions(
-      this._editor.getOption(EditorOption.multiCursorModifier),
+      this._editor.getOption(EditorOption.multiCursorModifier)
     )
 
     this._lastMouseMoveEvent = null
@@ -178,7 +178,7 @@ export class ClickLinkGesture extends Disposable {
       this._editor.onDidChangeConfiguration((e) => {
         if (e.hasChanged(EditorOption.multiCursorModifier)) {
           const newOpts = createOptions(
-            this._editor.getOption(EditorOption.multiCursorModifier),
+            this._editor.getOption(EditorOption.multiCursorModifier)
           )
           if (this._opts.equals(newOpts)) {
             return
@@ -189,50 +189,50 @@ export class ClickLinkGesture extends Disposable {
           this._lineNumberOnMouseDown = 0
           this._onCancel.fire()
         }
-      }),
+      })
     )
     this._register(
       this._editor.onMouseMove((e: IEditorMouseEvent) =>
-        this._onEditorMouseMove(new ClickLinkMouseEvent(e, this._opts)),
-      ),
+        this._onEditorMouseMove(new ClickLinkMouseEvent(e, this._opts))
+      )
     )
     this._register(
       this._editor.onMouseDown((e: IEditorMouseEvent) =>
-        this._onEditorMouseDown(new ClickLinkMouseEvent(e, this._opts)),
-      ),
+        this._onEditorMouseDown(new ClickLinkMouseEvent(e, this._opts))
+      )
     )
     this._register(
       this._editor.onMouseUp((e: IEditorMouseEvent) =>
-        this._onEditorMouseUp(new ClickLinkMouseEvent(e, this._opts)),
-      ),
+        this._onEditorMouseUp(new ClickLinkMouseEvent(e, this._opts))
+      )
     )
     this._register(
       this._editor.onKeyDown((e: IKeyboardEvent) =>
-        this._onEditorKeyDown(new ClickLinkKeyboardEvent(e, this._opts)),
-      ),
+        this._onEditorKeyDown(new ClickLinkKeyboardEvent(e, this._opts))
+      )
     )
     this._register(
       this._editor.onKeyUp((e: IKeyboardEvent) =>
-        this._onEditorKeyUp(new ClickLinkKeyboardEvent(e, this._opts)),
-      ),
+        this._onEditorKeyUp(new ClickLinkKeyboardEvent(e, this._opts))
+      )
     )
     this._register(this._editor.onMouseDrag(() => this._resetHandler()))
 
     this._register(
       this._editor.onDidChangeCursorSelection((e) =>
-        this._onDidChangeCursorSelection(e),
-      ),
+        this._onDidChangeCursorSelection(e)
+      )
     )
     this._register(this._editor.onDidChangeModel((e) => this._resetHandler()))
     this._register(
-      this._editor.onDidChangeModelContent(() => this._resetHandler()),
+      this._editor.onDidChangeModelContent(() => this._resetHandler())
     )
     this._register(
       this._editor.onDidScrollChange((e) => {
         if (e.scrollTopChanged || e.scrollLeftChanged) {
           this._resetHandler()
         }
-      }),
+      })
     )
   }
 

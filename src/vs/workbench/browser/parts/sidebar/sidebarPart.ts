@@ -105,7 +105,7 @@ export class SidebarPart extends AbstractPaneCompositePart {
   }
 
   private readonly activityBarPart = this._register(
-    this.instantiationService.createInstance(ActivitybarPart, this),
+    this.instantiationService.createInstance(ActivitybarPart, this)
   )
 
   //#endregion
@@ -124,7 +124,7 @@ export class SidebarPart extends AbstractPaneCompositePart {
     @IExtensionService extensionService: IExtensionService,
     @IConfigurationService
     private readonly configurationService: IConfigurationService,
-    @IMenuService menuService: IMenuService,
+    @IMenuService menuService: IMenuService
   ) {
     super(
       Parts.SIDEBAR_PART,
@@ -152,7 +152,7 @@ export class SidebarPart extends AbstractPaneCompositePart {
       viewDescriptorService,
       contextKeyService,
       extensionService,
-      menuService,
+      menuService
     )
 
     this.rememberActivityBarVisiblePosition()
@@ -161,7 +161,7 @@ export class SidebarPart extends AbstractPaneCompositePart {
         if (e.affectsConfiguration(LayoutSettings.ACTIVITY_BAR_LOCATION)) {
           this.onDidChangeActivityBarLocation()
         }
-      }),
+      })
     )
 
     this.registerActions()
@@ -218,7 +218,7 @@ export class SidebarPart extends AbstractPaneCompositePart {
     width: number,
     height: number,
     top: number,
-    left: number,
+    left: number
   ): void {
     if (!this.layoutService.isVisible(Parts.SIDEBAR_PART)) {
       return
@@ -239,7 +239,7 @@ export class SidebarPart extends AbstractPaneCompositePart {
       this.getCompositeBarOptions(),
       this.partId,
       this,
-      false,
+      false
     )
   }
 
@@ -276,12 +276,12 @@ export class SidebarPart extends AbstractPaneCompositePart {
         activeBorderBottomColor: theme.getColor(ACTIVITY_BAR_TOP_ACTIVE_BORDER),
         activeForegroundColor: theme.getColor(ACTIVITY_BAR_TOP_FOREGROUND),
         inactiveForegroundColor: theme.getColor(
-          ACTIVITY_BAR_TOP_INACTIVE_FOREGROUND,
+          ACTIVITY_BAR_TOP_INACTIVE_FOREGROUND
         ),
         badgeBackground: theme.getColor(ACTIVITY_BAR_BADGE_BACKGROUND),
         badgeForeground: theme.getColor(ACTIVITY_BAR_BADGE_FOREGROUND),
         dragAndDropBorder: theme.getColor(
-          ACTIVITY_BAR_TOP_DRAG_AND_DROP_BORDER,
+          ACTIVITY_BAR_TOP_DRAG_AND_DROP_BORDER
         ),
       }),
       compact: true,
@@ -291,7 +291,7 @@ export class SidebarPart extends AbstractPaneCompositePart {
   protected shouldShowCompositeBar(): boolean {
     const activityBarPosition =
       this.configurationService.getValue<ActivityBarPosition>(
-        LayoutSettings.ACTIVITY_BAR_LOCATION,
+        LayoutSettings.ACTIVITY_BAR_LOCATION
       )
     return (
       activityBarPosition === ActivityBarPosition.TOP ||
@@ -306,7 +306,7 @@ export class SidebarPart extends AbstractPaneCompositePart {
 
     return (
       this.configurationService.getValue(
-        LayoutSettings.ACTIVITY_BAR_LOCATION,
+        LayoutSettings.ACTIVITY_BAR_LOCATION
       ) !== ActivityBarPosition.HIDDEN
     )
   }
@@ -314,7 +314,7 @@ export class SidebarPart extends AbstractPaneCompositePart {
   protected getCompositeBarPosition(): CompositeBarPosition {
     const activityBarPosition =
       this.configurationService.getValue<ActivityBarPosition>(
-        LayoutSettings.ACTIVITY_BAR_LOCATION,
+        LayoutSettings.ACTIVITY_BAR_LOCATION
       )
     switch (activityBarPosition) {
       case ActivityBarPosition.TOP:
@@ -330,14 +330,14 @@ export class SidebarPart extends AbstractPaneCompositePart {
 
   private rememberActivityBarVisiblePosition(): void {
     const activityBarPosition = this.configurationService.getValue<string>(
-      LayoutSettings.ACTIVITY_BAR_LOCATION,
+      LayoutSettings.ACTIVITY_BAR_LOCATION
     )
     if (activityBarPosition !== ActivityBarPosition.HIDDEN) {
       this.storageService.store(
         LayoutSettings.ACTIVITY_BAR_LOCATION,
         activityBarPosition,
         StorageScope.PROFILE,
-        StorageTarget.USER,
+        StorageTarget.USER
       )
     }
   }
@@ -345,7 +345,7 @@ export class SidebarPart extends AbstractPaneCompositePart {
   private getRememberedActivityBarVisiblePosition(): ActivityBarPosition {
     const activityBarPosition = this.storageService.get(
       LayoutSettings.ACTIVITY_BAR_LOCATION,
-      StorageScope.PROFILE,
+      StorageScope.PROFILE
     )
     switch (activityBarPosition) {
       case ActivityBarPosition.TOP:
@@ -372,12 +372,12 @@ export class SidebarPart extends AbstractPaneCompositePart {
   async focusActivityBar(): Promise<void> {
     if (
       this.configurationService.getValue(
-        LayoutSettings.ACTIVITY_BAR_LOCATION,
+        LayoutSettings.ACTIVITY_BAR_LOCATION
       ) === ActivityBarPosition.HIDDEN
     ) {
       await this.configurationService.updateValue(
         LayoutSettings.ACTIVITY_BAR_LOCATION,
-        this.getRememberedActivityBarVisiblePosition(),
+        this.getRememberedActivityBarVisiblePosition()
       )
 
       this.onDidChangeActivityBarLocation()
@@ -404,24 +404,24 @@ export class SidebarPart extends AbstractPaneCompositePart {
               id: ToggleActivityBarVisibilityActionId,
               title: localize2(
                 "toggleActivityBar",
-                "Toggle Activity Bar Visibility",
+                "Toggle Activity Bar Visibility"
               ),
             })
           }
           run(): Promise<void> {
             const value =
               that.configurationService.getValue(
-                LayoutSettings.ACTIVITY_BAR_LOCATION,
+                LayoutSettings.ACTIVITY_BAR_LOCATION
               ) === ActivityBarPosition.HIDDEN
                 ? that.getRememberedActivityBarVisiblePosition()
                 : ActivityBarPosition.HIDDEN
             return that.configurationService.updateValue(
               LayoutSettings.ACTIVITY_BAR_LOCATION,
-              value,
+              value
             )
           }
-        },
-      ),
+        }
+      )
     )
   }
 

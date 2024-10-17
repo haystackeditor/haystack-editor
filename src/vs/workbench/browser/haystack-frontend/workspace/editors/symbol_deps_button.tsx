@@ -47,7 +47,7 @@ export function SymbolDepsButton({
         WorkspaceStoreWrapper.getWorkspaceState().sendTelemetry(
           `${
             depsType === SymbolDepsType.INCOMING ? "Incoming" : "Outgoing"
-          } Deps button clicked`,
+          } Deps button clicked`
         )
       }}
       ref={buttonRef}
@@ -65,12 +65,12 @@ export function SymbolDepsButton({
         forceHide={isActive}
         shortcut={
           depsType === SymbolDepsType.INCOMING
-            ? (WorkspaceStoreWrapper.getWorkspaceState()
+            ? WorkspaceStoreWrapper.getWorkspaceState()
                 .getKeybindingForCommand(ViewIncomingDependenciesAction.ID)
-                ?.getLabel() ?? undefined)
-            : (WorkspaceStoreWrapper.getWorkspaceState()
+                ?.getLabel() ?? undefined
+            : WorkspaceStoreWrapper.getWorkspaceState()
                 .getKeybindingForCommand(ViewOutgoingDependenciesAction.ID)
-                ?.getLabel() ?? undefined)
+                ?.getLabel() ?? undefined
         }
       />
       {depsType === SymbolDepsType.INCOMING ? (

@@ -30,7 +30,7 @@ export class WorkbenchReferencesController extends ReferencesController {
     @ILanguageService languageService: ILanguageService,
     @ILanguageFeaturesService languageFeatureService: ILanguageFeaturesService,
     @IInstantiationService instantiationService: IInstantiationService,
-    @IStorageService storageService: IStorageService,
+    @IStorageService storageService: IStorageService
   ) {
     super(
       false,
@@ -40,7 +40,7 @@ export class WorkbenchReferencesController extends ReferencesController {
       languageService,
       languageFeatureService,
       instantiationService,
-      storageService,
+      storageService
     )
   }
 }
@@ -48,5 +48,5 @@ export class WorkbenchReferencesController extends ReferencesController {
 registerEditorContribution(
   ReferencesController.ID,
   WorkbenchReferencesController,
-  EditorContributionInstantiation.Lazy,
+  EditorContributionInstantiation.Lazy
 )

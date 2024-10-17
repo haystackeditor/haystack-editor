@@ -9,12 +9,12 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IDisposable } from "vs/base/common/lifecycle"
+import { IDisposable } from 'vs/base/common/lifecycle';
 
 export interface ActionSet<T> extends IDisposable {
-  readonly validActions: readonly T[]
-  readonly allActions: readonly T[]
-  readonly hasAutoFix: boolean
-  readonly hasAIFix: boolean
-  readonly allAIFixes: boolean
+	readonly validActions: readonly T[];
+	readonly allActions: readonly T[];
+	readonly hasAutoFix: boolean;
+	readonly hasAIFix: boolean;
+	readonly allAIFixes: boolean;
 }

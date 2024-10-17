@@ -9,762 +9,745 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { URI } from "vs/base/common/uri"
+import { URI } from 'vs/base/common/uri';
 
 export function getOrSet<K, V>(map: Map<K, V>, key: K, value: V): V {
-  let result = map.get(key)
-  if (result === undefined) {
-    result = value
-    map.set(key, result)
-  }
+	let result = map.get(key);
+	if (result === undefined) {
+		result = value;
+		map.set(key, result);
+	}
 
-  return result
+	return result;
 }
 
 export function mapToString<K, V>(map: Map<K, V>): string {
-  const entries: string[] = []
-  map.forEach((value, key) => {
-    entries.push(`${key} => ${value}`)
-  })
+	const entries: string[] = [];
+	map.forEach((value, key) => {
+		entries.push(`${key} => ${value}`);
+	});
 
-  return `Map(${map.size}) {${entries.join(", ")}}`
+	return `Map(${map.size}) {${entries.join(', ')}}`;
 }
 
 export function setToString<K>(set: Set<K>): string {
-  const entries: K[] = []
-  set.forEach((value) => {
-    entries.push(value)
-  })
+	const entries: K[] = [];
+	set.forEach(value => {
+		entries.push(value);
+	});
 
-  return `Set(${set.size}) {${entries.join(", ")}}`
+	return `Set(${set.size}) {${entries.join(', ')}}`;
 }
 
 interface ResourceMapKeyFn {
-  (resource: URI): string
+	(resource: URI): string;
 }
 
 class ResourceMapEntry<T> {
-  constructor(
-    readonly uri: URI,
-    readonly value: T,
-  ) {}
+	constructor(readonly uri: URI, readonly value: T) { }
 }
 
-function isEntries<T>(
-  arg:
-    | ResourceMap<T>
-    | ResourceMapKeyFn
-    | readonly (readonly [URI, T])[]
-    | undefined,
-): arg is readonly (readonly [URI, T])[] {
-  return Array.isArray(arg)
+function isEntries<T>(arg: ResourceMap<T> | ResourceMapKeyFn | readonly (readonly [URI, T])[] | undefined): arg is readonly (readonly [URI, T])[] {
+	return Array.isArray(arg);
 }
 
 export class ResourceMap<T> implements Map<URI, T> {
-  private static readonly defaultToKey = (resource: URI) => resource.toString()
 
-  readonly [Symbol.toStringTag] = "ResourceMap"
+	private static readonly defaultToKey = (resource: URI) => resource.toString();
 
-  private readonly map: Map<string, ResourceMapEntry<T>>
-  private readonly toKey: ResourceMapKeyFn
+	readonly [Symbol.toStringTag] = 'ResourceMap';
 
-  /**
-   *
-   * @param toKey Custom uri identity function, e.g use an existing `IExtUri#getComparison`-util
-   */
-  constructor(toKey?: ResourceMapKeyFn)
+	private readonly map: Map<string, ResourceMapEntry<T>>;
+	private readonly toKey: ResourceMapKeyFn;
 
-  /**
-   *
-   * @param other Another resource which this maps is created from
-   * @param toKey Custom uri identity function, e.g use an existing `IExtUri#getComparison`-util
-   */
-  constructor(other?: ResourceMap<T>, toKey?: ResourceMapKeyFn)
+	/**
+	 *
+	 * @param toKey Custom uri identity function, e.g use an existing `IExtUri#getComparison`-util
+	 */
+	constructor(toKey?: ResourceMapKeyFn);
 
-  /**
-   *
-   * @param other Another resource which this maps is created from
-   * @param toKey Custom uri identity function, e.g use an existing `IExtUri#getComparison`-util
-   */
-  constructor(
-    entries?: readonly (readonly [URI, T])[],
-    toKey?: ResourceMapKeyFn,
-  )
+	/**
+	 *
+	 * @param other Another resource which this maps is created from
+	 * @param toKey Custom uri identity function, e.g use an existing `IExtUri#getComparison`-util
+	 */
+	constructor(other?: ResourceMap<T>, toKey?: ResourceMapKeyFn);
 
-  constructor(
-    arg?: ResourceMap<T> | ResourceMapKeyFn | readonly (readonly [URI, T])[],
-    toKey?: ResourceMapKeyFn,
-  ) {
-    if (arg instanceof ResourceMap) {
-      this.map = new Map(arg.map)
-      this.toKey = toKey ?? ResourceMap.defaultToKey
-    } else if (isEntries(arg)) {
-      this.map = new Map()
-      this.toKey = toKey ?? ResourceMap.defaultToKey
+	/**
+	 *
+	 * @param other Another resource which this maps is created from
+	 * @param toKey Custom uri identity function, e.g use an existing `IExtUri#getComparison`-util
+	 */
+	constructor(entries?: readonly (readonly [URI, T])[], toKey?: ResourceMapKeyFn);
 
-      for (const [resource, value] of arg) {
-        this.set(resource, value)
-      }
-    } else {
-      this.map = new Map()
-      this.toKey = arg ?? ResourceMap.defaultToKey
-    }
-  }
+	constructor(arg?: ResourceMap<T> | ResourceMapKeyFn | readonly (readonly [URI, T])[], toKey?: ResourceMapKeyFn) {
+		if (arg instanceof ResourceMap) {
+			this.map = new Map(arg.map);
+			this.toKey = toKey ?? ResourceMap.defaultToKey;
+		} else if (isEntries(arg)) {
+			this.map = new Map();
+			this.toKey = toKey ?? ResourceMap.defaultToKey;
 
-  set(resource: URI, value: T): this {
-    this.map.set(this.toKey(resource), new ResourceMapEntry(resource, value))
-    return this
-  }
+			for (const [resource, value] of arg) {
+				this.set(resource, value);
+			}
+		} else {
+			this.map = new Map();
+			this.toKey = arg ?? ResourceMap.defaultToKey;
+		}
+	}
 
-  get(resource: URI): T | undefined {
-    return this.map.get(this.toKey(resource))?.value
-  }
+	set(resource: URI, value: T): this {
+		this.map.set(this.toKey(resource), new ResourceMapEntry(resource, value));
+		return this;
+	}
 
-  has(resource: URI): boolean {
-    return this.map.has(this.toKey(resource))
-  }
+	get(resource: URI): T | undefined {
+		return this.map.get(this.toKey(resource))?.value;
+	}
 
-  get size(): number {
-    return this.map.size
-  }
+	has(resource: URI): boolean {
+		return this.map.has(this.toKey(resource));
+	}
 
-  clear(): void {
-    this.map.clear()
-  }
+	get size(): number {
+		return this.map.size;
+	}
 
-  delete(resource: URI): boolean {
-    return this.map.delete(this.toKey(resource))
-  }
+	clear(): void {
+		this.map.clear();
+	}
 
-  forEach(
-    clb: (value: T, key: URI, map: Map<URI, T>) => void,
-    thisArg?: any,
-  ): void {
-    if (typeof thisArg !== "undefined") {
-      clb = clb.bind(thisArg)
-    }
-    for (const [_, entry] of this.map) {
-      clb(entry.value, entry.uri, <any>this)
-    }
-  }
+	delete(resource: URI): boolean {
+		return this.map.delete(this.toKey(resource));
+	}
 
-  *values(): IterableIterator<T> {
-    for (const entry of this.map.values()) {
-      yield entry.value
-    }
-  }
+	forEach(clb: (value: T, key: URI, map: Map<URI, T>) => void, thisArg?: any): void {
+		if (typeof thisArg !== 'undefined') {
+			clb = clb.bind(thisArg);
+		}
+		for (const [_, entry] of this.map) {
+			clb(entry.value, entry.uri, <any>this);
+		}
+	}
 
-  *keys(): IterableIterator<URI> {
-    for (const entry of this.map.values()) {
-      yield entry.uri
-    }
-  }
+	*values(): IterableIterator<T> {
+		for (const entry of this.map.values()) {
+			yield entry.value;
+		}
+	}
 
-  *entries(): IterableIterator<[URI, T]> {
-    for (const entry of this.map.values()) {
-      yield [entry.uri, entry.value]
-    }
-  }
+	*keys(): IterableIterator<URI> {
+		for (const entry of this.map.values()) {
+			yield entry.uri;
+		}
+	}
 
-  *[Symbol.iterator](): IterableIterator<[URI, T]> {
-    for (const [, entry] of this.map) {
-      yield [entry.uri, entry.value]
-    }
-  }
+	*entries(): IterableIterator<[URI, T]> {
+		for (const entry of this.map.values()) {
+			yield [entry.uri, entry.value];
+		}
+	}
+
+	*[Symbol.iterator](): IterableIterator<[URI, T]> {
+		for (const [, entry] of this.map) {
+			yield [entry.uri, entry.value];
+		}
+	}
 }
 
 export class ResourceSet implements Set<URI> {
-  readonly [Symbol.toStringTag]: string = "ResourceSet"
 
-  private readonly _map: ResourceMap<URI>
+	readonly [Symbol.toStringTag]: string = 'ResourceSet';
 
-  constructor(toKey?: ResourceMapKeyFn)
-  constructor(entries: readonly URI[], toKey?: ResourceMapKeyFn)
-  constructor(
-    entriesOrKey?: readonly URI[] | ResourceMapKeyFn,
-    toKey?: ResourceMapKeyFn,
-  ) {
-    if (!entriesOrKey || typeof entriesOrKey === "function") {
-      this._map = new ResourceMap(entriesOrKey)
-    } else {
-      this._map = new ResourceMap(toKey)
-      entriesOrKey.forEach(this.add, this)
-    }
-  }
+	private readonly _map: ResourceMap<URI>;
 
-  get size(): number {
-    return this._map.size
-  }
+	constructor(toKey?: ResourceMapKeyFn);
+	constructor(entries: readonly URI[], toKey?: ResourceMapKeyFn);
+	constructor(entriesOrKey?: readonly URI[] | ResourceMapKeyFn, toKey?: ResourceMapKeyFn) {
+		if (!entriesOrKey || typeof entriesOrKey === 'function') {
+			this._map = new ResourceMap(entriesOrKey);
+		} else {
+			this._map = new ResourceMap(toKey);
+			entriesOrKey.forEach(this.add, this);
+		}
+	}
 
-  add(value: URI): this {
-    this._map.set(value, value)
-    return this
-  }
 
-  clear(): void {
-    this._map.clear()
-  }
+	get size(): number {
+		return this._map.size;
+	}
 
-  delete(value: URI): boolean {
-    return this._map.delete(value)
-  }
+	add(value: URI): this {
+		this._map.set(value, value);
+		return this;
+	}
 
-  forEach(
-    callbackfn: (value: URI, value2: URI, set: Set<URI>) => void,
-    thisArg?: any,
-  ): void {
-    this._map.forEach((_value, key) => callbackfn.call(thisArg, key, key, this))
-  }
+	clear(): void {
+		this._map.clear();
+	}
 
-  has(value: URI): boolean {
-    return this._map.has(value)
-  }
+	delete(value: URI): boolean {
+		return this._map.delete(value);
+	}
 
-  entries(): IterableIterator<[URI, URI]> {
-    return this._map.entries()
-  }
+	forEach(callbackfn: (value: URI, value2: URI, set: Set<URI>) => void, thisArg?: any): void {
+		this._map.forEach((_value, key) => callbackfn.call(thisArg, key, key, this));
+	}
 
-  keys(): IterableIterator<URI> {
-    return this._map.keys()
-  }
+	has(value: URI): boolean {
+		return this._map.has(value);
+	}
 
-  values(): IterableIterator<URI> {
-    return this._map.keys()
-  }
+	entries(): IterableIterator<[URI, URI]> {
+		return this._map.entries();
+	}
 
-  [Symbol.iterator](): IterableIterator<URI> {
-    return this.keys()
-  }
+	keys(): IterableIterator<URI> {
+		return this._map.keys();
+	}
+
+	values(): IterableIterator<URI> {
+		return this._map.keys();
+	}
+
+	[Symbol.iterator](): IterableIterator<URI> {
+		return this.keys();
+	}
 }
 
+
 interface Item<K, V> {
-  previous: Item<K, V> | undefined
-  next: Item<K, V> | undefined
-  key: K
-  value: V
+	previous: Item<K, V> | undefined;
+	next: Item<K, V> | undefined;
+	key: K;
+	value: V;
 }
 
 export const enum Touch {
-  None = 0,
-  AsOld = 1,
-  AsNew = 2,
+	None = 0,
+	AsOld = 1,
+	AsNew = 2
 }
 
 export class LinkedMap<K, V> implements Map<K, V> {
-  readonly [Symbol.toStringTag] = "LinkedMap"
 
-  private _map: Map<K, Item<K, V>>
-  private _head: Item<K, V> | undefined
-  private _tail: Item<K, V> | undefined
-  private _size: number
+	readonly [Symbol.toStringTag] = 'LinkedMap';
 
-  private _state: number
+	private _map: Map<K, Item<K, V>>;
+	private _head: Item<K, V> | undefined;
+	private _tail: Item<K, V> | undefined;
+	private _size: number;
 
-  constructor() {
-    this._map = new Map<K, Item<K, V>>()
-    this._head = undefined
-    this._tail = undefined
-    this._size = 0
-    this._state = 0
-  }
+	private _state: number;
 
-  clear(): void {
-    this._map.clear()
-    this._head = undefined
-    this._tail = undefined
-    this._size = 0
-    this._state++
-  }
+	constructor() {
+		this._map = new Map<K, Item<K, V>>();
+		this._head = undefined;
+		this._tail = undefined;
+		this._size = 0;
+		this._state = 0;
+	}
 
-  isEmpty(): boolean {
-    return !this._head && !this._tail
-  }
+	clear(): void {
+		this._map.clear();
+		this._head = undefined;
+		this._tail = undefined;
+		this._size = 0;
+		this._state++;
+	}
 
-  get size(): number {
-    return this._size
-  }
+	isEmpty(): boolean {
+		return !this._head && !this._tail;
+	}
 
-  get first(): V | undefined {
-    return this._head?.value
-  }
+	get size(): number {
+		return this._size;
+	}
 
-  get last(): V | undefined {
-    return this._tail?.value
-  }
+	get first(): V | undefined {
+		return this._head?.value;
+	}
 
-  has(key: K): boolean {
-    return this._map.has(key)
-  }
+	get last(): V | undefined {
+		return this._tail?.value;
+	}
 
-  get(key: K, touch: Touch = Touch.None): V | undefined {
-    const item = this._map.get(key)
-    if (!item) {
-      return undefined
-    }
-    if (touch !== Touch.None) {
-      this.touch(item, touch)
-    }
-    return item.value
-  }
+	has(key: K): boolean {
+		return this._map.has(key);
+	}
 
-  set(key: K, value: V, touch: Touch = Touch.None): this {
-    let item = this._map.get(key)
-    if (item) {
-      item.value = value
-      if (touch !== Touch.None) {
-        this.touch(item, touch)
-      }
-    } else {
-      item = { key, value, next: undefined, previous: undefined }
-      switch (touch) {
-        case Touch.None:
-          this.addItemLast(item)
-          break
-        case Touch.AsOld:
-          this.addItemFirst(item)
-          break
-        case Touch.AsNew:
-          this.addItemLast(item)
-          break
-        default:
-          this.addItemLast(item)
-          break
-      }
-      this._map.set(key, item)
-      this._size++
-    }
-    return this
-  }
+	get(key: K, touch: Touch = Touch.None): V | undefined {
+		const item = this._map.get(key);
+		if (!item) {
+			return undefined;
+		}
+		if (touch !== Touch.None) {
+			this.touch(item, touch);
+		}
+		return item.value;
+	}
 
-  delete(key: K): boolean {
-    return !!this.remove(key)
-  }
+	set(key: K, value: V, touch: Touch = Touch.None): this {
+		let item = this._map.get(key);
+		if (item) {
+			item.value = value;
+			if (touch !== Touch.None) {
+				this.touch(item, touch);
+			}
+		} else {
+			item = { key, value, next: undefined, previous: undefined };
+			switch (touch) {
+				case Touch.None:
+					this.addItemLast(item);
+					break;
+				case Touch.AsOld:
+					this.addItemFirst(item);
+					break;
+				case Touch.AsNew:
+					this.addItemLast(item);
+					break;
+				default:
+					this.addItemLast(item);
+					break;
+			}
+			this._map.set(key, item);
+			this._size++;
+		}
+		return this;
+	}
 
-  remove(key: K): V | undefined {
-    const item = this._map.get(key)
-    if (!item) {
-      return undefined
-    }
-    this._map.delete(key)
-    this.removeItem(item)
-    this._size--
-    return item.value
-  }
+	delete(key: K): boolean {
+		return !!this.remove(key);
+	}
 
-  shift(): V | undefined {
-    if (!this._head && !this._tail) {
-      return undefined
-    }
-    if (!this._head || !this._tail) {
-      throw new Error("Invalid list")
-    }
-    const item = this._head
-    this._map.delete(item.key)
-    this.removeItem(item)
-    this._size--
-    return item.value
-  }
+	remove(key: K): V | undefined {
+		const item = this._map.get(key);
+		if (!item) {
+			return undefined;
+		}
+		this._map.delete(key);
+		this.removeItem(item);
+		this._size--;
+		return item.value;
+	}
 
-  forEach(
-    callbackfn: (value: V, key: K, map: LinkedMap<K, V>) => void,
-    thisArg?: any,
-  ): void {
-    const state = this._state
-    let current = this._head
-    while (current) {
-      if (thisArg) {
-        callbackfn.bind(thisArg)(current.value, current.key, this)
-      } else {
-        callbackfn(current.value, current.key, this)
-      }
-      if (this._state !== state) {
-        throw new Error(`LinkedMap got modified during iteration.`)
-      }
-      current = current.next
-    }
-  }
+	shift(): V | undefined {
+		if (!this._head && !this._tail) {
+			return undefined;
+		}
+		if (!this._head || !this._tail) {
+			throw new Error('Invalid list');
+		}
+		const item = this._head;
+		this._map.delete(item.key);
+		this.removeItem(item);
+		this._size--;
+		return item.value;
+	}
 
-  keys(): IterableIterator<K> {
-    const map = this
-    const state = this._state
-    let current = this._head
-    const iterator: IterableIterator<K> = {
-      [Symbol.iterator]() {
-        return iterator
-      },
-      next(): IteratorResult<K> {
-        if (map._state !== state) {
-          throw new Error(`LinkedMap got modified during iteration.`)
-        }
-        if (current) {
-          const result = { value: current.key, done: false }
-          current = current.next
-          return result
-        } else {
-          return { value: undefined, done: true }
-        }
-      },
-    }
-    return iterator
-  }
+	forEach(callbackfn: (value: V, key: K, map: LinkedMap<K, V>) => void, thisArg?: any): void {
+		const state = this._state;
+		let current = this._head;
+		while (current) {
+			if (thisArg) {
+				callbackfn.bind(thisArg)(current.value, current.key, this);
+			} else {
+				callbackfn(current.value, current.key, this);
+			}
+			if (this._state !== state) {
+				throw new Error(`LinkedMap got modified during iteration.`);
+			}
+			current = current.next;
+		}
+	}
 
-  values(): IterableIterator<V> {
-    const map = this
-    const state = this._state
-    let current = this._head
-    const iterator: IterableIterator<V> = {
-      [Symbol.iterator]() {
-        return iterator
-      },
-      next(): IteratorResult<V> {
-        if (map._state !== state) {
-          throw new Error(`LinkedMap got modified during iteration.`)
-        }
-        if (current) {
-          const result = { value: current.value, done: false }
-          current = current.next
-          return result
-        } else {
-          return { value: undefined, done: true }
-        }
-      },
-    }
-    return iterator
-  }
+	keys(): IterableIterator<K> {
+		const map = this;
+		const state = this._state;
+		let current = this._head;
+		const iterator: IterableIterator<K> = {
+			[Symbol.iterator]() {
+				return iterator;
+			},
+			next(): IteratorResult<K> {
+				if (map._state !== state) {
+					throw new Error(`LinkedMap got modified during iteration.`);
+				}
+				if (current) {
+					const result = { value: current.key, done: false };
+					current = current.next;
+					return result;
+				} else {
+					return { value: undefined, done: true };
+				}
+			}
+		};
+		return iterator;
+	}
 
-  entries(): IterableIterator<[K, V]> {
-    const map = this
-    const state = this._state
-    let current = this._head
-    const iterator: IterableIterator<[K, V]> = {
-      [Symbol.iterator]() {
-        return iterator
-      },
-      next(): IteratorResult<[K, V]> {
-        if (map._state !== state) {
-          throw new Error(`LinkedMap got modified during iteration.`)
-        }
-        if (current) {
-          const result: IteratorResult<[K, V]> = {
-            value: [current.key, current.value],
-            done: false,
-          }
-          current = current.next
-          return result
-        } else {
-          return { value: undefined, done: true }
-        }
-      },
-    }
-    return iterator
-  }
+	values(): IterableIterator<V> {
+		const map = this;
+		const state = this._state;
+		let current = this._head;
+		const iterator: IterableIterator<V> = {
+			[Symbol.iterator]() {
+				return iterator;
+			},
+			next(): IteratorResult<V> {
+				if (map._state !== state) {
+					throw new Error(`LinkedMap got modified during iteration.`);
+				}
+				if (current) {
+					const result = { value: current.value, done: false };
+					current = current.next;
+					return result;
+				} else {
+					return { value: undefined, done: true };
+				}
+			}
+		};
+		return iterator;
+	}
 
-  [Symbol.iterator](): IterableIterator<[K, V]> {
-    return this.entries()
-  }
+	entries(): IterableIterator<[K, V]> {
+		const map = this;
+		const state = this._state;
+		let current = this._head;
+		const iterator: IterableIterator<[K, V]> = {
+			[Symbol.iterator]() {
+				return iterator;
+			},
+			next(): IteratorResult<[K, V]> {
+				if (map._state !== state) {
+					throw new Error(`LinkedMap got modified during iteration.`);
+				}
+				if (current) {
+					const result: IteratorResult<[K, V]> = { value: [current.key, current.value], done: false };
+					current = current.next;
+					return result;
+				} else {
+					return { value: undefined, done: true };
+				}
+			}
+		};
+		return iterator;
+	}
 
-  protected trimOld(newSize: number) {
-    if (newSize >= this.size) {
-      return
-    }
-    if (newSize === 0) {
-      this.clear()
-      return
-    }
-    let current = this._head
-    let currentSize = this.size
-    while (current && currentSize > newSize) {
-      this._map.delete(current.key)
-      current = current.next
-      currentSize--
-    }
-    this._head = current
-    this._size = currentSize
-    if (current) {
-      current.previous = undefined
-    }
-    this._state++
-  }
+	[Symbol.iterator](): IterableIterator<[K, V]> {
+		return this.entries();
+	}
 
-  protected trimNew(newSize: number) {
-    if (newSize >= this.size) {
-      return
-    }
-    if (newSize === 0) {
-      this.clear()
-      return
-    }
-    let current = this._tail
-    let currentSize = this.size
-    while (current && currentSize > newSize) {
-      this._map.delete(current.key)
-      current = current.previous
-      currentSize--
-    }
-    this._tail = current
-    this._size = currentSize
-    if (current) {
-      current.next = undefined
-    }
-    this._state++
-  }
+	protected trimOld(newSize: number) {
+		if (newSize >= this.size) {
+			return;
+		}
+		if (newSize === 0) {
+			this.clear();
+			return;
+		}
+		let current = this._head;
+		let currentSize = this.size;
+		while (current && currentSize > newSize) {
+			this._map.delete(current.key);
+			current = current.next;
+			currentSize--;
+		}
+		this._head = current;
+		this._size = currentSize;
+		if (current) {
+			current.previous = undefined;
+		}
+		this._state++;
+	}
 
-  private addItemFirst(item: Item<K, V>): void {
-    // First time Insert
-    if (!this._head && !this._tail) {
-      this._tail = item
-    } else if (!this._head) {
-      throw new Error("Invalid list")
-    } else {
-      item.next = this._head
-      this._head.previous = item
-    }
-    this._head = item
-    this._state++
-  }
+	protected trimNew(newSize: number) {
+		if (newSize >= this.size) {
+			return;
+		}
+		if (newSize === 0) {
+			this.clear();
+			return;
+		}
+		let current = this._tail;
+		let currentSize = this.size;
+		while (current && currentSize > newSize) {
+			this._map.delete(current.key);
+			current = current.previous;
+			currentSize--;
+		}
+		this._tail = current;
+		this._size = currentSize;
+		if (current) {
+			current.next = undefined;
+		}
+		this._state++;
+	}
 
-  private addItemLast(item: Item<K, V>): void {
-    // First time Insert
-    if (!this._head && !this._tail) {
-      this._head = item
-    } else if (!this._tail) {
-      throw new Error("Invalid list")
-    } else {
-      item.previous = this._tail
-      this._tail.next = item
-    }
-    this._tail = item
-    this._state++
-  }
+	private addItemFirst(item: Item<K, V>): void {
+		// First time Insert
+		if (!this._head && !this._tail) {
+			this._tail = item;
+		} else if (!this._head) {
+			throw new Error('Invalid list');
+		} else {
+			item.next = this._head;
+			this._head.previous = item;
+		}
+		this._head = item;
+		this._state++;
+	}
 
-  private removeItem(item: Item<K, V>): void {
-    if (item === this._head && item === this._tail) {
-      this._head = undefined
-      this._tail = undefined
-    } else if (item === this._head) {
-      // This can only happen if size === 1 which is handled
-      // by the case above.
-      if (!item.next) {
-        throw new Error("Invalid list")
-      }
-      item.next.previous = undefined
-      this._head = item.next
-    } else if (item === this._tail) {
-      // This can only happen if size === 1 which is handled
-      // by the case above.
-      if (!item.previous) {
-        throw new Error("Invalid list")
-      }
-      item.previous.next = undefined
-      this._tail = item.previous
-    } else {
-      const next = item.next
-      const previous = item.previous
-      if (!next || !previous) {
-        throw new Error("Invalid list")
-      }
-      next.previous = previous
-      previous.next = next
-    }
-    item.next = undefined
-    item.previous = undefined
-    this._state++
-  }
+	private addItemLast(item: Item<K, V>): void {
+		// First time Insert
+		if (!this._head && !this._tail) {
+			this._head = item;
+		} else if (!this._tail) {
+			throw new Error('Invalid list');
+		} else {
+			item.previous = this._tail;
+			this._tail.next = item;
+		}
+		this._tail = item;
+		this._state++;
+	}
 
-  private touch(item: Item<K, V>, touch: Touch): void {
-    if (!this._head || !this._tail) {
-      throw new Error("Invalid list")
-    }
-    if (touch !== Touch.AsOld && touch !== Touch.AsNew) {
-      return
-    }
+	private removeItem(item: Item<K, V>): void {
+		if (item === this._head && item === this._tail) {
+			this._head = undefined;
+			this._tail = undefined;
+		}
+		else if (item === this._head) {
+			// This can only happen if size === 1 which is handled
+			// by the case above.
+			if (!item.next) {
+				throw new Error('Invalid list');
+			}
+			item.next.previous = undefined;
+			this._head = item.next;
+		}
+		else if (item === this._tail) {
+			// This can only happen if size === 1 which is handled
+			// by the case above.
+			if (!item.previous) {
+				throw new Error('Invalid list');
+			}
+			item.previous.next = undefined;
+			this._tail = item.previous;
+		}
+		else {
+			const next = item.next;
+			const previous = item.previous;
+			if (!next || !previous) {
+				throw new Error('Invalid list');
+			}
+			next.previous = previous;
+			previous.next = next;
+		}
+		item.next = undefined;
+		item.previous = undefined;
+		this._state++;
+	}
 
-    if (touch === Touch.AsOld) {
-      if (item === this._head) {
-        return
-      }
+	private touch(item: Item<K, V>, touch: Touch): void {
+		if (!this._head || !this._tail) {
+			throw new Error('Invalid list');
+		}
+		if ((touch !== Touch.AsOld && touch !== Touch.AsNew)) {
+			return;
+		}
 
-      const next = item.next
-      const previous = item.previous
+		if (touch === Touch.AsOld) {
+			if (item === this._head) {
+				return;
+			}
 
-      // Unlink the item
-      if (item === this._tail) {
-        // previous must be defined since item was not head but is tail
-        // So there are more than on item in the map
-        previous!.next = undefined
-        this._tail = previous
-      } else {
-        // Both next and previous are not undefined since item was neither head nor tail.
-        next!.previous = previous
-        previous!.next = next
-      }
+			const next = item.next;
+			const previous = item.previous;
 
-      // Insert the node at head
-      item.previous = undefined
-      item.next = this._head
-      this._head.previous = item
-      this._head = item
-      this._state++
-    } else if (touch === Touch.AsNew) {
-      if (item === this._tail) {
-        return
-      }
+			// Unlink the item
+			if (item === this._tail) {
+				// previous must be defined since item was not head but is tail
+				// So there are more than on item in the map
+				previous!.next = undefined;
+				this._tail = previous;
+			}
+			else {
+				// Both next and previous are not undefined since item was neither head nor tail.
+				next!.previous = previous;
+				previous!.next = next;
+			}
 
-      const next = item.next
-      const previous = item.previous
+			// Insert the node at head
+			item.previous = undefined;
+			item.next = this._head;
+			this._head.previous = item;
+			this._head = item;
+			this._state++;
+		} else if (touch === Touch.AsNew) {
+			if (item === this._tail) {
+				return;
+			}
 
-      // Unlink the item.
-      if (item === this._head) {
-        // next must be defined since item was not tail but is head
-        // So there are more than on item in the map
-        next!.previous = undefined
-        this._head = next
-      } else {
-        // Both next and previous are not undefined since item was neither head nor tail.
-        next!.previous = previous
-        previous!.next = next
-      }
-      item.next = undefined
-      item.previous = this._tail
-      this._tail.next = item
-      this._tail = item
-      this._state++
-    }
-  }
+			const next = item.next;
+			const previous = item.previous;
 
-  toJSON(): [K, V][] {
-    const data: [K, V][] = []
+			// Unlink the item.
+			if (item === this._head) {
+				// next must be defined since item was not tail but is head
+				// So there are more than on item in the map
+				next!.previous = undefined;
+				this._head = next;
+			} else {
+				// Both next and previous are not undefined since item was neither head nor tail.
+				next!.previous = previous;
+				previous!.next = next;
+			}
+			item.next = undefined;
+			item.previous = this._tail;
+			this._tail.next = item;
+			this._tail = item;
+			this._state++;
+		}
+	}
 
-    this.forEach((value, key) => {
-      data.push([key, value])
-    })
+	toJSON(): [K, V][] {
+		const data: [K, V][] = [];
 
-    return data
-  }
+		this.forEach((value, key) => {
+			data.push([key, value]);
+		});
 
-  fromJSON(data: [K, V][]): void {
-    this.clear()
+		return data;
+	}
 
-    for (const [key, value] of data) {
-      this.set(key, value)
-    }
-  }
+	fromJSON(data: [K, V][]): void {
+		this.clear();
+
+		for (const [key, value] of data) {
+			this.set(key, value);
+		}
+	}
 }
 
 abstract class Cache<K, V> extends LinkedMap<K, V> {
-  protected _limit: number
-  protected _ratio: number
 
-  constructor(limit: number, ratio: number = 1) {
-    super()
-    this._limit = limit
-    this._ratio = Math.min(Math.max(0, ratio), 1)
-  }
+	protected _limit: number;
+	protected _ratio: number;
 
-  get limit(): number {
-    return this._limit
-  }
+	constructor(limit: number, ratio: number = 1) {
+		super();
+		this._limit = limit;
+		this._ratio = Math.min(Math.max(0, ratio), 1);
+	}
 
-  set limit(limit: number) {
-    this._limit = limit
-    this.checkTrim()
-  }
+	get limit(): number {
+		return this._limit;
+	}
 
-  get ratio(): number {
-    return this._ratio
-  }
+	set limit(limit: number) {
+		this._limit = limit;
+		this.checkTrim();
+	}
 
-  set ratio(ratio: number) {
-    this._ratio = Math.min(Math.max(0, ratio), 1)
-    this.checkTrim()
-  }
+	get ratio(): number {
+		return this._ratio;
+	}
 
-  override get(key: K, touch: Touch = Touch.AsNew): V | undefined {
-    return super.get(key, touch)
-  }
+	set ratio(ratio: number) {
+		this._ratio = Math.min(Math.max(0, ratio), 1);
+		this.checkTrim();
+	}
 
-  peek(key: K): V | undefined {
-    return super.get(key, Touch.None)
-  }
+	override get(key: K, touch: Touch = Touch.AsNew): V | undefined {
+		return super.get(key, touch);
+	}
 
-  override set(key: K, value: V): this {
-    super.set(key, value, Touch.AsNew)
-    return this
-  }
+	peek(key: K): V | undefined {
+		return super.get(key, Touch.None);
+	}
 
-  protected checkTrim() {
-    if (this.size > this._limit) {
-      this.trim(Math.round(this._limit * this._ratio))
-    }
-  }
+	override set(key: K, value: V): this {
+		super.set(key, value, Touch.AsNew);
+		return this;
+	}
 
-  protected abstract trim(newSize: number): void
+	protected checkTrim() {
+		if (this.size > this._limit) {
+			this.trim(Math.round(this._limit * this._ratio));
+		}
+	}
+
+	protected abstract trim(newSize: number): void;
 }
 
 export class LRUCache<K, V> extends Cache<K, V> {
-  constructor(limit: number, ratio: number = 1) {
-    super(limit, ratio)
-  }
 
-  protected override trim(newSize: number) {
-    this.trimOld(newSize)
-  }
+	constructor(limit: number, ratio: number = 1) {
+		super(limit, ratio);
+	}
 
-  override set(key: K, value: V): this {
-    super.set(key, value)
-    this.checkTrim()
-    return this
-  }
+	protected override trim(newSize: number) {
+		this.trimOld(newSize);
+	}
+
+	override set(key: K, value: V): this {
+		super.set(key, value);
+		this.checkTrim();
+		return this;
+	}
 }
 
 export class MRUCache<K, V> extends Cache<K, V> {
-  constructor(limit: number, ratio: number = 1) {
-    super(limit, ratio)
-  }
 
-  protected override trim(newSize: number) {
-    this.trimNew(newSize)
-  }
+	constructor(limit: number, ratio: number = 1) {
+		super(limit, ratio);
+	}
 
-  override set(key: K, value: V): this {
-    if (this._limit <= this.size && !this.has(key)) {
-      this.trim(Math.round(this._limit * this._ratio) - 1)
-    }
+	protected override trim(newSize: number) {
+		this.trimNew(newSize);
+	}
 
-    super.set(key, value)
-    return this
-  }
+	override set(key: K, value: V): this {
+		if (this._limit <= this.size && !this.has(key)) {
+			this.trim(Math.round(this._limit * this._ratio) - 1);
+		}
+
+		super.set(key, value);
+		return this;
+	}
 }
 
 export class CounterSet<T> {
-  private map = new Map<T, number>()
 
-  add(value: T): CounterSet<T> {
-    this.map.set(value, (this.map.get(value) || 0) + 1)
-    return this
-  }
+	private map = new Map<T, number>();
 
-  delete(value: T): boolean {
-    let counter = this.map.get(value) || 0
+	add(value: T): CounterSet<T> {
+		this.map.set(value, (this.map.get(value) || 0) + 1);
+		return this;
+	}
 
-    if (counter === 0) {
-      return false
-    }
+	delete(value: T): boolean {
+		let counter = this.map.get(value) || 0;
 
-    counter--
+		if (counter === 0) {
+			return false;
+		}
 
-    if (counter === 0) {
-      this.map.delete(value)
-    } else {
-      this.map.set(value, counter)
-    }
+		counter--;
 
-    return true
-  }
+		if (counter === 0) {
+			this.map.delete(value);
+		} else {
+			this.map.set(value, counter);
+		}
 
-  has(value: T): boolean {
-    return this.map.has(value)
-  }
+		return true;
+	}
+
+	has(value: T): boolean {
+		return this.map.has(value);
+	}
 }
 
 /**
@@ -772,133 +755,129 @@ export class CounterSet<T> {
  * **NOTE**: values need to be unique.
  */
 export class BidirectionalMap<K, V> {
-  private readonly _m1 = new Map<K, V>()
-  private readonly _m2 = new Map<V, K>()
 
-  constructor(entries?: readonly (readonly [K, V])[]) {
-    if (entries) {
-      for (const [key, value] of entries) {
-        this.set(key, value)
-      }
-    }
-  }
+	private readonly _m1 = new Map<K, V>();
+	private readonly _m2 = new Map<V, K>();
 
-  clear(): void {
-    this._m1.clear()
-    this._m2.clear()
-  }
+	constructor(entries?: readonly (readonly [K, V])[]) {
+		if (entries) {
+			for (const [key, value] of entries) {
+				this.set(key, value);
+			}
+		}
+	}
 
-  set(key: K, value: V): void {
-    this._m1.set(key, value)
-    this._m2.set(value, key)
-  }
+	clear(): void {
+		this._m1.clear();
+		this._m2.clear();
+	}
 
-  get(key: K): V | undefined {
-    return this._m1.get(key)
-  }
+	set(key: K, value: V): void {
+		this._m1.set(key, value);
+		this._m2.set(value, key);
+	}
 
-  getKey(value: V): K | undefined {
-    return this._m2.get(value)
-  }
+	get(key: K): V | undefined {
+		return this._m1.get(key);
+	}
 
-  delete(key: K): boolean {
-    const value = this._m1.get(key)
-    if (value === undefined) {
-      return false
-    }
-    this._m1.delete(key)
-    this._m2.delete(value)
-    return true
-  }
+	getKey(value: V): K | undefined {
+		return this._m2.get(value);
+	}
 
-  forEach(
-    callbackfn: (value: V, key: K, map: BidirectionalMap<K, V>) => void,
-    thisArg?: any,
-  ): void {
-    this._m1.forEach((value, key) => {
-      callbackfn.call(thisArg, value, key, this)
-    })
-  }
+	delete(key: K): boolean {
+		const value = this._m1.get(key);
+		if (value === undefined) {
+			return false;
+		}
+		this._m1.delete(key);
+		this._m2.delete(value);
+		return true;
+	}
 
-  keys(): IterableIterator<K> {
-    return this._m1.keys()
-  }
+	forEach(callbackfn: (value: V, key: K, map: BidirectionalMap<K, V>) => void, thisArg?: any): void {
+		this._m1.forEach((value, key) => {
+			callbackfn.call(thisArg, value, key, this);
+		});
+	}
 
-  values(): IterableIterator<V> {
-    return this._m1.values()
-  }
+	keys(): IterableIterator<K> {
+		return this._m1.keys();
+	}
+
+	values(): IterableIterator<V> {
+		return this._m1.values();
+	}
 }
 
 export class SetMap<K, V> {
-  private map = new Map<K, Set<V>>()
 
-  add(key: K, value: V): void {
-    let values = this.map.get(key)
+	private map = new Map<K, Set<V>>();
 
-    if (!values) {
-      values = new Set<V>()
-      this.map.set(key, values)
-    }
+	add(key: K, value: V): void {
+		let values = this.map.get(key);
 
-    values.add(value)
-  }
+		if (!values) {
+			values = new Set<V>();
+			this.map.set(key, values);
+		}
 
-  delete(key: K, value: V): void {
-    const values = this.map.get(key)
+		values.add(value);
+	}
 
-    if (!values) {
-      return
-    }
+	delete(key: K, value: V): void {
+		const values = this.map.get(key);
 
-    values.delete(value)
+		if (!values) {
+			return;
+		}
 
-    if (values.size === 0) {
-      this.map.delete(key)
-    }
-  }
+		values.delete(value);
 
-  forEach(key: K, fn: (value: V) => void): void {
-    const values = this.map.get(key)
+		if (values.size === 0) {
+			this.map.delete(key);
+		}
+	}
 
-    if (!values) {
-      return
-    }
+	forEach(key: K, fn: (value: V) => void): void {
+		const values = this.map.get(key);
 
-    values.forEach(fn)
-  }
+		if (!values) {
+			return;
+		}
 
-  get(key: K): ReadonlySet<V> {
-    const values = this.map.get(key)
-    if (!values) {
-      return new Set<V>()
-    }
-    return values
-  }
+		values.forEach(fn);
+	}
+
+	get(key: K): ReadonlySet<V> {
+		const values = this.map.get(key);
+		if (!values) {
+			return new Set<V>();
+		}
+		return values;
+	}
 }
 
-export function mapsStrictEqualIgnoreOrder(
-  a: Map<unknown, unknown>,
-  b: Map<unknown, unknown>,
-): boolean {
-  if (a === b) {
-    return true
-  }
+export function mapsStrictEqualIgnoreOrder(a: Map<unknown, unknown>, b: Map<unknown, unknown>): boolean {
+	if (a === b) {
+		return true;
+	}
 
-  if (a.size !== b.size) {
-    return false
-  }
+	if (a.size !== b.size) {
+		return false;
+	}
 
-  for (const [key, value] of a) {
-    if (!b.has(key) || b.get(key) !== value) {
-      return false
-    }
-  }
+	for (const [key, value] of a) {
+		if (!b.has(key) || b.get(key) !== value) {
+			return false;
+		}
+	}
 
-  for (const [key] of b) {
-    if (!a.has(key)) {
-      return false
-    }
-  }
+	for (const [key] of b) {
+		if (!a.has(key)) {
+			return false;
+		}
+	}
 
-  return true
+	return true;
 }

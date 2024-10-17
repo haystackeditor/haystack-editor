@@ -9,139 +9,102 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Emitter, Event } from "vs/base/common/event"
-import { IMarkdownString } from "vs/base/common/htmlContent"
-import { Disposable, IReference } from "vs/base/common/lifecycle"
-import { isEqual } from "vs/base/common/resources"
-import { URI } from "vs/base/common/uri"
-import {
-  IResolvedTextEditorModel,
-  ITextModelService,
-} from "vs/editor/common/services/resolverService"
-import { IInstantiationService } from "vs/platform/instantiation/common/instantiation"
-import { IRevertOptions, ISaveOptions } from "vs/workbench/common/editor"
-import { ICustomEditorModel } from "vs/workbench/contrib/customEditor/common/customEditor"
-import {
-  ITextFileEditorModel,
-  ITextFileService,
-  TextFileEditorModelState,
-} from "vs/workbench/services/textfile/common/textfiles"
+import { Emitter, Event } from 'vs/base/common/event';
+import { IMarkdownString } from 'vs/base/common/htmlContent';
+import { Disposable, IReference } from 'vs/base/common/lifecycle';
+import { isEqual } from 'vs/base/common/resources';
+import { URI } from 'vs/base/common/uri';
+import { IResolvedTextEditorModel, ITextModelService } from 'vs/editor/common/services/resolverService';
+import { IInstantiationService } from 'vs/platform/instantiation/common/instantiation';
+import { IRevertOptions, ISaveOptions } from 'vs/workbench/common/editor';
+import { ICustomEditorModel } from 'vs/workbench/contrib/customEditor/common/customEditor';
+import { ITextFileEditorModel, ITextFileService, TextFileEditorModelState } from 'vs/workbench/services/textfile/common/textfiles';
 
-export class CustomTextEditorModel
-  extends Disposable
-  implements ICustomEditorModel
-{
-  public static async create(
-    instantiationService: IInstantiationService,
-    viewType: string,
-    resource: URI,
-  ): Promise<CustomTextEditorModel> {
-    return instantiationService.invokeFunction(async (accessor) => {
-      const textModelResolverService = accessor.get(ITextModelService)
-      const model =
-        await textModelResolverService.createModelReference(resource)
-      return instantiationService.createInstance(
-        CustomTextEditorModel,
-        viewType,
-        resource,
-        model,
-      )
-    })
-  }
+export class CustomTextEditorModel extends Disposable implements ICustomEditorModel {
 
-  private readonly _textFileModel: ITextFileEditorModel | undefined
+	public static async create(
+		instantiationService: IInstantiationService,
+		viewType: string,
+		resource: URI
+	): Promise<CustomTextEditorModel> {
+		return instantiationService.invokeFunction(async accessor => {
+			const textModelResolverService = accessor.get(ITextModelService);
+			const model = await textModelResolverService.createModelReference(resource);
+			return instantiationService.createInstance(CustomTextEditorModel, viewType, resource, model);
+		});
+	}
 
-  private readonly _onDidChangeOrphaned = this._register(new Emitter<void>())
-  public readonly onDidChangeOrphaned = this._onDidChangeOrphaned.event
+	private readonly _textFileModel: ITextFileEditorModel | undefined;
 
-  private readonly _onDidChangeReadonly = this._register(new Emitter<void>())
-  public readonly onDidChangeReadonly = this._onDidChangeReadonly.event
+	private readonly _onDidChangeOrphaned = this._register(new Emitter<void>());
+	public readonly onDidChangeOrphaned = this._onDidChangeOrphaned.event;
 
-  constructor(
-    public readonly viewType: string,
-    private readonly _resource: URI,
-    private readonly _model: IReference<IResolvedTextEditorModel>,
-    @ITextFileService private readonly textFileService: ITextFileService,
-  ) {
-    super()
+	private readonly _onDidChangeReadonly = this._register(new Emitter<void>());
+	public readonly onDidChangeReadonly = this._onDidChangeReadonly.event;
 
-    this._register(_model)
+	constructor(
+		public readonly viewType: string,
+		private readonly _resource: URI,
+		private readonly _model: IReference<IResolvedTextEditorModel>,
+		@ITextFileService private readonly textFileService: ITextFileService
+	) {
+		super();
 
-    this._textFileModel = this.textFileService.files.get(_resource)
-    if (this._textFileModel) {
-      this._register(
-        this._textFileModel.onDidChangeOrphaned(() =>
-          this._onDidChangeOrphaned.fire(),
-        ),
-      )
-      this._register(
-        this._textFileModel.onDidChangeReadonly(() =>
-          this._onDidChangeReadonly.fire(),
-        ),
-      )
-    }
+		this._register(_model);
 
-    this._register(
-      this.textFileService.files.onDidChangeDirty((e) => {
-        if (isEqual(this.resource, e.resource)) {
-          this._onDidChangeDirty.fire()
-          this._onDidChangeContent.fire()
-        }
-      }),
-    )
-  }
+		this._textFileModel = this.textFileService.files.get(_resource);
+		if (this._textFileModel) {
+			this._register(this._textFileModel.onDidChangeOrphaned(() => this._onDidChangeOrphaned.fire()));
+			this._register(this._textFileModel.onDidChangeReadonly(() => this._onDidChangeReadonly.fire()));
+		}
 
-  public get resource() {
-    return this._resource
-  }
+		this._register(this.textFileService.files.onDidChangeDirty(e => {
+			if (isEqual(this.resource, e.resource)) {
+				this._onDidChangeDirty.fire();
+				this._onDidChangeContent.fire();
+			}
+		}));
+	}
 
-  public isReadonly(): boolean | IMarkdownString {
-    return this._model.object.isReadonly()
-  }
+	public get resource() {
+		return this._resource;
+	}
 
-  public get backupId() {
-    return undefined
-  }
+	public isReadonly(): boolean | IMarkdownString {
+		return this._model.object.isReadonly();
+	}
 
-  public get canHotExit() {
-    return true // ensured via backups from text file models
-  }
+	public get backupId() {
+		return undefined;
+	}
 
-  public isDirty(): boolean {
-    return this.textFileService.isDirty(this.resource)
-  }
+	public get canHotExit() {
+		return true; // ensured via backups from text file models
+	}
 
-  public isOrphaned(): boolean {
-    return !!this._textFileModel?.hasState(TextFileEditorModelState.ORPHAN)
-  }
+	public isDirty(): boolean {
+		return this.textFileService.isDirty(this.resource);
+	}
 
-  private readonly _onDidChangeDirty: Emitter<void> = this._register(
-    new Emitter<void>(),
-  )
-  readonly onDidChangeDirty: Event<void> = this._onDidChangeDirty.event
+	public isOrphaned(): boolean {
+		return !!this._textFileModel?.hasState(TextFileEditorModelState.ORPHAN);
+	}
 
-  private readonly _onDidChangeContent: Emitter<void> = this._register(
-    new Emitter<void>(),
-  )
-  readonly onDidChangeContent: Event<void> = this._onDidChangeContent.event
+	private readonly _onDidChangeDirty: Emitter<void> = this._register(new Emitter<void>());
+	readonly onDidChangeDirty: Event<void> = this._onDidChangeDirty.event;
 
-  public async revert(options?: IRevertOptions) {
-    return this.textFileService.revert(this.resource, options)
-  }
+	private readonly _onDidChangeContent: Emitter<void> = this._register(new Emitter<void>());
+	readonly onDidChangeContent: Event<void> = this._onDidChangeContent.event;
 
-  public saveCustomEditor(options?: ISaveOptions): Promise<URI | undefined> {
-    return this.textFileService.save(this.resource, options)
-  }
+	public async revert(options?: IRevertOptions) {
+		return this.textFileService.revert(this.resource, options);
+	}
 
-  public async saveCustomEditorAs(
-    resource: URI,
-    targetResource: URI,
-    options?: ISaveOptions,
-  ): Promise<boolean> {
-    return !!(await this.textFileService.saveAs(
-      resource,
-      targetResource,
-      options,
-    ))
-  }
+	public saveCustomEditor(options?: ISaveOptions): Promise<URI | undefined> {
+		return this.textFileService.save(this.resource, options);
+	}
+
+	public async saveCustomEditorAs(resource: URI, targetResource: URI, options?: ISaveOptions): Promise<boolean> {
+		return !!await this.textFileService.saveAs(resource, targetResource, options);
+	}
 }

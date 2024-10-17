@@ -10,75 +10,76 @@
  *--------------------------------------------------------------------------------------------*/
 
 export const enum ValidationState {
-  OK = 0,
-  Info = 1,
-  Warning = 2,
-  Error = 3,
-  Fatal = 4,
+	OK = 0,
+	Info = 1,
+	Warning = 2,
+	Error = 3,
+	Fatal = 4
 }
 
 export class ValidationStatus {
-  private _state: ValidationState
+	private _state: ValidationState;
 
-  constructor() {
-    this._state = ValidationState.OK
-  }
+	constructor() {
+		this._state = ValidationState.OK;
+	}
 
-  public get state(): ValidationState {
-    return this._state
-  }
+	public get state(): ValidationState {
+		return this._state;
+	}
 
-  public set state(value: ValidationState) {
-    if (value > this._state) {
-      this._state = value
-    }
-  }
+	public set state(value: ValidationState) {
+		if (value > this._state) {
+			this._state = value;
+		}
+	}
 
-  public isOK(): boolean {
-    return this._state === ValidationState.OK
-  }
+	public isOK(): boolean {
+		return this._state === ValidationState.OK;
+	}
 
-  public isFatal(): boolean {
-    return this._state === ValidationState.Fatal
-  }
+	public isFatal(): boolean {
+		return this._state === ValidationState.Fatal;
+	}
 }
 
 export interface IProblemReporter {
-  info(message: string): void
-  warn(message: string): void
-  error(message: string): void
-  fatal(message: string): void
-  status: ValidationStatus
+	info(message: string): void;
+	warn(message: string): void;
+	error(message: string): void;
+	fatal(message: string): void;
+	status: ValidationStatus;
 }
 
 export abstract class Parser {
-  private _problemReporter: IProblemReporter
 
-  constructor(problemReporter: IProblemReporter) {
-    this._problemReporter = problemReporter
-  }
+	private _problemReporter: IProblemReporter;
 
-  public reset(): void {
-    this._problemReporter.status.state = ValidationState.OK
-  }
+	constructor(problemReporter: IProblemReporter) {
+		this._problemReporter = problemReporter;
+	}
 
-  public get problemReporter(): IProblemReporter {
-    return this._problemReporter
-  }
+	public reset(): void {
+		this._problemReporter.status.state = ValidationState.OK;
+	}
 
-  public info(message: string): void {
-    this._problemReporter.info(message)
-  }
+	public get problemReporter(): IProblemReporter {
+		return this._problemReporter;
+	}
 
-  public warn(message: string): void {
-    this._problemReporter.warn(message)
-  }
+	public info(message: string): void {
+		this._problemReporter.info(message);
+	}
 
-  public error(message: string): void {
-    this._problemReporter.error(message)
-  }
+	public warn(message: string): void {
+		this._problemReporter.warn(message);
+	}
 
-  public fatal(message: string): void {
-    this._problemReporter.fatal(message)
-  }
+	public error(message: string): void {
+		this._problemReporter.error(message);
+	}
+
+	public fatal(message: string): void {
+		this._problemReporter.fatal(message);
+	}
 }

@@ -9,5 +9,5 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-export const windowLogId = "rendererLog"
-export const showWindowLogActionId = "workbench.action.showWindowLog"
+export const windowLogId = 'rendererLog';
+export const showWindowLogActionId = 'workbench.action.showWindowLog';

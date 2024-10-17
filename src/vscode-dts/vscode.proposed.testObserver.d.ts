@@ -9,201 +9,191 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-declare module "vscode" {
-  // https://github.com/microsoft/vscode/issues/107467
+declare module 'vscode' {
 
-  export namespace tests {
-    /**
-     * Requests that tests be run by their controller.
-     * @param run Run options to use.
-     * @param token Cancellation token for the test run
-     */
-    export function runTests(
-      run: TestRunRequest,
-      token?: CancellationToken,
-    ): Thenable<void>
+	// https://github.com/microsoft/vscode/issues/107467
 
-    /**
-     * Registers a provider that can provide follow-up actions for a test failure.
-     */
-    export function registerTestFollowupProvider(
-      provider: TestFollowupProvider,
-    ): Disposable
+	export namespace tests {
+		/**
+		 * Requests that tests be run by their controller.
+		 * @param run Run options to use.
+		 * @param token Cancellation token for the test run
+		 */
+		export function runTests(run: TestRunRequest, token?: CancellationToken): Thenable<void>;
 
-    /**
-     * Returns an observer that watches and can request tests.
-     */
-    export function createTestObserver(): TestObserver
-    /**
-     * List of test results stored by the editor, sorted in descending
-     * order by their `completedAt` time.
-     */
-    export const testResults: ReadonlyArray<TestRunResult>
+		/**
+		 * Registers a provider that can provide follow-up actions for a test failure.
+		 */
+		export function registerTestFollowupProvider(provider: TestFollowupProvider): Disposable;
 
-    /**
-     * Event that fires when the {@link testResults} array is updated.
-     */
-    export const onDidChangeTestResults: Event<void>
-  }
+		/**
+		 * Returns an observer that watches and can request tests.
+		 */
+		export function createTestObserver(): TestObserver;
+		/**
+		 * List of test results stored by the editor, sorted in descending
+		 * order by their `completedAt` time.
+		 */
+		export const testResults: ReadonlyArray<TestRunResult>;
 
-  export interface TestFollowupProvider {
-    provideFollowup(
-      result: TestRunResult,
-      test: TestResultSnapshot,
-      taskIndex: number,
-      messageIndex: number,
-      token: CancellationToken,
-    ): ProviderResult<Command[]>
-  }
+		/**
+		 * Event that fires when the {@link testResults} array is updated.
+		 */
+		export const onDidChangeTestResults: Event<void>;
+	}
 
-  export interface TestObserver {
-    /**
-     * List of tests returned by test provider for files in the workspace.
-     */
-    readonly tests: ReadonlyArray<TestItem>
+	export interface TestFollowupProvider {
+		provideFollowup(result: TestRunResult, test: TestResultSnapshot, taskIndex: number, messageIndex: number, token: CancellationToken): ProviderResult<Command[]>;
+	}
 
-    /**
-     * An event that fires when an existing test in the collection changes, or
-     * null if a top-level test was added or removed. When fired, the consumer
-     * should check the test item and all its children for changes.
-     */
-    readonly onDidChangeTest: Event<TestsChangeEvent>
+	export interface TestObserver {
+		/**
+		 * List of tests returned by test provider for files in the workspace.
+		 */
+		readonly tests: ReadonlyArray<TestItem>;
 
-    /**
-     * Dispose of the observer, allowing the editor to eventually tell test
-     * providers that they no longer need to update tests.
-     */
-    dispose(): void
-  }
+		/**
+		 * An event that fires when an existing test in the collection changes, or
+		 * null if a top-level test was added or removed. When fired, the consumer
+		 * should check the test item and all its children for changes.
+		 */
+		readonly onDidChangeTest: Event<TestsChangeEvent>;
 
-  export interface TestsChangeEvent {
-    /**
-     * List of all tests that are newly added.
-     */
-    readonly added: ReadonlyArray<TestItem>
+		/**
+		 * Dispose of the observer, allowing the editor to eventually tell test
+		 * providers that they no longer need to update tests.
+		 */
+		dispose(): void;
+	}
 
-    /**
-     * List of existing tests that have updated.
-     */
-    readonly updated: ReadonlyArray<TestItem>
+	export interface TestsChangeEvent {
+		/**
+		 * List of all tests that are newly added.
+		 */
+		readonly added: ReadonlyArray<TestItem>;
 
-    /**
-     * List of existing tests that have been removed.
-     */
-    readonly removed: ReadonlyArray<TestItem>
-  }
+		/**
+		 * List of existing tests that have updated.
+		 */
+		readonly updated: ReadonlyArray<TestItem>;
 
-  /**
-   * TestResults can be provided to the editor in {@link tests.publishTestResult},
-   * or read from it in {@link tests.testResults}.
-   *
-   * The results contain a 'snapshot' of the tests at the point when the test
-   * run is complete. Therefore, information such as its {@link Range} may be
-   * out of date. If the test still exists in the workspace, consumers can use
-   * its `id` to correlate the result instance with the living test.
-   */
-  export interface TestRunResult {
-    /**
-     * Unix milliseconds timestamp at which the test run was completed.
-     */
-    readonly completedAt: number
+		/**
+		 * List of existing tests that have been removed.
+		 */
+		readonly removed: ReadonlyArray<TestItem>;
+	}
 
-    /**
-     * Optional raw output from the test run.
-     */
-    readonly output?: string
+	/**
+	 * TestResults can be provided to the editor in {@link tests.publishTestResult},
+	 * or read from it in {@link tests.testResults}.
+	 *
+	 * The results contain a 'snapshot' of the tests at the point when the test
+	 * run is complete. Therefore, information such as its {@link Range} may be
+	 * out of date. If the test still exists in the workspace, consumers can use
+	 * its `id` to correlate the result instance with the living test.
+	 */
+	export interface TestRunResult {
+		/**
+		 * Unix milliseconds timestamp at which the test run was completed.
+		 */
+		readonly completedAt: number;
 
-    /**
-     * List of test results. The items in this array are the items that
-     * were passed in the {@link tests.runTests} method.
-     */
-    readonly results: ReadonlyArray<Readonly<TestResultSnapshot>>
-  }
+		/**
+		 * Optional raw output from the test run.
+		 */
+		readonly output?: string;
 
-  /**
-   * A {@link TestItem}-like interface with an associated result, which appear
-   * or can be provided in {@link TestResult} interfaces.
-   */
-  export interface TestResultSnapshot {
-    /**
-     * Unique identifier that matches that of the associated TestItem.
-     * This is used to correlate test results and tests in the document with
-     * those in the workspace (test explorer).
-     */
-    readonly id: string
+		/**
+		 * List of test results. The items in this array are the items that
+		 * were passed in the {@link tests.runTests} method.
+		 */
+		readonly results: ReadonlyArray<Readonly<TestResultSnapshot>>;
+	}
 
-    /**
-     * Parent of this item.
-     */
-    readonly parent?: TestResultSnapshot
+	/**
+	 * A {@link TestItem}-like interface with an associated result, which appear
+	 * or can be provided in {@link TestResult} interfaces.
+	 */
+	export interface TestResultSnapshot {
+		/**
+		 * Unique identifier that matches that of the associated TestItem.
+		 * This is used to correlate test results and tests in the document with
+		 * those in the workspace (test explorer).
+		 */
+		readonly id: string;
 
-    /**
-     * URI this TestItem is associated with. May be a file or file.
-     */
-    readonly uri?: Uri
+		/**
+		 * Parent of this item.
+		 */
+		readonly parent?: TestResultSnapshot;
 
-    /**
-     * Display name describing the test case.
-     */
-    readonly label: string
+		/**
+		 * URI this TestItem is associated with. May be a file or file.
+		 */
+		readonly uri?: Uri;
 
-    /**
-     * Optional description that appears next to the label.
-     */
-    readonly description?: string
+		/**
+		 * Display name describing the test case.
+		 */
+		readonly label: string;
 
-    /**
-     * Location of the test item in its `uri`. This is only meaningful if the
-     * `uri` points to a file.
-     */
-    readonly range?: Range
+		/**
+		 * Optional description that appears next to the label.
+		 */
+		readonly description?: string;
 
-    /**
-     * State of the test in each task. In the common case, a test will only
-     * be executed in a single task and the length of this array will be 1.
-     */
-    readonly taskStates: ReadonlyArray<TestSnapshotTaskState>
+		/**
+		 * Location of the test item in its `uri`. This is only meaningful if the
+		 * `uri` points to a file.
+		 */
+		readonly range?: Range;
 
-    /**
-     * Optional list of nested tests for this item.
-     */
-    readonly children: Readonly<TestResultSnapshot>[]
-  }
+		/**
+		 * State of the test in each task. In the common case, a test will only
+		 * be executed in a single task and the length of this array will be 1.
+		 */
+		readonly taskStates: ReadonlyArray<TestSnapshotTaskState>;
 
-  export interface TestSnapshotTaskState {
-    /**
-     * Current result of the test.
-     */
-    readonly state: TestResultState
+		/**
+		 * Optional list of nested tests for this item.
+		 */
+		readonly children: Readonly<TestResultSnapshot>[];
+	}
 
-    /**
-     * The number of milliseconds the test took to run. This is set once the
-     * `state` is `Passed`, `Failed`, or `Errored`.
-     */
-    readonly duration?: number
+	export interface TestSnapshotTaskState {
+		/**
+		 * Current result of the test.
+		 */
+		readonly state: TestResultState;
 
-    /**
-     * Associated test run message. Can, for example, contain assertion
-     * failure information if the test fails.
-     */
-    readonly messages: ReadonlyArray<TestMessage>
-  }
+		/**
+		 * The number of milliseconds the test took to run. This is set once the
+		 * `state` is `Passed`, `Failed`, or `Errored`.
+		 */
+		readonly duration?: number;
 
-  /**
-   * Possible states of tests in a test run.
-   */
-  export enum TestResultState {
-    // Test will be run, but is not currently running.
-    Queued = 1,
-    // Test is currently running
-    Running = 2,
-    // Test run has passed
-    Passed = 3,
-    // Test run has failed (on an assertion)
-    Failed = 4,
-    // Test run has been skipped
-    Skipped = 5,
-    // Test run failed for some other reason (compilation error, timeout, etc)
-    Errored = 6,
-  }
+		/**
+		 * Associated test run message. Can, for example, contain assertion
+		 * failure information if the test fails.
+		 */
+		readonly messages: ReadonlyArray<TestMessage>;
+	}
+
+	/**
+	 * Possible states of tests in a test run.
+	 */
+	export enum TestResultState {
+		// Test will be run, but is not currently running.
+		Queued = 1,
+		// Test is currently running
+		Running = 2,
+		// Test run has passed
+		Passed = 3,
+		// Test run has failed (on an assertion)
+		Failed = 4,
+		// Test run has been skipped
+		Skipped = 5,
+		// Test run failed for some other reason (compilation error, timeout, etc)
+		Errored = 6
+	}
 }

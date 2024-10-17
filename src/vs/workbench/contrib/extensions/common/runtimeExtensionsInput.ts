@@ -9,66 +9,54 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as nls from "vs/nls"
-import { URI } from "vs/base/common/uri"
-import {
-  EditorInputCapabilities,
-  IUntypedEditorInput,
-} from "vs/workbench/common/editor"
-import { EditorInput } from "vs/workbench/common/editor/editorInput"
-import { ThemeIcon } from "vs/base/common/themables"
-import { Codicon } from "vs/base/common/codicons"
-import { registerIcon } from "vs/platform/theme/common/iconRegistry"
+import * as nls from 'vs/nls';
+import { URI } from 'vs/base/common/uri';
+import { EditorInputCapabilities, IUntypedEditorInput } from 'vs/workbench/common/editor';
+import { EditorInput } from 'vs/workbench/common/editor/editorInput';
+import { ThemeIcon } from 'vs/base/common/themables';
+import { Codicon } from 'vs/base/common/codicons';
+import { registerIcon } from 'vs/platform/theme/common/iconRegistry';
 
-const RuntimeExtensionsEditorIcon = registerIcon(
-  "runtime-extensions-editor-label-icon",
-  Codicon.extensions,
-  nls.localize(
-    "runtimeExtensionEditorLabelIcon",
-    "Icon of the runtime extensions editor label.",
-  ),
-)
+const RuntimeExtensionsEditorIcon = registerIcon('runtime-extensions-editor-label-icon', Codicon.extensions, nls.localize('runtimeExtensionEditorLabelIcon', 'Icon of the runtime extensions editor label.'));
 
 export class RuntimeExtensionsInput extends EditorInput {
-  static readonly ID = "workbench.runtimeExtensions.input"
 
-  override get typeId(): string {
-    return RuntimeExtensionsInput.ID
-  }
+	static readonly ID = 'workbench.runtimeExtensions.input';
 
-  override get capabilities(): EditorInputCapabilities {
-    return EditorInputCapabilities.Readonly | EditorInputCapabilities.Singleton
-  }
+	override get typeId(): string {
+		return RuntimeExtensionsInput.ID;
+	}
 
-  static _instance: RuntimeExtensionsInput
-  static get instance() {
-    if (
-      !RuntimeExtensionsInput._instance ||
-      RuntimeExtensionsInput._instance.isDisposed()
-    ) {
-      RuntimeExtensionsInput._instance = new RuntimeExtensionsInput()
-    }
+	override get capabilities(): EditorInputCapabilities {
+		return EditorInputCapabilities.Readonly | EditorInputCapabilities.Singleton;
+	}
 
-    return RuntimeExtensionsInput._instance
-  }
+	static _instance: RuntimeExtensionsInput;
+	static get instance() {
+		if (!RuntimeExtensionsInput._instance || RuntimeExtensionsInput._instance.isDisposed()) {
+			RuntimeExtensionsInput._instance = new RuntimeExtensionsInput();
+		}
 
-  readonly resource = URI.from({
-    scheme: "runtime-extensions",
-    path: "default",
-  })
+		return RuntimeExtensionsInput._instance;
+	}
 
-  override getName(): string {
-    return nls.localize("extensionsInputName", "Running Extensions")
-  }
+	readonly resource = URI.from({
+		scheme: 'runtime-extensions',
+		path: 'default'
+	});
 
-  override getIcon(): ThemeIcon {
-    return RuntimeExtensionsEditorIcon
-  }
+	override getName(): string {
+		return nls.localize('extensionsInputName', "Running Extensions");
+	}
 
-  override matches(other: EditorInput | IUntypedEditorInput): boolean {
-    if (super.matches(other)) {
-      return true
-    }
-    return other instanceof RuntimeExtensionsInput
-  }
+	override getIcon(): ThemeIcon {
+		return RuntimeExtensionsEditorIcon;
+	}
+
+	override matches(other: EditorInput | IUntypedEditorInput): boolean {
+		if (super.matches(other)) {
+			return true;
+		}
+		return other instanceof RuntimeExtensionsInput;
+	}
 }

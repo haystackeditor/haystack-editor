@@ -9,227 +9,179 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import {
-  CancelablePromise,
-  createCancelablePromise,
-  timeout,
-} from "vs/base/common/async"
-import { onUnexpectedError } from "vs/base/common/errors"
-import { KeyCode, KeyMod } from "vs/base/common/keyCodes"
-import {
-  CodeEditorStateFlag,
-  EditorState,
-} from "vs/editor/contrib/editorState/browser/editorState"
-import { ICodeEditor } from "vs/editor/browser/editorBrowser"
-import {
-  EditorAction,
-  EditorContributionInstantiation,
-  registerEditorAction,
-  registerEditorContribution,
-  ServicesAccessor,
-} from "vs/editor/browser/editorExtensions"
-import { Range } from "vs/editor/common/core/range"
-import { Selection } from "vs/editor/common/core/selection"
-import {
-  IEditorContribution,
-  IEditorDecorationsCollection,
-} from "vs/editor/common/editorCommon"
-import { EditorContextKeys } from "vs/editor/common/editorContextKeys"
-import { ModelDecorationOptions } from "vs/editor/common/model/textModel"
-import { IInplaceReplaceSupportResult } from "vs/editor/common/languages"
-import { IEditorWorkerService } from "vs/editor/common/services/editorWorker"
-import * as nls from "vs/nls"
-import { KeybindingWeight } from "vs/platform/keybinding/common/keybindingsRegistry"
-import { InPlaceReplaceCommand } from "./inPlaceReplaceCommand"
-import "vs/css!./inPlaceReplace"
+import { CancelablePromise, createCancelablePromise, timeout } from 'vs/base/common/async';
+import { onUnexpectedError } from 'vs/base/common/errors';
+import { KeyCode, KeyMod } from 'vs/base/common/keyCodes';
+import { CodeEditorStateFlag, EditorState } from 'vs/editor/contrib/editorState/browser/editorState';
+import { ICodeEditor } from 'vs/editor/browser/editorBrowser';
+import { EditorAction, EditorContributionInstantiation, registerEditorAction, registerEditorContribution, ServicesAccessor } from 'vs/editor/browser/editorExtensions';
+import { Range } from 'vs/editor/common/core/range';
+import { Selection } from 'vs/editor/common/core/selection';
+import { IEditorContribution, IEditorDecorationsCollection } from 'vs/editor/common/editorCommon';
+import { EditorContextKeys } from 'vs/editor/common/editorContextKeys';
+import { ModelDecorationOptions } from 'vs/editor/common/model/textModel';
+import { IInplaceReplaceSupportResult } from 'vs/editor/common/languages';
+import { IEditorWorkerService } from 'vs/editor/common/services/editorWorker';
+import * as nls from 'vs/nls';
+import { KeybindingWeight } from 'vs/platform/keybinding/common/keybindingsRegistry';
+import { InPlaceReplaceCommand } from './inPlaceReplaceCommand';
+import 'vs/css!./inPlaceReplace';
 
 class InPlaceReplaceController implements IEditorContribution {
-  public static readonly ID = "editor.contrib.inPlaceReplaceController"
 
-  static get(editor: ICodeEditor): InPlaceReplaceController | null {
-    return editor.getContribution<InPlaceReplaceController>(
-      InPlaceReplaceController.ID,
-    )
-  }
+	public static readonly ID = 'editor.contrib.inPlaceReplaceController';
 
-  private static readonly DECORATION = ModelDecorationOptions.register({
-    description: "in-place-replace",
-    className: "valueSetReplacement",
-  })
+	static get(editor: ICodeEditor): InPlaceReplaceController | null {
+		return editor.getContribution<InPlaceReplaceController>(InPlaceReplaceController.ID);
+	}
 
-  private readonly editor: ICodeEditor
-  private readonly editorWorkerService: IEditorWorkerService
-  private readonly decorations: IEditorDecorationsCollection
-  private currentRequest?: CancelablePromise<IInplaceReplaceSupportResult | null>
-  private decorationRemover?: CancelablePromise<void>
+	private static readonly DECORATION = ModelDecorationOptions.register({
+		description: 'in-place-replace',
+		className: 'valueSetReplacement'
+	});
 
-  constructor(
-    editor: ICodeEditor,
-    @IEditorWorkerService editorWorkerService: IEditorWorkerService,
-  ) {
-    this.editor = editor
-    this.editorWorkerService = editorWorkerService
-    this.decorations = this.editor.createDecorationsCollection()
-  }
+	private readonly editor: ICodeEditor;
+	private readonly editorWorkerService: IEditorWorkerService;
+	private readonly decorations: IEditorDecorationsCollection;
+	private currentRequest?: CancelablePromise<IInplaceReplaceSupportResult | null>;
+	private decorationRemover?: CancelablePromise<void>;
 
-  public dispose(): void {}
+	constructor(
+		editor: ICodeEditor,
+		@IEditorWorkerService editorWorkerService: IEditorWorkerService
+	) {
+		this.editor = editor;
+		this.editorWorkerService = editorWorkerService;
+		this.decorations = this.editor.createDecorationsCollection();
+	}
 
-  public run(source: string, up: boolean): Promise<void> | undefined {
-    // cancel any pending request
-    this.currentRequest?.cancel()
+	public dispose(): void {
+	}
 
-    const editorSelection = this.editor.getSelection()
-    const model = this.editor.getModel()
-    if (!model || !editorSelection) {
-      return undefined
-    }
-    let selection = editorSelection
-    if (selection.startLineNumber !== selection.endLineNumber) {
-      // Can't accept multiline selection
-      return undefined
-    }
+	public run(source: string, up: boolean): Promise<void> | undefined {
 
-    const state = new EditorState(
-      this.editor,
-      CodeEditorStateFlag.Value | CodeEditorStateFlag.Position,
-    )
-    const modelURI = model.uri
-    if (!this.editorWorkerService.canNavigateValueSet(modelURI)) {
-      return Promise.resolve(undefined)
-    }
+		// cancel any pending request
+		this.currentRequest?.cancel();
 
-    this.currentRequest = createCancelablePromise((token) =>
-      this.editorWorkerService.navigateValueSet(modelURI, selection, up),
-    )
+		const editorSelection = this.editor.getSelection();
+		const model = this.editor.getModel();
+		if (!model || !editorSelection) {
+			return undefined;
+		}
+		let selection = editorSelection;
+		if (selection.startLineNumber !== selection.endLineNumber) {
+			// Can't accept multiline selection
+			return undefined;
+		}
 
-    return this.currentRequest
-      .then((result) => {
-        if (!result || !result.range || !result.value) {
-          // No proper result
-          return
-        }
+		const state = new EditorState(this.editor, CodeEditorStateFlag.Value | CodeEditorStateFlag.Position);
+		const modelURI = model.uri;
+		if (!this.editorWorkerService.canNavigateValueSet(modelURI)) {
+			return Promise.resolve(undefined);
+		}
 
-        if (!state.validate(this.editor)) {
-          // state has changed
-          return
-        }
+		this.currentRequest = createCancelablePromise(token => this.editorWorkerService.navigateValueSet(modelURI, selection, up));
 
-        // Selection
-        const editRange = Range.lift(result.range)
-        let highlightRange = result.range
-        const diff =
-          result.value.length - (selection.endColumn - selection.startColumn)
+		return this.currentRequest.then(result => {
 
-        // highlight
-        highlightRange = {
-          startLineNumber: highlightRange.startLineNumber,
-          startColumn: highlightRange.startColumn,
-          endLineNumber: highlightRange.endLineNumber,
-          endColumn: highlightRange.startColumn + result.value.length,
-        }
-        if (diff > 1) {
-          selection = new Selection(
-            selection.startLineNumber,
-            selection.startColumn,
-            selection.endLineNumber,
-            selection.endColumn + diff - 1,
-          )
-        }
+			if (!result || !result.range || !result.value) {
+				// No proper result
+				return;
+			}
 
-        // Insert new text
-        const command = new InPlaceReplaceCommand(
-          editRange,
-          selection,
-          result.value,
-        )
+			if (!state.validate(this.editor)) {
+				// state has changed
+				return;
+			}
 
-        this.editor.pushUndoStop()
-        this.editor.executeCommand(source, command)
-        this.editor.pushUndoStop()
+			// Selection
+			const editRange = Range.lift(result.range);
+			let highlightRange = result.range;
+			const diff = result.value.length - (selection.endColumn - selection.startColumn);
 
-        // add decoration
-        this.decorations.set([
-          {
-            range: highlightRange,
-            options: InPlaceReplaceController.DECORATION,
-          },
-        ])
+			// highlight
+			highlightRange = {
+				startLineNumber: highlightRange.startLineNumber,
+				startColumn: highlightRange.startColumn,
+				endLineNumber: highlightRange.endLineNumber,
+				endColumn: highlightRange.startColumn + result.value.length
+			};
+			if (diff > 1) {
+				selection = new Selection(selection.startLineNumber, selection.startColumn, selection.endLineNumber, selection.endColumn + diff - 1);
+			}
 
-        // remove decoration after delay
-        this.decorationRemover?.cancel()
-        this.decorationRemover = timeout(350)
-        this.decorationRemover
-          .then(() => this.decorations.clear())
-          .catch(onUnexpectedError)
-      })
-      .catch(onUnexpectedError)
-  }
+			// Insert new text
+			const command = new InPlaceReplaceCommand(editRange, selection, result.value);
+
+			this.editor.pushUndoStop();
+			this.editor.executeCommand(source, command);
+			this.editor.pushUndoStop();
+
+			// add decoration
+			this.decorations.set([{
+				range: highlightRange,
+				options: InPlaceReplaceController.DECORATION
+			}]);
+
+			// remove decoration after delay
+			this.decorationRemover?.cancel();
+			this.decorationRemover = timeout(350);
+			this.decorationRemover.then(() => this.decorations.clear()).catch(onUnexpectedError);
+
+		}).catch(onUnexpectedError);
+	}
 }
 
 class InPlaceReplaceUp extends EditorAction {
-  constructor() {
-    super({
-      id: "editor.action.inPlaceReplace.up",
-      label: nls.localize(
-        "InPlaceReplaceAction.previous.label",
-        "Replace with Previous Value",
-      ),
-      alias: "Replace with Previous Value",
-      precondition: EditorContextKeys.writable,
-      kbOpts: {
-        kbExpr: EditorContextKeys.editorTextFocus,
-        primary: KeyMod.CtrlCmd | KeyMod.Shift | KeyCode.Comma,
-        weight: KeybindingWeight.EditorContrib,
-      },
-    })
-  }
 
-  public run(
-    accessor: ServicesAccessor,
-    editor: ICodeEditor,
-  ): Promise<void> | undefined {
-    const controller = InPlaceReplaceController.get(editor)
-    if (!controller) {
-      return Promise.resolve(undefined)
-    }
-    return controller.run(this.id, false)
-  }
+	constructor() {
+		super({
+			id: 'editor.action.inPlaceReplace.up',
+			label: nls.localize('InPlaceReplaceAction.previous.label', "Replace with Previous Value"),
+			alias: 'Replace with Previous Value',
+			precondition: EditorContextKeys.writable,
+			kbOpts: {
+				kbExpr: EditorContextKeys.editorTextFocus,
+				primary: KeyMod.CtrlCmd | KeyMod.Shift | KeyCode.Comma,
+				weight: KeybindingWeight.EditorContrib
+			}
+		});
+	}
+
+	public run(accessor: ServicesAccessor, editor: ICodeEditor): Promise<void> | undefined {
+		const controller = InPlaceReplaceController.get(editor);
+		if (!controller) {
+			return Promise.resolve(undefined);
+		}
+		return controller.run(this.id, false);
+	}
 }
 
 class InPlaceReplaceDown extends EditorAction {
-  constructor() {
-    super({
-      id: "editor.action.inPlaceReplace.down",
-      label: nls.localize(
-        "InPlaceReplaceAction.next.label",
-        "Replace with Next Value",
-      ),
-      alias: "Replace with Next Value",
-      precondition: EditorContextKeys.writable,
-      kbOpts: {
-        kbExpr: EditorContextKeys.editorTextFocus,
-        primary: KeyMod.CtrlCmd | KeyMod.Shift | KeyCode.Period,
-        weight: KeybindingWeight.EditorContrib,
-      },
-    })
-  }
 
-  public run(
-    accessor: ServicesAccessor,
-    editor: ICodeEditor,
-  ): Promise<void> | undefined {
-    const controller = InPlaceReplaceController.get(editor)
-    if (!controller) {
-      return Promise.resolve(undefined)
-    }
-    return controller.run(this.id, true)
-  }
+	constructor() {
+		super({
+			id: 'editor.action.inPlaceReplace.down',
+			label: nls.localize('InPlaceReplaceAction.next.label', "Replace with Next Value"),
+			alias: 'Replace with Next Value',
+			precondition: EditorContextKeys.writable,
+			kbOpts: {
+				kbExpr: EditorContextKeys.editorTextFocus,
+				primary: KeyMod.CtrlCmd | KeyMod.Shift | KeyCode.Period,
+				weight: KeybindingWeight.EditorContrib
+			}
+		});
+	}
+
+	public run(accessor: ServicesAccessor, editor: ICodeEditor): Promise<void> | undefined {
+		const controller = InPlaceReplaceController.get(editor);
+		if (!controller) {
+			return Promise.resolve(undefined);
+		}
+		return controller.run(this.id, true);
+	}
 }
 
-registerEditorContribution(
-  InPlaceReplaceController.ID,
-  InPlaceReplaceController,
-  EditorContributionInstantiation.Lazy,
-)
-registerEditorAction(InPlaceReplaceUp)
-registerEditorAction(InPlaceReplaceDown)
+registerEditorContribution(InPlaceReplaceController.ID, InPlaceReplaceController, EditorContributionInstantiation.Lazy);
+registerEditorAction(InPlaceReplaceUp);
+registerEditorAction(InPlaceReplaceDown);

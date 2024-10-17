@@ -9,331 +9,267 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as assert from "assert"
-import { IDisposable } from "vs/base/common/lifecycle"
-import { ensureNoDisposablesAreLeakedInTestSuite } from "vs/base/test/common/utils"
-import { EditOperation } from "vs/editor/common/core/editOperation"
-import { Position } from "vs/editor/common/core/position"
-import { Range } from "vs/editor/common/core/range"
-import * as languages from "vs/editor/common/languages"
-import { NullState } from "vs/editor/common/languages/nullTokenize"
-import { TextModel } from "vs/editor/common/model/textModel"
-import { createTextModel } from "vs/editor/test/common/testTextModel"
+import * as assert from 'assert';
+import { IDisposable } from 'vs/base/common/lifecycle';
+import { ensureNoDisposablesAreLeakedInTestSuite } from 'vs/base/test/common/utils';
+import { EditOperation } from 'vs/editor/common/core/editOperation';
+import { Position } from 'vs/editor/common/core/position';
+import { Range } from 'vs/editor/common/core/range';
+import * as languages from 'vs/editor/common/languages';
+import { NullState } from 'vs/editor/common/languages/nullTokenize';
+import { TextModel } from 'vs/editor/common/model/textModel';
+import { createTextModel } from 'vs/editor/test/common/testTextModel';
 
 // --------- utils
 
-suite("Editor Model - Model Modes 1", () => {
-  let calledFor: string[] = []
+suite('Editor Model - Model Modes 1', () => {
 
-  function getAndClear(): string[] {
-    const result = calledFor
-    calledFor = []
-    return result
-  }
+	let calledFor: string[] = [];
 
-  const tokenizationSupport: languages.ITokenizationSupport = {
-    getInitialState: () => NullState,
-    tokenize: undefined!,
-    tokenizeEncoded: (
-      line: string,
-      hasEOL: boolean,
-      state: languages.IState,
-    ): languages.EncodedTokenizationResult => {
-      calledFor.push(line.charAt(0))
-      return new languages.EncodedTokenizationResult(new Uint32Array(0), state)
-    },
-  }
+	function getAndClear(): string[] {
+		const result = calledFor;
+		calledFor = [];
+		return result;
+	}
 
-  let thisModel: TextModel
-  let languageRegistration: IDisposable
+	const tokenizationSupport: languages.ITokenizationSupport = {
+		getInitialState: () => NullState,
+		tokenize: undefined!,
+		tokenizeEncoded: (line: string, hasEOL: boolean, state: languages.IState): languages.EncodedTokenizationResult => {
+			calledFor.push(line.charAt(0));
+			return new languages.EncodedTokenizationResult(new Uint32Array(0), state);
+		}
+	};
 
-  setup(() => {
-    const TEXT = "1\r\n" + "2\n" + "3\n" + "4\r\n" + "5"
-    const LANGUAGE_ID = "modelModeTest1"
-    calledFor = []
-    languageRegistration = languages.TokenizationRegistry.register(
-      LANGUAGE_ID,
-      tokenizationSupport,
-    )
-    thisModel = createTextModel(TEXT, LANGUAGE_ID)
-  })
+	let thisModel: TextModel;
+	let languageRegistration: IDisposable;
 
-  teardown(() => {
-    thisModel.dispose()
-    languageRegistration.dispose()
-    calledFor = []
-  })
+	setup(() => {
+		const TEXT =
+			'1\r\n' +
+			'2\n' +
+			'3\n' +
+			'4\r\n' +
+			'5';
+		const LANGUAGE_ID = 'modelModeTest1';
+		calledFor = [];
+		languageRegistration = languages.TokenizationRegistry.register(LANGUAGE_ID, tokenizationSupport);
+		thisModel = createTextModel(TEXT, LANGUAGE_ID);
+	});
 
-  ensureNoDisposablesAreLeakedInTestSuite()
+	teardown(() => {
+		thisModel.dispose();
+		languageRegistration.dispose();
+		calledFor = [];
+	});
 
-  test("model calls syntax highlighter 1", () => {
-    thisModel.tokenization.forceTokenization(1)
-    assert.deepStrictEqual(getAndClear(), ["1"])
-  })
+	ensureNoDisposablesAreLeakedInTestSuite();
 
-  test("model calls syntax highlighter 2", () => {
-    thisModel.tokenization.forceTokenization(2)
-    assert.deepStrictEqual(getAndClear(), ["1", "2"])
+	test('model calls syntax highlighter 1', () => {
+		thisModel.tokenization.forceTokenization(1);
+		assert.deepStrictEqual(getAndClear(), ['1']);
+	});
 
-    thisModel.tokenization.forceTokenization(2)
-    assert.deepStrictEqual(getAndClear(), [])
-  })
+	test('model calls syntax highlighter 2', () => {
+		thisModel.tokenization.forceTokenization(2);
+		assert.deepStrictEqual(getAndClear(), ['1', '2']);
 
-  test("model caches states", () => {
-    thisModel.tokenization.forceTokenization(1)
-    assert.deepStrictEqual(getAndClear(), ["1"])
+		thisModel.tokenization.forceTokenization(2);
+		assert.deepStrictEqual(getAndClear(), []);
+	});
 
-    thisModel.tokenization.forceTokenization(2)
-    assert.deepStrictEqual(getAndClear(), ["2"])
+	test('model caches states', () => {
+		thisModel.tokenization.forceTokenization(1);
+		assert.deepStrictEqual(getAndClear(), ['1']);
 
-    thisModel.tokenization.forceTokenization(3)
-    assert.deepStrictEqual(getAndClear(), ["3"])
+		thisModel.tokenization.forceTokenization(2);
+		assert.deepStrictEqual(getAndClear(), ['2']);
 
-    thisModel.tokenization.forceTokenization(4)
-    assert.deepStrictEqual(getAndClear(), ["4"])
+		thisModel.tokenization.forceTokenization(3);
+		assert.deepStrictEqual(getAndClear(), ['3']);
 
-    thisModel.tokenization.forceTokenization(5)
-    assert.deepStrictEqual(getAndClear(), ["5"])
+		thisModel.tokenization.forceTokenization(4);
+		assert.deepStrictEqual(getAndClear(), ['4']);
 
-    thisModel.tokenization.forceTokenization(5)
-    assert.deepStrictEqual(getAndClear(), [])
-  })
+		thisModel.tokenization.forceTokenization(5);
+		assert.deepStrictEqual(getAndClear(), ['5']);
 
-  test("model invalidates states for one line insert", () => {
-    thisModel.tokenization.forceTokenization(5)
-    assert.deepStrictEqual(getAndClear(), ["1", "2", "3", "4", "5"])
+		thisModel.tokenization.forceTokenization(5);
+		assert.deepStrictEqual(getAndClear(), []);
+	});
 
-    thisModel.applyEdits([EditOperation.insert(new Position(1, 1), "-")])
-    thisModel.tokenization.forceTokenization(5)
-    assert.deepStrictEqual(getAndClear(), ["-"])
+	test('model invalidates states for one line insert', () => {
+		thisModel.tokenization.forceTokenization(5);
+		assert.deepStrictEqual(getAndClear(), ['1', '2', '3', '4', '5']);
 
-    thisModel.tokenization.forceTokenization(5)
-    assert.deepStrictEqual(getAndClear(), [])
-  })
+		thisModel.applyEdits([EditOperation.insert(new Position(1, 1), '-')]);
+		thisModel.tokenization.forceTokenization(5);
+		assert.deepStrictEqual(getAndClear(), ['-']);
 
-  test("model invalidates states for many lines insert", () => {
-    thisModel.tokenization.forceTokenization(5)
-    assert.deepStrictEqual(getAndClear(), ["1", "2", "3", "4", "5"])
+		thisModel.tokenization.forceTokenization(5);
+		assert.deepStrictEqual(getAndClear(), []);
+	});
 
-    thisModel.applyEdits([EditOperation.insert(new Position(1, 1), "0\n-\n+")])
-    assert.strictEqual(thisModel.getLineCount(), 7)
-    thisModel.tokenization.forceTokenization(7)
-    assert.deepStrictEqual(getAndClear(), ["0", "-", "+"])
+	test('model invalidates states for many lines insert', () => {
+		thisModel.tokenization.forceTokenization(5);
+		assert.deepStrictEqual(getAndClear(), ['1', '2', '3', '4', '5']);
 
-    thisModel.tokenization.forceTokenization(7)
-    assert.deepStrictEqual(getAndClear(), [])
-  })
+		thisModel.applyEdits([EditOperation.insert(new Position(1, 1), '0\n-\n+')]);
+		assert.strictEqual(thisModel.getLineCount(), 7);
+		thisModel.tokenization.forceTokenization(7);
+		assert.deepStrictEqual(getAndClear(), ['0', '-', '+']);
 
-  test("model invalidates states for one new line", () => {
-    thisModel.tokenization.forceTokenization(5)
-    assert.deepStrictEqual(getAndClear(), ["1", "2", "3", "4", "5"])
+		thisModel.tokenization.forceTokenization(7);
+		assert.deepStrictEqual(getAndClear(), []);
+	});
 
-    thisModel.applyEdits([EditOperation.insert(new Position(1, 2), "\n")])
-    thisModel.applyEdits([EditOperation.insert(new Position(2, 1), "a")])
-    thisModel.tokenization.forceTokenization(6)
-    assert.deepStrictEqual(getAndClear(), ["1", "a"])
-  })
+	test('model invalidates states for one new line', () => {
+		thisModel.tokenization.forceTokenization(5);
+		assert.deepStrictEqual(getAndClear(), ['1', '2', '3', '4', '5']);
 
-  test("model invalidates states for one line delete", () => {
-    thisModel.tokenization.forceTokenization(5)
-    assert.deepStrictEqual(getAndClear(), ["1", "2", "3", "4", "5"])
+		thisModel.applyEdits([EditOperation.insert(new Position(1, 2), '\n')]);
+		thisModel.applyEdits([EditOperation.insert(new Position(2, 1), 'a')]);
+		thisModel.tokenization.forceTokenization(6);
+		assert.deepStrictEqual(getAndClear(), ['1', 'a']);
+	});
 
-    thisModel.applyEdits([EditOperation.insert(new Position(1, 2), "-")])
-    thisModel.tokenization.forceTokenization(5)
-    assert.deepStrictEqual(getAndClear(), ["1"])
+	test('model invalidates states for one line delete', () => {
+		thisModel.tokenization.forceTokenization(5);
+		assert.deepStrictEqual(getAndClear(), ['1', '2', '3', '4', '5']);
 
-    thisModel.applyEdits([EditOperation.delete(new Range(1, 1, 1, 2))])
-    thisModel.tokenization.forceTokenization(5)
-    assert.deepStrictEqual(getAndClear(), ["-"])
+		thisModel.applyEdits([EditOperation.insert(new Position(1, 2), '-')]);
+		thisModel.tokenization.forceTokenization(5);
+		assert.deepStrictEqual(getAndClear(), ['1']);
 
-    thisModel.tokenization.forceTokenization(5)
-    assert.deepStrictEqual(getAndClear(), [])
-  })
+		thisModel.applyEdits([EditOperation.delete(new Range(1, 1, 1, 2))]);
+		thisModel.tokenization.forceTokenization(5);
+		assert.deepStrictEqual(getAndClear(), ['-']);
 
-  test("model invalidates states for many lines delete", () => {
-    thisModel.tokenization.forceTokenization(5)
-    assert.deepStrictEqual(getAndClear(), ["1", "2", "3", "4", "5"])
+		thisModel.tokenization.forceTokenization(5);
+		assert.deepStrictEqual(getAndClear(), []);
+	});
 
-    thisModel.applyEdits([EditOperation.delete(new Range(1, 1, 3, 1))])
-    thisModel.tokenization.forceTokenization(3)
-    assert.deepStrictEqual(getAndClear(), ["3"])
+	test('model invalidates states for many lines delete', () => {
+		thisModel.tokenization.forceTokenization(5);
+		assert.deepStrictEqual(getAndClear(), ['1', '2', '3', '4', '5']);
 
-    thisModel.tokenization.forceTokenization(3)
-    assert.deepStrictEqual(getAndClear(), [])
-  })
-})
+		thisModel.applyEdits([EditOperation.delete(new Range(1, 1, 3, 1))]);
+		thisModel.tokenization.forceTokenization(3);
+		assert.deepStrictEqual(getAndClear(), ['3']);
 
-suite("Editor Model - Model Modes 2", () => {
-  class ModelState2 implements languages.IState {
-    prevLineContent: string
+		thisModel.tokenization.forceTokenization(3);
+		assert.deepStrictEqual(getAndClear(), []);
+	});
+});
 
-    constructor(prevLineContent: string) {
-      this.prevLineContent = prevLineContent
-    }
+suite('Editor Model - Model Modes 2', () => {
 
-    clone(): languages.IState {
-      return new ModelState2(this.prevLineContent)
-    }
+	class ModelState2 implements languages.IState {
+		prevLineContent: string;
 
-    equals(other: languages.IState): boolean {
-      return (
-        other instanceof ModelState2 &&
-        other.prevLineContent === this.prevLineContent
-      )
-    }
-  }
+		constructor(prevLineContent: string) {
+			this.prevLineContent = prevLineContent;
+		}
 
-  let calledFor: string[] = []
+		clone(): languages.IState {
+			return new ModelState2(this.prevLineContent);
+		}
 
-  function getAndClear(): string[] {
-    const actual = calledFor
-    calledFor = []
-    return actual
-  }
+		equals(other: languages.IState): boolean {
+			return (other instanceof ModelState2) && other.prevLineContent === this.prevLineContent;
+		}
+	}
 
-  const tokenizationSupport: languages.ITokenizationSupport = {
-    getInitialState: () => new ModelState2(""),
-    tokenize: undefined!,
-    tokenizeEncoded: (
-      line: string,
-      hasEOL: boolean,
-      state: languages.IState,
-    ): languages.EncodedTokenizationResult => {
-      calledFor.push(line)
-      ;(<ModelState2>state).prevLineContent = line
-      return new languages.EncodedTokenizationResult(new Uint32Array(0), state)
-    },
-  }
+	let calledFor: string[] = [];
 
-  let thisModel: TextModel
-  let languageRegistration: IDisposable
+	function getAndClear(): string[] {
+		const actual = calledFor;
+		calledFor = [];
+		return actual;
+	}
 
-  setup(() => {
-    const TEXT =
-      "Line1" +
-      "\r\n" +
-      "Line2" +
-      "\n" +
-      "Line3" +
-      "\n" +
-      "Line4" +
-      "\r\n" +
-      "Line5"
-    const LANGUAGE_ID = "modelModeTest2"
-    languageRegistration = languages.TokenizationRegistry.register(
-      LANGUAGE_ID,
-      tokenizationSupport,
-    )
-    thisModel = createTextModel(TEXT, LANGUAGE_ID)
-  })
+	const tokenizationSupport: languages.ITokenizationSupport = {
+		getInitialState: () => new ModelState2(''),
+		tokenize: undefined!,
+		tokenizeEncoded: (line: string, hasEOL: boolean, state: languages.IState): languages.EncodedTokenizationResult => {
+			calledFor.push(line);
+			(<ModelState2>state).prevLineContent = line;
+			return new languages.EncodedTokenizationResult(new Uint32Array(0), state);
+		}
+	};
 
-  teardown(() => {
-    thisModel.dispose()
-    languageRegistration.dispose()
-  })
+	let thisModel: TextModel;
+	let languageRegistration: IDisposable;
 
-  ensureNoDisposablesAreLeakedInTestSuite()
+	setup(() => {
+		const TEXT =
+			'Line1' + '\r\n' +
+			'Line2' + '\n' +
+			'Line3' + '\n' +
+			'Line4' + '\r\n' +
+			'Line5';
+		const LANGUAGE_ID = 'modelModeTest2';
+		languageRegistration = languages.TokenizationRegistry.register(LANGUAGE_ID, tokenizationSupport);
+		thisModel = createTextModel(TEXT, LANGUAGE_ID);
+	});
 
-  test("getTokensForInvalidLines one text insert", () => {
-    thisModel.tokenization.forceTokenization(5)
-    assert.deepStrictEqual(getAndClear(), [
-      "Line1",
-      "Line2",
-      "Line3",
-      "Line4",
-      "Line5",
-    ])
-    thisModel.applyEdits([EditOperation.insert(new Position(1, 6), "-")])
-    thisModel.tokenization.forceTokenization(5)
-    assert.deepStrictEqual(getAndClear(), ["Line1-", "Line2"])
-  })
+	teardown(() => {
+		thisModel.dispose();
+		languageRegistration.dispose();
+	});
 
-  test("getTokensForInvalidLines two text insert", () => {
-    thisModel.tokenization.forceTokenization(5)
-    assert.deepStrictEqual(getAndClear(), [
-      "Line1",
-      "Line2",
-      "Line3",
-      "Line4",
-      "Line5",
-    ])
-    thisModel.applyEdits([
-      EditOperation.insert(new Position(1, 6), "-"),
-      EditOperation.insert(new Position(3, 6), "-"),
-    ])
+	ensureNoDisposablesAreLeakedInTestSuite();
 
-    thisModel.tokenization.forceTokenization(5)
-    assert.deepStrictEqual(getAndClear(), [
-      "Line1-",
-      "Line2",
-      "Line3-",
-      "Line4",
-    ])
-  })
+	test('getTokensForInvalidLines one text insert', () => {
+		thisModel.tokenization.forceTokenization(5);
+		assert.deepStrictEqual(getAndClear(), ['Line1', 'Line2', 'Line3', 'Line4', 'Line5']);
+		thisModel.applyEdits([EditOperation.insert(new Position(1, 6), '-')]);
+		thisModel.tokenization.forceTokenization(5);
+		assert.deepStrictEqual(getAndClear(), ['Line1-', 'Line2']);
+	});
 
-  test("getTokensForInvalidLines one multi-line text insert, one small text insert", () => {
-    thisModel.tokenization.forceTokenization(5)
-    assert.deepStrictEqual(getAndClear(), [
-      "Line1",
-      "Line2",
-      "Line3",
-      "Line4",
-      "Line5",
-    ])
-    thisModel.applyEdits([
-      EditOperation.insert(new Position(1, 6), "\nNew line\nAnother new line"),
-    ])
-    thisModel.applyEdits([EditOperation.insert(new Position(5, 6), "-")])
-    thisModel.tokenization.forceTokenization(7)
-    assert.deepStrictEqual(getAndClear(), [
-      "Line1",
-      "New line",
-      "Another new line",
-      "Line2",
-      "Line3-",
-      "Line4",
-    ])
-  })
+	test('getTokensForInvalidLines two text insert', () => {
+		thisModel.tokenization.forceTokenization(5);
+		assert.deepStrictEqual(getAndClear(), ['Line1', 'Line2', 'Line3', 'Line4', 'Line5']);
+		thisModel.applyEdits([
+			EditOperation.insert(new Position(1, 6), '-'),
+			EditOperation.insert(new Position(3, 6), '-')
+		]);
 
-  test("getTokensForInvalidLines one delete text", () => {
-    thisModel.tokenization.forceTokenization(5)
-    assert.deepStrictEqual(getAndClear(), [
-      "Line1",
-      "Line2",
-      "Line3",
-      "Line4",
-      "Line5",
-    ])
-    thisModel.applyEdits([EditOperation.delete(new Range(1, 1, 1, 5))])
-    thisModel.tokenization.forceTokenization(5)
-    assert.deepStrictEqual(getAndClear(), ["1", "Line2"])
-  })
+		thisModel.tokenization.forceTokenization(5);
+		assert.deepStrictEqual(getAndClear(), ['Line1-', 'Line2', 'Line3-', 'Line4']);
+	});
 
-  test("getTokensForInvalidLines one line delete text", () => {
-    thisModel.tokenization.forceTokenization(5)
-    assert.deepStrictEqual(getAndClear(), [
-      "Line1",
-      "Line2",
-      "Line3",
-      "Line4",
-      "Line5",
-    ])
-    thisModel.applyEdits([EditOperation.delete(new Range(1, 1, 2, 1))])
-    thisModel.tokenization.forceTokenization(4)
-    assert.deepStrictEqual(getAndClear(), ["Line2"])
-  })
+	test('getTokensForInvalidLines one multi-line text insert, one small text insert', () => {
+		thisModel.tokenization.forceTokenization(5);
+		assert.deepStrictEqual(getAndClear(), ['Line1', 'Line2', 'Line3', 'Line4', 'Line5']);
+		thisModel.applyEdits([EditOperation.insert(new Position(1, 6), '\nNew line\nAnother new line')]);
+		thisModel.applyEdits([EditOperation.insert(new Position(5, 6), '-')]);
+		thisModel.tokenization.forceTokenization(7);
+		assert.deepStrictEqual(getAndClear(), ['Line1', 'New line', 'Another new line', 'Line2', 'Line3-', 'Line4']);
+	});
 
-  test("getTokensForInvalidLines multiple lines delete text", () => {
-    thisModel.tokenization.forceTokenization(5)
-    assert.deepStrictEqual(getAndClear(), [
-      "Line1",
-      "Line2",
-      "Line3",
-      "Line4",
-      "Line5",
-    ])
-    thisModel.applyEdits([EditOperation.delete(new Range(1, 1, 3, 3))])
-    thisModel.tokenization.forceTokenization(3)
-    assert.deepStrictEqual(getAndClear(), ["ne3", "Line4"])
-  })
-})
+	test('getTokensForInvalidLines one delete text', () => {
+		thisModel.tokenization.forceTokenization(5);
+		assert.deepStrictEqual(getAndClear(), ['Line1', 'Line2', 'Line3', 'Line4', 'Line5']);
+		thisModel.applyEdits([EditOperation.delete(new Range(1, 1, 1, 5))]);
+		thisModel.tokenization.forceTokenization(5);
+		assert.deepStrictEqual(getAndClear(), ['1', 'Line2']);
+	});
+
+	test('getTokensForInvalidLines one line delete text', () => {
+		thisModel.tokenization.forceTokenization(5);
+		assert.deepStrictEqual(getAndClear(), ['Line1', 'Line2', 'Line3', 'Line4', 'Line5']);
+		thisModel.applyEdits([EditOperation.delete(new Range(1, 1, 2, 1))]);
+		thisModel.tokenization.forceTokenization(4);
+		assert.deepStrictEqual(getAndClear(), ['Line2']);
+	});
+
+	test('getTokensForInvalidLines multiple lines delete text', () => {
+		thisModel.tokenization.forceTokenization(5);
+		assert.deepStrictEqual(getAndClear(), ['Line1', 'Line2', 'Line3', 'Line4', 'Line5']);
+		thisModel.applyEdits([EditOperation.delete(new Range(1, 1, 3, 3))]);
+		thisModel.tokenization.forceTokenization(3);
+		assert.deepStrictEqual(getAndClear(), ['ne3', 'Line4']);
+	});
+});

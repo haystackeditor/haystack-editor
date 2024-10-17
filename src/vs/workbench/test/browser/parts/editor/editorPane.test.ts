@@ -65,10 +65,10 @@ import { ensureNoDisposablesAreLeakedInTestSuite } from "vs/base/test/common/uti
 const NullThemeService = new TestThemeService()
 
 const editorRegistry: EditorPaneRegistry = Registry.as(
-  EditorExtensions.EditorPane,
+  EditorExtensions.EditorPane
 )
 const editorInputRegistry: IEditorFactoryRegistry = Registry.as(
-  EditorExtensions.EditorFactory,
+  EditorExtensions.EditorFactory
 )
 
 class TestEditor extends EditorPane {
@@ -79,7 +79,7 @@ class TestEditor extends EditorPane {
       group,
       NullTelemetryService,
       NullThemeService,
-      disposables.add(new TestStorageService()),
+      disposables.add(new TestStorageService())
     )
 
     this._register(disposables)
@@ -100,7 +100,7 @@ class OtherTestEditor extends EditorPane {
       group,
       NullTelemetryService,
       NullThemeService,
-      disposables.add(new TestStorageService()),
+      disposables.add(new TestStorageService())
     )
 
     this._register(disposables)
@@ -125,7 +125,7 @@ class TestInputSerializer implements IEditorSerializer {
 
   deserialize(
     instantiationService: IInstantiationService,
-    raw: string,
+    raw: string
   ): EditorInput {
     return {} as EditorInput
   }
@@ -135,7 +135,7 @@ class TestInput extends EditorInput {
   readonly resource = undefined
 
   override prefersEditorPane<T extends IEditorDescriptor<IEditorPane>>(
-    editors: T[],
+    editors: T[]
   ): T | undefined {
     return editors[1]
   }
@@ -183,7 +183,7 @@ suite("EditorPane", () => {
       input,
       options,
       Object.create(null),
-      CancellationToken.None,
+      CancellationToken.None
     )
     assert.strictEqual(<any>input, editor.input)
     editor.setVisible(true)
@@ -200,7 +200,7 @@ suite("EditorPane", () => {
     const editorDescriptor = EditorPaneDescriptor.create(
       TestEditor,
       "id",
-      "name",
+      "name"
     )
     assert.strictEqual(editorDescriptor.typeId, "id")
     assert.strictEqual(editorDescriptor.name, "name")
@@ -210,12 +210,12 @@ suite("EditorPane", () => {
     const editorDescriptor1 = EditorPaneDescriptor.create(
       TestEditor,
       "id1",
-      "name",
+      "name"
     )
     const editorDescriptor2 = EditorPaneDescriptor.create(
       OtherTestEditor,
       "id2",
-      "name",
+      "name"
     )
 
     const oldEditorsCnt = editorRegistry.getEditorPanes().length
@@ -224,37 +224,37 @@ suite("EditorPane", () => {
     disposables.add(
       editorRegistry.registerEditorPane(editorDescriptor1, [
         new SyncDescriptor(TestInput),
-      ]),
+      ])
     )
     disposables.add(
       editorRegistry.registerEditorPane(editorDescriptor2, [
         new SyncDescriptor(TestInput),
         new SyncDescriptor(OtherTestInput),
-      ]),
+      ])
     )
 
     assert.strictEqual(
       editorRegistry.getEditorPanes().length,
-      oldEditorsCnt + 2,
+      oldEditorsCnt + 2
     )
     assert.strictEqual(editorRegistry.getEditors().length, oldInputCnt + 3)
 
     assert.strictEqual(
       editorRegistry.getEditorPane(disposables.add(new TestInput())),
-      editorDescriptor2,
+      editorDescriptor2
     )
     assert.strictEqual(
       editorRegistry.getEditorPane(disposables.add(new OtherTestInput())),
-      editorDescriptor2,
+      editorDescriptor2
     )
 
     assert.strictEqual(
       editorRegistry.getEditorPaneByType("id1"),
-      editorDescriptor1,
+      editorDescriptor1
     )
     assert.strictEqual(
       editorRegistry.getEditorPaneByType("id2"),
-      editorDescriptor2,
+      editorDescriptor2
     )
     assert(!editorRegistry.getEditorPaneByType("id3"))
   })
@@ -266,7 +266,7 @@ suite("EditorPane", () => {
     disposables.add(
       editorRegistry.registerEditorPane(d1, [
         new SyncDescriptor(TestResourceEditorInput),
-      ]),
+      ])
     )
 
     const inst = workbenchInstantiationService(undefined, disposables)
@@ -288,11 +288,11 @@ suite("EditorPane", () => {
               undefined,
               undefined,
               undefined,
-              undefined,
-            ),
-          ),
+              undefined
+            )
+          )
         )!
-        .instantiate(inst, group),
+        .instantiate(inst, group)
     )
     assert.strictEqual(editor.getId(), "testEditor")
 
@@ -311,15 +311,15 @@ suite("EditorPane", () => {
               undefined,
               undefined,
               undefined,
-              undefined,
-            ),
-          ),
+              undefined
+            )
+          )
         )!
-        .instantiate(inst, group),
+        .instantiate(inst, group)
     )
     assert.strictEqual(
       otherEditor.getId(),
-      "workbench.editors.textResourceEditor",
+      "workbench.editors.textResourceEditor"
     )
   })
 
@@ -344,11 +344,11 @@ suite("EditorPane", () => {
               undefined,
               undefined,
               undefined,
-              undefined,
-            ),
-          ),
+              undefined
+            )
+          )
         )!
-        .instantiate(inst, group),
+        .instantiate(inst, group)
     )
 
     assert.strictEqual("workbench.editors.textResourceEditor", editor.getId())
@@ -356,16 +356,16 @@ suite("EditorPane", () => {
 
   test("Editor Input Serializer", function () {
     const testInput = disposables.add(
-      new TestEditorInput(URI.file("/fake"), "testTypeId"),
+      new TestEditorInput(URI.file("/fake"), "testTypeId")
     )
     workbenchInstantiationService(undefined, disposables).invokeFunction(
-      (accessor) => editorInputRegistry.start(accessor),
+      (accessor) => editorInputRegistry.start(accessor)
     )
     disposables.add(
       editorInputRegistry.registerEditorSerializer(
         testInput.typeId,
-        TestInputSerializer,
-      ),
+        TestInputSerializer
+      )
     )
 
     let factory = editorInputRegistry.getEditorSerializer("testTypeId")
@@ -378,8 +378,8 @@ suite("EditorPane", () => {
     assert.throws(() =>
       editorInputRegistry.registerEditorSerializer(
         testInput.typeId,
-        TestInputSerializer,
-      ),
+        TestInputSerializer
+      )
     )
   })
 
@@ -408,8 +408,8 @@ suite("EditorPane", () => {
         rawMemento,
         3,
         editorGroupService,
-        configurationService,
-      ),
+        configurationService
+      )
     )
 
     let res = memento.loadEditorState(testGroup0, URI.file("/A"))
@@ -452,8 +452,8 @@ suite("EditorPane", () => {
         rawMemento,
         3,
         editorGroupService,
-        configurationService,
-      ),
+        configurationService
+      )
     )
     assert.ok(memento.loadEditorState(testGroup0, URI.file("/C")))
     assert.ok(memento.loadEditorState(testGroup0, URI.file("/D")))
@@ -489,8 +489,8 @@ suite("EditorPane", () => {
         rawMemento,
         3,
         editorGroupService,
-        configurationService,
-      ),
+        configurationService
+      )
     )
 
     memento.saveEditorState(testGroup0, URI.file("/some/folder/file-1.txt"), {
@@ -506,36 +506,36 @@ suite("EditorPane", () => {
     memento.moveEditorState(
       URI.file("/some/folder/file-1.txt"),
       URI.file("/some/folder/file-moved.txt"),
-      extUri,
+      extUri
     )
 
     let res = memento.loadEditorState(
       testGroup0,
-      URI.file("/some/folder/file-1.txt"),
+      URI.file("/some/folder/file-1.txt")
     )
     assert.ok(!res)
 
     res = memento.loadEditorState(
       testGroup0,
-      URI.file("/some/folder/file-moved.txt"),
+      URI.file("/some/folder/file-moved.txt")
     )
     assert.strictEqual(res?.line, 1)
 
     memento.moveEditorState(
       URI.file("/some/folder"),
       URI.file("/some/folder-moved"),
-      extUri,
+      extUri
     )
 
     res = memento.loadEditorState(
       testGroup0,
-      URI.file("/some/folder-moved/file-moved.txt"),
+      URI.file("/some/folder-moved/file-moved.txt")
     )
     assert.strictEqual(res?.line, 1)
 
     res = memento.loadEditorState(
       testGroup0,
-      URI.file("/some/folder-moved/file-2.txt"),
+      URI.file("/some/folder-moved/file-2.txt")
     )
     assert.strictEqual(res?.line, 2)
   })
@@ -550,7 +550,7 @@ suite("EditorPane", () => {
     class TestEditorInput extends EditorInput {
       constructor(
         public resource: URI,
-        private id = "testEditorInputForMementoTest",
+        private id = "testEditorInputForMementoTest"
       ) {
         super()
       }
@@ -574,8 +574,8 @@ suite("EditorPane", () => {
         rawMemento,
         3,
         new TestEditorGroupsService(),
-        new TestTextResourceConfigurationService(),
-      ),
+        new TestTextResourceConfigurationService()
+      )
     )
 
     const testInputA = disposables.add(new TestEditorInput(URI.file("/A")))
@@ -604,7 +604,7 @@ suite("EditorPane", () => {
     class TestEditorInput extends EditorInput {
       constructor(
         public resource: URI,
-        private id = "testEditorInputForMementoTest",
+        private id = "testEditorInputForMementoTest"
       ) {
         super()
       }
@@ -628,8 +628,8 @@ suite("EditorPane", () => {
         rawMemento,
         3,
         new TestEditorGroupsService(),
-        new TestTextResourceConfigurationService(),
-      ),
+        new TestTextResourceConfigurationService()
+      )
     )
 
     const testInputA = disposables.add(new TestEditorInput(URI.file("/A")))
@@ -677,7 +677,7 @@ suite("EditorPane", () => {
             sharedViewState: true,
           },
         },
-      }),
+      })
     )
     const editorGroupService = new TestEditorGroupsService([testGroup0])
 
@@ -693,8 +693,8 @@ suite("EditorPane", () => {
         rawMemento,
         3,
         editorGroupService,
-        configurationService,
-      ),
+        configurationService
+      )
     )
 
     const resource = URI.file("/some/folder/file-1.txt")
@@ -732,14 +732,14 @@ suite("EditorPane", () => {
     class TrustRequiredTestEditor extends EditorPane {
       constructor(
         group: IEditorGroup,
-        @ITelemetryService telemetryService: ITelemetryService,
+        @ITelemetryService telemetryService: ITelemetryService
       ) {
         super(
           "TestEditor",
           group,
           NullTelemetryService,
           NullThemeService,
-          disposables.add(new TestStorageService()),
+          disposables.add(new TestStorageService())
         )
       }
 
@@ -768,14 +768,14 @@ suite("EditorPane", () => {
 
     const instantiationService = workbenchInstantiationService(
       undefined,
-      disposables,
+      disposables
     )
     const workspaceTrustService = disposables.add(
-      instantiationService.createInstance(TestWorkspaceTrustManagementService),
+      instantiationService.createInstance(TestWorkspaceTrustManagementService)
     )
     instantiationService.stub(
       IWorkspaceTrustManagementService,
-      workspaceTrustService,
+      workspaceTrustService
     )
     workspaceTrustService.setWorkspaceTrust(false)
 
@@ -783,7 +783,7 @@ suite("EditorPane", () => {
     instantiationService.stub(IEditorGroupsService, editorPart)
 
     const editorService = disposables.add(
-      instantiationService.createInstance(EditorService, undefined),
+      instantiationService.createInstance(EditorService, undefined)
     )
     instantiationService.stub(IEditorService, editorService)
 
@@ -792,12 +792,12 @@ suite("EditorPane", () => {
     const editorDescriptor = EditorPaneDescriptor.create(
       TrustRequiredTestEditor,
       "id1",
-      "name",
+      "name"
     )
     disposables.add(
       editorRegistry.registerEditorPane(editorDescriptor, [
         new SyncDescriptor(TrustRequiredTestInput),
-      ]),
+      ])
     )
 
     const testInput = disposables.add(new TrustRequiredTestInput())
@@ -805,7 +805,7 @@ suite("EditorPane", () => {
     await group.openEditor(testInput)
     assert.strictEqual(
       group.activeEditorPane?.getId(),
-      WorkspaceTrustRequiredPlaceholderEditor.ID,
+      WorkspaceTrustRequiredPlaceholderEditor.ID
     )
 
     const getEditorPaneIdAsync = () =>
@@ -813,7 +813,7 @@ suite("EditorPane", () => {
         disposables.add(
           editorService.onDidActiveEditorChange(() => {
             resolve(group.activeEditorPane?.getId())
-          }),
+          })
         )
       })
 
@@ -824,7 +824,7 @@ suite("EditorPane", () => {
     workspaceTrustService.setWorkspaceTrust(false)
     assert.strictEqual(
       await getEditorPaneIdAsync(),
-      WorkspaceTrustRequiredPlaceholderEditor.ID,
+      WorkspaceTrustRequiredPlaceholderEditor.ID
     )
 
     await group.closeAllEditors()

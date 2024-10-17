@@ -41,7 +41,7 @@ const defaultState: CenteredViewState = {
 const distributeSizing: DistributeSizing = { type: "distribute" }
 
 function createEmptyView(
-  background: Color | undefined,
+  background: Color | undefined
 ): ISplitViewView<{ top: number; left: number }> {
   const element = $(".centered-layout-margin")
   element.style.height = "100%"
@@ -60,7 +60,7 @@ function createEmptyView(
 
 function toSplitViewView(
   view: IView,
-  getHeight: () => number,
+  getHeight: () => number
 ): ISplitViewView<{ top: number; left: number }> {
   return {
     element: view.element,
@@ -99,7 +99,7 @@ export class CenteredViewLayout implements IDisposable {
     private container: HTMLElement,
     private view: IView,
     public state: CenteredViewState = { ...defaultState },
-    private centeredLayoutFixedWidth: boolean = false,
+    private centeredLayoutFixedWidth: boolean = false
   ) {
     this.container.appendChild(this.view.element)
     // Make sure to hide the split view overflow like sashes #52892
@@ -158,7 +158,7 @@ export class CenteredViewLayout implements IDisposable {
     if (this.centeredLayoutFixedWidth) {
       const centerViewWidth = Math.min(
         this.lastLayoutPosition.width,
-        this.state.targetWidth,
+        this.state.targetWidth
       )
       const marginWidthFloat =
         (this.lastLayoutPosition.width - centerViewWidth) / 2
@@ -230,18 +230,18 @@ export class CenteredViewLayout implements IDisposable {
           if (!!this.splitView) {
             this.updateState()
           }
-        }),
+        })
       )
       this.splitViewDisposables.add(
         this.splitView.onDidSashReset(() => {
           this.state = { ...defaultState }
           this.resizeSplitViews()
-        }),
+        })
       )
 
       this.splitView.layout(
         this.lastLayoutPosition.width,
-        this.lastLayoutPosition,
+        this.lastLayoutPosition
       )
       const backgroundColor = this.style ? this.style.background : undefined
       this.emptyViews = [
@@ -253,7 +253,7 @@ export class CenteredViewLayout implements IDisposable {
       this.splitView.addView(
         toSplitViewView(this.view, () => this.lastLayoutPosition.height),
         distributeSizing,
-        1,
+        1
       )
       this.splitView.addView(this.emptyViews[1], distributeSizing, 2)
 
@@ -271,7 +271,7 @@ export class CenteredViewLayout implements IDisposable {
         this.lastLayoutPosition.width,
         this.lastLayoutPosition.height,
         this.lastLayoutPosition.top,
-        this.lastLayoutPosition.left,
+        this.lastLayoutPosition.left
       )
     }
   }

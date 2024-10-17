@@ -47,7 +47,7 @@ suite("TextResourceEditorInput", () => {
     accessor.modelService.createModel(
       "function test() {}",
       accessor.languageService.createById(PLAINTEXT_LANGUAGE_ID),
-      resource,
+      resource
     )
 
     const input = disposables.add(
@@ -62,8 +62,8 @@ suite("TextResourceEditorInput", () => {
         undefined,
         undefined,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
 
     const model = disposables.add(await input.resolve())
@@ -71,7 +71,7 @@ suite("TextResourceEditorInput", () => {
     assert.ok(model)
     assert.strictEqual(
       snapshotToString((model as TextResourceEditorModel).createSnapshot()!),
-      "function test() {}",
+      "function test() {}"
     )
   })
 
@@ -88,7 +88,7 @@ suite("TextResourceEditorInput", () => {
     accessor.modelService.createModel(
       "function test() {}",
       accessor.languageService.createById(PLAINTEXT_LANGUAGE_ID),
-      resource,
+      resource
     )
 
     const input = disposables.add(
@@ -103,27 +103,27 @@ suite("TextResourceEditorInput", () => {
         undefined,
         undefined,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
 
     const model = disposables.add(await input.resolve())
     assert.ok(model)
     assert.strictEqual(
       model.textEditorModel?.getLanguageId(),
-      "resource-input-test",
+      "resource-input-test"
     )
 
     input.setLanguageId("text")
     assert.strictEqual(
       model.textEditorModel?.getLanguageId(),
-      PLAINTEXT_LANGUAGE_ID,
+      PLAINTEXT_LANGUAGE_ID
     )
 
     disposables.add(await input.resolve())
     assert.strictEqual(
       model.textEditorModel?.getLanguageId(),
-      PLAINTEXT_LANGUAGE_ID,
+      PLAINTEXT_LANGUAGE_ID
     )
     registration.dispose()
   })
@@ -141,7 +141,7 @@ suite("TextResourceEditorInput", () => {
     accessor.modelService.createModel(
       "function test() {}",
       accessor.languageService.createById(PLAINTEXT_LANGUAGE_ID),
-      resource,
+      resource
     )
 
     const input = disposables.add(
@@ -156,8 +156,8 @@ suite("TextResourceEditorInput", () => {
         undefined,
         undefined,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
     input.setPreferredLanguageId("resource-input-test")
 
@@ -165,7 +165,7 @@ suite("TextResourceEditorInput", () => {
     assert.ok(model)
     assert.strictEqual(
       model.textEditorModel?.getLanguageId(),
-      "resource-input-test",
+      "resource-input-test"
     )
     registration.dispose()
   })
@@ -179,7 +179,7 @@ suite("TextResourceEditorInput", () => {
     accessor.modelService.createModel(
       "function test() {}",
       accessor.languageService.createById(PLAINTEXT_LANGUAGE_ID),
-      resource,
+      resource
     )
 
     const input = disposables.add(
@@ -194,15 +194,15 @@ suite("TextResourceEditorInput", () => {
         undefined,
         undefined,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
 
     const model = disposables.add(await input.resolve())
     assert.ok(model)
     assert.strictEqual(
       model.textEditorModel?.getValue(),
-      "My Resource Input Contents",
+      "My Resource Input Contents"
     )
 
     model.textEditorModel.setValue("Some other contents")
@@ -221,7 +221,7 @@ suite("TextResourceEditorInput", () => {
     accessor.modelService.createModel(
       "function test() {}",
       accessor.languageService.createById(PLAINTEXT_LANGUAGE_ID),
-      resource,
+      resource
     )
 
     const input = disposables.add(
@@ -236,8 +236,8 @@ suite("TextResourceEditorInput", () => {
         undefined,
         undefined,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
     input.setPreferredContents("My Resource Input Contents")
 
@@ -245,7 +245,7 @@ suite("TextResourceEditorInput", () => {
     assert.ok(model)
     assert.strictEqual(
       model.textEditorModel?.getValue(),
-      "My Resource Input Contents",
+      "My Resource Input Contents"
     )
 
     model.textEditorModel.setValue("Some other contents")

@@ -32,7 +32,7 @@ import { IRange } from "vs/editor/common/core/range"
 import { LayoutableEditor } from "vs/workbench/contrib/comments/browser/simpleCommentEditor"
 
 export class CommentThreadBody<
-  T extends IRange | ICellRange = IRange,
+  T extends IRange | ICellRange = IRange
 > extends Disposable {
   private _commentsElement!: HTMLElement
   private _commentElements: CommentNode<T>[] = []
@@ -66,7 +66,7 @@ export class CommentThreadBody<
     private _parentCommentThreadWidget: ICommentThreadWidget,
     @ICommentService private commentService: ICommentService,
     @IOpenerService private openerService: IOpenerService,
-    @ILanguageService private languageService: ILanguageService,
+    @ILanguageService private languageService: ILanguageService
   ) {
     super()
 
@@ -74,15 +74,15 @@ export class CommentThreadBody<
       dom.addDisposableListener(container, dom.EventType.FOCUS_IN, (e) => {
         // TODO @rebornix, limit T to IRange | ICellRange
         this.commentService.setActiveEditingCommentThread(this._commentThread)
-      }),
+      })
     )
 
     this._markdownRenderer = this._register(
       new MarkdownRenderer(
         this._options,
         this.languageService,
-        this.openerService,
-      ),
+        this.openerService
+      )
     )
   }
 
@@ -93,7 +93,7 @@ export class CommentThreadBody<
   async display() {
     this._commentsElement = dom.append(
       this.container,
-      dom.$("div.comments-container"),
+      dom.$("div.comments-container")
     )
     this._commentsElement.setAttribute("role", "presentation")
     this._commentsElement.tabIndex = 0
@@ -121,18 +121,18 @@ export class CommentThreadBody<
               const newIndex = this._focusedComment! + change
               return Math.min(
                 Math.max(0, newIndex),
-                this._commentElements.length - 1,
+                this._commentElements.length - 1
               )
             }
 
             this._setFocusedComment(
               event.equals(KeyCode.UpArrow)
                 ? moveFocusWithinBounds(-1)
-                : moveFocusWithinBounds(1),
+                : moveFocusWithinBounds(1)
             )
           }
-        },
-      ),
+        }
+      )
     )
 
     this._commentElements = []
@@ -188,16 +188,16 @@ export class CommentThreadBody<
   }
 
   getCommentCoords(
-    commentUniqueId: number,
+    commentUniqueId: number
   ):
     | { thread: dom.IDomNodePagePosition; comment: dom.IDomNodePagePosition }
     | undefined {
     const matchedNode = this._commentElements.filter(
-      (commentNode) => commentNode.comment.uniqueIdInThread === commentUniqueId,
+      (commentNode) => commentNode.comment.uniqueIdInThread === commentUniqueId
     )
     if (matchedNode && matchedNode.length) {
       const commentThreadCoords = dom.getDomNodePagePosition(
-        this._commentElements[0].domNode,
+        this._commentElements[0].domNode
       )
       const commentCoords = dom.getDomNodePagePosition(matchedNode[0].domNode)
       return {
@@ -211,7 +211,7 @@ export class CommentThreadBody<
 
   async updateCommentThread(
     commentThread: languages.CommentThread<T>,
-    preserveFocus: boolean,
+    preserveFocus: boolean
   ) {
     const oldCommentsLen = this._commentElements.length
     const newCommentsLen = commentThread.comments
@@ -224,7 +224,7 @@ export class CommentThreadBody<
       const comment = this._commentElements[i].comment
       const newComment = commentThread.comments
         ? commentThread.comments.filter(
-            (c) => c.uniqueIdInThread === comment.uniqueIdInThread,
+            (c) => c.uniqueIdInThread === comment.uniqueIdInThread
           )
         : []
 
@@ -254,7 +254,7 @@ export class CommentThreadBody<
       const oldCommentNode = this._commentElements.filter(
         (commentNode) =>
           commentNode.comment.uniqueIdInThread ===
-          currentComment.uniqueIdInThread,
+          currentComment.uniqueIdInThread
       )
       if (oldCommentNode.length) {
         lastCommentElement = oldCommentNode[0].domNode
@@ -266,7 +266,7 @@ export class CommentThreadBody<
         if (lastCommentElement) {
           this._commentsElement.insertBefore(
             newElement.domNode,
-            lastCommentElement,
+            lastCommentElement
           )
           lastCommentElement = newElement.domNode
         } else {
@@ -286,7 +286,7 @@ export class CommentThreadBody<
 
     if (newCommentsInEditMode.length) {
       const lastIndex = this._commentElements.indexOf(
-        newCommentsInEditMode[newCommentsInEditMode.length - 1],
+        newCommentsInEditMode[newCommentsInEditMode.length - 1]
       )
       this._focusedComment = lastIndex
     }
@@ -306,14 +306,14 @@ export class CommentThreadBody<
           this._commentThread.comments?.length,
           this._commentThread.range.startLineNumber,
           this._commentThread.range.endLineNumber,
-          this._commentThread.label,
+          this._commentThread.label
         )
       } else {
         this._commentsElement.ariaLabel = nls.localize(
           "commentThreadAria.document",
           "Comment thread with {0} comments on the entire document. {1}.",
           this._commentThread.comments?.length,
-          this._commentThread.label,
+          this._commentThread.label
         )
       }
     } else {
@@ -321,7 +321,7 @@ export class CommentThreadBody<
         "commentThreadAria",
         "Comment thread with {0} comments. {1}.",
         this._commentThread.comments?.length,
-        this._commentThread.label,
+        this._commentThread.label
       )
     }
   }
@@ -351,7 +351,7 @@ export class CommentThreadBody<
       this.owner,
       this.parentResourceUri,
       this._parentCommentThreadWidget,
-      this._markdownRenderer,
+      this._markdownRenderer
     ) as unknown as CommentNode<T>
 
     this._register(newCommentNode)
@@ -362,10 +362,10 @@ export class CommentThreadBody<
           this._commentElements.findIndex(
             (commentNode) =>
               commentNode.comment.uniqueIdInThread ===
-              clickedNode.comment.uniqueIdInThread,
-          ),
-        ),
-      ),
+              clickedNode.comment.uniqueIdInThread
+          )
+        )
+      )
     )
 
     return newCommentNode

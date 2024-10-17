@@ -9,400 +9,277 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import {
-  IPickAndOpenOptions,
-  ISaveDialogOptions,
-  IOpenDialogOptions,
-  IFileDialogService,
-  FileFilter,
-  IPromptButton,
-} from "vs/platform/dialogs/common/dialogs"
-import { URI } from "vs/base/common/uri"
-import {
-  InstantiationType,
-  registerSingleton,
-} from "vs/platform/instantiation/common/extensions"
-import { AbstractFileDialogService } from "vs/workbench/services/dialogs/browser/abstractFileDialogService"
-import { Schemas } from "vs/base/common/network"
-import { memoize } from "vs/base/common/decorators"
-import { HTMLFileSystemProvider } from "vs/platform/files/browser/htmlFileSystemProvider"
-import { localize } from "vs/nls"
-import { getMediaOrTextMime } from "vs/base/common/mime"
-import { basename } from "vs/base/common/resources"
-import {
-  getActiveWindow,
-  triggerDownload,
-  triggerUpload,
-} from "vs/base/browser/dom"
-import Severity from "vs/base/common/severity"
-import { VSBuffer } from "vs/base/common/buffer"
-import { extractFileListData } from "vs/platform/dnd/browser/dnd"
-import { Iterable } from "vs/base/common/iterator"
-import { WebFileSystemAccess } from "vs/platform/files/browser/webFileSystemAccess"
-import { EmbeddedCodeEditorWidget } from "vs/editor/browser/widget/codeEditor/embeddedCodeEditorWidget"
+import { IPickAndOpenOptions, ISaveDialogOptions, IOpenDialogOptions, IFileDialogService, FileFilter, IPromptButton } from 'vs/platform/dialogs/common/dialogs';
+import { URI } from 'vs/base/common/uri';
+import { InstantiationType, registerSingleton } from 'vs/platform/instantiation/common/extensions';
+import { AbstractFileDialogService } from 'vs/workbench/services/dialogs/browser/abstractFileDialogService';
+import { Schemas } from 'vs/base/common/network';
+import { memoize } from 'vs/base/common/decorators';
+import { HTMLFileSystemProvider } from 'vs/platform/files/browser/htmlFileSystemProvider';
+import { localize } from 'vs/nls';
+import { getMediaOrTextMime } from 'vs/base/common/mime';
+import { basename } from 'vs/base/common/resources';
+import { getActiveWindow, triggerDownload, triggerUpload } from 'vs/base/browser/dom';
+import Severity from 'vs/base/common/severity';
+import { VSBuffer } from 'vs/base/common/buffer';
+import { extractFileListData } from 'vs/platform/dnd/browser/dnd';
+import { Iterable } from 'vs/base/common/iterator';
+import { WebFileSystemAccess } from 'vs/platform/files/browser/webFileSystemAccess';
+import { EmbeddedCodeEditorWidget } from 'vs/editor/browser/widget/codeEditor/embeddedCodeEditorWidget';
 
-export class FileDialogService
-  extends AbstractFileDialogService
-  implements IFileDialogService
-{
-  @memoize
-  private get fileSystemProvider(): HTMLFileSystemProvider {
-    return this.fileService.getProvider(Schemas.file) as HTMLFileSystemProvider
-  }
+export class FileDialogService extends AbstractFileDialogService implements IFileDialogService {
 
-  async pickFileFolderAndOpen(options: IPickAndOpenOptions): Promise<void> {
-    const schema = this.getFileSystemSchema(options)
+	@memoize
+	private get fileSystemProvider(): HTMLFileSystemProvider {
+		return this.fileService.getProvider(Schemas.file) as HTMLFileSystemProvider;
+	}
 
-    if (!options.defaultUri) {
-      options.defaultUri = await this.defaultFilePath(schema)
-    }
+	async pickFileFolderAndOpen(options: IPickAndOpenOptions): Promise<void> {
+		const schema = this.getFileSystemSchema(options);
 
-    if (this.shouldUseSimplified(schema)) {
-      return super.pickFileFolderAndOpenSimplified(schema, options, false)
-    }
+		if (!options.defaultUri) {
+			options.defaultUri = await this.defaultFilePath(schema);
+		}
 
-    throw new Error(
-      localize(
-        "pickFolderAndOpen",
-        "Can't open folders, try adding a folder to the workspace instead.",
-      ),
-    )
-  }
+		if (this.shouldUseSimplified(schema)) {
+			return super.pickFileFolderAndOpenSimplified(schema, options, false);
+		}
 
-  protected override addFileSchemaIfNeeded(
-    schema: string,
-    isFolder: boolean,
-  ): string[] {
-    return schema === Schemas.untitled
-      ? [Schemas.file]
-      : schema !== Schemas.file &&
-          (!isFolder || schema !== Schemas.vscodeRemote)
-        ? [schema, Schemas.file]
-        : [schema]
-  }
+		throw new Error(localize('pickFolderAndOpen', "Can't open folders, try adding a folder to the workspace instead."));
+	}
 
-  async pickFileAndOpen(options: IPickAndOpenOptions): Promise<void> {
-    const schema = this.getFileSystemSchema(options)
+	protected override addFileSchemaIfNeeded(schema: string, isFolder: boolean): string[] {
+		return (schema === Schemas.untitled) ? [Schemas.file]
+			: (((schema !== Schemas.file) && (!isFolder || (schema !== Schemas.vscodeRemote))) ? [schema, Schemas.file] : [schema]);
+	}
 
-    if (!options.defaultUri) {
-      options.defaultUri = await this.defaultFilePath(schema)
-    }
+	async pickFileAndOpen(options: IPickAndOpenOptions): Promise<void> {
+		const schema = this.getFileSystemSchema(options);
 
-    if (this.shouldUseSimplified(schema)) {
-      return super.pickFileAndOpenSimplified(schema, options, false)
-    }
+		if (!options.defaultUri) {
+			options.defaultUri = await this.defaultFilePath(schema);
+		}
 
-    const activeWindow = getActiveWindow()
-    if (!WebFileSystemAccess.supported(activeWindow)) {
-      return this.showUnsupportedBrowserWarning("open")
-    }
+		if (this.shouldUseSimplified(schema)) {
+			return super.pickFileAndOpenSimplified(schema, options, false);
+		}
 
-    let fileHandle: FileSystemHandle | undefined = undefined
-    try {
-      ;[fileHandle] = await activeWindow.showOpenFilePicker({ multiple: false })
-    } catch (error) {
-      return // `showOpenFilePicker` will throw an error when the user cancels
-    }
+		const activeWindow = getActiveWindow();
+		if (!WebFileSystemAccess.supported(activeWindow)) {
+			return this.showUnsupportedBrowserWarning('open');
+		}
 
-    if (!WebFileSystemAccess.isFileSystemFileHandle(fileHandle)) {
-      return
-    }
+		let fileHandle: FileSystemHandle | undefined = undefined;
+		try {
+			([fileHandle] = await activeWindow.showOpenFilePicker({ multiple: false }));
+		} catch (error) {
+			return; // `showOpenFilePicker` will throw an error when the user cancels
+		}
 
-    const uri = await this.fileSystemProvider.registerFileHandle(fileHandle)
+		if (!WebFileSystemAccess.isFileSystemFileHandle(fileHandle)) {
+			return;
+		}
 
-    this.addFileToRecentlyOpened(uri)
+		const uri = await this.fileSystemProvider.registerFileHandle(fileHandle);
 
-    await this.openerService.open(uri, {
-      fromUserGesture: true,
-      editorOptions: { pinned: true },
-    })
-  }
+		this.addFileToRecentlyOpened(uri);
 
-  async pickFolderAndOpen(options: IPickAndOpenOptions): Promise<void> {
-    const schema = this.getFileSystemSchema(options)
+		await this.openerService.open(uri, { fromUserGesture: true, editorOptions: { pinned: true } });
+	}
 
-    if (!options.defaultUri) {
-      options.defaultUri = await this.defaultFolderPath(schema)
-    }
+	async pickFolderAndOpen(options: IPickAndOpenOptions): Promise<void> {
+		const schema = this.getFileSystemSchema(options);
 
-    if (this.shouldUseSimplified(schema)) {
-      return super.pickFolderAndOpenSimplified(schema, options)
-    }
+		if (!options.defaultUri) {
+			options.defaultUri = await this.defaultFolderPath(schema);
+		}
 
-    throw new Error(
-      localize(
-        "pickFolderAndOpen",
-        "Can't open folders, try adding a folder to the workspace instead.",
-      ),
-    )
-  }
+		if (this.shouldUseSimplified(schema)) {
+			return super.pickFolderAndOpenSimplified(schema, options);
+		}
 
-  async pickWorkspaceAndOpen(options: IPickAndOpenOptions): Promise<void> {
-    options.availableFileSystems =
-      this.getWorkspaceAvailableFileSystems(options)
-    const schema = this.getFileSystemSchema(options)
+		throw new Error(localize('pickFolderAndOpen', "Can't open folders, try adding a folder to the workspace instead."));
+	}
 
-    if (!options.defaultUri) {
-      options.defaultUri = await this.defaultWorkspacePath(schema)
-    }
+	async pickWorkspaceAndOpen(options: IPickAndOpenOptions): Promise<void> {
+		options.availableFileSystems = this.getWorkspaceAvailableFileSystems(options);
+		const schema = this.getFileSystemSchema(options);
 
-    if (this.shouldUseSimplified(schema)) {
-      return super.pickWorkspaceAndOpenSimplified(schema, options)
-    }
+		if (!options.defaultUri) {
+			options.defaultUri = await this.defaultWorkspacePath(schema);
+		}
 
-    throw new Error(
-      localize(
-        "pickWorkspaceAndOpen",
-        "Can't open workspaces, try adding a folder to the workspace instead.",
-      ),
-    )
-  }
+		if (this.shouldUseSimplified(schema)) {
+			return super.pickWorkspaceAndOpenSimplified(schema, options);
+		}
 
-  async pickFileToSave(
-    defaultUri: URI,
-    availableFileSystems?: string[],
-  ): Promise<URI | undefined> {
-    const schema = this.getFileSystemSchema({
-      defaultUri,
-      availableFileSystems,
-    })
+		throw new Error(localize('pickWorkspaceAndOpen', "Can't open workspaces, try adding a folder to the workspace instead."));
+	}
 
-    const options = this.getPickFileToSaveDialogOptions(
-      defaultUri,
-      availableFileSystems,
-    )
-    if (this.shouldUseSimplified(schema)) {
-      return super.pickFileToSaveSimplified(schema, options)
-    }
+	async pickFileToSave(defaultUri: URI, availableFileSystems?: string[]): Promise<URI | undefined> {
+		const schema = this.getFileSystemSchema({ defaultUri, availableFileSystems });
 
-    const activeWindow = getActiveWindow()
-    if (!WebFileSystemAccess.supported(activeWindow)) {
-      return this.showUnsupportedBrowserWarning("save")
-    }
+		const options = this.getPickFileToSaveDialogOptions(defaultUri, availableFileSystems);
+		if (this.shouldUseSimplified(schema)) {
+			return super.pickFileToSaveSimplified(schema, options);
+		}
 
-    let fileHandle: FileSystemHandle | undefined = undefined
-    const startIn = Iterable.first(this.fileSystemProvider.directories)
+		const activeWindow = getActiveWindow();
+		if (!WebFileSystemAccess.supported(activeWindow)) {
+			return this.showUnsupportedBrowserWarning('save');
+		}
 
-    try {
-      fileHandle = await activeWindow.showSaveFilePicker({
-        types: this.getFilePickerTypes(options.filters),
-        ...{ suggestedName: basename(defaultUri), startIn },
-      })
-    } catch (error) {
-      return // `showSaveFilePicker` will throw an error when the user cancels
-    }
+		let fileHandle: FileSystemHandle | undefined = undefined;
+		const startIn = Iterable.first(this.fileSystemProvider.directories);
 
-    if (!WebFileSystemAccess.isFileSystemFileHandle(fileHandle)) {
-      return undefined
-    }
+		try {
+			fileHandle = await activeWindow.showSaveFilePicker({ types: this.getFilePickerTypes(options.filters), ...{ suggestedName: basename(defaultUri), startIn } });
+		} catch (error) {
+			return; // `showSaveFilePicker` will throw an error when the user cancels
+		}
 
-    return this.fileSystemProvider.registerFileHandle(fileHandle)
-  }
+		if (!WebFileSystemAccess.isFileSystemFileHandle(fileHandle)) {
+			return undefined;
+		}
 
-  private getFilePickerTypes(
-    filters?: FileFilter[],
-  ): FilePickerAcceptType[] | undefined {
-    return filters
-      ?.filter((filter) => {
-        return !(
-          filter.extensions.length === 1 &&
-          (filter.extensions[0] === "*" || filter.extensions[0] === "")
-        )
-      })
-      .map((filter) => {
-        const accept: Record<string, string[]> = {}
-        const extensions = filter.extensions.filter(
-          (ext) =>
-            ext.indexOf("-") < 0 &&
-            ext.indexOf("*") < 0 &&
-            ext.indexOf("_") < 0,
-        )
-        accept[
-          getMediaOrTextMime(`fileName.${filter.extensions[0]}`) ?? "text/plain"
-        ] = extensions.map((ext) => (ext.startsWith(".") ? ext : `.${ext}`))
-        return {
-          description: filter.name,
-          accept,
-        }
-      })
-  }
+		return this.fileSystemProvider.registerFileHandle(fileHandle);
+	}
 
-  async showSaveDialog(options: ISaveDialogOptions): Promise<URI | undefined> {
-    const schema = this.getFileSystemSchema(options)
+	private getFilePickerTypes(filters?: FileFilter[]): FilePickerAcceptType[] | undefined {
+		return filters?.filter(filter => {
+			return !((filter.extensions.length === 1) && ((filter.extensions[0] === '*') || filter.extensions[0] === ''));
+		}).map(filter => {
+			const accept: Record<string, string[]> = {};
+			const extensions = filter.extensions.filter(ext => (ext.indexOf('-') < 0) && (ext.indexOf('*') < 0) && (ext.indexOf('_') < 0));
+			accept[getMediaOrTextMime(`fileName.${filter.extensions[0]}`) ?? 'text/plain'] = extensions.map(ext => ext.startsWith('.') ? ext : `.${ext}`);
+			return {
+				description: filter.name,
+				accept
+			};
+		});
+	}
 
-    if (this.shouldUseSimplified(schema)) {
-      return super.showSaveDialogSimplified(schema, options)
-    }
+	async showSaveDialog(options: ISaveDialogOptions): Promise<URI | undefined> {
+		const schema = this.getFileSystemSchema(options);
 
-    const activeWindow = getActiveWindow()
-    if (!WebFileSystemAccess.supported(activeWindow)) {
-      return this.showUnsupportedBrowserWarning("save")
-    }
+		if (this.shouldUseSimplified(schema)) {
+			return super.showSaveDialogSimplified(schema, options);
+		}
 
-    let fileHandle: FileSystemHandle | undefined = undefined
-    const startIn = Iterable.first(this.fileSystemProvider.directories)
+		const activeWindow = getActiveWindow();
+		if (!WebFileSystemAccess.supported(activeWindow)) {
+			return this.showUnsupportedBrowserWarning('save');
+		}
 
-    try {
-      fileHandle = await activeWindow.showSaveFilePicker({
-        types: this.getFilePickerTypes(options.filters),
-        ...(options.defaultUri
-          ? { suggestedName: basename(options.defaultUri) }
-          : undefined),
-        ...{ startIn },
-      })
-    } catch (error) {
-      return undefined // `showSaveFilePicker` will throw an error when the user cancels
-    }
+		let fileHandle: FileSystemHandle | undefined = undefined;
+		const startIn = Iterable.first(this.fileSystemProvider.directories);
 
-    if (!WebFileSystemAccess.isFileSystemFileHandle(fileHandle)) {
-      return undefined
-    }
+		try {
+			fileHandle = await activeWindow.showSaveFilePicker({ types: this.getFilePickerTypes(options.filters), ...options.defaultUri ? { suggestedName: basename(options.defaultUri) } : undefined, ...{ startIn } });
+		} catch (error) {
+			return undefined; // `showSaveFilePicker` will throw an error when the user cancels
+		}
 
-    return this.fileSystemProvider.registerFileHandle(fileHandle)
-  }
+		if (!WebFileSystemAccess.isFileSystemFileHandle(fileHandle)) {
+			return undefined;
+		}
 
-  async showOpenDialog(
-    options: IOpenDialogOptions,
-  ): Promise<URI[] | undefined> {
-    const schema = this.getFileSystemSchema(options)
+		return this.fileSystemProvider.registerFileHandle(fileHandle);
+	}
 
-    if (this.shouldUseSimplified(schema)) {
-      return super.showOpenDialogSimplified(schema, options)
-    }
+	async showOpenDialog(options: IOpenDialogOptions): Promise<URI[] | undefined> {
+		const schema = this.getFileSystemSchema(options);
 
-    const activeWindow = getActiveWindow()
-    if (!WebFileSystemAccess.supported(activeWindow)) {
-      return this.showUnsupportedBrowserWarning("open")
-    }
+		if (this.shouldUseSimplified(schema)) {
+			return super.showOpenDialogSimplified(schema, options);
+		}
 
-    let uri: URI | undefined
-    const startIn =
-      Iterable.first(this.fileSystemProvider.directories) ?? "documents"
+		const activeWindow = getActiveWindow();
+		if (!WebFileSystemAccess.supported(activeWindow)) {
+			return this.showUnsupportedBrowserWarning('open');
+		}
 
-    try {
-      if (options.canSelectFiles) {
-        const handle = await activeWindow.showOpenFilePicker({
-          multiple: false,
-          types: this.getFilePickerTypes(options.filters),
-          ...{ startIn },
-        })
-        if (
-          handle.length === 1 &&
-          WebFileSystemAccess.isFileSystemFileHandle(handle[0])
-        ) {
-          uri = await this.fileSystemProvider.registerFileHandle(handle[0])
-        }
-      } else {
-        const handle = await activeWindow.showDirectoryPicker({
-          ...{ startIn },
-        })
-        uri = await this.fileSystemProvider.registerDirectoryHandle(handle)
-      }
-    } catch (error) {
-      // ignore - `showOpenFilePicker` / `showDirectoryPicker` will throw an error when the user cancels
-    }
+		let uri: URI | undefined;
+		const startIn = Iterable.first(this.fileSystemProvider.directories) ?? 'documents';
 
-    return uri ? [uri] : undefined
-  }
+		try {
+			if (options.canSelectFiles) {
+				const handle = await activeWindow.showOpenFilePicker({ multiple: false, types: this.getFilePickerTypes(options.filters), ...{ startIn } });
+				if (handle.length === 1 && WebFileSystemAccess.isFileSystemFileHandle(handle[0])) {
+					uri = await this.fileSystemProvider.registerFileHandle(handle[0]);
+				}
+			} else {
+				const handle = await activeWindow.showDirectoryPicker({ ...{ startIn } });
+				uri = await this.fileSystemProvider.registerDirectoryHandle(handle);
+			}
+		} catch (error) {
+			// ignore - `showOpenFilePicker` / `showDirectoryPicker` will throw an error when the user cancels
+		}
 
-  private async showUnsupportedBrowserWarning(
-    context: "save" | "open",
-  ): Promise<undefined> {
-    // When saving, try to just download the contents
-    // of the active text editor if any as a workaround
-    if (context === "save") {
-      const activeCodeEditor = this.codeEditorService.getActiveCodeEditor()
-      if (!(activeCodeEditor instanceof EmbeddedCodeEditorWidget)) {
-        const activeTextModel = activeCodeEditor?.getModel()
-        if (activeTextModel) {
-          triggerDownload(
-            VSBuffer.fromString(activeTextModel.getValue()).buffer,
-            basename(activeTextModel.uri),
-          )
-          return
-        }
-      }
-    }
+		return uri ? [uri] : undefined;
+	}
 
-    // Otherwise inform the user about options
+	private async showUnsupportedBrowserWarning(context: 'save' | 'open'): Promise<undefined> {
 
-    const buttons: IPromptButton<void>[] = [
-      {
-        label: localize(
-          { key: "openRemote", comment: ["&& denotes a mnemonic"] },
-          "&&Open Remote...",
-        ),
-        run: async () => {
-          await this.commandService.executeCommand(
-            "workbench.action.remote.showMenu",
-          )
-        },
-      },
-      {
-        label: localize(
-          { key: "learnMore", comment: ["&& denotes a mnemonic"] },
-          "&&Learn More",
-        ),
-        run: async () => {
-          await this.openerService.open(
-            "https://aka.ms/VSCodeWebLocalFileSystemAccess",
-          )
-        },
-      },
-    ]
-    if (context === "open") {
-      buttons.push({
-        label: localize(
-          { key: "openFiles", comment: ["&& denotes a mnemonic"] },
-          "Open &&Files...",
-        ),
-        run: async () => {
-          const files = await triggerUpload()
-          if (files) {
-            const filesData = (
-              await this.instantiationService.invokeFunction((accessor) =>
-                extractFileListData(accessor, files),
-              )
-            ).filter((fileData) => !fileData.isDirectory)
-            if (filesData.length > 0) {
-              this.editorService.openEditors(
-                filesData.map((fileData) => {
-                  return {
-                    resource: fileData.resource,
-                    contents: fileData.contents?.toString(),
-                    options: { pinned: true },
-                  }
-                }),
-              )
-            }
-          }
-        },
-      })
-    }
+		// When saving, try to just download the contents
+		// of the active text editor if any as a workaround
+		if (context === 'save') {
+			const activeCodeEditor = this.codeEditorService.getActiveCodeEditor();
+			if (!(activeCodeEditor instanceof EmbeddedCodeEditorWidget)) {
+				const activeTextModel = activeCodeEditor?.getModel();
+				if (activeTextModel) {
+					triggerDownload(VSBuffer.fromString(activeTextModel.getValue()).buffer, basename(activeTextModel.uri));
+					return;
+				}
+			}
+		}
 
-    await this.dialogService.prompt({
-      type: Severity.Warning,
-      message: localize(
-        "unsupportedBrowserMessage",
-        "Opening Local Folders is Unsupported",
-      ),
-      detail: localize(
-        "unsupportedBrowserDetail",
-        "Your browser doesn't support opening local folders.\nYou can either open single files or open a remote repository.",
-      ),
-      buttons,
-    })
+		// Otherwise inform the user about options
 
-    return undefined
-  }
+		const buttons: IPromptButton<void>[] = [
+			{
+				label: localize({ key: 'openRemote', comment: ['&& denotes a mnemonic'] }, "&&Open Remote..."),
+				run: async () => { await this.commandService.executeCommand('workbench.action.remote.showMenu'); }
+			},
+			{
+				label: localize({ key: 'learnMore', comment: ['&& denotes a mnemonic'] }, "&&Learn More"),
+				run: async () => { await this.openerService.open('https://aka.ms/VSCodeWebLocalFileSystemAccess'); }
+			}
+		];
+		if (context === 'open') {
+			buttons.push({
+				label: localize({ key: 'openFiles', comment: ['&& denotes a mnemonic'] }, "Open &&Files..."),
+				run: async () => {
+					const files = await triggerUpload();
+					if (files) {
+						const filesData = (await this.instantiationService.invokeFunction(accessor => extractFileListData(accessor, files))).filter(fileData => !fileData.isDirectory);
+						if (filesData.length > 0) {
+							this.editorService.openEditors(filesData.map(fileData => {
+								return {
+									resource: fileData.resource,
+									contents: fileData.contents?.toString(),
+									options: { pinned: true }
+								};
+							}));
+						}
+					}
+				}
+			});
+		}
 
-  private shouldUseSimplified(scheme: string): boolean {
-    return ![Schemas.file, Schemas.vscodeUserData, Schemas.tmp].includes(scheme)
-  }
+		await this.dialogService.prompt({
+			type: Severity.Warning,
+			message: localize('unsupportedBrowserMessage', "Opening Local Folders is Unsupported"),
+			detail: localize('unsupportedBrowserDetail', "Your browser doesn't support opening local folders.\nYou can either open single files or open a remote repository."),
+			buttons
+		});
+
+		return undefined;
+	}
+
+	private shouldUseSimplified(scheme: string): boolean {
+		return ![Schemas.file, Schemas.vscodeUserData, Schemas.tmp].includes(scheme);
+	}
 }
 
-registerSingleton(
-  IFileDialogService,
-  FileDialogService,
-  InstantiationType.Delayed,
-)
+registerSingleton(IFileDialogService, FileDialogService, InstantiationType.Delayed);

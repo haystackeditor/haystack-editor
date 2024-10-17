@@ -9,16 +9,16 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as v8 from "node:v8"
-import * as fs from "fs"
-import * as path from "path"
-import { argv } from "process"
-import { Mapping, SourceMapGenerator } from "source-map"
-import * as ts from "typescript"
-import { pathToFileURL } from "url"
-import * as workerpool from "workerpool"
-import { StaticLanguageServiceHost } from "./staticLanguageServiceHost"
-const buildfile = require("../../../src/buildfile")
+import * as v8 from "node:v8";
+import * as fs from "fs";
+import * as path from "path";
+import { argv } from "process";
+import { Mapping, SourceMapGenerator } from "source-map";
+import * as ts from "typescript";
+import { pathToFileURL } from "url";
+import * as workerpool from "workerpool";
+import { StaticLanguageServiceHost } from "./staticLanguageServiceHost";
+const buildfile = require("../../../src/buildfile");
 
 class ShortIdent {
   private static _keywords = new Set([
@@ -61,38 +61,40 @@ class ShortIdent {
     "while",
     "with",
     "yield",
-  ])
+  ]);
 
   private static _alphabet =
-    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890$_".split("")
+    "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890$_".split(
+      ""
+    );
 
-  private _value = 0
+  private _value = 0;
 
   constructor(private readonly prefix: string) {}
 
   next(isNameTaken?: (name: string) => boolean): string {
-    const candidate = this.prefix + ShortIdent.convert(this._value)
-    this._value++
+    const candidate = this.prefix + ShortIdent.convert(this._value);
+    this._value++;
     if (
       ShortIdent._keywords.has(candidate) ||
       /^[_0-9]/.test(candidate) ||
       isNameTaken?.(candidate)
     ) {
       // try again
-      return this.next(isNameTaken)
+      return this.next(isNameTaken);
     }
-    return candidate
+    return candidate;
   }
 
   private static convert(n: number): string {
-    const base = this._alphabet.length
-    let result = ""
+    const base = this._alphabet.length;
+    let result = "";
     do {
-      const rest = n % base
-      result += this._alphabet[rest]
-      n = (n / base) | 0
-    } while (n > 0)
-    return result
+      const rest = n % base;
+      result += this._alphabet[rest];
+      n = (n / base) | 0;
+    } while (n > 0);
+    return result;
   }
 }
 
@@ -103,34 +105,34 @@ const enum FieldType {
 }
 
 class ClassData {
-  fields = new Map<string, { type: FieldType; pos: number }>()
+  fields = new Map<string, { type: FieldType; pos: number }>();
 
-  private replacements: Map<string, string> | undefined
+  private replacements: Map<string, string> | undefined;
 
-  parent: ClassData | undefined
-  children: ClassData[] | undefined
+  parent: ClassData | undefined;
+  children: ClassData[] | undefined;
 
   constructor(
     readonly fileName: string,
-    readonly node: ts.ClassDeclaration | ts.ClassExpression,
+    readonly node: ts.ClassDeclaration | ts.ClassExpression
   ) {
     // analyse all fields (properties and methods). Find usages of all protected and
     // private ones and keep track of all public ones (to prevent naming collisions)
 
-    const candidates: ts.NamedDeclaration[] = []
+    const candidates: ts.NamedDeclaration[] = [];
     for (const member of node.members) {
       if (ts.isMethodDeclaration(member)) {
         // method `foo() {}`
-        candidates.push(member)
+        candidates.push(member);
       } else if (ts.isPropertyDeclaration(member)) {
         // property `foo = 234`
-        candidates.push(member)
+        candidates.push(member);
       } else if (ts.isGetAccessor(member)) {
         // getter: `get foo() { ... }`
-        candidates.push(member)
+        candidates.push(member);
       } else if (ts.isSetAccessor(member)) {
         // setter: `set foo() { ... }`
-        candidates.push(member)
+        candidates.push(member);
       } else if (ts.isConstructorDeclaration(member)) {
         // constructor-prop:`constructor(private foo) {}`
         for (const param of member.parameters) {
@@ -140,82 +142,82 @@ class ClassData {
             hasModifier(param, ts.SyntaxKind.PublicKeyword) ||
             hasModifier(param, ts.SyntaxKind.ReadonlyKeyword)
           ) {
-            candidates.push(param)
+            candidates.push(param);
           }
         }
       }
     }
     for (const member of candidates) {
-      const ident = ClassData._getMemberName(member)
+      const ident = ClassData._getMemberName(member);
       if (!ident) {
-        continue
+        continue;
       }
-      const type = ClassData._getFieldType(member)
-      this.fields.set(ident, { type, pos: member.name!.getStart() })
+      const type = ClassData._getFieldType(member);
+      this.fields.set(ident, { type, pos: member.name!.getStart() });
     }
   }
 
   private static _getMemberName(node: ts.NamedDeclaration): string | undefined {
     if (!node.name) {
-      return undefined
+      return undefined;
     }
-    const { name } = node
-    let ident = name.getText()
+    const { name } = node;
+    let ident = name.getText();
     if (name.kind === ts.SyntaxKind.ComputedPropertyName) {
       if (name.expression.kind !== ts.SyntaxKind.StringLiteral) {
         // unsupported: [Symbol.foo] or [abc + 'field']
-        return
+        return;
       }
       // ['foo']
-      ident = name.expression.getText().slice(1, -1)
+      ident = name.expression.getText().slice(1, -1);
     }
 
-    return ident
+    return ident;
   }
 
   private static _getFieldType(node: ts.Node): FieldType {
     if (hasModifier(node, ts.SyntaxKind.PrivateKeyword)) {
-      return FieldType.Private
+      return FieldType.Private;
     } else if (hasModifier(node, ts.SyntaxKind.ProtectedKeyword)) {
-      return FieldType.Protected
+      return FieldType.Protected;
     } else {
-      return FieldType.Public
+      return FieldType.Public;
     }
   }
 
   static _shouldMangle(type: FieldType): boolean {
-    return type === FieldType.Private || type === FieldType.Protected
+    return type === FieldType.Private || type === FieldType.Protected;
   }
 
   static makeImplicitPublicActuallyPublic(
     data: ClassData,
-    reportViolation: (name: string, what: string, why: string) => void,
+    reportViolation: (name: string, what: string, why: string) => void
   ): void {
     // TS-HACK
     // A subtype can make an inherited protected field public. To prevent accidential
     // mangling of public fields we mark the original (protected) fields as public...
     for (const [name, info] of data.fields) {
       if (info.type !== FieldType.Public) {
-        continue
+        continue;
       }
-      let parent: ClassData | undefined = data.parent
+      let parent: ClassData | undefined = data.parent;
       while (parent) {
         if (parent.fields.get(name)?.type === FieldType.Protected) {
           const parentPos = parent.node
             .getSourceFile()
-            .getLineAndCharacterOfPosition(parent.fields.get(name)!.pos)
+            .getLineAndCharacterOfPosition(parent.fields.get(name)!.pos);
           const infoPos = data.node
             .getSourceFile()
-            .getLineAndCharacterOfPosition(info.pos)
+            .getLineAndCharacterOfPosition(info.pos);
           reportViolation(
             name,
             `'${name}' from ${parent.fileName}:${parentPos.line + 1}`,
-            `${data.fileName}:${infoPos.line + 1}`,
-          )
+            `${data.fileName}:${infoPos.line + 1}`
+          );
 
-          parent.fields.get(name)!.type = FieldType.Public
+          parent.fields.get(name)!.type = FieldType.Public;
         }
-        parent = parent.parent
+        parent = parent.parent;
       }
     }
   }
@@ -223,53 +225,53 @@ class ClassData {
   static fillInReplacement(data: ClassData) {
     if (data.replacements) {
       // already done
-      return
+      return;
     }
 
     // fill in parents first
     if (data.parent) {
-      ClassData.fillInReplacement(data.parent)
+      ClassData.fillInReplacement(data.parent);
     }
 
-    data.replacements = new Map()
+    data.replacements = new Map();
 
     const isNameTaken = (name: string) => {
       // locally taken
       if (data._isNameTaken(name)) {
-        return true
+        return true;
       }
 
       // parents
-      let parent: ClassData | undefined = data.parent
+      let parent: ClassData | undefined = data.parent;
       while (parent) {
         if (parent._isNameTaken(name)) {
-          return true
+          return true;
         }
-        parent = parent.parent
+        parent = parent.parent;
       }
 
       // children
       if (data.children) {
-        const stack = [...data.children]
+        const stack = [...data.children];
         while (stack.length) {
-          const node = stack.pop()!
+          const node = stack.pop()!;
           if (node._isNameTaken(name)) {
-            return true
+            return true;
           }
           if (node.children) {
-            stack.push(...node.children)
+            stack.push(...node.children);
           }
         }
       }
 
-      return false
-    }
-    const identPool = new ShortIdent("")
+      return false;
+    };
+    const identPool = new ShortIdent("");
 
     for (const [name, info] of data.fields) {
       if (ClassData._shouldMangle(info.type)) {
-        const shortName = identPool.next(isNameTaken)
-        data.replacements.set(name, shortName)
+        const shortName = identPool.next(isNameTaken);
+        data.replacements.set(name, shortName);
       }
     }
   }
@@ -282,56 +284,56 @@ class ClassData {
       !ClassData._shouldMangle(this.fields.get(name)!.type)
     ) {
       // public field
-      return true
+      return true;
     }
     if (this.replacements) {
       for (const shortName of this.replacements.values()) {
         if (shortName === name) {
           // replaced already (happens wih super types)
-          return true
+          return true;
         }
       }
     }
 
     if (isNameTakenInFile(this.node, name)) {
-      return true
+      return true;
     }
 
-    return false
+    return false;
   }
 
   lookupShortName(name: string): string {
-    let value = this.replacements!.get(name)!
-    let parent = this.parent
+    let value = this.replacements!.get(name)!;
+    let parent = this.parent;
     while (parent) {
       if (
         parent.replacements!.has(name) &&
         parent.fields.get(name)?.type === FieldType.Protected
       ) {
-        value = parent.replacements!.get(name)! ?? value
+        value = parent.replacements!.get(name)! ?? value;
       }
-      parent = parent.parent
+      parent = parent.parent;
     }
-    return value
+    return value;
   }
 
   // --- parent chaining
 
   addChild(child: ClassData) {
-    this.children ??= []
-    this.children.push(child)
-    child.parent = this
+    this.children ??= [];
+    this.children.push(child);
+    child.parent = this;
   }
 }
 
 function isNameTakenInFile(node: ts.Node, name: string): boolean {
-  const identifiers = (<any>node.getSourceFile()).identifiers
+  const identifiers = (<any>node.getSourceFile()).identifiers;
   if (identifiers instanceof Map) {
     if (identifiers.has(name)) {
-      return true
+      return true;
     }
   }
-  return false
+  return false;
 }
 
 const skippedExportMangledFiles = [
@@ -369,7 +371,7 @@ const skippedExportMangledFiles = [
   ]
     .flat()
     .map((x) => x.name),
-]
+];
 
 const skippedExportMangledProjects = [
   // Test projects
@@ -380,16 +382,16 @@ const skippedExportMangledProjects = [
   "microsoft-authentication",
   "github-authentication",
   "html-language-features/server",
-]
+];
 
 const skippedExportMangledSymbols = [
   // Don't mangle extension entry points
   "activate",
   "deactivate",
-]
+];
 
 class DeclarationData {
-  readonly replacementName: string
+  readonly replacementName: string;
 
   constructor(
     readonly fileName: string,
@@ -398,21 +400,21 @@ class DeclarationData {
       | ts.ClassDeclaration
       | ts.EnumDeclaration
       | ts.VariableDeclaration,
-    fileIdents: ShortIdent,
+    fileIdents: ShortIdent
   ) {
     // Todo: generate replacement names based on usage count, with more used names getting shorter identifiers
-    this.replacementName = fileIdents.next()
+    this.replacementName = fileIdents.next();
   }
 
   getLocations(
-    service: ts.LanguageService,
+    service: ts.LanguageService
   ): Iterable<{ fileName: string; offset: number }> {
     if (ts.isVariableDeclaration(this.node)) {
       // If the const aliases any types, we need to rename those too
       const definitionResult = service.getDefinitionAndBoundSpan(
         this.fileName,
-        this.node.name.getStart(),
-      )
+        this.node.name.getStart()
+      );
       if (
         definitionResult?.definitions &&
         definitionResult.definitions.length > 1
@@ -420,7 +422,7 @@ class DeclarationData {
         return definitionResult.definitions.map((x) => ({
           fileName: x.fileName,
           offset: x.textSpan.start,
-        }))
+        }));
       }
     }
 
@@ -429,35 +431,35 @@ class DeclarationData {
         fileName: this.fileName,
         offset: this.node.name!.getStart(),
       },
-    ]
+    ];
   }
 
   shouldMangle(newName: string): boolean {
-    const currentName = this.node.name!.getText()
+    const currentName = this.node.name!.getText();
     if (
       currentName.startsWith("$") ||
       skippedExportMangledSymbols.includes(currentName)
     ) {
-      return false
+      return false;
     }
 
     // New name is longer the existing one :'(
     if (newName.length >= currentName.length) {
-      return false
+      return false;
     }
 
     // Don't mangle functions we've explicitly opted out
     if (this.node.getFullText().includes("@skipMangle")) {
-      return false
+      return false;
     }
 
-    return true
+    return true;
   }
 }
 
 export interface MangleOutput {
-  out: string
-  sourceMap?: string
+  out: string;
+  sourceMap?: string;
 }
 
 /**
@@ -470,53 +472,53 @@ export interface MangleOutput {
  * 5. Prepare and apply edits
  */
 export class Mangler {
-  private readonly allClassDataByKey = new Map<string, ClassData>()
-  private readonly allExportedSymbols = new Set<DeclarationData>()
+  private readonly allClassDataByKey = new Map<string, ClassData>();
+  private readonly allExportedSymbols = new Set<DeclarationData>();
 
-  private readonly renameWorkerPool: workerpool.WorkerPool
+  private readonly renameWorkerPool: workerpool.WorkerPool;
 
   constructor(
     private readonly projectPath: string,
     private readonly log: typeof console.log = () => {},
     private readonly config: {
-      readonly manglePrivateFields: boolean
-      readonly mangleExports: boolean
-    },
+      readonly manglePrivateFields: boolean;
+      readonly mangleExports: boolean;
+    }
   ) {
     this.renameWorkerPool = workerpool.pool(
       path.join(__dirname, "renameWorker.js"),
       {
         maxWorkers: 1,
         minWorkers: "max",
-      },
-    )
+      }
+    );
   }
 
   async computeNewFileContents(
-    strictImplicitPublicHandling?: Set<string>,
+    strictImplicitPublicHandling?: Set<string>
   ): Promise<Map<string, MangleOutput>> {
     const service = ts.createLanguageService(
-      new StaticLanguageServiceHost(this.projectPath),
-    )
+      new StaticLanguageServiceHost(this.projectPath)
+    );
 
     // STEP:
     // - Find all classes and their field info.
     // - Find exported symbols.
 
-    const fileIdents = new ShortIdent("$")
+    const fileIdents = new ShortIdent("$");
 
     const visit = (node: ts.Node): void => {
       if (this.config.manglePrivateFields) {
         if (ts.isClassDeclaration(node) || ts.isClassExpression(node)) {
-          const anchor = node.name ?? node
-          const key = `${node.getSourceFile().fileName}|${anchor.getStart()}`
+          const anchor = node.name ?? node;
+          const key = `${node.getSourceFile().fileName}|${anchor.getStart()}`;
           if (this.allClassDataByKey.has(key)) {
-            throw new Error("DUPE?")
+            throw new Error("DUPE?");
           }
           this.allClassDataByKey.set(
             key,
-            new ClassData(node.getSourceFile().fileName, node),
-          )
+            new ClassData(node.getSourceFile().fileName, node)
+          );
         }
       }
 
@@ -550,142 +552,138 @@ export class Mangler {
 					*/
         ) {
           if (isInAmbientContext(node)) {
-            return
+            return;
           }
 
           this.allExportedSymbols.add(
-            new DeclarationData(
-              node.getSourceFile().fileName,
-              node,
-              fileIdents,
-            ),
-          )
+            new DeclarationData(node.getSourceFile().fileName, node, fileIdents)
+          );
         }
       }
 
-      ts.forEachChild(node, visit)
-    }
+      ts.forEachChild(node, visit);
+    };
 
     for (const file of service.getProgram()!.getSourceFiles()) {
       if (!file.isDeclarationFile) {
-        ts.forEachChild(file, visit)
+        ts.forEachChild(file, visit);
       }
     }
     this.log(
-      `Done collecting. Classes: ${this.allClassDataByKey.size}. Exported symbols: ${this.allExportedSymbols.size}`,
-    )
+      `Done collecting. Classes: ${this.allClassDataByKey.size}. Exported symbols: ${this.allExportedSymbols.size}`
+    );
 
     //  STEP: connect sub and super-types
 
     const setupParents = (data: ClassData) => {
       const extendsClause = data.node.heritageClauses?.find(
-        (h) => h.token === ts.SyntaxKind.ExtendsKeyword,
-      )
+        (h) => h.token === ts.SyntaxKind.ExtendsKeyword
+      );
       if (!extendsClause) {
         // no EXTENDS-clause
-        return
+        return;
       }
 
       const info = service.getDefinitionAtPosition(
         data.fileName,
-        extendsClause.types[0].expression.getEnd(),
-      )
+        extendsClause.types[0].expression.getEnd()
+      );
       if (!info || info.length === 0) {
         // throw new Error('SUPER type not found');
-        return
+        return;
       }
 
       if (info.length !== 1) {
         // inherits from declared/library type
-        return
+        return;
       }
 
-      const [definition] = info
-      const key = `${definition.fileName}|${definition.textSpan.start}`
-      const parent = this.allClassDataByKey.get(key)
+      const [definition] = info;
+      const key = `${definition.fileName}|${definition.textSpan.start}`;
+      const parent = this.allClassDataByKey.get(key);
       if (!parent) {
         // throw new Error(`SUPER type not found: ${key}`);
-        return
+        return;
       }
-      parent.addChild(data)
-    }
+      parent.addChild(data);
+    };
     for (const data of this.allClassDataByKey.values()) {
-      setupParents(data)
+      setupParents(data);
     }
 
     //  STEP: make implicit public (actually protected) field really public
-    const violations = new Map<string, string[]>()
-    let violationsCauseFailure = false
+    const violations = new Map<string, string[]>();
+    let violationsCauseFailure = false;
     for (const data of this.allClassDataByKey.values()) {
       ClassData.makeImplicitPublicActuallyPublic(
         data,
         (name: string, what, why) => {
-          const arr = violations.get(what)
+          const arr = violations.get(what);
           if (arr) {
-            arr.push(why)
+            arr.push(why);
           } else {
-            violations.set(what, [why])
+            violations.set(what, [why]);
           }
 
           if (
             strictImplicitPublicHandling &&
             !strictImplicitPublicHandling.has(name)
           ) {
-            violationsCauseFailure = true
+            violationsCauseFailure = true;
           }
-        },
-      )
+        }
+      );
     }
     for (const [why, whys] of violations) {
-      this.log(`WARN: ${why} became PUBLIC because of: ${whys.join(" , ")}`)
+      this.log(`WARN: ${why} became PUBLIC because of: ${whys.join(" , ")}`);
     }
     if (violationsCauseFailure) {
       const message =
-        "Protected fields have been made PUBLIC. This hurts minification and is therefore not allowed. Review the WARN messages further above"
-      this.log(`ERROR: ${message}`)
-      throw new Error(message)
+        "Protected fields have been made PUBLIC. This hurts minification and is therefore not allowed. Review the WARN messages further above";
+      this.log(`ERROR: ${message}`);
+      throw new Error(message);
     }
 
     // STEP: compute replacement names for each class
     for (const data of this.allClassDataByKey.values()) {
-      ClassData.fillInReplacement(data)
+      ClassData.fillInReplacement(data);
     }
-    this.log(`Done creating class replacements`)
+    this.log(`Done creating class replacements`);
 
     // STEP: prepare rename edits
-    this.log(`Starting prepare rename edits`)
+    this.log(`Starting prepare rename edits`);
 
-    type Edit = { newText: string; offset: number; length: number }
-    const editsByFile = new Map<string, Edit[]>()
+    type Edit = { newText: string; offset: number; length: number };
+    const editsByFile = new Map<string, Edit[]>();
 
     const appendEdit = (fileName: string, edit: Edit) => {
-      const edits = editsByFile.get(fileName)
+      const edits = editsByFile.get(fileName);
       if (!edits) {
-        editsByFile.set(fileName, [edit])
+        editsByFile.set(fileName, [edit]);
       } else {
-        edits.push(edit)
+        edits.push(edit);
       }
-    }
+    };
     const appendRename = (newText: string, loc: ts.RenameLocation) => {
       appendEdit(loc.fileName, {
         newText: (loc.prefixText || "") + newText + (loc.suffixText || ""),
         offset: loc.textSpan.start,
         length: loc.textSpan.length,
-      })
-    }
+      });
+    };
 
     type RenameFn = (
       projectName: string,
       fileName: string,
-      pos: number,
-    ) => ts.RenameLocation[]
+      pos: number
+    ) => ts.RenameLocation[];
 
     const renameResults: Array<
       Promise<{
-        readonly newName: string
-        readonly locations: readonly ts.RenameLocation[]
+        readonly newName: string;
+        readonly locations: readonly ts.RenameLocation[];
       }>
-    > = []
+    > = [];
 
     const queueRename = (fileName: string, pos: number, newName: string) => {
       renameResults.push(
@@ -694,33 +692,33 @@ export class Mangler {
             this.projectPath,
             fileName,
             pos,
-          ]),
-        ).then((locations) => ({ newName, locations })),
-      )
-    }
+          ])
+        ).then((locations) => ({ newName, locations }))
+      );
+    };
 
     for (const data of this.allClassDataByKey.values()) {
       if (hasModifier(data.node, ts.SyntaxKind.DeclareKeyword)) {
-        continue
+        continue;
       }
 
       fields: for (const [name, info] of data.fields) {
         if (!ClassData._shouldMangle(info.type)) {
-          continue fields
+          continue fields;
         }
 
         // TS-HACK: protected became public via 'some' child
         // and because of that we might need to ignore this now
-        let parent = data.parent
+        let parent = data.parent;
         while (parent) {
           if (parent.fields.get(name)?.type === FieldType.Public) {
-            continue fields
+            continue fields;
           }
-          parent = parent.parent
+          parent = parent.parent;
         }
 
-        const newName = data.lookupShortName(name)
-        queueRename(data.fileName, info.pos, newName)
+        const newName = data.lookupShortName(name);
+        queueRename(data.fileName, info.pos, newName);
       }
     }
 
@@ -728,70 +726,72 @@ export class Mangler {
       if (
         data.fileName.endsWith(".d.ts") ||
         skippedExportMangledProjects.some((proj) =>
-          data.fileName.includes(proj),
+          data.fileName.includes(proj)
         ) ||
         skippedExportMangledFiles.some((file) =>
-          data.fileName.endsWith(file + ".ts"),
+          data.fileName.endsWith(file + ".ts")
         ) ||
         skippedExportMangledFiles.some((file) =>
-          data.fileName.endsWith(file + ".tsx"),
+          data.fileName.endsWith(file + ".tsx")
         )
       ) {
-        continue
+        continue;
       }
 
       if (!data.shouldMangle(data.replacementName)) {
-        continue
+        continue;
       }
 
-      const newText = data.replacementName
+      const newText = data.replacementName;
       for (const { fileName, offset } of data.getLocations(service)) {
-        queueRename(fileName, offset, newText)
+        queueRename(fileName, offset, newText);
       }
     }
 
     await Promise.all(renameResults).then((result) => {
       for (const { newName, locations } of result) {
         for (const loc of locations) {
-          appendRename(newName, loc)
+          appendRename(newName, loc);
         }
       }
-    })
+    });
 
-    await this.renameWorkerPool.terminate()
+    await this.renameWorkerPool.terminate();
 
-    this.log(`Done preparing edits: ${editsByFile.size} files`)
+    this.log(`Done preparing edits: ${editsByFile.size} files`);
 
     // STEP: apply all rename edits (per file)
-    const result = new Map<string, MangleOutput>()
-    let savedBytes = 0
+    const result = new Map<string, MangleOutput>();
+    let savedBytes = 0;
 
     for (const item of service.getProgram()!.getSourceFiles()) {
-      const { mapRoot, sourceRoot } = service.getProgram()!.getCompilerOptions()
-      const projectDir = path.dirname(this.projectPath)
+      const { mapRoot, sourceRoot } = service
+        .getProgram()!
+        .getCompilerOptions();
+      const projectDir = path.dirname(this.projectPath);
       const sourceMapRoot =
-        mapRoot ?? pathToFileURL(sourceRoot ?? projectDir).toString()
+        mapRoot ?? pathToFileURL(sourceRoot ?? projectDir).toString();
 
       // source maps
-      let generator: SourceMapGenerator | undefined
+      let generator: SourceMapGenerator | undefined;
 
-      let newFullText: string
-      const edits = editsByFile.get(item.fileName)
+      let newFullText: string;
+      const edits = editsByFile.get(item.fileName);
       if (!edits) {
         // just copy
-        newFullText = item.getFullText()
+        newFullText = item.getFullText();
       } else {
         // source map generator
         const relativeFileName = normalize(
-          path.relative(projectDir, item.fileName),
-        )
-        const mappingsByLine = new Map<number, Mapping[]>()
+          path.relative(projectDir, item.fileName)
+        );
+        const mappingsByLine = new Map<number, Mapping[]>();
 
         // apply renames
-        edits.sort((a, b) => b.offset - a.offset)
-        const characters = item.getFullText().split("")
+        edits.sort((a, b) => b.offset - a.offset);
+        const characters = item.getFullText().split("");
 
-        let lastEdit: Edit | undefined
+        let lastEdit: Edit | undefined;
 
         for (const edit of edits) {
           if (lastEdit && lastEdit.offset === edit.offset) {
@@ -804,26 +804,26 @@ export class Mangler {
                 "ERROR: Overlapping edit",
                 item.fileName,
                 edit.offset,
-                edits,
-              )
-              throw new Error("OVERLAPPING edit")
+                edits
+              );
+              throw new Error("OVERLAPPING edit");
             } else {
-              continue
+              continue;
             }
           }
-          lastEdit = edit
+          lastEdit = edit;
           const mangledName = characters
             .splice(edit.offset, edit.length, edit.newText)
-            .join("")
-          savedBytes += mangledName.length - edit.newText.length
+            .join("");
+          savedBytes += mangledName.length - edit.newText.length;
 
           // source maps
-          const pos = item.getLineAndCharacterOfPosition(edit.offset)
+          const pos = item.getLineAndCharacterOfPosition(edit.offset);
 
-          let mappings = mappingsByLine.get(pos.line)
+          let mappings = mappingsByLine.get(pos.line);
           if (!mappings) {
-            mappings = []
-            mappingsByLine.set(pos.line, mappings)
+            mappings = [];
+            mappingsByLine.set(pos.line, mappings);
           }
           mappings.unshift(
             {
@@ -842,18 +842,18 @@ export class Mangler {
                 line: pos.line + 1,
                 column: pos.character + edit.newText.length,
               },
-            },
-          )
+            }
+          );
         }
 
         // source map generation, make sure to get mappings per line correct
         generator = new SourceMapGenerator({
           file: path.basename(item.fileName),
           sourceRoot: sourceMapRoot,
-        })
-        generator.setSourceContent(relativeFileName, item.getFullText())
+        });
+        generator.setSourceContent(relativeFileName, item.getFullText());
         for (const [, mappings] of mappingsByLine) {
-          let lineDelta = 0
+          let lineDelta = 0;
           for (const mapping of mappings) {
             generator.addMapping({
               ...mapping,
@@ -861,28 +861,28 @@ export class Mangler {
                 line: mapping.generated.line,
                 column: mapping.generated.column - lineDelta,
               },
-            })
-            lineDelta += mapping.original.column - mapping.generated.column
+            });
+            lineDelta += mapping.original.column - mapping.generated.column;
           }
         }
 
-        newFullText = characters.join("")
+        newFullText = characters.join("");
       }
       result.set(item.fileName, {
         out: newFullText,
         sourceMap: generator?.toString(),
-      })
+      });
     }
 
-    service.dispose()
-    this.renameWorkerPool.terminate()
+    service.dispose();
+    this.renameWorkerPool.terminate();
 
     this.log(
       `Done: ${savedBytes / 1000}kb saved, memory-usage: ${JSON.stringify(
-        v8.getHeapStatistics(),
-      )}`,
-    )
-    return result
+        v8.getHeapStatistics()
+      )}`
+    );
+    return result;
   }
 }
 
@@ -891,53 +891,53 @@ export class Mangler {
 function hasModifier(node: ts.Node, kind: ts.SyntaxKind) {
   const modifiers = ts.canHaveModifiers(node)
     ? ts.getModifiers(node)
-    : undefined
-  return Boolean(modifiers?.find((mode) => mode.kind === kind))
+    : undefined;
+  return Boolean(modifiers?.find((mode) => mode.kind === kind));
 }
 
 function isInAmbientContext(node: ts.Node): boolean {
   for (let p = node.parent; p; p = p.parent) {
     if (ts.isModuleDeclaration(p)) {
-      return true
+      return true;
     }
   }
-  return false
+  return false;
 }
 
 function normalize(path: string): string {
-  return path.replace(/\\/g, "/")
+  return path.replace(/\\/g, "/");
 }
 
 async function _run() {
-  const root = path.join(__dirname, "..", "..", "..")
-  const projectBase = path.join(root, "src")
-  const projectPath = path.join(projectBase, "tsconfig.json")
+  const root = path.join(__dirname, "..", "..", "..");
+  const projectBase = path.join(root, "src");
+  const projectPath = path.join(projectBase, "tsconfig.json");
   const newProjectBase = path.join(
     path.dirname(projectBase),
-    path.basename(projectBase) + "2",
-  )
+    path.basename(projectBase) + "2"
+  );
 
-  fs.cpSync(projectBase, newProjectBase, { recursive: true })
+  fs.cpSync(projectBase, newProjectBase, { recursive: true });
 
   const mangler = new Mangler(projectPath, console.log, {
     mangleExports: true,
     manglePrivateFields: true,
-  })
+  });
   for (const [fileName, contents] of await mangler.computeNewFileContents(
-    new Set(["saveState"]),
+    new Set(["saveState"])
   )) {
     const newFilePath = path.join(
       newProjectBase,
-      path.relative(projectBase, fileName),
-    )
-    await fs.promises.mkdir(path.dirname(newFilePath), { recursive: true })
-    await fs.promises.writeFile(newFilePath, contents.out)
+      path.relative(projectBase, fileName)
+    );
+    await fs.promises.mkdir(path.dirname(newFilePath), { recursive: true });
+    await fs.promises.writeFile(newFilePath, contents.out);
     if (contents.sourceMap) {
-      await fs.promises.writeFile(newFilePath + ".map", contents.sourceMap)
+      await fs.promises.writeFile(newFilePath + ".map", contents.sourceMap);
     }
   }
 }
 
 if (__filename === argv[1]) {
-  _run()
+  _run();
 }

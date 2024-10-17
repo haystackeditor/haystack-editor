@@ -9,104 +9,98 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Code } from "./code"
-import { QuickAccess } from "./quickaccess"
-import { QuickInput } from "./quickinput"
+import { Code } from './code';
+import { QuickAccess } from './quickaccess';
+import { QuickInput } from './quickinput';
 
-const activeRowSelector = `.notebook-editor .monaco-list-row.focused`
+const activeRowSelector = `.notebook-editor .monaco-list-row.focused`;
 
 export class Notebook {
-  constructor(
-    private readonly quickAccess: QuickAccess,
-    private readonly quickInput: QuickInput,
-    private readonly code: Code,
-  ) {}
 
-  async openNotebook() {
-    await this.quickAccess.openFileQuickAccessAndWait("notebook.ipynb", 1)
-    await this.quickInput.selectQuickInputElement(0)
+	constructor(
+		private readonly quickAccess: QuickAccess,
+		private readonly quickInput: QuickInput,
+		private readonly code: Code) {
+	}
 
-    await this.code.waitForElement(activeRowSelector)
-    await this.focusFirstCell()
-    await this.waitForActiveCellEditorContents("code()")
-  }
+	async openNotebook() {
+		await this.quickAccess.openFileQuickAccessAndWait('notebook.ipynb', 1);
+		await this.quickInput.selectQuickInputElement(0);
 
-  async focusNextCell() {
-    await this.code.dispatchKeybinding("down")
-  }
+		await this.code.waitForElement(activeRowSelector);
+		await this.focusFirstCell();
+		await this.waitForActiveCellEditorContents('code()');
+	}
 
-  async focusFirstCell() {
-    await this.quickAccess.runCommand("notebook.focusTop")
-  }
+	async focusNextCell() {
+		await this.code.dispatchKeybinding('down');
+	}
 
-  async editCell() {
-    await this.code.dispatchKeybinding("enter")
-  }
+	async focusFirstCell() {
+		await this.quickAccess.runCommand('notebook.focusTop');
+	}
 
-  async stopEditingCell() {
-    await this.quickAccess.runCommand("notebook.cell.quitEdit")
-  }
+	async editCell() {
+		await this.code.dispatchKeybinding('enter');
+	}
 
-  async waitForTypeInEditor(text: string): Promise<any> {
-    const editor = `${activeRowSelector} .monaco-editor`
+	async stopEditingCell() {
+		await this.quickAccess.runCommand('notebook.cell.quitEdit');
+	}
 
-    await this.code.waitForElement(editor)
+	async waitForTypeInEditor(text: string): Promise<any> {
+		const editor = `${activeRowSelector} .monaco-editor`;
 
-    const textarea = `${editor} textarea`
-    await this.code.waitForActiveElement(textarea)
+		await this.code.waitForElement(editor);
 
-    await this.code.waitForTypeInEditor(textarea, text)
+		const textarea = `${editor} textarea`;
+		await this.code.waitForActiveElement(textarea);
 
-    await this._waitForActiveCellEditorContents((c) => c.indexOf(text) > -1)
-  }
+		await this.code.waitForTypeInEditor(textarea, text);
 
-  async waitForActiveCellEditorContents(contents: string): Promise<any> {
-    return this._waitForActiveCellEditorContents((str) => str === contents)
-  }
+		await this._waitForActiveCellEditorContents(c => c.indexOf(text) > -1);
+	}
 
-  private async _waitForActiveCellEditorContents(
-    accept: (contents: string) => boolean,
-  ): Promise<any> {
-    const selector = `${activeRowSelector} .monaco-editor .view-lines`
-    return this.code.waitForTextContent(selector, undefined, (c) =>
-      accept(c.replace(/\u00a0/g, " ")),
-    )
-  }
+	async waitForActiveCellEditorContents(contents: string): Promise<any> {
+		return this._waitForActiveCellEditorContents(str => str === contents);
+	}
 
-  async waitForMarkdownContents(
-    markdownSelector: string,
-    text: string,
-  ): Promise<void> {
-    const selector = `${activeRowSelector} .markdown ${markdownSelector}`
-    await this.code.waitForTextContent(selector, text)
-  }
+	private async _waitForActiveCellEditorContents(accept: (contents: string) => boolean): Promise<any> {
+		const selector = `${activeRowSelector} .monaco-editor .view-lines`;
+		return this.code.waitForTextContent(selector, undefined, c => accept(c.replace(/\u00a0/g, ' ')));
+	}
 
-  async insertNotebookCell(kind: "markdown" | "code"): Promise<void> {
-    if (kind === "markdown") {
-      await this.quickAccess.runCommand("notebook.cell.insertMarkdownCellBelow")
-    } else {
-      await this.quickAccess.runCommand("notebook.cell.insertCodeCellBelow")
-    }
-  }
+	async waitForMarkdownContents(markdownSelector: string, text: string): Promise<void> {
+		const selector = `${activeRowSelector} .markdown ${markdownSelector}`;
+		await this.code.waitForTextContent(selector, text);
+	}
 
-  async deleteActiveCell(): Promise<void> {
-    await this.quickAccess.runCommand("notebook.cell.delete")
-  }
+	async insertNotebookCell(kind: 'markdown' | 'code'): Promise<void> {
+		if (kind === 'markdown') {
+			await this.quickAccess.runCommand('notebook.cell.insertMarkdownCellBelow');
+		} else {
+			await this.quickAccess.runCommand('notebook.cell.insertCodeCellBelow');
+		}
+	}
 
-  async focusInCellOutput(): Promise<void> {
-    await this.quickAccess.runCommand("notebook.cell.focusInOutput")
-    await this.code.waitForActiveElement("webview, .webview")
-  }
+	async deleteActiveCell(): Promise<void> {
+		await this.quickAccess.runCommand('notebook.cell.delete');
+	}
 
-  async focusOutCellOutput(): Promise<void> {
-    await this.quickAccess.runCommand("notebook.cell.focusOutOutput")
-  }
+	async focusInCellOutput(): Promise<void> {
+		await this.quickAccess.runCommand('notebook.cell.focusInOutput');
+		await this.code.waitForActiveElement('webview, .webview');
+	}
 
-  async executeActiveCell(): Promise<void> {
-    await this.quickAccess.runCommand("notebook.cell.execute")
-  }
+	async focusOutCellOutput(): Promise<void> {
+		await this.quickAccess.runCommand('notebook.cell.focusOutOutput');
+	}
 
-  async executeCellAction(selector: string): Promise<void> {
-    await this.code.waitAndClick(selector)
-  }
+	async executeActiveCell(): Promise<void> {
+		await this.quickAccess.runCommand('notebook.cell.execute');
+	}
+
+	async executeCellAction(selector: string): Promise<void> {
+		await this.code.waitAndClick(selector);
+	}
 }

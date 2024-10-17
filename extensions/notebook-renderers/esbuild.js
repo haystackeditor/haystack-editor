@@ -9,16 +9,15 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 // @ts-check
-const path = require("path")
+const path = require('path');
 
-const srcDir = path.join(__dirname, "src")
-const outDir = path.join(__dirname, "renderer-out")
+const srcDir = path.join(__dirname, 'src');
+const outDir = path.join(__dirname, 'renderer-out');
 
-require("../esbuild-webview-common").run(
-  {
-    entryPoints: [path.join(srcDir, "index.ts")],
-    srcDir,
-    outdir: outDir,
-  },
-  process.argv,
-)
+require('../esbuild-webview-common').run({
+	entryPoints: [
+		path.join(srcDir, 'index.ts'),
+	],
+	srcDir,
+	outdir: outDir,
+}, process.argv);

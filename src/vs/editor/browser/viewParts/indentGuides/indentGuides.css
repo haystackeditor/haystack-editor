@@ -10,7 +10,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 .monaco-editor .lines-content .core-guide {
-  position: absolute;
-  box-sizing: border-box;
-  height: 100%;
+	position: absolute;
+	box-sizing: border-box;
+	height: 100%;
 }

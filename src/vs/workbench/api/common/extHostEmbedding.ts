@@ -9,118 +9,90 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CancellationToken } from "vs/base/common/cancellation"
-import { Emitter, Event } from "vs/base/common/event"
-import { IDisposable, toDisposable } from "vs/base/common/lifecycle"
-import { IExtensionDescription } from "vs/platform/extensions/common/extensions"
-import {
-  ExtHostEmbeddingsShape,
-  IMainContext,
-  MainContext,
-  MainThreadEmbeddingsShape,
-} from "vs/workbench/api/common/extHost.protocol"
-import type * as vscode from "vscode"
+import { CancellationToken } from 'vs/base/common/cancellation';
+import { Emitter, Event } from 'vs/base/common/event';
+import { IDisposable, toDisposable } from 'vs/base/common/lifecycle';
+import { IExtensionDescription } from 'vs/platform/extensions/common/extensions';
+import { ExtHostEmbeddingsShape, IMainContext, MainContext, MainThreadEmbeddingsShape } from 'vs/workbench/api/common/extHost.protocol';
+import type * as vscode from 'vscode';
+
 
 export class ExtHostEmbeddings implements ExtHostEmbeddingsShape {
-  private readonly _proxy: MainThreadEmbeddingsShape
-  private readonly _provider = new Map<
-    number,
-    { id: string; provider: vscode.EmbeddingsProvider }
-  >()
 
-  private readonly _onDidChange = new Emitter<void>()
-  readonly onDidChange: Event<void> = this._onDidChange.event
+	private readonly _proxy: MainThreadEmbeddingsShape;
+	private readonly _provider = new Map<number, { id: string; provider: vscode.EmbeddingsProvider }>();
 
-  private _allKnownModels = new Set<string>()
-  private _handlePool: number = 0
+	private readonly _onDidChange = new Emitter<void>();
+	readonly onDidChange: Event<void> = this._onDidChange.event;
 
-  constructor(mainContext: IMainContext) {
-    this._proxy = mainContext.getProxy(MainContext.MainThreadEmbeddings)
-  }
+	private _allKnownModels = new Set<string>();
+	private _handlePool: number = 0;
 
-  registerEmbeddingsProvider(
-    _extension: IExtensionDescription,
-    embeddingsModel: string,
-    provider: vscode.EmbeddingsProvider,
-  ): IDisposable {
-    if (this._allKnownModels.has(embeddingsModel)) {
-      throw new Error(
-        "An embeddings provider for this model is already registered",
-      )
-    }
+	constructor(
+		mainContext: IMainContext
+	) {
+		this._proxy = mainContext.getProxy(MainContext.MainThreadEmbeddings);
+	}
 
-    const handle = this._handlePool++
+	registerEmbeddingsProvider(_extension: IExtensionDescription, embeddingsModel: string, provider: vscode.EmbeddingsProvider): IDisposable {
+		if (this._allKnownModels.has(embeddingsModel)) {
+			throw new Error('An embeddings provider for this model is already registered');
+		}
 
-    this._proxy.$registerEmbeddingProvider(handle, embeddingsModel)
-    this._provider.set(handle, { id: embeddingsModel, provider })
+		const handle = this._handlePool++;
 
-    return toDisposable(() => {
-      this._proxy.$unregisterEmbeddingProvider(handle)
-      this._provider.delete(handle)
-    })
-  }
+		this._proxy.$registerEmbeddingProvider(handle, embeddingsModel);
+		this._provider.set(handle, { id: embeddingsModel, provider });
 
-  async computeEmbeddings(
-    embeddingsModel: string,
-    input: string,
-    token?: vscode.CancellationToken,
-  ): Promise<vscode.Embedding>
-  async computeEmbeddings(
-    embeddingsModel: string,
-    input: string[],
-    token?: vscode.CancellationToken,
-  ): Promise<vscode.Embedding[]>
-  async computeEmbeddings(
-    embeddingsModel: string,
-    input: string | string[],
-    token?: vscode.CancellationToken,
-  ): Promise<vscode.Embedding[] | vscode.Embedding> {
-    token ??= CancellationToken.None
+		return toDisposable(() => {
+			this._proxy.$unregisterEmbeddingProvider(handle);
+			this._provider.delete(handle);
+		});
+	}
 
-    let returnSingle = false
-    if (typeof input === "string") {
-      input = [input]
-      returnSingle = true
-    }
-    const result = await this._proxy.$computeEmbeddings(
-      embeddingsModel,
-      input,
-      token,
-    )
-    if (result.length !== input.length) {
-      throw new Error()
-    }
-    if (returnSingle) {
-      if (result.length !== 1) {
-        throw new Error()
-      }
-      return result[0]
-    }
-    return result
-  }
+	async computeEmbeddings(embeddingsModel: string, input: string, token?: vscode.CancellationToken): Promise<vscode.Embedding>;
+	async computeEmbeddings(embeddingsModel: string, input: string[], token?: vscode.CancellationToken): Promise<vscode.Embedding[]>;
+	async computeEmbeddings(embeddingsModel: string, input: string | string[], token?: vscode.CancellationToken): Promise<vscode.Embedding[] | vscode.Embedding> {
 
-  async $provideEmbeddings(
-    handle: number,
-    input: string[],
-    token: CancellationToken,
-  ): Promise<{ values: number[] }[]> {
-    const data = this._provider.get(handle)
-    if (!data) {
-      return []
-    }
-    const result = await data.provider.provideEmbeddings(input, token)
-    if (!result) {
-      return []
-    }
-    return result
-  }
+		token ??= CancellationToken.None;
 
-  get embeddingsModels(): string[] {
-    return Array.from(this._allKnownModels)
-  }
+		let returnSingle = false;
+		if (typeof input === 'string') {
+			input = [input];
+			returnSingle = true;
+		}
+		const result = await this._proxy.$computeEmbeddings(embeddingsModel, input, token);
+		if (result.length !== input.length) {
+			throw new Error();
+		}
+		if (returnSingle) {
+			if (result.length !== 1) {
+				throw new Error();
+			}
+			return result[0];
+		}
+		return result;
 
-  $acceptEmbeddingModels(models: string[]): void {
-    this._allKnownModels = new Set(models)
-    this._onDidChange.fire()
-  }
+	}
+
+	async $provideEmbeddings(handle: number, input: string[], token: CancellationToken): Promise<{ values: number[] }[]> {
+		const data = this._provider.get(handle);
+		if (!data) {
+			return [];
+		}
+		const result = await data.provider.provideEmbeddings(input, token);
+		if (!result) {
+			return [];
+		}
+		return result;
+	}
+
+	get embeddingsModels(): string[] {
+		return Array.from(this._allKnownModels);
+	}
+
+	$acceptEmbeddingModels(models: string[]): void {
+		this._allKnownModels = new Set(models);
+		this._onDidChange.fire();
+	}
 }

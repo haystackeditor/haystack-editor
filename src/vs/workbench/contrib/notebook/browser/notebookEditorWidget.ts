@@ -229,7 +229,7 @@ export function getDefaultNotebookCreationOptions(): INotebookEditorCreationOpti
   ]
   const contributions =
     EditorExtensionsRegistry.getEditorContributions().filter(
-      (c) => skipContributions.indexOf(c.id) === -1,
+      (c) => skipContributions.indexOf(c.id) === -1
     )
 
   return {
@@ -252,21 +252,21 @@ export class NotebookEditorWidget
 {
   //#region Eventing
   private readonly _onDidChangeCellState = this._register(
-    new Emitter<NotebookCellStateChangedEvent>(),
+    new Emitter<NotebookCellStateChangedEvent>()
   )
   readonly onDidChangeCellState = this._onDidChangeCellState.event
   private readonly _onDidChangeViewCells = this._register(
-    new Emitter<INotebookViewCellsUpdateEvent>(),
+    new Emitter<INotebookViewCellsUpdateEvent>()
   )
   readonly onDidChangeViewCells: Event<INotebookViewCellsUpdateEvent> =
     this._onDidChangeViewCells.event
   private readonly _onWillChangeModel = this._register(
-    new Emitter<NotebookTextModel | undefined>(),
+    new Emitter<NotebookTextModel | undefined>()
   )
   readonly onWillChangeModel: Event<NotebookTextModel | undefined> =
     this._onWillChangeModel.event
   private readonly _onDidChangeModel = this._register(
-    new Emitter<NotebookTextModel | undefined>(),
+    new Emitter<NotebookTextModel | undefined>()
   )
   readonly onDidChangeModel: Event<NotebookTextModel | undefined> =
     this._onDidChangeModel.event
@@ -287,7 +287,7 @@ export class NotebookEditorWidget
   private readonly _onDidChangeSelection = this._register(new Emitter<void>())
   readonly onDidChangeSelection: Event<void> = this._onDidChangeSelection.event
   private readonly _onDidChangeVisibleRanges = this._register(
-    new Emitter<void>(),
+    new Emitter<void>()
   )
   readonly onDidChangeVisibleRanges: Event<void> =
     this._onDidChangeVisibleRanges.event
@@ -296,12 +296,12 @@ export class NotebookEditorWidget
   private readonly _onDidBlurEmitter = this._register(new Emitter<void>())
   readonly onDidBlurWidget = this._onDidBlurEmitter.event
   private readonly _onDidChangeActiveEditor = this._register(
-    new Emitter<this>(),
+    new Emitter<this>()
   )
   readonly onDidChangeActiveEditor: Event<this> =
     this._onDidChangeActiveEditor.event
   private readonly _onDidChangeActiveKernel = this._register(
-    new Emitter<void>(),
+    new Emitter<void>()
   )
   readonly onDidChangeActiveKernel: Event<void> =
     this._onDidChangeActiveKernel.event
@@ -313,20 +313,20 @@ export class NotebookEditorWidget
   readonly onMouseDown: Event<INotebookEditorMouseEvent> =
     this._onMouseDown.event
   private readonly _onDidReceiveMessage = this._register(
-    new Emitter<INotebookWebviewMessage>(),
+    new Emitter<INotebookWebviewMessage>()
   )
   readonly onDidReceiveMessage: Event<INotebookWebviewMessage> =
     this._onDidReceiveMessage.event
   private readonly _onDidRenderOutput = this._register(
-    new Emitter<ICellOutputViewModel>(),
+    new Emitter<ICellOutputViewModel>()
   )
   private readonly onDidRenderOutput = this._onDidRenderOutput.event
   private readonly _onDidRemoveOutput = this._register(
-    new Emitter<ICellOutputViewModel>(),
+    new Emitter<ICellOutputViewModel>()
   )
   private readonly onDidRemoveOutput = this._onDidRemoveOutput.event
   private readonly _onDidResizeOutputEmitter = this._register(
-    new Emitter<ICellViewModel>(),
+    new Emitter<ICellViewModel>()
   )
   readonly onDidResizeOutput = this._onDidResizeOutputEmitter.event
 
@@ -354,7 +354,7 @@ export class NotebookEditorWidget
   private _viewContext: ViewContext
   private _notebookViewModel: NotebookViewModel | undefined
   private readonly _localStore: DisposableStore = this._register(
-    new DisposableStore(),
+    new DisposableStore()
   )
   private _localCellStateListeners: DisposableStore[] = []
   private _fontInfo: FontInfo | undefined
@@ -472,7 +472,7 @@ export class NotebookEditorWidget
     @INotebookLoggingService
     private readonly logService: INotebookLoggingService,
     @IKeybindingService private readonly keybindingService: IKeybindingService,
-    @ICodeEditorService codeEditorService: ICodeEditorService,
+    @ICodeEditorService codeEditorService: ICodeEditorService
   ) {
     super()
 
@@ -488,37 +488,37 @@ export class NotebookEditorWidget
         this.configurationService,
         notebookExecutionStateService,
         codeEditorService,
-        this._readOnly,
+        this._readOnly
       )
     this._register(this._notebookOptions)
     const eventDispatcher = this._register(new NotebookEventDispatcher())
     this._viewContext = new ViewContext(
       this._notebookOptions,
       eventDispatcher,
-      (language) => this.getBaseCellEditorOptions(language),
+      (language) => this.getBaseCellEditorOptions(language)
     )
     this._register(
       this._viewContext.eventDispatcher.onDidChangeCellState((e) => {
         this._onDidChangeCellState.fire(e)
-      }),
+      })
     )
 
     this._overlayContainer = document.createElement("div")
     this.scopedContextKeyService = this._register(
-      contextKeyService.createScoped(this._overlayContainer),
+      contextKeyService.createScoped(this._overlayContainer)
     )
     this.instantiationService = instantiationService.createChild(
-      new ServiceCollection([IContextKeyService, this.scopedContextKeyService]),
+      new ServiceCollection([IContextKeyService, this.scopedContextKeyService])
     )
 
     this._register(
       _notebookService.onDidChangeOutputRenderers(() => {
         this._updateOutputRenderers()
-      }),
+      })
     )
 
     this._register(
-      this.instantiationService.createInstance(NotebookEditorContextKeys, this),
+      this.instantiationService.createInstance(NotebookEditorContextKeys, this)
     )
 
     this._register(
@@ -527,11 +527,11 @@ export class NotebookEditorWidget
           this._loadKernelPreloads()
           this._onDidChangeActiveKernel.fire()
         }
-      }),
+      })
     )
 
     this._scrollBeyondLastLine = this.configurationService.getValue<boolean>(
-      "editor.scrollBeyondLastLine",
+      "editor.scrollBeyondLastLine"
     )
 
     this._register(
@@ -539,13 +539,13 @@ export class NotebookEditorWidget
         if (e.affectsConfiguration("editor.scrollBeyondLastLine")) {
           this._scrollBeyondLastLine =
             this.configurationService.getValue<boolean>(
-              "editor.scrollBeyondLastLine",
+              "editor.scrollBeyondLastLine"
             )
           if (this._dimension && this._isVisible) {
             this.layout(this._dimension)
           }
         }
-      }),
+      })
     )
 
     this._register(
@@ -592,7 +592,7 @@ export class NotebookEditorWidget
         if (this._dimension && this._isVisible) {
           this.layout(this._dimension)
         }
-      }),
+      })
     )
 
     const container = creationOptions.codeWindow
@@ -606,7 +606,7 @@ export class NotebookEditorWidget
 
         this.updateShadowElement(this._shadowElement, this._dimension)
         this.layoutContainerOverShadowElement(this._dimension, this._position)
-      }),
+      })
     )
 
     this.notebookEditorService.addNotebookEditor(this)
@@ -624,24 +624,24 @@ export class NotebookEditorWidget
     this._generateFontInfo()
 
     this._editorFocus = NOTEBOOK_EDITOR_FOCUSED.bindTo(
-      this.scopedContextKeyService,
+      this.scopedContextKeyService
     )
     this._outputFocus = NOTEBOOK_OUTPUT_FOCUSED.bindTo(
-      this.scopedContextKeyService,
+      this.scopedContextKeyService
     )
     this._outputInputFocus = NOTEBOOK_OUTPUT_INPUT_FOCUSED.bindTo(
-      this.scopedContextKeyService,
+      this.scopedContextKeyService
     )
     this._editorEditable = NOTEBOOK_EDITOR_EDITABLE.bindTo(
-      this.scopedContextKeyService,
+      this.scopedContextKeyService
     )
     this._cursorNavMode = NOTEBOOK_CURSOR_NAVIGATION_MODE.bindTo(
-      this.scopedContextKeyService,
+      this.scopedContextKeyService
     )
     // Never display the native cut/copy context menu items in notebooks
     new RawContextKey<boolean>(
       PreventDefaultContextMenuItemsContextKeyName,
-      false,
+      false
     )
       .bindTo(this.scopedContextKeyService)
       .set(true)
@@ -667,7 +667,7 @@ export class NotebookEditorWidget
         } else {
           contribution.dispose()
           throw new Error(
-            `DUPLICATE notebook editor contribution: '${desc.id}'`,
+            `DUPLICATE notebook editor contribution: '${desc.id}'`
           )
         }
       }
@@ -788,7 +788,7 @@ export class NotebookEditorWidget
         this,
         this.notebookOptions,
         this.configurationService,
-        language,
+        language
       )
       this._baseCellEditorOptions.set(language, options)
       return options
@@ -806,7 +806,7 @@ export class NotebookEditorWidget
     const cellToolbarLocation =
       this._notebookOptions.computeCellToolbarLocation(this.viewModel?.viewType)
     this._overlayContainer.classList.add(
-      `cell-title-toolbar-${cellToolbarLocation}`,
+      `cell-title-toolbar-${cellToolbarLocation}`
     )
 
     const cellToolbarInteraction =
@@ -822,7 +822,7 @@ export class NotebookEditorWidget
       cellToolbarInteractionState = cellToolbarInteraction
     }
     this._overlayContainer.classList.add(
-      `cell-toolbar-${cellToolbarInteractionState}`,
+      `cell-toolbar-${cellToolbarInteractionState}`
     )
   }
 
@@ -834,22 +834,22 @@ export class NotebookEditorWidget
       targetWindow,
       BareFontInfo.createFromRawSettings(
         editorOptions,
-        PixelRatio.getInstance(targetWindow).value,
-      ),
+        PixelRatio.getInstance(targetWindow).value
+      )
     )
   }
 
   private _createBody(parent: HTMLElement): void {
     this._notebookTopToolbarContainer = document.createElement("div")
     this._notebookTopToolbarContainer.classList.add(
-      "notebook-toolbar-container",
+      "notebook-toolbar-container"
     )
     this._notebookTopToolbarContainer.style.display = "none"
     DOM.append(parent, this._notebookTopToolbarContainer)
 
     this._notebookStickyScrollContainer = document.createElement("div")
     this._notebookStickyScrollContainer.classList.add(
-      "notebook-sticky-scroll-container",
+      "notebook-sticky-scroll-container"
     )
     DOM.append(parent, this._notebookStickyScrollContainer)
 
@@ -862,17 +862,17 @@ export class NotebookEditorWidget
 
     this._notebookOverviewRulerContainer = document.createElement("div")
     this._notebookOverviewRulerContainer.classList.add(
-      "notebook-overview-ruler-container",
+      "notebook-overview-ruler-container"
     )
     this._list.scrollableElement.appendChild(
-      this._notebookOverviewRulerContainer,
+      this._notebookOverviewRulerContainer
     )
     this._registerNotebookOverviewRuler()
 
     this._overflowContainer = document.createElement("div")
     this._overflowContainer.classList.add(
       "notebook-overflow-widget-container",
-      "monaco-editor",
+      "monaco-editor"
     )
     DOM.append(parent, this._overflowContainer)
   }
@@ -912,7 +912,7 @@ export class NotebookEditorWidget
 
     const { bottomToolbarGap, bottomToolbarHeight } =
       this._notebookOptions.computeBottomToolbarDimensions(
-        this.viewModel?.viewType,
+        this.viewModel?.viewType
       )
 
     const styleSheets: string[] = []
@@ -932,11 +932,11 @@ export class NotebookEditorWidget
 
     if (compactView) {
       styleSheets.push(
-        `.notebookOverlay .cell-list-container > .monaco-list > .monaco-scrollable-element > .monaco-list-rows > .markdown-cell-row div.cell.code { margin-left: ${getCellEditorContainerLeftMargin}px; }`,
+        `.notebookOverlay .cell-list-container > .monaco-list > .monaco-scrollable-element > .monaco-list-rows > .markdown-cell-row div.cell.code { margin-left: ${getCellEditorContainerLeftMargin}px; }`
       )
     } else {
       styleSheets.push(
-        `.notebookOverlay .cell-list-container > .monaco-list > .monaco-scrollable-element > .monaco-list-rows > .markdown-cell-row div.cell.code { margin-left: ${codeCellLeftMargin}px; }`,
+        `.notebookOverlay .cell-list-container > .monaco-list > .monaco-scrollable-element > .monaco-list-rows > .markdown-cell-row div.cell.code { margin-left: ${codeCellLeftMargin}px; }`
       )
     }
 
@@ -990,8 +990,8 @@ export class NotebookEditorWidget
 			.monaco-workbench .notebookOverlay .monaco-list.selection-multiple .monaco-list-row.code-cell-row.selected .cell-focus-indicator-left:before,
 			.monaco-workbench .notebookOverlay .monaco-list.selection-multiple .monaco-list-row.code-cell-row.selected .cell-focus-indicator-right:before {
 				top: -${cellTopMargin}px; height: calc(100% + ${
-          cellTopMargin + cellBottomMargin
-        }px)
+        cellTopMargin + cellBottomMargin
+      }px)
 			}`)
     } else {
       styleSheets.push(`
@@ -1034,17 +1034,17 @@ export class NotebookEditorWidget
       insertToolbarPosition === "both"
     ) {
       styleSheets.push(
-        `.monaco-workbench .notebookOverlay > .cell-list-container > .monaco-list > .monaco-scrollable-element > .monaco-list-rows > .monaco-list-row .cell-bottom-toolbar-container { display: flex; }`,
+        `.monaco-workbench .notebookOverlay > .cell-list-container > .monaco-list > .monaco-scrollable-element > .monaco-list-rows > .monaco-list-row .cell-bottom-toolbar-container { display: flex; }`
       )
       styleSheets.push(
-        `.monaco-workbench .notebookOverlay > .cell-list-container > .monaco-list > .monaco-scrollable-element > .monaco-list-rows > .view-zones .cell-list-top-cell-toolbar-container { display: flex; }`,
+        `.monaco-workbench .notebookOverlay > .cell-list-container > .monaco-list > .monaco-scrollable-element > .monaco-list-rows > .view-zones .cell-list-top-cell-toolbar-container { display: flex; }`
       )
     } else {
       styleSheets.push(
-        `.monaco-workbench .notebookOverlay > .cell-list-container > .monaco-list > .monaco-scrollable-element > .monaco-list-rows > .monaco-list-row .cell-bottom-toolbar-container { display: none; }`,
+        `.monaco-workbench .notebookOverlay > .cell-list-container > .monaco-list > .monaco-scrollable-element > .monaco-list-rows > .monaco-list-row .cell-bottom-toolbar-container { display: none; }`
       )
       styleSheets.push(
-        `.monaco-workbench .notebookOverlay > .cell-list-container > .monaco-list > .monaco-scrollable-element > .monaco-list-rows > .view-zones .cell-list-top-cell-toolbar-container { display: none; }`,
+        `.monaco-workbench .notebookOverlay > .cell-list-container > .monaco-list > .monaco-scrollable-element > .monaco-list-rows > .view-zones .cell-list-top-cell-toolbar-container { display: none; }`
       )
     }
 
@@ -1079,45 +1079,45 @@ export class NotebookEditorWidget
     }
 
     styleSheets.push(
-      `.notebookOverlay .cell-list-container > .monaco-list > .monaco-scrollable-element > .monaco-list-rows > .code-cell-row div.cell.code { margin-left: ${getCellEditorContainerLeftMargin}px; }`,
+      `.notebookOverlay .cell-list-container > .monaco-list > .monaco-scrollable-element > .monaco-list-rows > .code-cell-row div.cell.code { margin-left: ${getCellEditorContainerLeftMargin}px; }`
     )
     styleSheets.push(
-      `.notebookOverlay .cell-list-container > .monaco-list > .monaco-scrollable-element > .monaco-list-rows > .monaco-list-row div.cell { margin-right: ${cellRightMargin}px; }`,
+      `.notebookOverlay .cell-list-container > .monaco-list > .monaco-scrollable-element > .monaco-list-rows > .monaco-list-row div.cell { margin-right: ${cellRightMargin}px; }`
     )
     styleSheets.push(
-      `.notebookOverlay .cell-list-container > .monaco-list > .monaco-scrollable-element > .monaco-list-rows > .monaco-list-row > .cell-inner-container { padding-top: ${cellTopMargin}px; }`,
+      `.notebookOverlay .cell-list-container > .monaco-list > .monaco-scrollable-element > .monaco-list-rows > .monaco-list-row > .cell-inner-container { padding-top: ${cellTopMargin}px; }`
     )
     styleSheets.push(
-      `.notebookOverlay .cell-list-container > .monaco-list > .monaco-scrollable-element > .monaco-list-rows > .markdown-cell-row > .cell-inner-container { padding-bottom: ${markdownCellBottomMargin}px; padding-top: ${markdownCellTopMargin}px; }`,
+      `.notebookOverlay .cell-list-container > .monaco-list > .monaco-scrollable-element > .monaco-list-rows > .markdown-cell-row > .cell-inner-container { padding-bottom: ${markdownCellBottomMargin}px; padding-top: ${markdownCellTopMargin}px; }`
     )
     styleSheets.push(
-      `.notebookOverlay .cell-list-container > .monaco-list > .monaco-scrollable-element > .monaco-list-rows > .markdown-cell-row > .cell-inner-container.webview-backed-markdown-cell { padding: 0; }`,
+      `.notebookOverlay .cell-list-container > .monaco-list > .monaco-scrollable-element > .monaco-list-rows > .markdown-cell-row > .cell-inner-container.webview-backed-markdown-cell { padding: 0; }`
     )
     styleSheets.push(
-      `.notebookOverlay .cell-list-container > .monaco-list > .monaco-scrollable-element > .monaco-list-rows > .markdown-cell-row > .webview-backed-markdown-cell.markdown-cell-edit-mode .cell.code { padding-bottom: ${markdownCellBottomMargin}px; padding-top: ${markdownCellTopMargin}px; }`,
+      `.notebookOverlay .cell-list-container > .monaco-list > .monaco-scrollable-element > .monaco-list-rows > .markdown-cell-row > .webview-backed-markdown-cell.markdown-cell-edit-mode .cell.code { padding-bottom: ${markdownCellBottomMargin}px; padding-top: ${markdownCellTopMargin}px; }`
     )
     styleSheets.push(
-      `.notebookOverlay .output { margin: 0px ${cellRightMargin}px 0px ${getCellEditorContainerLeftMargin}px; }`,
+      `.notebookOverlay .output { margin: 0px ${cellRightMargin}px 0px ${getCellEditorContainerLeftMargin}px; }`
     )
     styleSheets.push(
       `.notebookOverlay .output { width: calc(100% - ${
         getCellEditorContainerLeftMargin + cellRightMargin
-      }px); }`,
+      }px); }`
     )
 
     // comment
     styleSheets.push(
-      `.notebookOverlay .cell-list-container > .monaco-list > .monaco-scrollable-element > .monaco-list-rows > .monaco-list-row .cell-comment-container { left: ${getCellEditorContainerLeftMargin}px; }`,
+      `.notebookOverlay .cell-list-container > .monaco-list > .monaco-scrollable-element > .monaco-list-rows > .monaco-list-row .cell-comment-container { left: ${getCellEditorContainerLeftMargin}px; }`
     )
     styleSheets.push(
       `.notebookOverlay .cell-list-container > .monaco-list > .monaco-scrollable-element > .monaco-list-rows > .monaco-list-row .cell-comment-container { width: calc(100% - ${
         getCellEditorContainerLeftMargin + cellRightMargin
-      }px); }`,
+      }px); }`
     )
 
     // output collapse button
     styleSheets.push(
-      `.monaco-workbench .notebookOverlay .output .output-collapse-container .expandButton { left: -${cellRunGutter}px; }`,
+      `.monaco-workbench .notebookOverlay .output .output-collapse-container .expandButton { left: -${cellRunGutter}px; }`
     )
     styleSheets.push(`.monaco-workbench .notebookOverlay .output .output-collapse-container .expandButton {
 			position: absolute;
@@ -1127,47 +1127,47 @@ export class NotebookEditorWidget
 
     // show more container
     styleSheets.push(
-      `.notebookOverlay .output-show-more-container { margin: 0px ${cellRightMargin}px 0px ${getCellEditorContainerLeftMargin}px; }`,
+      `.notebookOverlay .output-show-more-container { margin: 0px ${cellRightMargin}px 0px ${getCellEditorContainerLeftMargin}px; }`
     )
     styleSheets.push(
       `.notebookOverlay .output-show-more-container { width: calc(100% - ${
         getCellEditorContainerLeftMargin + cellRightMargin
-      }px); }`,
+      }px); }`
     )
 
     styleSheets.push(
-      `.notebookOverlay .cell-list-container > .monaco-list > .monaco-scrollable-element > .monaco-list-rows > .monaco-list-row div.cell.markdown { padding-left: ${cellRunGutter}px; }`,
+      `.notebookOverlay .cell-list-container > .monaco-list > .monaco-scrollable-element > .monaco-list-rows > .monaco-list-row div.cell.markdown { padding-left: ${cellRunGutter}px; }`
     )
     styleSheets.push(
       `.monaco-workbench .notebookOverlay > .cell-list-container .notebook-folding-indicator { left: ${
         (markdownCellGutter - 20) / 2 + markdownCellLeftMargin
-      }px; }`,
+      }px; }`
     )
     styleSheets.push(
       `.notebookOverlay > .cell-list-container .notebook-folded-hint { left: ${
         markdownCellGutter + markdownCellLeftMargin + 8
-      }px; }`,
+      }px; }`
     )
     styleSheets.push(
-      `.notebookOverlay .monaco-list .monaco-list-row :not(.webview-backed-markdown-cell) .cell-focus-indicator-top { height: ${cellTopMargin}px; }`,
+      `.notebookOverlay .monaco-list .monaco-list-row :not(.webview-backed-markdown-cell) .cell-focus-indicator-top { height: ${cellTopMargin}px; }`
     )
     styleSheets.push(
-      `.notebookOverlay .monaco-list .monaco-list-row .cell-focus-indicator-side { bottom: ${bottomToolbarGap}px; }`,
+      `.notebookOverlay .monaco-list .monaco-list-row .cell-focus-indicator-side { bottom: ${bottomToolbarGap}px; }`
     )
     styleSheets.push(
-      `.notebookOverlay .monaco-list .monaco-list-row.code-cell-row .cell-focus-indicator-left { width: ${getCellEditorContainerLeftMargin}px; }`,
+      `.notebookOverlay .monaco-list .monaco-list-row.code-cell-row .cell-focus-indicator-left { width: ${getCellEditorContainerLeftMargin}px; }`
     )
     styleSheets.push(
-      `.notebookOverlay .monaco-list .monaco-list-row.markdown-cell-row .cell-focus-indicator-left { width: ${codeCellLeftMargin}px; }`,
+      `.notebookOverlay .monaco-list .monaco-list-row.markdown-cell-row .cell-focus-indicator-left { width: ${codeCellLeftMargin}px; }`
     )
     styleSheets.push(
-      `.notebookOverlay .monaco-list .monaco-list-row .cell-focus-indicator.cell-focus-indicator-right { width: ${cellRightMargin}px; }`,
+      `.notebookOverlay .monaco-list .monaco-list-row .cell-focus-indicator.cell-focus-indicator-right { width: ${cellRightMargin}px; }`
     )
     styleSheets.push(
-      `.notebookOverlay .monaco-list .monaco-list-row .cell-focus-indicator-bottom { height: ${cellBottomMargin}px; }`,
+      `.notebookOverlay .monaco-list .monaco-list-row .cell-focus-indicator-bottom { height: ${cellBottomMargin}px; }`
     )
     styleSheets.push(
-      `.notebookOverlay .monaco-list .monaco-list-row .cell-shadow-container-bottom { top: ${cellBottomMargin}px; }`,
+      `.notebookOverlay .monaco-list .monaco-list-row .cell-shadow-container-bottom { top: ${cellBottomMargin}px; }`
     )
 
     styleSheets.push(`
@@ -1199,10 +1199,10 @@ export class NotebookEditorWidget
 		`)
 
     styleSheets.push(
-      `.monaco-workbench .notebookOverlay > .cell-list-container > .monaco-list > .monaco-scrollable-element > .monaco-list-rows > .monaco-list-row .cell-bottom-toolbar-container .monaco-toolbar { height: ${bottomToolbarHeight}px }`,
+      `.monaco-workbench .notebookOverlay > .cell-list-container > .monaco-list > .monaco-scrollable-element > .monaco-list-rows > .monaco-list-row .cell-bottom-toolbar-container .monaco-toolbar { height: ${bottomToolbarHeight}px }`
     )
     styleSheets.push(
-      `.monaco-workbench .notebookOverlay > .cell-list-container > .monaco-list > .monaco-scrollable-element > .monaco-list-rows > .view-zones .cell-list-top-cell-toolbar-container .monaco-toolbar { height: ${bottomToolbarHeight}px }`,
+      `.monaco-workbench .notebookOverlay > .cell-list-container > .monaco-list > .monaco-scrollable-element > .monaco-list-rows > .view-zones .cell-list-top-cell-toolbar-container .monaco-toolbar { height: ${bottomToolbarHeight}px }`
     )
 
     // cell toolbar
@@ -1240,7 +1240,7 @@ export class NotebookEditorWidget
     this._body.classList.add("cell-list-container")
 
     this._dndController = this._register(
-      new CellDragAndDropController(this, this._body),
+      new CellDragAndDropController(this, this._body)
     )
     const getScopedContextKeyService = (container: HTMLElement) =>
       this._list.contextKeyService.createScoped(container)
@@ -1250,14 +1250,14 @@ export class NotebookEditorWidget
         this,
         this._renderedEditors,
         this._dndController,
-        getScopedContextKeyService,
+        getScopedContextKeyService
       ),
       this.instantiationService.createInstance(
         MarkupCellRenderer,
         this,
         this._dndController,
         this._renderedEditors,
-        getScopedContextKeyService,
+        getScopedContextKeyService
       ),
     ]
 
@@ -1267,7 +1267,7 @@ export class NotebookEditorWidget
 
     this._listDelegate = this.instantiationService.createInstance(
       NotebookCellListDelegate,
-      DOM.getWindow(this.getDomNode()),
+      DOM.getWindow(this.getDomNode())
     )
     this._register(this._listDelegate)
 
@@ -1275,7 +1275,7 @@ export class NotebookEditorWidget
       this.notebookExecutionStateService,
       () => this.viewModel,
       this.keybindingService,
-      this.configurationService,
+      this.configurationService
     )
     this._register(accessibilityProvider)
 
@@ -1322,7 +1322,7 @@ export class NotebookEditorWidget
           listInactiveFocusOutline: notebookEditorBackground,
         },
         accessibilityProvider,
-      },
+      }
     )
     this._dndController.setList(this._list)
 
@@ -1339,14 +1339,14 @@ export class NotebookEditorWidget
       this.instantiationService.createInstance(
         ListTopCellToolbar,
         this,
-        this.notebookOptions,
-      ),
+        this.notebookOptions
+      )
     )
 
     // transparent cover
     this._webviewTransparentCover = DOM.append(
       this._list.rowsContainer,
-      $(".webview-cover"),
+      $(".webview-cover")
     )
     this._webviewTransparentCover.style.display = "none"
 
@@ -1360,8 +1360,8 @@ export class NotebookEditorWidget
           ) {
             this._webviewTransparentCover.style.display = "block"
           }
-        },
-      ),
+        }
+      )
     )
 
     this._register(
@@ -1372,8 +1372,8 @@ export class NotebookEditorWidget
             // no matter when
             this._webviewTransparentCover.style.display = "none"
           }
-        },
-      ),
+        }
+      )
     )
 
     this._register(
@@ -1381,7 +1381,7 @@ export class NotebookEditorWidget
         if (e.element) {
           this._onMouseDown.fire({ event: e.browserEvent, target: e.element })
         }
-      }),
+      })
     )
 
     this._register(
@@ -1389,7 +1389,7 @@ export class NotebookEditorWidget
         if (e.element) {
           this._onMouseUp.fire({ event: e.browserEvent, target: e.element })
         }
-      }),
+      })
     )
 
     this._register(
@@ -1398,19 +1398,19 @@ export class NotebookEditorWidget
         this._onDidChangeActiveCell.fire()
         this._onDidChangeFocus.fire()
         this._cursorNavMode.set(false)
-      }),
+      })
     )
 
     this._register(
       this._list.onContextMenu((e) => {
         this.showListContextMenu(e)
-      }),
+      })
     )
 
     this._register(
       this._list.onDidChangeVisibleRanges(() => {
         this._onDidChangeVisibleRanges.fire()
-      }),
+      })
     )
 
     this._register(
@@ -1419,7 +1419,7 @@ export class NotebookEditorWidget
           this._onDidScroll.fire()
           this.clearActiveCellWidgets()
         }
-      }),
+      })
     )
 
     this._focusTracker = this._register(DOM.trackFocus(this.getDomNode()))
@@ -1428,14 +1428,14 @@ export class NotebookEditorWidget
         this._editorFocus.set(false)
         this.viewModel?.setEditorFocus(false)
         this._onDidBlurEmitter.fire()
-      }),
+      })
     )
     this._register(
       this._focusTracker.onDidFocus(() => {
         this._editorFocus.set(true)
         this.viewModel?.setEditorFocus(true)
         this._onDidFocusEmitter.fire()
-      }),
+      })
     )
 
     this._registerNotebookActionsToolbar()
@@ -1446,7 +1446,7 @@ export class NotebookEditorWidget
         if (e.affectsConfiguration(AccessibilityVerbositySettingId.Notebook)) {
           this._list.ariaLabel = accessibilityProvider?.getWidgetAriaLabel()
         }
-      }),
+      })
     )
   }
 
@@ -1463,8 +1463,8 @@ export class NotebookEditorWidget
       this.instantiationService.createInstance(
         NotebookOverviewRuler,
         this,
-        this._notebookOverviewRulerContainer,
-      ),
+        this._notebookOverviewRulerContainer
+      )
     )
   }
 
@@ -1475,15 +1475,15 @@ export class NotebookEditorWidget
         this,
         this.scopedContextKeyService,
         this._notebookOptions,
-        this._notebookTopToolbarContainer,
-      ),
+        this._notebookTopToolbarContainer
+      )
     )
     this._register(
       this._notebookTopToolbar.onDidChangeVisibility(() => {
         if (this._dimension && this._isVisible) {
           this.layout(this._dimension)
         }
-      }),
+      })
     )
   }
 
@@ -1493,8 +1493,8 @@ export class NotebookEditorWidget
         NotebookStickyScroll,
         this._notebookStickyScrollContainer,
         this,
-        this._list,
-      ),
+        this._list
+      )
     )
 
     const localDisposableStore = this._register(new DisposableStore())
@@ -1522,11 +1522,11 @@ export class NotebookEditorWidget
                   }
                 }
                 localDisposableStore.delete(d)
-              },
-            ),
+              }
+            )
           )
-        },
-      ),
+        }
+      )
     )
   }
 
@@ -1558,13 +1558,13 @@ export class NotebookEditorWidget
   }
 
   setEditorProgressService(
-    editorProgressService: IEditorProgressService,
+    editorProgressService: IEditorProgressService
   ): void {
     this.editorProgressService = editorProgressService
   }
 
   setParentContextKeyService(
-    parentContextKeyService: IContextKeyService,
+    parentContextKeyService: IContextKeyService
   ): void {
     this.scopedContextKeyService.updateParent(parentContextKeyService)
   }
@@ -1572,18 +1572,18 @@ export class NotebookEditorWidget
   async setModel(
     textModel: NotebookTextModel,
     viewState: INotebookEditorViewState | undefined,
-    perf?: NotebookPerfMarks,
+    perf?: NotebookPerfMarks
   ): Promise<void> {
     if (this.viewModel === undefined || !this.viewModel.equal(textModel)) {
       const oldBottomToolbarDimensions =
         this._notebookOptions.computeBottomToolbarDimensions(
-          this.viewModel?.viewType,
+          this.viewModel?.viewType
         )
       this._detachModel()
       await this._attachModel(textModel, viewState, perf)
       const newBottomToolbarDimensions =
         this._notebookOptions.computeBottomToolbarDimensions(
-          this.viewModel?.viewType,
+          this.viewModel?.viewType
         )
 
       if (
@@ -1648,7 +1648,7 @@ export class NotebookEditorWidget
     this._localStore.add(
       this._list.onDidChangeFocus(() => {
         this.updateContextKeysOnFocusChange()
-      }),
+      })
     )
 
     this.updateContextKeysOnFocusChange()
@@ -1686,7 +1686,7 @@ export class NotebookEditorWidget
           (cell) =>
             cell.cellKind === CellKind.Markup &&
             !this._webview?.markupPreviewMapping.has(cell.id) &&
-            !this.cellIsHidden(cell),
+            !this.cellIsHidden(cell)
         ) as MarkupCellViewModel | undefined
         if (!firstMarkupCell) {
           return
@@ -1719,8 +1719,8 @@ export class NotebookEditorWidget
           this.instantiationService.createInstance(
             CellContextKeyManager,
             this,
-            focused as CellViewModel,
-          ),
+            focused as CellViewModel
+          )
         )
       }
 
@@ -1745,7 +1745,7 @@ export class NotebookEditorWidget
       options?.cellOptions ?? this._parseIndexedCellOptions(options)
     if (cellOptions) {
       const cell = this.viewModel.viewCells.find(
-        (cell) => cell.uri.toString() === cellOptions.resource.toString(),
+        (cell) => cell.uri.toString() === cellOptions.resource.toString()
       )
       if (cell) {
         this.focusElement(cell)
@@ -1759,13 +1759,13 @@ export class NotebookEditorWidget
               selection.startLineNumber,
               selection.startColumn,
               selection.endLineNumber || selection.startLineNumber,
-              selection.endColumn || selection.startColumn,
-            ),
+              selection.endColumn || selection.startColumn
+            )
           )
         } else {
           this._list.revealCell(
             cell,
-            options?.cellRevealType ?? CellRevealType.CenterIfOutsideViewport,
+            options?.cellRevealType ?? CellRevealType.CenterIfOutsideViewport
           )
         }
 
@@ -1777,7 +1777,7 @@ export class NotebookEditorWidget
               selection.startLineNumber,
               selection.startColumn,
               selection.endLineNumber || selection.startLineNumber,
-              selection.endColumn || selection.startColumn,
+              selection.endColumn || selection.startColumn
             )
             editor.setSelection(editorSelection)
             editor.revealPositionInCenterIfOutsideViewport({
@@ -1786,7 +1786,7 @@ export class NotebookEditorWidget
             })
             await this.revealRangeInCenterIfOutsideViewportAsync(
               cell,
-              editorSelection,
+              editorSelection
             )
           }
           if (!cellOptions.options?.preserveFocus) {
@@ -1817,7 +1817,7 @@ export class NotebookEditorWidget
   }
 
   private _parseIndexedCellOptions(
-    options: INotebookEditorOptions | undefined,
+    options: INotebookEditorOptions | undefined
   ) {
     if (options?.indexedCellOptions) {
       // convert index based selections
@@ -1857,11 +1857,11 @@ export class NotebookEditorWidget
     this._editorEditable.set(!this.viewModel.options.isReadOnly)
     this._overflowContainer.classList.toggle(
       "notebook-editor-editable",
-      !this.viewModel.options.isReadOnly,
+      !this.viewModel.options.isReadOnly
     )
     this.getDomNode().classList.toggle(
       "notebook-editor-editable",
-      !this.viewModel.options.isReadOnly,
+      !this.viewModel.options.isReadOnly
     )
   }
 
@@ -1878,23 +1878,23 @@ export class NotebookEditorWidget
       this._ensureWebview(
         this.getId(),
         this.textModel.viewType,
-        this.textModel.uri,
+        this.textModel.uri
       )
     }
 
     this._webviewResolvePromise = (async () => {
       if (!this._webview) {
         throw new Error(
-          "Notebook output webview object is not created successfully.",
+          "Notebook output webview object is not created successfully."
         )
       }
 
       await this._webview.createWebview(
-        this.creationOptions.codeWindow ?? mainWindow,
+        this.creationOptions.codeWindow ?? mainWindow
       )
       if (!this._webview.webview) {
         throw new Error(
-          "Notebook output webview element was not created successfully.",
+          "Notebook output webview element was not created successfully."
         )
       }
 
@@ -1905,7 +1905,7 @@ export class NotebookEditorWidget
 
           this.updateEditorFocus()
           this.updateCellFocusMode()
-        }),
+        })
       )
 
       this._localStore.add(
@@ -1913,13 +1913,13 @@ export class NotebookEditorWidget
           this._outputFocus.set(true)
           this.updateEditorFocus()
           this._webviewFocused = true
-        }),
+        })
       )
 
       this._localStore.add(
         this._webview.onMessage((e) => {
           this._onDidReceiveMessage.fire(e)
-        }),
+        })
       )
 
       return this._webview
@@ -1972,7 +1972,7 @@ export class NotebookEditorWidget
         ...this._notebookOptions.computeWebviewOptions(),
         fontFamily: this._generateFontFamily(),
       },
-      this.notebookRendererMessaging.getScoped(this._uuid),
+      this.notebookRendererMessaging.getScoped(this._uuid)
     )
 
     this._webview.element.style.width = "100%"
@@ -1984,7 +1984,7 @@ export class NotebookEditorWidget
   private async _attachModel(
     textModel: NotebookTextModel,
     viewState: INotebookEditorViewState | undefined,
-    perf?: NotebookPerfMarks,
+    perf?: NotebookPerfMarks
   ) {
     this._ensureWebview(this.getId(), textModel.viewType, textModel.uri)
 
@@ -1994,12 +1994,12 @@ export class NotebookEditorWidget
       textModel,
       this._viewContext,
       this.getLayoutInfo(),
-      { isReadOnly: this._readOnly },
+      { isReadOnly: this._readOnly }
     )
     this._viewContext.eventDispatcher.emit([
       new NotebookLayoutChangedEvent(
         { width: true, fontInfo: true },
-        this.getLayoutInfo(),
+        this.getLayoutInfo()
       ),
     ])
     this.notebookOptions.updateOptions(this._readOnly)
@@ -2026,14 +2026,14 @@ export class NotebookEditorWidget
     this._localStore.add(
       this.viewModel.onDidChangeViewCells((e) => {
         this._onDidChangeViewCells.fire(e)
-      }),
+      })
     )
 
     this._localStore.add(
       this.viewModel.onDidChangeSelection(() => {
         this._onDidChangeSelection.fire()
         this.updateSelectedMarkdownPreviews()
-      }),
+      })
     )
 
     this._localStore.add(
@@ -2041,7 +2041,7 @@ export class NotebookEditorWidget
         if (this._webview?.isResolved()) {
           this._webviewTransparentCover!.style.transform = `translateY(${e.scrollTop})`
         }
-      }),
+      })
     )
 
     let hasPendingChangeContentHeight = false
@@ -2059,21 +2059,21 @@ export class NotebookEditorWidget
               hasPendingChangeContentHeight = false
               this._updateScrollHeight()
             },
-            100,
-          ),
+            100
+          )
         )
-      }),
+      })
     )
 
     this._localStore.add(
       this._list.onDidRemoveOutputs((outputs) => {
         outputs.forEach((output) => this.removeInset(output))
-      }),
+      })
     )
     this._localStore.add(
       this._list.onDidHideOutputs((outputs) => {
         outputs.forEach((output) => this.hideInset(output))
-      }),
+      })
     )
     this._localStore.add(
       this._list.onDidRemoveCellsFromView((cells) => {
@@ -2085,7 +2085,7 @@ export class NotebookEditorWidget
             const mdCell = cell as MarkupCellViewModel
             if (
               this.viewModel?.viewCells.find(
-                (cell) => cell.handle === mdCell.handle,
+                (cell) => cell.handle === mdCell.handle
               )
             ) {
               // Cell has been folded but is still in model
@@ -2099,7 +2099,7 @@ export class NotebookEditorWidget
 
         this.hideMarkupPreviews(hiddenCells)
         this.deleteMarkupPreviews(deletedCells)
-      }),
+      })
     )
 
     // init rendering
@@ -2109,13 +2109,13 @@ export class NotebookEditorWidget
 
     // model attached
     this._localCellStateListeners = this.viewModel.viewCells.map((cell) =>
-      this._bindCellListener(cell),
+      this._bindCellListener(cell)
     )
     this._lastCellWithEditorFocus =
       this.viewModel.viewCells.find(
         (viewCell) =>
           this.getActiveCell() === viewCell &&
-          viewCell.focusMode === CellFocusMode.Editor,
+          viewCell.focusMode === CellFocusMode.Editor
       ) ?? null
 
     this._localStore.add(
@@ -2130,7 +2130,7 @@ export class NotebookEditorWidget
           const deletedCells = this._localCellStateListeners.splice(
             start,
             deleted,
-            ...newCells.map((cell) => this._bindCellListener(cell)),
+            ...newCells.map((cell) => this._bindCellListener(cell))
           )
 
           dispose(deletedCells)
@@ -2138,18 +2138,18 @@ export class NotebookEditorWidget
 
         if (
           e.splices.some((s) =>
-            s[2].some((cell) => cell.cellKind === CellKind.Markup),
+            s[2].some((cell) => cell.cellKind === CellKind.Markup)
           )
         ) {
           this._backgroundMarkdownRendering()
         }
-      }),
+      })
     )
 
     if (this._dimension) {
       this._list.layout(
         this.getBodyHeight(this._dimension.height),
-        this._dimension.width,
+        this._dimension.width
       )
     } else {
       this._list.layout()
@@ -2170,14 +2170,14 @@ export class NotebookEditorWidget
         if (e.totalHeight || e.outerWidth) {
           this.layoutNotebookCell(cell, cell.layoutInfo.totalHeight, e.context)
         }
-      }),
+      })
     )
 
     if (cell.cellKind === CellKind.Code) {
       store.add(
         (cell as CodeCellViewModel).onDidRemoveOutputs((outputs) => {
           outputs.forEach((output) => this.removeInset(output))
-        }),
+        })
       )
     }
 
@@ -2202,7 +2202,7 @@ export class NotebookEditorWidget
         if (e.focusModeChanged) {
           this._validateCellFocusMode(cell)
         }
-      }),
+      })
     )
 
     return store
@@ -2227,11 +2227,11 @@ export class NotebookEditorWidget
   private async _warmupWithMarkdownRenderer(
     viewModel: NotebookViewModel,
     viewState: INotebookEditorViewState | undefined,
-    perf?: NotebookPerfMarks,
+    perf?: NotebookPerfMarks
   ) {
     this.logService.debug(
       "NotebookEditorWidget",
-      "warmup " + this.viewModel?.uri.toString(),
+      "warmup " + this.viewModel?.uri.toString()
     )
     await this._resolveWebview()
     perf?.mark("webviewCommLoaded")
@@ -2263,14 +2263,14 @@ export class NotebookEditorWidget
     this._webview!.element.style.visibility = "visible"
     this.logService.debug(
       "NotebookEditorWidget",
-      "warmup - list view model attached, set to visible",
+      "warmup - list view model attached, set to visible"
     )
     this._onDidAttachViewModel.fire()
   }
 
   private async _warmupViewportMarkdownCells(
     viewModel: NotebookViewModel,
-    viewState: INotebookEditorViewState | undefined,
+    viewState: INotebookEditorViewState | undefined
   ) {
     if (viewState && viewState.cellTotalHeights) {
       const totalHeightCache = viewState.cellTotalHeights
@@ -2303,8 +2303,8 @@ export class NotebookEditorWidget
 
       await this._webview!.initializeMarkup(
         requests.map(([model, offset]) =>
-          this.createMarkupCellInitialization(model, offset),
-        ),
+          this.createMarkupCellInitialization(model, offset)
+        )
       )
     } else {
       const initRequests = viewModel.viewCells
@@ -2337,7 +2337,7 @@ export class NotebookEditorWidget
 
   private createMarkupCellInitialization(
     model: ICellViewModel,
-    offset: number,
+    offset: number
   ): IMarkupCellInitialization {
     return {
       mime: model.mime,
@@ -2390,21 +2390,21 @@ export class NotebookEditorWidget
   }
 
   private _restoreSelectedKernel(
-    viewState: INotebookEditorViewState | undefined,
+    viewState: INotebookEditorViewState | undefined
   ): void {
     if (viewState?.selectedKernelId && this.textModel) {
       const matching = this.notebookKernelService.getMatchingKernel(
-        this.textModel,
+        this.textModel
       )
       const kernel = matching.all.find(
-        (k) => k.id === viewState.selectedKernelId,
+        (k) => k.id === viewState.selectedKernelId
       )
       // Selected kernel may have already been picked prior to the view state loading
       // If so, don't overwrite it with the saved kernel.
       if (kernel && !matching.selected) {
         this.notebookKernelService.selectKernelForNotebook(
           kernel,
-          this.textModel,
+          this.textModel
         )
       }
     }
@@ -2479,14 +2479,14 @@ export class NotebookEditorWidget
         (this._notebookTopToolbar?.useGlobalToolbar
           ? /** Toolbar height */ 26
           : 0),
-      0,
+      0
     )
   }
 
   layout(
     dimension: DOM.Dimension,
     shadowElement?: HTMLElement,
-    position?: DOM.IDomPosition,
+    position?: DOM.IDomPosition
   ): void {
     if (!shadowElement && this._shadowElementViewInfo === null) {
       this._dimension = dimension
@@ -2558,7 +2558,7 @@ export class NotebookEditorWidget
     this._viewContext?.eventDispatcher.emit([
       new NotebookLayoutChangedEvent(
         { width: true, fontInfo: true },
-        this.getLayoutInfo(),
+        this.getLayoutInfo()
       ),
     ])
   }
@@ -2566,7 +2566,7 @@ export class NotebookEditorWidget
   private updateShadowElement(
     shadowElement: HTMLElement,
     dimension?: IDimension,
-    position?: DOM.IDomPosition,
+    position?: DOM.IDomPosition
   ) {
     this._shadowElement = shadowElement
     if (dimension && position) {
@@ -2590,7 +2590,7 @@ export class NotebookEditorWidget
 
   private layoutContainerOverShadowElement(
     dimension?: DOM.Dimension,
-    position?: DOM.IDomPosition,
+    position?: DOM.IDomPosition
   ): void {
     if (dimension && position) {
       this._overlayContainer.style.top = `${position.top}px`
@@ -2847,63 +2847,63 @@ export class NotebookEditorWidget
 
   async revealLineInViewAsync(
     cell: ICellViewModel,
-    line: number,
+    line: number
   ): Promise<void> {
     return this._list.revealRangeInCell(
       cell,
       new Range(line, 1, line, 1),
-      CellRevealRangeType.Default,
+      CellRevealRangeType.Default
     )
   }
 
   async revealLineInCenterAsync(
     cell: ICellViewModel,
-    line: number,
+    line: number
   ): Promise<void> {
     return this._list.revealRangeInCell(
       cell,
       new Range(line, 1, line, 1),
-      CellRevealRangeType.Center,
+      CellRevealRangeType.Center
     )
   }
 
   async revealLineInCenterIfOutsideViewportAsync(
     cell: ICellViewModel,
-    line: number,
+    line: number
   ): Promise<void> {
     return this._list.revealRangeInCell(
       cell,
       new Range(line, 1, line, 1),
-      CellRevealRangeType.CenterIfOutsideViewport,
+      CellRevealRangeType.CenterIfOutsideViewport
     )
   }
 
   async revealRangeInViewAsync(
     cell: ICellViewModel,
-    range: Selection | Range,
+    range: Selection | Range
   ): Promise<void> {
     return this._list.revealRangeInCell(
       cell,
       range,
-      CellRevealRangeType.Default,
+      CellRevealRangeType.Default
     )
   }
 
   async revealRangeInCenterAsync(
     cell: ICellViewModel,
-    range: Selection | Range,
+    range: Selection | Range
   ): Promise<void> {
     return this._list.revealRangeInCell(cell, range, CellRevealRangeType.Center)
   }
 
   async revealRangeInCenterIfOutsideViewportAsync(
     cell: ICellViewModel,
-    range: Selection | Range,
+    range: Selection | Range
   ): Promise<void> {
     return this._list.revealRangeInCell(
       cell,
       range,
-      CellRevealRangeType.CenterIfOutsideViewport,
+      CellRevealRangeType.CenterIfOutsideViewport
     )
   }
 
@@ -2937,11 +2937,11 @@ export class NotebookEditorWidget
 
   getCellRangeFromViewRange(
     startIndex: number,
-    endIndex: number,
+    endIndex: number
   ): ICellRange | undefined {
     return this._listViewInfoAccessor.getCellRangeFromViewRange(
       startIndex,
-      endIndex,
+      endIndex
     )
   }
 
@@ -2967,7 +2967,7 @@ export class NotebookEditorWidget
 
   deltaCellDecorations(
     oldDecorations: string[],
-    newDecorations: INotebookDeltaDecoration[],
+    newDecorations: INotebookDeltaDecoration[]
   ): string[] {
     const ret =
       this.viewModel?.deltaCellDecorations(oldDecorations, newDecorations) || []
@@ -2978,13 +2978,13 @@ export class NotebookEditorWidget
   deltaCellContainerClassNames(
     cellId: string,
     added: string[],
-    removed: string[],
+    removed: string[]
   ) {
     this._webview?.deltaCellContainerClassNames(cellId, added, removed)
   }
 
   changeModelDecorations<T>(
-    callback: (changeAccessor: IModelDecorationsChangeAccessor) => T,
+    callback: (changeAccessor: IModelDecorationsChangeAccessor) => T
   ): T | null {
     return this.viewModel?.changeModelDecorations<T>(callback) || null
   }
@@ -2993,7 +2993,7 @@ export class NotebookEditorWidget
 
   //#region View Zones
   changeViewZones(
-    callback: (accessor: INotebookViewZoneChangeAccessor) => void,
+    callback: (accessor: INotebookViewZoneChangeAccessor) => void
   ): void {
     this._list.changeViewZones(callback)
   }
@@ -3006,7 +3006,7 @@ export class NotebookEditorWidget
       return
     }
     const { selected } = this.notebookKernelService.getMatchingKernel(
-      this.textModel,
+      this.textModel
     )
     if (!this._webview?.isResolved()) {
       await this._resolveWebview()
@@ -3030,7 +3030,7 @@ export class NotebookEditorWidget
     }
     return this.notebookExecutionService.cancelNotebookCellHandles(
       this.textModel,
-      Array.from(cells).map((cell) => cell.handle),
+      Array.from(cells).map((cell) => cell.handle)
     )
   }
 
@@ -3038,7 +3038,7 @@ export class NotebookEditorWidget
     if (!this.viewModel || !this.hasModel()) {
       this.logService.info(
         "notebookEditorWidget",
-        "No NotebookViewModel, cannot execute cells",
+        "No NotebookViewModel, cannot execute cells"
       )
       return
     }
@@ -3048,7 +3048,7 @@ export class NotebookEditorWidget
     return this.notebookExecutionService.executeNotebookCells(
       this.textModel,
       Array.from(cells).map((c) => c.model),
-      this.scopedContextKeyService,
+      this.scopedContextKeyService
     )
   }
 
@@ -3060,7 +3060,7 @@ export class NotebookEditorWidget
   async layoutNotebookCell(
     cell: ICellViewModel,
     height: number,
-    context?: CellLayoutContext,
+    context?: CellLayoutContext
   ): Promise<void> {
     this._debug("layout cell", cell.handle, height)
     const viewIndex = this._list.getViewIndex(cell)
@@ -3111,7 +3111,7 @@ export class NotebookEditorWidget
           return this._list.updateElementHeight2(
             cell,
             height,
-            Math.min(cellIndex + 1, this.getLength() - 1),
+            Math.min(cellIndex + 1, this.getLength() - 1)
           )
         }
       }
@@ -3123,7 +3123,7 @@ export class NotebookEditorWidget
     if (this._list.inRenderingTransaction) {
       const layoutDisposable = DOM.scheduleAtNextAnimationFrame(
         DOM.getWindow(this.getDomNode()),
-        doLayout,
+        doLayout
       )
 
       this._pendingLayouts?.set(
@@ -3131,7 +3131,7 @@ export class NotebookEditorWidget
         toDisposable(() => {
           layoutDisposable.dispose()
           deferred.complete(undefined)
-        }),
+        })
       )
     } else {
       doLayout()
@@ -3152,34 +3152,34 @@ export class NotebookEditorWidget
 
   private _toggleNotebookCellSelection(
     selectedCell: ICellViewModel,
-    selectFromPrevious: boolean,
+    selectFromPrevious: boolean
   ): void {
     const currentSelections = this._list.getSelectedElements()
     const isSelected = currentSelections.includes(selectedCell)
 
     const previousSelection = selectFromPrevious
-      ? (currentSelections[currentSelections.length - 1] ?? selectedCell)
+      ? currentSelections[currentSelections.length - 1] ?? selectedCell
       : selectedCell
     const selectedIndex = this._list.getViewIndex(selectedCell)!
     const previousIndex = this._list.getViewIndex(previousSelection)!
 
     const cellsInSelectionRange = this.getCellsInViewRange(
       selectedIndex,
-      previousIndex,
+      previousIndex
     )
     if (isSelected) {
       // Deselect
       this._list.selectElements(
         currentSelections.filter(
-          (current) => !cellsInSelectionRange.includes(current),
-        ),
+          (current) => !cellsInSelectionRange.includes(current)
+        )
       )
     } else {
       // Add to selection
       this.focusElement(selectedCell)
       this._list.selectElements([
         ...currentSelections.filter(
-          (current) => !cellsInSelectionRange.includes(current),
+          (current) => !cellsInSelectionRange.includes(current)
         ),
         ...cellsInSelectionRange,
       ])
@@ -3188,7 +3188,7 @@ export class NotebookEditorWidget
 
   private getCellsInViewRange(
     fromInclusive: number,
-    toInclusive: number,
+    toInclusive: number
   ): ICellViewModel[] {
     const selectedCellsInRange: ICellViewModel[] = []
     for (let index = 0; index < this._list.length; ++index) {
@@ -3208,7 +3208,7 @@ export class NotebookEditorWidget
   async focusNotebookCell(
     cell: ICellViewModel,
     focusItem: "editor" | "container" | "output",
-    options?: IFocusNotebookCellOptions,
+    options?: IFocusNotebookCellOptions
   ) {
     if (this._isDisposed) {
       return
@@ -3242,8 +3242,8 @@ export class NotebookEditorWidget
               cell,
               Range.fromPositions(
                 firstSelectionPosition,
-                firstSelectionPosition,
-              ),
+                firstSelectionPosition
+              )
             )
           } else {
             await this.revealInView(cell)
@@ -3262,13 +3262,13 @@ export class NotebookEditorWidget
       }
 
       const firstOutputId = cell.outputsViewModels.find(
-        (o) => o.model.alternativeOutputId,
+        (o) => o.model.alternativeOutputId
       )?.model.alternativeOutputId
       const focusElementId = options?.outputId ?? firstOutputId ?? cell.id
       this._webview.focusOutput(
         focusElementId,
         options?.altOutputId,
-        options?.outputWebviewFocused || this._webviewFocused,
+        options?.outputWebviewFocused || this._webviewFocused
       )
 
       cell.updateEditState(CellEditState.Preview, "focusNotebookCell")
@@ -3318,7 +3318,7 @@ export class NotebookEditorWidget
 
   async focusNextNotebookCell(
     cell: ICellViewModel,
-    focusItem: "editor" | "container" | "output",
+    focusItem: "editor" | "container" | "output"
   ) {
     const idx = this.viewModel?.getCellIndex(cell)
     if (typeof idx !== "number") {
@@ -3346,7 +3346,7 @@ export class NotebookEditorWidget
     for (const output of outputs.slice(0, outputDisplayLimit)) {
       const [mimeTypes, pick] = output.resolveMimeTypes(
         this.textModel!,
-        undefined,
+        undefined
       )
       if (
         !mimeTypes.find((mimeType) => mimeType.isTrusted) ||
@@ -3362,7 +3362,7 @@ export class NotebookEditorWidget
       }
 
       const renderer = this._notebookService.getRendererInfo(
-        pickedMimeTypeRenderer.rendererId,
+        pickedMimeTypeRenderer.rendererId
       )
 
       if (!renderer) {
@@ -3381,12 +3381,12 @@ export class NotebookEditorWidget
           this._register(
             Event.any(
               this.onDidRenderOutput,
-              this.onDidRemoveOutput,
+              this.onDidRemoveOutput
             )((e) => {
               if (e.model === result.source.model) {
                 resolve()
               }
-            }),
+            })
           )
         })
         this.createOutput(viewCell, result, 0, false)
@@ -3436,7 +3436,7 @@ export class NotebookEditorWidget
     token: CancellationToken,
     skipWarmup: boolean = false,
     shouldGetSearchPreviewInfo = false,
-    ownerID?: string,
+    ownerID?: string
   ): Promise<CellFindMatchWithIndex[]> {
     if (!this._notebookViewModel) {
       return []
@@ -3479,7 +3479,7 @@ export class NotebookEditorWidget
         .filter((range) => !!range)
       const selectedIndexes = cellRangesToIndexes(selectedRanges ?? [])
       const findIds: string[] = selectedIndexes.map<string>(
-        (index) => this._notebookViewModel?.viewCells[index].id ?? "",
+        (index) => this._notebookViewModel?.viewCells[index].id ?? ""
       )
 
       const webviewMatches = await this._webview.find(query, {
@@ -3499,7 +3499,7 @@ export class NotebookEditorWidget
       // attach webview matches to model find matches
       webviewMatches.forEach((match) => {
         const cell = this._notebookViewModel!.viewCells.find(
-          (cell) => cell.id === match.cellId,
+          (cell) => cell.id === match.cellId
         )
 
         if (!cell) {
@@ -3535,13 +3535,13 @@ export class NotebookEditorWidget
         } else {
           matchMap[match.cellId] = new CellFindMatchModel(
             this._notebookViewModel!.viewCells.find(
-              (cell) => cell.id === match.cellId,
+              (cell) => cell.id === match.cellId
             )!,
             this._notebookViewModel!.viewCells.findIndex(
-              (cell) => cell.id === match.cellId,
+              (cell) => cell.id === match.cellId
             )!,
             [],
-            [match],
+            [match]
           )
         }
       })
@@ -3555,8 +3555,8 @@ export class NotebookEditorWidget
             cell,
             index,
             matchMap[cell.id].contentMatches,
-            matchMap[cell.id].webviewMatches,
-          ),
+            matchMap[cell.id].webviewMatches
+          )
         )
       }
     })
@@ -3566,7 +3566,7 @@ export class NotebookEditorWidget
 
   async findHighlightCurrent(
     matchIndex: number,
-    ownerID?: string,
+    ownerID?: string
   ): Promise<number> {
     if (!this._webview) {
       return 0
@@ -3574,13 +3574,13 @@ export class NotebookEditorWidget
 
     return this._webview?.findHighlightCurrent(
       matchIndex,
-      ownerID ?? this.getId(),
+      ownerID ?? this.getId()
     )
   }
 
   async findUnHighlightCurrent(
     matchIndex: number,
-    ownerID?: string,
+    ownerID?: string
   ): Promise<void> {
     if (!this._webview) {
       return
@@ -3588,7 +3588,7 @@ export class NotebookEditorWidget
 
     return this._webview?.findUnHighlightCurrent(
       matchIndex,
-      ownerID ?? this.getId(),
+      ownerID ?? this.getId()
     )
   }
 
@@ -3662,7 +3662,7 @@ export class NotebookEditorWidget
     const modelIndex = this.viewModel!.getCellIndex(cell)
     const foldedRanges = this.viewModel!.getHiddenRanges()
     return foldedRanges.some(
-      (range) => modelIndex >= range.start && modelIndex <= range.end,
+      (range) => modelIndex >= range.start && modelIndex <= range.end
     )
   }
 
@@ -3715,7 +3715,7 @@ export class NotebookEditorWidget
 
     // Only show selection when there is more than 1 cell selected
     await this._webview?.updateMarkupPreviewSelections(
-      selectedCells.length > 1 ? selectedCells : [],
+      selectedCells.length > 1 ? selectedCells : []
     )
   }
 
@@ -3723,7 +3723,7 @@ export class NotebookEditorWidget
     cell: CodeCellViewModel,
     output: IInsetRenderOutput,
     offset: number,
-    createWhenIdle: boolean,
+    createWhenIdle: boolean
   ): Promise<void> {
     this._insetModifyQueueByOutputId.queue(
       output.source.model.outputId,
@@ -3750,7 +3750,7 @@ export class NotebookEditorWidget
 
         const webviewTop = parseInt(
           this._list.webviewElement.domNode.style.top,
-          10,
+          10
         )
         const top = !!webviewTop ? 0 - webviewTop : 0
 
@@ -3772,7 +3772,7 @@ export class NotebookEditorWidget
               },
               output,
               cellTop,
-              offset,
+              offset
             )
           } else {
             this._webview.createOutput(
@@ -3784,7 +3784,7 @@ export class NotebookEditorWidget
               },
               output,
               cellTop,
-              offset,
+              offset
             )
           }
         } else if (
@@ -3798,7 +3798,7 @@ export class NotebookEditorWidget
             { cellId: cell.id, cellHandle: cell.handle, cellUri: cell.uri },
             output,
             cellTop,
-            offset,
+            offset
           )
         } else if (existingOutput.versionId !== output.source.model.versionId) {
           this._webview.updateOutput(
@@ -3810,7 +3810,7 @@ export class NotebookEditorWidget
             },
             output,
             cellTop,
-            offset,
+            offset
           )
         } else {
           const outputIndex = cell.outputsViewModels.indexOf(output.source)
@@ -3825,17 +3825,17 @@ export class NotebookEditorWidget
                 forceDisplay: !cell.isOutputCollapsed,
               },
             ],
-            [],
+            []
           )
         }
-      },
+      }
     )
   }
 
   async updateOutput(
     cell: CodeCellViewModel,
     output: IInsetRenderOutput,
-    offset: number,
+    offset: number
   ): Promise<void> {
     this._insetModifyQueueByOutputId.queue(
       output.source.model.outputId,
@@ -3862,7 +3862,7 @@ export class NotebookEditorWidget
 
         const webviewTop = parseInt(
           this._list.webviewElement.domNode.style.top,
-          10,
+          10
         )
         const top = !!webviewTop ? 0 - webviewTop : 0
 
@@ -3871,9 +3871,9 @@ export class NotebookEditorWidget
           { cellId: cell.id, cellHandle: cell.handle, cellUri: cell.uri },
           output,
           cellTop,
-          offset,
+          offset
         )
-      },
+      }
     )
   }
 
@@ -3931,7 +3931,7 @@ export class NotebookEditorWidget
   getCellByInfo(cellInfo: ICommonCellInfo): ICellViewModel {
     const { cellHandle } = cellInfo
     return this.viewModel?.viewCells.find(
-      (vc) => vc.handle === cellHandle,
+      (vc) => vc.handle === cellHandle
     ) as CodeCellViewModel
   }
 
@@ -3977,7 +3977,7 @@ export class NotebookEditorWidget
       }
 
       this.viewModel?.viewCells.find(
-        (cell) => cell.handle === value.cellInfo.cellHandle,
+        (cell) => cell.handle === value.cellInfo.cellHandle
       )
       const viewIndex = this._list.getViewIndex(cell)
 
@@ -4017,7 +4017,7 @@ export class NotebookEditorWidget
     if (markdownUpdateItems.length || updateItems.length) {
       this._debug(
         "_list.onDidChangeContentHeight/markdown",
-        markdownUpdateItems,
+        markdownUpdateItems
       )
       this._webview?.updateScrollTops(updateItems, markdownUpdateItems)
     }
@@ -4031,10 +4031,10 @@ export class NotebookEditorWidget
     output: ICellOutputViewModel,
     outputHeight: number,
     isInit: boolean,
-    source?: string,
+    source?: string
   ): void {
     const cell = this.viewModel?.viewCells.find(
-      (vc) => vc.handle === cellInfo.cellHandle,
+      (vc) => vc.handle === cellInfo.cellHandle
     )
     if (cell && cell instanceof CodeCellViewModel) {
       const outputIndex = cell.outputsViewModels.indexOf(output)
@@ -4056,7 +4056,7 @@ export class NotebookEditorWidget
   private _scheduleOutputHeightAck(
     cellInfo: ICommonCellInfo,
     outputId: string,
-    height: number,
+    height: number
   ) {
     const wasEmpty = this._pendingOutputHeightAcks.size === 0
     this._pendingOutputHeightAcks.set(outputId, {
@@ -4076,7 +4076,7 @@ export class NotebookEditorWidget
 
           this._pendingOutputHeightAcks.clear()
         },
-        -1,
+        -1
       ) // -1 priority because this depends on calls to layoutNotebookCell, and that may be called multiple times before this runs
     }
   }
@@ -4088,19 +4088,19 @@ export class NotebookEditorWidget
   private _updateMarkupCellHeight(
     cellId: string,
     height: number,
-    isInit: boolean,
+    isInit: boolean
   ) {
     const cell = this._getCellById(cellId)
     if (cell && cell instanceof MarkupCellViewModel) {
       const { bottomToolbarGap } =
         this._notebookOptions.computeBottomToolbarDimensions(
-          this.viewModel?.viewType,
+          this.viewModel?.viewType
         )
       this._debug(
         "updateMarkdownCellHeight",
         cell.handle,
         height + bottomToolbarGap,
-        isInit,
+        isInit
       )
       cell.renderedMarkdownHeight = height
     }
@@ -4108,7 +4108,7 @@ export class NotebookEditorWidget
 
   private _setMarkupCellEditState(
     cellId: string,
-    editState: CellEditState,
+    editState: CellEditState
   ): void {
     const cell = this._getCellById(cellId)
     if (cell instanceof MarkupCellViewModel) {
@@ -4119,7 +4119,7 @@ export class NotebookEditorWidget
 
   private _didStartDragMarkupCell(
     cellId: string,
-    event: { dragOffsetY: number },
+    event: { dragOffsetY: number }
   ): void {
     const cell = this._getCellById(cellId)
     if (cell instanceof MarkupCellViewModel) {
@@ -4128,14 +4128,14 @@ export class NotebookEditorWidget
         : 0
       this._dndController?.startExplicitDrag(
         cell,
-        event.dragOffsetY - webviewOffset,
+        event.dragOffsetY - webviewOffset
       )
     }
   }
 
   private _didDragMarkupCell(
     cellId: string,
-    event: { dragOffsetY: number },
+    event: { dragOffsetY: number }
   ): void {
     const cell = this._getCellById(cellId)
     if (cell instanceof MarkupCellViewModel) {
@@ -4148,7 +4148,7 @@ export class NotebookEditorWidget
 
   private _didDropMarkupCell(
     cellId: string,
-    event: { dragOffsetY: number; ctrlKey: boolean; altKey: boolean },
+    event: { dragOffsetY: number; ctrlKey: boolean; altKey: boolean }
   ): void {
     const cell = this._getCellById(cellId)
     if (cell instanceof MarkupCellViewModel) {
@@ -4178,7 +4178,7 @@ export class NotebookEditorWidget
     cellId: string,
     executionId: string,
     duration: number,
-    rendererId: string,
+    rendererId: string
   ): void {
     if (!this.hasModel()) {
       return
@@ -4209,7 +4209,7 @@ export class NotebookEditorWidget
         undefined,
         () => undefined,
         undefined,
-        false,
+        false
       )
     }
   }
@@ -4296,8 +4296,8 @@ export const notebookCellBorder = registerColor(
   },
   nls.localize(
     "notebook.cellBorderColor",
-    "The border color for notebook cells.",
-  ),
+    "The border color for notebook cells."
+  )
 )
 
 export const focusedEditorBorderColor = registerColor(
@@ -4310,8 +4310,8 @@ export const focusedEditorBorderColor = registerColor(
   },
   nls.localize(
     "notebook.focusedEditorBorder",
-    "The color of the notebook cell editor border.",
-  ),
+    "The color of the notebook cell editor border."
+  )
 )
 
 export const cellStatusIconSuccess = registerColor(
@@ -4324,8 +4324,8 @@ export const cellStatusIconSuccess = registerColor(
   },
   nls.localize(
     "notebookStatusSuccessIcon.foreground",
-    "The error icon color of notebook cells in the cell status bar.",
-  ),
+    "The error icon color of notebook cells in the cell status bar."
+  )
 )
 
 export const runningCellRulerDecorationColor = registerColor(
@@ -4338,8 +4338,8 @@ export const runningCellRulerDecorationColor = registerColor(
   },
   nls.localize(
     "notebookEditorOverviewRuler.runningCellForeground",
-    "The color of the running cell decoration in the notebook editor overview ruler.",
-  ),
+    "The color of the running cell decoration in the notebook editor overview ruler."
+  )
 )
 
 export const cellStatusIconError = registerColor(
@@ -4352,8 +4352,8 @@ export const cellStatusIconError = registerColor(
   },
   nls.localize(
     "notebookStatusErrorIcon.foreground",
-    "The error icon color of notebook cells in the cell status bar.",
-  ),
+    "The error icon color of notebook cells in the cell status bar."
+  )
 )
 
 export const cellStatusIconRunning = registerColor(
@@ -4366,8 +4366,8 @@ export const cellStatusIconRunning = registerColor(
   },
   nls.localize(
     "notebookStatusRunningIcon.foreground",
-    "The running icon color of notebook cells in the cell status bar.",
-  ),
+    "The running icon color of notebook cells in the cell status bar."
+  )
 )
 
 export const notebookOutputContainerBorderColor = registerColor(
@@ -4380,8 +4380,8 @@ export const notebookOutputContainerBorderColor = registerColor(
   },
   nls.localize(
     "notebook.outputContainerBorderColor",
-    "The border color of the notebook output container.",
-  ),
+    "The border color of the notebook output container."
+  )
 )
 
 export const notebookOutputContainerColor = registerColor(
@@ -4394,8 +4394,8 @@ export const notebookOutputContainerColor = registerColor(
   },
   nls.localize(
     "notebook.outputContainerBackgroundColor",
-    "The color of the notebook output container background.",
-  ),
+    "The color of the notebook output container background."
+  )
 )
 
 // TODO@rebornix currently also used for toolbar border, if we keep all of this, pick a generic name
@@ -4409,8 +4409,8 @@ export const CELL_TOOLBAR_SEPERATOR = registerColor(
   },
   nls.localize(
     "notebook.cellToolbarSeparator",
-    "The color of the separator in the cell bottom toolbar",
-  ),
+    "The color of the separator in the cell bottom toolbar"
+  )
 )
 
 export const focusedCellBackground = registerColor(
@@ -4423,8 +4423,8 @@ export const focusedCellBackground = registerColor(
   },
   nls.localize(
     "focusedCellBackground",
-    "The background color of a cell when the cell is focused.",
-  ),
+    "The background color of a cell when the cell is focused."
+  )
 )
 
 export const selectedCellBackground = registerColor(
@@ -4437,8 +4437,8 @@ export const selectedCellBackground = registerColor(
   },
   nls.localize(
     "selectedCellBackground",
-    "The background color of a cell when the cell is selected.",
-  ),
+    "The background color of a cell when the cell is selected."
+  )
 )
 
 export const cellHoverBackground = registerColor(
@@ -4451,8 +4451,8 @@ export const cellHoverBackground = registerColor(
   },
   nls.localize(
     "notebook.cellHoverBackground",
-    "The background color of a cell when the cell is hovered.",
-  ),
+    "The background color of a cell when the cell is hovered."
+  )
 )
 
 export const selectedCellBorder = registerColor(
@@ -4465,8 +4465,8 @@ export const selectedCellBorder = registerColor(
   },
   nls.localize(
     "notebook.selectedCellBorder",
-    "The color of the cell's top and bottom border when the cell is selected but not focused.",
-  ),
+    "The color of the cell's top and bottom border when the cell is selected but not focused."
+  )
 )
 
 export const inactiveSelectedCellBorder = registerColor(
@@ -4479,8 +4479,8 @@ export const inactiveSelectedCellBorder = registerColor(
   },
   nls.localize(
     "notebook.inactiveSelectedCellBorder",
-    "The color of the cell's borders when multiple cells are selected.",
-  ),
+    "The color of the cell's borders when multiple cells are selected."
+  )
 )
 
 export const focusedCellBorder = registerColor(
@@ -4493,8 +4493,8 @@ export const focusedCellBorder = registerColor(
   },
   nls.localize(
     "notebook.focusedCellBorder",
-    "The color of the cell's focus indicator borders when the cell is focused.",
-  ),
+    "The color of the cell's focus indicator borders when the cell is focused."
+  )
 )
 
 export const inactiveFocusedCellBorder = registerColor(
@@ -4507,8 +4507,8 @@ export const inactiveFocusedCellBorder = registerColor(
   },
   nls.localize(
     "notebook.inactiveFocusedCellBorder",
-    "The color of the cell's top and bottom border when a cell is focused while the primary focus is outside of the editor.",
-  ),
+    "The color of the cell's top and bottom border when a cell is focused while the primary focus is outside of the editor."
+  )
 )
 
 export const cellStatusBarItemHover = registerColor(
@@ -4521,8 +4521,8 @@ export const cellStatusBarItemHover = registerColor(
   },
   nls.localize(
     "notebook.cellStatusBarItemHoverBackground",
-    "The background color of notebook cell status bar items.",
-  ),
+    "The background color of notebook cell status bar items."
+  )
 )
 
 export const cellInsertionIndicator = registerColor(
@@ -4535,8 +4535,8 @@ export const cellInsertionIndicator = registerColor(
   },
   nls.localize(
     "notebook.cellInsertionIndicator",
-    "The color of the notebook cell insertion indicator.",
-  ),
+    "The color of the notebook cell insertion indicator."
+  )
 )
 
 export const listScrollbarSliderBackground = registerColor(
@@ -4549,8 +4549,8 @@ export const listScrollbarSliderBackground = registerColor(
   },
   nls.localize(
     "notebookScrollbarSliderBackground",
-    "Notebook scrollbar slider background color.",
-  ),
+    "Notebook scrollbar slider background color."
+  )
 )
 
 export const listScrollbarSliderHoverBackground = registerColor(
@@ -4563,8 +4563,8 @@ export const listScrollbarSliderHoverBackground = registerColor(
   },
   nls.localize(
     "notebookScrollbarSliderHoverBackground",
-    "Notebook scrollbar slider background color when hovering.",
-  ),
+    "Notebook scrollbar slider background color when hovering."
+  )
 )
 
 export const listScrollbarSliderActiveBackground = registerColor(
@@ -4577,8 +4577,8 @@ export const listScrollbarSliderActiveBackground = registerColor(
   },
   nls.localize(
     "notebookScrollbarSliderActiveBackground",
-    "Notebook scrollbar slider background color when clicked on.",
-  ),
+    "Notebook scrollbar slider background color when clicked on."
+  )
 )
 
 export const cellSymbolHighlight = registerColor(
@@ -4591,8 +4591,8 @@ export const cellSymbolHighlight = registerColor(
   },
   nls.localize(
     "notebook.symbolHighlightBackground",
-    "Background color of highlighted cell",
-  ),
+    "Background color of highlighted cell"
+  )
 )
 
 export const cellEditorBackground = registerColor(
@@ -4603,10 +4603,7 @@ export const cellEditorBackground = registerColor(
     hcDark: null,
     hcLight: null,
   },
-  nls.localize(
-    "notebook.cellEditorBackground",
-    "Cell editor background color.",
-  ),
+  nls.localize("notebook.cellEditorBackground", "Cell editor background color.")
 )
 
 const notebookEditorBackground = registerColor(
@@ -4617,5 +4614,5 @@ const notebookEditorBackground = registerColor(
     hcDark: null,
     hcLight: null,
   },
-  nls.localize("notebook.editorBackground", "Notebook background color."),
+  nls.localize("notebook.editorBackground", "Notebook background color.")
 )

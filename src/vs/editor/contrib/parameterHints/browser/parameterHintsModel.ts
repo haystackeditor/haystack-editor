@@ -9,394 +9,336 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import {
-  CancelablePromise,
-  createCancelablePromise,
-  Delayer,
-} from "vs/base/common/async"
-import { onUnexpectedError } from "vs/base/common/errors"
-import { Emitter } from "vs/base/common/event"
-import { Disposable, MutableDisposable } from "vs/base/common/lifecycle"
-import { ICodeEditor } from "vs/editor/browser/editorBrowser"
-import { EditorOption } from "vs/editor/common/config/editorOptions"
-import { CharacterSet } from "vs/editor/common/core/characterClassifier"
-import { ICursorSelectionChangedEvent } from "vs/editor/common/cursorEvents"
-import { LanguageFeatureRegistry } from "vs/editor/common/languageFeatureRegistry"
-import * as languages from "vs/editor/common/languages"
-import { provideSignatureHelp } from "vs/editor/contrib/parameterHints/browser/provideSignatureHelp"
+import { CancelablePromise, createCancelablePromise, Delayer } from 'vs/base/common/async';
+import { onUnexpectedError } from 'vs/base/common/errors';
+import { Emitter } from 'vs/base/common/event';
+import { Disposable, MutableDisposable } from 'vs/base/common/lifecycle';
+import { ICodeEditor } from 'vs/editor/browser/editorBrowser';
+import { EditorOption } from 'vs/editor/common/config/editorOptions';
+import { CharacterSet } from 'vs/editor/common/core/characterClassifier';
+import { ICursorSelectionChangedEvent } from 'vs/editor/common/cursorEvents';
+import { LanguageFeatureRegistry } from 'vs/editor/common/languageFeatureRegistry';
+import * as languages from 'vs/editor/common/languages';
+import { provideSignatureHelp } from 'vs/editor/contrib/parameterHints/browser/provideSignatureHelp';
 
 export interface TriggerContext {
-  readonly triggerKind: languages.SignatureHelpTriggerKind
-  readonly triggerCharacter?: string
+	readonly triggerKind: languages.SignatureHelpTriggerKind;
+	readonly triggerCharacter?: string;
 }
 
 namespace ParameterHintState {
-  export const enum Type {
-    Default,
-    Active,
-    Pending,
-  }
+	export const enum Type {
+		Default,
+		Active,
+		Pending,
+	}
 
-  export const Default = { type: Type.Default } as const
+	export const Default = { type: Type.Default } as const;
 
-  export class Pending {
-    readonly type = Type.Pending
-    constructor(
-      readonly request: CancelablePromise<
-        languages.SignatureHelpResult | undefined | null
-      >,
-      readonly previouslyActiveHints: languages.SignatureHelp | undefined,
-    ) {}
-  }
+	export class Pending {
+		readonly type = Type.Pending;
+		constructor(
+			readonly request: CancelablePromise<languages.SignatureHelpResult | undefined | null>,
+			readonly previouslyActiveHints: languages.SignatureHelp | undefined,
+		) { }
+	}
 
-  export class Active {
-    readonly type = Type.Active
-    constructor(readonly hints: languages.SignatureHelp) {}
-  }
+	export class Active {
+		readonly type = Type.Active;
+		constructor(
+			readonly hints: languages.SignatureHelp
+		) { }
+	}
 
-  export type State = typeof Default | Pending | Active
+	export type State = typeof Default | Pending | Active;
 }
 
 export class ParameterHintsModel extends Disposable {
-  private static readonly DEFAULT_DELAY = 120 // ms
 
-  private readonly _onChangedHints = this._register(
-    new Emitter<languages.SignatureHelp | undefined>(),
-  )
-  public readonly onChangedHints = this._onChangedHints.event
+	private static readonly DEFAULT_DELAY = 120; // ms
 
-  private readonly editor: ICodeEditor
-  private readonly providers: LanguageFeatureRegistry<languages.SignatureHelpProvider>
+	private readonly _onChangedHints = this._register(new Emitter<languages.SignatureHelp | undefined>());
+	public readonly onChangedHints = this._onChangedHints.event;
 
-  private triggerOnType = false
-  private _state: ParameterHintState.State = ParameterHintState.Default
-  private _pendingTriggers: TriggerContext[] = []
+	private readonly editor: ICodeEditor;
+	private readonly providers: LanguageFeatureRegistry<languages.SignatureHelpProvider>;
 
-  private readonly _lastSignatureHelpResult = this._register(
-    new MutableDisposable<languages.SignatureHelpResult>(),
-  )
-  private readonly triggerChars = new CharacterSet()
-  private readonly retriggerChars = new CharacterSet()
+	private triggerOnType = false;
+	private _state: ParameterHintState.State = ParameterHintState.Default;
+	private _pendingTriggers: TriggerContext[] = [];
 
-  private readonly throttledDelayer: Delayer<boolean>
-  private triggerId = 0
+	private readonly _lastSignatureHelpResult = this._register(new MutableDisposable<languages.SignatureHelpResult>());
+	private readonly triggerChars = new CharacterSet();
+	private readonly retriggerChars = new CharacterSet();
 
-  constructor(
-    editor: ICodeEditor,
-    providers: LanguageFeatureRegistry<languages.SignatureHelpProvider>,
-    delay: number = ParameterHintsModel.DEFAULT_DELAY,
-  ) {
-    super()
+	private readonly throttledDelayer: Delayer<boolean>;
+	private triggerId = 0;
 
-    this.editor = editor
-    this.providers = providers
+	constructor(
+		editor: ICodeEditor,
+		providers: LanguageFeatureRegistry<languages.SignatureHelpProvider>,
+		delay: number = ParameterHintsModel.DEFAULT_DELAY
+	) {
+		super();
 
-    this.throttledDelayer = new Delayer(delay)
+		this.editor = editor;
+		this.providers = providers;
 
-    this._register(this.editor.onDidBlurEditorWidget(() => this.cancel()))
-    this._register(
-      this.editor.onDidChangeConfiguration(() =>
-        this.onEditorConfigurationChange(),
-      ),
-    )
-    this._register(this.editor.onDidChangeModel((e) => this.onModelChanged()))
-    this._register(
-      this.editor.onDidChangeModelLanguage((_) => this.onModelChanged()),
-    )
-    this._register(
-      this.editor.onDidChangeCursorSelection((e) => this.onCursorChange(e)),
-    )
-    this._register(
-      this.editor.onDidChangeModelContent((e) => this.onModelContentChange()),
-    )
-    this._register(this.providers.onDidChange(this.onModelChanged, this))
-    this._register(this.editor.onDidType((text) => this.onDidType(text)))
+		this.throttledDelayer = new Delayer(delay);
 
-    this.onEditorConfigurationChange()
-    this.onModelChanged()
-  }
+		this._register(this.editor.onDidBlurEditorWidget(() => this.cancel()));
+		this._register(this.editor.onDidChangeConfiguration(() => this.onEditorConfigurationChange()));
+		this._register(this.editor.onDidChangeModel(e => this.onModelChanged()));
+		this._register(this.editor.onDidChangeModelLanguage(_ => this.onModelChanged()));
+		this._register(this.editor.onDidChangeCursorSelection(e => this.onCursorChange(e)));
+		this._register(this.editor.onDidChangeModelContent(e => this.onModelContentChange()));
+		this._register(this.providers.onDidChange(this.onModelChanged, this));
+		this._register(this.editor.onDidType(text => this.onDidType(text)));
 
-  private get state() {
-    return this._state
-  }
-  private set state(value: ParameterHintState.State) {
-    if (this._state.type === ParameterHintState.Type.Pending) {
-      this._state.request.cancel()
-    }
-    this._state = value
-  }
+		this.onEditorConfigurationChange();
+		this.onModelChanged();
+	}
 
-  cancel(silent: boolean = false): void {
-    this.state = ParameterHintState.Default
+	private get state() { return this._state; }
+	private set state(value: ParameterHintState.State) {
+		if (this._state.type === ParameterHintState.Type.Pending) {
+			this._state.request.cancel();
+		}
+		this._state = value;
+	}
 
-    this.throttledDelayer.cancel()
+	cancel(silent: boolean = false): void {
+		this.state = ParameterHintState.Default;
 
-    if (!silent) {
-      this._onChangedHints.fire(undefined)
-    }
-  }
+		this.throttledDelayer.cancel();
 
-  trigger(context: TriggerContext, delay?: number): void {
-    const model = this.editor.getModel()
-    if (!model || !this.providers.has(model)) {
-      return
-    }
+		if (!silent) {
+			this._onChangedHints.fire(undefined);
+		}
+	}
 
-    const triggerId = ++this.triggerId
+	trigger(context: TriggerContext, delay?: number): void {
+		const model = this.editor.getModel();
+		if (!model || !this.providers.has(model)) {
+			return;
+		}
 
-    this._pendingTriggers.push(context)
-    this.throttledDelayer
-      .trigger(() => {
-        return this.doTrigger(triggerId)
-      }, delay)
-      .catch(onUnexpectedError)
-  }
+		const triggerId = ++this.triggerId;
 
-  public next(): void {
-    if (this.state.type !== ParameterHintState.Type.Active) {
-      return
-    }
+		this._pendingTriggers.push(context);
+		this.throttledDelayer.trigger(() => {
+			return this.doTrigger(triggerId);
+		}, delay)
+			.catch(onUnexpectedError);
+	}
 
-    const length = this.state.hints.signatures.length
-    const activeSignature = this.state.hints.activeSignature
-    const last = activeSignature % length === length - 1
-    const cycle = this.editor.getOption(EditorOption.parameterHints).cycle
+	public next(): void {
+		if (this.state.type !== ParameterHintState.Type.Active) {
+			return;
+		}
 
-    // If there is only one signature, or we're on last signature of list
-    if ((length < 2 || last) && !cycle) {
-      this.cancel()
-      return
-    }
+		const length = this.state.hints.signatures.length;
+		const activeSignature = this.state.hints.activeSignature;
+		const last = (activeSignature % length) === (length - 1);
+		const cycle = this.editor.getOption(EditorOption.parameterHints).cycle;
 
-    this.updateActiveSignature(last && cycle ? 0 : activeSignature + 1)
-  }
+		// If there is only one signature, or we're on last signature of list
+		if ((length < 2 || last) && !cycle) {
+			this.cancel();
+			return;
+		}
 
-  public previous(): void {
-    if (this.state.type !== ParameterHintState.Type.Active) {
-      return
-    }
+		this.updateActiveSignature(last && cycle ? 0 : activeSignature + 1);
+	}
 
-    const length = this.state.hints.signatures.length
-    const activeSignature = this.state.hints.activeSignature
-    const first = activeSignature === 0
-    const cycle = this.editor.getOption(EditorOption.parameterHints).cycle
+	public previous(): void {
+		if (this.state.type !== ParameterHintState.Type.Active) {
+			return;
+		}
 
-    // If there is only one signature, or we're on first signature of list
-    if ((length < 2 || first) && !cycle) {
-      this.cancel()
-      return
-    }
+		const length = this.state.hints.signatures.length;
+		const activeSignature = this.state.hints.activeSignature;
+		const first = activeSignature === 0;
+		const cycle = this.editor.getOption(EditorOption.parameterHints).cycle;
 
-    this.updateActiveSignature(
-      first && cycle ? length - 1 : activeSignature - 1,
-    )
-  }
+		// If there is only one signature, or we're on first signature of list
+		if ((length < 2 || first) && !cycle) {
+			this.cancel();
+			return;
+		}
 
-  private updateActiveSignature(activeSignature: number) {
-    if (this.state.type !== ParameterHintState.Type.Active) {
-      return
-    }
+		this.updateActiveSignature(first && cycle ? length - 1 : activeSignature - 1);
+	}
 
-    this.state = new ParameterHintState.Active({
-      ...this.state.hints,
-      activeSignature,
-    })
-    this._onChangedHints.fire(this.state.hints)
-  }
+	private updateActiveSignature(activeSignature: number) {
+		if (this.state.type !== ParameterHintState.Type.Active) {
+			return;
+		}
 
-  private async doTrigger(triggerId: number): Promise<boolean> {
-    const isRetrigger =
-      this.state.type === ParameterHintState.Type.Active ||
-      this.state.type === ParameterHintState.Type.Pending
-    const activeSignatureHelp = this.getLastActiveHints()
-    this.cancel(true)
+		this.state = new ParameterHintState.Active({ ...this.state.hints, activeSignature });
+		this._onChangedHints.fire(this.state.hints);
+	}
 
-    if (this._pendingTriggers.length === 0) {
-      return false
-    }
+	private async doTrigger(triggerId: number): Promise<boolean> {
+		const isRetrigger = this.state.type === ParameterHintState.Type.Active || this.state.type === ParameterHintState.Type.Pending;
+		const activeSignatureHelp = this.getLastActiveHints();
+		this.cancel(true);
 
-    const context: TriggerContext =
-      this._pendingTriggers.reduce(mergeTriggerContexts)
-    this._pendingTriggers = []
+		if (this._pendingTriggers.length === 0) {
+			return false;
+		}
 
-    const triggerContext = {
-      triggerKind: context.triggerKind,
-      triggerCharacter: context.triggerCharacter,
-      isRetrigger: isRetrigger,
-      activeSignatureHelp: activeSignatureHelp,
-    }
+		const context: TriggerContext = this._pendingTriggers.reduce(mergeTriggerContexts);
+		this._pendingTriggers = [];
 
-    if (!this.editor.hasModel()) {
-      return false
-    }
+		const triggerContext = {
+			triggerKind: context.triggerKind,
+			triggerCharacter: context.triggerCharacter,
+			isRetrigger: isRetrigger,
+			activeSignatureHelp: activeSignatureHelp
+		};
 
-    const model = this.editor.getModel()
-    const position = this.editor.getPosition()
+		if (!this.editor.hasModel()) {
+			return false;
+		}
 
-    this.state = new ParameterHintState.Pending(
-      createCancelablePromise((token) =>
-        provideSignatureHelp(
-          this.providers,
-          model,
-          position,
-          triggerContext,
-          token,
-        ),
-      ),
-      activeSignatureHelp,
-    )
+		const model = this.editor.getModel();
+		const position = this.editor.getPosition();
 
-    try {
-      const result = await this.state.request
+		this.state = new ParameterHintState.Pending(
+			createCancelablePromise(token => provideSignatureHelp(this.providers, model, position, triggerContext, token)),
+			activeSignatureHelp);
 
-      // Check that we are still resolving the correct signature help
-      if (triggerId !== this.triggerId) {
-        result?.dispose()
+		try {
+			const result = await this.state.request;
 
-        return false
-      }
+			// Check that we are still resolving the correct signature help
+			if (triggerId !== this.triggerId) {
+				result?.dispose();
 
-      if (
-        !result ||
-        !result.value.signatures ||
-        result.value.signatures.length === 0
-      ) {
-        result?.dispose()
-        this._lastSignatureHelpResult.clear()
-        this.cancel()
-        return false
-      } else {
-        this.state = new ParameterHintState.Active(result.value)
-        this._lastSignatureHelpResult.value = result
-        this._onChangedHints.fire(this.state.hints)
-        return true
-      }
-    } catch (error) {
-      if (triggerId === this.triggerId) {
-        this.state = ParameterHintState.Default
-      }
-      onUnexpectedError(error)
-      return false
-    }
-  }
+				return false;
+			}
 
-  private getLastActiveHints(): languages.SignatureHelp | undefined {
-    switch (this.state.type) {
-      case ParameterHintState.Type.Active:
-        return this.state.hints
-      case ParameterHintState.Type.Pending:
-        return this.state.previouslyActiveHints
-      default:
-        return undefined
-    }
-  }
+			if (!result || !result.value.signatures || result.value.signatures.length === 0) {
+				result?.dispose();
+				this._lastSignatureHelpResult.clear();
+				this.cancel();
+				return false;
+			} else {
+				this.state = new ParameterHintState.Active(result.value);
+				this._lastSignatureHelpResult.value = result;
+				this._onChangedHints.fire(this.state.hints);
+				return true;
+			}
+		} catch (error) {
+			if (triggerId === this.triggerId) {
+				this.state = ParameterHintState.Default;
+			}
+			onUnexpectedError(error);
+			return false;
+		}
+	}
 
-  private get isTriggered(): boolean {
-    return (
-      this.state.type === ParameterHintState.Type.Active ||
-      this.state.type === ParameterHintState.Type.Pending ||
-      this.throttledDelayer.isTriggered()
-    )
-  }
+	private getLastActiveHints(): languages.SignatureHelp | undefined {
+		switch (this.state.type) {
+			case ParameterHintState.Type.Active: return this.state.hints;
+			case ParameterHintState.Type.Pending: return this.state.previouslyActiveHints;
+			default: return undefined;
+		}
+	}
 
-  private onModelChanged(): void {
-    this.cancel()
+	private get isTriggered(): boolean {
+		return this.state.type === ParameterHintState.Type.Active
+			|| this.state.type === ParameterHintState.Type.Pending
+			|| this.throttledDelayer.isTriggered();
+	}
 
-    this.triggerChars.clear()
-    this.retriggerChars.clear()
+	private onModelChanged(): void {
+		this.cancel();
 
-    const model = this.editor.getModel()
-    if (!model) {
-      return
-    }
+		this.triggerChars.clear();
+		this.retriggerChars.clear();
 
-    for (const support of this.providers.ordered(model)) {
-      for (const ch of support.signatureHelpTriggerCharacters || []) {
-        if (ch.length) {
-          const charCode = ch.charCodeAt(0)
-          this.triggerChars.add(charCode)
+		const model = this.editor.getModel();
+		if (!model) {
+			return;
+		}
 
-          // All trigger characters are also considered retrigger characters
-          this.retriggerChars.add(charCode)
-        }
-      }
+		for (const support of this.providers.ordered(model)) {
+			for (const ch of support.signatureHelpTriggerCharacters || []) {
+				if (ch.length) {
+					const charCode = ch.charCodeAt(0);
+					this.triggerChars.add(charCode);
 
-      for (const ch of support.signatureHelpRetriggerCharacters || []) {
-        if (ch.length) {
-          this.retriggerChars.add(ch.charCodeAt(0))
-        }
-      }
-    }
-  }
+					// All trigger characters are also considered retrigger characters
+					this.retriggerChars.add(charCode);
+				}
+			}
 
-  private onDidType(text: string) {
-    if (!this.triggerOnType) {
-      return
-    }
+			for (const ch of support.signatureHelpRetriggerCharacters || []) {
+				if (ch.length) {
+					this.retriggerChars.add(ch.charCodeAt(0));
+				}
+			}
+		}
+	}
 
-    const lastCharIndex = text.length - 1
-    const triggerCharCode = text.charCodeAt(lastCharIndex)
+	private onDidType(text: string) {
+		if (!this.triggerOnType) {
+			return;
+		}
 
-    if (
-      this.triggerChars.has(triggerCharCode) ||
-      (this.isTriggered && this.retriggerChars.has(triggerCharCode))
-    ) {
-      this.trigger({
-        triggerKind: languages.SignatureHelpTriggerKind.TriggerCharacter,
-        triggerCharacter: text.charAt(lastCharIndex),
-      })
-    }
-  }
+		const lastCharIndex = text.length - 1;
+		const triggerCharCode = text.charCodeAt(lastCharIndex);
 
-  private onCursorChange(e: ICursorSelectionChangedEvent): void {
-    if (e.source === "mouse") {
-      this.cancel()
-    } else if (this.isTriggered) {
-      this.trigger({
-        triggerKind: languages.SignatureHelpTriggerKind.ContentChange,
-      })
-    }
-  }
+		if (this.triggerChars.has(triggerCharCode) || this.isTriggered && this.retriggerChars.has(triggerCharCode)) {
+			this.trigger({
+				triggerKind: languages.SignatureHelpTriggerKind.TriggerCharacter,
+				triggerCharacter: text.charAt(lastCharIndex),
+			});
+		}
+	}
 
-  private onModelContentChange(): void {
-    if (this.isTriggered) {
-      this.trigger({
-        triggerKind: languages.SignatureHelpTriggerKind.ContentChange,
-      })
-    }
-  }
+	private onCursorChange(e: ICursorSelectionChangedEvent): void {
+		if (e.source === 'mouse') {
+			this.cancel();
+		} else if (this.isTriggered) {
+			this.trigger({ triggerKind: languages.SignatureHelpTriggerKind.ContentChange });
+		}
+	}
 
-  private onEditorConfigurationChange(): void {
-    this.triggerOnType = this.editor.getOption(
-      EditorOption.parameterHints,
-    ).enabled
+	private onModelContentChange(): void {
+		if (this.isTriggered) {
+			this.trigger({ triggerKind: languages.SignatureHelpTriggerKind.ContentChange });
+		}
+	}
 
-    if (!this.triggerOnType) {
-      this.cancel()
-    }
-  }
+	private onEditorConfigurationChange(): void {
+		this.triggerOnType = this.editor.getOption(EditorOption.parameterHints).enabled;
 
-  override dispose(): void {
-    this.cancel(true)
-    super.dispose()
-  }
+		if (!this.triggerOnType) {
+			this.cancel();
+		}
+	}
+
+	override dispose(): void {
+		this.cancel(true);
+		super.dispose();
+	}
 }
 
-function mergeTriggerContexts(
-  previous: TriggerContext,
-  current: TriggerContext,
-) {
-  switch (current.triggerKind) {
-    case languages.SignatureHelpTriggerKind.Invoke:
-      // Invoke overrides previous triggers.
-      return current
+function mergeTriggerContexts(previous: TriggerContext, current: TriggerContext) {
+	switch (current.triggerKind) {
+		case languages.SignatureHelpTriggerKind.Invoke:
+			// Invoke overrides previous triggers.
+			return current;
 
-    case languages.SignatureHelpTriggerKind.ContentChange:
-      // Ignore content changes triggers
-      return previous
+		case languages.SignatureHelpTriggerKind.ContentChange:
+			// Ignore content changes triggers
+			return previous;
 
-    case languages.SignatureHelpTriggerKind.TriggerCharacter:
-    default:
-      return current
-  }
+		case languages.SignatureHelpTriggerKind.TriggerCharacter:
+		default:
+			return current;
+	}
 }

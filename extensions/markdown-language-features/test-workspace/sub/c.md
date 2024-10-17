@@ -1,5 +1,4 @@
 # First
-
 # Second
 
 [b](/b.md)

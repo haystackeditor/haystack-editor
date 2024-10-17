@@ -109,7 +109,7 @@ export class EditorParts
     @IThemeService themeService: IThemeService,
     @IAuxiliaryWindowService
     private readonly auxiliaryWindowService: IAuxiliaryWindowService,
-    @IContextKeyService private readonly contextKeyService: IContextKeyService,
+    @IContextKeyService private readonly contextKeyService: IContextKeyService
   ) {
     super("workbench.editorParts", themeService, storageService)
 
@@ -123,8 +123,8 @@ export class EditorParts
     this._register(
       this.onDidChangeMementoValue(
         StorageScope.WORKSPACE,
-        this._store,
-      )((e) => this.onDidChangeMementoState(e)),
+        this._store
+      )((e) => this.onDidChangeMementoState(e))
     )
     this.whenReady.then(() => this.registerGroupsContextKeyListeners())
   }
@@ -136,13 +136,13 @@ export class EditorParts
   //#region Auxiliary Editor Parts
 
   private readonly _onDidCreateAuxiliaryEditorPart = this._register(
-    new Emitter<IAuxiliaryEditorPartCreateEvent>(),
+    new Emitter<IAuxiliaryEditorPartCreateEvent>()
   )
   readonly onDidCreateAuxiliaryEditorPart =
     this._onDidCreateAuxiliaryEditorPart.event
 
   async createAuxiliaryEditorPart(
-    options?: IAuxiliaryEditorPartOpenOptions,
+    options?: IAuxiliaryEditorPartOpenOptions
   ): Promise<IAuxiliaryEditorPart> {
     const { part, instantiationService, disposables } =
       await this.instantiationService
@@ -192,7 +192,7 @@ export class EditorParts
 
   private registerEditorPartListeners(
     part: EditorPart,
-    disposables: DisposableStore,
+    disposables: DisposableStore
   ): void {
     disposables.add(
       part.onDidFocus(() => {
@@ -201,48 +201,48 @@ export class EditorParts
         if (this._parts.size > 1) {
           this._onDidActiveGroupChange.fire(this.activeGroup) // this can only happen when we have more than 1 editor part
         }
-      }),
+      })
     )
     disposables.add(toDisposable(() => this.doUpdateMostRecentActive(part)))
 
     disposables.add(
       part.onDidChangeActiveGroup((group) =>
-        this._onDidActiveGroupChange.fire(group),
-      ),
+        this._onDidActiveGroupChange.fire(group)
+      )
     )
     disposables.add(
-      part.onDidAddGroup((group) => this._onDidAddGroup.fire(group)),
+      part.onDidAddGroup((group) => this._onDidAddGroup.fire(group))
     )
     disposables.add(
-      part.onDidRemoveGroup((group) => this._onDidRemoveGroup.fire(group)),
+      part.onDidRemoveGroup((group) => this._onDidRemoveGroup.fire(group))
     )
     disposables.add(
-      part.onDidMoveGroup((group) => this._onDidMoveGroup.fire(group)),
+      part.onDidMoveGroup((group) => this._onDidMoveGroup.fire(group))
     )
     disposables.add(
-      part.onDidActivateGroup((group) => this._onDidActivateGroup.fire(group)),
+      part.onDidActivateGroup((group) => this._onDidActivateGroup.fire(group))
     )
     disposables.add(
       part.onDidChangeGroupMaximized((maximized) =>
-        this._onDidChangeGroupMaximized.fire(maximized),
-      ),
+        this._onDidChangeGroupMaximized.fire(maximized)
+      )
     )
 
     disposables.add(
       part.onDidChangeGroupIndex((group) =>
-        this._onDidChangeGroupIndex.fire(group),
-      ),
+        this._onDidChangeGroupIndex.fire(group)
+      )
     )
     disposables.add(
       part.onDidChangeGroupLocked((group) =>
-        this._onDidChangeGroupLocked.fire(group),
-      ),
+        this._onDidChangeGroupLocked.fire(group)
+      )
     )
   }
 
   private doUpdateMostRecentActive(
     part: EditorPart,
-    makeMostRecentlyActive?: boolean,
+    makeMostRecentlyActive?: boolean
   ): void {
     const index = this.mostRecentActiveParts.indexOf(part)
 
@@ -268,7 +268,7 @@ export class EditorParts
   override getPart(group: IEditorGroupView | GroupIdentifier): EditorPart
   override getPart(element: HTMLElement): EditorPart
   override getPart(
-    groupOrElement: IEditorGroupView | GroupIdentifier | HTMLElement,
+    groupOrElement: IEditorGroupView | GroupIdentifier | HTMLElement
   ): EditorPart {
     if (this._parts.size > 1) {
       if (isHTMLElement(groupOrElement)) {
@@ -305,7 +305,7 @@ export class EditorParts
 
   private readonly workspaceMemento = this.getMemento(
     StorageScope.WORKSPACE,
-    StorageTarget.USER,
+    StorageTarget.USER
   )
 
   private _isReady = false
@@ -370,7 +370,7 @@ export class EditorParts
         .filter((part) => part !== this.mainPart)
         .map((part) => {
           const auxiliaryWindow = this.auxiliaryWindowService.getWindow(
-            part.windowId,
+            part.windowId
           )
 
           return {
@@ -389,7 +389,7 @@ export class EditorParts
       // Create auxiliary editor parts
       for (const auxiliaryEditorPartState of state.auxiliary) {
         auxiliaryEditorPartPromises.push(
-          this.createAuxiliaryEditorPart(auxiliaryEditorPartState),
+          this.createAuxiliaryEditorPart(auxiliaryEditorPartState)
         )
       }
 
@@ -424,7 +424,7 @@ export class EditorParts
   }
 
   private async applyState(
-    state: IEditorPartsUIState | "empty",
+    state: IEditorPartsUIState | "empty"
   ): Promise<boolean> {
     // Before closing windows, try to close as many editors as
     // possible, but skip over those that would trigger a dialog
@@ -463,7 +463,7 @@ export class EditorParts
   private editorWorkingSets: IEditorWorkingSetState[] = (() => {
     const workingSetsRaw = this.storageService.get(
       EditorParts.EDITOR_WORKING_SETS_STORAGE_KEY,
-      StorageScope.WORKSPACE,
+      StorageScope.WORKSPACE
     )
     if (workingSetsRaw) {
       return JSON.parse(workingSetsRaw)
@@ -508,7 +508,7 @@ export class EditorParts
 
   async applyWorkingSet(
     workingSet: IEditorWorkingSet | "empty",
-    options?: IEditorWorkingSetOptions,
+    options?: IEditorWorkingSetOptions
   ): Promise<boolean> {
     let workingSetState: IEditorWorkingSetState | "empty" | undefined
     if (workingSet === "empty") {
@@ -527,14 +527,14 @@ export class EditorParts
     // Also, in rare cases, the auxiliary part may not be able to apply the state
     // for certain editors that cannot move to the main part.
     const applied = await this.applyState(
-      workingSetState === "empty" ? workingSetState : workingSetState.auxiliary,
+      workingSetState === "empty" ? workingSetState : workingSetState.auxiliary
     )
     if (!applied) {
       return false
     }
     await this.mainPart.applyState(
       workingSetState === "empty" ? workingSetState : workingSetState.main,
-      options,
+      options
     )
 
     // Restore Focus unless instructed otherwise
@@ -564,7 +564,7 @@ export class EditorParts
       EditorParts.EDITOR_WORKING_SETS_STORAGE_KEY,
       JSON.stringify(this.editorWorkingSets),
       StorageScope.WORKSPACE,
-      StorageTarget.MACHINE,
+      StorageTarget.MACHINE
     )
   }
 
@@ -573,42 +573,42 @@ export class EditorParts
   //#region Events
 
   private readonly _onDidActiveGroupChange = this._register(
-    new Emitter<IEditorGroupView>(),
+    new Emitter<IEditorGroupView>()
   )
   readonly onDidChangeActiveGroup = this._onDidActiveGroupChange.event
 
   private readonly _onDidAddGroup = this._register(
-    new Emitter<IEditorGroupView>(),
+    new Emitter<IEditorGroupView>()
   )
   readonly onDidAddGroup = this._onDidAddGroup.event
 
   private readonly _onDidRemoveGroup = this._register(
-    new Emitter<IEditorGroupView>(),
+    new Emitter<IEditorGroupView>()
   )
   readonly onDidRemoveGroup = this._onDidRemoveGroup.event
 
   private readonly _onDidMoveGroup = this._register(
-    new Emitter<IEditorGroupView>(),
+    new Emitter<IEditorGroupView>()
   )
   readonly onDidMoveGroup = this._onDidMoveGroup.event
 
   private readonly _onDidActivateGroup = this._register(
-    new Emitter<IEditorGroupView>(),
+    new Emitter<IEditorGroupView>()
   )
   readonly onDidActivateGroup = this._onDidActivateGroup.event
 
   private readonly _onDidChangeGroupIndex = this._register(
-    new Emitter<IEditorGroupView>(),
+    new Emitter<IEditorGroupView>()
   )
   readonly onDidChangeGroupIndex = this._onDidChangeGroupIndex.event
 
   private readonly _onDidChangeGroupLocked = this._register(
-    new Emitter<IEditorGroupView>(),
+    new Emitter<IEditorGroupView>()
   )
   readonly onDidChangeGroupLocked = this._onDidChangeGroupLocked.event
 
   private readonly _onDidChangeGroupMaximized = this._register(
-    new Emitter<boolean>(),
+    new Emitter<boolean>()
   )
   readonly onDidChangeGroupMaximized = this._onDidChangeGroupMaximized.event
 
@@ -665,7 +665,7 @@ export class EditorParts
   }
 
   private assertGroupView(
-    group: IEditorGroupView | GroupIdentifier,
+    group: IEditorGroupView | GroupIdentifier
   ): IEditorGroupView {
     let groupView: IEditorGroupView | undefined
     if (typeof group === "number") {
@@ -694,26 +694,26 @@ export class EditorParts
 
   setSize(
     group: IEditorGroupView | GroupIdentifier,
-    size: { width: number; height: number },
+    size: { width: number; height: number }
   ): void {
     this.getPart(group).setSize(group, size)
   }
 
   arrangeGroups(
     arrangement: GroupsArrangement,
-    group: IEditorGroupView | GroupIdentifier = this.activePart.activeGroup,
+    group: IEditorGroupView | GroupIdentifier = this.activePart.activeGroup
   ): void {
     this.getPart(group).arrangeGroups(arrangement, group)
   }
 
   toggleMaximizeGroup(
-    group: IEditorGroupView | GroupIdentifier = this.activePart.activeGroup,
+    group: IEditorGroupView | GroupIdentifier = this.activePart.activeGroup
   ): void {
     this.getPart(group).toggleMaximizeGroup(group)
   }
 
   toggleExpandGroup(
-    group: IEditorGroupView | GroupIdentifier = this.activePart.activeGroup,
+    group: IEditorGroupView | GroupIdentifier = this.activePart.activeGroup
   ): void {
     this.getPart(group).toggleExpandGroup(group)
   }
@@ -741,7 +741,7 @@ export class EditorParts
   findGroup(
     scope: IFindGroupScope,
     source: IEditorGroupView | GroupIdentifier = this.activeGroup,
-    wrap?: boolean,
+    wrap?: boolean
   ): IEditorGroupView | undefined {
     const sourcePart = this.getPart(source)
     if (this._parts.size > 1) {
@@ -794,7 +794,7 @@ export class EditorParts
 
   addGroup(
     location: IEditorGroupView | GroupIdentifier,
-    direction: GroupDirection,
+    direction: GroupDirection
   ): IEditorGroupView {
     return this.getPart(location).addGroup(location, direction)
   }
@@ -806,7 +806,7 @@ export class EditorParts
   moveGroup(
     group: IEditorGroupView | GroupIdentifier,
     location: IEditorGroupView | GroupIdentifier,
-    direction: GroupDirection,
+    direction: GroupDirection
   ): IEditorGroupView {
     return this.getPart(group).moveGroup(group, location, direction)
   }
@@ -814,7 +814,7 @@ export class EditorParts
   mergeGroup(
     group: IEditorGroupView | GroupIdentifier,
     target: IEditorGroupView | GroupIdentifier,
-    options?: IMergeGroupOptions,
+    options?: IMergeGroupOptions
   ): boolean {
     return this.getPart(group).mergeGroup(group, target, options)
   }
@@ -826,14 +826,14 @@ export class EditorParts
   copyGroup(
     group: IEditorGroupView | GroupIdentifier,
     location: IEditorGroupView | GroupIdentifier,
-    direction: GroupDirection,
+    direction: GroupDirection
   ): IEditorGroupView {
     return this.getPart(group).copyGroup(group, location, direction)
   }
 
   createEditorDropTarget(
     container: HTMLElement,
-    delegate: IEditorDropTargetDelegate,
+    delegate: IEditorDropTargetDelegate
   ): IDisposable {
     return this.getPart(container).createEditorDropTarget(container, delegate)
   }
@@ -853,28 +853,28 @@ export class EditorParts
 
   private registerGroupsContextKeyListeners(): void {
     this._register(
-      this.onDidChangeActiveGroup(() => this.updateGlobalContextKeys()),
+      this.onDidChangeActiveGroup(() => this.updateGlobalContextKeys())
     )
     this.groups.forEach((group) =>
-      this.registerGroupContextKeyProvidersListeners(group),
+      this.registerGroupContextKeyProvidersListeners(group)
     )
     this._register(
       this.onDidAddGroup((group) =>
-        this.registerGroupContextKeyProvidersListeners(group),
-      ),
+        this.registerGroupContextKeyProvidersListeners(group)
+      )
     )
     this._register(
       this.onDidRemoveGroup((group) => {
         this.scopedContextKeys.delete(group.id)
         this.registeredContextKeys.delete(group.id)
         this.contextKeyProviderDisposables.deleteAndDispose(group.id)
-      }),
+      })
     )
   }
 
   private updateGlobalContextKeys(): void {
     const activeGroupScopedContextKeys = this.scopedContextKeys.get(
-      this.activeGroup.id,
+      this.activeGroup.id
     )
     if (!activeGroupScopedContextKeys) {
       return
@@ -892,7 +892,7 @@ export class EditorParts
 
   bind<T extends ContextKeyValue>(
     contextKey: RawContextKey<T>,
-    group: IEditorGroupView,
+    group: IEditorGroupView
   ): IContextKey<T> {
     // Ensure we only bind to the same context key once globaly
     let globalContextKey = this.globalContextKeys.get(contextKey.key)
@@ -943,14 +943,14 @@ export class EditorParts
   >()
 
   registerContextKeyProvider<T extends ContextKeyValue>(
-    provider: IEditorGroupContextKeyProvider<T>,
+    provider: IEditorGroupContextKeyProvider<T>
   ): IDisposable {
     if (
       this.contextKeyProviders.has(provider.contextKey.key) ||
       this.globalContextKeys.has(provider.contextKey.key)
     ) {
       throw new Error(
-        `A context key provider for key ${provider.contextKey.key} already exists.`,
+        `A context key provider for key ${provider.contextKey.key} already exists.`
       )
     }
 
@@ -971,21 +971,21 @@ export class EditorParts
 
       this.globalContextKeys.delete(provider.contextKey.key)
       this.scopedContextKeys.forEach((scopedContextKeys) =>
-        scopedContextKeys.delete(provider.contextKey.key),
+        scopedContextKeys.delete(provider.contextKey.key)
       )
 
       this.contextKeyProviders.delete(provider.contextKey.key)
       this.registeredContextKeys.forEach((registeredContextKeys) =>
-        registeredContextKeys.delete(provider.contextKey.key),
+        registeredContextKeys.delete(provider.contextKey.key)
       )
     })
   }
 
   private readonly contextKeyProviderDisposables = this._register(
-    new DisposableMap<GroupIdentifier, IDisposable>(),
+    new DisposableMap<GroupIdentifier, IDisposable>()
   )
   private registerGroupContextKeyProvidersListeners(
-    group: IEditorGroupView,
+    group: IEditorGroupView
   ): void {
     // Update context keys from providers for the group when its active editor changes
     const disposable = group.onDidActiveEditorChange(() => {
@@ -999,7 +999,7 @@ export class EditorParts
 
   private updateRegisteredContextKey<T extends ContextKeyValue>(
     group: IEditorGroupView,
-    provider: IEditorGroupContextKeyProvider<T>,
+    provider: IEditorGroupContextKeyProvider<T>
   ): void {
     // Get the group scoped context keys for the provider
     // If the providers context key has not yet been bound
@@ -1012,13 +1012,13 @@ export class EditorParts
     }
 
     let scopedRegisteredContextKey = groupRegisteredContextKeys.get(
-      provider.contextKey.key,
+      provider.contextKey.key
     )
     if (!scopedRegisteredContextKey) {
       scopedRegisteredContextKey = this.bind(provider.contextKey, group)
       groupRegisteredContextKeys.set(
         provider.contextKey.key,
-        scopedRegisteredContextKey,
+        scopedRegisteredContextKey
       )
     }
 

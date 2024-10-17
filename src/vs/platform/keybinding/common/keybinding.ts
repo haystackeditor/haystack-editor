@@ -75,7 +75,7 @@ export interface IKeybindingService {
    */
   softDispatch(
     keyboardEvent: IKeyboardEvent,
-    target: IContextKeyServiceTarget,
+    target: IContextKeyServiceTarget
   ): ResolutionResult
 
   /**
@@ -88,7 +88,7 @@ export interface IKeybindingService {
 
   dispatchByUserSettingsLabel(
     userSettingsLabel: string,
-    target: IContextKeyServiceTarget,
+    target: IContextKeyServiceTarget
   ): void
 
   /**
@@ -103,7 +103,7 @@ export interface IKeybindingService {
    */
   lookupKeybinding(
     commandId: string,
-    context?: IContextKeyService,
+    context?: IContextKeyService
   ): ResolvedKeybinding | undefined
 
   getDefaultKeybindingsContent(): string

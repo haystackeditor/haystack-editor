@@ -9,16 +9,14 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from "vscode"
+import * as vscode from 'vscode';
 
 export interface ILogDirectoryProvider {
-  getNewLogDirectory(): vscode.Uri | undefined
+	getNewLogDirectory(): vscode.Uri | undefined;
 }
 
-export const noopLogDirectoryProvider = new (class
-  implements ILogDirectoryProvider
-{
-  public getNewLogDirectory(): undefined {
-    return undefined
-  }
-})()
+export const noopLogDirectoryProvider = new class implements ILogDirectoryProvider {
+	public getNewLogDirectory(): undefined {
+		return undefined;
+	}
+};

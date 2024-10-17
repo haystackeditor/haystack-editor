@@ -9,97 +9,71 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { localize } from "vs/nls"
-import { raceCancellation } from "vs/base/common/async"
-import {
-  CancellationTokenSource,
-  CancellationToken,
-} from "vs/base/common/cancellation"
-import { ILogService } from "vs/platform/log/common/log"
-import {
-  IProgressService,
-  ProgressLocation,
-} from "vs/platform/progress/common/progress"
-import {
-  ITextFileSaveParticipant,
-  ITextFileEditorModel,
-  ITextFileSaveParticipantContext,
-} from "vs/workbench/services/textfile/common/textfiles"
-import { IDisposable, Disposable, toDisposable } from "vs/base/common/lifecycle"
-import { insert } from "vs/base/common/arrays"
+import { localize } from 'vs/nls';
+import { raceCancellation } from 'vs/base/common/async';
+import { CancellationTokenSource, CancellationToken } from 'vs/base/common/cancellation';
+import { ILogService } from 'vs/platform/log/common/log';
+import { IProgressService, ProgressLocation } from 'vs/platform/progress/common/progress';
+import { ITextFileSaveParticipant, ITextFileEditorModel, ITextFileSaveParticipantContext } from 'vs/workbench/services/textfile/common/textfiles';
+import { IDisposable, Disposable, toDisposable } from 'vs/base/common/lifecycle';
+import { insert } from 'vs/base/common/arrays';
 
 export class TextFileSaveParticipant extends Disposable {
-  private readonly saveParticipants: ITextFileSaveParticipant[] = []
 
-  constructor(
-    @IProgressService private readonly progressService: IProgressService,
-    @ILogService private readonly logService: ILogService,
-  ) {
-    super()
-  }
+	private readonly saveParticipants: ITextFileSaveParticipant[] = [];
 
-  addSaveParticipant(participant: ITextFileSaveParticipant): IDisposable {
-    const remove = insert(this.saveParticipants, participant)
+	constructor(
+		@IProgressService private readonly progressService: IProgressService,
+		@ILogService private readonly logService: ILogService
+	) {
+		super();
+	}
 
-    return toDisposable(() => remove())
-  }
+	addSaveParticipant(participant: ITextFileSaveParticipant): IDisposable {
+		const remove = insert(this.saveParticipants, participant);
 
-  participate(
-    model: ITextFileEditorModel,
-    context: ITextFileSaveParticipantContext,
-    token: CancellationToken,
-  ): Promise<void> {
-    const cts = new CancellationTokenSource(token)
+		return toDisposable(() => remove());
+	}
 
-    return this.progressService
-      .withProgress(
-        {
-          title: localize("saveParticipants", "Saving '{0}'", model.name),
-          location: ProgressLocation.Notification,
-          cancellable: true,
-          delay: model.isDirty() ? 3000 : 5000,
-        },
-        async (progress) => {
-          // undoStop before participation
-          model.textEditorModel?.pushStackElement()
+	participate(model: ITextFileEditorModel, context: ITextFileSaveParticipantContext, token: CancellationToken): Promise<void> {
+		const cts = new CancellationTokenSource(token);
 
-          for (const saveParticipant of this.saveParticipants) {
-            if (
-              cts.token.isCancellationRequested ||
-              !model.textEditorModel /* disposed */
-            ) {
-              break
-            }
+		return this.progressService.withProgress({
+			title: localize('saveParticipants', "Saving '{0}'", model.name),
+			location: ProgressLocation.Notification,
+			cancellable: true,
+			delay: model.isDirty() ? 3000 : 5000
+		}, async progress => {
 
-            try {
-              const promise = saveParticipant.participate(
-                model,
-                context,
-                progress,
-                cts.token,
-              )
-              await raceCancellation(promise, cts.token)
-            } catch (err) {
-              this.logService.error(err)
-            }
-          }
+			// undoStop before participation
+			model.textEditorModel?.pushStackElement();
 
-          // undoStop after participation
-          model.textEditorModel?.pushStackElement()
-        },
-        () => {
-          // user cancel
-          cts.cancel()
-        },
-      )
-      .finally(() => {
-        cts.dispose()
-      })
-  }
+			for (const saveParticipant of this.saveParticipants) {
+				if (cts.token.isCancellationRequested || !model.textEditorModel /* disposed */) {
+					break;
+				}
 
-  override dispose(): void {
-    this.saveParticipants.splice(0, this.saveParticipants.length)
+				try {
+					const promise = saveParticipant.participate(model, context, progress, cts.token);
+					await raceCancellation(promise, cts.token);
+				} catch (err) {
+					this.logService.error(err);
+				}
+			}
 
-    super.dispose()
-  }
+			// undoStop after participation
+			model.textEditorModel?.pushStackElement();
+		}, () => {
+			// user cancel
+			cts.cancel();
+		}).finally(() => {
+			cts.dispose();
+		});
+	}
+
+	override dispose(): void {
+		this.saveParticipants.splice(0, this.saveParticipants.length);
+
+		super.dispose();
+	}
 }

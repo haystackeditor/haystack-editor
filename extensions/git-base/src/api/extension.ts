@@ -9,53 +9,53 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Model } from "../model"
-import { GitBaseExtension, API } from "./git-base"
-import { Event, EventEmitter } from "vscode"
-import { ApiImpl } from "./api1"
+import { Model } from '../model';
+import { GitBaseExtension, API } from './git-base';
+import { Event, EventEmitter } from 'vscode';
+import { ApiImpl } from './api1';
 
 export class GitBaseExtensionImpl implements GitBaseExtension {
-  enabled: boolean = false
 
-  private _onDidChangeEnablement = new EventEmitter<boolean>()
-  readonly onDidChangeEnablement: Event<boolean> =
-    this._onDidChangeEnablement.event
+	enabled: boolean = false;
 
-  private _model: Model | undefined = undefined
+	private _onDidChangeEnablement = new EventEmitter<boolean>();
+	readonly onDidChangeEnablement: Event<boolean> = this._onDidChangeEnablement.event;
 
-  set model(model: Model | undefined) {
-    this._model = model
+	private _model: Model | undefined = undefined;
 
-    const enabled = !!model
+	set model(model: Model | undefined) {
+		this._model = model;
 
-    if (this.enabled === enabled) {
-      return
-    }
+		const enabled = !!model;
 
-    this.enabled = enabled
-    this._onDidChangeEnablement.fire(this.enabled)
-  }
+		if (this.enabled === enabled) {
+			return;
+		}
 
-  get model(): Model | undefined {
-    return this._model
-  }
+		this.enabled = enabled;
+		this._onDidChangeEnablement.fire(this.enabled);
+	}
 
-  constructor(model?: Model) {
-    if (model) {
-      this.enabled = true
-      this._model = model
-    }
-  }
+	get model(): Model | undefined {
+		return this._model;
+	}
 
-  getAPI(version: number): API {
-    if (!this._model) {
-      throw new Error("Git model not found")
-    }
+	constructor(model?: Model) {
+		if (model) {
+			this.enabled = true;
+			this._model = model;
+		}
+	}
 
-    if (version !== 1) {
-      throw new Error(`No API version ${version} found.`)
-    }
+	getAPI(version: number): API {
+		if (!this._model) {
+			throw new Error('Git model not found');
+		}
 
-    return new ApiImpl(this._model)
-  }
+		if (version !== 1) {
+			throw new Error(`No API version ${version} found.`);
+		}
+
+		return new ApiImpl(this._model);
+	}
 }

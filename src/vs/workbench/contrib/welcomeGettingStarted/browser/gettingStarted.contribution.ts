@@ -93,7 +93,7 @@ registerAction2(
         metadata: {
           description: localize2(
             "minWelcomeDescription",
-            "Opens a Walkthrough to help you get started in VS Code.",
+            "Opens a Walkthrough to help you get started in VS Code."
           ),
         },
       })
@@ -102,7 +102,7 @@ registerAction2(
     public async run(
       accessor: ServicesAccessor,
       walkthroughID: string | { category: string; step: string } | undefined,
-      toSide: boolean | undefined,
+      toSide: boolean | undefined
     ) {
       const haystackService = accessor.get(IHaystackService)
 
@@ -127,24 +127,24 @@ registerAction2(
         }
       }
     }
-  },
+  }
 )
 
 Registry.as<IEditorFactoryRegistry>(
-  EditorExtensions.EditorFactory,
+  EditorExtensions.EditorFactory
 ).registerEditorSerializer(
   GettingStartedInput.ID,
-  GettingStartedInputSerializer,
+  GettingStartedInputSerializer
 )
 Registry.as<IEditorPaneRegistry>(
-  EditorExtensions.EditorPane,
+  EditorExtensions.EditorPane
 ).registerEditorPane(
   EditorPaneDescriptor.create(
     GettingStartedPage,
     GettingStartedPage.ID,
-    localize("welcome", "Welcome"),
+    localize("welcome", "Welcome")
   ),
-  [new SyncDescriptor(GettingStartedInput)],
+  [new SyncDescriptor(GettingStartedInput)]
 )
 
 const category = localize2("welcome", "Welcome")
@@ -163,7 +163,7 @@ registerAction2(
         },
         precondition: ContextKeyExpr.equals(
           "activeEditor",
-          "gettingStartedPage",
+          "gettingStartedPage"
         ),
         f1: true,
       })
@@ -176,7 +176,7 @@ registerAction2(
         editorPane.escape()
       }
     }
-  },
+  }
 )
 
 CommandsRegistry.registerCommand({
@@ -188,7 +188,7 @@ CommandsRegistry.registerCommand({
       editorPane.selectStepLoose(stepID)
     } else {
       console.error(
-        "Cannot run walkthroughs.selectStep outside of walkthrough context",
+        "Cannot run walkthroughs.selectStep outside of walkthrough context"
       )
     }
   },
@@ -211,7 +211,7 @@ registerAction2(
       const gettingStartedService = accessor.get(IWalkthroughsService)
       gettingStartedService.progressStep(arg)
     }
-  },
+  }
 )
 
 registerAction2(
@@ -231,7 +231,7 @@ registerAction2(
       const gettingStartedService = accessor.get(IWalkthroughsService)
       gettingStartedService.deprogressStep(arg)
     }
-  },
+  }
 )
 
 registerAction2(
@@ -247,7 +247,7 @@ registerAction2(
 
     private async getQuickPickItems(
       contextService: IContextKeyService,
-      gettingStartedService: IWalkthroughsService,
+      gettingStartedService: IWalkthroughsService
     ): Promise<IQuickPickItem[]> {
       const categories = await gettingStartedService.getWalkthroughs()
       return categories
@@ -273,11 +273,11 @@ registerAction2(
       quickPick.matchOnDetail = true
       quickPick.placeholder = localize(
         "pickWalkthroughs",
-        "Select a walkthrough to open",
+        "Select a walkthrough to open"
       )
       quickPick.items = await this.getQuickPickItems(
         contextService,
-        gettingStartedService,
+        gettingStartedService
       )
       quickPick.busy = true
       quickPick.onDidAccept(() => {
@@ -285,7 +285,7 @@ registerAction2(
         if (selection) {
           commandService.executeCommand(
             "workbench.action.openWalkthrough",
-            selection.id,
+            selection.id
           )
         }
         quickPick.hide()
@@ -295,13 +295,13 @@ registerAction2(
       gettingStartedService.onDidAddWalkthrough(async () => {
         quickPick.items = await this.getQuickPickItems(
           contextService,
-          gettingStartedService,
+          gettingStartedService
         )
       })
       quickPick.show()
       quickPick.busy = false
     }
-  },
+  }
 )
 
 export const WorkspacePlatform = new RawContextKey<
@@ -311,8 +311,8 @@ export const WorkspacePlatform = new RawContextKey<
   undefined,
   localize(
     "workspacePlatform",
-    "The platform of the current workspace, which in remote or serverless contexts may be different from the platform of the UI",
-  ),
+    "The platform of the current workspace, which in remote or serverless contexts may be different from the platform of the UI"
+  )
 )
 class WorkspacePlatformContribution {
   static readonly ID = "workbench.contrib.workspacePlatform"
@@ -322,7 +322,7 @@ class WorkspacePlatformContribution {
     private readonly extensionManagementServerService: IExtensionManagementServerService,
     @IRemoteAgentService
     private readonly remoteAgentService: IRemoteAgentService,
-    @IContextKeyService private readonly contextService: IContextKeyService,
+    @IContextKeyService private readonly contextService: IContextKeyService
   ) {
     this.remoteAgentService.getEnvironment().then((env) => {
       const remoteOS = env?.os
@@ -331,10 +331,10 @@ class WorkspacePlatformContribution {
         remoteOS === OS.Macintosh
           ? "mac"
           : remoteOS === OS.Windows
-            ? "windows"
-            : remoteOS === OS.Linux
-              ? "linux"
-              : undefined
+          ? "windows"
+          : remoteOS === OS.Linux
+          ? "linux"
+          : undefined
 
       if (remotePlatform) {
         WorkspacePlatform.bindTo(this.contextService).set(remotePlatform)
@@ -360,7 +360,7 @@ class WorkspacePlatformContribution {
 }
 
 const configurationRegistry = Registry.as<IConfigurationRegistry>(
-  ConfigurationExtensions.Configuration,
+  ConfigurationExtensions.Configuration
 )
 configurationRegistry.registerConfiguration({
   ...workbenchConfigurationNodeBase,
@@ -371,7 +371,7 @@ configurationRegistry.registerConfiguration({
       default: true,
       description: localize(
         "workbench.welcomePage.walkthroughs.openOnInstall",
-        "When enabled, an extension's walkthrough will open upon install of the extension.",
+        "When enabled, an extension's walkthrough will open upon install of the extension."
       ),
     },
     "workbench.startupEditor": {
@@ -393,7 +393,7 @@ configurationRegistry.registerConfiguration({
             ],
             key: "workbench.startupEditor.none",
           },
-          "Start without an editor.",
+          "Start without an editor."
         ),
         localize(
           {
@@ -402,7 +402,7 @@ configurationRegistry.registerConfiguration({
             ],
             key: "workbench.startupEditor.welcomePage",
           },
-          "Open the Welcome page, with content to aid in getting started with VS Code and extensions.",
+          "Open the Welcome page, with content to aid in getting started with VS Code and extensions."
         ),
         localize(
           {
@@ -411,7 +411,7 @@ configurationRegistry.registerConfiguration({
             ],
             key: "workbench.startupEditor.readme",
           },
-          "Open the README when opening a folder that contains one, fallback to 'welcomePage' otherwise. Note: This is only observed as a global configuration, it will be ignored if set in a workspace or folder configuration.",
+          "Open the README when opening a folder that contains one, fallback to 'welcomePage' otherwise. Note: This is only observed as a global configuration, it will be ignored if set in a workspace or folder configuration."
         ),
         localize(
           {
@@ -420,7 +420,7 @@ configurationRegistry.registerConfiguration({
             ],
             key: "workbench.startupEditor.newUntitledFile",
           },
-          "Open a new untitled text file (only applies when opening an empty window).",
+          "Open a new untitled text file (only applies when opening an empty window)."
         ),
         localize(
           {
@@ -429,7 +429,7 @@ configurationRegistry.registerConfiguration({
             ],
             key: "workbench.startupEditor.welcomePageInEmptyWorkbench",
           },
-          "Open the Welcome page when opening an empty workbench.",
+          "Open the Welcome page when opening an empty workbench."
         ),
         localize(
           {
@@ -438,13 +438,13 @@ configurationRegistry.registerConfiguration({
             ],
             key: "workbench.startupEditor.terminal",
           },
-          "Open a new terminal in the editor area.",
+          "Open a new terminal in the editor area."
         ),
       ],
       default: "welcomePage",
       description: localize(
         "workbench.startupEditor",
-        "Controls which editor is shown at startup, if none are restored from the previous session.",
+        "Controls which editor is shown at startup, if none are restored from the previous session."
       ),
     },
     "workbench.welcomePage.preferReducedMotion": {
@@ -453,11 +453,11 @@ configurationRegistry.registerConfiguration({
       default: false,
       deprecationMessage: localize(
         "deprecationMessage",
-        "Deprecated, use the global `workbench.reduceMotion`.",
+        "Deprecated, use the global `workbench.reduceMotion`."
       ),
       description: localize(
         "workbench.welcomePage.preferReducedMotion",
-        "When enabled, reduce motion in welcome page.",
+        "When enabled, reduce motion in welcome page."
       ),
     },
   },
@@ -466,15 +466,15 @@ configurationRegistry.registerConfiguration({
 registerWorkbenchContribution2(
   WorkspacePlatformContribution.ID,
   WorkspacePlatformContribution,
-  WorkbenchPhase.AfterRestored,
+  WorkbenchPhase.AfterRestored
 )
 registerWorkbenchContribution2(
   StartupPageEditorResolverContribution.ID,
   StartupPageEditorResolverContribution,
-  WorkbenchPhase.BlockRestore,
+  WorkbenchPhase.BlockRestore
 )
 registerWorkbenchContribution2(
   StartupPageRunnerContribution.ID,
   StartupPageRunnerContribution,
-  WorkbenchPhase.AfterRestored,
+  WorkbenchPhase.AfterRestored
 )

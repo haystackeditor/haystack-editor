@@ -9,13 +9,10 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { VSBuffer } from "vs/base/common/buffer"
-import { Event } from "vs/base/common/event"
-import { IDisposable } from "vs/base/common/lifecycle"
-import {
-  IMessagePassingProtocol,
-  IPCClient,
-} from "vs/base/parts/ipc/common/ipc"
+import { VSBuffer } from 'vs/base/common/buffer';
+import { Event } from 'vs/base/common/event';
+import { IDisposable } from 'vs/base/common/lifecycle';
+import { IMessagePassingProtocol, IPCClient } from 'vs/base/parts/ipc/common/ipc';
 
 /**
  * Declare minimal `MessageEvent` and `MessagePort` interfaces here
@@ -24,27 +21,23 @@ import {
  */
 
 export interface MessageEvent {
-  /**
-   * For our use we only consider `Uint8Array` a valid data transfer
-   * via message ports because our protocol implementation is buffer based.
-   */
-  data: Uint8Array
+
+	/**
+	 * For our use we only consider `Uint8Array` a valid data transfer
+	 * via message ports because our protocol implementation is buffer based.
+	 */
+	data: Uint8Array;
 }
 
 export interface MessagePort {
-  addEventListener(
-    type: "message",
-    listener: (this: MessagePort, e: MessageEvent) => unknown,
-  ): void
-  removeEventListener(
-    type: "message",
-    listener: (this: MessagePort, e: MessageEvent) => unknown,
-  ): void
 
-  postMessage(message: Uint8Array): void
+	addEventListener(type: 'message', listener: (this: MessagePort, e: MessageEvent) => unknown): void;
+	removeEventListener(type: 'message', listener: (this: MessagePort, e: MessageEvent) => unknown): void;
 
-  start(): void
-  close(): void
+	postMessage(message: Uint8Array): void;
+
+	start(): void;
+	close(): void;
 }
 
 /**
@@ -53,47 +46,46 @@ export interface MessagePort {
  * is a simple `onmessage` / `postMessage` pattern.
  */
 export class Protocol implements IMessagePassingProtocol {
-  readonly onMessage = Event.fromDOMEventEmitter<VSBuffer>(
-    this.port,
-    "message",
-    (e: MessageEvent) => {
-      if (e.data) {
-        return VSBuffer.wrap(e.data)
-      }
-      return VSBuffer.alloc(0)
-    },
-  )
 
-  constructor(private port: MessagePort) {
-    // we must call start() to ensure messages are flowing
-    port.start()
-  }
+	readonly onMessage = Event.fromDOMEventEmitter<VSBuffer>(this.port, 'message', (e: MessageEvent) => {
+		if (e.data) {
+			return VSBuffer.wrap(e.data);
+		}
+		return VSBuffer.alloc(0);
+	});
 
-  send(message: VSBuffer): void {
-    this.port.postMessage(message.buffer)
-  }
+	constructor(private port: MessagePort) {
 
-  disconnect(): void {
-    this.port.close()
-  }
+		// we must call start() to ensure messages are flowing
+		port.start();
+	}
+
+	send(message: VSBuffer): void {
+		this.port.postMessage(message.buffer);
+	}
+
+	disconnect(): void {
+		this.port.close();
+	}
 }
 
 /**
  * An implementation of a `IPCClient` on top of MessagePort style IPC communication.
  */
 export class Client extends IPCClient implements IDisposable {
-  private protocol: Protocol
 
-  constructor(port: MessagePort, clientId: string) {
-    const protocol = new Protocol(port)
-    super(protocol, clientId)
+	private protocol: Protocol;
 
-    this.protocol = protocol
-  }
+	constructor(port: MessagePort, clientId: string) {
+		const protocol = new Protocol(port);
+		super(protocol, clientId);
 
-  override dispose(): void {
-    this.protocol.disconnect()
+		this.protocol = protocol;
+	}
 
-    super.dispose()
-  }
+	override dispose(): void {
+		this.protocol.disconnect();
+
+		super.dispose();
+	}
 }

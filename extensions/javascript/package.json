@@ -8,9 +8,7 @@
   "engines": {
     "vscode": "0.10.x"
   },
-  "categories": [
-    "Programming Languages"
-  ],
+  "categories": ["Programming Languages"],
   "contributes": {
     "configurationDefaults": {
       "[javascript]": {

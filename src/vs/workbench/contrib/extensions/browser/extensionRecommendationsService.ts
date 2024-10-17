@@ -9,366 +9,248 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Disposable, toDisposable } from "vs/base/common/lifecycle"
-import {
-  IExtensionManagementService,
-  IExtensionGalleryService,
-  InstallOperation,
-  InstallExtensionResult,
-} from "vs/platform/extensionManagement/common/extensionManagement"
-import {
-  IExtensionRecommendationsService,
-  ExtensionRecommendationReason,
-  IExtensionIgnoredRecommendationsService,
-} from "vs/workbench/services/extensionRecommendations/common/extensionRecommendations"
-import { IInstantiationService } from "vs/platform/instantiation/common/instantiation"
-import { ITelemetryService } from "vs/platform/telemetry/common/telemetry"
-import { shuffle } from "vs/base/common/arrays"
-import { Emitter, Event } from "vs/base/common/event"
-import { IEnvironmentService } from "vs/platform/environment/common/environment"
-import {
-  LifecyclePhase,
-  ILifecycleService,
-} from "vs/workbench/services/lifecycle/common/lifecycle"
-import { ExeBasedRecommendations } from "vs/workbench/contrib/extensions/browser/exeBasedRecommendations"
-import { WorkspaceRecommendations } from "vs/workbench/contrib/extensions/browser/workspaceRecommendations"
-import { FileBasedRecommendations } from "vs/workbench/contrib/extensions/browser/fileBasedRecommendations"
-import { KeymapRecommendations } from "vs/workbench/contrib/extensions/browser/keymapRecommendations"
-import { LanguageRecommendations } from "vs/workbench/contrib/extensions/browser/languageRecommendations"
-import { ExtensionRecommendation } from "vs/workbench/contrib/extensions/browser/extensionRecommendations"
-import { ConfigBasedRecommendations } from "vs/workbench/contrib/extensions/browser/configBasedRecommendations"
-import { IExtensionRecommendationNotificationService } from "vs/platform/extensionRecommendations/common/extensionRecommendations"
-import { CancelablePromise, timeout } from "vs/base/common/async"
-import { URI } from "vs/base/common/uri"
-import { WebRecommendations } from "vs/workbench/contrib/extensions/browser/webRecommendations"
-import { IExtensionsWorkbenchService } from "vs/workbench/contrib/extensions/common/extensions"
-import { areSameExtensions } from "vs/platform/extensionManagement/common/extensionManagementUtil"
-import { RemoteRecommendations } from "vs/workbench/contrib/extensions/browser/remoteRecommendations"
-import { IRemoteExtensionsScannerService } from "vs/platform/remote/common/remoteExtensionsScanner"
-import { IUserDataInitializationService } from "vs/workbench/services/userData/browser/userDataInit"
-import { isString } from "vs/base/common/types"
+import { Disposable, toDisposable } from 'vs/base/common/lifecycle';
+import { IExtensionManagementService, IExtensionGalleryService, InstallOperation, InstallExtensionResult } from 'vs/platform/extensionManagement/common/extensionManagement';
+import { IExtensionRecommendationsService, ExtensionRecommendationReason, IExtensionIgnoredRecommendationsService } from 'vs/workbench/services/extensionRecommendations/common/extensionRecommendations';
+import { IInstantiationService } from 'vs/platform/instantiation/common/instantiation';
+import { ITelemetryService } from 'vs/platform/telemetry/common/telemetry';
+import { shuffle } from 'vs/base/common/arrays';
+import { Emitter, Event } from 'vs/base/common/event';
+import { IEnvironmentService } from 'vs/platform/environment/common/environment';
+import { LifecyclePhase, ILifecycleService } from 'vs/workbench/services/lifecycle/common/lifecycle';
+import { ExeBasedRecommendations } from 'vs/workbench/contrib/extensions/browser/exeBasedRecommendations';
+import { WorkspaceRecommendations } from 'vs/workbench/contrib/extensions/browser/workspaceRecommendations';
+import { FileBasedRecommendations } from 'vs/workbench/contrib/extensions/browser/fileBasedRecommendations';
+import { KeymapRecommendations } from 'vs/workbench/contrib/extensions/browser/keymapRecommendations';
+import { LanguageRecommendations } from 'vs/workbench/contrib/extensions/browser/languageRecommendations';
+import { ExtensionRecommendation } from 'vs/workbench/contrib/extensions/browser/extensionRecommendations';
+import { ConfigBasedRecommendations } from 'vs/workbench/contrib/extensions/browser/configBasedRecommendations';
+import { IExtensionRecommendationNotificationService } from 'vs/platform/extensionRecommendations/common/extensionRecommendations';
+import { CancelablePromise, timeout } from 'vs/base/common/async';
+import { URI } from 'vs/base/common/uri';
+import { WebRecommendations } from 'vs/workbench/contrib/extensions/browser/webRecommendations';
+import { IExtensionsWorkbenchService } from 'vs/workbench/contrib/extensions/common/extensions';
+import { areSameExtensions } from 'vs/platform/extensionManagement/common/extensionManagementUtil';
+import { RemoteRecommendations } from 'vs/workbench/contrib/extensions/browser/remoteRecommendations';
+import { IRemoteExtensionsScannerService } from 'vs/platform/remote/common/remoteExtensionsScanner';
+import { IUserDataInitializationService } from 'vs/workbench/services/userData/browser/userDataInit';
+import { isString } from 'vs/base/common/types';
 
 type IgnoreRecommendationClassification = {
-  owner: "sandy081"
-  comment: "Report when a recommendation is ignored"
-  recommendationReason: {
-    classification: "SystemMetaData"
-    purpose: "FeatureInsight"
-    comment: "Reason why extension is recommended"
-  }
-  extensionId: {
-    classification: "PublicNonPersonalData"
-    purpose: "FeatureInsight"
-    comment: "Id of the extension recommendation that is being ignored"
-  }
-}
+	owner: 'sandy081';
+	comment: 'Report when a recommendation is ignored';
+	recommendationReason: { classification: 'SystemMetaData'; purpose: 'FeatureInsight'; comment: 'Reason why extension is recommended' };
+	extensionId: { classification: 'PublicNonPersonalData'; purpose: 'FeatureInsight'; comment: 'Id of the extension recommendation that is being ignored' };
+};
 
-export class ExtensionRecommendationsService
-  extends Disposable
-  implements IExtensionRecommendationsService
-{
-  declare readonly _serviceBrand: undefined
+export class ExtensionRecommendationsService extends Disposable implements IExtensionRecommendationsService {
 
-  // Recommendations
-  private readonly fileBasedRecommendations: FileBasedRecommendations
-  private readonly workspaceRecommendations: WorkspaceRecommendations
-  private readonly configBasedRecommendations: ConfigBasedRecommendations
-  private readonly exeBasedRecommendations: ExeBasedRecommendations
-  private readonly keymapRecommendations: KeymapRecommendations
-  private readonly webRecommendations: WebRecommendations
-  private readonly languageRecommendations: LanguageRecommendations
-  private readonly remoteRecommendations: RemoteRecommendations
+	declare readonly _serviceBrand: undefined;
 
-  public readonly activationPromise: Promise<void>
-  private sessionSeed: number
+	// Recommendations
+	private readonly fileBasedRecommendations: FileBasedRecommendations;
+	private readonly workspaceRecommendations: WorkspaceRecommendations;
+	private readonly configBasedRecommendations: ConfigBasedRecommendations;
+	private readonly exeBasedRecommendations: ExeBasedRecommendations;
+	private readonly keymapRecommendations: KeymapRecommendations;
+	private readonly webRecommendations: WebRecommendations;
+	private readonly languageRecommendations: LanguageRecommendations;
+	private readonly remoteRecommendations: RemoteRecommendations;
 
-  private _onDidChangeRecommendations = this._register(new Emitter<void>())
-  readonly onDidChangeRecommendations = this._onDidChangeRecommendations.event
+	public readonly activationPromise: Promise<void>;
+	private sessionSeed: number;
 
-  constructor(
-    @IInstantiationService instantiationService: IInstantiationService,
-    @ILifecycleService private readonly lifecycleService: ILifecycleService,
-    @IExtensionGalleryService
-    private readonly galleryService: IExtensionGalleryService,
-    @ITelemetryService private readonly telemetryService: ITelemetryService,
-    @IEnvironmentService
-    private readonly environmentService: IEnvironmentService,
-    @IExtensionManagementService
-    private readonly extensionManagementService: IExtensionManagementService,
-    @IExtensionIgnoredRecommendationsService
-    private readonly extensionRecommendationsManagementService: IExtensionIgnoredRecommendationsService,
-    @IExtensionRecommendationNotificationService
-    private readonly extensionRecommendationNotificationService: IExtensionRecommendationNotificationService,
-    @IExtensionsWorkbenchService
-    private readonly extensionsWorkbenchService: IExtensionsWorkbenchService,
-    @IRemoteExtensionsScannerService
-    private readonly remoteExtensionsScannerService: IRemoteExtensionsScannerService,
-    @IUserDataInitializationService
-    private readonly userDataInitializationService: IUserDataInitializationService,
-  ) {
-    super()
+	private _onDidChangeRecommendations = this._register(new Emitter<void>());
+	readonly onDidChangeRecommendations = this._onDidChangeRecommendations.event;
 
-    this.workspaceRecommendations = this._register(
-      instantiationService.createInstance(WorkspaceRecommendations),
-    )
-    this.fileBasedRecommendations = this._register(
-      instantiationService.createInstance(FileBasedRecommendations),
-    )
-    this.configBasedRecommendations = this._register(
-      instantiationService.createInstance(ConfigBasedRecommendations),
-    )
-    this.exeBasedRecommendations = this._register(
-      instantiationService.createInstance(ExeBasedRecommendations),
-    )
-    this.keymapRecommendations = this._register(
-      instantiationService.createInstance(KeymapRecommendations),
-    )
-    this.webRecommendations = this._register(
-      instantiationService.createInstance(WebRecommendations),
-    )
-    this.languageRecommendations = this._register(
-      instantiationService.createInstance(LanguageRecommendations),
-    )
-    this.remoteRecommendations = this._register(
-      instantiationService.createInstance(RemoteRecommendations),
-    )
+	constructor(
+		@IInstantiationService instantiationService: IInstantiationService,
+		@ILifecycleService private readonly lifecycleService: ILifecycleService,
+		@IExtensionGalleryService private readonly galleryService: IExtensionGalleryService,
+		@ITelemetryService private readonly telemetryService: ITelemetryService,
+		@IEnvironmentService private readonly environmentService: IEnvironmentService,
+		@IExtensionManagementService private readonly extensionManagementService: IExtensionManagementService,
+		@IExtensionIgnoredRecommendationsService private readonly extensionRecommendationsManagementService: IExtensionIgnoredRecommendationsService,
+		@IExtensionRecommendationNotificationService private readonly extensionRecommendationNotificationService: IExtensionRecommendationNotificationService,
+		@IExtensionsWorkbenchService private readonly extensionsWorkbenchService: IExtensionsWorkbenchService,
+		@IRemoteExtensionsScannerService private readonly remoteExtensionsScannerService: IRemoteExtensionsScannerService,
+		@IUserDataInitializationService private readonly userDataInitializationService: IUserDataInitializationService,
+	) {
+		super();
 
-    if (!this.isEnabled()) {
-      this.sessionSeed = 0
-      this.activationPromise = Promise.resolve()
-      return
-    }
+		this.workspaceRecommendations = this._register(instantiationService.createInstance(WorkspaceRecommendations));
+		this.fileBasedRecommendations = this._register(instantiationService.createInstance(FileBasedRecommendations));
+		this.configBasedRecommendations = this._register(instantiationService.createInstance(ConfigBasedRecommendations));
+		this.exeBasedRecommendations = this._register(instantiationService.createInstance(ExeBasedRecommendations));
+		this.keymapRecommendations = this._register(instantiationService.createInstance(KeymapRecommendations));
+		this.webRecommendations = this._register(instantiationService.createInstance(WebRecommendations));
+		this.languageRecommendations = this._register(instantiationService.createInstance(LanguageRecommendations));
+		this.remoteRecommendations = this._register(instantiationService.createInstance(RemoteRecommendations));
 
-    this.sessionSeed = +new Date()
+		if (!this.isEnabled()) {
+			this.sessionSeed = 0;
+			this.activationPromise = Promise.resolve();
+			return;
+		}
 
-    // Activation
-    this.activationPromise = this.activate()
+		this.sessionSeed = +new Date();
 
-    this._register(
-      this.extensionManagementService.onDidInstallExtensions((e) =>
-        this.onDidInstallExtensions(e),
-      ),
-    )
-  }
+		// Activation
+		this.activationPromise = this.activate();
 
-  private async activate(): Promise<void> {
-    try {
-      await Promise.allSettled([
-        this.remoteExtensionsScannerService.whenExtensionsReady(),
-        this.userDataInitializationService.whenInitializationFinished(),
-        this.lifecycleService.when(LifecyclePhase.Restored),
-      ])
-    } catch (error) {
-      /* ignore */
-    }
+		this._register(this.extensionManagementService.onDidInstallExtensions(e => this.onDidInstallExtensions(e)));
+	}
 
-    // activate all recommendations
-    await Promise.all([
-      this.workspaceRecommendations.activate(),
-      this.configBasedRecommendations.activate(),
-      this.fileBasedRecommendations.activate(),
-      this.keymapRecommendations.activate(),
-      this.languageRecommendations.activate(),
-      this.webRecommendations.activate(),
-      this.remoteRecommendations.activate(),
-    ])
+	private async activate(): Promise<void> {
+		try {
+			await Promise.allSettled([
+				this.remoteExtensionsScannerService.whenExtensionsReady(),
+				this.userDataInitializationService.whenInitializationFinished(),
+				this.lifecycleService.when(LifecyclePhase.Restored)]);
+		} catch (error) { /* ignore */ }
 
-    this._register(
-      Event.any(
-        this.workspaceRecommendations.onDidChangeRecommendations,
-        this.configBasedRecommendations.onDidChangeRecommendations,
-        this.extensionRecommendationsManagementService
-          .onDidChangeIgnoredRecommendations,
-      )(() => this._onDidChangeRecommendations.fire()),
-    )
-    this._register(
-      this.extensionRecommendationsManagementService.onDidChangeGlobalIgnoredRecommendation(
-        ({ extensionId, isRecommended }) => {
-          if (!isRecommended) {
-            const reason = this.getAllRecommendationsWithReason()[extensionId]
-            if (reason && reason.reasonId) {
-              this.telemetryService.publicLog2<
-                {
-                  extensionId: string
-                  recommendationReason: ExtensionRecommendationReason
-                },
-                IgnoreRecommendationClassification
-              >("extensionsRecommendations:ignoreRecommendation", {
-                extensionId,
-                recommendationReason: reason.reasonId,
-              })
-            }
-          }
-        },
-      ),
-    )
+		// activate all recommendations
+		await Promise.all([
+			this.workspaceRecommendations.activate(),
+			this.configBasedRecommendations.activate(),
+			this.fileBasedRecommendations.activate(),
+			this.keymapRecommendations.activate(),
+			this.languageRecommendations.activate(),
+			this.webRecommendations.activate(),
+			this.remoteRecommendations.activate()
+		]);
 
-    this.promptWorkspaceRecommendations()
-  }
+		this._register(Event.any(this.workspaceRecommendations.onDidChangeRecommendations, this.configBasedRecommendations.onDidChangeRecommendations, this.extensionRecommendationsManagementService.onDidChangeIgnoredRecommendations)(() => this._onDidChangeRecommendations.fire()));
+		this._register(this.extensionRecommendationsManagementService.onDidChangeGlobalIgnoredRecommendation(({ extensionId, isRecommended }) => {
+			if (!isRecommended) {
+				const reason = this.getAllRecommendationsWithReason()[extensionId];
+				if (reason && reason.reasonId) {
+					this.telemetryService.publicLog2<{ extensionId: string; recommendationReason: ExtensionRecommendationReason }, IgnoreRecommendationClassification>('extensionsRecommendations:ignoreRecommendation', { extensionId, recommendationReason: reason.reasonId });
+				}
+			}
+		}));
 
-  private isEnabled(): boolean {
-    return (
-      this.galleryService.isEnabled() &&
-      !this.environmentService.isExtensionDevelopment
-    )
-  }
+		this.promptWorkspaceRecommendations();
+	}
 
-  private async activateProactiveRecommendations(): Promise<void> {
-    await Promise.all([
-      this.exeBasedRecommendations.activate(),
-      this.configBasedRecommendations.activate(),
-    ])
-  }
+	private isEnabled(): boolean {
+		return this.galleryService.isEnabled() && !this.environmentService.isExtensionDevelopment;
+	}
 
-  getAllRecommendationsWithReason(): {
-    [id: string]: {
-      reasonId: ExtensionRecommendationReason
-      reasonText: string
-    }
-  } {
-    /* Activate proactive recommendations */
-    this.activateProactiveRecommendations()
+	private async activateProactiveRecommendations(): Promise<void> {
+		await Promise.all([this.exeBasedRecommendations.activate(), this.configBasedRecommendations.activate()]);
+	}
 
-    const output: {
-      [id: string]: {
-        reasonId: ExtensionRecommendationReason
-        reasonText: string
-      }
-    } = Object.create(null)
+	getAllRecommendationsWithReason(): { [id: string]: { reasonId: ExtensionRecommendationReason; reasonText: string } } {
+		/* Activate proactive recommendations */
+		this.activateProactiveRecommendations();
 
-    const allRecommendations = [
-      ...this.configBasedRecommendations.recommendations,
-      ...this.exeBasedRecommendations.recommendations,
-      ...this.fileBasedRecommendations.recommendations,
-      ...this.workspaceRecommendations.recommendations,
-      ...this.keymapRecommendations.recommendations,
-      ...this.languageRecommendations.recommendations,
-      ...this.webRecommendations.recommendations,
-    ]
+		const output: { [id: string]: { reasonId: ExtensionRecommendationReason; reasonText: string } } = Object.create(null);
 
-    for (const { extension, reason } of allRecommendations) {
-      if (
-        isString(extension) &&
-        this.isExtensionAllowedToBeRecommended(extension)
-      ) {
-        output[extension.toLowerCase()] = reason
-      }
-    }
+		const allRecommendations = [
+			...this.configBasedRecommendations.recommendations,
+			...this.exeBasedRecommendations.recommendations,
+			...this.fileBasedRecommendations.recommendations,
+			...this.workspaceRecommendations.recommendations,
+			...this.keymapRecommendations.recommendations,
+			...this.languageRecommendations.recommendations,
+			...this.webRecommendations.recommendations,
+		];
 
-    return output
-  }
+		for (const { extension, reason } of allRecommendations) {
+			if (isString(extension) && this.isExtensionAllowedToBeRecommended(extension)) {
+				output[extension.toLowerCase()] = reason;
+			}
+		}
 
-  async getConfigBasedRecommendations(): Promise<{
-    important: string[]
-    others: string[]
-  }> {
-    await this.configBasedRecommendations.activate()
-    return {
-      important: this.toExtensionIds(
-        this.configBasedRecommendations.importantRecommendations,
-      ),
-      others: this.toExtensionIds(
-        this.configBasedRecommendations.otherRecommendations,
-      ),
-    }
-  }
+		return output;
+	}
 
-  async getOtherRecommendations(): Promise<string[]> {
-    await this.activationPromise
-    await this.activateProactiveRecommendations()
+	async getConfigBasedRecommendations(): Promise<{ important: string[]; others: string[] }> {
+		await this.configBasedRecommendations.activate();
+		return {
+			important: this.toExtensionIds(this.configBasedRecommendations.importantRecommendations),
+			others: this.toExtensionIds(this.configBasedRecommendations.otherRecommendations)
+		};
+	}
 
-    const recommendations = [
-      ...this.configBasedRecommendations.otherRecommendations,
-      ...this.exeBasedRecommendations.otherRecommendations,
-      ...this.webRecommendations.recommendations,
-    ]
+	async getOtherRecommendations(): Promise<string[]> {
+		await this.activationPromise;
+		await this.activateProactiveRecommendations();
 
-    const extensionIds = this.toExtensionIds(recommendations)
-    shuffle(extensionIds, this.sessionSeed)
-    return extensionIds
-  }
+		const recommendations = [
+			...this.configBasedRecommendations.otherRecommendations,
+			...this.exeBasedRecommendations.otherRecommendations,
+			...this.webRecommendations.recommendations
+		];
 
-  async getImportantRecommendations(): Promise<string[]> {
-    await this.activateProactiveRecommendations()
+		const extensionIds = this.toExtensionIds(recommendations);
+		shuffle(extensionIds, this.sessionSeed);
+		return extensionIds;
+	}
 
-    const recommendations = [
-      ...this.fileBasedRecommendations.importantRecommendations,
-      ...this.configBasedRecommendations.importantRecommendations,
-      ...this.exeBasedRecommendations.importantRecommendations,
-    ]
+	async getImportantRecommendations(): Promise<string[]> {
+		await this.activateProactiveRecommendations();
 
-    const extensionIds = this.toExtensionIds(recommendations)
-    shuffle(extensionIds, this.sessionSeed)
-    return extensionIds
-  }
+		const recommendations = [
+			...this.fileBasedRecommendations.importantRecommendations,
+			...this.configBasedRecommendations.importantRecommendations,
+			...this.exeBasedRecommendations.importantRecommendations,
+		];
 
-  getKeymapRecommendations(): string[] {
-    return this.toExtensionIds(this.keymapRecommendations.recommendations)
-  }
+		const extensionIds = this.toExtensionIds(recommendations);
+		shuffle(extensionIds, this.sessionSeed);
+		return extensionIds;
+	}
 
-  getLanguageRecommendations(): string[] {
-    return this.toExtensionIds(this.languageRecommendations.recommendations)
-  }
+	getKeymapRecommendations(): string[] {
+		return this.toExtensionIds(this.keymapRecommendations.recommendations);
+	}
 
-  getRemoteRecommendations(): string[] {
-    return this.toExtensionIds(this.remoteRecommendations.recommendations)
-  }
+	getLanguageRecommendations(): string[] {
+		return this.toExtensionIds(this.languageRecommendations.recommendations);
+	}
 
-  async getWorkspaceRecommendations(): Promise<Array<string | URI>> {
-    if (!this.isEnabled()) {
-      return []
-    }
-    await this.workspaceRecommendations.activate()
-    const result: Array<string | URI> = []
-    for (const { extension } of this.workspaceRecommendations.recommendations) {
-      if (isString(extension)) {
-        if (
-          !result.includes(extension.toLowerCase()) &&
-          this.isExtensionAllowedToBeRecommended(extension)
-        ) {
-          result.push(extension.toLowerCase())
-        }
-      } else {
-        result.push(extension)
-      }
-    }
-    return result
-  }
+	getRemoteRecommendations(): string[] {
+		return this.toExtensionIds(this.remoteRecommendations.recommendations);
+	}
 
-  async getExeBasedRecommendations(
-    exe?: string,
-  ): Promise<{ important: string[]; others: string[] }> {
-    await this.exeBasedRecommendations.activate()
-    const { important, others } = exe
-      ? this.exeBasedRecommendations.getRecommendations(exe)
-      : {
-          important: this.exeBasedRecommendations.importantRecommendations,
-          others: this.exeBasedRecommendations.otherRecommendations,
-        }
-    return {
-      important: this.toExtensionIds(important),
-      others: this.toExtensionIds(others),
-    }
-  }
+	async getWorkspaceRecommendations(): Promise<Array<string | URI>> {
+		if (!this.isEnabled()) {
+			return [];
+		}
+		await this.workspaceRecommendations.activate();
+		const result: Array<string | URI> = [];
+		for (const { extension } of this.workspaceRecommendations.recommendations) {
+			if (isString(extension)) {
+				if (!result.includes(extension.toLowerCase()) && this.isExtensionAllowedToBeRecommended(extension)) {
+					result.push(extension.toLowerCase());
+				}
+			} else {
+				result.push(extension);
+			}
+		}
+		return result;
+	}
 
-  getFileBasedRecommendations(): string[] {
-    return this.toExtensionIds(this.fileBasedRecommendations.recommendations)
-  }
+	async getExeBasedRecommendations(exe?: string): Promise<{ important: string[]; others: string[] }> {
+		await this.exeBasedRecommendations.activate();
+		const { important, others } = exe ? this.exeBasedRecommendations.getRecommendations(exe)
+			: { important: this.exeBasedRecommendations.importantRecommendations, others: this.exeBasedRecommendations.otherRecommendations };
+		return { important: this.toExtensionIds(important), others: this.toExtensionIds(others) };
+	}
 
-  private onDidInstallExtensions(
-    results: readonly InstallExtensionResult[],
-  ): void {
-    for (const e of results) {
-      if (
-        e.source &&
-        !URI.isUri(e.source) &&
-        e.operation === InstallOperation.Install
-      ) {
-        const extRecommendations = this.getAllRecommendationsWithReason() || {}
-        const recommendationReason =
-          extRecommendations[e.source.identifier.id.toLowerCase()]
-        if (recommendationReason) {
-          /* __GDPR__
+	getFileBasedRecommendations(): string[] {
+		return this.toExtensionIds(this.fileBasedRecommendations.recommendations);
+	}
+
+	private onDidInstallExtensions(results: readonly InstallExtensionResult[]): void {
+		for (const e of results) {
+			if (e.source && !URI.isUri(e.source) && e.operation === InstallOperation.Install) {
+				const extRecommendations = this.getAllRecommendationsWithReason() || {};
+				const recommendationReason = extRecommendations[e.source.identifier.id.toLowerCase()];
+				if (recommendationReason) {
+					/* __GDPR__
 						"extensionGallery:install:recommendations" : {
 							"owner": "sandy081",
 							"recommendationReason": { "classification": "SystemMetaData", "purpose": "FeatureInsight", "isMeasurement": true },
@@ -377,71 +259,44 @@ export class ExtensionRecommendationsService
 							]
 						}
 					*/
-          this.telemetryService.publicLog(
-            "extensionGallery:install:recommendations",
-            {
-              ...e.source.telemetryData,
-              recommendationReason: recommendationReason.reasonId,
-            },
-          )
-        }
-      }
-    }
-  }
+					this.telemetryService.publicLog('extensionGallery:install:recommendations', { ...e.source.telemetryData, recommendationReason: recommendationReason.reasonId });
+				}
+			}
+		}
+	}
 
-  private toExtensionIds(
-    recommendations: ReadonlyArray<ExtensionRecommendation>,
-  ): string[] {
-    const extensionIds: string[] = []
-    for (const { extension } of recommendations) {
-      if (
-        isString(extension) &&
-        this.isExtensionAllowedToBeRecommended(extension) &&
-        !extensionIds.includes(extension.toLowerCase())
-      ) {
-        extensionIds.push(extension.toLowerCase())
-      }
-    }
-    return extensionIds
-  }
+	private toExtensionIds(recommendations: ReadonlyArray<ExtensionRecommendation>): string[] {
+		const extensionIds: string[] = [];
+		for (const { extension } of recommendations) {
+			if (isString(extension) && this.isExtensionAllowedToBeRecommended(extension) && !extensionIds.includes(extension.toLowerCase())) {
+				extensionIds.push(extension.toLowerCase());
+			}
+		}
+		return extensionIds;
+	}
 
-  private isExtensionAllowedToBeRecommended(extensionId: string): boolean {
-    return !this.extensionRecommendationsManagementService.ignoredRecommendations.includes(
-      extensionId.toLowerCase(),
-    )
-  }
+	private isExtensionAllowedToBeRecommended(extensionId: string): boolean {
+		return !this.extensionRecommendationsManagementService.ignoredRecommendations.includes(extensionId.toLowerCase());
+	}
 
-  private async promptWorkspaceRecommendations(): Promise<void> {
-    const installed = await this.extensionsWorkbenchService.queryLocal()
-    const allowedRecommendations = [
-      ...this.workspaceRecommendations.recommendations,
-      ...this.configBasedRecommendations.importantRecommendations.filter(
-        (recommendation) =>
-          !recommendation.whenNotInstalled ||
-          recommendation.whenNotInstalled.every((id) =>
-            installed.every(
-              (local) => !areSameExtensions(local.identifier, { id }),
-            ),
-          ),
-      ),
-    ]
-      .map(({ extension }) => extension)
-      .filter(
-        (extension) =>
-          !isString(extension) ||
-          this.isExtensionAllowedToBeRecommended(extension),
-      )
+	private async promptWorkspaceRecommendations(): Promise<void> {
+		const installed = await this.extensionsWorkbenchService.queryLocal();
+		const allowedRecommendations = [
+			...this.workspaceRecommendations.recommendations,
+			...this.configBasedRecommendations.importantRecommendations.filter(
+				recommendation => !recommendation.whenNotInstalled || recommendation.whenNotInstalled.every(id => installed.every(local => !areSameExtensions(local.identifier, { id }))))
+		]
+			.map(({ extension }) => extension)
+			.filter(extension => !isString(extension) || this.isExtensionAllowedToBeRecommended(extension));
 
-    if (allowedRecommendations.length) {
-      await this._registerP(timeout(5000))
-      await this.extensionRecommendationNotificationService.promptWorkspaceRecommendations(
-        allowedRecommendations,
-      )
-    }
-  }
+		if (allowedRecommendations.length) {
+			await this._registerP(timeout(5000));
+			await this.extensionRecommendationNotificationService.promptWorkspaceRecommendations(allowedRecommendations);
+		}
+	}
 
-  private _registerP<T>(o: CancelablePromise<T>): CancelablePromise<T> {
-    this._register(toDisposable(() => o.cancel()))
-    return o
-  }
+	private _registerP<T>(o: CancelablePromise<T>): CancelablePromise<T> {
+		this._register(toDisposable(() => o.cancel()));
+		return o;
+	}
 }

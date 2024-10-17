@@ -109,7 +109,7 @@ export class EditorPanes extends Disposable {
   readonly onDidFocus = this._onDidFocus.event
 
   private _onDidChangeSizeConstraints = this._register(
-    new Emitter<{ width: number; height: number } | undefined>(),
+    new Emitter<{ width: number; height: number } | undefined>()
   )
   readonly onDidChangeSizeConstraints = this._onDidChangeSizeConstraints.event
 
@@ -148,15 +148,15 @@ export class EditorPanes extends Disposable {
   private readonly editorPanes: EditorPane[] = []
 
   private readonly activeEditorPaneDisposables = this._register(
-    new DisposableStore(),
+    new DisposableStore()
   )
   private pagePosition: IDomNodePagePosition | undefined
   private boundarySashes: IBoundarySashes | undefined
   private readonly editorOperation = this._register(
-    new LongRunningOperation(this.editorProgressService),
+    new LongRunningOperation(this.editorProgressService)
   )
   private readonly editorPanesRegistry = Registry.as<IEditorPaneRegistry>(
-    EditorExtensions.EditorPane,
+    EditorExtensions.EditorPane
   )
 
   constructor(
@@ -172,7 +172,7 @@ export class EditorPanes extends Disposable {
     @IWorkspaceTrustManagementService
     private readonly workspaceTrustService: IWorkspaceTrustManagementService,
     @ILogService private readonly logService: ILogService,
-    @IDialogService private readonly dialogService: IDialogService,
+    @IDialogService private readonly dialogService: IDialogService
   ) {
     super()
 
@@ -186,8 +186,8 @@ export class EditorPanes extends Disposable {
   private registerListeners(): void {
     this._register(
       this.workspaceTrustService.onDidChangeTrust(() =>
-        this.onDidChangeWorkspaceTrust(),
-      ),
+        this.onDidChangeWorkspaceTrust()
+      )
     )
   }
 
@@ -209,7 +209,7 @@ export class EditorPanes extends Disposable {
     options: IEditorOptions | undefined,
     internalOptions: IInternalEditorOpenOptions | undefined,
     context: IEditorOpenContext = Object.create(null),
-    domElement?: HTMLElement,
+    domElement?: HTMLElement
   ): Promise<IOpenEditorResult> {
     try {
       return await this.doOpenEditor(
@@ -218,7 +218,7 @@ export class EditorPanes extends Disposable {
         options,
         internalOptions,
         context,
-        domElement,
+        domElement
       )
     } catch (error) {
       // First check if caller instructed us to ignore error handling
@@ -242,7 +242,7 @@ export class EditorPanes extends Disposable {
     editor: EditorInput,
     options: IEditorOptions | undefined,
     internalOptions: IInternalEditorOpenOptions | undefined,
-    context?: IEditorOpenContext,
+    context?: IEditorOpenContext
   ): Promise<IOpenEditorResult> {
     // Always log the error to figure out what is going on
     this.logService.error(error)
@@ -275,7 +275,7 @@ export class EditorPanes extends Disposable {
         editor,
         editorPlaceholderOptions,
         internalOptions,
-        context,
+        context
       )),
       error,
     }
@@ -283,7 +283,7 @@ export class EditorPanes extends Disposable {
 
   private async doShowErrorDialog(
     error: Error,
-    editor: EditorInput,
+    editor: EditorInput
   ): Promise<boolean> {
     let severity = Severity.Error
     let message: string | undefined = undefined
@@ -303,7 +303,7 @@ export class EditorPanes extends Disposable {
       message = localize(
         "editorOpenErrorDialog",
         "Unable to open '{0}'",
-        editor.getName(),
+        editor.getName()
       )
     }
 
@@ -319,7 +319,7 @@ export class EditorPanes extends Disposable {
       buttons.push({
         label: localize(
           { key: "ok", comment: ["&& denotes a mnemonic"] },
-          "&&OK",
+          "&&OK"
         ),
         run: () => undefined,
       })
@@ -350,7 +350,7 @@ export class EditorPanes extends Disposable {
       const errorActionResult = result.run()
       if (errorActionResult instanceof Promise) {
         errorActionResult.catch((error) =>
-          this.dialogService.error(toErrorMessage(error)),
+          this.dialogService.error(toErrorMessage(error))
         )
       }
 
@@ -366,7 +366,7 @@ export class EditorPanes extends Disposable {
     options: IEditorOptions | undefined,
     internalOptions: IInternalEditorOpenOptions | undefined,
     context: IEditorOpenContext = Object.create(null),
-    domElement?: HTMLElement,
+    domElement?: HTMLElement
   ): Promise<IOpenEditorResult> {
     // Editor pane
     const pane = this.doShowEditorPane(descriptor, domElement)
@@ -379,7 +379,7 @@ export class EditorPanes extends Disposable {
       pane,
       editor,
       options,
-      context,
+      context
     )
 
     // Make sure to pass focus to the pane or otherwise
@@ -452,7 +452,7 @@ export class EditorPanes extends Disposable {
 
   private doShowEditorPane(
     descriptor: IEditorPaneDescriptor,
-    domElement?: HTMLElement,
+    domElement?: HTMLElement
   ): EditorPane {
     // Hide active one first
     this.doHideActiveEditorPane()
@@ -483,7 +483,7 @@ export class EditorPanes extends Disposable {
     if (this.pagePosition) {
       editorPane.layout(
         new Dimension(this.pagePosition.width, this.pagePosition.height),
-        { top: this.pagePosition.top, left: this.pagePosition.left },
+        { top: this.pagePosition.top, left: this.pagePosition.left }
       )
     }
 
@@ -509,7 +509,7 @@ export class EditorPanes extends Disposable {
   }
 
   private doInstantiateEditorPane(
-    descriptor: IEditorPaneDescriptor,
+    descriptor: IEditorPaneDescriptor
   ): EditorPane {
     // Return early if already instantiated
     // const existingEditorPane = this.editorPanes.find(editorPane => descriptor.describes(editorPane));
@@ -519,7 +519,7 @@ export class EditorPanes extends Disposable {
 
     // Otherwise instantiate new
     const editorPane = this._register(
-      descriptor.instantiate(this.instantiationService, this.groupView),
+      descriptor.instantiate(this.instantiationService, this.groupView)
     )
     this.editorPanes.push(editorPane)
 
@@ -536,11 +536,11 @@ export class EditorPanes extends Disposable {
     if (editorPane) {
       this.activeEditorPaneDisposables.add(
         editorPane.onDidChangeSizeConstraints((e) =>
-          this._onDidChangeSizeConstraints.fire(e),
-        ),
+          this._onDidChangeSizeConstraints.fire(e)
+        )
       )
       this.activeEditorPaneDisposables.add(
-        editorPane.onDidFocus(() => this._onDidFocus.fire()),
+        editorPane.onDidFocus(() => this._onDidFocus.fire())
       )
     }
 
@@ -552,7 +552,7 @@ export class EditorPanes extends Disposable {
     editorPane: EditorPane,
     editor: EditorInput,
     options: IEditorOptions | undefined,
-    context: IEditorOpenContext,
+    context: IEditorOpenContext
   ): Promise<{ changed: boolean; cancelled: boolean }> {
     // If the input did not change, return early and only
     // apply the options unless the options instruct us to
@@ -568,7 +568,7 @@ export class EditorPanes extends Disposable {
     // and to support cancellation. Any new operation that is
     // started will cancel the previous one.
     const operation = this.editorOperation.start(
-      this.layoutService.isRestored() ? 800 : 3200,
+      this.layoutService.isRestored() ? 800 : 3200
     )
 
     let cancelled = false
@@ -625,7 +625,7 @@ export class EditorPanes extends Disposable {
 
   closeEditorIrrespectiveOfActive(editor: EditorInput): void {
     const index = this.editorPanes.findIndex(
-      (editorPane) => editorPane.input === editor,
+      (editorPane) => editorPane.input === editor
     )
     if (index === -1) return
 

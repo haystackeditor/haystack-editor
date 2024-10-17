@@ -9,150 +9,103 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { DisposableStore, IDisposable } from "vs/base/common/lifecycle"
-import { constObservable } from "vs/base/common/observable"
-import {
-  ICodeEditor,
-  IEditorMouseEvent,
-  MouseTargetType,
-} from "vs/editor/browser/editorBrowser"
-import { EditorOption } from "vs/editor/common/config/editorOptions"
-import { Range } from "vs/editor/common/core/range"
-import { IModelDecoration } from "vs/editor/common/model"
-import {
-  HoverAnchor,
-  HoverAnchorType,
-  HoverForeignElementAnchor,
-  IEditorHoverParticipant,
-  IEditorHoverRenderContext,
-  IHoverPart,
-} from "vs/editor/contrib/hover/browser/hoverTypes"
-import { IInstantiationService } from "vs/platform/instantiation/common/instantiation"
-import { ITelemetryService } from "vs/platform/telemetry/common/telemetry"
-import { InlineEditController } from "vs/editor/contrib/inlineEdit/browser/inlineEditController"
-import { InlineEditHintsContentWidget } from "vs/editor/contrib/inlineEdit/browser/inlineEditHintsWidget"
+import { DisposableStore, IDisposable } from 'vs/base/common/lifecycle';
+import { constObservable } from 'vs/base/common/observable';
+import { ICodeEditor, IEditorMouseEvent, MouseTargetType } from 'vs/editor/browser/editorBrowser';
+import { EditorOption } from 'vs/editor/common/config/editorOptions';
+import { Range } from 'vs/editor/common/core/range';
+import { IModelDecoration } from 'vs/editor/common/model';
+import { HoverAnchor, HoverAnchorType, HoverForeignElementAnchor, IEditorHoverParticipant, IEditorHoverRenderContext, IHoverPart } from 'vs/editor/contrib/hover/browser/hoverTypes';
+import { IInstantiationService } from 'vs/platform/instantiation/common/instantiation';
+import { ITelemetryService } from 'vs/platform/telemetry/common/telemetry';
+import { InlineEditController } from 'vs/editor/contrib/inlineEdit/browser/inlineEditController';
+import { InlineEditHintsContentWidget } from 'vs/editor/contrib/inlineEdit/browser/inlineEditHintsWidget';
 
 export class InlineEditHover implements IHoverPart {
-  constructor(
-    public readonly owner: IEditorHoverParticipant<InlineEditHover>,
-    public readonly range: Range,
-    public readonly controller: InlineEditController,
-  ) {}
+	constructor(
+		public readonly owner: IEditorHoverParticipant<InlineEditHover>,
+		public readonly range: Range,
+		public readonly controller: InlineEditController
+	) { }
 
-  public isValidForHoverAnchor(anchor: HoverAnchor): boolean {
-    return (
-      anchor.type === HoverAnchorType.Range &&
-      this.range.startColumn <= anchor.range.startColumn &&
-      this.range.endColumn >= anchor.range.endColumn
-    )
-  }
+	public isValidForHoverAnchor(anchor: HoverAnchor): boolean {
+		return (
+			anchor.type === HoverAnchorType.Range
+			&& this.range.startColumn <= anchor.range.startColumn
+			&& this.range.endColumn >= anchor.range.endColumn
+		);
+	}
 }
 
-export class InlineEditHoverParticipant
-  implements IEditorHoverParticipant<InlineEditHover>
-{
-  public readonly hoverOrdinal: number = 5
+export class InlineEditHoverParticipant implements IEditorHoverParticipant<InlineEditHover> {
 
-  constructor(
-    private readonly _editor: ICodeEditor,
-    @IInstantiationService
-    private readonly _instantiationService: IInstantiationService,
-    @ITelemetryService private readonly _telemetryService: ITelemetryService,
-  ) {}
+	public readonly hoverOrdinal: number = 5;
 
-  suggestHoverAnchor(mouseEvent: IEditorMouseEvent): HoverAnchor | null {
-    const controller = InlineEditController.get(this._editor)
-    if (!controller) {
-      return null
-    }
+	constructor(
+		private readonly _editor: ICodeEditor,
+		@IInstantiationService private readonly _instantiationService: IInstantiationService,
+		@ITelemetryService private readonly _telemetryService: ITelemetryService,
+	) {
+	}
 
-    const target = mouseEvent.target
-    if (target.type === MouseTargetType.CONTENT_VIEW_ZONE) {
-      // handle the case where the mouse is over the view zone
-      const viewZoneData = target.detail
-      if (controller.shouldShowHoverAtViewZone(viewZoneData.viewZoneId)) {
-        // const range = Range.fromPositions(this._editor.getModel()!.validatePosition(viewZoneData.positionBefore || viewZoneData.position));
-        const range = target.range
-        return new HoverForeignElementAnchor(
-          1000,
-          this,
-          range,
-          mouseEvent.event.posx,
-          mouseEvent.event.posy,
-          false,
-        )
-      }
-    }
-    if (target.type === MouseTargetType.CONTENT_EMPTY) {
-      // handle the case where the mouse is over the empty portion of a line following ghost text
-      if (controller.shouldShowHoverAt(target.range)) {
-        return new HoverForeignElementAnchor(
-          1000,
-          this,
-          target.range,
-          mouseEvent.event.posx,
-          mouseEvent.event.posy,
-          false,
-        )
-      }
-    }
-    if (target.type === MouseTargetType.CONTENT_TEXT) {
-      // handle the case where the mouse is directly over ghost text
-      const mightBeForeignElement = target.detail.mightBeForeignElement
-      if (mightBeForeignElement && controller.shouldShowHoverAt(target.range)) {
-        return new HoverForeignElementAnchor(
-          1000,
-          this,
-          target.range,
-          mouseEvent.event.posx,
-          mouseEvent.event.posy,
-          false,
-        )
-      }
-    }
-    return null
-  }
+	suggestHoverAnchor(mouseEvent: IEditorMouseEvent): HoverAnchor | null {
+		const controller = InlineEditController.get(this._editor);
+		if (!controller) {
+			return null;
+		}
 
-  computeSync(
-    anchor: HoverAnchor,
-    lineDecorations: IModelDecoration[],
-  ): InlineEditHover[] {
-    if (
-      this._editor.getOption(EditorOption.inlineEdit).showToolbar !== "onHover"
-    ) {
-      return []
-    }
+		const target = mouseEvent.target;
+		if (target.type === MouseTargetType.CONTENT_VIEW_ZONE) {
+			// handle the case where the mouse is over the view zone
+			const viewZoneData = target.detail;
+			if (controller.shouldShowHoverAtViewZone(viewZoneData.viewZoneId)) {
+				// const range = Range.fromPositions(this._editor.getModel()!.validatePosition(viewZoneData.positionBefore || viewZoneData.position));
+				const range = target.range;
+				return new HoverForeignElementAnchor(1000, this, range, mouseEvent.event.posx, mouseEvent.event.posy, false);
+			}
+		}
+		if (target.type === MouseTargetType.CONTENT_EMPTY) {
+			// handle the case where the mouse is over the empty portion of a line following ghost text
+			if (controller.shouldShowHoverAt(target.range)) {
+				return new HoverForeignElementAnchor(1000, this, target.range, mouseEvent.event.posx, mouseEvent.event.posy, false);
+			}
+		}
+		if (target.type === MouseTargetType.CONTENT_TEXT) {
+			// handle the case where the mouse is directly over ghost text
+			const mightBeForeignElement = target.detail.mightBeForeignElement;
+			if (mightBeForeignElement && controller.shouldShowHoverAt(target.range)) {
+				return new HoverForeignElementAnchor(1000, this, target.range, mouseEvent.event.posx, mouseEvent.event.posy, false);
+			}
+		}
+		return null;
+	}
 
-    const controller = InlineEditController.get(this._editor)
-    if (controller && controller.shouldShowHoverAt(anchor.range)) {
-      return [new InlineEditHover(this, anchor.range, controller)]
-    }
-    return []
-  }
+	computeSync(anchor: HoverAnchor, lineDecorations: IModelDecoration[]): InlineEditHover[] {
+		if (this._editor.getOption(EditorOption.inlineEdit).showToolbar !== 'onHover') {
+			return [];
+		}
 
-  renderHoverParts(
-    context: IEditorHoverRenderContext,
-    hoverParts: InlineEditHover[],
-  ): IDisposable {
-    const disposableStore = new DisposableStore()
+		const controller = InlineEditController.get(this._editor);
+		if (controller && controller.shouldShowHoverAt(anchor.range)) {
+			return [new InlineEditHover(this, anchor.range, controller)];
+		}
+		return [];
+	}
 
-    this._telemetryService.publicLog2<
-      {},
-      {
-        owner: "hediet"
-        comment: "This event tracks whenever an inline edit hover is shown."
-      }
-    >("inlineEditHover.shown")
+	renderHoverParts(context: IEditorHoverRenderContext, hoverParts: InlineEditHover[]): IDisposable {
+		const disposableStore = new DisposableStore();
 
-    const w = this._instantiationService.createInstance(
-      InlineEditHintsContentWidget,
-      this._editor,
-      false,
-      constObservable(null),
-    )
-    context.fragment.appendChild(w.getDomNode())
-    disposableStore.add(w)
+		this._telemetryService.publicLog2<{}, {
+			owner: 'hediet';
+			comment: 'This event tracks whenever an inline edit hover is shown.';
+		}>('inlineEditHover.shown');
 
-    return disposableStore
-  }
+		const w = this._instantiationService.createInstance(InlineEditHintsContentWidget, this._editor, false,
+			constObservable(null),
+		);
+		context.fragment.appendChild(w.getDomNode());
+		disposableStore.add(w);
+
+		return disposableStore;
+	}
 }

@@ -9,33 +9,23 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import {
-  WorkbenchPhase,
-  registerWorkbenchContribution2,
-} from "vs/workbench/common/contributions"
-import { ISplashStorageService } from "vs/workbench/contrib/splash/browser/splash"
-import {
-  InstantiationType,
-  registerSingleton,
-} from "vs/platform/instantiation/common/extensions"
-import { PartsSplash } from "vs/workbench/contrib/splash/browser/partsSplash"
-import { IPartsSplash } from "vs/platform/theme/common/themeService"
+import { WorkbenchPhase, registerWorkbenchContribution2 } from 'vs/workbench/common/contributions';
+import { ISplashStorageService } from 'vs/workbench/contrib/splash/browser/splash';
+import { InstantiationType, registerSingleton } from 'vs/platform/instantiation/common/extensions';
+import { PartsSplash } from 'vs/workbench/contrib/splash/browser/partsSplash';
+import { IPartsSplash } from 'vs/platform/theme/common/themeService';
 
-registerSingleton(
-  ISplashStorageService,
-  class SplashStorageService implements ISplashStorageService {
-    _serviceBrand: undefined
+registerSingleton(ISplashStorageService, class SplashStorageService implements ISplashStorageService {
+	_serviceBrand: undefined;
 
-    async saveWindowSplash(splash: IPartsSplash): Promise<void> {
-      const raw = JSON.stringify(splash)
-      localStorage.setItem("monaco-parts-splash", raw)
-    }
-  },
-  InstantiationType.Delayed,
-)
+	async saveWindowSplash(splash: IPartsSplash): Promise<void> {
+		const raw = JSON.stringify(splash);
+		localStorage.setItem('monaco-parts-splash', raw);
+	}
+}, InstantiationType.Delayed);
 
 registerWorkbenchContribution2(
-  PartsSplash.ID,
-  PartsSplash,
-  WorkbenchPhase.BlockStartup,
-)
+	PartsSplash.ID,
+	PartsSplash,
+	WorkbenchPhase.BlockStartup
+);

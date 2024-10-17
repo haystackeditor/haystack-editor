@@ -1,6 +1,6 @@
-let a = Array<number>() // Highlight ok here
+let a = Array<number>();   // Highlight ok here
 
 interface egGenericsInArray {
-  a: Array<number>
+   a: Array<number>;
 }
-let s = "nothing should fail here..."
+let s = "nothing should fail here...";

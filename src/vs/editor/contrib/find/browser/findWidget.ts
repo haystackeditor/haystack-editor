@@ -112,16 +112,16 @@ const findCollapsedIcon = registerIcon(
   Codicon.chevronRight,
   nls.localize(
     "findCollapsedIcon",
-    "Icon to indicate that the editor find widget is collapsed.",
-  ),
+    "Icon to indicate that the editor find widget is collapsed."
+  )
 )
 const findExpandedIcon = registerIcon(
   "find-expanded",
   Codicon.chevronDown,
   nls.localize(
     "findExpandedIcon",
-    "Icon to indicate that the editor find widget is expanded.",
-  ),
+    "Icon to indicate that the editor find widget is expanded."
+  )
 )
 
 export const findSelectionIcon = registerIcon(
@@ -129,40 +129,40 @@ export const findSelectionIcon = registerIcon(
   Codicon.selection,
   nls.localize(
     "findSelectionIcon",
-    "Icon for 'Find in Selection' in the editor find widget.",
-  ),
+    "Icon for 'Find in Selection' in the editor find widget."
+  )
 )
 export const findReplaceIcon = registerIcon(
   "find-replace",
   Codicon.replace,
   nls.localize(
     "findReplaceIcon",
-    "Icon for 'Replace' in the editor find widget.",
-  ),
+    "Icon for 'Replace' in the editor find widget."
+  )
 )
 export const findReplaceAllIcon = registerIcon(
   "find-replace-all",
   Codicon.replaceAll,
   nls.localize(
     "findReplaceAllIcon",
-    "Icon for 'Replace All' in the editor find widget.",
-  ),
+    "Icon for 'Replace All' in the editor find widget."
+  )
 )
 export const findPreviousMatchIcon = registerIcon(
   "find-previous-match",
   Codicon.arrowUp,
   nls.localize(
     "findPreviousMatchIcon",
-    "Icon for 'Find Previous' in the editor find widget.",
-  ),
+    "Icon for 'Find Previous' in the editor find widget."
+  )
 )
 export const findNextMatchIcon = registerIcon(
   "find-next-match",
   Codicon.arrowDown,
   nls.localize(
     "findNextMatchIcon",
-    "Icon for 'Find Next' in the editor find widget.",
-  ),
+    "Icon for 'Find Next' in the editor find widget."
+  )
 )
 
 export interface IFindController {
@@ -176,39 +176,39 @@ const NLS_FIND_INPUT_LABEL = nls.localize("label.find", "Find")
 const NLS_FIND_INPUT_PLACEHOLDER = nls.localize("placeholder.find", "Find")
 const NLS_PREVIOUS_MATCH_BTN_LABEL = nls.localize(
   "label.previousMatchButton",
-  "Previous Match",
+  "Previous Match"
 )
 const NLS_NEXT_MATCH_BTN_LABEL = nls.localize(
   "label.nextMatchButton",
-  "Next Match",
+  "Next Match"
 )
 const NLS_TOGGLE_SELECTION_FIND_TITLE = nls.localize(
   "label.toggleSelectionFind",
-  "Find in Selection",
+  "Find in Selection"
 )
 const NLS_CLOSE_BTN_LABEL = nls.localize("label.closeButton", "Close")
 const NLS_REPLACE_INPUT_LABEL = nls.localize("label.replace", "Replace")
 const NLS_REPLACE_INPUT_PLACEHOLDER = nls.localize(
   "placeholder.replace",
-  "Replace",
+  "Replace"
 )
 const NLS_REPLACE_BTN_LABEL = nls.localize("label.replaceButton", "Replace")
 const NLS_REPLACE_ALL_BTN_LABEL = nls.localize(
   "label.replaceAllButton",
-  "Replace All",
+  "Replace All"
 )
 const NLS_TOGGLE_REPLACE_MODE_BTN_LABEL = nls.localize(
   "label.toggleReplaceButton",
-  "Toggle Replace",
+  "Toggle Replace"
 )
 const NLS_MATCHES_COUNT_LIMIT_TITLE = nls.localize(
   "title.matchesCountLimit",
   "Only the first {0} results are highlighted, but all find operations work on the entire text.",
-  MATCHES_LIMIT,
+  MATCHES_LIMIT
 )
 export const NLS_MATCHES_LOCATION = nls.localize(
   "label.matchesLocation",
-  "{0} of {1}",
+  "{0} of {1}"
 )
 export const NLS_NO_RESULTS = nls.localize("label.noResults", "No results")
 
@@ -243,7 +243,7 @@ export class FindWidgetViewZone implements IViewZone {
 function stopPropagationForMultiLineUpwards(
   event: IKeyboardEvent,
   value: string,
-  textarea: HTMLTextAreaElement | null,
+  textarea: HTMLTextAreaElement | null
 ) {
   const isMultiline = !!value.match(/\n/)
   if (textarea && isMultiline && textarea.selectionStart > 0) {
@@ -255,7 +255,7 @@ function stopPropagationForMultiLineUpwards(
 function stopPropagationForMultiLineDownwards(
   event: IKeyboardEvent,
   value: string,
-  textarea: HTMLTextAreaElement | null,
+  textarea: HTMLTextAreaElement | null
 ) {
   const isMultiline = !!value.match(/\n/)
   if (
@@ -322,7 +322,7 @@ export class FindWidget
     themeService: IThemeService,
     storageService: IStorageService,
     notificationService: INotificationService,
-    private readonly _hoverService: IHoverService,
+    private readonly _hoverService: IHoverService
   ) {
     super()
     this._codeEditor = codeEditor
@@ -336,7 +336,7 @@ export class FindWidget
 
     this._ctrlEnterReplaceAllWarningPrompted = !!storageService.getBoolean(
       ctrlEnterReplaceAllWarningPromptedKey,
-      StorageScope.PROFILE,
+      StorageScope.PROFILE
     )
 
     this._isVisible = false
@@ -346,7 +346,7 @@ export class FindWidget
     this._updateHistoryDelayer = new Delayer<void>(500)
     this._register(toDisposable(() => this._updateHistoryDelayer.cancel()))
     this._register(
-      this._state.onFindReplaceStateChange((e) => this._onStateChanged(e)),
+      this._state.onFindReplaceStateChange((e) => this._onStateChanged(e))
     )
     this._buildDomNode()
     this._updateButtons()
@@ -373,11 +373,11 @@ export class FindWidget
 
           if (e.hasChanged(EditorOption.find)) {
             const supportLoop = this._codeEditor.getOption(
-              EditorOption.find,
+              EditorOption.find
             ).loop
             this._state.change({ loop: supportLoop }, false)
             const addExtraSpaceOnTop = this._codeEditor.getOption(
-              EditorOption.find,
+              EditorOption.find
             ).addExtraSpaceOnTop
             if (addExtraSpaceOnTop && !this._viewZone) {
               this._viewZone = new FindWidgetViewZone(0)
@@ -387,8 +387,8 @@ export class FindWidget
               this._removeViewZone()
             }
           }
-        },
-      ),
+        }
+      )
     )
     this.updateAccessibilitySupport()
     this._register(
@@ -396,7 +396,7 @@ export class FindWidget
         if (this._isVisible) {
           this._updateToggleSelectionFindButton()
         }
-      }),
+      })
     )
     this._register(
       this._codeEditor.onDidFocusEditorWidget(async () => {
@@ -410,40 +410,40 @@ export class FindWidget
             this._findInput.select()
           }
         }
-      }),
+      })
     )
     this._findInputFocused =
       CONTEXT_FIND_INPUT_FOCUSED.bindTo(contextKeyService)
     this._findFocusTracker = this._register(
-      dom.trackFocus(this._findInput.inputBox.inputElement),
+      dom.trackFocus(this._findInput.inputBox.inputElement)
     )
     this._register(
       this._findFocusTracker.onDidFocus(() => {
         this._findInputFocused.set(true)
         this._updateSearchScope()
-      }),
+      })
     )
     this._register(
       this._findFocusTracker.onDidBlur(() => {
         this._findInputFocused.set(false)
-      }),
+      })
     )
 
     this._replaceInputFocused =
       CONTEXT_REPLACE_INPUT_FOCUSED.bindTo(contextKeyService)
     this._replaceFocusTracker = this._register(
-      dom.trackFocus(this._replaceInput.inputBox.inputElement),
+      dom.trackFocus(this._replaceInput.inputBox.inputElement)
     )
     this._register(
       this._replaceFocusTracker.onDidFocus(() => {
         this._replaceInputFocused.set(true)
         this._updateSearchScope()
-      }),
+      })
     )
     this._register(
       this._replaceFocusTracker.onDidBlur(() => {
         this._replaceInputFocused.set(false)
-      }),
+      })
     )
 
     this._codeEditor.addOverlayWidget(this)
@@ -457,7 +457,7 @@ export class FindWidget
           return
         }
         this._viewZoneId = undefined
-      }),
+      })
     )
 
     this._register(
@@ -471,7 +471,7 @@ export class FindWidget
         setTimeout(() => {
           this._layoutViewZone()
         }, 0)
-      }),
+      })
     )
   }
 
@@ -623,7 +623,7 @@ export class FindWidget
       label = strings.format(
         NLS_MATCHES_LOCATION,
         matchesPosition,
-        matchesCount,
+        matchesCount
       )
     } else {
       label = NLS_NO_RESULTS
@@ -635,12 +635,12 @@ export class FindWidget
       this._getAriaLabel(
         label,
         this._state.currentMatch,
-        this._state.searchString,
-      ),
+        this._state.searchString
+      )
     )
     MAX_MATCHES_COUNT_WIDTH = Math.max(
       MAX_MATCHES_COUNT_WIDTH,
-      this._matchesCount.clientWidth,
+      this._matchesCount.clientWidth
     )
   }
 
@@ -649,7 +649,7 @@ export class FindWidget
   private _getAriaLabel(
     label: string,
     currentMatch: Range | null,
-    searchString: string,
+    searchString: string
   ): string {
     if (label === NLS_NO_RESULTS) {
       return searchString === ""
@@ -658,7 +658,7 @@ export class FindWidget
             "ariaSearchNoResult",
             "{0} found for '{1}'",
             label,
-            searchString,
+            searchString
           )
     }
     if (currentMatch) {
@@ -667,7 +667,7 @@ export class FindWidget
         "{0} found for '{1}', at {2}",
         label,
         searchString,
-        currentMatch.startLineNumber + ":" + currentMatch.startColumn,
+        currentMatch.startLineNumber + ":" + currentMatch.startColumn
       )
       const model = this._codeEditor.getModel()
       if (
@@ -686,7 +686,7 @@ export class FindWidget
       "ariaSearchNoResultWithLineNumNoCurrentMatch",
       "{0} found for '{1}'",
       label,
-      searchString,
+      searchString
     )
   }
 
@@ -721,19 +721,19 @@ export class FindWidget
       this._isVisible &&
         findInputIsNonEmpty &&
         matchesCount &&
-        this._state.canNavigateBack(),
+        this._state.canNavigateBack()
     )
     this._nextBtn.setEnabled(
       this._isVisible &&
         findInputIsNonEmpty &&
         matchesCount &&
-        this._state.canNavigateForward(),
+        this._state.canNavigateForward()
     )
     this._replaceBtn.setEnabled(
-      this._isVisible && this._isReplaceVisible && findInputIsNonEmpty,
+      this._isVisible && this._isReplaceVisible && findInputIsNonEmpty
     )
     this._replaceAllBtn.setEnabled(
-      this._isVisible && this._isReplaceVisible && findInputIsNonEmpty,
+      this._isVisible && this._isReplaceVisible && findInputIsNonEmpty
     )
 
     this._domNode.classList.toggle("replaceToggled", this._isReplaceVisible)
@@ -783,14 +783,14 @@ export class FindWidget
         setTimeout(() => {
           this._domNode.classList.add("visible")
           this._domNode.setAttribute("aria-hidden", "false")
-        }, 0),
+        }, 0)
       )
 
       // validate query again as it's being dismissed when we hide the find widget.
       this._revealTimeouts.push(
         setTimeout(() => {
           this._findInput.validate()
-        }, 200),
+        }, 200)
       )
 
       this._codeEditor.layoutOverlayWidget(this)
@@ -805,7 +805,7 @@ export class FindWidget
         if (domNode) {
           const editorCoords = dom.getDomNodePagePosition(domNode)
           const startCoords = this._codeEditor.getScrolledVisiblePosition(
-            selection.getStartPosition(),
+            selection.getStartPosition()
           )
           const startLeft =
             editorCoords.left + (startCoords ? startCoords.left : 0)
@@ -821,7 +821,7 @@ export class FindWidget
               adjustEditorScrollTop = false
             }
             const endCoords = this._codeEditor.getScrolledVisiblePosition(
-              selection.getEndPosition(),
+              selection.getEndPosition()
             )
             const endLeft = editorCoords.left + (endCoords ? endCoords.left : 0)
             if (endLeft > leftOfFindWidget) {
@@ -859,7 +859,7 @@ export class FindWidget
 
   private _layoutViewZone(targetScrollTop?: number) {
     const addExtraSpaceOnTop = this._codeEditor.getOption(
-      EditorOption.find,
+      EditorOption.find
     ).addExtraSpaceOnTop
 
     if (!addExtraSpaceOnTop) {
@@ -880,8 +880,7 @@ export class FindWidget
       this._viewZoneId = accessor.addZone(viewZone)
       // scroll top adjust to make sure the editor doesn't scroll when adding viewzone at the beginning.
       this._codeEditor.setScrollTop(
-        targetScrollTop ||
-          this._codeEditor.getScrollTop() + viewZone.heightInPx,
+        targetScrollTop || this._codeEditor.getScrollTop() + viewZone.heightInPx
       )
     })
   }
@@ -892,7 +891,7 @@ export class FindWidget
     }
 
     const addExtraSpaceOnTop = this._codeEditor.getOption(
-      EditorOption.find,
+      EditorOption.find
     ).addExtraSpaceOnTop
 
     if (!addExtraSpaceOnTop) {
@@ -919,7 +918,7 @@ export class FindWidget
 
         if (adjustScroll) {
           this._codeEditor.setScrollTop(
-            this._codeEditor.getScrollTop() + scrollAdjustment,
+            this._codeEditor.getScrollTop() + scrollAdjustment
           )
         }
 
@@ -938,7 +937,7 @@ export class FindWidget
 
         if (adjustScroll) {
           this._codeEditor.setScrollTop(
-            this._codeEditor.getScrollTop() + scrollAdjustment,
+            this._codeEditor.getScrollTop() + scrollAdjustment
           )
         }
       }
@@ -952,7 +951,7 @@ export class FindWidget
         this._viewZoneId = undefined
         if (this._viewZone) {
           this._codeEditor.setScrollTop(
-            this._codeEditor.getScrollTop() - this._viewZone.heightInPx,
+            this._codeEditor.getScrollTop() - this._viewZone.heightInPx
           )
           this._viewZone = undefined
         }
@@ -1108,7 +1107,7 @@ export class FindWidget
               selection.endLineNumber - 1,
               this._codeEditor
                 .getModel()!
-                .getLineMaxColumn(selection.endLineNumber - 1),
+                .getLineMaxColumn(selection.endLineNumber - 1)
             )
           }
           const currentMatch = this._state.currentMatch
@@ -1166,7 +1165,7 @@ export class FindWidget
       return stopPropagationForMultiLineUpwards(
         e,
         this._findInput.getValue(),
-        this._findInput.domNode.querySelector("textarea"),
+        this._findInput.domNode.querySelector("textarea")
       )
     }
 
@@ -1174,7 +1173,7 @@ export class FindWidget
       return stopPropagationForMultiLineDownwards(
         e,
         this._findInput.getValue(),
-        this._findInput.domNode.querySelector("textarea"),
+        this._findInput.domNode.querySelector("textarea")
       )
     }
   }
@@ -1194,8 +1193,8 @@ export class FindWidget
           this._notificationService.info(
             nls.localize(
               "ctrlEnter.keybindingChanged",
-              "Ctrl+Enter now inserts line break instead of replacing all. You can modify the keybinding for editor.action.replaceAll to override this behavior.",
-            ),
+              "Ctrl+Enter now inserts line break instead of replacing all. You can modify the keybinding for editor.action.replaceAll to override this behavior."
+            )
           )
 
           this._ctrlEnterReplaceAllWarningPrompted = true
@@ -1203,7 +1202,7 @@ export class FindWidget
             ctrlEnterReplaceAllWarningPromptedKey,
             true,
             StorageScope.PROFILE,
-            StorageTarget.USER,
+            StorageTarget.USER
           )
         }
 
@@ -1235,7 +1234,7 @@ export class FindWidget
       return stopPropagationForMultiLineUpwards(
         e,
         this._replaceInput.inputBox.value,
-        this._replaceInput.inputBox.element.querySelector("textarea"),
+        this._replaceInput.inputBox.element.querySelector("textarea")
       )
     }
 
@@ -1243,7 +1242,7 @@ export class FindWidget
       return stopPropagationForMultiLineDownwards(
         e,
         this._replaceInput.inputBox.value,
-        this._replaceInput.inputBox.element.querySelector("textarea"),
+        this._replaceInput.inputBox.element.querySelector("textarea")
       )
     }
   }
@@ -1275,13 +1274,13 @@ export class FindWidget
           label: NLS_FIND_INPUT_LABEL,
           placeholder: NLS_FIND_INPUT_PLACEHOLDER,
           appendCaseSensitiveLabel: this._keybindingLabelFor(
-            FIND_IDS.ToggleCaseSensitiveCommand,
+            FIND_IDS.ToggleCaseSensitiveCommand
           ),
           appendWholeWordsLabel: this._keybindingLabelFor(
-            FIND_IDS.ToggleWholeWordCommand,
+            FIND_IDS.ToggleWholeWordCommand
           ),
           appendRegexLabel: this._keybindingLabelFor(
-            FIND_IDS.ToggleRegexCommand,
+            FIND_IDS.ToggleRegexCommand
           ),
           validation: (value: string): InputBoxMessage | null => {
             if (value.length === 0 || !this._findInput.getRegex()) {
@@ -1304,14 +1303,14 @@ export class FindWidget
           inputBoxStyles: defaultInputBoxStyles,
           toggleStyles: defaultToggleStyles,
         },
-        this._contextKeyService,
-      ),
+        this._contextKeyService
+      )
     )
     this._findInput.setRegex(!!this._state.isRegex)
     this._findInput.setCaseSensitive(!!this._state.matchCase)
     this._findInput.setWholeWords(!!this._state.wholeWord)
     this._register(
-      this._findInput.onKeyDown((e) => this._onFindInputKeyDown(e)),
+      this._findInput.onKeyDown((e) => this._onFindInputKeyDown(e))
     )
     this._register(
       this._findInput.inputBox.onDidChange(() => {
@@ -1319,7 +1318,7 @@ export class FindWidget
           return
         }
         this._state.change({ searchString: this._findInput.getValue() }, true)
-      }),
+      })
     )
     this._register(
       this._findInput.onDidOptionChange(() => {
@@ -1329,9 +1328,9 @@ export class FindWidget
             wholeWord: this._findInput.getWholeWords(),
             matchCase: this._findInput.getCaseSensitive(),
           },
-          true,
+          true
         )
-      }),
+      })
     )
     this._register(
       this._findInput.onCaseSensitiveKeyDown((e) => {
@@ -1341,7 +1340,7 @@ export class FindWidget
             e.preventDefault()
           }
         }
-      }),
+      })
     )
     this._register(
       this._findInput.onRegexKeyDown((e) => {
@@ -1351,18 +1350,18 @@ export class FindWidget
             e.preventDefault()
           }
         }
-      }),
+      })
     )
     this._register(
       this._findInput.inputBox.onDidHeightChange((e) => {
         if (this._tryUpdateHeight()) {
           this._showViewZone()
         }
-      }),
+      })
     )
     if (platform.isLinux) {
       this._register(
-        this._findInput.onMouseDown((e) => this._onFindInputMouseDown(e)),
+        this._findInput.onMouseDown((e) => this._onFindInputMouseDown(e))
       )
     }
 
@@ -1384,14 +1383,14 @@ export class FindWidget
           hoverDelegate,
           onTrigger: () => {
             assertIsDefined(
-              this._codeEditor.getAction(FIND_IDS.PreviousMatchFindAction),
+              this._codeEditor.getAction(FIND_IDS.PreviousMatchFindAction)
             )
               .run()
               .then(undefined, onUnexpectedError)
           },
         },
-        this._hoverService,
-      ),
+        this._hoverService
+      )
     )
 
     // Next button
@@ -1405,14 +1404,14 @@ export class FindWidget
           hoverDelegate,
           onTrigger: () => {
             assertIsDefined(
-              this._codeEditor.getAction(FIND_IDS.NextMatchFindAction),
+              this._codeEditor.getAction(FIND_IDS.NextMatchFindAction)
             )
               .run()
               .then(undefined, onUnexpectedError)
           },
         },
-        this._hoverService,
-      ),
+        this._hoverService
+      )
     )
 
     const findPart = document.createElement("div")
@@ -1437,7 +1436,7 @@ export class FindWidget
         inputActiveOptionBackground: asCssVariable(inputActiveOptionBackground),
         inputActiveOptionBorder: asCssVariable(inputActiveOptionBorder),
         inputActiveOptionForeground: asCssVariable(inputActiveOptionForeground),
-      }),
+      })
     )
 
     this._register(
@@ -1455,7 +1454,7 @@ export class FindWidget
                     selection.endLineNumber - 1,
                     this._codeEditor
                       .getModel()!
-                      .getLineMaxColumn(selection.endLineNumber - 1),
+                      .getLineMaxColumn(selection.endLineNumber - 1)
                   )
                 }
                 if (!selection.isEmpty()) {
@@ -1472,7 +1471,7 @@ export class FindWidget
         } else {
           this._state.change({ searchScope: null }, true)
         }
-      }),
+      })
     )
 
     actionsContainer.appendChild(this._toggleSelectionFind.domNode)
@@ -1502,8 +1501,8 @@ export class FindWidget
             }
           },
         },
-        this._hoverService,
-      ),
+        this._hoverService
+      )
     )
 
     // Replace input
@@ -1515,7 +1514,7 @@ export class FindWidget
           label: NLS_REPLACE_INPUT_LABEL,
           placeholder: NLS_REPLACE_INPUT_PLACEHOLDER,
           appendPreserveCaseLabel: this._keybindingLabelFor(
-            FIND_IDS.TogglePreserveCaseCommand,
+            FIND_IDS.TogglePreserveCaseCommand
           ),
           history: [],
           flexibleHeight,
@@ -1527,27 +1526,27 @@ export class FindWidget
           toggleStyles: defaultToggleStyles,
         },
         this._contextKeyService,
-        true,
-      ),
+        true
+      )
     )
     this._replaceInput.setPreserveCase(!!this._state.preserveCase)
     this._register(
-      this._replaceInput.onKeyDown((e) => this._onReplaceInputKeyDown(e)),
+      this._replaceInput.onKeyDown((e) => this._onReplaceInputKeyDown(e))
     )
     this._register(
       this._replaceInput.inputBox.onDidChange(() => {
         this._state.change(
           { replaceString: this._replaceInput.inputBox.value },
-          false,
+          false
         )
-      }),
+      })
     )
     this._register(
       this._replaceInput.inputBox.onDidHeightChange((e) => {
         if (this._isReplaceVisible && this._tryUpdateHeight()) {
           this._showViewZone()
         }
-      }),
+      })
     )
     this._register(
       this._replaceInput.onDidOptionChange(() => {
@@ -1555,9 +1554,9 @@ export class FindWidget
           {
             preserveCase: this._replaceInput.getPreserveCase(),
           },
-          true,
+          true
         )
-      }),
+      })
     )
     this._register(
       this._replaceInput.onPreserveCaseKeyDown((e) => {
@@ -1574,7 +1573,7 @@ export class FindWidget
 
           e.preventDefault()
         }
-      }),
+      })
     )
 
     // Create scoped hover delegate for replace actions
@@ -1599,8 +1598,8 @@ export class FindWidget
             }
           },
         },
-        this._hoverService,
-      ),
+        this._hoverService
+      )
     )
 
     // Replace all button
@@ -1616,8 +1615,8 @@ export class FindWidget
             this._controller.replaceAll()
           },
         },
-        this._hoverService,
-      ),
+        this._hoverService
+      )
     )
 
     const replacePart = document.createElement("div")
@@ -1640,19 +1639,19 @@ export class FindWidget
           onTrigger: () => {
             this._state.change(
               { isReplaceRevealed: !this._isReplaceVisible },
-              false,
+              false
             )
             if (this._isReplaceVisible) {
               this._replaceInput.width = dom.getTotalWidth(
-                this._findInput.domNode,
+                this._findInput.domNode
               )
               this._replaceInput.inputBox.layout()
             }
             this._showViewZone()
           },
         },
-        this._hoverService,
-      ),
+        this._hoverService
+      )
     )
     this._toggleReplaceBtn.setExpanded(this._isReplaceVisible)
 
@@ -1675,7 +1674,7 @@ export class FindWidget
       new Sash(this._domNode, this, {
         orientation: Orientation.VERTICAL,
         size: 2,
-      }),
+      })
     )
     this._resized = false
     let originalWidth = FIND_WIDGET_INITIAL_WIDTH
@@ -1683,7 +1682,7 @@ export class FindWidget
     this._register(
       this._resizeSash.onDidStart(() => {
         originalWidth = dom.getTotalWidth(this._domNode)
-      }),
+      })
     )
 
     this._register(
@@ -1708,7 +1707,7 @@ export class FindWidget
 
         this._findInput.inputBox.layout()
         this._tryUpdateHeight()
-      }),
+      })
     )
 
     this._register(
@@ -1741,14 +1740,14 @@ export class FindWidget
         }
 
         this._findInput.inputBox.layout()
-      }),
+      })
     )
   }
 
   private updateAccessibilitySupport(): void {
     const value = this._codeEditor.getOption(EditorOption.accessibilitySupport)
     this._findInput.setFocusInputOnOptionClick(
-      value !== AccessibilitySupport.Enabled,
+      value !== AccessibilitySupport.Enabled
     )
   }
 
@@ -1811,8 +1810,8 @@ export class SimpleButton extends Widget {
       hoverService.setupUpdatableHover(
         opts.hoverDelegate ?? getDefaultHoverDelegate("element"),
         this._domNode,
-        this._opts.label,
-      ),
+        this._opts.label
+      )
     )
 
     this.onclick(this._domNode, (e) => {
@@ -1852,17 +1851,17 @@ export class SimpleButton extends Widget {
     this._domNode.setAttribute("aria-expanded", String(!!expanded))
     if (expanded) {
       this._domNode.classList.remove(
-        ...ThemeIcon.asClassNameArray(findCollapsedIcon),
+        ...ThemeIcon.asClassNameArray(findCollapsedIcon)
       )
       this._domNode.classList.add(
-        ...ThemeIcon.asClassNameArray(findExpandedIcon),
+        ...ThemeIcon.asClassNameArray(findExpandedIcon)
       )
     } else {
       this._domNode.classList.remove(
-        ...ThemeIcon.asClassNameArray(findExpandedIcon),
+        ...ThemeIcon.asClassNameArray(findExpandedIcon)
       )
       this._domNode.classList.add(
-        ...ThemeIcon.asClassNameArray(findCollapsedIcon),
+        ...ThemeIcon.asClassNameArray(findCollapsedIcon)
       )
     }
   }
@@ -1872,45 +1871,45 @@ export class SimpleButton extends Widget {
 
 registerThemingParticipant((theme, collector) => {
   const findMatchHighlightBorder = theme.getColor(
-    editorFindMatchHighlightBorder,
+    editorFindMatchHighlightBorder
   )
   if (findMatchHighlightBorder) {
     collector.addRule(
       `.monaco-editor .findMatch { border: 1px ${
         isHighContrast(theme.type) ? "dotted" : "solid"
-      } ${findMatchHighlightBorder}; box-sizing: border-box; }`,
+      } ${findMatchHighlightBorder}; box-sizing: border-box; }`
     )
   }
 
   const findRangeHighlightBorder = theme.getColor(
-    editorFindRangeHighlightBorder,
+    editorFindRangeHighlightBorder
   )
   if (findRangeHighlightBorder) {
     collector.addRule(
       `.monaco-editor .findScope { border: 1px ${
         isHighContrast(theme.type) ? "dashed" : "solid"
-      } ${findRangeHighlightBorder}; }`,
+      } ${findRangeHighlightBorder}; }`
     )
   }
 
   const hcBorder = theme.getColor(contrastBorder)
   if (hcBorder) {
     collector.addRule(
-      `.monaco-editor .find-widget { border: 1px solid ${hcBorder}; }`,
+      `.monaco-editor .find-widget { border: 1px solid ${hcBorder}; }`
     )
   }
   const findMatchForeground = theme.getColor(editorFindMatchForeground)
   if (findMatchForeground) {
     collector.addRule(
-      `.monaco-editor .findMatchInline { color: ${findMatchForeground}; }`,
+      `.monaco-editor .findMatchInline { color: ${findMatchForeground}; }`
     )
   }
   const findMatchHighlightForeground = theme.getColor(
-    editorFindMatchHighlightForeground,
+    editorFindMatchHighlightForeground
   )
   if (findMatchHighlightForeground) {
     collector.addRule(
-      `.monaco-editor .currentFindMatchInline { color: ${findMatchHighlightForeground}; }`,
+      `.monaco-editor .currentFindMatchInline { color: ${findMatchHighlightForeground}; }`
     )
   }
 })

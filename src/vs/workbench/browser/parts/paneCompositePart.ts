@@ -105,7 +105,7 @@ export interface IPaneCompositePart extends IView {
    */
   openPaneComposite(
     id: string | undefined,
-    focus?: boolean,
+    focus?: boolean
   ): Promise<IPaneComposite | undefined>
 
   /**
@@ -167,7 +167,7 @@ export abstract class AbstractPaneCompositePart
   get onDidPaneCompositeOpen(): Event<IPaneComposite> {
     return Event.map(
       this.onDidCompositeOpen.event,
-      (compositeEvent) => <IPaneComposite>compositeEvent.composite,
+      (compositeEvent) => <IPaneComposite>compositeEvent.composite
     )
   }
   readonly onDidPaneCompositeClose = this.onDidCompositeClose
@@ -177,11 +177,11 @@ export abstract class AbstractPaneCompositePart
   private titleContainer: HTMLElement | undefined
   private headerFooterCompositeBarContainer: HTMLElement | undefined
   protected readonly headerFooterCompositeBarDispoables = this._register(
-    new DisposableStore(),
+    new DisposableStore()
   )
   private paneCompositeBarContainer: HTMLElement | undefined
   private readonly paneCompositeBar = this._register(
-    new MutableDisposable<PaneCompositeBar>(),
+    new MutableDisposable<PaneCompositeBar>()
   )
   private compositeBarPosition: CompositeBarPosition | undefined = undefined
   private emptyPaneMessageElement: HTMLElement | undefined
@@ -217,7 +217,7 @@ export abstract class AbstractPaneCompositePart
     @IContextKeyService
     protected readonly contextKeyService: IContextKeyService,
     @IExtensionService private readonly extensionService: IExtensionService,
-    @IMenuService protected readonly menuService: IMenuService,
+    @IMenuService protected readonly menuService: IMenuService
   ) {
     let location = ViewContainerLocation.Sidebar
     let registryId = Extensions.Viewlets
@@ -247,7 +247,7 @@ export abstract class AbstractPaneCompositePart
       compositeCSSClass,
       titleForegroundColor,
       partId,
-      partOptions,
+      partOptions
     )
 
     this.location = location
@@ -256,8 +256,8 @@ export abstract class AbstractPaneCompositePart
         CompositeMenuActions,
         globalActionsMenuId,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
 
     this.registerListeners()
@@ -265,11 +265,11 @@ export abstract class AbstractPaneCompositePart
 
   private registerListeners(): void {
     this._register(
-      this.onDidPaneCompositeOpen((composite) => this.onDidOpen(composite)),
+      this.onDidPaneCompositeOpen((composite) => this.onDidOpen(composite))
     )
     this._register(this.onDidPaneCompositeClose(this.onDidClose, this))
     this._register(
-      this.globalActions.onDidChange(() => this.updateGlobalToolbarActions()),
+      this.globalActions.onDidChange(() => this.updateGlobalToolbarActions())
     )
 
     this._register(
@@ -280,14 +280,14 @@ export abstract class AbstractPaneCompositePart
             .filter(
               (container) =>
                 this.viewDescriptorService.getViewContainerModel(container)
-                  .activeViewDescriptors.length > 0,
+                  .activeViewDescriptors.length > 0
             )
 
           if (activeContainers.length) {
             if (this.getActiveComposite()?.getId() === viewletDescriptor.id) {
               const defaultViewletId =
                 this.viewDescriptorService.getDefaultViewContainer(
-                  this.location,
+                  this.location
                 )?.id
               const containerToOpen =
                 activeContainers.filter((c) => c.id === defaultViewletId)[0] ||
@@ -299,14 +299,14 @@ export abstract class AbstractPaneCompositePart
           }
 
           this.removeComposite(viewletDescriptor.id)
-        },
-      ),
+        }
+      )
     )
 
     this._register(
       this.extensionService.onDidRegisterExtensions(() => {
         this.layoutCompositeBar()
-      }),
+      })
     )
   }
 
@@ -349,10 +349,10 @@ export abstract class AbstractPaneCompositePart
 
     const focusTracker = this._register(trackFocus(parent))
     this._register(
-      focusTracker.onDidFocus(() => this.paneFocusContextKey.set(true)),
+      focusTracker.onDidFocus(() => this.paneFocusContextKey.set(true))
     )
     this._register(
-      focusTracker.onDidBlur(() => this.paneFocusContextKey.set(false)),
+      focusTracker.onDidBlur(() => this.paneFocusContextKey.set(false))
     )
   }
 
@@ -364,7 +364,7 @@ export abstract class AbstractPaneCompositePart
     messageElement.classList.add("empty-pane-message")
     messageElement.innerText = localize(
       "pane.emptyMessage",
-      "Drag a view here to display.",
+      "Drag a view here to display."
     )
 
     this.emptyPaneMessageElement.appendChild(messageElement)
@@ -381,12 +381,12 @@ export abstract class AbstractPaneCompositePart
                 this.paneCompositeBar.value.dndHandler.onDragEnter(
                   e.dragAndDropData,
                   undefined,
-                  e.eventData,
+                  e.eventData
                 )
               toggleDropEffect(
                 e.eventData.dataTransfer,
                 "move",
-                validDropTarget,
+                validDropTarget
               )
             }
           },
@@ -397,7 +397,7 @@ export abstract class AbstractPaneCompositePart
                 this.paneCompositeBar.value.dndHandler.onDragEnter(
                   e.dragAndDropData,
                   undefined,
-                  e.eventData,
+                  e.eventData
                 )
               this.emptyPaneMessageElement!.style.backgroundColor =
                 validDropTarget
@@ -422,12 +422,12 @@ export abstract class AbstractPaneCompositePart
               this.paneCompositeBar.value.dndHandler.drop(
                 e.dragAndDropData,
                 undefined,
-                e.eventData,
+                e.eventData
               )
             }
           },
-        },
-      ),
+        }
+      )
     )
   }
 
@@ -437,21 +437,21 @@ export abstract class AbstractPaneCompositePart
     this._register(
       addDisposableListener(titleArea, EventType.CONTEXT_MENU, (e) => {
         this.onTitleAreaContextMenu(
-          new StandardMouseEvent(getWindow(titleArea), e),
+          new StandardMouseEvent(getWindow(titleArea), e)
         )
-      }),
+      })
     )
     this._register(Gesture.addTarget(titleArea))
     this._register(
       addDisposableListener(titleArea, GestureEventType.Contextmenu, (e) => {
         this.onTitleAreaContextMenu(
-          new StandardMouseEvent(getWindow(titleArea), e),
+          new StandardMouseEvent(getWindow(titleArea), e)
         )
-      }),
+      })
     )
 
     const globalTitleActionsContainer = titleArea.appendChild(
-      $(".global-actions"),
+      $(".global-actions")
     )
 
     // Global Actions Toolbar
@@ -470,8 +470,8 @@ export abstract class AbstractPaneCompositePart
           toggleMenuTitle: localize("moreActions", "More Actions..."),
           hoverDelegate: this.toolbarHoverDelegate,
           hiddenItemStrategy: HiddenItemStrategy.NoHide,
-        },
-      ),
+        }
+      )
     )
 
     this.updateGlobalToolbarActions()
@@ -480,7 +480,7 @@ export abstract class AbstractPaneCompositePart
   }
 
   protected override createTitleLabel(
-    parent: HTMLElement,
+    parent: HTMLElement
   ): ICompositeTitleLabel {
     this.titleContainer = parent
 
@@ -497,8 +497,8 @@ export abstract class AbstractPaneCompositePart
       CompositeDragAndDropObserver.INSTANCE.registerDraggable(
         this.titleLabelElement!,
         draggedItemProvider,
-        {},
-      ),
+        {}
+      )
     )
 
     return titleLabel
@@ -529,7 +529,7 @@ export abstract class AbstractPaneCompositePart
         !previousCompositeBarContainer
       ) {
         throw new Error(
-          "Composite bar containers should exist when removing the previous composite bar",
+          "Composite bar containers should exist when removing the previous composite bar"
         )
       }
 
@@ -566,14 +566,14 @@ export abstract class AbstractPaneCompositePart
         !newCompositeBarContainer
       ) {
         throw new Error(
-          "Invalid composite bar state when creating the new composite bar",
+          "Invalid composite bar state when creating the new composite bar"
         )
       }
 
       newCompositeBarContainer.classList.add("has-composite-bar")
       this.paneCompositeBarContainer = prepend(
         newCompositeBarContainer,
-        $(".composite-bar-container"),
+        $(".composite-bar-container")
       )
       this.paneCompositeBar.value = this.createCompositeBar()
       this.paneCompositeBar.value.create(this.paneCompositeBarContainer)
@@ -608,17 +608,17 @@ export abstract class AbstractPaneCompositePart
     this.headerFooterCompositeBarDispoables.add(
       addDisposableListener(area, EventType.CONTEXT_MENU, (e) => {
         this.onCompositeBarAreaContextMenu(
-          new StandardMouseEvent(getWindow(area), e),
+          new StandardMouseEvent(getWindow(area), e)
         )
-      }),
+      })
     )
     this.headerFooterCompositeBarDispoables.add(Gesture.addTarget(area))
     this.headerFooterCompositeBarDispoables.add(
       addDisposableListener(area, GestureEventType.Contextmenu, (e) => {
         this.onCompositeBarAreaContextMenu(
-          new StandardMouseEvent(getWindow(area), e),
+          new StandardMouseEvent(getWindow(area), e)
         )
-      }),
+      })
     )
 
     return area
@@ -639,7 +639,7 @@ export abstract class AbstractPaneCompositePart
       PaneCompositeBar,
       this.getCompositeBarOptions(),
       this.partId,
-      this,
+      this
     )
   }
 
@@ -652,7 +652,7 @@ export abstract class AbstractPaneCompositePart
 
   async openPaneComposite(
     id?: string,
-    focus?: boolean,
+    focus?: boolean
   ): Promise<PaneComposite | undefined> {
     if (typeof id === "string" && this.getPaneComposite(id)) {
       return this.doOpenPaneComposite(id, focus)
@@ -669,7 +669,7 @@ export abstract class AbstractPaneCompositePart
 
   private doOpenPaneComposite(
     id: string,
-    focus?: boolean,
+    focus?: boolean
   ): PaneComposite | undefined {
     if (this.blockOpening) {
       return undefined // Workaround against a potential race condition
@@ -739,7 +739,7 @@ export abstract class AbstractPaneCompositePart
     width: number,
     height: number,
     top: number,
-    left: number,
+    left: number
   ): void {
     if (!this.layoutService.isVisible(this.partId)) {
       return
@@ -752,7 +752,7 @@ export abstract class AbstractPaneCompositePart
       this.contentDimension.width,
       this.contentDimension.height,
       top,
-      left,
+      left
     )
 
     // Layout composite bar
@@ -778,7 +778,7 @@ export abstract class AbstractPaneCompositePart
       let availableWidth = this.contentDimension.width - padding - borderWidth
       availableWidth = Math.max(
         AbstractPaneCompositePart.MIN_COMPOSITE_BAR_WIDTH,
-        availableWidth - this.getToolbarWidth(),
+        availableWidth - this.getToolbarWidth()
       )
       this.paneCompositeBar.value.layout(availableWidth, this.dimension.height)
     }
@@ -797,7 +797,7 @@ export abstract class AbstractPaneCompositePart
     const secondaryActions = this.globalActions.getSecondaryActions()
     this.globalToolBar?.setActions(
       prepareActions(primaryActions),
-      prepareActions(secondaryActions),
+      prepareActions(secondaryActions)
     )
   }
 
@@ -875,21 +875,21 @@ export abstract class AbstractPaneCompositePart
       const disposables = new DisposableStore()
       const viewsActions: IAction[] = []
       const scopedContextKeyService = disposables.add(
-        this.contextKeyService.createScoped(this.element),
+        this.contextKeyService.createScoped(this.element)
       )
       scopedContextKeyService.createKey(
         "viewContainer",
-        viewPaneContainer.viewContainer.id,
+        viewPaneContainer.viewContainer.id
       )
       const menu = this.menuService.getMenuActions(
         ViewsSubMenu,
         scopedContextKeyService,
-        { shouldForwardArgs: true, renderShortTitle: true },
+        { shouldForwardArgs: true, renderShortTitle: true }
       )
       createAndFillInActionBarActions(
         menu,
         { primary: viewsActions, secondary: [] },
-        () => true,
+        () => true
       )
       disposables.dispose()
       return viewsActions.length > 1 && viewsActions.some((a) => a.enabled)

@@ -9,219 +9,160 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Emitter, Event } from "vs/base/common/event"
-import { Disposable } from "vs/base/common/lifecycle"
-import { revive } from "vs/base/common/marshalling"
-import { IServerChannel } from "vs/base/parts/ipc/common/ipc"
-import { ILogService } from "vs/platform/log/common/log"
-import {
-  IBaseSerializableStorageRequest,
-  ISerializableItemsChangeEvent,
-  ISerializableUpdateRequest,
-  Key,
-  Value,
-} from "vs/platform/storage/common/storageIpc"
-import {
-  IStorageChangeEvent,
-  IStorageMain,
-} from "vs/platform/storage/electron-main/storageMain"
-import { IStorageMainService } from "vs/platform/storage/electron-main/storageMainService"
-import { IUserDataProfile } from "vs/platform/userDataProfile/common/userDataProfile"
-import {
-  reviveIdentifier,
-  IAnyWorkspaceIdentifier,
-} from "vs/platform/workspace/common/workspace"
+import { Emitter, Event } from 'vs/base/common/event';
+import { Disposable } from 'vs/base/common/lifecycle';
+import { revive } from 'vs/base/common/marshalling';
+import { IServerChannel } from 'vs/base/parts/ipc/common/ipc';
+import { ILogService } from 'vs/platform/log/common/log';
+import { IBaseSerializableStorageRequest, ISerializableItemsChangeEvent, ISerializableUpdateRequest, Key, Value } from 'vs/platform/storage/common/storageIpc';
+import { IStorageChangeEvent, IStorageMain } from 'vs/platform/storage/electron-main/storageMain';
+import { IStorageMainService } from 'vs/platform/storage/electron-main/storageMainService';
+import { IUserDataProfile } from 'vs/platform/userDataProfile/common/userDataProfile';
+import { reviveIdentifier, IAnyWorkspaceIdentifier } from 'vs/platform/workspace/common/workspace';
 
-export class StorageDatabaseChannel
-  extends Disposable
-  implements IServerChannel
-{
-  private static readonly STORAGE_CHANGE_DEBOUNCE_TIME = 100
+export class StorageDatabaseChannel extends Disposable implements IServerChannel {
 
-  private readonly onDidChangeApplicationStorageEmitter = this._register(
-    new Emitter<ISerializableItemsChangeEvent>(),
-  )
+	private static readonly STORAGE_CHANGE_DEBOUNCE_TIME = 100;
 
-  private readonly mapProfileToOnDidChangeProfileStorageEmitter = new Map<
-    string /* profile ID */,
-    Emitter<ISerializableItemsChangeEvent>
-  >()
+	private readonly onDidChangeApplicationStorageEmitter = this._register(new Emitter<ISerializableItemsChangeEvent>());
 
-  constructor(
-    private readonly logService: ILogService,
-    private readonly storageMainService: IStorageMainService,
-  ) {
-    super()
+	private readonly mapProfileToOnDidChangeProfileStorageEmitter = new Map<string /* profile ID */, Emitter<ISerializableItemsChangeEvent>>();
 
-    this.registerStorageChangeListeners(
-      storageMainService.applicationStorage,
-      this.onDidChangeApplicationStorageEmitter,
-    )
-  }
+	constructor(
+		private readonly logService: ILogService,
+		private readonly storageMainService: IStorageMainService
+	) {
+		super();
 
-  //#region Storage Change Events
+		this.registerStorageChangeListeners(storageMainService.applicationStorage, this.onDidChangeApplicationStorageEmitter);
+	}
 
-  private registerStorageChangeListeners(
-    storage: IStorageMain,
-    emitter: Emitter<ISerializableItemsChangeEvent>,
-  ): void {
-    // Listen for changes in provided storage to send to listeners
-    // that are listening. Use a debouncer to reduce IPC traffic.
+	//#region Storage Change Events
 
-    this._register(
-      Event.debounce(
-        storage.onDidChangeStorage,
-        (prev: IStorageChangeEvent[] | undefined, cur: IStorageChangeEvent) => {
-          if (!prev) {
-            prev = [cur]
-          } else {
-            prev.push(cur)
-          }
+	private registerStorageChangeListeners(storage: IStorageMain, emitter: Emitter<ISerializableItemsChangeEvent>): void {
 
-          return prev
-        },
-        StorageDatabaseChannel.STORAGE_CHANGE_DEBOUNCE_TIME,
-      )((events) => {
-        if (events.length) {
-          emitter.fire(this.serializeStorageChangeEvents(events, storage))
-        }
-      }),
-    )
-  }
+		// Listen for changes in provided storage to send to listeners
+		// that are listening. Use a debouncer to reduce IPC traffic.
 
-  private serializeStorageChangeEvents(
-    events: IStorageChangeEvent[],
-    storage: IStorageMain,
-  ): ISerializableItemsChangeEvent {
-    const changed = new Map<Key, Value>()
-    const deleted = new Set<Key>()
-    events.forEach((event) => {
-      const existing = storage.get(event.key)
-      if (typeof existing === "string") {
-        changed.set(event.key, existing)
-      } else {
-        deleted.add(event.key)
-      }
-    })
+		this._register(Event.debounce(storage.onDidChangeStorage, (prev: IStorageChangeEvent[] | undefined, cur: IStorageChangeEvent) => {
+			if (!prev) {
+				prev = [cur];
+			} else {
+				prev.push(cur);
+			}
 
-    return {
-      changed: Array.from(changed.entries()),
-      deleted: Array.from(deleted.values()),
-    }
-  }
+			return prev;
+		}, StorageDatabaseChannel.STORAGE_CHANGE_DEBOUNCE_TIME)(events => {
+			if (events.length) {
+				emitter.fire(this.serializeStorageChangeEvents(events, storage));
+			}
+		}));
+	}
 
-  listen(
-    _: unknown,
-    event: string,
-    arg: IBaseSerializableStorageRequest,
-  ): Event<any> {
-    switch (event) {
-      case "onDidChangeStorage": {
-        const profile = arg.profile
-          ? revive<IUserDataProfile>(arg.profile)
-          : undefined
+	private serializeStorageChangeEvents(events: IStorageChangeEvent[], storage: IStorageMain): ISerializableItemsChangeEvent {
+		const changed = new Map<Key, Value>();
+		const deleted = new Set<Key>();
+		events.forEach(event => {
+			const existing = storage.get(event.key);
+			if (typeof existing === 'string') {
+				changed.set(event.key, existing);
+			} else {
+				deleted.add(event.key);
+			}
+		});
 
-        // Without profile: application scope
-        if (!profile) {
-          return this.onDidChangeApplicationStorageEmitter.event
-        }
+		return {
+			changed: Array.from(changed.entries()),
+			deleted: Array.from(deleted.values())
+		};
+	}
 
-        // With profile: profile scope for the profile
-        let profileStorageChangeEmitter =
-          this.mapProfileToOnDidChangeProfileStorageEmitter.get(profile.id)
-        if (!profileStorageChangeEmitter) {
-          profileStorageChangeEmitter = this._register(
-            new Emitter<ISerializableItemsChangeEvent>(),
-          )
-          this.registerStorageChangeListeners(
-            this.storageMainService.profileStorage(profile),
-            profileStorageChangeEmitter,
-          )
-          this.mapProfileToOnDidChangeProfileStorageEmitter.set(
-            profile.id,
-            profileStorageChangeEmitter,
-          )
-        }
+	listen(_: unknown, event: string, arg: IBaseSerializableStorageRequest): Event<any> {
+		switch (event) {
+			case 'onDidChangeStorage': {
+				const profile = arg.profile ? revive<IUserDataProfile>(arg.profile) : undefined;
 
-        return profileStorageChangeEmitter.event
-      }
-    }
+				// Without profile: application scope
+				if (!profile) {
+					return this.onDidChangeApplicationStorageEmitter.event;
+				}
 
-    throw new Error(`Event not found: ${event}`)
-  }
+				// With profile: profile scope for the profile
+				let profileStorageChangeEmitter = this.mapProfileToOnDidChangeProfileStorageEmitter.get(profile.id);
+				if (!profileStorageChangeEmitter) {
+					profileStorageChangeEmitter = this._register(new Emitter<ISerializableItemsChangeEvent>());
+					this.registerStorageChangeListeners(this.storageMainService.profileStorage(profile), profileStorageChangeEmitter);
+					this.mapProfileToOnDidChangeProfileStorageEmitter.set(profile.id, profileStorageChangeEmitter);
+				}
 
-  //#endregion
+				return profileStorageChangeEmitter.event;
+			}
+		}
 
-  async call(
-    _: unknown,
-    command: string,
-    arg: IBaseSerializableStorageRequest,
-  ): Promise<any> {
-    const profile = arg.profile
-      ? revive<IUserDataProfile>(arg.profile)
-      : undefined
-    const workspace = reviveIdentifier(arg.workspace)
+		throw new Error(`Event not found: ${event}`);
+	}
 
-    // Get storage to be ready
-    const storage = await this.withStorageInitialized(profile, workspace)
+	//#endregion
 
-    // handle call
-    switch (command) {
-      case "getItems": {
-        return Array.from(storage.items.entries())
-      }
+	async call(_: unknown, command: string, arg: IBaseSerializableStorageRequest): Promise<any> {
+		const profile = arg.profile ? revive<IUserDataProfile>(arg.profile) : undefined;
+		const workspace = reviveIdentifier(arg.workspace);
 
-      case "updateItems": {
-        const items: ISerializableUpdateRequest = arg
+		// Get storage to be ready
+		const storage = await this.withStorageInitialized(profile, workspace);
 
-        if (items.insert) {
-          for (const [key, value] of items.insert) {
-            storage.set(key, value)
-          }
-        }
+		// handle call
+		switch (command) {
+			case 'getItems': {
+				return Array.from(storage.items.entries());
+			}
 
-        items.delete?.forEach((key) => storage.delete(key))
+			case 'updateItems': {
+				const items: ISerializableUpdateRequest = arg;
 
-        break
-      }
+				if (items.insert) {
+					for (const [key, value] of items.insert) {
+						storage.set(key, value);
+					}
+				}
 
-      case "optimize": {
-        return storage.optimize()
-      }
+				items.delete?.forEach(key => storage.delete(key));
 
-      case "isUsed": {
-        const path = arg.payload as string | undefined
-        if (typeof path === "string") {
-          return this.storageMainService.isUsed(path)
-        }
-      }
+				break;
+			}
 
-      default:
-        throw new Error(`Call not found: ${command}`)
-    }
-  }
+			case 'optimize': {
+				return storage.optimize();
+			}
 
-  private async withStorageInitialized(
-    profile: IUserDataProfile | undefined,
-    workspace: IAnyWorkspaceIdentifier | undefined,
-  ): Promise<IStorageMain> {
-    let storage: IStorageMain
-    if (workspace) {
-      storage = this.storageMainService.workspaceStorage(workspace)
-    } else if (profile) {
-      storage = this.storageMainService.profileStorage(profile)
-    } else {
-      storage = this.storageMainService.applicationStorage
-    }
+			case 'isUsed': {
+				const path = arg.payload as string | undefined;
+				if (typeof path === 'string') {
+					return this.storageMainService.isUsed(path);
+				}
+			}
 
-    try {
-      await storage.init()
-    } catch (error) {
-      this.logService.error(
-        `StorageIPC#init: Unable to init ${workspace ? "workspace" : profile ? "profile" : "application"} storage due to ${error}`,
-      )
-    }
+			default:
+				throw new Error(`Call not found: ${command}`);
+		}
+	}
 
-    return storage
-  }
+	private async withStorageInitialized(profile: IUserDataProfile | undefined, workspace: IAnyWorkspaceIdentifier | undefined): Promise<IStorageMain> {
+		let storage: IStorageMain;
+		if (workspace) {
+			storage = this.storageMainService.workspaceStorage(workspace);
+		} else if (profile) {
+			storage = this.storageMainService.profileStorage(profile);
+		} else {
+			storage = this.storageMainService.applicationStorage;
+		}
+
+		try {
+			await storage.init();
+		} catch (error) {
+			this.logService.error(`StorageIPC#init: Unable to init ${workspace ? 'workspace' : profile ? 'profile' : 'application'} storage due to ${error}`);
+		}
+
+		return storage;
+	}
 }

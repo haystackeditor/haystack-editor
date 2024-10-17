@@ -303,7 +303,7 @@ class StandaloneTextModelService implements ITextModelService {
   constructor(@IModelService private readonly modelService: IModelService) {}
 
   public createModelReference(
-    resource: URI,
+    resource: URI
   ): Promise<IReference<IResolvedTextEditorModel>> {
     const model = this.modelService.getModel(resource)
 
@@ -316,7 +316,7 @@ class StandaloneTextModelService implements ITextModelService {
 
   public registerTextModelContentProvider(
     scheme: string,
-    provider: ITextModelContentProvider,
+    provider: ITextModelContentProvider
   ): IDisposable {
     return {
       dispose: function () {
@@ -361,7 +361,7 @@ class StandaloneProgressService implements IProgressService {
       | IProgressWindowOptions
       | IProgressCompositeOptions,
     task: (progress: IProgress<IProgressStep>) => Promise<R>,
-    onDidCancel?: ((choice?: number | undefined) => void) | undefined,
+    onDidCancel?: ((choice?: number | undefined) => void) | undefined
   ): Promise<R> {
     return task({
       report: () => {},
@@ -459,12 +459,12 @@ class StandaloneDialogService implements IDialogService {
   }
 
   prompt<T>(
-    prompt: IPromptWithCustomCancel<T>,
+    prompt: IPromptWithCustomCancel<T>
   ): Promise<IPromptResultWithCancel<T>>
   prompt<T>(prompt: IPrompt<T>): Promise<IPromptResult<T>>
   prompt<T>(prompt: IPromptWithDefaultCancel<T>): Promise<IPromptResult<T>>
   async prompt<T>(
-    prompt: IPrompt<T> | IPromptWithCustomCancel<T>,
+    prompt: IPrompt<T> | IPromptWithCustomCancel<T>
   ): Promise<IPromptResult<T> | IPromptResultWithCancel<T>> {
     let result: T | undefined = undefined
     const confirmed = this.doConfirm(prompt.message, prompt.detail)
@@ -548,20 +548,20 @@ export class StandaloneNotificationService implements INotificationService {
     severity: Severity,
     message: string,
     choices: IPromptChoice[],
-    options?: IPromptOptions,
+    options?: IPromptOptions
   ): INotificationHandle {
     return StandaloneNotificationService.NO_OP
   }
 
   public status(
     message: string | Error,
-    options?: IStatusMessageOptions,
+    options?: IStatusMessageOptions
   ): IDisposable {
     return Disposable.None
   }
 
   public setFilter(
-    filter: NotificationsFilter | INotificationSourceFilter,
+    filter: NotificationsFilter | INotificationSourceFilter
   ): void {}
 
   public getFilter(source?: INotificationSource): NotificationsFilter {
@@ -588,7 +588,7 @@ export class StandaloneCommandService implements ICommandService {
     this._onDidExecuteCommand.event
 
   constructor(
-    @IInstantiationService instantiationService: IInstantiationService,
+    @IInstantiationService instantiationService: IInstantiationService
   ) {
     this._instantiationService = instantiationService
   }
@@ -603,7 +603,7 @@ export class StandaloneCommandService implements ICommandService {
       this._onWillExecuteCommand.fire({ commandId: id, args })
       const result = this._instantiationService.invokeFunction.apply(
         this._instantiationService,
-        [command.handler, ...args],
+        [command.handler, ...args]
       ) as T
 
       this._onDidExecuteCommand.fire({ commandId: id, args })
@@ -632,14 +632,14 @@ export class StandaloneKeybindingService extends AbstractKeybindingService {
     @ITelemetryService telemetryService: ITelemetryService,
     @INotificationService notificationService: INotificationService,
     @ILogService logService: ILogService,
-    @ICodeEditorService codeEditorService: ICodeEditorService,
+    @ICodeEditorService codeEditorService: ICodeEditorService
   ) {
     super(
       contextKeyService,
       commandService,
       telemetryService,
       notificationService,
-      logService,
+      logService
     )
 
     this._cachedResolver = null
@@ -658,14 +658,14 @@ export class StandaloneKeybindingService extends AbstractKeybindingService {
             const keyEvent = new StandardKeyboardEvent(e)
             const shouldPreventDefault = this._dispatch(
               keyEvent,
-              keyEvent.target,
+              keyEvent.target
             )
             if (shouldPreventDefault) {
               keyEvent.preventDefault()
               keyEvent.stopPropagation()
             }
-          },
-        ),
+          }
+        )
       )
 
       // for single modifier chord keybindings (e.g. shift shift)
@@ -677,13 +677,13 @@ export class StandaloneKeybindingService extends AbstractKeybindingService {
             const keyEvent = new StandardKeyboardEvent(e)
             const shouldPreventDefault = this._singleModifierDispatch(
               keyEvent,
-              keyEvent.target,
+              keyEvent.target
             )
             if (shouldPreventDefault) {
               keyEvent.preventDefault()
             }
-          },
-        ),
+          }
+        )
       )
 
       this._domNodeListeners.push(new DomNodeListeners(domNode, disposables))
@@ -729,7 +729,7 @@ export class StandaloneKeybindingService extends AbstractKeybindingService {
     command: string,
     keybinding: number,
     handler: ICommandHandler,
-    when: ContextKeyExpression | undefined,
+    when: ContextKeyExpression | undefined
   ): IDisposable {
     return combinedDisposable(
       CommandsRegistry.registerCommand(command, handler),
@@ -739,7 +739,7 @@ export class StandaloneKeybindingService extends AbstractKeybindingService {
           command,
           when,
         },
-      ]),
+      ])
     )
   }
 
@@ -782,16 +782,16 @@ export class StandaloneKeybindingService extends AbstractKeybindingService {
     if (!this._cachedResolver) {
       const defaults = this._toNormalizedKeybindingItems(
         KeybindingsRegistry.getDefaultKeybindings(),
-        true,
+        true
       )
       const overrides = this._toNormalizedKeybindingItems(
         this._dynamicKeybindings,
-        false,
+        false
       )
       this._cachedResolver = new KeybindingResolver(
         defaults,
         overrides,
-        (str) => this._log(str),
+        (str) => this._log(str)
       )
     }
     return this._cachedResolver
@@ -803,7 +803,7 @@ export class StandaloneKeybindingService extends AbstractKeybindingService {
 
   private _toNormalizedKeybindingItems(
     items: IKeybindingItem[],
-    isDefault: boolean,
+    isDefault: boolean
   ): ResolvedKeybindingItem[] {
     const result: ResolvedKeybindingItem[] = []
     let resultLen = 0
@@ -820,7 +820,7 @@ export class StandaloneKeybindingService extends AbstractKeybindingService {
           when,
           isDefault,
           null,
-          false,
+          false
         )
       } else {
         const resolvedKeybindings =
@@ -833,7 +833,7 @@ export class StandaloneKeybindingService extends AbstractKeybindingService {
             when,
             isDefault,
             null,
-            false,
+            false
           )
         }
       }
@@ -847,14 +847,14 @@ export class StandaloneKeybindingService extends AbstractKeybindingService {
   }
 
   public resolveKeyboardEvent(
-    keyboardEvent: IKeyboardEvent,
+    keyboardEvent: IKeyboardEvent
   ): ResolvedKeybinding {
     const chord = new KeyCodeChord(
       keyboardEvent.ctrlKey,
       keyboardEvent.shiftKey,
       keyboardEvent.altKey,
       keyboardEvent.metaKey,
-      keyboardEvent.keyCode,
+      keyboardEvent.keyCode
     )
     return new USLayoutResolvedKeybinding([chord], OS)
   }
@@ -872,7 +872,7 @@ export class StandaloneKeybindingService extends AbstractKeybindingService {
   }
 
   public registerSchemaContribution(
-    contribution: KeybindingsSchemaContribution,
+    contribution: KeybindingsSchemaContribution
   ): void {
     // noop
   }
@@ -881,7 +881,7 @@ export class StandaloneKeybindingService extends AbstractKeybindingService {
    * not yet supported
    */
   public override enableKeybindingHoldMode(
-    commandId: string,
+    commandId: string
   ): Promise<void> | undefined {
     return undefined
   }
@@ -890,7 +890,7 @@ export class StandaloneKeybindingService extends AbstractKeybindingService {
 class DomNodeListeners extends Disposable {
   constructor(
     public readonly domNode: HTMLElement,
-    disposables: DisposableStore,
+    disposables: DisposableStore
   ) {
     super()
     this._register(disposables)
@@ -898,7 +898,7 @@ class DomNodeListeners extends Disposable {
 }
 
 function isConfigurationOverrides(
-  thing: any,
+  thing: any
 ): thing is IConfigurationOverrides {
   return (
     thing &&
@@ -931,7 +931,7 @@ export class StandaloneConfigurationService implements IConfigurationService {
       new ResourceMap<ConfigurationModel>(),
       ConfigurationModel.createEmptyModel(logService),
       new ResourceMap<ConfigurationModel>(),
-      logService,
+      logService
     )
     defaultConfiguration.dispose()
   }
@@ -945,8 +945,8 @@ export class StandaloneConfigurationService implements IConfigurationService {
     const overrides = isConfigurationOverrides(arg1)
       ? arg1
       : isConfigurationOverrides(arg2)
-        ? arg2
-        : {}
+      ? arg2
+      : {}
     return this._configuration.getValue(section, overrides, undefined)
   }
 
@@ -970,7 +970,7 @@ export class StandaloneConfigurationService implements IConfigurationService {
         previous,
         this._configuration,
         undefined,
-        this.logService,
+        this.logService
       )
       configurationChangeEvent.source = ConfigurationTarget.MEMORY
       this._onDidChangeConfiguration.fire(configurationChangeEvent)
@@ -983,14 +983,14 @@ export class StandaloneConfigurationService implements IConfigurationService {
     key: string,
     value: any,
     arg3?: any,
-    arg4?: any,
+    arg4?: any
   ): Promise<void> {
     return this.updateValues([[key, value]])
   }
 
   public inspect<C>(
     key: string,
-    options: IConfigurationOverrides = {},
+    options: IConfigurationOverrides = {}
   ): IConfigurationValue<C> {
     return this._configuration.inspect<C>(key, options, undefined)
   }
@@ -1034,7 +1034,7 @@ class StandaloneResourceConfigurationService
     @IConfigurationService
     private readonly configurationService: StandaloneConfigurationService,
     @IModelService private readonly modelService: IModelService,
-    @ILanguageService private readonly languageService: ILanguageService,
+    @ILanguageService private readonly languageService: ILanguageService
   ) {
     this.configurationService.onDidChangeConfiguration((e) => {
       this._onDidChangeConfiguration.fire({
@@ -1054,8 +1054,8 @@ class StandaloneResourceConfigurationService
         ? arg3
         : undefined
       : typeof arg2 === "string"
-        ? arg2
-        : undefined
+      ? arg2
+      : undefined
     const language = resource ? this.getLanguage(resource, position) : undefined
     if (typeof section === "undefined") {
       return this.configurationService.getValue<T>({
@@ -1072,7 +1072,7 @@ class StandaloneResourceConfigurationService
   inspect<T>(
     resource: URI | undefined,
     position: IPosition | null,
-    section: string,
+    section: string
   ): IConfigurationValue<Readonly<T>> {
     const language = resource ? this.getLanguage(resource, position) : undefined
     return this.configurationService.inspect<T>(section, {
@@ -1083,7 +1083,7 @@ class StandaloneResourceConfigurationService
 
   private getLanguage(
     resource: URI,
-    position: IPosition | null,
+    position: IPosition | null
   ): string | null {
     const model = this.modelService.getModel(resource)
     if (model) {
@@ -1098,13 +1098,13 @@ class StandaloneResourceConfigurationService
     resource: URI,
     key: string,
     value: any,
-    configurationTarget?: ConfigurationTarget,
+    configurationTarget?: ConfigurationTarget
   ): Promise<void> {
     return this.configurationService.updateValue(
       key,
       value,
       { resource },
-      configurationTarget,
+      configurationTarget
     )
   }
 }
@@ -1116,7 +1116,7 @@ class StandaloneResourcePropertiesService
 
   constructor(
     @IConfigurationService
-    private readonly configurationService: IConfigurationService,
+    private readonly configurationService: IConfigurationService
   ) {}
 
   getEOL(resource: URI, language?: string): string {
@@ -1220,7 +1220,7 @@ class StandaloneWorkspaceContextService implements IWorkspaceContextService {
     workspaceIdOrFolder:
       | IWorkspaceIdentifier
       | ISingleFolderWorkspaceIdentifier
-      | URI,
+      | URI
   ): boolean {
     return true
   }
@@ -1229,7 +1229,7 @@ class StandaloneWorkspaceContextService implements IWorkspaceContextService {
 export function updateConfigurationService(
   configurationService: IConfigurationService,
   source: any,
-  isDiffEditor: boolean,
+  isDiffEditor: boolean
 ): void {
   if (!source) {
     return
@@ -1268,7 +1268,7 @@ class StandaloneBulkEditService implements IBulkEditService {
 
   async apply(
     editsIn: ResourceEdit[] | WorkspaceEdit,
-    _options?: IBulkEditOptions,
+    _options?: IBulkEditOptions
   ): Promise<IBulkEditResult> {
     const edits = Array.isArray(editsIn)
       ? editsIn
@@ -1297,8 +1297,8 @@ class StandaloneBulkEditService implements IBulkEditService {
       array.push(
         EditOperation.replaceMove(
           Range.lift(edit.textEdit.range),
-          edit.textEdit.text,
-        ),
+          edit.textEdit.text
+        )
       )
     }
 
@@ -1316,7 +1316,7 @@ class StandaloneBulkEditService implements IBulkEditService {
       ariaSummary: strings.format(
         StandaloneServicesNLS.bulkEditServiceSummary,
         totalEdits,
-        totalFiles,
+        totalFiles
       ),
       isApplied: totalEdits > 0,
     }
@@ -1331,7 +1331,7 @@ class StandaloneUriLabelService implements ILabelService {
 
   public getUriLabel(
     resource: URI,
-    options?: { relative?: boolean; forceNoTildify?: boolean },
+    options?: { relative?: boolean; forceNoTildify?: boolean }
   ): string {
     if (resource.scheme === "file") {
       return resource.fsPath
@@ -1349,7 +1349,7 @@ class StandaloneUriLabelService implements ILabelService {
       | ISingleFolderWorkspaceIdentifier
       | URI
       | IWorkspace,
-    options?: { verbose: Verbosity },
+    options?: { verbose: Verbosity }
   ): string {
     return ""
   }
@@ -1363,7 +1363,7 @@ class StandaloneUriLabelService implements ILabelService {
   }
 
   public registerCachedFormatter(
-    formatter: ResourceLabelFormatter,
+    formatter: ResourceLabelFormatter
   ): IDisposable {
     return this.registerFormatter(formatter)
   }
@@ -1380,7 +1380,7 @@ class StandaloneUriLabelService implements ILabelService {
 class StandaloneContextViewService extends ContextViewService {
   constructor(
     @ILayoutService layoutService: ILayoutService,
-    @ICodeEditorService private readonly _codeEditorService: ICodeEditorService,
+    @ICodeEditorService private readonly _codeEditorService: ICodeEditorService
   ) {
     super(layoutService)
   }
@@ -1388,7 +1388,7 @@ class StandaloneContextViewService extends ContextViewService {
   override showContextView(
     delegate: IContextViewDelegate,
     container?: HTMLElement,
-    shadowRoot?: boolean,
+    shadowRoot?: boolean
   ): IOpenContextView {
     if (!container) {
       const codeEditor =
@@ -1445,7 +1445,7 @@ class StandaloneWorkspaceTrustManagementService
     // noop
   }
   addWorkspaceTrustTransitionParticipant(
-    participant: IWorkspaceTrustTransitionParticipant,
+    participant: IWorkspaceTrustTransitionParticipant
   ): IDisposable {
     throw new Error("Method not supported.")
   }
@@ -1470,7 +1470,7 @@ class StandaloneContextMenuService extends ContextMenuService {
     @IContextViewService contextViewService: IContextViewService,
     @IKeybindingService keybindingService: IKeybindingService,
     @IMenuService menuService: IMenuService,
-    @IContextKeyService contextKeyService: IContextKeyService,
+    @IContextKeyService contextKeyService: IContextKeyService
   ) {
     super(
       telemetryService,
@@ -1478,7 +1478,7 @@ class StandaloneContextMenuService extends ContextMenuService {
       contextViewService,
       keybindingService,
       menuService,
-      contextKeyService,
+      contextKeyService
     )
     this.configure({ blockMouse: false }) // we do not want that in the standalone editor
   }
@@ -1495,14 +1495,14 @@ class StandaloneAccessbilitySignalService
   getEnabledState(
     signal: AccessibilitySignal,
     userGesture: boolean,
-    modality?: AccessibilityModality | undefined,
+    modality?: AccessibilityModality | undefined
   ): IValueWithChangeEvent<boolean> {
     return ValueWithChangeEvent.const(false)
   }
 
   getDelayMs(
     signal: AccessibilitySignal,
-    modality: AccessibilityModality,
+    modality: AccessibilityModality
   ): number {
     return 0
   }
@@ -1521,7 +1521,7 @@ class StandaloneAccessbilitySignalService
 
   async playSound(
     cue: Sound,
-    allowManyInParallel?: boolean | undefined,
+    allowManyInParallel?: boolean | undefined
   ): Promise<void> {}
   playSignalLoop(cue: AccessibilitySignal): IDisposable {
     return toDisposable(() => {})
@@ -1536,147 +1536,147 @@ registerSingleton(ILogService, StandaloneLogService, InstantiationType.Eager)
 registerSingleton(
   IConfigurationService,
   StandaloneConfigurationService,
-  InstantiationType.Eager,
+  InstantiationType.Eager
 )
 registerSingleton(
   ITextResourceConfigurationService,
   StandaloneResourceConfigurationService,
-  InstantiationType.Eager,
+  InstantiationType.Eager
 )
 registerSingleton(
   ITextResourcePropertiesService,
   StandaloneResourcePropertiesService,
-  InstantiationType.Eager,
+  InstantiationType.Eager
 )
 registerSingleton(
   IWorkspaceContextService,
   StandaloneWorkspaceContextService,
-  InstantiationType.Eager,
+  InstantiationType.Eager
 )
 registerSingleton(
   ILabelService,
   StandaloneUriLabelService,
-  InstantiationType.Eager,
+  InstantiationType.Eager
 )
 registerSingleton(
   ITelemetryService,
   StandaloneTelemetryService,
-  InstantiationType.Eager,
+  InstantiationType.Eager
 )
 registerSingleton(
   IDialogService,
   StandaloneDialogService,
-  InstantiationType.Eager,
+  InstantiationType.Eager
 )
 registerSingleton(
   IEnvironmentService,
   StandaloneEnvironmentService,
-  InstantiationType.Eager,
+  InstantiationType.Eager
 )
 registerSingleton(
   INotificationService,
   StandaloneNotificationService,
-  InstantiationType.Eager,
+  InstantiationType.Eager
 )
 registerSingleton(IMarkerService, MarkerService, InstantiationType.Eager)
 registerSingleton(
   ILanguageService,
   StandaloneLanguageService,
-  InstantiationType.Eager,
+  InstantiationType.Eager
 )
 registerSingleton(
   IStandaloneThemeService,
   StandaloneThemeService,
-  InstantiationType.Eager,
+  InstantiationType.Eager
 )
 registerSingleton(IModelService, ModelService, InstantiationType.Eager)
 registerSingleton(
   IMarkerDecorationsService,
   MarkerDecorationsService,
-  InstantiationType.Eager,
+  InstantiationType.Eager
 )
 registerSingleton(
   IContextKeyService,
   ContextKeyService,
-  InstantiationType.Eager,
+  InstantiationType.Eager
 )
 registerSingleton(
   IProgressService,
   StandaloneProgressService,
-  InstantiationType.Eager,
+  InstantiationType.Eager
 )
 registerSingleton(
   IEditorProgressService,
   StandaloneEditorProgressService,
-  InstantiationType.Eager,
+  InstantiationType.Eager
 )
 registerSingleton(
   IStorageService,
   InMemoryStorageService,
-  InstantiationType.Eager,
+  InstantiationType.Eager
 )
 registerSingleton(
   IEditorWorkerService,
   EditorWorkerService,
-  InstantiationType.Eager,
+  InstantiationType.Eager
 )
 registerSingleton(
   IBulkEditService,
   StandaloneBulkEditService,
-  InstantiationType.Eager,
+  InstantiationType.Eager
 )
 registerSingleton(
   IWorkspaceTrustManagementService,
   StandaloneWorkspaceTrustManagementService,
-  InstantiationType.Eager,
+  InstantiationType.Eager
 )
 registerSingleton(
   ITextModelService,
   StandaloneTextModelService,
-  InstantiationType.Eager,
+  InstantiationType.Eager
 )
 registerSingleton(
   IAccessibilityService,
   AccessibilityService,
-  InstantiationType.Eager,
+  InstantiationType.Eager
 )
 registerSingleton(IListService, ListService, InstantiationType.Eager)
 registerSingleton(
   ICommandService,
   StandaloneCommandService,
-  InstantiationType.Eager,
+  InstantiationType.Eager
 )
 registerSingleton(
   IKeybindingService,
   StandaloneKeybindingService,
-  InstantiationType.Eager,
+  InstantiationType.Eager
 )
 registerSingleton(
   IQuickInputService,
   StandaloneQuickInputService,
-  InstantiationType.Eager,
+  InstantiationType.Eager
 )
 registerSingleton(
   IContextViewService,
   StandaloneContextViewService,
-  InstantiationType.Eager,
+  InstantiationType.Eager
 )
 registerSingleton(IOpenerService, OpenerService, InstantiationType.Eager)
 registerSingleton(
   IClipboardService,
   BrowserClipboardService,
-  InstantiationType.Eager,
+  InstantiationType.Eager
 )
 registerSingleton(
   IContextMenuService,
   StandaloneContextMenuService,
-  InstantiationType.Eager,
+  InstantiationType.Eager
 )
 registerSingleton(IMenuService, MenuService, InstantiationType.Eager)
 registerSingleton(
   IAccessibilitySignalService,
   StandaloneAccessbilitySignalService,
-  InstantiationType.Eager,
+  InstantiationType.Eager
 )
 
 /**
@@ -1702,7 +1702,7 @@ export module StandaloneServices {
     }
     if (r instanceof SyncDescriptor) {
       return instantiationService.invokeFunction((accessor) =>
-        accessor.get(serviceId),
+        accessor.get(serviceId)
       )
     } else {
       return r
@@ -1712,7 +1712,7 @@ export module StandaloneServices {
   let initialized = false
   const onDidInitialize = new Emitter<void>()
   export function initialize(
-    overrides: IEditorOverrideServices,
+    overrides: IEditorOverrideServices
   ): IInstantiationService {
     if (initialized) {
       return instantiationService
@@ -1767,7 +1767,7 @@ export module StandaloneServices {
       onDidInitialize.event(() => {
         listener.dispose()
         disposable.add(callback())
-      }),
+      })
     )
 
     return disposable

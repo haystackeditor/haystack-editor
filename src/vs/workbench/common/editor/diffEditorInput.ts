@@ -99,14 +99,14 @@ export class DiffEditorInput
     readonly original: EditorInput,
     readonly modified: EditorInput,
     private readonly forceOpenAsBinary: boolean | undefined,
-    @IEditorService editorService: IEditorService,
+    @IEditorService editorService: IEditorService
   ) {
     super(
       preferredName,
       preferredDescription,
       original,
       modified,
-      editorService,
+      editorService
     )
   }
 
@@ -124,7 +124,7 @@ export class DiffEditorInput
         "sideBySideLabels",
         "{0} ↔ {1}",
         originalName,
-        modifiedName,
+        modifiedName
       )
 
       // Enforce description when the names are identical
@@ -142,20 +142,20 @@ export class DiffEditorInput
     } else {
       shortDescription = this.computeLabel(
         this.original.getDescription(Verbosity.SHORT),
-        this.modified.getDescription(Verbosity.SHORT),
+        this.modified.getDescription(Verbosity.SHORT)
       )
       longDescription = this.computeLabel(
         this.original.getDescription(Verbosity.LONG),
-        this.modified.getDescription(Verbosity.LONG),
+        this.modified.getDescription(Verbosity.LONG)
       )
 
       // Medium Description: try to be verbose by computing
       // a label that resembles the difference between the two
       const originalMediumDescription = this.original.getDescription(
-        Verbosity.MEDIUM,
+        Verbosity.MEDIUM
       )
       const modifiedMediumDescription = this.modified.getDescription(
-        Verbosity.MEDIUM,
+        Verbosity.MEDIUM
       )
       if (
         typeof originalMediumDescription === "string" &&
@@ -168,7 +168,7 @@ export class DiffEditorInput
         ] = shorten([originalMediumDescription, modifiedMediumDescription])
         mediumDescription = this.computeLabel(
           shortenedOriginalMediumDescription,
-          shortenedModifiedMediumDescription,
+          shortenedModifiedMediumDescription
         )
       }
     }
@@ -177,17 +177,17 @@ export class DiffEditorInput
     let shortTitle = this.computeLabel(
       this.original.getTitle(Verbosity.SHORT) ?? this.original.getName(),
       this.modified.getTitle(Verbosity.SHORT) ?? this.modified.getName(),
-      " ↔ ",
+      " ↔ "
     )
     let mediumTitle = this.computeLabel(
       this.original.getTitle(Verbosity.MEDIUM) ?? this.original.getName(),
       this.modified.getTitle(Verbosity.MEDIUM) ?? this.modified.getName(),
-      " ↔ ",
+      " ↔ "
     )
     let longTitle = this.computeLabel(
       this.original.getTitle(Verbosity.LONG) ?? this.original.getName(),
       this.modified.getTitle(Verbosity.LONG) ?? this.modified.getName(),
-      " ↔ ",
+      " ↔ "
     )
 
     const preferredTitle = this.getPreferredTitle()
@@ -212,17 +212,17 @@ export class DiffEditorInput
   private computeLabel(
     originalLabel: string,
     modifiedLabel: string,
-    separator?: string,
+    separator?: string
   ): string
   private computeLabel(
     originalLabel: string | undefined,
     modifiedLabel: string | undefined,
-    separator?: string,
+    separator?: string
   ): string | undefined
   private computeLabel(
     originalLabel: string | undefined,
     modifiedLabel: string | undefined,
-    separator = " - ",
+    separator = " - "
   ): string | undefined {
     if (!originalLabel || !modifiedLabel) {
       return undefined
@@ -277,21 +277,21 @@ export class DiffEditorInput
   }
 
   override prefersEditorPane<T extends IEditorDescriptor<IEditorPane>>(
-    editorPanes: T[],
+    editorPanes: T[]
   ): T | undefined {
     if (this.forceOpenAsBinary) {
       return editorPanes.find(
-        (editorPane) => editorPane.typeId === BINARY_DIFF_EDITOR_ID,
+        (editorPane) => editorPane.typeId === BINARY_DIFF_EDITOR_ID
       )
     }
 
     return editorPanes.find(
-      (editorPane) => editorPane.typeId === TEXT_DIFF_EDITOR_ID,
+      (editorPane) => editorPane.typeId === TEXT_DIFF_EDITOR_ID
     )
   }
 
   private async createModel(
-    options?: ITextEditorOptions,
+    options?: ITextEditorOptions
   ): Promise<DiffEditorModel> {
     // Join resolve call over two inputs and build diff editor model
     const originalModelPromise = this.original.resolve()
@@ -319,12 +319,12 @@ export class DiffEditorInput
         : undefined,
       isResolvedEditorModel(modifiedEditorModel)
         ? modifiedEditorModel
-        : undefined,
+        : undefined
     )
   }
 
   override toUntyped(
-    options?: IUntypedEditorOptions,
+    options?: IUntypedEditorOptions
   ): (IResourceDiffEditorInput & IResourceSideBySideEditorInput) | undefined {
     const untyped = super.toUntyped(options)
     if (untyped) {
@@ -380,7 +380,7 @@ export class DiffEditorInputSerializer extends AbstractSideBySideEditorInputSeri
     name: string | undefined,
     description: string | undefined,
     secondaryInput: EditorInput,
-    primaryInput: EditorInput,
+    primaryInput: EditorInput
   ): EditorInput {
     return instantiationService.createInstance(
       DiffEditorInput,
@@ -388,7 +388,7 @@ export class DiffEditorInputSerializer extends AbstractSideBySideEditorInputSeri
       description,
       secondaryInput,
       primaryInput,
-      undefined,
+      undefined
     )
   }
 }

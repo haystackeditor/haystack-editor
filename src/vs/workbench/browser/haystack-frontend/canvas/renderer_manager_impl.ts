@@ -96,7 +96,7 @@ export class RendererManagerImpl implements RendererManagerInterface {
 
   public forwardPointerEvent(
     event: PointerEvent,
-    force: boolean = false,
+    force: boolean = false
   ): void {
     if (this.currentScene === this.workspaceScene) {
       this.workspaceScene.receiveForwardedPointerEvent(event, force)
@@ -106,13 +106,13 @@ export class RendererManagerImpl implements RendererManagerInterface {
   public navigateToPosition(
     canvasPosition: Vector,
     size: Vector,
-    navigationType: NavigationType,
+    navigationType: NavigationType
   ): void {
     if (this.currentScene === this.workspaceScene) {
       this.workspaceScene.navigateToPosition(
         canvasPosition,
         size,
-        navigationType,
+        navigationType
       )
     }
   }
@@ -223,7 +223,7 @@ export class RendererManagerImpl implements RendererManagerInterface {
   public getViewportDimensionsWithPadding(): Vector {
     return new Vector(
       this.width - VIEWPORT_PADDING,
-      this.height - VIEWPORT_PADDING * 2,
+      this.height - VIEWPORT_PADDING * 2
     )
   }
 
@@ -243,20 +243,20 @@ export class RendererManagerImpl implements RendererManagerInterface {
   public getViewportDimensionsWithDoublePadding(): Vector {
     return new Vector(
       this.width - VIEWPORT_PADDING * 2,
-      this.height - VIEWPORT_PADDING * 4,
+      this.height - VIEWPORT_PADDING * 4
     ).div(this.currentScene.scale.x)
   }
 
   public navigateToPositionUnconditionally(
     canvasPosition: Vector,
     size: Vector,
-    navigationType: NavigationType,
+    navigationType: NavigationType
   ): void {
     if (this.currentScene === this.workspaceScene) {
       this.workspaceScene.navigateToPositionUnconditionally(
         canvasPosition,
         size,
-        navigationType,
+        navigationType
       )
     }
   }

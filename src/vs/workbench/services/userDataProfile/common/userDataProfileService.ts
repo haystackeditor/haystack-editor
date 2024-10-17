@@ -9,64 +9,53 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Promises } from "vs/base/common/async"
-import { Emitter } from "vs/base/common/event"
-import { Disposable } from "vs/base/common/lifecycle"
-import { equals } from "vs/base/common/objects"
-import { ThemeIcon } from "vs/base/common/themables"
-import { IUserDataProfile } from "vs/platform/userDataProfile/common/userDataProfile"
-import {
-  defaultUserDataProfileIcon,
-  DidChangeUserDataProfileEvent,
-  IUserDataProfileService,
-} from "vs/workbench/services/userDataProfile/common/userDataProfile"
+import { Promises } from 'vs/base/common/async';
+import { Emitter } from 'vs/base/common/event';
+import { Disposable } from 'vs/base/common/lifecycle';
+import { equals } from 'vs/base/common/objects';
+import { ThemeIcon } from 'vs/base/common/themables';
+import { IUserDataProfile } from 'vs/platform/userDataProfile/common/userDataProfile';
+import { defaultUserDataProfileIcon, DidChangeUserDataProfileEvent, IUserDataProfileService } from 'vs/workbench/services/userDataProfile/common/userDataProfile';
 
-export class UserDataProfileService
-  extends Disposable
-  implements IUserDataProfileService
-{
-  readonly _serviceBrand: undefined
+export class UserDataProfileService extends Disposable implements IUserDataProfileService {
 
-  private readonly _onDidChangeCurrentProfile = this._register(
-    new Emitter<DidChangeUserDataProfileEvent>(),
-  )
-  readonly onDidChangeCurrentProfile = this._onDidChangeCurrentProfile.event
+	readonly _serviceBrand: undefined;
 
-  private _currentProfile: IUserDataProfile
-  get currentProfile(): IUserDataProfile {
-    return this._currentProfile
-  }
+	private readonly _onDidChangeCurrentProfile = this._register(new Emitter<DidChangeUserDataProfileEvent>());
+	readonly onDidChangeCurrentProfile = this._onDidChangeCurrentProfile.event;
 
-  constructor(currentProfile: IUserDataProfile) {
-    super()
-    this._currentProfile = currentProfile
-  }
+	private _currentProfile: IUserDataProfile;
+	get currentProfile(): IUserDataProfile { return this._currentProfile; }
 
-  async updateCurrentProfile(userDataProfile: IUserDataProfile): Promise<void> {
-    if (equals(this._currentProfile, userDataProfile)) {
-      return
-    }
-    const previous = this._currentProfile
-    this._currentProfile = userDataProfile
-    const joiners: Promise<void>[] = []
-    this._onDidChangeCurrentProfile.fire({
-      previous,
-      profile: userDataProfile,
-      join(promise) {
-        joiners.push(promise)
-      },
-    })
-    await Promises.settled(joiners)
-  }
+	constructor(
+		currentProfile: IUserDataProfile
+	) {
+		super();
+		this._currentProfile = currentProfile;
+	}
 
-  getShortName(profile: IUserDataProfile): string {
-    if (
-      !profile.isDefault &&
-      profile.shortName &&
-      ThemeIcon.fromId(profile.shortName)
-    ) {
-      return profile.shortName
-    }
-    return `$(${defaultUserDataProfileIcon.id})`
-  }
+	async updateCurrentProfile(userDataProfile: IUserDataProfile): Promise<void> {
+		if (equals(this._currentProfile, userDataProfile)) {
+			return;
+		}
+		const previous = this._currentProfile;
+		this._currentProfile = userDataProfile;
+		const joiners: Promise<void>[] = [];
+		this._onDidChangeCurrentProfile.fire({
+			previous,
+			profile: userDataProfile,
+			join(promise) {
+				joiners.push(promise);
+			}
+		});
+		await Promises.settled(joiners);
+	}
+
+	getShortName(profile: IUserDataProfile): string {
+		if (!profile.isDefault && profile.shortName && ThemeIcon.fromId(profile.shortName)) {
+			return profile.shortName;
+		}
+		return `$(${defaultUserDataProfileIcon.id})`;
+	}
+
 }

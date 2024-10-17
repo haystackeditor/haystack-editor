@@ -38,7 +38,7 @@ export class RendererProfiling {
     @ITimerService timerService: ITimerService,
     @IConfigurationService configService: IConfigurationService,
     @IProfileAnalysisWorkerService
-    profileAnalysisService: IProfileAnalysisWorkerService,
+    profileAnalysisService: IProfileAnalysisWorkerService
   ) {
     const devOpts = parseExtensionDevOptions(_environmentService)
     if (devOpts.isExtensionDevTestFromCli) {
@@ -48,7 +48,7 @@ export class RendererProfiling {
 
     timerService.perfBaseline.then((perfBaseline) => {
       _logService.info(
-        `[perf] Render performance baseline is ${perfBaseline}ms`,
+        `[perf] Render performance baseline is ${perfBaseline}ms`
       )
 
       if (perfBaseline < 0) {
@@ -74,7 +74,7 @@ export class RendererProfiling {
           !configService.getValue("application.experimental.rendererProfiling")
         ) {
           _logService.debug(
-            `[perf] SLOW task detected (${maxDuration}ms) but renderer profiling is disabled via 'application.experimental.rendererProfiling'`,
+            `[perf] SLOW task detected (${maxDuration}ms) but renderer profiling is disabled via 'application.experimental.rendererProfiling'`
           )
           return
         }
@@ -82,7 +82,7 @@ export class RendererProfiling {
         const sessionId = generateUuid()
 
         _logService.warn(
-          `[perf] Renderer reported VERY LONG TASK (${maxDuration}ms), starting profiling session '${sessionId}'`,
+          `[perf] Renderer reported VERY LONG TASK (${maxDuration}ms), starting profiling session '${sessionId}'`
         )
 
         // pause observation, we'll take a detailed look
@@ -93,13 +93,13 @@ export class RendererProfiling {
           try {
             const profile = await nativeHostService.profileRenderer(
               sessionId,
-              5000,
+              5000
             )
             const output = await profileAnalysisService.analyseBottomUp(
               profile,
               (_url) => "<<renderer>>",
               perfBaseline,
-              true,
+              true
             )
             if (output === ProfilingOutput.Interesting) {
               this._store(profile, sessionId)
@@ -129,11 +129,11 @@ export class RendererProfiling {
   private async _store(profile: IV8Profile, sessionId: string): Promise<void> {
     const path = joinPath(
       this._environmentService.tmpDir,
-      `renderer-${Math.random().toString(16).slice(2, 8)}.cpuprofile.json`,
+      `renderer-${Math.random().toString(16).slice(2, 8)}.cpuprofile.json`
     )
     await this._fileService.writeFile(
       path,
-      VSBuffer.fromString(JSON.stringify(profile)),
+      VSBuffer.fromString(JSON.stringify(profile))
     )
     this._logService.info(`[perf] stored profile to DISK '${path}'`, sessionId)
   }

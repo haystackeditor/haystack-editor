@@ -21,6 +21,6 @@ module.exports = withDefaults({
 		extension: './src/extension.ts',
 	},
 	resolve: {
-		mainFields: ['module', 'main'],
-	},
+		mainFields: ['module', 'main']
+	}
 });

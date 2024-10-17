@@ -36,7 +36,7 @@ suite("diffing fixtures", () => {
   })
 
   const fixturesOutDir = FileAccess.asFileUri(
-    "vs/editor/test/node/diffing/fixtures",
+    "vs/editor/test/node/diffing/fixtures"
   ).fsPath
   // We want the dir in src, so we can directly update the source files if they disagree and create invalid files to capture the previous state.
   // This makes it very easy to update the fixtures.
@@ -74,11 +74,11 @@ suite("diffing fixtures", () => {
         ignoreTrimWhitespace,
         maxComputationTimeMs: Number.MAX_SAFE_INTEGER,
         computeMoves: true,
-      },
+      }
     )
 
     function getDiffs(
-      changes: readonly DetailedLineRangeMapping[],
+      changes: readonly DetailedLineRangeMapping[]
     ): IDetailedDiff[] {
       return changes.map<IDetailedDiff>((c) => ({
         originalRange: c.original.toString(),
@@ -125,11 +125,11 @@ suite("diffing fixtures", () => {
 
     const expectedFilePath = join(
       folderPath,
-      `${diffingAlgoName}.expected.diff.json`,
+      `${diffingAlgoName}.expected.diff.json`
     )
     const invalidFilePath = join(
       folderPath,
-      `${diffingAlgoName}.invalid.diff.json`,
+      `${diffingAlgoName}.invalid.diff.json`
     )
 
     const actualJsonStr = JSON.stringify(actualDiffingResult, null, "\t")
@@ -140,7 +140,7 @@ suite("diffing fixtures", () => {
       // Create invalid file so that this test fails on a re-run
       writeFileSync(invalidFilePath, "")
       throw new Error(
-        "No expected file! Expected and invalid files were written. Delete the invalid file to make the test pass.",
+        "No expected file! Expected and invalid files were written. Delete the invalid file to make the test pass."
       )
     }
     if (existsSync(invalidFilePath)) {
@@ -149,7 +149,7 @@ suite("diffing fixtures", () => {
         // Update expected file
         writeFileSync(expectedFilePath, actualJsonStr)
         throw new Error(
-          `Delete the invalid ${invalidFilePath} file to make the test pass.`,
+          `Delete the invalid ${invalidFilePath} file to make the test pass.`
         )
       } else {
         const expectedFileDiffResult: DiffingResult = JSON.parse(invalidJsonStr)

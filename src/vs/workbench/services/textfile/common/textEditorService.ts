@@ -96,7 +96,7 @@ export class TextEditorService
   >()
 
   private readonly fileEditorFactory = Registry.as<IEditorFactoryRegistry>(
-    EditorExtensions.EditorFactory,
+    EditorExtensions.EditorFactory
   ).getFileEditorFactory()
 
   constructor(
@@ -108,7 +108,7 @@ export class TextEditorService
     private readonly uriIdentityService: IUriIdentityService,
     @IFileService private readonly fileService: IFileService,
     @IEditorResolverService
-    private readonly editorResolverService: IEditorResolverService,
+    private readonly editorResolverService: IEditorResolverService
   ) {
     super()
 
@@ -138,15 +138,15 @@ export class TextEditorService
           createDiffEditorInput: (diffEditor) => ({
             editor: this.createTextEditor(diffEditor),
           }),
-        },
-      ),
+        }
+      )
     )
   }
 
   resolveTextEditor(input: IUntypedEditorInput): Promise<EditorInput>
   resolveTextEditor(input: IUntypedFileEditorInput): Promise<IFileEditorInput>
   async resolveTextEditor(
-    input: IUntypedEditorInput | IUntypedFileEditorInput,
+    input: IUntypedEditorInput | IUntypedFileEditorInput
   ): Promise<EditorInput | IFileEditorInput> {
     return this.createTextEditor(input)
   }
@@ -154,7 +154,7 @@ export class TextEditorService
   createTextEditor(input: IUntypedEditorInput): EditorInput
   createTextEditor(input: IUntypedFileEditorInput): IFileEditorInput
   createTextEditor(
-    input: IUntypedEditorInput | IUntypedFileEditorInput,
+    input: IUntypedEditorInput | IUntypedFileEditorInput
   ): EditorInput | IFileEditorInput {
     // Merge Editor Not Supported (we fallback to showing the result only)
     if (isResourceMergeEditorInput(input)) {
@@ -172,7 +172,7 @@ export class TextEditorService
         input.description,
         original,
         modified,
-        undefined,
+        undefined
       )
     }
 
@@ -186,7 +186,7 @@ export class TextEditorService
         input.label,
         input.description,
         secondary,
-        primary,
+        primary
       )
     }
 
@@ -223,8 +223,8 @@ export class TextEditorService
       return this.createOrGetCached(untitledModel.resource, undefined, () =>
         this.instantiationService.createInstance(
           UntitledTextEditorInput,
-          untitledModel,
-        ),
+          untitledModel
+        )
       )
     }
 
@@ -271,7 +271,7 @@ export class TextEditorService
               textResourceEditorInput.yPosition,
               textResourceEditorInput.width,
               textResourceEditorInput.height,
-              this.instantiationService,
+              this.instantiationService
             )
           }
 
@@ -287,7 +287,7 @@ export class TextEditorService
             textResourceEditorInput.xPosition,
             textResourceEditorInput.yPosition,
             textResourceEditorInput.width,
-            textResourceEditorInput.height,
+            textResourceEditorInput.height
           )
         },
         (cachedInput) => {
@@ -306,7 +306,7 @@ export class TextEditorService
 
             if (textResourceEditorInput.description) {
               cachedInput.setPreferredDescription(
-                textResourceEditorInput.description,
+                textResourceEditorInput.description
               )
             }
 
@@ -316,7 +316,7 @@ export class TextEditorService
 
             if (textResourceEditorInput.languageId) {
               cachedInput.setPreferredLanguageId(
-                textResourceEditorInput.languageId,
+                textResourceEditorInput.languageId
               )
             }
 
@@ -337,7 +337,7 @@ export class TextEditorService
 
             if (textResourceEditorInput.languageId) {
               cachedInput.setPreferredLanguageId(
-                textResourceEditorInput.languageId,
+                textResourceEditorInput.languageId
               )
             }
 
@@ -345,14 +345,14 @@ export class TextEditorService
               cachedInput.setPreferredContents(textResourceEditorInput.contents)
             }
           }
-        },
+        }
       )
     }
 
     throw new Error(
       `ITextEditorService: Unable to create texteditor from ${JSON.stringify(
-        input,
-      )}`,
+        input
+      )}`
     )
   }
 
@@ -367,8 +367,8 @@ export class TextEditorService
       input:
         | TextResourceEditorInput
         | IFileEditorInput
-        | UntitledTextEditorInput,
-    ) => void,
+        | UntitledTextEditorInput
+    ) => void
   ): TextResourceEditorInput | IFileEditorInput | UntitledTextEditorInput {
     const editRangeString = editRange
       ? `${editRange.startLineNumber}-${editRange.startColumn}-${editRange.endLineNumber}-${editRange.endColumn}`
@@ -394,5 +394,5 @@ export class TextEditorService
 registerSingleton(
   ITextEditorService,
   TextEditorService,
-  InstantiationType.Eager /* do not change: https://github.com/microsoft/vscode/issues/137675 */,
+  InstantiationType.Eager /* do not change: https://github.com/microsoft/vscode/issues/137675 */
 )

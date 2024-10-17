@@ -9,331 +9,298 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as assert from "assert"
-import { ensureNoDisposablesAreLeakedInTestSuite } from "vs/base/test/common/utils"
-import {
-  compressConsecutiveTextChanges,
-  TextChange,
-} from "vs/editor/common/core/textChange"
+import * as assert from 'assert';
+import { ensureNoDisposablesAreLeakedInTestSuite } from 'vs/base/test/common/utils';
+import { compressConsecutiveTextChanges, TextChange } from 'vs/editor/common/core/textChange';
 
-const GENERATE_TESTS = false
+const GENERATE_TESTS = false;
 
 interface IGeneratedEdit {
-  offset: number
-  length: number
-  text: string
+	offset: number;
+	length: number;
+	text: string;
 }
 
-suite("TextChangeCompressor", () => {
-  ensureNoDisposablesAreLeakedInTestSuite()
+suite('TextChangeCompressor', () => {
 
-  function getResultingContent(
-    initialContent: string,
-    edits: IGeneratedEdit[],
-  ): string {
-    let content = initialContent
-    for (let i = edits.length - 1; i >= 0; i--) {
-      content =
-        content.substring(0, edits[i].offset) +
-        edits[i].text +
-        content.substring(edits[i].offset + edits[i].length)
-    }
-    return content
-  }
+	ensureNoDisposablesAreLeakedInTestSuite();
 
-  function getTextChanges(
-    initialContent: string,
-    edits: IGeneratedEdit[],
-  ): TextChange[] {
-    let content = initialContent
-    const changes: TextChange[] = new Array<TextChange>(edits.length)
-    let deltaOffset = 0
+	function getResultingContent(initialContent: string, edits: IGeneratedEdit[]): string {
+		let content = initialContent;
+		for (let i = edits.length - 1; i >= 0; i--) {
+			content = (
+				content.substring(0, edits[i].offset) +
+				edits[i].text +
+				content.substring(edits[i].offset + edits[i].length)
+			);
+		}
+		return content;
+	}
 
-    for (let i = 0; i < edits.length; i++) {
-      const edit = edits[i]
+	function getTextChanges(initialContent: string, edits: IGeneratedEdit[]): TextChange[] {
+		let content = initialContent;
+		const changes: TextChange[] = new Array<TextChange>(edits.length);
+		let deltaOffset = 0;
 
-      const position = edit.offset + deltaOffset
-      const length = edit.length
-      const text = edit.text
+		for (let i = 0; i < edits.length; i++) {
+			const edit = edits[i];
 
-      const oldText = content.substr(position, length)
+			const position = edit.offset + deltaOffset;
+			const length = edit.length;
+			const text = edit.text;
 
-      content =
-        content.substr(0, position) + text + content.substr(position + length)
+			const oldText = content.substr(position, length);
 
-      changes[i] = new TextChange(edit.offset, oldText, position, text)
+			content = (
+				content.substr(0, position) +
+				text +
+				content.substr(position + length)
+			);
 
-      deltaOffset += text.length - length
-    }
+			changes[i] = new TextChange(edit.offset, oldText, position, text);
 
-    return changes
-  }
+			deltaOffset += text.length - length;
+		}
 
-  function assertCompression(
-    initialText: string,
-    edit1: IGeneratedEdit[],
-    edit2: IGeneratedEdit[],
-  ): void {
-    const tmpText = getResultingContent(initialText, edit1)
-    const chg1 = getTextChanges(initialText, edit1)
+		return changes;
+	}
 
-    const finalText = getResultingContent(tmpText, edit2)
-    const chg2 = getTextChanges(tmpText, edit2)
+	function assertCompression(initialText: string, edit1: IGeneratedEdit[], edit2: IGeneratedEdit[]): void {
 
-    const compressedTextChanges = compressConsecutiveTextChanges(chg1, chg2)
+		const tmpText = getResultingContent(initialText, edit1);
+		const chg1 = getTextChanges(initialText, edit1);
 
-    // Check that the compression was correct
-    const compressedDoTextEdits: IGeneratedEdit[] = compressedTextChanges.map(
-      (change) => {
-        return {
-          offset: change.oldPosition,
-          length: change.oldLength,
-          text: change.newText,
-        }
-      },
-    )
-    const actualDoResult = getResultingContent(
-      initialText,
-      compressedDoTextEdits,
-    )
-    assert.strictEqual(actualDoResult, finalText)
+		const finalText = getResultingContent(tmpText, edit2);
+		const chg2 = getTextChanges(tmpText, edit2);
 
-    const compressedUndoTextEdits: IGeneratedEdit[] = compressedTextChanges.map(
-      (change) => {
-        return {
-          offset: change.newPosition,
-          length: change.newLength,
-          text: change.oldText,
-        }
-      },
-    )
-    const actualUndoResult = getResultingContent(
-      finalText,
-      compressedUndoTextEdits,
-    )
-    assert.strictEqual(actualUndoResult, initialText)
-  }
+		const compressedTextChanges = compressConsecutiveTextChanges(chg1, chg2);
 
-  test("simple 1", () => {
-    assertCompression(
-      "",
-      [{ offset: 0, length: 0, text: "h" }],
-      [{ offset: 1, length: 0, text: "e" }],
-    )
-  })
+		// Check that the compression was correct
+		const compressedDoTextEdits: IGeneratedEdit[] = compressedTextChanges.map((change) => {
+			return {
+				offset: change.oldPosition,
+				length: change.oldLength,
+				text: change.newText
+			};
+		});
+		const actualDoResult = getResultingContent(initialText, compressedDoTextEdits);
+		assert.strictEqual(actualDoResult, finalText);
 
-  test("simple 2", () => {
-    assertCompression(
-      "|",
-      [{ offset: 0, length: 0, text: "h" }],
-      [{ offset: 2, length: 0, text: "e" }],
-    )
-  })
+		const compressedUndoTextEdits: IGeneratedEdit[] = compressedTextChanges.map((change) => {
+			return {
+				offset: change.newPosition,
+				length: change.newLength,
+				text: change.oldText
+			};
+		});
+		const actualUndoResult = getResultingContent(finalText, compressedUndoTextEdits);
+		assert.strictEqual(actualUndoResult, initialText);
+	}
 
-  test("complex1", () => {
-    assertCompression(
-      "abcdefghij",
-      [
-        { offset: 0, length: 3, text: "qh" },
-        { offset: 5, length: 0, text: "1" },
-        { offset: 8, length: 2, text: "X" },
-      ],
-      [
-        { offset: 1, length: 0, text: "Z" },
-        { offset: 3, length: 3, text: "Y" },
-      ],
-    )
-  })
+	test('simple 1', () => {
+		assertCompression(
+			'',
+			[{ offset: 0, length: 0, text: 'h' }],
+			[{ offset: 1, length: 0, text: 'e' }]
+		);
+	});
 
-  // test('issue #118041', () => {
-  // 	assertCompression(
-  // 		'﻿',
-  // 		[
-  // 			{ offset: 0, length: 1, text: '' },
-  // 		],
-  // 		[
-  // 			{ offset: 1, length: 0, text: 'Z' },
-  // 			{ offset: 3, length: 3, text: 'Y' },
-  // 		]
-  // 	);
-  // })
+	test('simple 2', () => {
+		assertCompression(
+			'|',
+			[{ offset: 0, length: 0, text: 'h' }],
+			[{ offset: 2, length: 0, text: 'e' }]
+		);
+	});
 
-  test("gen1", () => {
-    assertCompression(
-      "kxm",
-      [{ offset: 0, length: 1, text: "tod_neu" }],
-      [{ offset: 1, length: 2, text: "sag_e" }],
-    )
-  })
+	test('complex1', () => {
+		assertCompression(
+			'abcdefghij',
+			[
+				{ offset: 0, length: 3, text: 'qh' },
+				{ offset: 5, length: 0, text: '1' },
+				{ offset: 8, length: 2, text: 'X' }
+			],
+			[
+				{ offset: 1, length: 0, text: 'Z' },
+				{ offset: 3, length: 3, text: 'Y' },
+			]
+		);
+	});
 
-  test("gen2", () => {
-    assertCompression(
-      "kpb_r_v",
-      [{ offset: 5, length: 2, text: "a_jvf_l" }],
-      [{ offset: 10, length: 2, text: "w" }],
-    )
-  })
+	// test('issue #118041', () => {
+	// 	assertCompression(
+	// 		'﻿',
+	// 		[
+	// 			{ offset: 0, length: 1, text: '' },
+	// 		],
+	// 		[
+	// 			{ offset: 1, length: 0, text: 'Z' },
+	// 			{ offset: 3, length: 3, text: 'Y' },
+	// 		]
+	// 	);
+	// })
 
-  test("gen3", () => {
-    assertCompression(
-      "slu_w",
-      [{ offset: 4, length: 1, text: "_wfw" }],
-      [{ offset: 3, length: 5, text: "" }],
-    )
-  })
+	test('gen1', () => {
+		assertCompression(
+			'kxm',
+			[{ offset: 0, length: 1, text: 'tod_neu' }],
+			[{ offset: 1, length: 2, text: 'sag_e' }]
+		);
+	});
 
-  test("gen4", () => {
-    assertCompression(
-      "_e",
-      [{ offset: 2, length: 0, text: "zo_b" }],
-      [{ offset: 1, length: 3, text: "tra" }],
-    )
-  })
+	test('gen2', () => {
+		assertCompression(
+			'kpb_r_v',
+			[{ offset: 5, length: 2, text: 'a_jvf_l' }],
+			[{ offset: 10, length: 2, text: 'w' }]
+		);
+	});
 
-  test("gen5", () => {
-    assertCompression(
-      "ssn_",
-      [{ offset: 0, length: 2, text: "tat_nwe" }],
-      [{ offset: 2, length: 6, text: "jm" }],
-    )
-  })
+	test('gen3', () => {
+		assertCompression(
+			'slu_w',
+			[{ offset: 4, length: 1, text: '_wfw' }],
+			[{ offset: 3, length: 5, text: '' }]
+		);
+	});
 
-  test("gen6", () => {
-    assertCompression(
-      "kl_nru",
-      [{ offset: 4, length: 1, text: "" }],
-      [{ offset: 1, length: 4, text: "__ut" }],
-    )
-  })
+	test('gen4', () => {
+		assertCompression(
+			'_e',
+			[{ offset: 2, length: 0, text: 'zo_b' }],
+			[{ offset: 1, length: 3, text: 'tra' }]
+		);
+	});
 
-  const _a = "a".charCodeAt(0)
-  const _z = "z".charCodeAt(0)
+	test('gen5', () => {
+		assertCompression(
+			'ssn_',
+			[{ offset: 0, length: 2, text: 'tat_nwe' }],
+			[{ offset: 2, length: 6, text: 'jm' }]
+		);
+	});
 
-  function getRandomInt(min: number, max: number): number {
-    return Math.floor(Math.random() * (max - min + 1)) + min
-  }
+	test('gen6', () => {
+		assertCompression(
+			'kl_nru',
+			[{ offset: 4, length: 1, text: '' }],
+			[{ offset: 1, length: 4, text: '__ut' }]
+		);
+	});
 
-  function getRandomString(minLength: number, maxLength: number): string {
-    const length = getRandomInt(minLength, maxLength)
-    let r = ""
-    for (let i = 0; i < length; i++) {
-      r += String.fromCharCode(getRandomInt(_a, _z))
-    }
-    return r
-  }
+	const _a = 'a'.charCodeAt(0);
+	const _z = 'z'.charCodeAt(0);
 
-  function getRandomEOL(): string {
-    switch (getRandomInt(1, 3)) {
-      case 1:
-        return "\r"
-      case 2:
-        return "\n"
-      case 3:
-        return "\r\n"
-    }
-    throw new Error(`not possible`)
-  }
+	function getRandomInt(min: number, max: number): number {
+		return Math.floor(Math.random() * (max - min + 1)) + min;
+	}
 
-  function getRandomBuffer(small: boolean): string {
-    const lineCount = getRandomInt(1, small ? 3 : 10)
-    const lines: string[] = []
-    for (let i = 0; i < lineCount; i++) {
-      lines.push(getRandomString(0, small ? 3 : 10) + getRandomEOL())
-    }
-    return lines.join("")
-  }
+	function getRandomString(minLength: number, maxLength: number): string {
+		const length = getRandomInt(minLength, maxLength);
+		let r = '';
+		for (let i = 0; i < length; i++) {
+			r += String.fromCharCode(getRandomInt(_a, _z));
+		}
+		return r;
+	}
 
-  function getRandomEdits(
-    content: string,
-    min: number = 1,
-    max: number = 5,
-  ): IGeneratedEdit[] {
-    const result: IGeneratedEdit[] = []
-    let cnt = getRandomInt(min, max)
+	function getRandomEOL(): string {
+		switch (getRandomInt(1, 3)) {
+			case 1: return '\r';
+			case 2: return '\n';
+			case 3: return '\r\n';
+		}
+		throw new Error(`not possible`);
+	}
 
-    let maxOffset = content.length
+	function getRandomBuffer(small: boolean): string {
+		const lineCount = getRandomInt(1, small ? 3 : 10);
+		const lines: string[] = [];
+		for (let i = 0; i < lineCount; i++) {
+			lines.push(getRandomString(0, small ? 3 : 10) + getRandomEOL());
+		}
+		return lines.join('');
+	}
 
-    while (cnt > 0 && maxOffset > 0) {
-      const offset = getRandomInt(0, maxOffset)
-      const length = getRandomInt(0, maxOffset - offset)
-      const text = getRandomBuffer(true)
+	function getRandomEdits(content: string, min: number = 1, max: number = 5): IGeneratedEdit[] {
 
-      result.push({
-        offset: offset,
-        length: length,
-        text: text,
-      })
+		const result: IGeneratedEdit[] = [];
+		let cnt = getRandomInt(min, max);
 
-      maxOffset = offset
-      cnt--
-    }
+		let maxOffset = content.length;
 
-    result.reverse()
+		while (cnt > 0 && maxOffset > 0) {
 
-    return result
-  }
+			const offset = getRandomInt(0, maxOffset);
+			const length = getRandomInt(0, maxOffset - offset);
+			const text = getRandomBuffer(true);
 
-  class GeneratedTest {
-    private readonly _content: string
-    private readonly _edits1: IGeneratedEdit[]
-    private readonly _edits2: IGeneratedEdit[]
+			result.push({
+				offset: offset,
+				length: length,
+				text: text
+			});
 
-    constructor() {
-      this._content = getRandomBuffer(false).replace(/\n/g, "_")
-      this._edits1 = getRandomEdits(this._content, 1, 5).map((e) => {
-        return {
-          offset: e.offset,
-          length: e.length,
-          text: e.text.replace(/\n/g, "_"),
-        }
-      })
-      const tmp = getResultingContent(this._content, this._edits1)
-      this._edits2 = getRandomEdits(tmp, 1, 5).map((e) => {
-        return {
-          offset: e.offset,
-          length: e.length,
-          text: e.text.replace(/\n/g, "_"),
-        }
-      })
-    }
+			maxOffset = offset;
+			cnt--;
+		}
 
-    public print(): void {
-      console.log(
-        `assertCompression(${JSON.stringify(this._content)}, ${JSON.stringify(this._edits1)}, ${JSON.stringify(this._edits2)});`,
-      )
-    }
+		result.reverse();
 
-    public assert(): void {
-      assertCompression(this._content, this._edits1, this._edits2)
-    }
-  }
+		return result;
+	}
 
-  if (GENERATE_TESTS) {
-    let testNumber = 0
-    while (true) {
-      testNumber++
-      console.log(`------RUNNING TextChangeCompressor TEST ${testNumber}`)
-      const test = new GeneratedTest()
-      try {
-        test.assert()
-      } catch (err) {
-        console.log(err)
-        test.print()
-        break
-      }
-    }
-  }
-})
+	class GeneratedTest {
 
-suite("TextChange", () => {
-  ensureNoDisposablesAreLeakedInTestSuite()
+		private readonly _content: string;
+		private readonly _edits1: IGeneratedEdit[];
+		private readonly _edits2: IGeneratedEdit[];
 
-  test("issue #118041: unicode character undo bug", () => {
-    const textChange = new TextChange(428, "﻿", 428, "")
-    const buff = new Uint8Array(textChange.writeSize())
-    textChange.write(buff, 0)
-    const actual: TextChange[] = []
-    TextChange.read(buff, 0, actual)
-    assert.deepStrictEqual(actual[0], textChange)
-  })
-})
+		constructor() {
+			this._content = getRandomBuffer(false).replace(/\n/g, '_');
+			this._edits1 = getRandomEdits(this._content, 1, 5).map((e) => { return { offset: e.offset, length: e.length, text: e.text.replace(/\n/g, '_') }; });
+			const tmp = getResultingContent(this._content, this._edits1);
+			this._edits2 = getRandomEdits(tmp, 1, 5).map((e) => { return { offset: e.offset, length: e.length, text: e.text.replace(/\n/g, '_') }; });
+		}
+
+		public print(): void {
+			console.log(`assertCompression(${JSON.stringify(this._content)}, ${JSON.stringify(this._edits1)}, ${JSON.stringify(this._edits2)});`);
+		}
+
+		public assert(): void {
+			assertCompression(this._content, this._edits1, this._edits2);
+		}
+	}
+
+	if (GENERATE_TESTS) {
+		let testNumber = 0;
+		while (true) {
+			testNumber++;
+			console.log(`------RUNNING TextChangeCompressor TEST ${testNumber}`);
+			const test = new GeneratedTest();
+			try {
+				test.assert();
+			} catch (err) {
+				console.log(err);
+				test.print();
+				break;
+			}
+		}
+	}
+});
+
+suite('TextChange', () => {
+
+	ensureNoDisposablesAreLeakedInTestSuite();
+
+	test('issue #118041: unicode character undo bug', () => {
+		const textChange = new TextChange(428, '﻿', 428, '');
+		const buff = new Uint8Array(textChange.writeSize());
+		textChange.write(buff, 0);
+		const actual: TextChange[] = [];
+		TextChange.read(buff, 0, actual);
+		assert.deepStrictEqual(actual[0], textChange);
+	});
+
+});

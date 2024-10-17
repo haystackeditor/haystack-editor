@@ -10,28 +10,28 @@
  *--------------------------------------------------------------------------------------------*/
 
 export interface IRawChatCommandContribution {
-  name: string
-  description: string
-  sampleRequest?: string
-  isSticky?: boolean
-  when?: string
-  defaultImplicitVariables?: string[]
+	name: string;
+	description: string;
+	sampleRequest?: string;
+	isSticky?: boolean;
+	when?: string;
+	defaultImplicitVariables?: string[];
 }
 
-export type RawChatParticipantLocation = "panel" | "terminal" | "notebook"
+export type RawChatParticipantLocation = 'panel' | 'terminal' | 'notebook';
 
 export interface IRawChatParticipantContribution {
-  id: string
-  name: string
-  fullName: string
-  when?: string
-  description?: string
-  isDefault?: boolean
-  isSticky?: boolean
-  sampleRequest?: string
-  commands?: IRawChatCommandContribution[]
-  defaultImplicitVariables?: string[]
-  locations?: RawChatParticipantLocation[]
+	id: string;
+	name: string;
+	fullName: string;
+	when?: string;
+	description?: string;
+	isDefault?: boolean;
+	isSticky?: boolean;
+	sampleRequest?: string;
+	commands?: IRawChatCommandContribution[];
+	defaultImplicitVariables?: string[];
+	locations?: RawChatParticipantLocation[];
 }
 
 /**
@@ -39,4 +39,4 @@ export interface IRawChatParticipantContribution {
  * DON'T use this for any new data, only for old persisted data.
  * @deprecated
  */
-export const CHAT_PROVIDER_ID = "copilot"
+export const CHAT_PROVIDER_ID = 'copilot';

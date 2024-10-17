@@ -44,8 +44,8 @@ suite("Files - TextFileEditorModelManager", () => {
     accessor = instantiationService.createInstance(TestServiceAccessor)
     disposables.add(
       toDisposable(
-        () => accessor.textFileService.files as ITestTextFileEditorModelManager,
-      ),
+        () => accessor.textFileService.files as ITestTextFileEditorModelManager
+      )
     )
   })
 
@@ -64,8 +64,8 @@ suite("Files - TextFileEditorModelManager", () => {
         "utf8",
         undefined,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
     const model2: TextFileEditorModel = disposables.add(
       instantiationService.createInstance(
@@ -74,8 +74,8 @@ suite("Files - TextFileEditorModelManager", () => {
         "utf8",
         undefined,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
     const model3: TextFileEditorModel = disposables.add(
       instantiationService.createInstance(
@@ -84,8 +84,8 @@ suite("Files - TextFileEditorModelManager", () => {
         "utf8",
         undefined,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
 
     manager.add(URI.file("/test.html"), model1)
@@ -142,7 +142,7 @@ suite("Files - TextFileEditorModelManager", () => {
     disposables.add(
       manager.onDidCreate((model) => {
         events.push(model)
-      }),
+      })
     )
 
     const modelPromise = manager.resolve(resource, { encoding })
@@ -165,11 +165,11 @@ suite("Files - TextFileEditorModelManager", () => {
     assert.strictEqual(events.length, 2)
     assert.strictEqual(
       events[0].resource.toString(),
-      model1.resource.toString(),
+      model1.resource.toString()
     )
     assert.strictEqual(
       events[1].resource.toString(),
-      model2.resource.toString(),
+      model2.resource.toString()
     )
   })
 
@@ -188,7 +188,7 @@ suite("Files - TextFileEditorModelManager", () => {
             didResolve = true
             resolve()
           }
-        }),
+        })
       )
     })
 
@@ -212,7 +212,7 @@ suite("Files - TextFileEditorModelManager", () => {
         if (model.resource.toString() === resource.toString()) {
           didResolve = true
         }
-      }),
+      })
     )
 
     await manager.resolve(resource, { reload: { async: false } })
@@ -225,7 +225,7 @@ suite("Files - TextFileEditorModelManager", () => {
     const resource = URI.file("/path/index.txt")
 
     accessor.textFileService.setReadStreamErrorOnce(
-      new FileOperationError("fail", FileOperationResult.FILE_OTHER_ERROR),
+      new FileOperationError("fail", FileOperationResult.FILE_OTHER_ERROR)
     )
 
     let error: Error | undefined = undefined
@@ -247,13 +247,13 @@ suite("Files - TextFileEditorModelManager", () => {
     disposables.add(await manager.resolve(resource))
 
     accessor.textFileService.setReadStreamErrorOnce(
-      new FileOperationError("fail", FileOperationResult.FILE_OTHER_ERROR),
+      new FileOperationError("fail", FileOperationResult.FILE_OTHER_ERROR)
     )
 
     let error: Error | undefined = undefined
     try {
       disposables.add(
-        await manager.resolve(resource, { reload: { async: false } }),
+        await manager.resolve(resource, { reload: { async: false } })
       )
     } catch (e) {
       error = e
@@ -271,7 +271,7 @@ suite("Files - TextFileEditorModelManager", () => {
     const model = disposables.add(
       await manager.resolve(resource, {
         contents: createTextBufferFactory("Hello World"),
-      }),
+      })
     )
     assert.strictEqual(model.textEditorModel?.getValue(), "Hello World")
     assert.strictEqual(model.isDirty(), true)
@@ -279,7 +279,7 @@ suite("Files - TextFileEditorModelManager", () => {
     disposables.add(
       await manager.resolve(resource, {
         contents: createTextBufferFactory("More Changes"),
-      }),
+      })
     )
     assert.strictEqual(model.textEditorModel?.getValue(), "More Changes")
     assert.strictEqual(model.isDirty(), true)
@@ -299,7 +299,7 @@ suite("Files - TextFileEditorModelManager", () => {
           resolvedModel = disposables.add(e.model as TextFileEditorModel)
           contents.push(e.model.textEditorModel!.getValue())
         }
-      }),
+      })
     )
 
     await Promise.all([
@@ -317,7 +317,7 @@ suite("Files - TextFileEditorModelManager", () => {
 
     assert.strictEqual(
       resolvedModel.textEditorModel?.getValue(),
-      "More Changes",
+      "More Changes"
     )
     assert.strictEqual(resolvedModel.isDirty(), true)
 
@@ -337,8 +337,8 @@ suite("Files - TextFileEditorModelManager", () => {
         "utf8",
         undefined,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
     const model2: TextFileEditorModel = disposables.add(
       instantiationService.createInstance(
@@ -347,8 +347,8 @@ suite("Files - TextFileEditorModelManager", () => {
         "utf8",
         undefined,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
     const model3: TextFileEditorModel = disposables.add(
       instantiationService.createInstance(
@@ -357,8 +357,8 @@ suite("Files - TextFileEditorModelManager", () => {
         "utf8",
         undefined,
         undefined,
-        undefined,
-      ),
+        undefined
+      )
     )
 
     manager.add(URI.file("/test.html"), model1)
@@ -391,7 +391,7 @@ suite("Files - TextFileEditorModelManager", () => {
         if (model.resource.toString() === resource1.toString()) {
           resolvedCounter++
         }
-      }),
+      })
     )
 
     disposables.add(
@@ -402,7 +402,7 @@ suite("Files - TextFileEditorModelManager", () => {
         ) {
           removedCounter++
         }
-      }),
+      })
     )
 
     disposables.add(
@@ -414,7 +414,7 @@ suite("Files - TextFileEditorModelManager", () => {
             gotNonDirtyCounter++
           }
         }
-      }),
+      })
     )
 
     disposables.add(
@@ -422,7 +422,7 @@ suite("Files - TextFileEditorModelManager", () => {
         if (model.resource.toString() === resource1.toString()) {
           revertedCounter++
         }
-      }),
+      })
     )
 
     disposables.add(
@@ -430,7 +430,7 @@ suite("Files - TextFileEditorModelManager", () => {
         if (model.resource.toString() === resource1.toString()) {
           savedCounter++
         }
-      }),
+      })
     )
 
     disposables.add(
@@ -438,7 +438,7 @@ suite("Files - TextFileEditorModelManager", () => {
         if (model.resource.toString() === resource1.toString()) {
           encodingCounter++
         }
-      }),
+      })
     )
 
     const model1 = await manager.resolve(resource1, { encoding: "utf8" })
@@ -447,26 +447,26 @@ suite("Files - TextFileEditorModelManager", () => {
     accessor.fileService.fireFileChanges(
       new FileChangesEvent(
         [{ resource: resource1, type: FileChangeType.DELETED }],
-        false,
-      ),
+        false
+      )
     )
     accessor.fileService.fireFileChanges(
       new FileChangesEvent(
         [{ resource: resource1, type: FileChangeType.ADDED }],
-        false,
-      ),
+        false
+      )
     )
 
     const model2 = await manager.resolve(resource2, { encoding: "utf8" })
     assert.strictEqual(resolvedCounter, 2)
     ;(model1 as TextFileEditorModel).updateTextEditorModel(
-      createTextBufferFactory("changed"),
+      createTextBufferFactory("changed")
     )
     model1.updatePreferredEncoding("utf16")
 
     await model1.revert()
     ;(model1 as TextFileEditorModel).updateTextEditorModel(
-      createTextBufferFactory("changed again"),
+      createTextBufferFactory("changed again")
     )
 
     await model1.save()
@@ -506,10 +506,10 @@ suite("Files - TextFileEditorModelManager", () => {
     const resource = toResource.call(this, "/path/index_something.txt")
 
     const model = disposables.add(
-      await manager.resolve(resource, { encoding: "utf8" }),
+      await manager.resolve(resource, { encoding: "utf8" })
     )
     ;(model as TextFileEditorModel).updateTextEditorModel(
-      createTextBufferFactory("make dirty"),
+      createTextBufferFactory("make dirty")
     )
 
     const canDisposePromise = manager.canDispose(model as TextFileEditorModel)
@@ -536,7 +536,7 @@ suite("Files - TextFileEditorModelManager", () => {
     disposables.add(
       accessor.languageService.registerLanguage({
         id: languageId,
-      }),
+      })
     )
 
     const manager = accessor.textFileService
@@ -545,14 +545,14 @@ suite("Files - TextFileEditorModelManager", () => {
     const resource: URI = toResource.call(this, "/path/index_something.txt")
 
     let model = disposables.add(
-      await manager.resolve(resource, { languageId: languageId }),
+      await manager.resolve(resource, { languageId: languageId })
     )
     assert.strictEqual(model.textEditorModel!.getLanguageId(), languageId)
 
     model = await manager.resolve(resource, { languageId: "text" })
     assert.strictEqual(
       model.textEditorModel!.getLanguageId(),
-      PLAINTEXT_LANGUAGE_ID,
+      PLAINTEXT_LANGUAGE_ID
     )
   })
 
@@ -571,12 +571,12 @@ suite("Files - TextFileEditorModelManager", () => {
             didResolve = true
             resolve()
           }
-        }),
+        })
       )
     })
 
     accessor.fileService.fireFileChanges(
-      new FileChangesEvent([{ resource, type: FileChangeType.UPDATED }], false),
+      new FileChangesEvent([{ resource, type: FileChangeType.UPDATED }], false)
     )
 
     await onDidResolve
@@ -603,12 +603,12 @@ suite("Files - TextFileEditorModelManager", () => {
               resolve()
             }
           }
-        }),
+        })
       )
     })
 
     accessor.fileService.fireFileChanges(
-      new FileChangesEvent([{ resource, type: FileChangeType.UPDATED }], false),
+      new FileChangesEvent([{ resource, type: FileChangeType.UPDATED }], false)
     )
 
     await onDidResolve

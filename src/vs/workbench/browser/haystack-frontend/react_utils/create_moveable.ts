@@ -12,7 +12,7 @@ import * as uuid from "vs/base/common/uuid"
 export function useMoveable(
   element: HTMLElement | null,
   options: MoveOptions,
-  useMoveBehaviorCondition?: boolean,
+  useMoveBehaviorCondition?: boolean
 ) {
   React.useEffect(() => {
     if (element == null || useMoveBehaviorCondition === false) return

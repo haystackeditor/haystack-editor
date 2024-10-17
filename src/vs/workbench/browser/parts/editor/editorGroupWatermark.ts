@@ -28,8 +28,8 @@ registerColor(
   },
   localize(
     "editorLineHighlight",
-    "Foreground color for the labels in the editor watermark.",
-  ),
+    "Foreground color for the labels in the editor watermark."
+  )
 )
 
 export class EditorGroupWatermark extends Disposable {

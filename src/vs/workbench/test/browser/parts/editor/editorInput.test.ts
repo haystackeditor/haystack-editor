@@ -166,7 +166,7 @@ suite("EditorInput", () => {
       input.onWillDispose(() => {
         assert(true)
         counter++
-      }),
+      })
     )
 
     input.dispose()
@@ -177,7 +177,7 @@ suite("EditorInput", () => {
     const testInputID = "untypedMatches"
     const testInputResource = URI.file("/fake")
     const testInput = disposables.add(
-      new TestEditorInput(testInputResource, testInputID),
+      new TestEditorInput(testInputResource, testInputID)
     )
     const testUntypedInput = {
       resource: testInputResource,
@@ -214,16 +214,16 @@ suite("EditorInput", () => {
       undefined,
       undefined,
       undefined,
-      undefined,
+      undefined
     )
 
     assert.ok(textResourceEditorInput.matches(untypedResourceEditorInput))
     assert.ok(textResourceEditorInput.matches(untypedTextResourceEditorInput))
     assert.ok(
-      !textResourceEditorInput.matches(untypedResourceSideBySideEditorInput),
+      !textResourceEditorInput.matches(untypedResourceSideBySideEditorInput)
     )
     assert.ok(
-      !textResourceEditorInput.matches(untypedUntitledResourceEditorinput),
+      !textResourceEditorInput.matches(untypedUntitledResourceEditorinput)
     )
     assert.ok(!textResourceEditorInput.matches(untypedResourceDiffEditorInput))
     assert.ok(!textResourceEditorInput.matches(untypedResourceMergeEditorInput))
@@ -246,7 +246,7 @@ suite("EditorInput", () => {
       undefined,
       undefined,
       undefined,
-      undefined,
+      undefined
     )
 
     assert.ok(fileEditorInput.matches(untypedResourceEditorInput))
@@ -281,7 +281,7 @@ suite("EditorInput", () => {
       testResource,
       mergeData,
       mergeData,
-      testResource,
+      testResource
     )
 
     assert.ok(!mergeEditorInput.matches(untypedResourceEditorInput))
@@ -315,16 +315,16 @@ suite("EditorInput", () => {
     const untitledTextEditorInput: UntitledTextEditorInput =
       instantiationService.createInstance(
         UntitledTextEditorInput,
-        untitledModel,
+        untitledModel
       )
 
     assert.ok(!untitledTextEditorInput.matches(untypedResourceEditorInput))
     assert.ok(!untitledTextEditorInput.matches(untypedTextResourceEditorInput))
     assert.ok(
-      !untitledTextEditorInput.matches(untypedResourceSideBySideEditorInput),
+      !untitledTextEditorInput.matches(untypedResourceSideBySideEditorInput)
     )
     assert.ok(
-      untitledTextEditorInput.matches(untypedUntitledResourceEditorinput),
+      untitledTextEditorInput.matches(untypedUntitledResourceEditorinput)
     )
     assert.ok(!untitledTextEditorInput.matches(untypedResourceDiffEditorInput))
     assert.ok(!untitledTextEditorInput.matches(untypedResourceMergeEditorInput))
@@ -334,10 +334,10 @@ suite("EditorInput", () => {
     assert.ok(!untitledTextEditorInput.matches(untypedResourceEditorInput))
     assert.ok(!untitledTextEditorInput.matches(untypedTextResourceEditorInput))
     assert.ok(
-      !untitledTextEditorInput.matches(untypedResourceSideBySideEditorInput),
+      !untitledTextEditorInput.matches(untypedResourceSideBySideEditorInput)
     )
     assert.ok(
-      untitledTextEditorInput.matches(untypedUntitledResourceEditorinput),
+      untitledTextEditorInput.matches(untypedUntitledResourceEditorinput)
     )
     assert.ok(!untitledTextEditorInput.matches(untypedResourceDiffEditorInput))
     assert.ok(!untitledTextEditorInput.matches(untypedResourceMergeEditorInput))
@@ -360,7 +360,7 @@ suite("EditorInput", () => {
       undefined,
       undefined,
       undefined,
-      undefined,
+      undefined
     )
     const fileEditorInput2 = instantiationService.createInstance(
       FileEditorInput,
@@ -376,7 +376,7 @@ suite("EditorInput", () => {
       undefined,
       undefined,
       undefined,
-      undefined,
+      undefined
     )
     const diffEditorInput: DiffEditorInput =
       instantiationService.createInstance(
@@ -385,7 +385,7 @@ suite("EditorInput", () => {
         undefined,
         fileEditorInput1,
         fileEditorInput2,
-        false,
+        false
       )
 
     assert.ok(!diffEditorInput.matches(untypedResourceEditorInput))

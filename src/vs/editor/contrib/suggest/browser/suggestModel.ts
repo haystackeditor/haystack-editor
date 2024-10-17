@@ -95,7 +95,7 @@ export class LineContext {
     const editRange = editor._getViewModel()?.getEditRange()
     const pos = editor.getPosition()
     const editorPosition = editRange
-      ? (pos.delta(editRange.startLineNumber - 1) ?? null)
+      ? pos.delta(editRange.startLineNumber - 1) ?? null
       : pos
     model.tokenization.tokenizeIfCheap(editorPosition.lineNumber)
 
@@ -125,7 +125,7 @@ export class LineContext {
   constructor(
     model: ITextModel,
     position: Position,
-    triggerOptions: SuggestTriggerOptions,
+    triggerOptions: SuggestTriggerOptions
   ) {
     this.leadingLineContent = model
       .getLineContent(position.lineNumber)
@@ -146,13 +146,13 @@ export const enum State {
 function canShowQuickSuggest(
   editor: ICodeEditor,
   contextKeyService: IContextKeyService,
-  configurationService: IConfigurationService,
+  configurationService: IConfigurationService
 ): boolean {
   if (
     !Boolean(
       contextKeyService.getContextKeyValue(
-        InlineCompletionContextKeys.inlineSuggestionVisible.key,
-      ),
+        InlineCompletionContextKeys.inlineSuggestionVisible.key
+      )
     )
   ) {
     // Allow if there is no inline suggestion.
@@ -170,7 +170,7 @@ function canShowQuickSuggest(
 function canShowSuggestOnTriggerCharacters(
   editor: ICodeEditor,
   contextKeyService: IContextKeyService,
-  configurationService: IConfigurationService,
+  configurationService: IConfigurationService
 ): boolean {
   if (
     !Boolean(contextKeyService.getContextKeyValue("inlineSuggestionVisible"))
@@ -219,7 +219,7 @@ export class SuggestModel implements IDisposable {
     private readonly _configurationService: IConfigurationService,
     @ILanguageFeaturesService
     private readonly _languageFeaturesService: ILanguageFeaturesService,
-    @IEnvironmentService private readonly _envService: IEnvironmentService,
+    @IEnvironmentService private readonly _envService: IEnvironmentService
   ) {
     this._currentSelection =
       this._editor.getSelection() || new Selection(1, 1, 1, 1)
@@ -229,37 +229,37 @@ export class SuggestModel implements IDisposable {
       this._editor.onDidChangeModel(() => {
         this._updateTriggerCharacters()
         this.cancel()
-      }),
+      })
     )
     this._toDispose.add(
       this._editor.onDidChangeModelLanguage(() => {
         this._updateTriggerCharacters()
         this.cancel()
-      }),
+      })
     )
     this._toDispose.add(
       this._editor.onDidChangeConfiguration(() => {
         this._updateTriggerCharacters()
-      }),
+      })
     )
     this._toDispose.add(
       this._languageFeaturesService.completionProvider.onDidChange(() => {
         this._updateTriggerCharacters()
         this._updateActiveSuggestSession()
-      }),
+      })
     )
 
     let editorIsComposing = false
     this._toDispose.add(
       this._editor.onDidCompositionStart(() => {
         editorIsComposing = true
-      }),
+      })
     )
     this._toDispose.add(
       this._editor.onDidCompositionEnd(() => {
         editorIsComposing = false
         this._onCompositionEnd()
-      }),
+      })
     )
     this._toDispose.add(
       this._editor.onDidChangeCursorSelection((e) => {
@@ -267,7 +267,7 @@ export class SuggestModel implements IDisposable {
         if (!editorIsComposing) {
           this._onCursorChange(e)
         }
-      }),
+      })
     )
     this._toDispose.add(
       this._editor.onDidChangeModelContent(() => {
@@ -277,7 +277,7 @@ export class SuggestModel implements IDisposable {
         if (!editorIsComposing && this._triggerState !== undefined) {
           this._refilterCompletionItems()
         }
-      }),
+      })
     )
 
     this._updateTriggerCharacters()
@@ -312,7 +312,7 @@ export class SuggestModel implements IDisposable {
       Set<CompletionItemProvider>
     >()
     for (const support of this._languageFeaturesService.completionProvider.all(
-      this._editor.getModel(),
+      this._editor.getModel()
     )) {
       for (const ch of support.triggerCharacters || []) {
         let set = supportsByTriggerCharacter.get(ch)
@@ -330,7 +330,7 @@ export class SuggestModel implements IDisposable {
         !canShowSuggestOnTriggerCharacters(
           this._editor,
           this._contextKeyService,
-          this._configurationService,
+          this._configurationService
         )
       ) {
         return
@@ -390,10 +390,10 @@ export class SuggestModel implements IDisposable {
     }
 
     this._triggerCharacterListener.add(
-      this._editor.onDidType(checkTriggerCharacter),
+      this._editor.onDidType(checkTriggerCharacter)
     )
     this._triggerCharacterListener.add(
-      this._editor.onDidCompositionEnd(() => checkTriggerCharacter()),
+      this._editor.onDidCompositionEnd(() => checkTriggerCharacter())
     )
   }
 
@@ -430,7 +430,7 @@ export class SuggestModel implements IDisposable {
       if (
         !this._editor.hasModel() ||
         !this._languageFeaturesService.completionProvider.has(
-          this._editor.getModel(),
+          this._editor.getModel()
         )
       ) {
         this.cancel()
@@ -495,7 +495,7 @@ export class SuggestModel implements IDisposable {
   private _doTriggerQuickSuggest(): void {
     if (
       QuickSuggestionsOptions.isAllOff(
-        this._editor.getOption(EditorOption.quickSuggestions),
+        this._editor.getOption(EditorOption.quickSuggestions)
       )
     ) {
       // not enabled
@@ -533,17 +533,17 @@ export class SuggestModel implements IDisposable {
 
       if (!QuickSuggestionsOptions.isAllOn(config)) {
         const editorPosition = SuggestModel._getAdjustedEditorPosition(
-          this._editor,
+          this._editor
         )!
         // Check the type of the token that triggered this
         model.tokenization.tokenizeIfCheap(editorPosition.lineNumber)
         const lineTokens = model.tokenization.getLineTokens(
-          editorPosition.lineNumber,
+          editorPosition.lineNumber
         )
         const tokenType = lineTokens.getStandardTokenType(
           lineTokens.findTokenIndexAtOffset(
-            Math.max(editorPosition.column - 1 - 1, 0),
-          ),
+            Math.max(editorPosition.column - 1 - 1, 0)
+          )
         )
         if (QuickSuggestionsOptions.valueFor(config, tokenType) !== "on") {
           return
@@ -554,7 +554,7 @@ export class SuggestModel implements IDisposable {
         !canShowQuickSuggest(
           this._editor,
           this._contextKeyService,
-          this._configurationService,
+          this._configurationService
         )
       ) {
         // do not trigger quick suggestions if inline suggestions are shown
@@ -592,7 +592,7 @@ export class SuggestModel implements IDisposable {
     const ctx = new LineContext(
       model,
       SuggestModel._getAdjustedEditorPosition(this._editor)!,
-      options,
+      options
     )
 
     // Cancel previous requests, change state & update UI
@@ -622,7 +622,7 @@ export class SuggestModel implements IDisposable {
 
     // kind filter and snippet sort rules
     const snippetSuggestions = this._editor.getOption(
-      EditorOption.snippetSuggestions,
+      EditorOption.snippetSuggestions
     )
     let snippetSortOrder = SnippetSortOrder.Inline
     switch (snippetSuggestions) {
@@ -645,11 +645,11 @@ export class SuggestModel implements IDisposable {
       options.completionOptions?.kindFilter ?? itemKindFilter,
       options.completionOptions?.providerFilter,
       options.completionOptions?.providerItemsToReuse,
-      showDeprecated,
+      showDeprecated
     )
     const wordDistance = WordDistance.create(
       this._editorWorkerService,
-      this._editor,
+      this._editor
     )
 
     const completions = provideSuggestionItems(
@@ -658,7 +658,7 @@ export class SuggestModel implements IDisposable {
       SuggestModel._getAdjustedEditorPosition(this._editor)!,
       completionOptions,
       suggestCtx,
-      this._requestToken.token,
+      this._requestToken.token
     )
 
     Promise.all([completions, wordDistance])
@@ -689,7 +689,7 @@ export class SuggestModel implements IDisposable {
         const ctx = new LineContext(
           model,
           SuggestModel._getAdjustedEditorPosition(this._editor)!,
-          options,
+          options
         )
         const fuzzySearchOptions = {
           ...FuzzyScoreOptions.default,
@@ -707,7 +707,7 @@ export class SuggestModel implements IDisposable {
           this._editor.getOption(EditorOption.suggest),
           this._editor.getOption(EditorOption.snippetSuggestions),
           fuzzySearchOptions,
-          clipboardText,
+          clipboardText
         )
 
         // store containers so that they can be disposed later
@@ -727,7 +727,7 @@ export class SuggestModel implements IDisposable {
             if (item.isInvalid) {
               this._logService.warn(
                 `[suggest] did IGNORE invalid completion item from ${item.provider._debugDisplayName}`,
-                item.completion,
+                item.completion
               )
             }
           }
@@ -756,7 +756,7 @@ export class SuggestModel implements IDisposable {
       }
       this._telemetryService.publicLog2<Durations, DurationsClassification>(
         "suggest.durations.json",
-        { data: JSON.stringify(durations) },
+        { data: JSON.stringify(durations) }
       )
       this._logService.debug("suggest.durations.json", durations)
     })
@@ -1016,7 +1016,7 @@ export class SuggestModel implements IDisposable {
     const editRange = editor._getViewModel()?.getEditRange()
     const pos = editor.getPosition()
     const editorPosition = editRange
-      ? (pos?.delta(editRange.startLineNumber - 1) ?? null)
+      ? pos?.delta(editRange.startLineNumber - 1) ?? null
       : pos
     return editorPosition
   }

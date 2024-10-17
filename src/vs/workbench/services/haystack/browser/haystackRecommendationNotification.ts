@@ -28,7 +28,7 @@ export class EmailNotification extends Disposable {
     private readonly severity: Severity,
     private readonly message: string,
     private readonly choices: IPromptChoice[],
-    private readonly notificationService: INotificationService,
+    private readonly notificationService: INotificationService
   ) {
     super()
   }
@@ -40,8 +40,8 @@ export class EmailNotification extends Disposable {
           this.severity,
           this.message,
           this.choices,
-          { sticky: true, onCancel: () => (this.cancelled = true) },
-        ),
+          { sticky: true, onCancel: () => (this.cancelled = true) }
+        )
       )
     }
   }
@@ -59,8 +59,8 @@ export class EmailNotification extends Disposable {
           {
             priority: NotificationPriority.SILENT,
             onCancel: () => (this.cancelled = true),
-          },
-        ),
+          }
+        )
       )
     }
   }
@@ -70,10 +70,10 @@ export class EmailNotification extends Disposable {
   }
 
   private readonly onDidCloseDisposable = this._register(
-    new MutableDisposable(),
+    new MutableDisposable()
   )
   private readonly onDidChangeVisibilityDisposable = this._register(
-    new MutableDisposable(),
+    new MutableDisposable()
   )
   private updateNotificationHandle(notificationHandle: INotificationHandle) {
     this.onDidCloseDisposable.clear()
@@ -91,7 +91,7 @@ export class EmailNotification extends Disposable {
     })
     this.onDidChangeVisibilityDisposable.value =
       this.notificationHandle.onDidChangeVisibility((e) =>
-        this._onDidChangeVisibility.fire(e),
+        this._onDidChangeVisibility.fire(e)
       )
   }
 }

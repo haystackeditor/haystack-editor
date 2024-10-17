@@ -9,591 +9,498 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Event } from "vs/base/common/event"
-import {
-  GLOBSTAR,
-  IRelativePattern,
-  parse,
-  ParsedPattern,
-} from "vs/base/common/glob"
-import {
-  Disposable,
-  DisposableStore,
-  IDisposable,
-  MutableDisposable,
-} from "vs/base/common/lifecycle"
-import { isAbsolute } from "vs/base/common/path"
-import { isLinux } from "vs/base/common/platform"
-import { URI } from "vs/base/common/uri"
-import {
-  FileChangeFilter,
-  FileChangeType,
-  IFileChange,
-  isParent,
-} from "vs/platform/files/common/files"
+import { Event } from 'vs/base/common/event';
+import { GLOBSTAR, IRelativePattern, parse, ParsedPattern } from 'vs/base/common/glob';
+import { Disposable, DisposableStore, IDisposable, MutableDisposable } from 'vs/base/common/lifecycle';
+import { isAbsolute } from 'vs/base/common/path';
+import { isLinux } from 'vs/base/common/platform';
+import { URI } from 'vs/base/common/uri';
+import { FileChangeFilter, FileChangeType, IFileChange, isParent } from 'vs/platform/files/common/files';
 
 interface IWatchRequest {
-  /**
-   * The path to watch.
-   */
-  readonly path: string
 
-  /**
-   * Whether to watch recursively or not.
-   */
-  readonly recursive: boolean
+	/**
+	 * The path to watch.
+	 */
+	readonly path: string;
 
-  /**
-   * A set of glob patterns or paths to exclude from watching.
-   */
-  readonly excludes: string[]
+	/**
+	 * Whether to watch recursively or not.
+	 */
+	readonly recursive: boolean;
 
-  /**
-   * An optional set of glob patterns or paths to include for
-   * watching. If not provided, all paths are considered for
-   * events.
-   */
-  readonly includes?: Array<string | IRelativePattern>
+	/**
+	 * A set of glob patterns or paths to exclude from watching.
+	 */
+	readonly excludes: string[];
 
-  /**
-   * If provided, file change events from the watcher that
-   * are a result of this watch request will carry the same
-   * id.
-   */
-  readonly correlationId?: number
+	/**
+	 * An optional set of glob patterns or paths to include for
+	 * watching. If not provided, all paths are considered for
+	 * events.
+	 */
+	readonly includes?: Array<string | IRelativePattern>;
 
-  /**
-   * If provided, allows to filter the events that the watcher should consider
-   * for emitting. If not provided, all events are emitted.
-   *
-   * For example, to emit added and updated events, set to:
-   * `FileChangeFilter.ADDED | FileChangeFilter.UPDATED`.
-   */
-  readonly filter?: FileChangeFilter
+	/**
+	 * If provided, file change events from the watcher that
+	 * are a result of this watch request will carry the same
+	 * id.
+	 */
+	readonly correlationId?: number;
+
+	/**
+	 * If provided, allows to filter the events that the watcher should consider
+	 * for emitting. If not provided, all events are emitted.
+	 *
+	 * For example, to emit added and updated events, set to:
+	 * `FileChangeFilter.ADDED | FileChangeFilter.UPDATED`.
+	 */
+	readonly filter?: FileChangeFilter;
 }
 
 export interface IWatchRequestWithCorrelation extends IWatchRequest {
-  readonly correlationId: number
+	readonly correlationId: number;
 }
 
-export function isWatchRequestWithCorrelation(
-  request: IWatchRequest,
-): request is IWatchRequestWithCorrelation {
-  return typeof request.correlationId === "number"
+export function isWatchRequestWithCorrelation(request: IWatchRequest): request is IWatchRequestWithCorrelation {
+	return typeof request.correlationId === 'number';
 }
 
 export interface INonRecursiveWatchRequest extends IWatchRequest {
-  /**
-   * The watcher will be non-recursive.
-   */
-  readonly recursive: false
+
+	/**
+	 * The watcher will be non-recursive.
+	 */
+	readonly recursive: false;
 }
 
 export interface IRecursiveWatchRequest extends IWatchRequest {
-  /**
-   * The watcher will be recursive.
-   */
-  readonly recursive: true
 
-  /**
-   * @deprecated this only exists for WSL1 support and should never
-   * be used in any other case.
-   */
-  pollingInterval?: number
+	/**
+	 * The watcher will be recursive.
+	 */
+	readonly recursive: true;
+
+	/**
+	 * @deprecated this only exists for WSL1 support and should never
+	 * be used in any other case.
+	 */
+	pollingInterval?: number;
 }
 
-export function isRecursiveWatchRequest(
-  request: IWatchRequest,
-): request is IRecursiveWatchRequest {
-  return request.recursive === true
+export function isRecursiveWatchRequest(request: IWatchRequest): request is IRecursiveWatchRequest {
+	return request.recursive === true;
 }
 
-export type IUniversalWatchRequest =
-  | IRecursiveWatchRequest
-  | INonRecursiveWatchRequest
+export type IUniversalWatchRequest = IRecursiveWatchRequest | INonRecursiveWatchRequest;
 
 export interface IWatcherErrorEvent {
-  readonly error: string
-  readonly request?: IUniversalWatchRequest
+	readonly error: string;
+	readonly request?: IUniversalWatchRequest;
 }
 
 export interface IWatcher {
-  /**
-   * A normalized file change event from the raw events
-   * the watcher emits.
-   */
-  readonly onDidChangeFile: Event<IFileChange[]>
 
-  /**
-   * An event to indicate a message that should get logged.
-   */
-  readonly onDidLogMessage: Event<ILogMessage>
+	/**
+	 * A normalized file change event from the raw events
+	 * the watcher emits.
+	 */
+	readonly onDidChangeFile: Event<IFileChange[]>;
 
-  /**
-   * An event to indicate an error occurred from the watcher
-   * that is unrecoverable. Listeners should restart the
-   * watcher if possible.
-   */
-  readonly onDidError: Event<IWatcherErrorEvent>
+	/**
+	 * An event to indicate a message that should get logged.
+	 */
+	readonly onDidLogMessage: Event<ILogMessage>;
 
-  /**
-   * Configures the watcher to watch according to the
-   * requests. Any existing watched path that is not
-   * in the array, will be removed from watching and
-   * any new path will be added to watching.
-   */
-  watch(requests: IWatchRequest[]): Promise<void>
+	/**
+	 * An event to indicate an error occurred from the watcher
+	 * that is unrecoverable. Listeners should restart the
+	 * watcher if possible.
+	 */
+	readonly onDidError: Event<IWatcherErrorEvent>;
 
-  /**
-   * Enable verbose logging in the watcher.
-   */
-  setVerboseLogging(enabled: boolean): Promise<void>
+	/**
+	 * Configures the watcher to watch according to the
+	 * requests. Any existing watched path that is not
+	 * in the array, will be removed from watching and
+	 * any new path will be added to watching.
+	 */
+	watch(requests: IWatchRequest[]): Promise<void>;
 
-  /**
-   * Stop all watchers.
-   */
-  stop(): Promise<void>
+	/**
+	 * Enable verbose logging in the watcher.
+	 */
+	setVerboseLogging(enabled: boolean): Promise<void>;
+
+	/**
+	 * Stop all watchers.
+	 */
+	stop(): Promise<void>;
 }
 
 export interface IRecursiveWatcher extends IWatcher {
-  watch(requests: IRecursiveWatchRequest[]): Promise<void>
+	watch(requests: IRecursiveWatchRequest[]): Promise<void>;
 }
 
 export interface IRecursiveWatcherWithSubscribe extends IRecursiveWatcher {
-  /**
-   * Subscribe to file events for the given path. The callback is called
-   * whenever a file event occurs for the path. If the watcher failed,
-   * the error parameter is set to `true`.
-   *
-   * @returns an `IDisposable` to stop listening to events or `undefined`
-   * if no events can be watched for the path given the current set of
-   * recursive watch requests.
-   */
-  subscribe(
-    path: string,
-    callback: (error: true | null, change?: IFileChange) => void,
-  ): IDisposable | undefined
+
+	/**
+	 * Subscribe to file events for the given path. The callback is called
+	 * whenever a file event occurs for the path. If the watcher failed,
+	 * the error parameter is set to `true`.
+	 *
+	 * @returns an `IDisposable` to stop listening to events or `undefined`
+	 * if no events can be watched for the path given the current set of
+	 * recursive watch requests.
+	 */
+	subscribe(path: string, callback: (error: true | null, change?: IFileChange) => void): IDisposable | undefined;
 }
 
 export interface IRecursiveWatcherOptions {
-  /**
-   * If `true`, will enable polling for all watchers, otherwise
-   * will enable it for paths included in the string array.
-   *
-   * @deprecated this only exists for WSL1 support and should never
-   * be used in any other case.
-   */
-  readonly usePolling: boolean | string[]
 
-  /**
-   * If polling is enabled (via `usePolling`), defines the duration
-   * in which the watcher will poll for changes.
-   *
-   * @deprecated this only exists for WSL1 support and should never
-   * be used in any other case.
-   */
-  readonly pollingInterval?: number
+	/**
+	 * If `true`, will enable polling for all watchers, otherwise
+	 * will enable it for paths included in the string array.
+	 *
+	 * @deprecated this only exists for WSL1 support and should never
+	 * be used in any other case.
+	 */
+	readonly usePolling: boolean | string[];
+
+	/**
+	 * If polling is enabled (via `usePolling`), defines the duration
+	 * in which the watcher will poll for changes.
+	 *
+	 * @deprecated this only exists for WSL1 support and should never
+	 * be used in any other case.
+	 */
+	readonly pollingInterval?: number;
 }
 
 export interface INonRecursiveWatcher extends IWatcher {
-  watch(requests: INonRecursiveWatchRequest[]): Promise<void>
+	watch(requests: INonRecursiveWatchRequest[]): Promise<void>;
 }
 
 export interface IUniversalWatcher extends IWatcher {
-  watch(requests: IUniversalWatchRequest[]): Promise<void>
+	watch(requests: IUniversalWatchRequest[]): Promise<void>;
 }
 
 export abstract class AbstractWatcherClient extends Disposable {
-  private static readonly MAX_RESTARTS_PER_REQUEST_ERROR = 3 // how often we give a request a chance to restart on error
-  private static readonly MAX_RESTARTS_PER_UNKNOWN_ERROR = 10 // how often we give the watcher a chance to restart on unknown errors (like crash)
 
-  private watcher: IWatcher | undefined
-  private readonly watcherDisposables = this._register(new MutableDisposable())
+	private static readonly MAX_RESTARTS_PER_REQUEST_ERROR = 3;  // how often we give a request a chance to restart on error
+	private static readonly MAX_RESTARTS_PER_UNKNOWN_ERROR = 10; // how often we give the watcher a chance to restart on unknown errors (like crash)
 
-  private requests: IWatchRequest[] | undefined = undefined
+	private watcher: IWatcher | undefined;
+	private readonly watcherDisposables = this._register(new MutableDisposable());
 
-  private restartsPerRequestError = new Map<
-    string /* request path */,
-    number /* restarts */
-  >()
-  private restartsPerUnknownError = 0
+	private requests: IWatchRequest[] | undefined = undefined;
 
-  constructor(
-    private readonly onFileChanges: (changes: IFileChange[]) => void,
-    private readonly onLogMessage: (msg: ILogMessage) => void,
-    private verboseLogging: boolean,
-    private options: {
-      readonly type: string
-      readonly restartOnError: boolean
-    },
-  ) {
-    super()
-  }
+	private restartsPerRequestError = new Map<string /* request path */, number /* restarts */>();
+	private restartsPerUnknownError = 0;
 
-  protected abstract createWatcher(disposables: DisposableStore): IWatcher
+	constructor(
+		private readonly onFileChanges: (changes: IFileChange[]) => void,
+		private readonly onLogMessage: (msg: ILogMessage) => void,
+		private verboseLogging: boolean,
+		private options: {
+			readonly type: string;
+			readonly restartOnError: boolean;
+		}
+	) {
+		super();
+	}
 
-  protected init(): void {
-    // Associate disposables to the watcher
-    const disposables = new DisposableStore()
-    this.watcherDisposables.value = disposables
+	protected abstract createWatcher(disposables: DisposableStore): IWatcher;
 
-    // Ask implementors to create the watcher
-    this.watcher = this.createWatcher(disposables)
-    this.watcher.setVerboseLogging(this.verboseLogging)
+	protected init(): void {
 
-    // Wire in event handlers
-    disposables.add(
-      this.watcher.onDidChangeFile((changes) => this.onFileChanges(changes)),
-    )
-    disposables.add(
-      this.watcher.onDidLogMessage((msg) => this.onLogMessage(msg)),
-    )
-    disposables.add(
-      this.watcher.onDidError((e) => this.onError(e.error, e.request)),
-    )
-  }
+		// Associate disposables to the watcher
+		const disposables = new DisposableStore();
+		this.watcherDisposables.value = disposables;
 
-  protected onError(
-    error: string,
-    failedRequest?: IUniversalWatchRequest,
-  ): void {
-    // Restart on error (up to N times, if enabled)
-    if (this.options.restartOnError && this.requests?.length) {
-      // A request failed
-      if (failedRequest) {
-        const restartsPerRequestError =
-          this.restartsPerRequestError.get(failedRequest.path) ?? 0
-        if (
-          restartsPerRequestError <
-          AbstractWatcherClient.MAX_RESTARTS_PER_REQUEST_ERROR
-        ) {
-          this.error(
-            `restarting watcher from error in watch request (retrying request): ${error} (${JSON.stringify(failedRequest)})`,
-          )
-          this.restartsPerRequestError.set(
-            failedRequest.path,
-            restartsPerRequestError + 1,
-          )
-          this.restart(this.requests)
-        } else {
-          this.error(
-            `restarting watcher from error in watch request (skipping request): ${error} (${JSON.stringify(failedRequest)})`,
-          )
-          this.restart(
-            this.requests.filter(
-              (request) => request.path !== failedRequest.path,
-            ),
-          )
-        }
-      }
+		// Ask implementors to create the watcher
+		this.watcher = this.createWatcher(disposables);
+		this.watcher.setVerboseLogging(this.verboseLogging);
 
-      // Any request failed or process crashed
-      else {
-        if (
-          this.restartsPerUnknownError <
-          AbstractWatcherClient.MAX_RESTARTS_PER_UNKNOWN_ERROR
-        ) {
-          this.error(`restarting watcher after unknown global error: ${error}`)
-          this.restartsPerUnknownError++
-          this.restart(this.requests)
-        } else {
-          this.error(
-            `giving up attempting to restart watcher after error: ${error}`,
-          )
-        }
-      }
-    }
+		// Wire in event handlers
+		disposables.add(this.watcher.onDidChangeFile(changes => this.onFileChanges(changes)));
+		disposables.add(this.watcher.onDidLogMessage(msg => this.onLogMessage(msg)));
+		disposables.add(this.watcher.onDidError(e => this.onError(e.error, e.request)));
+	}
 
-    // Do not attempt to restart if not enabled
-    else {
-      this.error(error)
-    }
-  }
+	protected onError(error: string, failedRequest?: IUniversalWatchRequest): void {
 
-  private restart(requests: IUniversalWatchRequest[]): void {
-    this.init()
-    this.watch(requests)
-  }
+		// Restart on error (up to N times, if enabled)
+		if (this.options.restartOnError && this.requests?.length) {
 
-  async watch(requests: IUniversalWatchRequest[]): Promise<void> {
-    this.requests = requests
+			// A request failed
+			if (failedRequest) {
+				const restartsPerRequestError = this.restartsPerRequestError.get(failedRequest.path) ?? 0;
+				if (restartsPerRequestError < AbstractWatcherClient.MAX_RESTARTS_PER_REQUEST_ERROR) {
+					this.error(`restarting watcher from error in watch request (retrying request): ${error} (${JSON.stringify(failedRequest)})`);
+					this.restartsPerRequestError.set(failedRequest.path, restartsPerRequestError + 1);
+					this.restart(this.requests);
+				} else {
+					this.error(`restarting watcher from error in watch request (skipping request): ${error} (${JSON.stringify(failedRequest)})`);
+					this.restart(this.requests.filter(request => request.path !== failedRequest.path));
+				}
+			}
 
-    await this.watcher?.watch(requests)
-  }
+			// Any request failed or process crashed
+			else {
+				if (this.restartsPerUnknownError < AbstractWatcherClient.MAX_RESTARTS_PER_UNKNOWN_ERROR) {
+					this.error(`restarting watcher after unknown global error: ${error}`);
+					this.restartsPerUnknownError++;
+					this.restart(this.requests);
+				} else {
+					this.error(`giving up attempting to restart watcher after error: ${error}`);
+				}
+			}
+		}
 
-  async setVerboseLogging(verboseLogging: boolean): Promise<void> {
-    this.verboseLogging = verboseLogging
+		// Do not attempt to restart if not enabled
+		else {
+			this.error(error);
+		}
+	}
 
-    await this.watcher?.setVerboseLogging(verboseLogging)
-  }
+	private restart(requests: IUniversalWatchRequest[]): void {
+		this.init();
+		this.watch(requests);
+	}
 
-  private error(message: string) {
-    this.onLogMessage({
-      type: "error",
-      message: `[File Watcher (${this.options.type})] ${message}`,
-    })
-  }
+	async watch(requests: IUniversalWatchRequest[]): Promise<void> {
+		this.requests = requests;
 
-  protected trace(message: string) {
-    this.onLogMessage({
-      type: "trace",
-      message: `[File Watcher (${this.options.type})] ${message}`,
-    })
-  }
+		await this.watcher?.watch(requests);
+	}
 
-  override dispose(): void {
-    // Render the watcher invalid from here
-    this.watcher = undefined
+	async setVerboseLogging(verboseLogging: boolean): Promise<void> {
+		this.verboseLogging = verboseLogging;
 
-    return super.dispose()
-  }
+		await this.watcher?.setVerboseLogging(verboseLogging);
+	}
+
+	private error(message: string) {
+		this.onLogMessage({ type: 'error', message: `[File Watcher (${this.options.type})] ${message}` });
+	}
+
+	protected trace(message: string) {
+		this.onLogMessage({ type: 'trace', message: `[File Watcher (${this.options.type})] ${message}` });
+	}
+
+	override dispose(): void {
+
+		// Render the watcher invalid from here
+		this.watcher = undefined;
+
+		return super.dispose();
+	}
 }
 
 export abstract class AbstractNonRecursiveWatcherClient extends AbstractWatcherClient {
-  constructor(
-    onFileChanges: (changes: IFileChange[]) => void,
-    onLogMessage: (msg: ILogMessage) => void,
-    verboseLogging: boolean,
-  ) {
-    super(onFileChanges, onLogMessage, verboseLogging, {
-      type: "node.js",
-      restartOnError: false,
-    })
-  }
 
-  protected abstract override createWatcher(
-    disposables: DisposableStore,
-  ): INonRecursiveWatcher
+	constructor(
+		onFileChanges: (changes: IFileChange[]) => void,
+		onLogMessage: (msg: ILogMessage) => void,
+		verboseLogging: boolean
+	) {
+		super(onFileChanges, onLogMessage, verboseLogging, { type: 'node.js', restartOnError: false });
+	}
+
+	protected abstract override createWatcher(disposables: DisposableStore): INonRecursiveWatcher;
 }
 
 export abstract class AbstractUniversalWatcherClient extends AbstractWatcherClient {
-  constructor(
-    onFileChanges: (changes: IFileChange[]) => void,
-    onLogMessage: (msg: ILogMessage) => void,
-    verboseLogging: boolean,
-  ) {
-    super(onFileChanges, onLogMessage, verboseLogging, {
-      type: "universal",
-      restartOnError: true,
-    })
-  }
 
-  protected abstract override createWatcher(
-    disposables: DisposableStore,
-  ): IUniversalWatcher
+	constructor(
+		onFileChanges: (changes: IFileChange[]) => void,
+		onLogMessage: (msg: ILogMessage) => void,
+		verboseLogging: boolean
+	) {
+		super(onFileChanges, onLogMessage, verboseLogging, { type: 'universal', restartOnError: true });
+	}
+
+	protected abstract override createWatcher(disposables: DisposableStore): IUniversalWatcher;
 }
 
 export interface ILogMessage {
-  readonly type: "trace" | "warn" | "error" | "info" | "debug"
-  readonly message: string
+	readonly type: 'trace' | 'warn' | 'error' | 'info' | 'debug';
+	readonly message: string;
 }
 
 export function reviveFileChanges(changes: IFileChange[]): IFileChange[] {
-  return changes.map((change) => ({
-    type: change.type,
-    resource: URI.revive(change.resource),
-    cId: change.cId,
-  }))
+	return changes.map(change => ({
+		type: change.type,
+		resource: URI.revive(change.resource),
+		cId: change.cId
+	}));
 }
 
 export function coalesceEvents(changes: IFileChange[]): IFileChange[] {
-  // Build deltas
-  const coalescer = new EventCoalescer()
-  for (const event of changes) {
-    coalescer.processEvent(event)
-  }
 
-  return coalescer.coalesce()
+	// Build deltas
+	const coalescer = new EventCoalescer();
+	for (const event of changes) {
+		coalescer.processEvent(event);
+	}
+
+	return coalescer.coalesce();
 }
 
-export function normalizeWatcherPattern(
-  path: string,
-  pattern: string | IRelativePattern,
-): string | IRelativePattern {
-  // Patterns are always matched on the full absolute path
-  // of the event. As such, if the pattern is not absolute
-  // and is a string and does not start with a leading
-  // `**`, we have to convert it to a relative pattern with
-  // the given `base`
+export function normalizeWatcherPattern(path: string, pattern: string | IRelativePattern): string | IRelativePattern {
 
-  if (
-    typeof pattern === "string" &&
-    !pattern.startsWith(GLOBSTAR) &&
-    !isAbsolute(pattern)
-  ) {
-    return { base: path, pattern }
-  }
+	// Patterns are always matched on the full absolute path
+	// of the event. As such, if the pattern is not absolute
+	// and is a string and does not start with a leading
+	// `**`, we have to convert it to a relative pattern with
+	// the given `base`
 
-  return pattern
+	if (typeof pattern === 'string' && !pattern.startsWith(GLOBSTAR) && !isAbsolute(pattern)) {
+		return { base: path, pattern };
+	}
+
+	return pattern;
 }
 
-export function parseWatcherPatterns(
-  path: string,
-  patterns: Array<string | IRelativePattern>,
-): ParsedPattern[] {
-  const parsedPatterns: ParsedPattern[] = []
+export function parseWatcherPatterns(path: string, patterns: Array<string | IRelativePattern>): ParsedPattern[] {
+	const parsedPatterns: ParsedPattern[] = [];
 
-  for (const pattern of patterns) {
-    parsedPatterns.push(parse(normalizeWatcherPattern(path, pattern)))
-  }
+	for (const pattern of patterns) {
+		parsedPatterns.push(parse(normalizeWatcherPattern(path, pattern)));
+	}
 
-  return parsedPatterns
+	return parsedPatterns;
 }
 
 class EventCoalescer {
-  private readonly coalesced = new Set<IFileChange>()
-  private readonly mapPathToChange = new Map<string, IFileChange>()
 
-  private toKey(event: IFileChange): string {
-    if (isLinux) {
-      return event.resource.fsPath
-    }
+	private readonly coalesced = new Set<IFileChange>();
+	private readonly mapPathToChange = new Map<string, IFileChange>();
 
-    return event.resource.fsPath.toLowerCase() // normalise to file system case sensitivity
-  }
+	private toKey(event: IFileChange): string {
+		if (isLinux) {
+			return event.resource.fsPath;
+		}
 
-  processEvent(event: IFileChange): void {
-    const existingEvent = this.mapPathToChange.get(this.toKey(event))
+		return event.resource.fsPath.toLowerCase(); // normalise to file system case sensitivity
+	}
 
-    let keepEvent = false
+	processEvent(event: IFileChange): void {
+		const existingEvent = this.mapPathToChange.get(this.toKey(event));
 
-    // Event path already exists
-    if (existingEvent) {
-      const currentChangeType = existingEvent.type
-      const newChangeType = event.type
+		let keepEvent = false;
 
-      // macOS/Windows: track renames to different case
-      // by keeping both CREATE and DELETE events
-      if (
-        existingEvent.resource.fsPath !== event.resource.fsPath &&
-        (event.type === FileChangeType.DELETED ||
-          event.type === FileChangeType.ADDED)
-      ) {
-        keepEvent = true
-      }
+		// Event path already exists
+		if (existingEvent) {
+			const currentChangeType = existingEvent.type;
+			const newChangeType = event.type;
 
-      // Ignore CREATE followed by DELETE in one go
-      else if (
-        currentChangeType === FileChangeType.ADDED &&
-        newChangeType === FileChangeType.DELETED
-      ) {
-        this.mapPathToChange.delete(this.toKey(event))
-        this.coalesced.delete(existingEvent)
-      }
+			// macOS/Windows: track renames to different case
+			// by keeping both CREATE and DELETE events
+			if (existingEvent.resource.fsPath !== event.resource.fsPath && (event.type === FileChangeType.DELETED || event.type === FileChangeType.ADDED)) {
+				keepEvent = true;
+			}
 
-      // Flatten DELETE followed by CREATE into CHANGE
-      else if (
-        currentChangeType === FileChangeType.DELETED &&
-        newChangeType === FileChangeType.ADDED
-      ) {
-        existingEvent.type = FileChangeType.UPDATED
-      }
+			// Ignore CREATE followed by DELETE in one go
+			else if (currentChangeType === FileChangeType.ADDED && newChangeType === FileChangeType.DELETED) {
+				this.mapPathToChange.delete(this.toKey(event));
+				this.coalesced.delete(existingEvent);
+			}
 
-      // Do nothing. Keep the created event
-      else if (
-        currentChangeType === FileChangeType.ADDED &&
-        newChangeType === FileChangeType.UPDATED
-      ) {
-      }
+			// Flatten DELETE followed by CREATE into CHANGE
+			else if (currentChangeType === FileChangeType.DELETED && newChangeType === FileChangeType.ADDED) {
+				existingEvent.type = FileChangeType.UPDATED;
+			}
 
-      // Otherwise apply change type
-      else {
-        existingEvent.type = newChangeType
-      }
-    }
+			// Do nothing. Keep the created event
+			else if (currentChangeType === FileChangeType.ADDED && newChangeType === FileChangeType.UPDATED) { }
 
-    // Otherwise keep
-    else {
-      keepEvent = true
-    }
+			// Otherwise apply change type
+			else {
+				existingEvent.type = newChangeType;
+			}
+		}
 
-    if (keepEvent) {
-      this.coalesced.add(event)
-      this.mapPathToChange.set(this.toKey(event), event)
-    }
-  }
+		// Otherwise keep
+		else {
+			keepEvent = true;
+		}
 
-  coalesce(): IFileChange[] {
-    const addOrChangeEvents: IFileChange[] = []
-    const deletedPaths: string[] = []
+		if (keepEvent) {
+			this.coalesced.add(event);
+			this.mapPathToChange.set(this.toKey(event), event);
+		}
+	}
 
-    // This algorithm will remove all DELETE events up to the root folder
-    // that got deleted if any. This ensures that we are not producing
-    // DELETE events for each file inside a folder that gets deleted.
-    //
-    // 1.) split ADD/CHANGE and DELETED events
-    // 2.) sort short deleted paths to the top
-    // 3.) for each DELETE, check if there is a deleted parent and ignore the event in that case
-    return Array.from(this.coalesced)
-      .filter((e) => {
-        if (e.type !== FileChangeType.DELETED) {
-          addOrChangeEvents.push(e)
+	coalesce(): IFileChange[] {
+		const addOrChangeEvents: IFileChange[] = [];
+		const deletedPaths: string[] = [];
 
-          return false // remove ADD / CHANGE
-        }
+		// This algorithm will remove all DELETE events up to the root folder
+		// that got deleted if any. This ensures that we are not producing
+		// DELETE events for each file inside a folder that gets deleted.
+		//
+		// 1.) split ADD/CHANGE and DELETED events
+		// 2.) sort short deleted paths to the top
+		// 3.) for each DELETE, check if there is a deleted parent and ignore the event in that case
+		return Array.from(this.coalesced).filter(e => {
+			if (e.type !== FileChangeType.DELETED) {
+				addOrChangeEvents.push(e);
 
-        return true // keep DELETE
-      })
-      .sort((e1, e2) => {
-        return e1.resource.fsPath.length - e2.resource.fsPath.length // shortest path first
-      })
-      .filter((e) => {
-        if (
-          deletedPaths.some((deletedPath) =>
-            isParent(e.resource.fsPath, deletedPath, !isLinux /* ignorecase */),
-          )
-        ) {
-          return false // DELETE is ignored if parent is deleted already
-        }
+				return false; // remove ADD / CHANGE
+			}
 
-        // otherwise mark as deleted
-        deletedPaths.push(e.resource.fsPath)
+			return true; // keep DELETE
+		}).sort((e1, e2) => {
+			return e1.resource.fsPath.length - e2.resource.fsPath.length; // shortest path first
+		}).filter(e => {
+			if (deletedPaths.some(deletedPath => isParent(e.resource.fsPath, deletedPath, !isLinux /* ignorecase */))) {
+				return false; // DELETE is ignored if parent is deleted already
+			}
 
-        return true
-      })
-      .concat(addOrChangeEvents)
-  }
+			// otherwise mark as deleted
+			deletedPaths.push(e.resource.fsPath);
+
+			return true;
+		}).concat(addOrChangeEvents);
+	}
 }
 
-export function isFiltered(
-  event: IFileChange,
-  filter: FileChangeFilter | undefined,
-): boolean {
-  if (typeof filter === "number") {
-    switch (event.type) {
-      case FileChangeType.ADDED:
-        return (filter & FileChangeFilter.ADDED) === 0
-      case FileChangeType.DELETED:
-        return (filter & FileChangeFilter.DELETED) === 0
-      case FileChangeType.UPDATED:
-        return (filter & FileChangeFilter.UPDATED) === 0
-    }
-  }
+export function isFiltered(event: IFileChange, filter: FileChangeFilter | undefined): boolean {
+	if (typeof filter === 'number') {
+		switch (event.type) {
+			case FileChangeType.ADDED:
+				return (filter & FileChangeFilter.ADDED) === 0;
+			case FileChangeType.DELETED:
+				return (filter & FileChangeFilter.DELETED) === 0;
+			case FileChangeType.UPDATED:
+				return (filter & FileChangeFilter.UPDATED) === 0;
+		}
+	}
 
-  return false
+	return false;
 }
 
-export function requestFilterToString(
-  filter: FileChangeFilter | undefined,
-): string {
-  if (typeof filter === "number") {
-    const filters = []
-    if (filter & FileChangeFilter.ADDED) {
-      filters.push("Added")
-    }
-    if (filter & FileChangeFilter.DELETED) {
-      filters.push("Deleted")
-    }
-    if (filter & FileChangeFilter.UPDATED) {
-      filters.push("Updated")
-    }
+export function requestFilterToString(filter: FileChangeFilter | undefined): string {
+	if (typeof filter === 'number') {
+		const filters = [];
+		if (filter & FileChangeFilter.ADDED) {
+			filters.push('Added');
+		}
+		if (filter & FileChangeFilter.DELETED) {
+			filters.push('Deleted');
+		}
+		if (filter & FileChangeFilter.UPDATED) {
+			filters.push('Updated');
+		}
 
-    if (filters.length === 0) {
-      return "<all>"
-    }
+		if (filters.length === 0) {
+			return '<all>';
+		}
 
-    return `[${filters.join(", ")}]`
-  }
+		return `[${filters.join(', ')}]`;
+	}
 
-  return "<none>"
+	return '<none>';
 }

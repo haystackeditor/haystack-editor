@@ -9,167 +9,126 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Emitter } from "vs/base/common/event"
-import { Barrier } from "vs/base/common/async"
-import { Disposable } from "vs/base/common/lifecycle"
-import {
-  ILifecycleService,
-  WillShutdownEvent,
-  StartupKind,
-  LifecyclePhase,
-  LifecyclePhaseToString,
-  ShutdownReason,
-  BeforeShutdownErrorEvent,
-  InternalBeforeShutdownEvent,
-} from "vs/workbench/services/lifecycle/common/lifecycle"
-import { ILogService } from "vs/platform/log/common/log"
-import { mark } from "vs/base/common/performance"
-import {
-  IStorageService,
-  StorageScope,
-  StorageTarget,
-  WillSaveStateReason,
-} from "vs/platform/storage/common/storage"
+import { Emitter } from 'vs/base/common/event';
+import { Barrier } from 'vs/base/common/async';
+import { Disposable } from 'vs/base/common/lifecycle';
+import { ILifecycleService, WillShutdownEvent, StartupKind, LifecyclePhase, LifecyclePhaseToString, ShutdownReason, BeforeShutdownErrorEvent, InternalBeforeShutdownEvent } from 'vs/workbench/services/lifecycle/common/lifecycle';
+import { ILogService } from 'vs/platform/log/common/log';
+import { mark } from 'vs/base/common/performance';
+import { IStorageService, StorageScope, StorageTarget, WillSaveStateReason } from 'vs/platform/storage/common/storage';
 
-export abstract class AbstractLifecycleService
-  extends Disposable
-  implements ILifecycleService
-{
-  private static readonly LAST_SHUTDOWN_REASON_KEY =
-    "lifecyle.lastShutdownReason"
+export abstract class AbstractLifecycleService extends Disposable implements ILifecycleService {
 
-  declare readonly _serviceBrand: undefined
+	private static readonly LAST_SHUTDOWN_REASON_KEY = 'lifecyle.lastShutdownReason';
 
-  protected readonly _onBeforeShutdown = this._register(
-    new Emitter<InternalBeforeShutdownEvent>(),
-  )
-  readonly onBeforeShutdown = this._onBeforeShutdown.event
+	declare readonly _serviceBrand: undefined;
 
-  protected readonly _onWillShutdown = this._register(
-    new Emitter<WillShutdownEvent>(),
-  )
-  readonly onWillShutdown = this._onWillShutdown.event
+	protected readonly _onBeforeShutdown = this._register(new Emitter<InternalBeforeShutdownEvent>());
+	readonly onBeforeShutdown = this._onBeforeShutdown.event;
 
-  protected readonly _onDidShutdown = this._register(new Emitter<void>())
-  readonly onDidShutdown = this._onDidShutdown.event
+	protected readonly _onWillShutdown = this._register(new Emitter<WillShutdownEvent>());
+	readonly onWillShutdown = this._onWillShutdown.event;
 
-  protected readonly _onBeforeShutdownError = this._register(
-    new Emitter<BeforeShutdownErrorEvent>(),
-  )
-  readonly onBeforeShutdownError = this._onBeforeShutdownError.event
+	protected readonly _onDidShutdown = this._register(new Emitter<void>());
+	readonly onDidShutdown = this._onDidShutdown.event;
 
-  protected readonly _onShutdownVeto = this._register(new Emitter<void>())
-  readonly onShutdownVeto = this._onShutdownVeto.event
+	protected readonly _onBeforeShutdownError = this._register(new Emitter<BeforeShutdownErrorEvent>());
+	readonly onBeforeShutdownError = this._onBeforeShutdownError.event;
 
-  private _startupKind: StartupKind
-  get startupKind(): StartupKind {
-    return this._startupKind
-  }
+	protected readonly _onShutdownVeto = this._register(new Emitter<void>());
+	readonly onShutdownVeto = this._onShutdownVeto.event;
 
-  private _phase = LifecyclePhase.Starting
-  get phase(): LifecyclePhase {
-    return this._phase
-  }
+	private _startupKind: StartupKind;
+	get startupKind(): StartupKind { return this._startupKind; }
 
-  private readonly phaseWhen = new Map<LifecyclePhase, Barrier>()
+	private _phase = LifecyclePhase.Starting;
+	get phase(): LifecyclePhase { return this._phase; }
 
-  protected shutdownReason: ShutdownReason | undefined
+	private readonly phaseWhen = new Map<LifecyclePhase, Barrier>();
 
-  constructor(
-    @ILogService protected readonly logService: ILogService,
-    @IStorageService protected readonly storageService: IStorageService,
-  ) {
-    super()
+	protected shutdownReason: ShutdownReason | undefined;
 
-    // Resolve startup kind
-    this._startupKind = this.resolveStartupKind()
+	constructor(
+		@ILogService protected readonly logService: ILogService,
+		@IStorageService protected readonly storageService: IStorageService
+	) {
+		super();
 
-    // Save shutdown reason to retrieve on next startup
-    this._register(
-      this.storageService.onWillSaveState((e) => {
-        if (e.reason === WillSaveStateReason.SHUTDOWN) {
-          this.storageService.store(
-            AbstractLifecycleService.LAST_SHUTDOWN_REASON_KEY,
-            this.shutdownReason,
-            StorageScope.WORKSPACE,
-            StorageTarget.MACHINE,
-          )
-        }
-      }),
-    )
-  }
+		// Resolve startup kind
+		this._startupKind = this.resolveStartupKind();
 
-  private resolveStartupKind(): StartupKind {
-    const startupKind = this.doResolveStartupKind() ?? StartupKind.NewWindow
-    this.logService.trace(
-      `[lifecycle] starting up (startup kind: ${startupKind})`,
-    )
+		// Save shutdown reason to retrieve on next startup
+		this._register(this.storageService.onWillSaveState(e => {
+			if (e.reason === WillSaveStateReason.SHUTDOWN) {
+				this.storageService.store(AbstractLifecycleService.LAST_SHUTDOWN_REASON_KEY, this.shutdownReason, StorageScope.WORKSPACE, StorageTarget.MACHINE);
+			}
+		}));
+	}
 
-    return startupKind
-  }
+	private resolveStartupKind(): StartupKind {
+		const startupKind = this.doResolveStartupKind() ?? StartupKind.NewWindow;
+		this.logService.trace(`[lifecycle] starting up (startup kind: ${startupKind})`);
 
-  protected doResolveStartupKind(): StartupKind | undefined {
-    // Retrieve and reset last shutdown reason
-    const lastShutdownReason = this.storageService.getNumber(
-      AbstractLifecycleService.LAST_SHUTDOWN_REASON_KEY,
-      StorageScope.WORKSPACE,
-    )
-    this.storageService.remove(
-      AbstractLifecycleService.LAST_SHUTDOWN_REASON_KEY,
-      StorageScope.WORKSPACE,
-    )
+		return startupKind;
+	}
 
-    // Convert into startup kind
-    let startupKind: StartupKind | undefined = undefined
-    switch (lastShutdownReason) {
-      case ShutdownReason.RELOAD:
-        startupKind = StartupKind.ReloadedWindow
-        break
-      case ShutdownReason.LOAD:
-        startupKind = StartupKind.ReopenedWindow
-        break
-    }
+	protected doResolveStartupKind(): StartupKind | undefined {
 
-    return startupKind
-  }
+		// Retrieve and reset last shutdown reason
+		const lastShutdownReason = this.storageService.getNumber(AbstractLifecycleService.LAST_SHUTDOWN_REASON_KEY, StorageScope.WORKSPACE);
+		this.storageService.remove(AbstractLifecycleService.LAST_SHUTDOWN_REASON_KEY, StorageScope.WORKSPACE);
 
-  set phase(value: LifecyclePhase) {
-    if (value < this.phase) {
-      throw new Error("Lifecycle cannot go backwards")
-    }
+		// Convert into startup kind
+		let startupKind: StartupKind | undefined = undefined;
+		switch (lastShutdownReason) {
+			case ShutdownReason.RELOAD:
+				startupKind = StartupKind.ReloadedWindow;
+				break;
+			case ShutdownReason.LOAD:
+				startupKind = StartupKind.ReopenedWindow;
+				break;
+		}
 
-    if (this._phase === value) {
-      return
-    }
+		return startupKind;
+	}
 
-    this.logService.trace(`lifecycle: phase changed (value: ${value})`)
+	set phase(value: LifecyclePhase) {
+		if (value < this.phase) {
+			throw new Error('Lifecycle cannot go backwards');
+		}
 
-    this._phase = value
-    mark(`code/LifecyclePhase/${LifecyclePhaseToString(value)}`)
+		if (this._phase === value) {
+			return;
+		}
 
-    const barrier = this.phaseWhen.get(this._phase)
-    if (barrier) {
-      barrier.open()
-      this.phaseWhen.delete(this._phase)
-    }
-  }
+		this.logService.trace(`lifecycle: phase changed (value: ${value})`);
 
-  async when(phase: LifecyclePhase): Promise<void> {
-    if (phase <= this._phase) {
-      return
-    }
+		this._phase = value;
+		mark(`code/LifecyclePhase/${LifecyclePhaseToString(value)}`);
 
-    let barrier = this.phaseWhen.get(phase)
-    if (!barrier) {
-      barrier = new Barrier()
-      this.phaseWhen.set(phase, barrier)
-    }
+		const barrier = this.phaseWhen.get(this._phase);
+		if (barrier) {
+			barrier.open();
+			this.phaseWhen.delete(this._phase);
+		}
+	}
 
-    await barrier.wait()
-  }
+	async when(phase: LifecyclePhase): Promise<void> {
+		if (phase <= this._phase) {
+			return;
+		}
 
-  /**
-   * Subclasses to implement the explicit shutdown method.
-   */
-  abstract shutdown(): Promise<void>
+		let barrier = this.phaseWhen.get(phase);
+		if (!barrier) {
+			barrier = new Barrier();
+			this.phaseWhen.set(phase, barrier);
+		}
+
+		await barrier.wait();
+	}
+
+	/**
+	 * Subclasses to implement the explicit shutdown method.
+	 */
+	abstract shutdown(): Promise<void>;
 }

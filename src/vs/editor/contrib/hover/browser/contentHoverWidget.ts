@@ -75,7 +75,7 @@ export class ContentHoverWidget extends ResizableContentWidget {
     private readonly _configurationService: IConfigurationService,
     @IAccessibilityService
     private readonly _accessibilityService: IAccessibilityService,
-    @IKeybindingService private readonly _keybindingService: IKeybindingService,
+    @IKeybindingService private readonly _keybindingService: IKeybindingService
   ) {
     const minimumHeight = editor.getOption(EditorOption.lineHeight) + 8
     const minimumWidth = 150
@@ -96,27 +96,27 @@ export class ContentHoverWidget extends ResizableContentWidget {
         if (this.isVisible) {
           this._updateMaxDimensions()
         }
-      }),
+      })
     )
     this._register(
       this._editor.onDidChangeConfiguration((e: ConfigurationChangedEvent) => {
         if (e.hasChanged(EditorOption.fontInfo)) {
           this._updateFont()
         }
-      }),
+      })
     )
     const focusTracker = this._register(
-      dom.trackFocus(this._resizableNode.domNode),
+      dom.trackFocus(this._resizableNode.domNode)
     )
     this._register(
       focusTracker.onDidFocus(() => {
         this._hoverFocusedKey.set(true)
-      }),
+      })
     )
     this._register(
       focusTracker.onDidBlur(() => {
         this._hoverFocusedKey.set(false)
-      }),
+      })
     )
     this._setHoverData(undefined)
     this._editor.addContentWidget(this)
@@ -135,7 +135,7 @@ export class ContentHoverWidget extends ResizableContentWidget {
   private static _applyDimensions(
     container: HTMLElement,
     width: number | string,
-    height: number | string,
+    height: number | string
   ): void {
     const transformedWidth = typeof width === "number" ? `${width}px` : width
     const transformedHeight =
@@ -146,7 +146,7 @@ export class ContentHoverWidget extends ResizableContentWidget {
 
   private _setContentsDomNodeDimensions(
     width: number | string,
-    height: number | string,
+    height: number | string
   ): void {
     const contentsDomNode = this._hover.contentsDomNode
     return ContentHoverWidget._applyDimensions(contentsDomNode, width, height)
@@ -154,7 +154,7 @@ export class ContentHoverWidget extends ResizableContentWidget {
 
   private _setContainerDomNodeDimensions(
     width: number | string,
-    height: number | string,
+    height: number | string
   ): void {
     const containerDomNode = this._hover.containerDomNode
     return ContentHoverWidget._applyDimensions(containerDomNode, width, height)
@@ -162,7 +162,7 @@ export class ContentHoverWidget extends ResizableContentWidget {
 
   private _setHoverWidgetDimensions(
     width: number | string,
-    height: number | string,
+    height: number | string
   ): void {
     this._setContentsDomNodeDimensions(width, height)
     this._setContainerDomNodeDimensions(width, height)
@@ -172,7 +172,7 @@ export class ContentHoverWidget extends ResizableContentWidget {
   private static _applyMaxDimensions(
     container: HTMLElement,
     width: number | string,
-    height: number | string,
+    height: number | string
   ) {
     const transformedWidth = typeof width === "number" ? `${width}px` : width
     const transformedHeight =
@@ -183,21 +183,21 @@ export class ContentHoverWidget extends ResizableContentWidget {
 
   private _setHoverWidgetMaxDimensions(
     width: number | string,
-    height: number | string,
+    height: number | string
   ): void {
     ContentHoverWidget._applyMaxDimensions(
       this._hover.contentsDomNode,
       width,
-      height,
+      height
     )
     ContentHoverWidget._applyMaxDimensions(
       this._hover.containerDomNode,
       width,
-      height,
+      height
     )
     this._hover.containerDomNode.style.setProperty(
       "--vscode-hover-maxWidth",
-      typeof width === "number" ? `${width}px` : width,
+      typeof width === "number" ? `${width}px` : width
     )
     this._layoutContentWidget()
   }
@@ -214,7 +214,7 @@ export class ContentHoverWidget extends ResizableContentWidget {
     const maxRenderingHeight = this._findMaximumRenderingHeight() ?? Infinity
     this._resizableNode.maxSize = new dom.Dimension(
       maxRenderingWidth,
-      maxRenderingHeight,
+      maxRenderingHeight
     )
     this._setHoverWidgetMaxDimensions(maxRenderingWidth, maxRenderingHeight)
   }
@@ -222,7 +222,7 @@ export class ContentHoverWidget extends ResizableContentWidget {
   protected override _resize(size: dom.Dimension): void {
     ContentHoverWidget._lastDimensions = new dom.Dimension(
       size.width,
-      size.height,
+      size.height
     )
     this._setAdjustedHoverWidgetDimensions(size)
     this._resizableNode.layout(size.height, size.width)
@@ -260,24 +260,24 @@ export class ContentHoverWidget extends ResizableContentWidget {
     // To find out if the text is overflowing, we will disable wrapping, check the widths, and then re-enable wrapping
     this._hover.containerDomNode.style.setProperty(
       "--vscode-hover-whiteSpace",
-      "nowrap",
+      "nowrap"
     )
     this._hover.containerDomNode.style.setProperty(
       "--vscode-hover-sourceWhiteSpace",
-      "nowrap",
+      "nowrap"
     )
 
     const overflowing = Array.from(this._hover.contentsDomNode.children).some(
       (hoverElement) => {
         return hoverElement.scrollWidth > hoverElement.clientWidth
-      },
+      }
     )
 
     this._hover.containerDomNode.style.removeProperty(
-      "--vscode-hover-whiteSpace",
+      "--vscode-hover-whiteSpace"
     )
     this._hover.containerDomNode.style.removeProperty(
-      "--vscode-hover-sourceWhiteSpace",
+      "--vscode-hover-sourceWhiteSpace"
     )
 
     return overflowing
@@ -297,7 +297,7 @@ export class ContentHoverWidget extends ResizableContentWidget {
       this._hover.containerDomNode.clientWidth < initialWidth
     ) {
       const bodyBoxWidth = dom.getClientArea(
-        this._hover.containerDomNode.ownerDocument.body,
+        this._hover.containerDomNode.ownerDocument.body
       ).width
       const horizontalPadding = 14
       return bodyBoxWidth - horizontalPadding
@@ -328,7 +328,7 @@ export class ContentHoverWidget extends ResizableContentWidget {
           widgetRect.left,
           widgetRect.top,
           widgetRect.width,
-          widgetRect.height,
+          widgetRect.height
         )
     }
 
@@ -338,7 +338,7 @@ export class ContentHoverWidget extends ResizableContentWidget {
       widgetRect.left,
       widgetRect.top,
       widgetRect.width,
-      widgetRect.height,
+      widgetRect.height
     )
     if (
       distance >
@@ -350,7 +350,7 @@ export class ContentHoverWidget extends ResizableContentWidget {
 
     this._visibleData.closestMouseDistance = Math.min(
       this._visibleData.closestMouseDistance,
-      distance,
+      distance
     )
     return true
   }
@@ -364,13 +364,13 @@ export class ContentHoverWidget extends ResizableContentWidget {
 
   private _updateFont(): void {
     const { fontSize, lineHeight } = this._editor.getOption(
-      EditorOption.fontInfo,
+      EditorOption.fontInfo
     )
     const contentsDomNode = this._hover.contentsDomNode
     contentsDomNode.style.fontSize = `${fontSize}px`
     contentsDomNode.style.lineHeight = `${lineHeight / fontSize}`
     const codeClasses: HTMLElement[] = Array.prototype.slice.call(
-      this._hover.contentsDomNode.getElementsByClassName("code"),
+      this._hover.contentsDomNode.getElementsByClassName("code")
     )
     codeClasses.forEach((node) => this._editor.applyFontInfo(node))
   }
@@ -391,12 +391,12 @@ export class ContentHoverWidget extends ResizableContentWidget {
     const height = Math.max(
       this._editor.getLayoutInfo().height / 4,
       250,
-      ContentHoverWidget._lastDimensions.height,
+      ContentHoverWidget._lastDimensions.height
     )
     const width = Math.max(
       this._editor.getLayoutInfo().width * 0.66,
       500,
-      ContentHoverWidget._lastDimensions.width,
+      ContentHoverWidget._lastDimensions.width
     )
     this._setHoverWidgetMaxDimensions(width, height)
   }
@@ -430,7 +430,7 @@ export class ContentHoverWidget extends ResizableContentWidget {
 
   public showAt(
     node: DocumentFragment,
-    hoverData: ContentHoverVisibleData,
+    hoverData: ContentHoverVisibleData
   ): void {
     if (!this._editor || !this._editor.hasModel()) {
       return
@@ -460,7 +460,7 @@ export class ContentHoverWidget extends ResizableContentWidget {
           true && this._accessibilityService.isScreenReaderOptimized(),
         this._keybindingService
           .lookupKeybinding("editor.action.accessibleView")
-          ?.getAriaLabel() ?? "",
+          ?.getAriaLabel() ?? ""
       )
 
     if (accessibleViewHint) {
@@ -497,7 +497,7 @@ export class ContentHoverWidget extends ResizableContentWidget {
     // We combine the new minimum dimensions with the previous ones
     this._minimumSize = new dom.Dimension(
       Math.max(this._minimumSize.width, dimensions.width),
-      Math.max(this._minimumSize.height, dimensions.height),
+      Math.max(this._minimumSize.height, dimensions.height)
     )
     this._updateMinimumWidth()
   }
@@ -510,7 +510,7 @@ export class ContentHoverWidget extends ResizableContentWidget {
     // We want to avoid that the hover is artificially large, so we use the content width as minimum width
     this._resizableNode.minSize = new dom.Dimension(
       width,
-      this._minimumSize.height,
+      this._minimumSize.height
     )
   }
 
@@ -534,7 +534,7 @@ export class ContentHoverWidget extends ResizableContentWidget {
       const widgetHeight = dom.getTotalHeight(this._hover.containerDomNode)
       this._positionPreference = this._findPositionPreference(
         widgetHeight,
-        this._visibleData.showAtPosition,
+        this._visibleData.showAtPosition
       )
     }
     this._layoutContentWidget()
@@ -607,7 +607,7 @@ function computeDistanceFromPointToRectangle(
   left: number,
   top: number,
   width: number,
-  height: number,
+  height: number
 ): number {
   const x = left + width / 2 // x center of rectangle
   const y = top + height / 2 // y center of rectangle

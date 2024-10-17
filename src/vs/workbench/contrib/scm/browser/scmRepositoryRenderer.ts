@@ -9,230 +9,155 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import "vs/css!./media/scm"
-import {
-  IDisposable,
-  DisposableStore,
-  combinedDisposable,
-  toDisposable,
-} from "vs/base/common/lifecycle"
-import { append, $ } from "vs/base/browser/dom"
-import {
-  ISCMProvider,
-  ISCMRepository,
-  ISCMViewService,
-} from "vs/workbench/contrib/scm/common/scm"
-import { CountBadge } from "vs/base/browser/ui/countBadge/countBadge"
-import { IContextMenuService } from "vs/platform/contextview/browser/contextView"
-import { ICommandService } from "vs/platform/commands/common/commands"
-import { ActionRunner, IAction } from "vs/base/common/actions"
-import { connectPrimaryMenu, isSCMRepository, StatusBarAction } from "./util"
-import { ITreeNode } from "vs/base/browser/ui/tree/tree"
-import { ICompressibleTreeRenderer } from "vs/base/browser/ui/tree/objectTree"
-import { FuzzyScore } from "vs/base/common/filters"
-import { IListRenderer } from "vs/base/browser/ui/list/list"
-import { IActionViewItemProvider } from "vs/base/browser/ui/actionbar/actionbar"
-import { defaultCountBadgeStyles } from "vs/platform/theme/browser/defaultStyles"
-import { WorkbenchToolBar } from "vs/platform/actions/browser/toolbar"
-import {
-  IMenuService,
-  MenuId,
-  MenuItemAction,
-} from "vs/platform/actions/common/actions"
-import { IContextKeyService } from "vs/platform/contextkey/common/contextkey"
-import { IKeybindingService } from "vs/platform/keybinding/common/keybinding"
-import { ITelemetryService } from "vs/platform/telemetry/common/telemetry"
+import 'vs/css!./media/scm';
+import { IDisposable, DisposableStore, combinedDisposable, toDisposable } from 'vs/base/common/lifecycle';
+import { append, $ } from 'vs/base/browser/dom';
+import { ISCMProvider, ISCMRepository, ISCMViewService } from 'vs/workbench/contrib/scm/common/scm';
+import { CountBadge } from 'vs/base/browser/ui/countBadge/countBadge';
+import { IContextMenuService } from 'vs/platform/contextview/browser/contextView';
+import { ICommandService } from 'vs/platform/commands/common/commands';
+import { ActionRunner, IAction } from 'vs/base/common/actions';
+import { connectPrimaryMenu, isSCMRepository, StatusBarAction } from './util';
+import { ITreeNode } from 'vs/base/browser/ui/tree/tree';
+import { ICompressibleTreeRenderer } from 'vs/base/browser/ui/tree/objectTree';
+import { FuzzyScore } from 'vs/base/common/filters';
+import { IListRenderer } from 'vs/base/browser/ui/list/list';
+import { IActionViewItemProvider } from 'vs/base/browser/ui/actionbar/actionbar';
+import { defaultCountBadgeStyles } from 'vs/platform/theme/browser/defaultStyles';
+import { WorkbenchToolBar } from 'vs/platform/actions/browser/toolbar';
+import { IMenuService, MenuId, MenuItemAction } from 'vs/platform/actions/common/actions';
+import { IContextKeyService } from 'vs/platform/contextkey/common/contextkey';
+import { IKeybindingService } from 'vs/platform/keybinding/common/keybinding';
+import { ITelemetryService } from 'vs/platform/telemetry/common/telemetry';
 
 export class RepositoryActionRunner extends ActionRunner {
-  constructor(
-    private readonly getSelectedRepositories: () => ISCMRepository[],
-  ) {
-    super()
-  }
+	constructor(private readonly getSelectedRepositories: () => ISCMRepository[]) {
+		super();
+	}
 
-  protected override async runAction(
-    action: IAction,
-    context: ISCMProvider,
-  ): Promise<void> {
-    if (!(action instanceof MenuItemAction)) {
-      return super.runAction(action, context)
-    }
+	protected override async runAction(action: IAction, context: ISCMProvider): Promise<void> {
+		if (!(action instanceof MenuItemAction)) {
+			return super.runAction(action, context);
+		}
 
-    const selection = this.getSelectedRepositories().map((r) => r.provider)
-    const actionContext = selection.some((s) => s === context)
-      ? selection
-      : [context]
+		const selection = this.getSelectedRepositories().map(r => r.provider);
+		const actionContext = selection.some(s => s === context) ? selection : [context];
 
-    await action.run(...actionContext)
-  }
+		await action.run(...actionContext);
+	}
 }
 
 interface RepositoryTemplate {
-  readonly label: HTMLElement
-  readonly name: HTMLElement
-  readonly description: HTMLElement
-  readonly countContainer: HTMLElement
-  readonly count: CountBadge
-  readonly toolBar: WorkbenchToolBar
-  readonly elementDisposables: DisposableStore
-  readonly templateDisposable: IDisposable
+	readonly label: HTMLElement;
+	readonly name: HTMLElement;
+	readonly description: HTMLElement;
+	readonly countContainer: HTMLElement;
+	readonly count: CountBadge;
+	readonly toolBar: WorkbenchToolBar;
+	readonly elementDisposables: DisposableStore;
+	readonly templateDisposable: IDisposable;
 }
 
-export class RepositoryRenderer
-  implements
-    ICompressibleTreeRenderer<ISCMRepository, FuzzyScore, RepositoryTemplate>,
-    IListRenderer<ISCMRepository, RepositoryTemplate>
-{
-  static readonly TEMPLATE_ID = "repository"
-  get templateId(): string {
-    return RepositoryRenderer.TEMPLATE_ID
-  }
+export class RepositoryRenderer implements ICompressibleTreeRenderer<ISCMRepository, FuzzyScore, RepositoryTemplate>, IListRenderer<ISCMRepository, RepositoryTemplate> {
 
-  constructor(
-    private readonly toolbarMenuId: MenuId,
-    private readonly actionViewItemProvider: IActionViewItemProvider,
-    @ISCMViewService private scmViewService: ISCMViewService,
-    @ICommandService private commandService: ICommandService,
-    @IContextKeyService private contextKeyService: IContextKeyService,
-    @IContextMenuService private contextMenuService: IContextMenuService,
-    @IKeybindingService private keybindingService: IKeybindingService,
-    @IMenuService private menuService: IMenuService,
-    @ITelemetryService private telemetryService: ITelemetryService,
-  ) {}
+	static readonly TEMPLATE_ID = 'repository';
+	get templateId(): string { return RepositoryRenderer.TEMPLATE_ID; }
 
-  renderTemplate(container: HTMLElement): RepositoryTemplate {
-    // hack
-    if (container.classList.contains("monaco-tl-contents")) {
-      ;(
-        container.parentElement!.parentElement!.querySelector(
-          ".monaco-tl-twistie",
-        )! as HTMLElement
-      ).classList.add("force-twistie")
-    }
+	constructor(
+		private readonly toolbarMenuId: MenuId,
+		private readonly actionViewItemProvider: IActionViewItemProvider,
+		@ISCMViewService private scmViewService: ISCMViewService,
+		@ICommandService private commandService: ICommandService,
+		@IContextKeyService private contextKeyService: IContextKeyService,
+		@IContextMenuService private contextMenuService: IContextMenuService,
+		@IKeybindingService private keybindingService: IKeybindingService,
+		@IMenuService private menuService: IMenuService,
+		@ITelemetryService private telemetryService: ITelemetryService
+	) { }
 
-    const provider = append(container, $(".scm-provider"))
-    const label = append(provider, $(".label"))
-    const name = append(label, $("span.name"))
-    const description = append(label, $("span.description"))
-    const actions = append(provider, $(".actions"))
-    const toolBar = new WorkbenchToolBar(
-      actions,
-      {
-        actionViewItemProvider: this.actionViewItemProvider,
-        resetMenu: this.toolbarMenuId,
-      },
-      this.menuService,
-      this.contextKeyService,
-      this.contextMenuService,
-      this.keybindingService,
-      this.commandService,
-      this.telemetryService,
-    )
-    const countContainer = append(provider, $(".count"))
-    const count = new CountBadge(countContainer, {}, defaultCountBadgeStyles)
-    const visibilityDisposable = toolBar.onDidChangeDropdownVisibility((e) =>
-      provider.classList.toggle("active", e),
-    )
+	renderTemplate(container: HTMLElement): RepositoryTemplate {
+		// hack
+		if (container.classList.contains('monaco-tl-contents')) {
+			(container.parentElement!.parentElement!.querySelector('.monaco-tl-twistie')! as HTMLElement).classList.add('force-twistie');
+		}
 
-    const templateDisposable = combinedDisposable(visibilityDisposable, toolBar)
+		const provider = append(container, $('.scm-provider'));
+		const label = append(provider, $('.label'));
+		const name = append(label, $('span.name'));
+		const description = append(label, $('span.description'));
+		const actions = append(provider, $('.actions'));
+		const toolBar = new WorkbenchToolBar(actions, { actionViewItemProvider: this.actionViewItemProvider, resetMenu: this.toolbarMenuId }, this.menuService, this.contextKeyService, this.contextMenuService, this.keybindingService, this.commandService, this.telemetryService);
+		const countContainer = append(provider, $('.count'));
+		const count = new CountBadge(countContainer, {}, defaultCountBadgeStyles);
+		const visibilityDisposable = toolBar.onDidChangeDropdownVisibility(e => provider.classList.toggle('active', e));
 
-    return {
-      label,
-      name,
-      description,
-      countContainer,
-      count,
-      toolBar,
-      elementDisposables: new DisposableStore(),
-      templateDisposable,
-    }
-  }
+		const templateDisposable = combinedDisposable(visibilityDisposable, toolBar);
 
-  renderElement(
-    arg: ISCMRepository | ITreeNode<ISCMRepository, FuzzyScore>,
-    index: number,
-    templateData: RepositoryTemplate,
-    height: number | undefined,
-  ): void {
-    const repository = isSCMRepository(arg) ? arg : arg.element
+		return { label, name, description, countContainer, count, toolBar, elementDisposables: new DisposableStore(), templateDisposable };
+	}
 
-    templateData.name.textContent = repository.provider.name
-    if (repository.provider.rootUri) {
-      templateData.label.title = `${repository.provider.label}: ${repository.provider.rootUri.fsPath}`
-      templateData.description.textContent = repository.provider.label
-    } else {
-      templateData.label.title = repository.provider.label
-      templateData.description.textContent = ""
-    }
+	renderElement(arg: ISCMRepository | ITreeNode<ISCMRepository, FuzzyScore>, index: number, templateData: RepositoryTemplate, height: number | undefined): void {
+		const repository = isSCMRepository(arg) ? arg : arg.element;
 
-    let statusPrimaryActions: IAction[] = []
-    let menuPrimaryActions: IAction[] = []
-    let menuSecondaryActions: IAction[] = []
-    const updateToolbar = () => {
-      templateData.toolBar.setActions(
-        [...statusPrimaryActions, ...menuPrimaryActions],
-        menuSecondaryActions,
-      )
-    }
+		templateData.name.textContent = repository.provider.name;
+		if (repository.provider.rootUri) {
+			templateData.label.title = `${repository.provider.label}: ${repository.provider.rootUri.fsPath}`;
+			templateData.description.textContent = repository.provider.label;
+		} else {
+			templateData.label.title = repository.provider.label;
+			templateData.description.textContent = '';
+		}
 
-    const onDidChangeProvider = () => {
-      const commands = repository.provider.statusBarCommands || []
-      statusPrimaryActions = commands.map(
-        (c) => new StatusBarAction(c, this.commandService),
-      )
-      updateToolbar()
+		let statusPrimaryActions: IAction[] = [];
+		let menuPrimaryActions: IAction[] = [];
+		let menuSecondaryActions: IAction[] = [];
+		const updateToolbar = () => {
+			templateData.toolBar.setActions([...statusPrimaryActions, ...menuPrimaryActions], menuSecondaryActions);
+		};
 
-      const count = repository.provider.count || 0
-      templateData.countContainer.setAttribute("data-count", String(count))
-      templateData.count.setCount(count)
-    }
+		const onDidChangeProvider = () => {
+			const commands = repository.provider.statusBarCommands || [];
+			statusPrimaryActions = commands.map(c => new StatusBarAction(c, this.commandService));
+			updateToolbar();
 
-    // TODO@joao TODO@lszomoru
-    let disposed = false
-    templateData.elementDisposables.add(toDisposable(() => (disposed = true)))
-    templateData.elementDisposables.add(
-      repository.provider.onDidChange(() => {
-        if (disposed) {
-          return
-        }
+			const count = repository.provider.count || 0;
+			templateData.countContainer.setAttribute('data-count', String(count));
+			templateData.count.setCount(count);
+		};
 
-        onDidChangeProvider()
-      }),
-    )
+		// TODO@joao TODO@lszomoru
+		let disposed = false;
+		templateData.elementDisposables.add(toDisposable(() => disposed = true));
+		templateData.elementDisposables.add(repository.provider.onDidChange(() => {
+			if (disposed) {
+				return;
+			}
 
-    onDidChangeProvider()
+			onDidChangeProvider();
+		}));
 
-    const repositoryMenus = this.scmViewService.menus.getRepositoryMenus(
-      repository.provider,
-    )
-    const menu =
-      this.toolbarMenuId === MenuId.SCMTitle
-        ? repositoryMenus.titleMenu.menu
-        : repositoryMenus.repositoryMenu
-    templateData.elementDisposables.add(
-      connectPrimaryMenu(menu, (primary, secondary) => {
-        menuPrimaryActions = primary
-        menuSecondaryActions = secondary
-        updateToolbar()
-      }),
-    )
-    templateData.toolBar.context = repository.provider
-  }
+		onDidChangeProvider();
 
-  renderCompressedElements(): void {
-    throw new Error("Should never happen since node is incompressible")
-  }
+		const repositoryMenus = this.scmViewService.menus.getRepositoryMenus(repository.provider);
+		const menu = this.toolbarMenuId === MenuId.SCMTitle ? repositoryMenus.titleMenu.menu : repositoryMenus.repositoryMenu;
+		templateData.elementDisposables.add(connectPrimaryMenu(menu, (primary, secondary) => {
+			menuPrimaryActions = primary;
+			menuSecondaryActions = secondary;
+			updateToolbar();
+		}));
+		templateData.toolBar.context = repository.provider;
+	}
 
-  disposeElement(
-    group: ISCMRepository | ITreeNode<ISCMRepository, FuzzyScore>,
-    index: number,
-    template: RepositoryTemplate,
-  ): void {
-    template.elementDisposables.clear()
-  }
+	renderCompressedElements(): void {
+		throw new Error('Should never happen since node is incompressible');
+	}
 
-  disposeTemplate(templateData: RepositoryTemplate): void {
-    templateData.elementDisposables.dispose()
-    templateData.templateDisposable.dispose()
-  }
+	disposeElement(group: ISCMRepository | ITreeNode<ISCMRepository, FuzzyScore>, index: number, template: RepositoryTemplate): void {
+		template.elementDisposables.clear();
+	}
+
+	disposeTemplate(templateData: RepositoryTemplate): void {
+		templateData.elementDisposables.dispose();
+		templateData.templateDisposable.dispose();
+	}
 }

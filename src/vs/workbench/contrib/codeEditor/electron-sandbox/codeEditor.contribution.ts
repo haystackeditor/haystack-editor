@@ -9,8 +9,8 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import "./displayChangeRemeasureFonts"
-import "./inputClipboardActions"
-import "./selectionClipboard"
-import "./sleepResumeRepaintMinimap"
-import "./startDebugTextMate"
+import './displayChangeRemeasureFonts';
+import './inputClipboardActions';
+import './selectionClipboard';
+import './sleepResumeRepaintMinimap';
+import './startDebugTextMate';

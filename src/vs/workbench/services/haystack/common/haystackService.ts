@@ -207,7 +207,7 @@ export interface IHaystackService {
   createFileEditor(
     uri: URI | undefined,
     args?: EditorOpenArgs,
-    options?: IEditorOptions,
+    options?: IEditorOptions
   ): Promise<IEditorPane | undefined>
 
   createMergeEditor(input: IResourceMergeEditorInput,
@@ -220,17 +220,17 @@ export interface IHaystackService {
     uri: URI,
     range: IRange,
     args?: EditorOpenArgs,
-    options?: IEditorOptions,
+    options?: IEditorOptions
   ): Promise<IEditorPane | undefined>
   createReferenceEditor(
     referencesModel: ReferencesModel,
     codeEditor: ICodeEditor,
-    range: IRange,
+    range: IRange
   ): void
   createFileDiffEditor(
     originalUri: URI,
     modifiedUri: URI,
-    args?: EditorOpenArgs,
+    args?: EditorOpenArgs
   ): Promise<IEditorPane | undefined>
 
   createEditorElement(
@@ -239,20 +239,20 @@ export interface IHaystackService {
     deferredEditorPanePromise: DeferredPromise<IEditorPane | undefined>,
     canvasCodeEditor?: CanvasCodeEditor,
     options?: IEditorOptions,
-    args?: EditorOpenArgs,
+    args?: EditorOpenArgs
   ): Promise<IEditorIdentifier | null>
 
   createSymbolEditorWithPosition(
     name: string,
     symbolType: SymbolKind,
     uri: URI,
-    range: IRange,
+    range: IRange
   ): Promise<void>
 
   createModalEditor(
     input: EditorInput | IResourceEditorInput,
     args?: EditorOpenArgs,
-    options?: IEditorOptions,
+    options?: IEditorOptions
   ): Promise<IEditorPane | undefined>
 
   resetZoomLevel(): void
@@ -262,19 +262,19 @@ export interface IHaystackService {
   setCurrentReference(
     editorId: string,
     uri: URI,
-    numberOfReferences?: number,
+    numberOfReferences?: number
   ): void
 
   getOrCreateTextModelRef(
-    uri: URI,
+    uri: URI
   ): Promise<IReference<ITextFileEditorModel> | null>
 
   getDeepestSymbolContainingRange(
-    location: Location,
+    location: Location
   ): Promise<DocumentSymbol | null>
 
   getSymbolAtPosition(
-    locationLinks: LocationLink,
+    locationLinks: LocationLink
   ): Promise<DocumentSymbol | null>
 
   getFocusedCodeEditor(): ICodeEditor | null
@@ -341,7 +341,7 @@ export interface IHaystackService {
 
 export function adjustRangeForComments(
   range: IRange,
-  model: ITextModel,
+  model: ITextModel
 ): IRange {
   let adjustableRange = Range.fromIRange(range)
   let line = model.getLineContent(range.startLineNumber).trim()
@@ -352,7 +352,7 @@ export function adjustRangeForComments(
       adjustableRange.startLineNumber + 1,
       1,
       adjustableRange.startLineNumber + 1,
-      1,
+      1
     )
     if (adjustableRange.startLineNumber > model.getLineCount()) {
       return Range.toIRange(adjustableRange.delta(-1))

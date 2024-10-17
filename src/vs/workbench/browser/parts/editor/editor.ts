@@ -68,7 +68,7 @@ export interface IEditorPartCreationOptions {
 export const DEFAULT_EDITOR_MIN_DIMENSIONS = new Dimension(220, 70)
 export const DEFAULT_EDITOR_MAX_DIMENSIONS = new Dimension(
   Number.POSITIVE_INFINITY,
-  Number.POSITIVE_INFINITY,
+  Number.POSITIVE_INFINITY
 )
 
 export const DEFAULT_EDITOR_PART_OPTIONS: IEditorPartOptions = {
@@ -128,7 +128,7 @@ export const DEFAULT_EDITOR_PART_OPTIONS: IEditorPartOptions = {
 }
 
 export function impactsEditorPartOptions(
-  event: IConfigurationChangeEvent,
+  event: IConfigurationChangeEvent
 ): boolean {
   return (
     event.affectsConfiguration("workbench.editor") ||
@@ -139,7 +139,7 @@ export function impactsEditorPartOptions(
 
 export function getEditorPartOptions(
   configurationService: IConfigurationService,
-  themeService: IThemeService,
+  themeService: IThemeService
 ): IEditorPartOptions {
   const options = {
     ...DEFAULT_EDITOR_PART_OPTIONS,
@@ -156,7 +156,7 @@ export function getEditorPartOptions(
       options.autoLockGroups = DEFAULT_EDITOR_PART_OPTIONS.autoLockGroups
 
       for (const [editorId, enablement] of Object.entries(
-        config.workbench.editor.autoLockGroups,
+        config.workbench.editor.autoLockGroups
       )) {
         if (enablement === true) {
           options.autoLockGroups.add(editorId)
@@ -176,7 +176,7 @@ export function getEditorPartOptions(
 }
 
 function validateEditorPartOptions(
-  options: IEditorPartOptions,
+  options: IEditorPartOptions
 ): IEditorPartOptions {
   // Migrate: Show tabs (config migration kicks in very late and can cause flicker otherwise)
   if (typeof options.showTabs === "boolean") {
@@ -187,67 +187,67 @@ function validateEditorPartOptions(
     {
       wrapTabs: new BooleanVerifier(DEFAULT_EDITOR_PART_OPTIONS["wrapTabs"]),
       scrollToSwitchTabs: new BooleanVerifier(
-        DEFAULT_EDITOR_PART_OPTIONS["scrollToSwitchTabs"],
+        DEFAULT_EDITOR_PART_OPTIONS["scrollToSwitchTabs"]
       ),
       highlightModifiedTabs: new BooleanVerifier(
-        DEFAULT_EDITOR_PART_OPTIONS["highlightModifiedTabs"],
+        DEFAULT_EDITOR_PART_OPTIONS["highlightModifiedTabs"]
       ),
       tabActionCloseVisibility: new BooleanVerifier(
-        DEFAULT_EDITOR_PART_OPTIONS["tabActionCloseVisibility"],
+        DEFAULT_EDITOR_PART_OPTIONS["tabActionCloseVisibility"]
       ),
       tabActionUnpinVisibility: new BooleanVerifier(
-        DEFAULT_EDITOR_PART_OPTIONS["tabActionUnpinVisibility"],
+        DEFAULT_EDITOR_PART_OPTIONS["tabActionUnpinVisibility"]
       ),
       alwaysShowEditorActions: new BooleanVerifier(
-        DEFAULT_EDITOR_PART_OPTIONS["alwaysShowEditorActions"],
+        DEFAULT_EDITOR_PART_OPTIONS["alwaysShowEditorActions"]
       ),
       pinnedTabsOnSeparateRow: new BooleanVerifier(
-        DEFAULT_EDITOR_PART_OPTIONS["pinnedTabsOnSeparateRow"],
+        DEFAULT_EDITOR_PART_OPTIONS["pinnedTabsOnSeparateRow"]
       ),
       focusRecentEditorAfterClose: new BooleanVerifier(
-        DEFAULT_EDITOR_PART_OPTIONS["focusRecentEditorAfterClose"],
+        DEFAULT_EDITOR_PART_OPTIONS["focusRecentEditorAfterClose"]
       ),
       showIcons: new BooleanVerifier(DEFAULT_EDITOR_PART_OPTIONS["showIcons"]),
       enablePreview: new BooleanVerifier(
-        DEFAULT_EDITOR_PART_OPTIONS["enablePreview"],
+        DEFAULT_EDITOR_PART_OPTIONS["enablePreview"]
       ),
       enablePreviewFromQuickOpen: new BooleanVerifier(
-        DEFAULT_EDITOR_PART_OPTIONS["enablePreviewFromQuickOpen"],
+        DEFAULT_EDITOR_PART_OPTIONS["enablePreviewFromQuickOpen"]
       ),
       enablePreviewFromCodeNavigation: new BooleanVerifier(
-        DEFAULT_EDITOR_PART_OPTIONS["enablePreviewFromCodeNavigation"],
+        DEFAULT_EDITOR_PART_OPTIONS["enablePreviewFromCodeNavigation"]
       ),
       closeOnFileDelete: new BooleanVerifier(
-        DEFAULT_EDITOR_PART_OPTIONS["closeOnFileDelete"],
+        DEFAULT_EDITOR_PART_OPTIONS["closeOnFileDelete"]
       ),
       closeEmptyGroups: new BooleanVerifier(
-        DEFAULT_EDITOR_PART_OPTIONS["closeEmptyGroups"],
+        DEFAULT_EDITOR_PART_OPTIONS["closeEmptyGroups"]
       ),
       revealIfOpen: new BooleanVerifier(
-        DEFAULT_EDITOR_PART_OPTIONS["revealIfOpen"],
+        DEFAULT_EDITOR_PART_OPTIONS["revealIfOpen"]
       ),
       mouseBackForwardToNavigate: new BooleanVerifier(
-        DEFAULT_EDITOR_PART_OPTIONS["mouseBackForwardToNavigate"],
+        DEFAULT_EDITOR_PART_OPTIONS["mouseBackForwardToNavigate"]
       ),
       restoreViewState: new BooleanVerifier(
-        DEFAULT_EDITOR_PART_OPTIONS["restoreViewState"],
+        DEFAULT_EDITOR_PART_OPTIONS["restoreViewState"]
       ),
       splitOnDragAndDrop: new BooleanVerifier(
-        DEFAULT_EDITOR_PART_OPTIONS["splitOnDragAndDrop"],
+        DEFAULT_EDITOR_PART_OPTIONS["splitOnDragAndDrop"]
       ),
       dragToOpenWindow: new BooleanVerifier(
-        DEFAULT_EDITOR_PART_OPTIONS["dragToOpenWindow"],
+        DEFAULT_EDITOR_PART_OPTIONS["dragToOpenWindow"]
       ),
       centeredLayoutFixedWidth: new BooleanVerifier(
-        DEFAULT_EDITOR_PART_OPTIONS["centeredLayoutFixedWidth"],
+        DEFAULT_EDITOR_PART_OPTIONS["centeredLayoutFixedWidth"]
       ),
       hasIcons: new BooleanVerifier(DEFAULT_EDITOR_PART_OPTIONS["hasIcons"]),
 
       tabSizingFixedMinWidth: new NumberVerifier(
-        DEFAULT_EDITOR_PART_OPTIONS["tabSizingFixedMinWidth"],
+        DEFAULT_EDITOR_PART_OPTIONS["tabSizingFixedMinWidth"]
       ),
       tabSizingFixedMaxWidth: new NumberVerifier(
-        DEFAULT_EDITOR_PART_OPTIONS["tabSizingFixedMaxWidth"],
+        DEFAULT_EDITOR_PART_OPTIONS["tabSizingFixedMaxWidth"]
       ),
 
       showTabs: new EnumVerifier(DEFAULT_EDITOR_PART_OPTIONS["showTabs"], [
@@ -257,7 +257,7 @@ function validateEditorPartOptions(
       ]),
       tabActionLocation: new EnumVerifier(
         DEFAULT_EDITOR_PART_OPTIONS["tabActionLocation"],
-        ["left", "right"],
+        ["left", "right"]
       ),
       tabSizing: new EnumVerifier(DEFAULT_EDITOR_PART_OPTIONS["tabSizing"], [
         "fit",
@@ -266,7 +266,7 @@ function validateEditorPartOptions(
       ]),
       pinnedTabSizing: new EnumVerifier(
         DEFAULT_EDITOR_PART_OPTIONS["pinnedTabSizing"],
-        ["normal", "compact", "shrink"],
+        ["normal", "compact", "shrink"]
       ),
       tabHeight: new EnumVerifier(DEFAULT_EDITOR_PART_OPTIONS["tabHeight"], [
         "default",
@@ -274,74 +274,74 @@ function validateEditorPartOptions(
       ]),
       preventPinnedEditorClose: new EnumVerifier(
         DEFAULT_EDITOR_PART_OPTIONS["preventPinnedEditorClose"],
-        ["keyboardAndMouse", "keyboard", "mouse", "never"],
+        ["keyboardAndMouse", "keyboard", "mouse", "never"]
       ),
       titleScrollbarSizing: new EnumVerifier(
         DEFAULT_EDITOR_PART_OPTIONS["titleScrollbarSizing"],
-        ["default", "large"],
+        ["default", "large"]
       ),
       openPositioning: new EnumVerifier(
         DEFAULT_EDITOR_PART_OPTIONS["openPositioning"],
-        ["left", "right", "first", "last"],
+        ["left", "right", "first", "last"]
       ),
       openSideBySideDirection: new EnumVerifier(
         DEFAULT_EDITOR_PART_OPTIONS["openSideBySideDirection"],
-        ["right", "down"],
+        ["right", "down"]
       ),
       labelFormat: new EnumVerifier(
         DEFAULT_EDITOR_PART_OPTIONS["labelFormat"],
-        ["default", "short", "medium", "long"],
+        ["default", "short", "medium", "long"]
       ),
       splitInGroupLayout: new EnumVerifier(
         DEFAULT_EDITOR_PART_OPTIONS["splitInGroupLayout"],
-        ["vertical", "horizontal"],
+        ["vertical", "horizontal"]
       ),
       splitSizing: new EnumVerifier(
         DEFAULT_EDITOR_PART_OPTIONS["splitSizing"],
-        ["distribute", "split", "auto"],
+        ["distribute", "split", "auto"]
       ),
       doubleClickTabToToggleEditorGroupSizes: new EnumVerifier(
         DEFAULT_EDITOR_PART_OPTIONS["doubleClickTabToToggleEditorGroupSizes"],
-        ["maximize", "expand", "off"],
+        ["maximize", "expand", "off"]
       ),
       editorActionsLocation: new EnumVerifier(
         DEFAULT_EDITOR_PART_OPTIONS["editorActionsLocation"],
-        ["default", "titleBar", "hidden"],
+        ["default", "titleBar", "hidden"]
       ),
       autoLockGroups: new SetVerifier<string>(
-        DEFAULT_EDITOR_PART_OPTIONS["autoLockGroups"],
+        DEFAULT_EDITOR_PART_OPTIONS["autoLockGroups"]
       ),
 
       limit: new ObjectVerifier<IEditorPartLimitOptions>(
         DEFAULT_EDITOR_PART_OPTIONS["limit"],
         {
           enabled: new BooleanVerifier(
-            DEFAULT_EDITOR_PART_OPTIONS["limit"]["enabled"],
+            DEFAULT_EDITOR_PART_OPTIONS["limit"]["enabled"]
           ),
           value: new NumberVerifier(
-            DEFAULT_EDITOR_PART_OPTIONS["limit"]["value"],
+            DEFAULT_EDITOR_PART_OPTIONS["limit"]["value"]
           ),
           perEditorGroup: new BooleanVerifier(
-            DEFAULT_EDITOR_PART_OPTIONS["limit"]["perEditorGroup"],
+            DEFAULT_EDITOR_PART_OPTIONS["limit"]["perEditorGroup"]
           ),
           excludeDirty: new BooleanVerifier(
-            DEFAULT_EDITOR_PART_OPTIONS["limit"]["excludeDirty"],
+            DEFAULT_EDITOR_PART_OPTIONS["limit"]["excludeDirty"]
           ),
-        },
+        }
       ),
       decorations: new ObjectVerifier<IEditorPartDecorationOptions>(
         DEFAULT_EDITOR_PART_OPTIONS["decorations"],
         {
           badges: new BooleanVerifier(
-            DEFAULT_EDITOR_PART_OPTIONS["decorations"]["badges"],
+            DEFAULT_EDITOR_PART_OPTIONS["decorations"]["badges"]
           ),
           colors: new BooleanVerifier(
-            DEFAULT_EDITOR_PART_OPTIONS["decorations"]["colors"],
+            DEFAULT_EDITOR_PART_OPTIONS["decorations"]["colors"]
           ),
-        },
+        }
       ),
     },
-    options,
+    options
   )
 }
 
@@ -360,12 +360,12 @@ export interface IEditorPartsView {
   readonly count: number
 
   createAuxiliaryEditorPart(
-    options?: IAuxiliaryWindowOpenOptions,
+    options?: IAuxiliaryWindowOpenOptions
   ): Promise<IAuxiliaryEditorPart>
 
   bind<T extends ContextKeyValue>(
     contextKey: RawContextKey<T>,
-    group: IEditorGroupView,
+    group: IEditorGroupView
   ): IContextKey<T>
 }
 
@@ -388,40 +388,40 @@ export interface IEditorGroupsView {
 
   activateGroup(
     identifier: IEditorGroupView | GroupIdentifier,
-    preserveWindowOrder?: boolean,
+    preserveWindowOrder?: boolean
   ): IEditorGroupView
   restoreGroup(identifier: IEditorGroupView | GroupIdentifier): IEditorGroupView
 
   addGroup(
     location: IEditorGroupView | GroupIdentifier,
     direction: GroupDirection,
-    groupToCopy?: IEditorGroupView,
+    groupToCopy?: IEditorGroupView
   ): IEditorGroupView
   mergeGroup(
     group: IEditorGroupView | GroupIdentifier,
     target: IEditorGroupView | GroupIdentifier,
-    options?: IMergeGroupOptions,
+    options?: IMergeGroupOptions
   ): boolean
 
   moveGroup(
     group: IEditorGroupView | GroupIdentifier,
     location: IEditorGroupView | GroupIdentifier,
-    direction: GroupDirection,
+    direction: GroupDirection
   ): IEditorGroupView
   copyGroup(
     group: IEditorGroupView | GroupIdentifier,
     location: IEditorGroupView | GroupIdentifier,
-    direction: GroupDirection,
+    direction: GroupDirection
   ): IEditorGroupView
 
   removeGroup(
     group: IEditorGroupView | GroupIdentifier,
-    preserveFocus?: boolean,
+    preserveFocus?: boolean
   ): void
 
   arrangeGroups(
     arrangement: GroupsArrangement,
-    target?: IEditorGroupView | GroupIdentifier,
+    target?: IEditorGroupView | GroupIdentifier
   ): void
   toggleMaximizeGroup(group?: IEditorGroupView | GroupIdentifier): void
   toggleExpandGroup(group?: IEditorGroupView | GroupIdentifier): void
@@ -487,7 +487,7 @@ export interface IEditorGroupView
     editor: EditorInput,
     options?: IEditorOptions,
     internalOptions?: IInternalEditorOpenOptions,
-    domElement?: HTMLElement,
+    domElement?: HTMLElement
   ): Promise<IEditorPane | undefined>
 
   relayout(): void
@@ -496,7 +496,7 @@ export interface IEditorGroupView
 export function fillActiveEditorViewState(
   group: IEditorGroup,
   expectedActiveEditor?: EditorInput,
-  presetOptions?: IEditorOptions,
+  presetOptions?: IEditorOptions
 ): IEditorOptions {
   if (
     !expectedActiveEditor ||

@@ -47,7 +47,7 @@ suite("ResourceEditorInput", () => {
       @ITextResourceConfigurationService
       textResourceConfigurationService: ITextResourceConfigurationService,
       @ICustomEditorLabelService
-      customEditorLabelService: ICustomEditorLabelService,
+      customEditorLabelService: ICustomEditorLabelService
     ) {
       super(
         resource,
@@ -61,7 +61,7 @@ suite("ResourceEditorInput", () => {
         fileService,
         filesConfigurationService,
         textResourceConfigurationService,
-        customEditorLabelService,
+        customEditorLabelService
       )
     }
   }
@@ -71,7 +71,7 @@ suite("ResourceEditorInput", () => {
   > {
     const instantiationService = workbenchInstantiationService(
       undefined,
-      disposables,
+      disposables
     )
 
     const testConfigurationService = new TestConfigurationService()
@@ -80,12 +80,12 @@ suite("ResourceEditorInput", () => {
     const customEditorLabelService = disposables.add(
       new CustomEditorLabelService(
         testConfigurationService,
-        instantiationService.get(IWorkspaceContextService),
-      ),
+        instantiationService.get(IWorkspaceContextService)
+      )
     )
     instantiationService.stub(
       ICustomEditorLabelService,
-      customEditorLabelService,
+      customEditorLabelService
     )
 
     return [
@@ -108,7 +108,7 @@ suite("ResourceEditorInput", () => {
     })
 
     const input = disposables.add(
-      instantiationService.createInstance(TestResourceEditorInput, resource),
+      instantiationService.createInstance(TestResourceEditorInput, resource)
     )
 
     assert.ok(input.getName().length > 0)
@@ -123,12 +123,12 @@ suite("ResourceEditorInput", () => {
 
     assert.strictEqual(
       input.hasCapability(EditorInputCapabilities.Readonly),
-      false,
+      false
     )
     assert.strictEqual(input.isReadonly(), false)
     assert.strictEqual(
       input.hasCapability(EditorInputCapabilities.Untitled),
-      true,
+      true
     )
   })
 
@@ -149,10 +149,10 @@ suite("ResourceEditorInput", () => {
     })
 
     const input1 = disposables.add(
-      instantiationService.createInstance(TestResourceEditorInput, resource1),
+      instantiationService.createInstance(TestResourceEditorInput, resource1)
     )
     const input2 = disposables.add(
-      instantiationService.createInstance(TestResourceEditorInput, resource2),
+      instantiationService.createInstance(TestResourceEditorInput, resource2)
     )
 
     await testConfigurationService.setUserConfiguration(
@@ -161,7 +161,7 @@ suite("ResourceEditorInput", () => {
         "**/theOtherPath/**": "Label 1",
         "**/*.txt": "Label 2",
         "**/resource.txt": "Label 3",
-      },
+      }
     )
     testConfigurationService.onDidChangeConfigurationEmitter.fire({
       affectsConfiguration(configuration: string) {
@@ -176,12 +176,12 @@ suite("ResourceEditorInput", () => {
       customEditorLabelService.onDidChange(() => {
         label1Name = input1.getName()
         label2Name = input2.getName()
-      }),
+      })
     )
 
     await testConfigurationService.setUserConfiguration(
       CustomEditorLabelService.SETTING_ID_ENABLED,
-      true,
+      true
     )
     testConfigurationService.onDidChangeConfigurationEmitter.fire({
       affectsConfiguration(configuration: string) {
@@ -195,7 +195,7 @@ suite("ResourceEditorInput", () => {
 
     await testConfigurationService.setUserConfiguration(
       CustomEditorLabelService.SETTING_ID_ENABLED,
-      false,
+      false
     )
     testConfigurationService.onDidChangeConfigurationEmitter.fire({
       affectsConfiguration(configuration: string) {
@@ -209,7 +209,7 @@ suite("ResourceEditorInput", () => {
 
     await testConfigurationService.setUserConfiguration(
       CustomEditorLabelService.SETTING_ID_ENABLED,
-      true,
+      true
     )
     testConfigurationService.onDidChangeConfigurationEmitter.fire({
       affectsConfiguration(configuration: string) {
@@ -223,7 +223,7 @@ suite("ResourceEditorInput", () => {
       {
         "thePath/**/resource.txt": "Label 4",
         "thePath/of/*/resource.txt": "Label 5",
-      },
+      }
     )
     testConfigurationService.onDidChangeConfigurationEmitter.fire({
       affectsConfiguration(configuration: string) {

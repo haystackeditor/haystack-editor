@@ -5,7 +5,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 export const enum IterResult {
-  CONTINUE = 0,
-  SKIP = 1,
-  BREAK = 2,
+    CONTINUE = 0,
+    SKIP = 1,
+    BREAK = 2,
 }

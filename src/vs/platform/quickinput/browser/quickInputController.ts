@@ -72,7 +72,7 @@ export class QuickInputController extends Disposable {
   private readonly onDidAcceptEmitter = this._register(new Emitter<void>())
   private readonly onDidCustomEmitter = this._register(new Emitter<void>())
   private readonly onDidTriggerButtonEmitter = this._register(
-    new Emitter<IQuickInputButton>(),
+    new Emitter<IQuickInputButton>()
   )
   private keyMods: Writeable<IKeyMods> = {
     ctrlCmd: false,
@@ -101,10 +101,10 @@ export class QuickInputController extends Disposable {
   private previousFocusElement?: HTMLElement
 
   private readonly inQuickInputContext = InQuickInputContextKey.bindTo(
-    this.contextKeyService,
+    this.contextKeyService
   )
   private readonly quickInputTypeContext = QuickInputTypeContextKey.bindTo(
-    this.contextKeyService,
+    this.contextKeyService
   )
   private readonly endOfQuickInputBoxContext =
     EndOfQuickInputBoxContextKey.bindTo(this.contextKeyService)
@@ -114,7 +114,7 @@ export class QuickInputController extends Disposable {
     @ILayoutService private readonly layoutService: ILayoutService,
     @IInstantiationService
     private readonly instantiationService: IInstantiationService,
-    @IContextKeyService private readonly contextKeyService: IContextKeyService,
+    @IContextKeyService private readonly contextKeyService: IContextKeyService
   ) {
     super()
     this.idPrefix = options.idPrefix
@@ -125,8 +125,8 @@ export class QuickInputController extends Disposable {
         dom.onDidRegisterWindow,
         ({ window, disposables }) =>
           this.registerKeyModsListeners(window, disposables),
-        { window: mainWindow, disposables: this._store },
-      ),
+        { window: mainWindow, disposables: this._store }
+      )
     )
     this._register(
       dom.onWillUnregisterWindow((window) => {
@@ -138,16 +138,16 @@ export class QuickInputController extends Disposable {
           this.reparentUI(this.layoutService.mainContainer)
           this.layout(
             this.layoutService.mainContainerDimension,
-            this.layoutService.mainContainerOffset.quickPickTop,
+            this.layoutService.mainContainerOffset.quickPickTop
           )
         }
-      }),
+      })
     )
   }
 
   private registerKeyModsListeners(
     window: Window,
-    disposables: DisposableStore,
+    disposables: DisposableStore
   ): void {
     const listener = (e: KeyboardEvent | MouseEvent) => {
       this.keyMods.ctrlCmd = e.ctrlKey || e.metaKey
@@ -176,7 +176,7 @@ export class QuickInputController extends Disposable {
           this.reparentUI(this.layoutService.activeContainer)
           this.layout(
             this.layoutService.activeContainerDimension,
-            this.layoutService.activeContainerOffset.quickPickTop,
+            this.layoutService.activeContainerOffset.quickPickTop
           )
         }
       }
@@ -186,7 +186,7 @@ export class QuickInputController extends Disposable {
 
     const container = dom.append(
       this._container,
-      $(".quick-input-widget.show-file-icons"),
+      $(".quick-input-widget.show-file-icons")
     )
     container.tabIndex = -1
     container.style.display = "none"
@@ -196,14 +196,14 @@ export class QuickInputController extends Disposable {
     const titleBar = dom.append(container, $(".quick-input-titlebar"))
 
     const leftActionBar = this._register(
-      new ActionBar(titleBar, { hoverDelegate: this.options.hoverDelegate }),
+      new ActionBar(titleBar, { hoverDelegate: this.options.hoverDelegate })
     )
     leftActionBar.domNode.classList.add("quick-input-left-action-bar")
 
     const title = dom.append(titleBar, $(".quick-input-title"))
 
     const rightActionBar = this._register(
-      new ActionBar(titleBar, { hoverDelegate: this.options.hoverDelegate }),
+      new ActionBar(titleBar, { hoverDelegate: this.options.hoverDelegate })
     )
     rightActionBar.domNode.classList.add("quick-input-right-action-bar")
 
@@ -215,13 +215,13 @@ export class QuickInputController extends Disposable {
     checkAll.type = "checkbox"
     checkAll.setAttribute(
       "aria-label",
-      localize("quickInput.checkAll", "Toggle all checkboxes"),
+      localize("quickInput.checkAll", "Toggle all checkboxes")
     )
     this._register(
       dom.addStandardDisposableListener(checkAll, dom.EventType.CHANGE, (e) => {
         const checked = checkAll.checked
         list.setAllVisibleChecked(checked)
-      }),
+      })
     )
     this._register(
       dom.addDisposableListener(checkAll, dom.EventType.CLICK, (e) => {
@@ -229,16 +229,16 @@ export class QuickInputController extends Disposable {
           // Avoid 'click' triggered by 'space'...
           inputBox.setFocus()
         }
-      }),
+      })
     )
 
     const description2 = dom.append(
       headerContainer,
-      $(".quick-input-description"),
+      $(".quick-input-description")
     )
     const inputContainer = dom.append(
       headerContainer,
-      $(".quick-input-and-message"),
+      $(".quick-input-and-message")
     )
     const filterContainer = dom.append(inputContainer, $(".quick-input-filter"))
 
@@ -246,14 +246,14 @@ export class QuickInputController extends Disposable {
       new QuickInputBox(
         filterContainer,
         this.styles.inputBox,
-        this.styles.toggle,
-      ),
+        this.styles.toggle
+      )
     )
     inputBox.setAttribute("aria-describedby", `${this.idPrefix}message`)
 
     const visibleCountContainer = dom.append(
       filterContainer,
-      $(".quick-input-visible-count"),
+      $(".quick-input-visible-count")
     )
     visibleCountContainer.setAttribute("aria-live", "polite")
     visibleCountContainer.setAttribute("aria-atomic", "true")
@@ -267,10 +267,10 @@ export class QuickInputController extends Disposable {
               "This tells the user how many items are shown in a list of items to select from. The items can be anything. Currently not visible, but read by screen readers.",
             ],
           },
-          "{0} Results",
+          "{0} Results"
         ),
       },
-      this.styles.countBadge,
+      this.styles.countBadge
     )
 
     const countContainer = dom.append(filterContainer, $(".quick-input-count"))
@@ -285,10 +285,10 @@ export class QuickInputController extends Disposable {
               "This tells the user how many items are selected in a list of items to select from. The items can be anything.",
             ],
           },
-          "{0} Selected",
+          "{0} Selected"
         ),
       },
-      this.styles.countBadge,
+      this.styles.countBadge
     )
 
     const okContainer = dom.append(headerContainer, $(".quick-input-action"))
@@ -297,33 +297,33 @@ export class QuickInputController extends Disposable {
     this._register(
       ok.onDidClick((e) => {
         this.onDidAcceptEmitter.fire()
-      }),
+      })
     )
 
     const customButtonContainer = dom.append(
       headerContainer,
-      $(".quick-input-action"),
+      $(".quick-input-action")
     )
     const customButton = this._register(
       new Button(customButtonContainer, {
         ...this.styles.button,
         supportIcons: true,
-      }),
+      })
     )
     customButton.label = localize("custom", "Custom")
     this._register(
       customButton.onDidClick((e) => {
         this.onDidCustomEmitter.fire()
-      }),
+      })
     )
 
     const message = dom.append(
       inputContainer,
-      $(`#${this.idPrefix}message.quick-input-message`),
+      $(`#${this.idPrefix}message.quick-input-message`)
     )
 
     const progressBar = this._register(
-      new ProgressBar(container, this.styles.progressBar),
+      new ProgressBar(container, this.styles.progressBar)
     )
     progressBar.getContainer().classList.add("quick-input-progress")
 
@@ -339,32 +339,32 @@ export class QuickInputController extends Disposable {
         container,
         this.options.hoverDelegate,
         this.options.linkOpenerDelegate,
-        listId,
-      ),
+        listId
+      )
     )
     inputBox.setAttribute("aria-controls", listId)
     this._register(
       list.onDidChangeFocus(() => {
         inputBox.setAttribute(
           "aria-activedescendant",
-          list.getActiveDescendant() ?? "",
+          list.getActiveDescendant() ?? ""
         )
-      }),
+      })
     )
     this._register(
       list.onChangedAllVisibleChecked((checked) => {
         checkAll.checked = checked
-      }),
+      })
     )
     this._register(
       list.onChangedVisibleCount((c) => {
         visibleCount.setCount(c)
-      }),
+      })
     )
     this._register(
       list.onChangedCheckedCount((c) => {
         count.setCount(c)
-      }),
+      })
     )
     this._register(
       list.onLeave(() => {
@@ -382,7 +382,7 @@ export class QuickInputController extends Disposable {
             list.clearFocus()
           }
         }, 0)
-      }),
+      })
     )
 
     const focusTracker = dom.trackFocus(container)
@@ -410,8 +410,8 @@ export class QuickInputController extends Disposable {
             ? e.relatedTarget
             : undefined
         },
-        true,
-      ),
+        true
+      )
     )
     this._register(
       focusTracker.onDidBlur(() => {
@@ -421,7 +421,7 @@ export class QuickInputController extends Disposable {
         this.inQuickInputContext.set(false)
         this.endOfQuickInputBoxContext.set(false)
         this.previousFocusElement = undefined
-      }),
+      })
     )
     this._register(
       inputBox.onKeyDown((_) => {
@@ -429,7 +429,7 @@ export class QuickInputController extends Disposable {
         if (this.endOfQuickInputBoxContext.get() !== value) {
           this.endOfQuickInputBoxContext.set(value)
         }
-      }),
+      })
     )
     this._register(
       dom.addDisposableListener(
@@ -437,8 +437,8 @@ export class QuickInputController extends Disposable {
         dom.EventType.FOCUS,
         (e: FocusEvent) => {
           inputBox.setFocus()
-        },
-      ),
+        }
+      )
     )
     // TODO: Turn into commands instead of handling KEY_DOWN
     // Keybindings for the quickinput widget as a whole
@@ -491,7 +491,7 @@ export class QuickInputController extends Disposable {
                   selectors.push(".quick-input-html-widget")
                 }
                 const stops = container.querySelectorAll<HTMLElement>(
-                  selectors.join(", "),
+                  selectors.join(", ")
                 )
                 if (event.shiftKey && event.target === stops[0]) {
                   // Clear the focus from the list in order to allow
@@ -514,8 +514,8 @@ export class QuickInputController extends Disposable {
               }
               break
           }
-        },
-      ),
+        }
+      )
     )
 
     this.ui = {
@@ -569,7 +569,7 @@ export class QuickInputController extends Disposable {
   pick<T extends IQuickPickItem, O extends IPickOptions<T>>(
     picks: Promise<QuickPickInput<T>[]> | QuickPickInput<T>[],
     options: O = <O>{},
-    token: CancellationToken = CancellationToken.None,
+    token: CancellationToken = CancellationToken.None
   ): Promise<(O extends { canPickMany: true } ? T[] : T) | undefined> {
     type R = (O extends { canPickMany: true } ? T[] : T) | undefined
     return new Promise<R>((doResolve, reject) => {
@@ -624,7 +624,7 @@ export class QuickInputController extends Disposable {
                   const items = input.items.slice()
                   const removed = items.splice(index, 1)
                   const activeItems = input.activeItems.filter(
-                    (activeItem) => activeItem !== removed[0],
+                    (activeItem) => activeItem !== removed[0]
                   )
                   const keepScrollPositionBefore = input.keepScrollPosition
                   input.keepScrollPosition = true
@@ -635,10 +635,10 @@ export class QuickInputController extends Disposable {
                   input.keepScrollPosition = keepScrollPositionBefore
                 }
               },
-            }),
+            })
         ),
         input.onDidTriggerSeparatorButton((event) =>
-          options.onDidTriggerSeparatorButton?.(event),
+          options.onDidTriggerSeparatorButton?.(event)
         ),
         input.onDidChangeValue((value) => {
           if (
@@ -676,7 +676,7 @@ export class QuickInputController extends Disposable {
         input.items = items
         if (input.canSelectMany) {
           input.selectedItems = items.filter(
-            (item) => item.type !== "separator" && item.picked,
+            (item) => item.type !== "separator" && item.picked
           ) as T[]
         }
         if (activeItem) {
@@ -700,7 +700,7 @@ export class QuickInputController extends Disposable {
           severity: Severity
         }
       | null
-      | undefined,
+      | undefined
   ) {
     if (validationResult && isString(validationResult)) {
       input.severity = Severity.Error
@@ -716,7 +716,7 @@ export class QuickInputController extends Disposable {
 
   input(
     options: IInputOptions = {},
-    token: CancellationToken = CancellationToken.None,
+    token: CancellationToken = CancellationToken.None
   ): Promise<string | undefined> {
     return new Promise<string | undefined>((resolve) => {
       if (token.isCancellationRequested) {
@@ -730,7 +730,7 @@ export class QuickInputController extends Disposable {
       const onDidValueChange = Event.debounce(
         input.onDidChangeValue,
         (last, cur) => cur,
-        100,
+        100
       )
       let validationValue = options.value || ""
       let validation = Promise.resolve(validateInput(validationValue))
@@ -838,7 +838,7 @@ export class QuickInputController extends Disposable {
       ? localize(
           "quickInput.backWithKeybinding",
           "Back ({0})",
-          backKeybindingLabel,
+          backKeybindingLabel
         )
       : localize("quickInput.back", "Back")
 
@@ -884,7 +884,7 @@ export class QuickInputController extends Disposable {
     ui.container.classList.toggle("show-checkboxes", !!visibilities.checkBox)
     ui.container.classList.toggle(
       "hidden-input",
-      !visibilities.inputBox && !visibilities.description,
+      !visibilities.inputBox && !visibilities.description
     )
     this.updateLayout() // TODO
   }
@@ -958,7 +958,7 @@ export class QuickInputController extends Disposable {
   navigate(next: boolean, quickNavigate?: IQuickNavigateConfiguration) {
     if (this.isVisible() && this.getUI().list.isDisplayed()) {
       this.getUI().list.focus(
-        next ? QuickPickFocus.Next : QuickPickFocus.Previous,
+        next ? QuickPickFocus.Next : QuickPickFocus.Previous
       )
       if (quickNavigate && this.controller instanceof QuickPick) {
         this.controller.quickNavigate = quickNavigate
@@ -967,7 +967,7 @@ export class QuickInputController extends Disposable {
   }
 
   async accept(
-    keyMods: IKeyMods = { alt: false, ctrlCmd: false, shift: false },
+    keyMods: IKeyMods = { alt: false, ctrlCmd: false, shift: false }
   ) {
     // When accepting the item programmatically, it is important that
     // we update `keyMods` either from the provided set or unset it
@@ -1001,7 +1001,7 @@ export class QuickInputController extends Disposable {
       const style = this.ui.container.style
       const width = Math.min(
         this.dimension!.width * 0.62 /* golden cut */,
-        QuickInputController.MAX_WIDTH,
+        QuickInputController.MAX_WIDTH
       )
       style.width = width + "px"
       style.marginLeft = "-" + width / 2 + "px"
@@ -1039,17 +1039,17 @@ export class QuickInputController extends Disposable {
       const content: string[] = []
       if (this.styles.pickerGroup.pickerGroupBorder) {
         content.push(
-          `.quick-input-list .quick-input-list-entry { border-top-color:  ${this.styles.pickerGroup.pickerGroupBorder}; }`,
+          `.quick-input-list .quick-input-list-entry { border-top-color:  ${this.styles.pickerGroup.pickerGroupBorder}; }`
         )
       }
       if (this.styles.pickerGroup.pickerGroupForeground) {
         content.push(
-          `.quick-input-list .quick-input-list-separator { color:  ${this.styles.pickerGroup.pickerGroupForeground}; }`,
+          `.quick-input-list .quick-input-list-separator { color:  ${this.styles.pickerGroup.pickerGroupForeground}; }`
         )
       }
       if (this.styles.pickerGroup.pickerGroupForeground) {
         content.push(
-          `.quick-input-list .quick-input-list-separator-as-item { color: var(--vscode-descriptionForeground); }`,
+          `.quick-input-list .quick-input-list-separator-as-item { color: var(--vscode-descriptionForeground); }`
         )
       }
 
@@ -1061,32 +1061,32 @@ export class QuickInputController extends Disposable {
         this.styles.keybindingLabel.keybindingLabelForeground
       ) {
         content.push(
-          ".quick-input-list .monaco-keybinding > .monaco-keybinding-key {",
+          ".quick-input-list .monaco-keybinding > .monaco-keybinding-key {"
         )
         if (this.styles.keybindingLabel.keybindingLabelBackground) {
           content.push(
-            `background-color: ${this.styles.keybindingLabel.keybindingLabelBackground};`,
+            `background-color: ${this.styles.keybindingLabel.keybindingLabelBackground};`
           )
         }
         if (this.styles.keybindingLabel.keybindingLabelBorder) {
           // Order matters here. `border-color` must come before `border-bottom-color`.
           content.push(
-            `border-color: ${this.styles.keybindingLabel.keybindingLabelBorder};`,
+            `border-color: ${this.styles.keybindingLabel.keybindingLabelBorder};`
           )
         }
         if (this.styles.keybindingLabel.keybindingLabelBottomBorder) {
           content.push(
-            `border-bottom-color: ${this.styles.keybindingLabel.keybindingLabelBottomBorder};`,
+            `border-bottom-color: ${this.styles.keybindingLabel.keybindingLabelBottomBorder};`
           )
         }
         if (this.styles.keybindingLabel.keybindingLabelShadow) {
           content.push(
-            `box-shadow: inset 0 -1px 0 ${this.styles.keybindingLabel.keybindingLabelShadow};`,
+            `box-shadow: inset 0 -1px 0 ${this.styles.keybindingLabel.keybindingLabelShadow};`
           )
         }
         if (this.styles.keybindingLabel.keybindingLabelForeground) {
           content.push(
-            `color: ${this.styles.keybindingLabel.keybindingLabelForeground};`,
+            `color: ${this.styles.keybindingLabel.keybindingLabelForeground};`
           )
         }
         content.push("}")

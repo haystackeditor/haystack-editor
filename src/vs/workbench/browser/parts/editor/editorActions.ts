@@ -131,7 +131,7 @@ class ExecuteCommandAction extends Action2 {
   constructor(
     desc: Readonly<IAction2Options>,
     private readonly commandId: string,
-    private readonly commandArgs?: unknown,
+    private readonly commandArgs?: unknown
   ) {
     super(desc)
   }
@@ -145,7 +145,7 @@ class ExecuteCommandAction extends Action2 {
 
 abstract class AbstractSplitEditorAction extends Action2 {
   protected getDirection(
-    configurationService: IConfigurationService,
+    configurationService: IConfigurationService
   ): GroupDirection {
     return preferredSideBySideGroupDirection(configurationService)
   }
@@ -153,7 +153,7 @@ abstract class AbstractSplitEditorAction extends Action2 {
   override async run(
     accessor: ServicesAccessor,
     resourceOrContext?: URI | IEditorCommandsContext,
-    context?: IEditorCommandsContext,
+    context?: IEditorCommandsContext
   ): Promise<void> {
     const editorGroupService = accessor.get(IEditorGroupsService)
     const configurationService = accessor.get(IConfigurationService)
@@ -161,12 +161,12 @@ abstract class AbstractSplitEditorAction extends Action2 {
     const commandContext = getCommandsContext(
       accessor,
       resourceOrContext,
-      context,
+      context
     )
     splitEditor(
       editorGroupService,
       this.getDirection(configurationService),
-      commandContext ? [commandContext] : undefined,
+      commandContext ? [commandContext] : undefined
     )
   }
 }
@@ -198,7 +198,7 @@ export class SplitEditorOrthogonalAction extends AbstractSplitEditorAction {
         weight: KeybindingWeight.WorkbenchContrib,
         primary: KeyChord(
           KeyMod.CtrlCmd | KeyCode.KeyK,
-          KeyMod.CtrlCmd | KeyCode.Backslash,
+          KeyMod.CtrlCmd | KeyCode.Backslash
         ),
       },
       category: Categories.View,
@@ -206,7 +206,7 @@ export class SplitEditorOrthogonalAction extends AbstractSplitEditorAction {
   }
 
   protected override getDirection(
-    configurationService: IConfigurationService,
+    configurationService: IConfigurationService
   ): GroupDirection {
     const direction = preferredSideBySideGroupDirection(configurationService)
 
@@ -227,12 +227,12 @@ export class SplitEditorLeftAction extends ExecuteCommandAction {
           weight: KeybindingWeight.WorkbenchContrib,
           primary: KeyChord(
             KeyMod.CtrlCmd | KeyCode.KeyK,
-            KeyMod.CtrlCmd | KeyCode.Backslash,
+            KeyMod.CtrlCmd | KeyCode.Backslash
           ),
         },
         category: Categories.View,
       },
-      SPLIT_EDITOR_LEFT,
+      SPLIT_EDITOR_LEFT
     )
   }
 }
@@ -248,12 +248,12 @@ export class SplitEditorRightAction extends ExecuteCommandAction {
           weight: KeybindingWeight.WorkbenchContrib,
           primary: KeyChord(
             KeyMod.CtrlCmd | KeyCode.KeyK,
-            KeyMod.CtrlCmd | KeyCode.Backslash,
+            KeyMod.CtrlCmd | KeyCode.Backslash
           ),
         },
         category: Categories.View,
       },
-      SPLIT_EDITOR_RIGHT,
+      SPLIT_EDITOR_RIGHT
     )
   }
 }
@@ -271,12 +271,12 @@ export class SplitEditorUpAction extends ExecuteCommandAction {
           weight: KeybindingWeight.WorkbenchContrib,
           primary: KeyChord(
             KeyMod.CtrlCmd | KeyCode.KeyK,
-            KeyMod.CtrlCmd | KeyCode.Backslash,
+            KeyMod.CtrlCmd | KeyCode.Backslash
           ),
         },
         category: Categories.View,
       },
-      SPLIT_EDITOR_UP,
+      SPLIT_EDITOR_UP
     )
   }
 }
@@ -294,12 +294,12 @@ export class SplitEditorDownAction extends ExecuteCommandAction {
           weight: KeybindingWeight.WorkbenchContrib,
           primary: KeyChord(
             KeyMod.CtrlCmd | KeyCode.KeyK,
-            KeyMod.CtrlCmd | KeyCode.Backslash,
+            KeyMod.CtrlCmd | KeyCode.Backslash
           ),
         },
         category: Categories.View,
       },
-      SPLIT_EDITOR_DOWN,
+      SPLIT_EDITOR_DOWN
     )
   }
 }
@@ -316,7 +316,7 @@ export class JoinTwoGroupsAction extends Action2 {
 
   override async run(
     accessor: ServicesAccessor,
-    context?: IEditorIdentifier,
+    context?: IEditorIdentifier
   ): Promise<void> {
     const editorGroupService = accessor.get(IEditorGroupsService)
 
@@ -337,7 +337,7 @@ export class JoinTwoGroupsAction extends Action2 {
       for (const targetGroupDirection of targetGroupDirections) {
         const targetGroup = editorGroupService.findGroup(
           { direction: targetGroupDirection },
-          sourceGroup,
+          sourceGroup
         )
         if (targetGroup && sourceGroup !== targetGroup) {
           editorGroupService.mergeGroup(sourceGroup, targetGroup)
@@ -372,7 +372,7 @@ export class NavigateBetweenGroupsAction extends Action2 {
       id: "workbench.action.navigateEditorGroups",
       title: localize2(
         "navigateEditorGroups",
-        "Navigate Between Editor Groups",
+        "Navigate Between Editor Groups"
       ),
       f1: true,
       category: Categories.View,
@@ -385,7 +385,7 @@ export class NavigateBetweenGroupsAction extends Action2 {
     const nextGroup = editorGroupService.findGroup(
       { location: GroupLocation.NEXT },
       editorGroupService.activeGroup,
-      true,
+      true
     )
     nextGroup?.focus()
   }
@@ -411,7 +411,7 @@ export class FocusActiveGroupAction extends Action2 {
 abstract class AbstractFocusGroupAction extends Action2 {
   constructor(
     desc: Readonly<IAction2Options>,
-    private readonly scope: IFindGroupScope,
+    private readonly scope: IFindGroupScope
   ) {
     super(desc)
   }
@@ -422,7 +422,7 @@ abstract class AbstractFocusGroupAction extends Action2 {
     const group = editorGroupService.findGroup(
       this.scope,
       editorGroupService.activeGroup,
-      true,
+      true
     )
     group?.focus()
   }
@@ -441,7 +441,7 @@ export class FocusFirstGroupAction extends AbstractFocusGroupAction {
         },
         category: Categories.View,
       },
-      { location: GroupLocation.FIRST },
+      { location: GroupLocation.FIRST }
     )
   }
 }
@@ -455,7 +455,7 @@ export class FocusLastGroupAction extends AbstractFocusGroupAction {
         f1: true,
         category: Categories.View,
       },
-      { location: GroupLocation.LAST },
+      { location: GroupLocation.LAST }
     )
   }
 }
@@ -469,7 +469,7 @@ export class FocusNextGroup extends AbstractFocusGroupAction {
         f1: true,
         category: Categories.View,
       },
-      { location: GroupLocation.NEXT },
+      { location: GroupLocation.NEXT }
     )
   }
 }
@@ -483,7 +483,7 @@ export class FocusPreviousGroup extends AbstractFocusGroupAction {
         f1: true,
         category: Categories.View,
       },
-      { location: GroupLocation.PREVIOUS },
+      { location: GroupLocation.PREVIOUS }
     )
   }
 }
@@ -499,12 +499,12 @@ export class FocusLeftGroup extends AbstractFocusGroupAction {
           weight: KeybindingWeight.WorkbenchContrib,
           primary: KeyChord(
             KeyMod.CtrlCmd | KeyCode.KeyK,
-            KeyMod.CtrlCmd | KeyCode.LeftArrow,
+            KeyMod.CtrlCmd | KeyCode.LeftArrow
           ),
         },
         category: Categories.View,
       },
-      { direction: GroupDirection.LEFT },
+      { direction: GroupDirection.LEFT }
     )
   }
 }
@@ -520,12 +520,12 @@ export class FocusRightGroup extends AbstractFocusGroupAction {
           weight: KeybindingWeight.WorkbenchContrib,
           primary: KeyChord(
             KeyMod.CtrlCmd | KeyCode.KeyK,
-            KeyMod.CtrlCmd | KeyCode.RightArrow,
+            KeyMod.CtrlCmd | KeyCode.RightArrow
           ),
         },
         category: Categories.View,
       },
-      { direction: GroupDirection.RIGHT },
+      { direction: GroupDirection.RIGHT }
     )
   }
 }
@@ -541,12 +541,12 @@ export class FocusAboveGroup extends AbstractFocusGroupAction {
           weight: KeybindingWeight.WorkbenchContrib,
           primary: KeyChord(
             KeyMod.CtrlCmd | KeyCode.KeyK,
-            KeyMod.CtrlCmd | KeyCode.UpArrow,
+            KeyMod.CtrlCmd | KeyCode.UpArrow
           ),
         },
         category: Categories.View,
       },
-      { direction: GroupDirection.UP },
+      { direction: GroupDirection.UP }
     )
   }
 }
@@ -562,12 +562,12 @@ export class FocusBelowGroup extends AbstractFocusGroupAction {
           weight: KeybindingWeight.WorkbenchContrib,
           primary: KeyChord(
             KeyMod.CtrlCmd | KeyCode.KeyK,
-            KeyMod.CtrlCmd | KeyCode.DownArrow,
+            KeyMod.CtrlCmd | KeyCode.DownArrow
           ),
         },
         category: Categories.View,
       },
-      { direction: GroupDirection.DOWN },
+      { direction: GroupDirection.DOWN }
     )
   }
 }
@@ -579,7 +579,7 @@ export class CloseEditorAction extends Action {
   constructor(
     id: string,
     label: string,
-    @ICommandService private readonly commandService: ICommandService,
+    @ICommandService private readonly commandService: ICommandService
   ) {
     super(id, label, ThemeIcon.asClassName(Codicon.close))
   }
@@ -588,7 +588,7 @@ export class CloseEditorAction extends Action {
     return this.commandService.executeCommand(
       CLOSE_EDITOR_COMMAND_ID,
       undefined,
-      context,
+      context
     )
   }
 }
@@ -600,7 +600,7 @@ export class UnpinEditorAction extends Action {
   constructor(
     id: string,
     label: string,
-    @ICommandService private readonly commandService: ICommandService,
+    @ICommandService private readonly commandService: ICommandService
   ) {
     super(id, label, ThemeIcon.asClassName(Codicon.pinned))
   }
@@ -609,7 +609,7 @@ export class UnpinEditorAction extends Action {
     return this.commandService.executeCommand(
       UNPIN_EDITOR_COMMAND_ID,
       undefined,
-      context,
+      context
     )
   }
 }
@@ -622,7 +622,7 @@ export class CloseEditorTabAction extends Action {
     id: string,
     label: string,
     @IEditorGroupsService
-    private readonly editorGroupService: IEditorGroupsService,
+    private readonly editorGroupService: IEditorGroupsService
   ) {
     super(id, label, ThemeIcon.asClassName(Codicon.close))
   }
@@ -691,7 +691,7 @@ export class RevertAndCloseEditorAction extends Action2 {
 
         await editorService.revert(
           { editor, groupId: group.id },
-          { soft: true },
+          { soft: true }
         )
       }
 
@@ -706,7 +706,7 @@ export class CloseLeftEditorsInGroupAction extends Action2 {
       id: "workbench.action.closeEditorsToTheLeft",
       title: localize2(
         "closeEditorsToTheLeft",
-        "Close Editors to the Left in Group",
+        "Close Editors to the Left in Group"
       ),
       f1: true,
       category: Categories.View,
@@ -715,7 +715,7 @@ export class CloseLeftEditorsInGroupAction extends Action2 {
 
   override async run(
     accessor: ServicesAccessor,
-    context?: IEditorIdentifier,
+    context?: IEditorIdentifier
   ): Promise<void> {
     const editorGroupService = accessor.get(IEditorGroupsService)
 
@@ -731,7 +731,7 @@ export class CloseLeftEditorsInGroupAction extends Action2 {
 
   private getTarget(
     editorGroupService: IEditorGroupsService,
-    context?: IEditorIdentifier,
+    context?: IEditorIdentifier
   ): { editor: EditorInput | null; group: IEditorGroup | undefined } {
     if (context) {
       return {
@@ -750,7 +750,7 @@ export class CloseLeftEditorsInGroupAction extends Action2 {
 
 abstract class AbstractCloseAllAction extends Action2 {
   protected groupsToClose(
-    editorGroupService: IEditorGroupsService,
+    editorGroupService: IEditorGroupsService
   ): IEditorGroup[] {
     const groupsToClose: IEditorGroup[] = []
 
@@ -784,7 +784,7 @@ abstract class AbstractCloseAllAction extends Action2 {
 
     for (const { editor, groupId } of editorService.getEditors(
       EditorsOrder.SEQUENTIAL,
-      { excludeSticky: this.excludeSticky },
+      { excludeSticky: this.excludeSticky }
     )) {
       let confirmClose = false
       if (editor.closeHandler) {
@@ -850,7 +850,7 @@ abstract class AbstractCloseAllAction extends Action2 {
           }
 
           return editor.getName()
-        }),
+        })
       )
 
       switch (confirmation) {
@@ -871,8 +871,9 @@ abstract class AbstractCloseAllAction extends Action2 {
 
       await this.revealEditorsToConfirm(editors, editorGroupService) // help user make a decision by revealing editors
 
-      const confirmation =
-        await firstOrDefault(editors)?.editor.closeHandler?.confirm?.(editors)
+      const confirmation = await firstOrDefault(
+        editors
+      )?.editor.closeHandler?.confirm?.(editors)
       if (typeof confirmation === "number") {
         switch (confirmation) {
           case ConfirmResult.CANCEL:
@@ -910,7 +911,7 @@ abstract class AbstractCloseAllAction extends Action2 {
 
   private async revealEditorsToConfirm(
     editors: ReadonlyArray<IEditorIdentifier>,
-    editorGroupService: IEditorGroupsService,
+    editorGroupService: IEditorGroupsService
   ): Promise<void> {
     try {
       const handledGroups = new Set<GroupIdentifier>()
@@ -932,12 +933,12 @@ abstract class AbstractCloseAllAction extends Action2 {
   protected abstract get excludeSticky(): boolean
 
   protected async doCloseAll(
-    editorGroupService: IEditorGroupsService,
+    editorGroupService: IEditorGroupsService
   ): Promise<void> {
     await Promise.all(
       this.groupsToClose(editorGroupService).map((group) =>
-        group.closeAllEditors({ excludeSticky: this.excludeSticky }),
-      ),
+        group.closeAllEditors({ excludeSticky: this.excludeSticky })
+      )
     )
   }
 }
@@ -955,7 +956,7 @@ export class CloseAllEditorsAction extends AbstractCloseAllAction {
         weight: KeybindingWeight.WorkbenchContrib,
         primary: KeyChord(
           KeyMod.CtrlCmd | KeyCode.KeyK,
-          KeyMod.CtrlCmd | KeyCode.KeyW,
+          KeyMod.CtrlCmd | KeyCode.KeyW
         ),
       },
       icon: Codicon.closeAll,
@@ -978,7 +979,7 @@ export class CloseAllEditorGroupsAction extends AbstractCloseAllAction {
         weight: KeybindingWeight.WorkbenchContrib,
         primary: KeyChord(
           KeyMod.CtrlCmd | KeyCode.KeyK,
-          KeyMod.CtrlCmd | KeyMod.Shift | KeyCode.KeyW,
+          KeyMod.CtrlCmd | KeyMod.Shift | KeyCode.KeyW
         ),
       },
       category: Categories.View,
@@ -990,7 +991,7 @@ export class CloseAllEditorGroupsAction extends AbstractCloseAllAction {
   }
 
   protected override async doCloseAll(
-    editorGroupService: IEditorGroupsService,
+    editorGroupService: IEditorGroupsService
   ): Promise<void> {
     await super.doCloseAll(editorGroupService)
 
@@ -1006,7 +1007,7 @@ export class CloseEditorsInOtherGroupsAction extends Action2 {
       id: "workbench.action.closeEditorsInOtherGroups",
       title: localize2(
         "closeEditorsInOtherGroups",
-        "Close Editors in Other Groups",
+        "Close Editors in Other Groups"
       ),
       f1: true,
       category: Categories.View,
@@ -1015,7 +1016,7 @@ export class CloseEditorsInOtherGroupsAction extends Action2 {
 
   override async run(
     accessor: ServicesAccessor,
-    context?: IEditorIdentifier,
+    context?: IEditorIdentifier
   ): Promise<void> {
     const editorGroupService = accessor.get(IEditorGroupsService)
 
@@ -1031,7 +1032,7 @@ export class CloseEditorsInOtherGroupsAction extends Action2 {
           }
 
           return group.closeAllEditors({ excludeSticky: true })
-        }),
+        })
     )
   }
 }
@@ -1055,7 +1056,7 @@ export class CloseEditorInAllGroupsAction extends Action2 {
       await Promise.all(
         editorGroupService
           .getGroups(GroupsOrder.MOST_RECENTLY_ACTIVE)
-          .map((group) => group.closeEditor(activeEditor)),
+          .map((group) => group.closeEditor(activeEditor))
       )
     }
   }
@@ -1065,14 +1066,14 @@ abstract class AbstractMoveCopyGroupAction extends Action2 {
   constructor(
     desc: Readonly<IAction2Options>,
     private readonly direction: GroupDirection,
-    private readonly isMove: boolean,
+    private readonly isMove: boolean
   ) {
     super(desc)
   }
 
   override async run(
     accessor: ServicesAccessor,
-    context?: IEditorIdentifier,
+    context?: IEditorIdentifier
   ): Promise<void> {
     const editorGroupService = accessor.get(IEditorGroupsService)
 
@@ -1088,20 +1089,20 @@ abstract class AbstractMoveCopyGroupAction extends Action2 {
       if (this.isMove) {
         const targetGroup = this.findTargetGroup(
           editorGroupService,
-          sourceGroup,
+          sourceGroup
         )
         if (targetGroup) {
           resultGroup = editorGroupService.moveGroup(
             sourceGroup,
             targetGroup,
-            this.direction,
+            this.direction
           )
         }
       } else {
         resultGroup = editorGroupService.copyGroup(
           sourceGroup,
           sourceGroup,
-          this.direction,
+          this.direction
         )
       }
 
@@ -1113,7 +1114,7 @@ abstract class AbstractMoveCopyGroupAction extends Action2 {
 
   private findTargetGroup(
     editorGroupService: IEditorGroupsService,
-    sourceGroup: IEditorGroup,
+    sourceGroup: IEditorGroup
   ): IEditorGroup | undefined {
     const targetNeighbours: GroupDirection[] = [this.direction]
 
@@ -1134,7 +1135,7 @@ abstract class AbstractMoveCopyGroupAction extends Action2 {
     for (const targetNeighbour of targetNeighbours) {
       const targetNeighbourGroup = editorGroupService.findGroup(
         { direction: targetNeighbour },
-        sourceGroup,
+        sourceGroup
       )
       if (targetNeighbourGroup) {
         return targetNeighbourGroup
@@ -1164,7 +1165,7 @@ export class MoveGroupLeftAction extends AbstractMoveGroupAction {
         },
         category: Categories.View,
       },
-      GroupDirection.LEFT,
+      GroupDirection.LEFT
     )
   }
 }
@@ -1182,7 +1183,7 @@ export class MoveGroupRightAction extends AbstractMoveGroupAction {
         },
         category: Categories.View,
       },
-      GroupDirection.RIGHT,
+      GroupDirection.RIGHT
     )
   }
 }
@@ -1200,7 +1201,7 @@ export class MoveGroupUpAction extends AbstractMoveGroupAction {
         },
         category: Categories.View,
       },
-      GroupDirection.UP,
+      GroupDirection.UP
     )
   }
 }
@@ -1218,7 +1219,7 @@ export class MoveGroupDownAction extends AbstractMoveGroupAction {
         },
         category: Categories.View,
       },
-      GroupDirection.DOWN,
+      GroupDirection.DOWN
     )
   }
 }
@@ -1236,12 +1237,12 @@ export class DuplicateGroupLeftAction extends AbstractDuplicateGroupAction {
         id: "workbench.action.duplicateActiveEditorGroupLeft",
         title: localize2(
           "duplicateActiveGroupLeft",
-          "Duplicate Editor Group Left",
+          "Duplicate Editor Group Left"
         ),
         f1: true,
         category: Categories.View,
       },
-      GroupDirection.LEFT,
+      GroupDirection.LEFT
     )
   }
 }
@@ -1253,12 +1254,12 @@ export class DuplicateGroupRightAction extends AbstractDuplicateGroupAction {
         id: "workbench.action.duplicateActiveEditorGroupRight",
         title: localize2(
           "duplicateActiveGroupRight",
-          "Duplicate Editor Group Right",
+          "Duplicate Editor Group Right"
         ),
         f1: true,
         category: Categories.View,
       },
-      GroupDirection.RIGHT,
+      GroupDirection.RIGHT
     )
   }
 }
@@ -1272,7 +1273,7 @@ export class DuplicateGroupUpAction extends AbstractDuplicateGroupAction {
         f1: true,
         category: Categories.View,
       },
-      GroupDirection.UP,
+      GroupDirection.UP
     )
   }
 }
@@ -1284,12 +1285,12 @@ export class DuplicateGroupDownAction extends AbstractDuplicateGroupAction {
         id: "workbench.action.duplicateActiveEditorGroupDown",
         title: localize2(
           "duplicateActiveGroupDown",
-          "Duplicate Editor Group Down",
+          "Duplicate Editor Group Down"
         ),
         f1: true,
         category: Categories.View,
       },
-      GroupDirection.DOWN,
+      GroupDirection.DOWN
     )
   }
 }
@@ -1318,14 +1319,14 @@ export class MinimizeOtherGroupsHideSidebarAction extends Action2 {
       id: "workbench.action.minimizeOtherEditorsHideSidebar",
       title: localize2(
         "minimizeOtherEditorGroupsHideSidebar",
-        "Expand Editor Group and Hide Side Bars",
+        "Expand Editor Group and Hide Side Bars"
       ),
       f1: true,
       category: Categories.View,
       precondition: ContextKeyExpr.or(
         MultipleEditorGroupsContext,
         SideBarVisibleContext,
-        AuxiliaryBarVisibleContext,
+        AuxiliaryBarVisibleContext
       ),
     })
   }
@@ -1380,17 +1381,17 @@ export class MaximizeGroupHideSidebarAction extends Action2 {
       id: "workbench.action.maximizeEditorHideSidebar",
       title: localize2(
         "maximizeEditorHideSidebar",
-        "Maximize Editor Group and Hide Side Bars",
+        "Maximize Editor Group and Hide Side Bars"
       ),
       f1: true,
       category: Categories.View,
       precondition: ContextKeyExpr.or(
         ContextKeyExpr.and(
           EditorPartMaximizedEditorGroupContext.negate(),
-          EditorPartMultipleEditorGroupsContext,
+          EditorPartMultipleEditorGroupsContext
         ),
         SideBarVisibleContext,
-        AuxiliaryBarVisibleContext,
+        AuxiliaryBarVisibleContext
       ),
     })
   }
@@ -1414,19 +1415,19 @@ export class ToggleMaximizeEditorGroupAction extends Action2 {
       id: TOGGLE_MAXIMIZE_EDITOR_GROUP,
       title: localize2(
         "toggleMaximizeEditorGroup",
-        "Toggle Maximize Editor Group",
+        "Toggle Maximize Editor Group"
       ),
       f1: true,
       category: Categories.View,
       precondition: ContextKeyExpr.or(
         EditorPartMultipleEditorGroupsContext,
-        EditorPartMaximizedEditorGroupContext,
+        EditorPartMaximizedEditorGroupContext
       ),
       keybinding: {
         weight: KeybindingWeight.WorkbenchContrib,
         primary: KeyChord(
           KeyMod.CtrlCmd | KeyCode.KeyK,
-          KeyMod.CtrlCmd | KeyCode.KeyM,
+          KeyMod.CtrlCmd | KeyCode.KeyM
         ),
       },
       menu: [
@@ -1451,13 +1452,13 @@ export class ToggleMaximizeEditorGroupAction extends Action2 {
   override async run(
     accessor: ServicesAccessor,
     resourceOrContext?: URI | IEditorCommandsContext,
-    context?: IEditorCommandsContext,
+    context?: IEditorCommandsContext
   ): Promise<void> {
     const editorGroupsService = accessor.get(IEditorGroupsService)
 
     const { group } = resolveCommandsContext(
       editorGroupsService,
-      getCommandsContext(accessor, resourceOrContext, context),
+      getCommandsContext(accessor, resourceOrContext, context)
     )
     editorGroupsService.toggleMaximizeGroup(group)
   }
@@ -1484,7 +1485,7 @@ abstract class AbstractNavigateEditorAction extends Action2 {
   }
 
   protected abstract navigate(
-    editorGroupService: IEditorGroupsService,
+    editorGroupService: IEditorGroupsService
   ): IEditorIdentifier | undefined
 }
 
@@ -1507,7 +1508,7 @@ export class OpenNextEditor extends AbstractNavigateEditorAction {
   }
 
   protected navigate(
-    editorGroupService: IEditorGroupsService,
+    editorGroupService: IEditorGroupsService
   ): IEditorIdentifier | undefined {
     // Navigate in active group if possible
     const activeGroup = editorGroupService.activeGroup
@@ -1529,7 +1530,7 @@ export class OpenNextEditor extends AbstractNavigateEditorAction {
       currentGroup = editorGroupService.findGroup(
         { location: GroupLocation.NEXT },
         currentGroup,
-        true,
+        true
       )
       if (currentGroup) {
         handledGroups.add(currentGroup.id)
@@ -1564,7 +1565,7 @@ export class OpenPreviousEditor extends AbstractNavigateEditorAction {
   }
 
   protected navigate(
-    editorGroupService: IEditorGroupsService,
+    editorGroupService: IEditorGroupsService
   ): IEditorIdentifier | undefined {
     // Navigate in active group if possible
     const activeGroup = editorGroupService.activeGroup
@@ -1586,7 +1587,7 @@ export class OpenPreviousEditor extends AbstractNavigateEditorAction {
       currentGroup = editorGroupService.findGroup(
         { location: GroupLocation.PREVIOUS },
         currentGroup,
-        true,
+        true
       )
       if (currentGroup) {
         handledGroups.add(currentGroup.id)
@@ -1615,12 +1616,12 @@ export class OpenNextEditorInGroup extends AbstractNavigateEditorAction {
         weight: KeybindingWeight.WorkbenchContrib,
         primary: KeyChord(
           KeyMod.CtrlCmd | KeyCode.KeyK,
-          KeyMod.CtrlCmd | KeyCode.PageDown,
+          KeyMod.CtrlCmd | KeyCode.PageDown
         ),
         mac: {
           primary: KeyChord(
             KeyMod.CtrlCmd | KeyCode.KeyK,
-            KeyMod.CtrlCmd | KeyMod.Alt | KeyCode.RightArrow,
+            KeyMod.CtrlCmd | KeyMod.Alt | KeyCode.RightArrow
           ),
         },
       },
@@ -1629,7 +1630,7 @@ export class OpenNextEditorInGroup extends AbstractNavigateEditorAction {
   }
 
   protected navigate(
-    editorGroupService: IEditorGroupsService,
+    editorGroupService: IEditorGroupsService
   ): IEditorIdentifier {
     const group = editorGroupService.activeGroup
     const editors = group.getEditors(EditorsOrder.SEQUENTIAL)
@@ -1648,19 +1649,19 @@ export class OpenPreviousEditorInGroup extends AbstractNavigateEditorAction {
       id: "workbench.action.previousEditorInGroup",
       title: localize2(
         "openPreviousEditorInGroup",
-        "Open Previous Editor in Group",
+        "Open Previous Editor in Group"
       ),
       f1: true,
       keybinding: {
         weight: KeybindingWeight.WorkbenchContrib,
         primary: KeyChord(
           KeyMod.CtrlCmd | KeyCode.KeyK,
-          KeyMod.CtrlCmd | KeyCode.PageUp,
+          KeyMod.CtrlCmd | KeyCode.PageUp
         ),
         mac: {
           primary: KeyChord(
             KeyMod.CtrlCmd | KeyCode.KeyK,
-            KeyMod.CtrlCmd | KeyMod.Alt | KeyCode.LeftArrow,
+            KeyMod.CtrlCmd | KeyMod.Alt | KeyCode.LeftArrow
           ),
         },
       },
@@ -1669,7 +1670,7 @@ export class OpenPreviousEditorInGroup extends AbstractNavigateEditorAction {
   }
 
   protected navigate(
-    editorGroupService: IEditorGroupsService,
+    editorGroupService: IEditorGroupsService
   ): IEditorIdentifier {
     const group = editorGroupService.activeGroup
     const editors = group.getEditors(EditorsOrder.SEQUENTIAL)
@@ -1693,7 +1694,7 @@ export class OpenFirstEditorInGroup extends AbstractNavigateEditorAction {
   }
 
   protected navigate(
-    editorGroupService: IEditorGroupsService,
+    editorGroupService: IEditorGroupsService
   ): IEditorIdentifier {
     const group = editorGroupService.activeGroup
     const editors = group.getEditors(EditorsOrder.SEQUENTIAL)
@@ -1722,7 +1723,7 @@ export class OpenLastEditorInGroup extends AbstractNavigateEditorAction {
   }
 
   protected navigate(
-    editorGroupService: IEditorGroupsService,
+    editorGroupService: IEditorGroupsService
   ): IEditorIdentifier {
     const group = editorGroupService.activeGroup
     const editors = group.getEditors(EditorsOrder.SEQUENTIAL)
@@ -1742,7 +1743,7 @@ export class NavigateForwardAction extends Action2 {
         ...localize2("navigateForward", "Go Forward"),
         mnemonicTitle: localize(
           { key: "miForward", comment: ["&& denotes a mnemonic"] },
-          "&&Forward",
+          "&&Forward"
         ),
       },
       f1: true,
@@ -1779,7 +1780,7 @@ export class NavigateBackwardsAction extends Action2 {
         ...localize2("navigateBack", "Go Back"),
         mnemonicTitle: localize(
           { key: "miBack", comment: ["&& denotes a mnemonic"] },
-          "&&Back",
+          "&&Back"
         ),
       },
       f1: true,
@@ -1827,7 +1828,7 @@ export class NavigateForwardInEditsAction extends Action2 {
       id: "workbench.action.navigateForwardInEditLocations",
       title: localize2(
         "navigateForwardInEdits",
-        "Go Forward in Edit Locations",
+        "Go Forward in Edit Locations"
       ),
       f1: true,
     })
@@ -1862,7 +1863,7 @@ export class NavigatePreviousInEditsAction extends Action2 {
       id: "workbench.action.navigatePreviousInEditLocations",
       title: localize2(
         "navigatePreviousInEdits",
-        "Go Previous in Edit Locations",
+        "Go Previous in Edit Locations"
       ),
       f1: true,
     })
@@ -1881,14 +1882,14 @@ export class NavigateToLastEditLocationAction extends Action2 {
       id: "workbench.action.navigateToLastEditLocation",
       title: localize2(
         "navigateToLastEditLocation",
-        "Go to Last Edit Location",
+        "Go to Last Edit Location"
       ),
       f1: true,
       keybinding: {
         weight: KeybindingWeight.WorkbenchContrib,
         primary: KeyChord(
           KeyMod.CtrlCmd | KeyCode.KeyK,
-          KeyMod.CtrlCmd | KeyCode.KeyQ,
+          KeyMod.CtrlCmd | KeyCode.KeyQ
         ),
       },
     })
@@ -1907,7 +1908,7 @@ export class NavigateForwardInNavigationsAction extends Action2 {
       id: "workbench.action.navigateForwardInNavigationLocations",
       title: localize2(
         "navigateForwardInNavigations",
-        "Go Forward in Navigation Locations",
+        "Go Forward in Navigation Locations"
       ),
       f1: true,
     })
@@ -1926,7 +1927,7 @@ export class NavigateBackwardsInNavigationsAction extends Action2 {
       id: "workbench.action.navigateBackInNavigationLocations",
       title: localize2(
         "navigateBackInNavigations",
-        "Go Back in Navigation Locations",
+        "Go Back in Navigation Locations"
       ),
       f1: true,
     })
@@ -1945,7 +1946,7 @@ export class NavigatePreviousInNavigationsAction extends Action2 {
       id: "workbench.action.navigatePreviousInNavigationLocations",
       title: localize2(
         "navigatePreviousInNavigationLocations",
-        "Go Previous in Navigation Locations",
+        "Go Previous in Navigation Locations"
       ),
       f1: true,
     })
@@ -1964,7 +1965,7 @@ export class NavigateToLastNavigationLocationAction extends Action2 {
       id: "workbench.action.navigateToLastNavigationLocation",
       title: localize2(
         "navigateToLastNavigationLocation",
-        "Go to Last Navigation Location",
+        "Go to Last Navigation Location"
       ),
       f1: true,
     })
@@ -2022,12 +2023,12 @@ export class ClearRecentFilesAction extends Action2 {
       type: "warning",
       message: localize(
         "confirmClearRecentsMessage",
-        "Do you want to clear all recently opened files and workspaces?",
+        "Do you want to clear all recently opened files and workspaces?"
       ),
       detail: localize("confirmClearDetail", "This action is irreversible!"),
       primaryButton: localize(
         { key: "clearButtonLabel", comment: ["&& denotes a mnemonic"] },
-        "&&Clear",
+        "&&Clear"
       ),
     })
 
@@ -2051,7 +2052,7 @@ export class ShowEditorsInActiveGroupByMostRecentlyUsedAction extends Action2 {
       id: ShowEditorsInActiveGroupByMostRecentlyUsedAction.ID,
       title: localize2(
         "showEditorsInActiveGroup",
-        "Show Editors in Active Group By Most Recently Used",
+        "Show Editors in Active Group By Most Recently Used"
       ),
       f1: true,
       category: Categories.View,
@@ -2062,7 +2063,7 @@ export class ShowEditorsInActiveGroupByMostRecentlyUsedAction extends Action2 {
     const quickInputService = accessor.get(IQuickInputService)
 
     quickInputService.quickAccess.show(
-      ActiveGroupEditorsByMostRecentlyUsedQuickAccess.PREFIX,
+      ActiveGroupEditorsByMostRecentlyUsedQuickAccess.PREFIX
     )
   }
 }
@@ -2079,7 +2080,7 @@ export class ShowAllEditorsByAppearanceAction extends Action2 {
         weight: KeybindingWeight.WorkbenchContrib,
         primary: KeyChord(
           KeyMod.CtrlCmd | KeyCode.KeyK,
-          KeyMod.CtrlCmd | KeyCode.KeyP,
+          KeyMod.CtrlCmd | KeyCode.KeyP
         ),
         mac: {
           primary: KeyMod.CtrlCmd | KeyMod.Alt | KeyCode.Tab,
@@ -2104,7 +2105,7 @@ export class ShowAllEditorsByMostRecentlyUsedAction extends Action2 {
       id: ShowAllEditorsByMostRecentlyUsedAction.ID,
       title: localize2(
         "showAllEditorsByMostRecentlyUsed",
-        "Show All Editors By Most Recently Used",
+        "Show All Editors By Most Recently Used"
       ),
       f1: true,
       category: Categories.View,
@@ -2115,7 +2116,7 @@ export class ShowAllEditorsByMostRecentlyUsedAction extends Action2 {
     const quickInputService = accessor.get(IQuickInputService)
 
     quickInputService.quickAccess.show(
-      AllEditorsByMostRecentlyUsedQuickAccess.PREFIX,
+      AllEditorsByMostRecentlyUsedQuickAccess.PREFIX
     )
   }
 }
@@ -2124,7 +2125,7 @@ abstract class AbstractQuickAccessEditorAction extends Action2 {
   constructor(
     desc: Readonly<IAction2Options>,
     private readonly prefix: string,
-    private readonly itemActivation: ItemActivation | undefined,
+    private readonly itemActivation: ItemActivation | undefined
   ) {
     super(desc)
   }
@@ -2149,13 +2150,13 @@ export class QuickAccessPreviousRecentlyUsedEditorAction extends AbstractQuickAc
         id: "workbench.action.quickOpenPreviousRecentlyUsedEditor",
         title: localize2(
           "quickOpenPreviousRecentlyUsedEditor",
-          "Quick Open Previous Recently Used Editor",
+          "Quick Open Previous Recently Used Editor"
         ),
         f1: true,
         category: Categories.View,
       },
       AllEditorsByMostRecentlyUsedQuickAccess.PREFIX,
-      undefined,
+      undefined
     )
   }
 }
@@ -2167,13 +2168,13 @@ export class QuickAccessLeastRecentlyUsedEditorAction extends AbstractQuickAcces
         id: "workbench.action.quickOpenLeastRecentlyUsedEditor",
         title: localize2(
           "quickOpenLeastRecentlyUsedEditor",
-          "Quick Open Least Recently Used Editor",
+          "Quick Open Least Recently Used Editor"
         ),
         f1: true,
         category: Categories.View,
       },
       AllEditorsByMostRecentlyUsedQuickAccess.PREFIX,
-      undefined,
+      undefined
     )
   }
 }
@@ -2185,7 +2186,7 @@ export class QuickAccessPreviousRecentlyUsedEditorInGroupAction extends Abstract
         id: "workbench.action.quickOpenPreviousRecentlyUsedEditorInGroup",
         title: localize2(
           "quickOpenPreviousRecentlyUsedEditorInGroup",
-          "Quick Open Previous Recently Used Editor in Group",
+          "Quick Open Previous Recently Used Editor in Group"
         ),
         f1: true,
         keybinding: {
@@ -2199,7 +2200,7 @@ export class QuickAccessPreviousRecentlyUsedEditorInGroupAction extends Abstract
         category: Categories.View,
       },
       ActiveGroupEditorsByMostRecentlyUsedQuickAccess.PREFIX,
-      undefined,
+      undefined
     )
   }
 }
@@ -2211,7 +2212,7 @@ export class QuickAccessLeastRecentlyUsedEditorInGroupAction extends AbstractQui
         id: "workbench.action.quickOpenLeastRecentlyUsedEditorInGroup",
         title: localize2(
           "quickOpenLeastRecentlyUsedEditorInGroup",
-          "Quick Open Least Recently Used Editor in Group",
+          "Quick Open Least Recently Used Editor in Group"
         ),
         f1: true,
         keybinding: {
@@ -2225,7 +2226,7 @@ export class QuickAccessLeastRecentlyUsedEditorInGroupAction extends AbstractQui
         category: Categories.View,
       },
       ActiveGroupEditorsByMostRecentlyUsedQuickAccess.PREFIX,
-      ItemActivation.LAST,
+      ItemActivation.LAST
     )
   }
 }
@@ -2238,7 +2239,7 @@ export class QuickAccessPreviousEditorFromHistoryAction extends Action2 {
       id: QuickAccessPreviousEditorFromHistoryAction.ID,
       title: localize2(
         "navigateEditorHistoryByInput",
-        "Quick Open Previous Editor from History",
+        "Quick Open Previous Editor from History"
       ),
       f1: true,
     })
@@ -2250,7 +2251,7 @@ export class QuickAccessPreviousEditorFromHistoryAction extends Action2 {
     const editorGroupService = accessor.get(IEditorGroupsService)
 
     const keybindings = keybindingService.lookupKeybindings(
-      QuickAccessPreviousEditorFromHistoryAction.ID,
+      QuickAccessPreviousEditorFromHistoryAction.ID
     )
 
     // Enforce to activate the first item in quick access if
@@ -2273,7 +2274,7 @@ export class OpenNextRecentlyUsedEditorAction extends Action2 {
       id: "workbench.action.openNextRecentlyUsedEditor",
       title: localize2(
         "openNextRecentlyUsedEditor",
-        "Open Next Recently Used Editor",
+        "Open Next Recently Used Editor"
       ),
       f1: true,
       category: Categories.View,
@@ -2293,7 +2294,7 @@ export class OpenPreviousRecentlyUsedEditorAction extends Action2 {
       id: "workbench.action.openPreviousRecentlyUsedEditor",
       title: localize2(
         "openPreviousRecentlyUsedEditor",
-        "Open Previous Recently Used Editor",
+        "Open Previous Recently Used Editor"
       ),
       f1: true,
       category: Categories.View,
@@ -2313,7 +2314,7 @@ export class OpenNextRecentlyUsedEditorInGroupAction extends Action2 {
       id: "workbench.action.openNextRecentlyUsedEditorInGroup",
       title: localize2(
         "openNextRecentlyUsedEditorInGroup",
-        "Open Next Recently Used Editor In Group",
+        "Open Next Recently Used Editor In Group"
       ),
       f1: true,
       category: Categories.View,
@@ -2325,7 +2326,7 @@ export class OpenNextRecentlyUsedEditorInGroupAction extends Action2 {
     const editorGroupsService = accessor.get(IEditorGroupsService)
 
     historyService.openNextRecentlyUsedEditor(
-      editorGroupsService.activeGroup.id,
+      editorGroupsService.activeGroup.id
     )
   }
 }
@@ -2336,7 +2337,7 @@ export class OpenPreviousRecentlyUsedEditorInGroupAction extends Action2 {
       id: "workbench.action.openPreviousRecentlyUsedEditorInGroup",
       title: localize2(
         "openPreviousRecentlyUsedEditorInGroup",
-        "Open Previous Recently Used Editor In Group",
+        "Open Previous Recently Used Editor In Group"
       ),
       f1: true,
       category: Categories.View,
@@ -2369,12 +2370,12 @@ export class ClearEditorHistoryAction extends Action2 {
       type: "warning",
       message: localize(
         "confirmClearEditorHistoryMessage",
-        "Do you want to clear the history of recently opened editors?",
+        "Do you want to clear the history of recently opened editors?"
       ),
       detail: localize("confirmClearDetail", "This action is irreversible!"),
       primaryButton: localize(
         { key: "clearButtonLabel", comment: ["&& denotes a mnemonic"] },
-        "&&Clear",
+        "&&Clear"
       ),
     })
 
@@ -2399,7 +2400,7 @@ export class MoveEditorLeftInGroupAction extends ExecuteCommandAction {
           mac: {
             primary: KeyChord(
               KeyMod.CtrlCmd | KeyCode.KeyK,
-              KeyMod.CtrlCmd | KeyMod.Shift | KeyCode.LeftArrow,
+              KeyMod.CtrlCmd | KeyMod.Shift | KeyCode.LeftArrow
             ),
           },
         },
@@ -2407,7 +2408,7 @@ export class MoveEditorLeftInGroupAction extends ExecuteCommandAction {
         category: Categories.View,
       },
       MOVE_ACTIVE_EDITOR_COMMAND_ID,
-      { to: "left" } satisfies ActiveEditorMoveCopyArguments,
+      { to: "left" } satisfies ActiveEditorMoveCopyArguments
     )
   }
 }
@@ -2424,7 +2425,7 @@ export class MoveEditorRightInGroupAction extends ExecuteCommandAction {
           mac: {
             primary: KeyChord(
               KeyMod.CtrlCmd | KeyCode.KeyK,
-              KeyMod.CtrlCmd | KeyMod.Shift | KeyCode.RightArrow,
+              KeyMod.CtrlCmd | KeyMod.Shift | KeyCode.RightArrow
             ),
           },
         },
@@ -2432,7 +2433,7 @@ export class MoveEditorRightInGroupAction extends ExecuteCommandAction {
         category: Categories.View,
       },
       MOVE_ACTIVE_EDITOR_COMMAND_ID,
-      { to: "right" } satisfies ActiveEditorMoveCopyArguments,
+      { to: "right" } satisfies ActiveEditorMoveCopyArguments
     )
   }
 }
@@ -2444,7 +2445,7 @@ export class MoveEditorToPreviousGroupAction extends ExecuteCommandAction {
         id: "workbench.action.moveEditorToPreviousGroup",
         title: localize2(
           "moveEditorToPreviousGroup",
-          "Move Editor into Previous Group",
+          "Move Editor into Previous Group"
         ),
         keybinding: {
           weight: KeybindingWeight.WorkbenchContrib,
@@ -2457,7 +2458,7 @@ export class MoveEditorToPreviousGroupAction extends ExecuteCommandAction {
         category: Categories.View,
       },
       MOVE_ACTIVE_EDITOR_COMMAND_ID,
-      { to: "previous", by: "group" } satisfies ActiveEditorMoveCopyArguments,
+      { to: "previous", by: "group" } satisfies ActiveEditorMoveCopyArguments
     )
   }
 }
@@ -2469,7 +2470,7 @@ export class MoveEditorToNextGroupAction extends ExecuteCommandAction {
         id: "workbench.action.moveEditorToNextGroup",
         title: localize2(
           "moveEditorToNextGroup",
-          "Move Editor into Next Group",
+          "Move Editor into Next Group"
         ),
         f1: true,
         keybinding: {
@@ -2482,7 +2483,7 @@ export class MoveEditorToNextGroupAction extends ExecuteCommandAction {
         category: Categories.View,
       },
       MOVE_ACTIVE_EDITOR_COMMAND_ID,
-      { to: "next", by: "group" } satisfies ActiveEditorMoveCopyArguments,
+      { to: "next", by: "group" } satisfies ActiveEditorMoveCopyArguments
     )
   }
 }
@@ -2494,13 +2495,13 @@ export class MoveEditorToAboveGroupAction extends ExecuteCommandAction {
         id: "workbench.action.moveEditorToAboveGroup",
         title: localize2(
           "moveEditorToAboveGroup",
-          "Move Editor into Group Above",
+          "Move Editor into Group Above"
         ),
         f1: true,
         category: Categories.View,
       },
       MOVE_ACTIVE_EDITOR_COMMAND_ID,
-      { to: "up", by: "group" } satisfies ActiveEditorMoveCopyArguments,
+      { to: "up", by: "group" } satisfies ActiveEditorMoveCopyArguments
     )
   }
 }
@@ -2512,13 +2513,13 @@ export class MoveEditorToBelowGroupAction extends ExecuteCommandAction {
         id: "workbench.action.moveEditorToBelowGroup",
         title: localize2(
           "moveEditorToBelowGroup",
-          "Move Editor into Group Below",
+          "Move Editor into Group Below"
         ),
         f1: true,
         category: Categories.View,
       },
       MOVE_ACTIVE_EDITOR_COMMAND_ID,
-      { to: "down", by: "group" } satisfies ActiveEditorMoveCopyArguments,
+      { to: "down", by: "group" } satisfies ActiveEditorMoveCopyArguments
     )
   }
 }
@@ -2530,13 +2531,13 @@ export class MoveEditorToLeftGroupAction extends ExecuteCommandAction {
         id: "workbench.action.moveEditorToLeftGroup",
         title: localize2(
           "moveEditorToLeftGroup",
-          "Move Editor into Left Group",
+          "Move Editor into Left Group"
         ),
         f1: true,
         category: Categories.View,
       },
       MOVE_ACTIVE_EDITOR_COMMAND_ID,
-      { to: "left", by: "group" } satisfies ActiveEditorMoveCopyArguments,
+      { to: "left", by: "group" } satisfies ActiveEditorMoveCopyArguments
     )
   }
 }
@@ -2548,13 +2549,13 @@ export class MoveEditorToRightGroupAction extends ExecuteCommandAction {
         id: "workbench.action.moveEditorToRightGroup",
         title: localize2(
           "moveEditorToRightGroup",
-          "Move Editor into Right Group",
+          "Move Editor into Right Group"
         ),
         f1: true,
         category: Categories.View,
       },
       MOVE_ACTIVE_EDITOR_COMMAND_ID,
-      { to: "right", by: "group" } satisfies ActiveEditorMoveCopyArguments,
+      { to: "right", by: "group" } satisfies ActiveEditorMoveCopyArguments
     )
   }
 }
@@ -2566,7 +2567,7 @@ export class MoveEditorToFirstGroupAction extends ExecuteCommandAction {
         id: "workbench.action.moveEditorToFirstGroup",
         title: localize2(
           "moveEditorToFirstGroup",
-          "Move Editor into First Group",
+          "Move Editor into First Group"
         ),
         f1: true,
         keybinding: {
@@ -2579,7 +2580,7 @@ export class MoveEditorToFirstGroupAction extends ExecuteCommandAction {
         category: Categories.View,
       },
       MOVE_ACTIVE_EDITOR_COMMAND_ID,
-      { to: "first", by: "group" } satisfies ActiveEditorMoveCopyArguments,
+      { to: "first", by: "group" } satisfies ActiveEditorMoveCopyArguments
     )
   }
 }
@@ -2591,7 +2592,7 @@ export class MoveEditorToLastGroupAction extends ExecuteCommandAction {
         id: "workbench.action.moveEditorToLastGroup",
         title: localize2(
           "moveEditorToLastGroup",
-          "Move Editor into Last Group",
+          "Move Editor into Last Group"
         ),
         f1: true,
         keybinding: {
@@ -2604,7 +2605,7 @@ export class MoveEditorToLastGroupAction extends ExecuteCommandAction {
         category: Categories.View,
       },
       MOVE_ACTIVE_EDITOR_COMMAND_ID,
-      { to: "last", by: "group" } satisfies ActiveEditorMoveCopyArguments,
+      { to: "last", by: "group" } satisfies ActiveEditorMoveCopyArguments
     )
   }
 }
@@ -2616,13 +2617,13 @@ export class SplitEditorToPreviousGroupAction extends ExecuteCommandAction {
         id: "workbench.action.splitEditorToPreviousGroup",
         title: localize2(
           "splitEditorToPreviousGroup",
-          "Split Editor into Previous Group",
+          "Split Editor into Previous Group"
         ),
         f1: true,
         category: Categories.View,
       },
       COPY_ACTIVE_EDITOR_COMMAND_ID,
-      { to: "previous", by: "group" } satisfies ActiveEditorMoveCopyArguments,
+      { to: "previous", by: "group" } satisfies ActiveEditorMoveCopyArguments
     )
   }
 }
@@ -2634,13 +2635,13 @@ export class SplitEditorToNextGroupAction extends ExecuteCommandAction {
         id: "workbench.action.splitEditorToNextGroup",
         title: localize2(
           "splitEditorToNextGroup",
-          "Split Editor into Next Group",
+          "Split Editor into Next Group"
         ),
         f1: true,
         category: Categories.View,
       },
       COPY_ACTIVE_EDITOR_COMMAND_ID,
-      { to: "next", by: "group" } satisfies ActiveEditorMoveCopyArguments,
+      { to: "next", by: "group" } satisfies ActiveEditorMoveCopyArguments
     )
   }
 }
@@ -2652,13 +2653,13 @@ export class SplitEditorToAboveGroupAction extends ExecuteCommandAction {
         id: "workbench.action.splitEditorToAboveGroup",
         title: localize2(
           "splitEditorToAboveGroup",
-          "Split Editor into Group Above",
+          "Split Editor into Group Above"
         ),
         f1: true,
         category: Categories.View,
       },
       COPY_ACTIVE_EDITOR_COMMAND_ID,
-      { to: "up", by: "group" } satisfies ActiveEditorMoveCopyArguments,
+      { to: "up", by: "group" } satisfies ActiveEditorMoveCopyArguments
     )
   }
 }
@@ -2670,13 +2671,13 @@ export class SplitEditorToBelowGroupAction extends ExecuteCommandAction {
         id: "workbench.action.splitEditorToBelowGroup",
         title: localize2(
           "splitEditorToBelowGroup",
-          "Split Editor into Group Below",
+          "Split Editor into Group Below"
         ),
         f1: true,
         category: Categories.View,
       },
       COPY_ACTIVE_EDITOR_COMMAND_ID,
-      { to: "down", by: "group" } satisfies ActiveEditorMoveCopyArguments,
+      { to: "down", by: "group" } satisfies ActiveEditorMoveCopyArguments
     )
   }
 }
@@ -2685,7 +2686,7 @@ export class SplitEditorToLeftGroupAction extends ExecuteCommandAction {
   static readonly ID = "workbench.action.splitEditorToLeftGroup"
   static readonly LABEL = localize(
     "splitEditorToLeftGroup",
-    "Split Editor into Left Group",
+    "Split Editor into Left Group"
   )
 
   constructor() {
@@ -2694,13 +2695,13 @@ export class SplitEditorToLeftGroupAction extends ExecuteCommandAction {
         id: "workbench.action.splitEditorToLeftGroup",
         title: localize2(
           "splitEditorToLeftGroup",
-          "Split Editor into Left Group",
+          "Split Editor into Left Group"
         ),
         f1: true,
         category: Categories.View,
       },
       COPY_ACTIVE_EDITOR_COMMAND_ID,
-      { to: "left", by: "group" } satisfies ActiveEditorMoveCopyArguments,
+      { to: "left", by: "group" } satisfies ActiveEditorMoveCopyArguments
     )
   }
 }
@@ -2712,13 +2713,13 @@ export class SplitEditorToRightGroupAction extends ExecuteCommandAction {
         id: "workbench.action.splitEditorToRightGroup",
         title: localize2(
           "splitEditorToRightGroup",
-          "Split Editor into Right Group",
+          "Split Editor into Right Group"
         ),
         f1: true,
         category: Categories.View,
       },
       COPY_ACTIVE_EDITOR_COMMAND_ID,
-      { to: "right", by: "group" } satisfies ActiveEditorMoveCopyArguments,
+      { to: "right", by: "group" } satisfies ActiveEditorMoveCopyArguments
     )
   }
 }
@@ -2730,13 +2731,13 @@ export class SplitEditorToFirstGroupAction extends ExecuteCommandAction {
         id: "workbench.action.splitEditorToFirstGroup",
         title: localize2(
           "splitEditorToFirstGroup",
-          "Split Editor into First Group",
+          "Split Editor into First Group"
         ),
         f1: true,
         category: Categories.View,
       },
       COPY_ACTIVE_EDITOR_COMMAND_ID,
-      { to: "first", by: "group" } satisfies ActiveEditorMoveCopyArguments,
+      { to: "first", by: "group" } satisfies ActiveEditorMoveCopyArguments
     )
   }
 }
@@ -2748,13 +2749,13 @@ export class SplitEditorToLastGroupAction extends ExecuteCommandAction {
         id: "workbench.action.splitEditorToLastGroup",
         title: localize2(
           "splitEditorToLastGroup",
-          "Split Editor into Last Group",
+          "Split Editor into Last Group"
         ),
         f1: true,
         category: Categories.View,
       },
       COPY_ACTIVE_EDITOR_COMMAND_ID,
-      { to: "last", by: "group" } satisfies ActiveEditorMoveCopyArguments,
+      { to: "last", by: "group" } satisfies ActiveEditorMoveCopyArguments
     )
   }
 }
@@ -2774,7 +2775,7 @@ export class EditorLayoutSingleAction extends ExecuteCommandAction {
       {
         groups: [{}],
         orientation: GroupOrientation.HORIZONTAL,
-      } satisfies EditorGroupLayout,
+      } satisfies EditorGroupLayout
     )
   }
 }
@@ -2794,7 +2795,7 @@ export class EditorLayoutTwoColumnsAction extends ExecuteCommandAction {
       {
         groups: [{}, {}],
         orientation: GroupOrientation.HORIZONTAL,
-      } satisfies EditorGroupLayout,
+      } satisfies EditorGroupLayout
     )
   }
 }
@@ -2808,7 +2809,7 @@ export class EditorLayoutThreeColumnsAction extends ExecuteCommandAction {
         id: EditorLayoutThreeColumnsAction.ID,
         title: localize2(
           "editorLayoutThreeColumns",
-          "Three Columns Editor Layout",
+          "Three Columns Editor Layout"
         ),
         f1: true,
         category: Categories.View,
@@ -2817,7 +2818,7 @@ export class EditorLayoutThreeColumnsAction extends ExecuteCommandAction {
       {
         groups: [{}, {}, {}],
         orientation: GroupOrientation.HORIZONTAL,
-      } satisfies EditorGroupLayout,
+      } satisfies EditorGroupLayout
     )
   }
 }
@@ -2837,7 +2838,7 @@ export class EditorLayoutTwoRowsAction extends ExecuteCommandAction {
       {
         groups: [{}, {}],
         orientation: GroupOrientation.VERTICAL,
-      } satisfies EditorGroupLayout,
+      } satisfies EditorGroupLayout
     )
   }
 }
@@ -2857,7 +2858,7 @@ export class EditorLayoutThreeRowsAction extends ExecuteCommandAction {
       {
         groups: [{}, {}, {}],
         orientation: GroupOrientation.VERTICAL,
-      } satisfies EditorGroupLayout,
+      } satisfies EditorGroupLayout
     )
   }
 }
@@ -2871,7 +2872,7 @@ export class EditorLayoutTwoByTwoGridAction extends ExecuteCommandAction {
         id: EditorLayoutTwoByTwoGridAction.ID,
         title: localize2(
           "editorLayoutTwoByTwoGrid",
-          "Grid Editor Layout (2x2)",
+          "Grid Editor Layout (2x2)"
         ),
         f1: true,
         category: Categories.View,
@@ -2880,7 +2881,7 @@ export class EditorLayoutTwoByTwoGridAction extends ExecuteCommandAction {
       {
         groups: [{ groups: [{}, {}] }, { groups: [{}, {}] }],
         orientation: GroupOrientation.HORIZONTAL,
-      } satisfies EditorGroupLayout,
+      } satisfies EditorGroupLayout
     )
   }
 }
@@ -2894,7 +2895,7 @@ export class EditorLayoutTwoColumnsBottomAction extends ExecuteCommandAction {
         id: EditorLayoutTwoColumnsBottomAction.ID,
         title: localize2(
           "editorLayoutTwoColumnsBottom",
-          "Two Columns Bottom Editor Layout",
+          "Two Columns Bottom Editor Layout"
         ),
         f1: true,
         category: Categories.View,
@@ -2903,7 +2904,7 @@ export class EditorLayoutTwoColumnsBottomAction extends ExecuteCommandAction {
       {
         groups: [{}, { groups: [{}, {}] }],
         orientation: GroupOrientation.VERTICAL,
-      } satisfies EditorGroupLayout,
+      } satisfies EditorGroupLayout
     )
   }
 }
@@ -2917,7 +2918,7 @@ export class EditorLayoutTwoRowsRightAction extends ExecuteCommandAction {
         id: EditorLayoutTwoRowsRightAction.ID,
         title: localize2(
           "editorLayoutTwoRowsRight",
-          "Two Rows Right Editor Layout",
+          "Two Rows Right Editor Layout"
         ),
         f1: true,
         category: Categories.View,
@@ -2926,7 +2927,7 @@ export class EditorLayoutTwoRowsRightAction extends ExecuteCommandAction {
       {
         groups: [{}, { groups: [{}, {}] }],
         orientation: GroupOrientation.HORIZONTAL,
-      } satisfies EditorGroupLayout,
+      } satisfies EditorGroupLayout
     )
   }
 }
@@ -2934,7 +2935,7 @@ export class EditorLayoutTwoRowsRightAction extends ExecuteCommandAction {
 abstract class AbstractCreateEditorGroupAction extends Action2 {
   constructor(
     desc: Readonly<IAction2Options>,
-    private readonly direction: GroupDirection,
+    private readonly direction: GroupDirection
   ) {
     super(desc)
   }
@@ -2961,7 +2962,7 @@ abstract class AbstractCreateEditorGroupAction extends Action2 {
 
     const group = editorGroupService.addGroup(
       editorGroupService.activeGroup,
-      this.direction,
+      this.direction
     )
     editorGroupService.activateGroup(group)
 
@@ -2980,7 +2981,7 @@ export class NewEditorGroupLeftAction extends AbstractCreateEditorGroupAction {
         f1: true,
         category: Categories.View,
       },
-      GroupDirection.LEFT,
+      GroupDirection.LEFT
     )
   }
 }
@@ -2994,7 +2995,7 @@ export class NewEditorGroupRightAction extends AbstractCreateEditorGroupAction {
         f1: true,
         category: Categories.View,
       },
-      GroupDirection.RIGHT,
+      GroupDirection.RIGHT
     )
   }
 }
@@ -3008,7 +3009,7 @@ export class NewEditorGroupAboveAction extends AbstractCreateEditorGroupAction {
         f1: true,
         category: Categories.View,
       },
-      GroupDirection.UP,
+      GroupDirection.UP
     )
   }
 }
@@ -3022,7 +3023,7 @@ export class NewEditorGroupBelowAction extends AbstractCreateEditorGroupAction {
         f1: true,
         category: Categories.View,
       },
-      GroupDirection.DOWN,
+      GroupDirection.DOWN
     )
   }
 }
@@ -3048,7 +3049,7 @@ export class ToggleEditorTypeAction extends Action2 {
     }
 
     const activeEditorResource = EditorResourceAccessor.getCanonicalUri(
-      activeEditorPane.input,
+      activeEditorPane.input
     )
     if (!activeEditorResource) {
       return
@@ -3075,7 +3076,7 @@ export class ToggleEditorTypeAction extends Action2 {
           },
         },
       ],
-      activeEditorPane.group,
+      activeEditorPane.group
     )
   }
 }
@@ -3100,7 +3101,7 @@ export class ReOpenInTextEditorAction extends Action2 {
     }
 
     const activeEditorResource = EditorResourceAccessor.getCanonicalUri(
-      activeEditorPane.input,
+      activeEditorPane.input
     )
     if (!activeEditorResource) {
       return
@@ -3119,7 +3120,7 @@ export class ReOpenInTextEditorAction extends Action2 {
           },
         },
       ],
-      activeEditorPane.group,
+      activeEditorPane.group
     )
   }
 }
@@ -3129,7 +3130,7 @@ abstract class BaseMoveCopyEditorToNewWindowAction extends Action2 {
     id: string,
     title: ICommandActionTitle,
     keybinding: Omit<IKeybindingRule, "id"> | undefined,
-    private readonly move: boolean,
+    private readonly move: boolean
   ) {
     super({
       id,
@@ -3144,11 +3145,11 @@ abstract class BaseMoveCopyEditorToNewWindowAction extends Action2 {
   override async run(
     accessor: ServicesAccessor,
     resourceOrContext?: URI | IEditorCommandsContext,
-    context?: IEditorCommandsContext,
+    context?: IEditorCommandsContext
   ) {
     const editorGroupService = accessor.get(IEditorGroupsService)
     const editorsContext = resolveEditorsContext(
-      getEditorsContext(accessor, resourceOrContext, context),
+      getEditorsContext(accessor, resourceOrContext, context)
     )
     if (editorsContext.length === 0) {
       return
@@ -3159,7 +3160,7 @@ abstract class BaseMoveCopyEditorToNewWindowAction extends Action2 {
 
     const sourceGroup = editorsContext[0].group // only single group supported for move/copy for now
     const sourceEditors = editorsContext.filter(
-      ({ group }) => group === sourceGroup,
+      ({ group }) => group === sourceGroup
     )
     if (this.move) {
       sourceGroup.moveEditors(sourceEditors, auxiliaryEditorPart.activeGroup)
@@ -3182,11 +3183,11 @@ export class MoveEditorToNewWindowAction extends BaseMoveCopyEditorToNewWindowAc
             key: "miMoveEditorToNewWindow",
             comment: ["&& denotes a mnemonic"],
           },
-          "&&Move Editor into New Window",
+          "&&Move Editor into New Window"
         ),
       },
       undefined,
-      true,
+      true
     )
   }
 }
@@ -3202,17 +3203,17 @@ export class CopyEditorToNewindowAction extends BaseMoveCopyEditorToNewWindowAct
             key: "miCopyEditorToNewWindow",
             comment: ["&& denotes a mnemonic"],
           },
-          "&&Copy Editor into New Window",
+          "&&Copy Editor into New Window"
         ),
       },
       {
         primary: KeyChord(
           KeyMod.CtrlCmd | KeyCode.KeyK,
-          KeyMod.CtrlCmd | KeyCode.KeyO,
+          KeyMod.CtrlCmd | KeyCode.KeyO
         ),
         weight: KeybindingWeight.WorkbenchContrib,
       },
-      false,
+      false
     )
   }
 }
@@ -3221,7 +3222,7 @@ abstract class BaseMoveCopyEditorGroupToNewWindowAction extends Action2 {
   constructor(
     id: string,
     title: ICommandActionTitle,
-    private readonly move: boolean,
+    private readonly move: boolean
   ) {
     super({
       id,
@@ -3245,7 +3246,7 @@ abstract class BaseMoveCopyEditorGroupToNewWindowAction extends Action2 {
         mode: this.move
           ? MergeGroupMode.MOVE_EDITORS
           : MergeGroupMode.COPY_EDITORS,
-      },
+      }
     )
 
     auxiliaryEditorPart.activeGroup.focus()
@@ -3259,17 +3260,17 @@ export class MoveEditorGroupToNewWindowAction extends BaseMoveCopyEditorGroupToN
       {
         ...localize2(
           "moveEditorGroupToNewWindow",
-          "Move Editor Group into New Window",
+          "Move Editor Group into New Window"
         ),
         mnemonicTitle: localize(
           {
             key: "miMoveEditorGroupToNewWindow",
             comment: ["&& denotes a mnemonic"],
           },
-          "&&Move Editor Group into New Window",
+          "&&Move Editor Group into New Window"
         ),
       },
-      true,
+      true
     )
   }
 }
@@ -3281,17 +3282,17 @@ export class CopyEditorGroupToNewWindowAction extends BaseMoveCopyEditorGroupToN
       {
         ...localize2(
           "copyEditorGroupToNewWindow",
-          "Copy Editor Group into New Window",
+          "Copy Editor Group into New Window"
         ),
         mnemonicTitle: localize(
           {
             key: "miCopyEditorGroupToNewWindow",
             comment: ["&& denotes a mnemonic"],
           },
-          "&&Copy Editor Group into New Window",
+          "&&Copy Editor Group into New Window"
         ),
       },
-      false,
+      false
     )
   }
 }
@@ -3303,14 +3304,14 @@ export class RestoreEditorsToMainWindowAction extends Action2 {
       title: {
         ...localize2(
           "restoreEditorsToMainWindow",
-          "Restore Editors into Main Window",
+          "Restore Editors into Main Window"
         ),
         mnemonicTitle: localize(
           {
             key: "miRestoreEditorsToMainWindow",
             comment: ["&& denotes a mnemonic"],
           },
-          "&&Restore Editors into Main Window",
+          "&&Restore Editors into Main Window"
         ),
       },
       f1: true,
@@ -3334,7 +3335,7 @@ export class NewEmptyEditorWindowAction extends Action2 {
         ...localize2("newEmptyEditorWindow", "New Empty Editor Window"),
         mnemonicTitle: localize(
           { key: "miNewEmptyEditorWindow", comment: ["&& denotes a mnemonic"] },
-          "&&New Empty Editor Window",
+          "&&New Empty Editor Window"
         ),
       },
       f1: true,

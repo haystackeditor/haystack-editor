@@ -9,431 +9,377 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IKeyboardEvent } from "vs/base/browser/keyboardEvent"
-import {
-  BaseActionViewItem,
-  IActionViewItemOptions,
-} from "vs/base/browser/ui/actionbar/actionViewItems"
-import { Widget } from "vs/base/browser/ui/widget"
-import { IAction } from "vs/base/common/actions"
-import { Codicon } from "vs/base/common/codicons"
-import { ThemeIcon } from "vs/base/common/themables"
-import { Emitter, Event } from "vs/base/common/event"
-import { KeyCode } from "vs/base/common/keyCodes"
-import "vs/css!./toggle"
-import {
-  isActiveElement,
-  $,
-  addDisposableListener,
-  EventType,
-} from "vs/base/browser/dom"
-import { getDefaultHoverDelegate } from "vs/base/browser/ui/hover/hoverDelegateFactory"
-import { IHoverDelegate } from "vs/base/browser/ui/hover/hoverDelegate"
-import type { IUpdatableHover } from "vs/base/browser/ui/hover/hover"
-import { getBaseLayerHoverDelegate } from "vs/base/browser/ui/hover/hoverDelegate2"
+import { IKeyboardEvent } from 'vs/base/browser/keyboardEvent';
+import { BaseActionViewItem, IActionViewItemOptions } from 'vs/base/browser/ui/actionbar/actionViewItems';
+import { Widget } from 'vs/base/browser/ui/widget';
+import { IAction } from 'vs/base/common/actions';
+import { Codicon } from 'vs/base/common/codicons';
+import { ThemeIcon } from 'vs/base/common/themables';
+import { Emitter, Event } from 'vs/base/common/event';
+import { KeyCode } from 'vs/base/common/keyCodes';
+import 'vs/css!./toggle';
+import { isActiveElement, $, addDisposableListener, EventType } from 'vs/base/browser/dom';
+import { getDefaultHoverDelegate } from 'vs/base/browser/ui/hover/hoverDelegateFactory';
+import { IHoverDelegate } from 'vs/base/browser/ui/hover/hoverDelegate';
+import type { IUpdatableHover } from 'vs/base/browser/ui/hover/hover';
+import { getBaseLayerHoverDelegate } from 'vs/base/browser/ui/hover/hoverDelegate2';
 
 export interface IToggleOpts extends IToggleStyles {
-  readonly actionClassName?: string
-  readonly icon?: ThemeIcon
-  readonly title: string
-  readonly isChecked: boolean
-  readonly notFocusable?: boolean
-  readonly hoverDelegate?: IHoverDelegate
+	readonly actionClassName?: string;
+	readonly icon?: ThemeIcon;
+	readonly title: string;
+	readonly isChecked: boolean;
+	readonly notFocusable?: boolean;
+	readonly hoverDelegate?: IHoverDelegate;
 }
 
 export interface IToggleStyles {
-  readonly inputActiveOptionBorder: string | undefined
-  readonly inputActiveOptionForeground: string | undefined
-  readonly inputActiveOptionBackground: string | undefined
+	readonly inputActiveOptionBorder: string | undefined;
+	readonly inputActiveOptionForeground: string | undefined;
+	readonly inputActiveOptionBackground: string | undefined;
 }
 
 export interface ICheckboxStyles {
-  readonly checkboxBackground: string | undefined
-  readonly checkboxBorder: string | undefined
-  readonly checkboxForeground: string | undefined
+	readonly checkboxBackground: string | undefined;
+	readonly checkboxBorder: string | undefined;
+	readonly checkboxForeground: string | undefined;
 }
 
 export const unthemedToggleStyles = {
-  inputActiveOptionBorder: "#007ACC00",
-  inputActiveOptionForeground: "#FFFFFF",
-  inputActiveOptionBackground: "#0E639C50",
-}
+	inputActiveOptionBorder: '#007ACC00',
+	inputActiveOptionForeground: '#FFFFFF',
+	inputActiveOptionBackground: '#0E639C50'
+};
 
 export class ToggleActionViewItem extends BaseActionViewItem {
-  protected readonly toggle: Toggle
 
-  constructor(context: any, action: IAction, options: IActionViewItemOptions) {
-    super(context, action, options)
+	protected readonly toggle: Toggle;
 
-    this.toggle = this._register(
-      new Toggle({
-        actionClassName: this._action.class,
-        isChecked: !!this._action.checked,
-        title: (<IActionViewItemOptions>this.options).keybinding
-          ? `${this._action.label} (${(<IActionViewItemOptions>this.options).keybinding})`
-          : this._action.label,
-        notFocusable: true,
-        inputActiveOptionBackground:
-          options.toggleStyles?.inputActiveOptionBackground,
-        inputActiveOptionBorder: options.toggleStyles?.inputActiveOptionBorder,
-        inputActiveOptionForeground:
-          options.toggleStyles?.inputActiveOptionForeground,
-        hoverDelegate: options.hoverDelegate,
-      }),
-    )
-    this._register(
-      this.toggle.onChange(
-        () => (this._action.checked = !!this.toggle && this.toggle.checked),
-      ),
-    )
-  }
+	constructor(context: any, action: IAction, options: IActionViewItemOptions) {
+		super(context, action, options);
 
-  override render(container: HTMLElement): void {
-    this.element = container
-    this.element.appendChild(this.toggle.domNode)
-  }
+		this.toggle = this._register(new Toggle({
+			actionClassName: this._action.class,
+			isChecked: !!this._action.checked,
+			title: (<IActionViewItemOptions>this.options).keybinding ? `${this._action.label} (${(<IActionViewItemOptions>this.options).keybinding})` : this._action.label,
+			notFocusable: true,
+			inputActiveOptionBackground: options.toggleStyles?.inputActiveOptionBackground,
+			inputActiveOptionBorder: options.toggleStyles?.inputActiveOptionBorder,
+			inputActiveOptionForeground: options.toggleStyles?.inputActiveOptionForeground,
+			hoverDelegate: options.hoverDelegate
+		}));
+		this._register(this.toggle.onChange(() => this._action.checked = !!this.toggle && this.toggle.checked));
+	}
 
-  protected override updateEnabled(): void {
-    if (this.toggle) {
-      if (this.isEnabled()) {
-        this.toggle.enable()
-      } else {
-        this.toggle.disable()
-      }
-    }
-  }
+	override render(container: HTMLElement): void {
+		this.element = container;
+		this.element.appendChild(this.toggle.domNode);
+	}
 
-  protected override updateChecked(): void {
-    this.toggle.checked = !!this._action.checked
-  }
+	protected override updateEnabled(): void {
+		if (this.toggle) {
+			if (this.isEnabled()) {
+				this.toggle.enable();
+			} else {
+				this.toggle.disable();
+			}
+		}
+	}
 
-  override focus(): void {
-    this.toggle.domNode.tabIndex = 0
-    this.toggle.focus()
-  }
+	protected override updateChecked(): void {
+		this.toggle.checked = !!this._action.checked;
+	}
 
-  override blur(): void {
-    this.toggle.domNode.tabIndex = -1
-    this.toggle.domNode.blur()
-  }
+	override focus(): void {
+		this.toggle.domNode.tabIndex = 0;
+		this.toggle.focus();
+	}
 
-  override setFocusable(focusable: boolean): void {
-    this.toggle.domNode.tabIndex = focusable ? 0 : -1
-  }
+	override blur(): void {
+		this.toggle.domNode.tabIndex = -1;
+		this.toggle.domNode.blur();
+	}
+
+	override setFocusable(focusable: boolean): void {
+		this.toggle.domNode.tabIndex = focusable ? 0 : -1;
+	}
+
 }
 
 export class Toggle extends Widget {
-  private readonly _onChange = this._register(new Emitter<boolean>())
-  readonly onChange: Event<boolean /* via keyboard */> = this._onChange.event
 
-  private readonly _onKeyDown = this._register(new Emitter<IKeyboardEvent>())
-  readonly onKeyDown: Event<IKeyboardEvent> = this._onKeyDown.event
+	private readonly _onChange = this._register(new Emitter<boolean>());
+	readonly onChange: Event<boolean /* via keyboard */> = this._onChange.event;
 
-  private readonly _opts: IToggleOpts
-  private _icon: ThemeIcon | undefined
-  readonly domNode: HTMLElement
+	private readonly _onKeyDown = this._register(new Emitter<IKeyboardEvent>());
+	readonly onKeyDown: Event<IKeyboardEvent> = this._onKeyDown.event;
 
-  private _checked: boolean
-  private _hover: IUpdatableHover
+	private readonly _opts: IToggleOpts;
+	private _icon: ThemeIcon | undefined;
+	readonly domNode: HTMLElement;
 
-  constructor(opts: IToggleOpts) {
-    super()
+	private _checked: boolean;
+	private _hover: IUpdatableHover;
 
-    this._opts = opts
-    this._checked = this._opts.isChecked
+	constructor(opts: IToggleOpts) {
+		super();
 
-    const classes = ["monaco-custom-toggle"]
-    if (this._opts.icon) {
-      this._icon = this._opts.icon
-      classes.push(...ThemeIcon.asClassNameArray(this._icon))
-    }
-    if (this._opts.actionClassName) {
-      classes.push(...this._opts.actionClassName.split(" "))
-    }
-    if (this._checked) {
-      classes.push("checked")
-    }
+		this._opts = opts;
+		this._checked = this._opts.isChecked;
 
-    this.domNode = document.createElement("div")
-    this._hover = this._register(
-      getBaseLayerHoverDelegate().setupUpdatableHover(
-        opts.hoverDelegate ?? getDefaultHoverDelegate("mouse"),
-        this.domNode,
-        this._opts.title,
-      ),
-    )
-    this.domNode.classList.add(...classes)
-    if (!this._opts.notFocusable) {
-      this.domNode.tabIndex = 0
-    }
-    this.domNode.setAttribute("role", "checkbox")
-    this.domNode.setAttribute("aria-checked", String(this._checked))
-    this.domNode.setAttribute("aria-label", this._opts.title)
+		const classes = ['monaco-custom-toggle'];
+		if (this._opts.icon) {
+			this._icon = this._opts.icon;
+			classes.push(...ThemeIcon.asClassNameArray(this._icon));
+		}
+		if (this._opts.actionClassName) {
+			classes.push(...this._opts.actionClassName.split(' '));
+		}
+		if (this._checked) {
+			classes.push('checked');
+		}
 
-    this.applyStyles()
+		this.domNode = document.createElement('div');
+		this._hover = this._register(getBaseLayerHoverDelegate().setupUpdatableHover(opts.hoverDelegate ?? getDefaultHoverDelegate('mouse'), this.domNode, this._opts.title));
+		this.domNode.classList.add(...classes);
+		if (!this._opts.notFocusable) {
+			this.domNode.tabIndex = 0;
+		}
+		this.domNode.setAttribute('role', 'checkbox');
+		this.domNode.setAttribute('aria-checked', String(this._checked));
+		this.domNode.setAttribute('aria-label', this._opts.title);
 
-    this.onclick(this.domNode, (ev) => {
-      if (this.enabled) {
-        this.checked = !this._checked
-        this._onChange.fire(false)
-        ev.preventDefault()
-      }
-    })
+		this.applyStyles();
 
-    this._register(this.ignoreGesture(this.domNode))
+		this.onclick(this.domNode, (ev) => {
+			if (this.enabled) {
+				this.checked = !this._checked;
+				this._onChange.fire(false);
+				ev.preventDefault();
+			}
+		});
 
-    this.onkeydown(this.domNode, (keyboardEvent) => {
-      if (
-        keyboardEvent.keyCode === KeyCode.Space ||
-        keyboardEvent.keyCode === KeyCode.Enter
-      ) {
-        this.checked = !this._checked
-        this._onChange.fire(true)
-        keyboardEvent.preventDefault()
-        keyboardEvent.stopPropagation()
-        return
-      }
+		this._register(this.ignoreGesture(this.domNode));
 
-      this._onKeyDown.fire(keyboardEvent)
-    })
-  }
+		this.onkeydown(this.domNode, (keyboardEvent) => {
+			if (keyboardEvent.keyCode === KeyCode.Space || keyboardEvent.keyCode === KeyCode.Enter) {
+				this.checked = !this._checked;
+				this._onChange.fire(true);
+				keyboardEvent.preventDefault();
+				keyboardEvent.stopPropagation();
+				return;
+			}
 
-  get enabled(): boolean {
-    return this.domNode.getAttribute("aria-disabled") !== "true"
-  }
+			this._onKeyDown.fire(keyboardEvent);
+		});
+	}
 
-  focus(): void {
-    this.domNode.focus()
-  }
+	get enabled(): boolean {
+		return this.domNode.getAttribute('aria-disabled') !== 'true';
+	}
 
-  get checked(): boolean {
-    return this._checked
-  }
+	focus(): void {
+		this.domNode.focus();
+	}
 
-  set checked(newIsChecked: boolean) {
-    this._checked = newIsChecked
+	get checked(): boolean {
+		return this._checked;
+	}
 
-    this.domNode.setAttribute("aria-checked", String(this._checked))
-    this.domNode.classList.toggle("checked", this._checked)
+	set checked(newIsChecked: boolean) {
+		this._checked = newIsChecked;
 
-    this.applyStyles()
-  }
+		this.domNode.setAttribute('aria-checked', String(this._checked));
+		this.domNode.classList.toggle('checked', this._checked);
 
-  setIcon(icon: ThemeIcon | undefined): void {
-    if (this._icon) {
-      this.domNode.classList.remove(...ThemeIcon.asClassNameArray(this._icon))
-    }
-    this._icon = icon
-    if (this._icon) {
-      this.domNode.classList.add(...ThemeIcon.asClassNameArray(this._icon))
-    }
-  }
+		this.applyStyles();
+	}
 
-  width(): number {
-    return (
-      2 /*margin left*/ + 2 /*border*/ + 2 /*padding*/ + 16 /* icon width */
-    )
-  }
+	setIcon(icon: ThemeIcon | undefined): void {
+		if (this._icon) {
+			this.domNode.classList.remove(...ThemeIcon.asClassNameArray(this._icon));
+		}
+		this._icon = icon;
+		if (this._icon) {
+			this.domNode.classList.add(...ThemeIcon.asClassNameArray(this._icon));
+		}
+	}
 
-  protected applyStyles(): void {
-    if (this.domNode) {
-      this.domNode.style.borderColor =
-        (this._checked && this._opts.inputActiveOptionBorder) || ""
-      this.domNode.style.color =
-        (this._checked && this._opts.inputActiveOptionForeground) || "inherit"
-      this.domNode.style.backgroundColor =
-        (this._checked && this._opts.inputActiveOptionBackground) || ""
-    }
-  }
+	width(): number {
+		return 2 /*margin left*/ + 2 /*border*/ + 2 /*padding*/ + 16 /* icon width */;
+	}
 
-  enable(): void {
-    this.domNode.setAttribute("aria-disabled", String(false))
-  }
+	protected applyStyles(): void {
+		if (this.domNode) {
+			this.domNode.style.borderColor = (this._checked && this._opts.inputActiveOptionBorder) || '';
+			this.domNode.style.color = (this._checked && this._opts.inputActiveOptionForeground) || 'inherit';
+			this.domNode.style.backgroundColor = (this._checked && this._opts.inputActiveOptionBackground) || '';
+		}
+	}
 
-  disable(): void {
-    this.domNode.setAttribute("aria-disabled", String(true))
-  }
+	enable(): void {
+		this.domNode.setAttribute('aria-disabled', String(false));
+	}
 
-  setTitle(newTitle: string): void {
-    this._hover.update(newTitle)
-    this.domNode.setAttribute("aria-label", newTitle)
-  }
+	disable(): void {
+		this.domNode.setAttribute('aria-disabled', String(true));
+	}
 
-  set visible(visible: boolean) {
-    this.domNode.style.display = visible ? "" : "none"
-  }
+	setTitle(newTitle: string): void {
+		this._hover.update(newTitle);
+		this.domNode.setAttribute('aria-label', newTitle);
+	}
 
-  get visible() {
-    return this.domNode.style.display !== "none"
-  }
+	set visible(visible: boolean) {
+		this.domNode.style.display = visible ? '' : 'none';
+	}
+
+	get visible() {
+		return this.domNode.style.display !== 'none';
+	}
 }
 
 export class Checkbox extends Widget {
-  static readonly CLASS_NAME = "monaco-checkbox"
 
-  private readonly _onChange = this._register(new Emitter<boolean>())
-  readonly onChange: Event<boolean /* via keyboard */> = this._onChange.event
+	static readonly CLASS_NAME = 'monaco-checkbox';
 
-  private checkbox: Toggle
-  private styles: ICheckboxStyles
+	private readonly _onChange = this._register(new Emitter<boolean>());
+	readonly onChange: Event<boolean /* via keyboard */> = this._onChange.event;
 
-  readonly domNode: HTMLElement
+	private checkbox: Toggle;
+	private styles: ICheckboxStyles;
 
-  constructor(
-    private title: string,
-    private isChecked: boolean,
-    styles: ICheckboxStyles,
-  ) {
-    super()
+	readonly domNode: HTMLElement;
 
-    this.checkbox = this._register(
-      new Toggle({
-        title: this.title,
-        isChecked: this.isChecked,
-        icon: Codicon.check,
-        actionClassName: Checkbox.CLASS_NAME,
-        ...unthemedToggleStyles,
-      }),
-    )
+	constructor(private title: string, private isChecked: boolean, styles: ICheckboxStyles) {
+		super();
 
-    this.domNode = this.checkbox.domNode
+		this.checkbox = this._register(new Toggle({ title: this.title, isChecked: this.isChecked, icon: Codicon.check, actionClassName: Checkbox.CLASS_NAME, ...unthemedToggleStyles }));
 
-    this.styles = styles
+		this.domNode = this.checkbox.domNode;
 
-    this.applyStyles()
+		this.styles = styles;
 
-    this._register(
-      this.checkbox.onChange((keyboard) => {
-        this.applyStyles()
-        this._onChange.fire(keyboard)
-      }),
-    )
-  }
+		this.applyStyles();
 
-  get checked(): boolean {
-    return this.checkbox.checked
-  }
+		this._register(this.checkbox.onChange(keyboard => {
+			this.applyStyles();
+			this._onChange.fire(keyboard);
+		}));
+	}
 
-  set checked(newIsChecked: boolean) {
-    this.checkbox.checked = newIsChecked
+	get checked(): boolean {
+		return this.checkbox.checked;
+	}
 
-    this.applyStyles()
-  }
+	set checked(newIsChecked: boolean) {
+		this.checkbox.checked = newIsChecked;
 
-  focus(): void {
-    this.domNode.focus()
-  }
+		this.applyStyles();
+	}
 
-  hasFocus(): boolean {
-    return isActiveElement(this.domNode)
-  }
+	focus(): void {
+		this.domNode.focus();
+	}
 
-  enable(): void {
-    this.checkbox.enable()
-  }
+	hasFocus(): boolean {
+		return isActiveElement(this.domNode);
+	}
 
-  disable(): void {
-    this.checkbox.disable()
-  }
+	enable(): void {
+		this.checkbox.enable();
+	}
 
-  protected applyStyles(): void {
-    this.domNode.style.color = this.styles.checkboxForeground || ""
-    this.domNode.style.backgroundColor = this.styles.checkboxBackground || ""
-    this.domNode.style.borderColor = this.styles.checkboxBorder || ""
-  }
+	disable(): void {
+		this.checkbox.disable();
+	}
+
+	protected applyStyles(): void {
+		this.domNode.style.color = this.styles.checkboxForeground || '';
+		this.domNode.style.backgroundColor = this.styles.checkboxBackground || '';
+		this.domNode.style.borderColor = this.styles.checkboxBorder || '';
+	}
 }
 
 export interface ICheckboxActionViewItemOptions extends IActionViewItemOptions {
-  checkboxStyles: ICheckboxStyles
+	checkboxStyles: ICheckboxStyles;
 }
 
 export class CheckboxActionViewItem extends BaseActionViewItem {
-  protected readonly toggle: Checkbox
-  private cssClass?: string
 
-  constructor(
-    context: any,
-    action: IAction,
-    options: ICheckboxActionViewItemOptions,
-  ) {
-    super(context, action, options)
+	protected readonly toggle: Checkbox;
+	private cssClass?: string;
 
-    this.toggle = this._register(
-      new Checkbox(
-        this._action.label,
-        !!this._action.checked,
-        options.checkboxStyles,
-      ),
-    )
-    this._register(this.toggle.onChange(() => this.onChange()))
-  }
+	constructor(context: any, action: IAction, options: ICheckboxActionViewItemOptions) {
+		super(context, action, options);
 
-  override render(container: HTMLElement): void {
-    this.element = container
-    this.element.classList.add("checkbox-action-item")
-    this.element.appendChild(this.toggle.domNode)
-    if ((<IActionViewItemOptions>this.options).label && this._action.label) {
-      const label = this.element.appendChild(
-        $("span.checkbox-label", undefined, this._action.label),
-      )
-      this._register(
-        addDisposableListener(label, EventType.CLICK, (e: MouseEvent) => {
-          this.toggle.checked = !this.toggle.checked
-          e.stopPropagation()
-          e.preventDefault()
-          this.onChange()
-        }),
-      )
-    }
+		this.toggle = this._register(new Checkbox(this._action.label, !!this._action.checked, options.checkboxStyles));
+		this._register(this.toggle.onChange(() => this.onChange()));
+	}
 
-    this.updateEnabled()
-    this.updateClass()
-    this.updateChecked()
-  }
+	override render(container: HTMLElement): void {
+		this.element = container;
+		this.element.classList.add('checkbox-action-item');
+		this.element.appendChild(this.toggle.domNode);
+		if ((<IActionViewItemOptions>this.options).label && this._action.label) {
+			const label = this.element.appendChild($('span.checkbox-label', undefined, this._action.label));
+			this._register(addDisposableListener(label, EventType.CLICK, (e: MouseEvent) => {
+				this.toggle.checked = !this.toggle.checked;
+				e.stopPropagation();
+				e.preventDefault();
+				this.onChange();
+			}));
+		}
 
-  private onChange(): void {
-    this._action.checked = !!this.toggle && this.toggle.checked
-    this.actionRunner.run(this._action, this._context)
-  }
+		this.updateEnabled();
+		this.updateClass();
+		this.updateChecked();
+	}
 
-  protected override updateEnabled(): void {
-    if (this.isEnabled()) {
-      this.toggle.enable()
-    } else {
-      this.toggle.disable()
-    }
-    if (this.action.enabled) {
-      this.element?.classList.remove("disabled")
-    } else {
-      this.element?.classList.add("disabled")
-    }
-  }
+	private onChange(): void {
+		this._action.checked = !!this.toggle && this.toggle.checked;
+		this.actionRunner.run(this._action, this._context);
+	}
 
-  protected override updateChecked(): void {
-    this.toggle.checked = !!this._action.checked
-  }
+	protected override updateEnabled(): void {
+		if (this.isEnabled()) {
+			this.toggle.enable();
+		} else {
+			this.toggle.disable();
+		}
+		if (this.action.enabled) {
+			this.element?.classList.remove('disabled');
+		} else {
+			this.element?.classList.add('disabled');
+		}
+	}
 
-  protected override updateClass(): void {
-    if (this.cssClass) {
-      this.toggle.domNode.classList.remove(...this.cssClass.split(" "))
-    }
-    this.cssClass = this.getClass()
-    if (this.cssClass) {
-      this.toggle.domNode.classList.add(...this.cssClass.split(" "))
-    }
-  }
+	protected override updateChecked(): void {
+		this.toggle.checked = !!this._action.checked;
+	}
 
-  override focus(): void {
-    this.toggle.domNode.tabIndex = 0
-    this.toggle.focus()
-  }
+	protected override updateClass(): void {
+		if (this.cssClass) {
+			this.toggle.domNode.classList.remove(...this.cssClass.split(' '));
+		}
+		this.cssClass = this.getClass();
+		if (this.cssClass) {
+			this.toggle.domNode.classList.add(...this.cssClass.split(' '));
+		}
+	}
 
-  override blur(): void {
-    this.toggle.domNode.tabIndex = -1
-    this.toggle.domNode.blur()
-  }
+	override focus(): void {
+		this.toggle.domNode.tabIndex = 0;
+		this.toggle.focus();
+	}
 
-  override setFocusable(focusable: boolean): void {
-    this.toggle.domNode.tabIndex = focusable ? 0 : -1
-  }
+	override blur(): void {
+		this.toggle.domNode.tabIndex = -1;
+		this.toggle.domNode.blur();
+	}
+
+	override setFocusable(focusable: boolean): void {
+		this.toggle.domNode.tabIndex = focusable ? 0 : -1;
+	}
+
 }

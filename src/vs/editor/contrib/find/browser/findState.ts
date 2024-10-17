@@ -42,7 +42,7 @@ export const enum FindOptionOverride {
 }
 
 export interface INewFindReplaceState<
-  T extends { update: (value: T) => void } = { update: () => {} },
+  T extends { update: (value: T) => void } = { update: () => {} }
 > {
   searchString?: string
   replaceString?: string
@@ -64,7 +64,7 @@ export interface INewFindReplaceState<
 
 function effectiveOptionValue(
   override: FindOptionOverride,
-  value: boolean,
+  value: boolean
 ): boolean {
   if (override === FindOptionOverride.True) {
     return true
@@ -76,7 +76,7 @@ function effectiveOptionValue(
 }
 
 export class FindReplaceState<
-  T extends { update: (value: T) => void } = { update: () => {} },
+  T extends { update: (value: T) => void } = { update: () => {} }
 > extends Disposable {
   private _searchString: string
   private _replaceString: string
@@ -98,7 +98,7 @@ export class FindReplaceState<
   private _isSearching: boolean
   private _filters: T | null
   private readonly _onFindReplaceStateChange = this._register(
-    new Emitter<FindReplaceStateChangedEvent>(),
+    new Emitter<FindReplaceStateChangedEvent>()
   )
 
   public get searchString(): string {
@@ -186,7 +186,7 @@ export class FindReplaceState<
   public changeMatchInfo(
     matchesPosition: number,
     matchesCount: number,
-    currentMatch: Range | undefined,
+    currentMatch: Range | undefined
   ): void {
     const changeEvent: FindReplaceStateChangedEvent = {
       moveCursor: false,
@@ -243,7 +243,7 @@ export class FindReplaceState<
   public change(
     newState: INewFindReplaceState<T>,
     moveCursor: boolean,
-    updateHistory: boolean = true,
+    updateHistory: boolean = true
   ): void {
     const changeEvent: FindReplaceStateChangedEvent = {
       moveCursor: moveCursor,

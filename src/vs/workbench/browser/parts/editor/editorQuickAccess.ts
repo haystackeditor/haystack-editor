@@ -78,7 +78,7 @@ export abstract class BaseEditorQuickAccessProvider extends PickerQuickAccessPro
     @IEditorService protected readonly editorService: IEditorService,
     @IModelService private readonly modelService: IModelService,
     @ILanguageService private readonly languageService: ILanguageService,
-    @IHaystackService private readonly _haystackService: IHaystackService,
+    @IHaystackService private readonly _haystackService: IHaystackService
   ) {
     super(prefix, {
       canAcceptInBackground: true,
@@ -91,7 +91,7 @@ export abstract class BaseEditorQuickAccessProvider extends PickerQuickAccessPro
 
   override provide(
     picker: IQuickPick<IEditorQuickPickItem>,
-    token: CancellationToken,
+    token: CancellationToken
   ): IDisposable {
     // Reset the pick state for this run
     this.pickState.reset(!!picker.quickNavigate)
@@ -101,7 +101,7 @@ export abstract class BaseEditorQuickAccessProvider extends PickerQuickAccessPro
   }
 
   protected _getPicks(
-    filter: string,
+    filter: string
   ): Array<IEditorQuickPickItem | IQuickPickSeparator> {
     const query = prepareQuery(filter)
 
@@ -118,7 +118,7 @@ export abstract class BaseEditorQuickAccessProvider extends PickerQuickAccessPro
           query,
           true,
           quickPickItemScorerAccessor,
-          this.pickState.scorerCache,
+          this.pickState.scorerCache
         )
         if (!itemScore.score) {
           return false
@@ -131,7 +131,7 @@ export abstract class BaseEditorQuickAccessProvider extends PickerQuickAccessPro
         }
 
         return true
-      },
+      }
     )
 
     // Sorting
@@ -150,7 +150,7 @@ export abstract class BaseEditorQuickAccessProvider extends PickerQuickAccessPro
           query,
           true,
           quickPickItemScorerAccessor,
-          this.pickState.scorerCache,
+          this.pickState.scorerCache
         )
       })
     }
@@ -217,13 +217,13 @@ export abstract class BaseEditorQuickAccessProvider extends PickerQuickAccessPro
                     "entryAriaLabelWithGroupDirty",
                     "{0}, unsaved changes, {1}",
                     nameAndDescription,
-                    mapGroupIdToGroupAriaLabel.get(groupId),
+                    mapGroupIdToGroupAriaLabel.get(groupId)
                   )
                 : localize(
                     "entryAriaLabelWithGroup",
                     "{0}, {1}",
                     nameAndDescription,
-                    mapGroupIdToGroupAriaLabel.get(groupId),
+                    mapGroupIdToGroupAriaLabel.get(groupId)
                   )
             }
 
@@ -231,7 +231,7 @@ export abstract class BaseEditorQuickAccessProvider extends PickerQuickAccessPro
               ? localize(
                   "entryAriaLabelDirty",
                   "{0}, unsaved changes",
-                  nameAndDescription,
+                  nameAndDescription
                 )
               : nameAndDescription
           })(),
@@ -241,7 +241,7 @@ export abstract class BaseEditorQuickAccessProvider extends PickerQuickAccessPro
             this.languageService,
             resource,
             undefined,
-            editor.getIcon(),
+            editor.getIcon()
           ).concat(editor.getLabelExtraClasses()),
           italic: !this.editorGroupService.getGroup(groupId)?.isPinned(editor),
           buttons: (() => {
@@ -271,7 +271,7 @@ export abstract class BaseEditorQuickAccessProvider extends PickerQuickAccessPro
             this._haystackService.panToEditorWithIdentifier(editor, groupId)
           },
         }
-      },
+      }
     )
   }
 
@@ -288,7 +288,7 @@ export class ActiveGroupEditorsByMostRecentlyUsedQuickAccess extends BaseEditorQ
     @IEditorService editorService: IEditorService,
     @IModelService modelService: IModelService,
     @ILanguageService languageService: ILanguageService,
-    @IHaystackService haystackService: IHaystackService,
+    @IHaystackService haystackService: IHaystackService
   ) {
     super(
       ActiveGroupEditorsByMostRecentlyUsedQuickAccess.PREFIX,
@@ -296,7 +296,7 @@ export class ActiveGroupEditorsByMostRecentlyUsedQuickAccess extends BaseEditorQ
       editorService,
       modelService,
       languageService,
-      haystackService,
+      haystackService
     )
   }
 
@@ -304,7 +304,7 @@ export class ActiveGroupEditorsByMostRecentlyUsedQuickAccess extends BaseEditorQ
     const entries: IEditorIdentifier[] = []
 
     for (const editor of this.editorService.getEditors(
-      EditorsOrder.MOST_RECENTLY_ACTIVE,
+      EditorsOrder.MOST_RECENTLY_ACTIVE
     )) {
       entries.push(editor)
     }
@@ -325,7 +325,7 @@ export class AllEditorsByAppearanceQuickAccess extends BaseEditorQuickAccessProv
     @IEditorService editorService: IEditorService,
     @IModelService modelService: IModelService,
     @ILanguageService languageService: ILanguageService,
-    @IHaystackService haystackService: IHaystackService,
+    @IHaystackService haystackService: IHaystackService
   ) {
     super(
       AllEditorsByAppearanceQuickAccess.PREFIX,
@@ -333,7 +333,7 @@ export class AllEditorsByAppearanceQuickAccess extends BaseEditorQuickAccessProv
       editorService,
       modelService,
       languageService,
-      haystackService,
+      haystackService
     )
   }
 
@@ -341,7 +341,7 @@ export class AllEditorsByAppearanceQuickAccess extends BaseEditorQuickAccessProv
     const entries: IEditorIdentifier[] = []
 
     for (const group of this.editorGroupService.getGroups(
-      GroupsOrder.GRID_APPEARANCE,
+      GroupsOrder.GRID_APPEARANCE
     )) {
       for (const editor of group.getEditors(EditorsOrder.SEQUENTIAL)) {
         entries.push({ editor, groupId: group.id })
@@ -364,7 +364,7 @@ export class AllEditorsByMostRecentlyUsedQuickAccess extends BaseEditorQuickAcce
     @IEditorService editorService: IEditorService,
     @IModelService modelService: IModelService,
     @ILanguageService languageService: ILanguageService,
-    @IHaystackService haystackService: IHaystackService,
+    @IHaystackService haystackService: IHaystackService
   ) {
     super(
       AllEditorsByMostRecentlyUsedQuickAccess.PREFIX,
@@ -372,7 +372,7 @@ export class AllEditorsByMostRecentlyUsedQuickAccess extends BaseEditorQuickAcce
       editorService,
       modelService,
       languageService,
-      haystackService,
+      haystackService
     )
   }
 
@@ -380,7 +380,7 @@ export class AllEditorsByMostRecentlyUsedQuickAccess extends BaseEditorQuickAcce
     const entries: IEditorIdentifier[] = []
 
     for (const editor of this.editorService.getEditors(
-      EditorsOrder.MOST_RECENTLY_ACTIVE,
+      EditorsOrder.MOST_RECENTLY_ACTIVE
     )) {
       entries.push(editor)
     }

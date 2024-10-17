@@ -48,11 +48,11 @@ export interface IWorkspaceSymbol {
 export interface IWorkspaceSymbolProvider {
   provideWorkspaceSymbols(
     search: string,
-    token: CancellationToken,
+    token: CancellationToken
   ): ProviderResult<IWorkspaceSymbol[]>
   resolveWorkspaceSymbol?(
     item: IWorkspaceSymbol,
-    token: CancellationToken,
+    token: CancellationToken
   ): ProviderResult<IWorkspaceSymbol>
 }
 
@@ -86,13 +86,13 @@ export namespace WorkspaceSymbolProviderRegistry {
 export class WorkspaceSymbolItem {
   constructor(
     readonly symbol: IWorkspaceSymbol,
-    readonly provider: IWorkspaceSymbolProvider,
+    readonly provider: IWorkspaceSymbolProvider
   ) {}
 }
 
 export async function getWorkspaceSymbols(
   query: string,
-  token: CancellationToken = CancellationToken.None,
+  token: CancellationToken = CancellationToken.None
 ): Promise<WorkspaceSymbolItem[]> {
   const all: WorkspaceSymbolItem[] = []
 
@@ -109,7 +109,7 @@ export async function getWorkspaceSymbols(
       } catch (err) {
         onUnexpectedExternalError(err)
       }
-    },
+    }
   )
 
   await Promise.all(promises)
@@ -122,7 +122,7 @@ export async function getWorkspaceSymbols(
 
   function compareItems(
     a: WorkspaceSymbolItem,
-    b: WorkspaceSymbolItem,
+    b: WorkspaceSymbolItem
   ): number {
     let res = compare(a.symbol.name, b.symbol.name)
     if (res === 0) {
@@ -131,7 +131,7 @@ export async function getWorkspaceSymbols(
     if (res === 0) {
       res = compare(
         a.symbol.location.uri.toString(),
-        b.symbol.location.uri.toString(),
+        b.symbol.location.uri.toString()
       )
     }
     if (res === 0) {
@@ -139,12 +139,12 @@ export async function getWorkspaceSymbols(
         if (
           !Range.areIntersecting(
             a.symbol.location.range,
-            b.symbol.location.range,
+            b.symbol.location.range
           )
         ) {
           res = Range.compareRangesUsingStarts(
             a.symbol.location.range,
-            b.symbol.location.range,
+            b.symbol.location.range
           )
         }
       } else if (
@@ -189,7 +189,7 @@ export interface IWorkbenchSearchConfiguration extends ISearchConfiguration {
  * Helper to return all opened editors with resources not belonging to the currently opened workspace.
  */
 export function getOutOfWorkspaceEditorResources(
-  accessor: ServicesAccessor,
+  accessor: ServicesAccessor
 ): URI[] {
   const editorService = accessor.get(IEditorService)
   const contextService = accessor.get(IWorkspaceContextService)
@@ -199,13 +199,13 @@ export function getOutOfWorkspaceEditorResources(
     .map((editor) =>
       EditorResourceAccessor.getOriginalUri(editor, {
         supportSideBySide: SideBySideEditor.PRIMARY,
-      }),
+      })
     )
     .filter(
       (resource) =>
         !!resource &&
         !contextService.isInsideWorkspace(resource) &&
-        fileService.hasProvider(resource),
+        fileService.hasProvider(resource)
     )
 
   return resources as URI[]
@@ -221,7 +221,7 @@ export interface IFilterAndRange {
 
 export function extractRangeFromFilter(
   filter: string,
-  unless?: string[],
+  unless?: string[]
 ): IFilterAndRange | undefined {
   // Ignore when the unless character not the first character or is before the line colon pattern
   if (
@@ -296,7 +296,7 @@ export enum SearchUIState {
 
 export const SearchStateKey = new RawContextKey<SearchUIState>(
   "searchState",
-  SearchUIState.Idle,
+  SearchUIState.Idle
 )
 
 export interface NotebookPriorityInfo {

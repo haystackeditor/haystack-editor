@@ -9,134 +9,102 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import {
-  Disposable,
-  DisposableStore,
-  IDisposable,
-} from "vs/base/common/lifecycle"
-import { Registry } from "vs/platform/registry/common/platform"
-import {
-  IWorkbenchContribution,
-  IWorkbenchContributionsRegistry,
-  Extensions as WorkbenchExtensions,
-} from "vs/workbench/common/contributions"
-import { INotebookKernelService } from "vs/workbench/contrib/notebook/common/notebookKernelService"
-import { INotebookLoggingService } from "vs/workbench/contrib/notebook/common/notebookLoggingService"
-import { IExtensionService } from "vs/workbench/services/extensions/common/extensions"
-import { LifecyclePhase } from "vs/workbench/services/lifecycle/common/lifecycle"
 
-class NotebookKernelDetection
-  extends Disposable
-  implements IWorkbenchContribution
-{
-  private _detectionMap = new Map<string, IDisposable>()
-  private readonly _localDisposableStore = this._register(new DisposableStore())
+import { Disposable, DisposableStore, IDisposable } from 'vs/base/common/lifecycle';
+import { Registry } from 'vs/platform/registry/common/platform';
+import { IWorkbenchContribution, IWorkbenchContributionsRegistry, Extensions as WorkbenchExtensions } from 'vs/workbench/common/contributions';
+import { INotebookKernelService } from 'vs/workbench/contrib/notebook/common/notebookKernelService';
+import { INotebookLoggingService } from 'vs/workbench/contrib/notebook/common/notebookLoggingService';
+import { IExtensionService } from 'vs/workbench/services/extensions/common/extensions';
+import { LifecyclePhase } from 'vs/workbench/services/lifecycle/common/lifecycle';
 
-  constructor(
-    @INotebookKernelService
-    private readonly _notebookKernelService: INotebookKernelService,
-    @IExtensionService private readonly _extensionService: IExtensionService,
-    @INotebookLoggingService
-    private readonly _notebookLoggingService: INotebookLoggingService,
-  ) {
-    super()
+class NotebookKernelDetection extends Disposable implements IWorkbenchContribution {
+	private _detectionMap = new Map<string, IDisposable>();
+	private readonly _localDisposableStore = this._register(new DisposableStore());
 
-    this._registerListeners()
-  }
+	constructor(
+		@INotebookKernelService private readonly _notebookKernelService: INotebookKernelService,
+		@IExtensionService private readonly _extensionService: IExtensionService,
+		@INotebookLoggingService private readonly _notebookLoggingService: INotebookLoggingService
+	) {
+		super();
 
-  private _registerListeners() {
-    this._localDisposableStore.clear()
+		this._registerListeners();
+	}
 
-    this._localDisposableStore.add(
-      this._extensionService.onWillActivateByEvent((e) => {
-        if (e.event.startsWith("onNotebook:")) {
-          if (this._extensionService.activationEventIsDone(e.event)) {
-            return
-          }
+	private _registerListeners() {
+		this._localDisposableStore.clear();
 
-          // parse the event to get the notebook type
-          const notebookType = e.event.substring("onNotebook:".length)
+		this._localDisposableStore.add(this._extensionService.onWillActivateByEvent(e => {
+			if (e.event.startsWith('onNotebook:')) {
+				if (this._extensionService.activationEventIsDone(e.event)) {
+					return;
+				}
 
-          if (notebookType === "*") {
-            // ignore
-            return
-          }
+				// parse the event to get the notebook type
+				const notebookType = e.event.substring('onNotebook:'.length);
 
-          let shouldStartDetection = false
+				if (notebookType === '*') {
+					// ignore
+					return;
+				}
 
-          const extensionStatus = this._extensionService.getExtensionsStatus()
-          this._extensionService.extensions.forEach((extension) => {
-            if (extensionStatus[extension.identifier.value].activationTimes) {
-              // already activated
-              return
-            }
-            if (extension.activationEvents?.includes(e.event)) {
-              shouldStartDetection = true
-            }
-          })
+				let shouldStartDetection = false;
 
-          if (shouldStartDetection && !this._detectionMap.has(notebookType)) {
-            this._notebookLoggingService.debug(
-              "KernelDetection",
-              `start extension activation for ${notebookType}`,
-            )
-            const task =
-              this._notebookKernelService.registerNotebookKernelDetectionTask({
-                notebookType: notebookType,
-              })
+				const extensionStatus = this._extensionService.getExtensionsStatus();
+				this._extensionService.extensions.forEach(extension => {
+					if (extensionStatus[extension.identifier.value].activationTimes) {
+						// already activated
+						return;
+					}
+					if (extension.activationEvents?.includes(e.event)) {
+						shouldStartDetection = true;
+					}
+				});
 
-            this._detectionMap.set(notebookType, task)
-          }
-        }
-      }),
-    )
+				if (shouldStartDetection && !this._detectionMap.has(notebookType)) {
+					this._notebookLoggingService.debug('KernelDetection', `start extension activation for ${notebookType}`);
+					const task = this._notebookKernelService.registerNotebookKernelDetectionTask({
+						notebookType: notebookType
+					});
 
-    let timer: any = null
+					this._detectionMap.set(notebookType, task);
+				}
+			}
+		}));
 
-    this._localDisposableStore.add(
-      this._extensionService.onDidChangeExtensionsStatus(() => {
-        if (timer) {
-          clearTimeout(timer)
-        }
+		let timer: any = null;
 
-        // activation state might not be updated yet, postpone to next frame
-        timer = setTimeout(() => {
-          const taskToDelete: string[] = []
-          for (const [notebookType, task] of this._detectionMap) {
-            if (
-              this._extensionService.activationEventIsDone(
-                `onNotebook:${notebookType}`,
-              )
-            ) {
-              this._notebookLoggingService.debug(
-                "KernelDetection",
-                `finish extension activation for ${notebookType}`,
-              )
-              taskToDelete.push(notebookType)
-              task.dispose()
-            }
-          }
+		this._localDisposableStore.add(this._extensionService.onDidChangeExtensionsStatus(() => {
+			if (timer) {
+				clearTimeout(timer);
+			}
 
-          taskToDelete.forEach((notebookType) => {
-            this._detectionMap.delete(notebookType)
-          })
-        })
-      }),
-    )
+			// activation state might not be updated yet, postpone to next frame
+			timer = setTimeout(() => {
+				const taskToDelete: string[] = [];
+				for (const [notebookType, task] of this._detectionMap) {
+					if (this._extensionService.activationEventIsDone(`onNotebook:${notebookType}`)) {
+						this._notebookLoggingService.debug('KernelDetection', `finish extension activation for ${notebookType}`);
+						taskToDelete.push(notebookType);
+						task.dispose();
+					}
+				}
 
-    this._localDisposableStore.add({
-      dispose: () => {
-        if (timer) {
-          clearTimeout(timer)
-        }
-      },
-    })
-  }
+				taskToDelete.forEach(notebookType => {
+					this._detectionMap.delete(notebookType);
+				});
+			});
+		}));
+
+		this._localDisposableStore.add({
+			dispose: () => {
+				if (timer) {
+					clearTimeout(timer);
+				}
+			}
+		});
+	}
 }
 
-Registry.as<IWorkbenchContributionsRegistry>(
-  WorkbenchExtensions.Workbench,
-).registerWorkbenchContribution(
-  NotebookKernelDetection,
-  LifecyclePhase.Restored,
-)
+Registry.as<IWorkbenchContributionsRegistry>(WorkbenchExtensions.Workbench).registerWorkbenchContribution(NotebookKernelDetection, LifecyclePhase.Restored);

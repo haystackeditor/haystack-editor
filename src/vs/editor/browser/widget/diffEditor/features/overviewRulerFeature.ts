@@ -62,13 +62,13 @@ export class OverviewRulerFeature extends Disposable {
     private readonly _rootWidth: IObservable<number>,
     private readonly _rootHeight: IObservable<number>,
     private readonly _modifiedEditorLayoutInfo: IObservable<EditorLayoutInfo | null>,
-    @IThemeService private readonly _themeService: IThemeService,
+    @IThemeService private readonly _themeService: IThemeService
   ) {
     super()
 
     const currentColorTheme = observableFromEvent(
       this._themeService.onDidColorThemeChange,
-      () => this._themeService.getColorTheme(),
+      () => this._themeService.getColorTheme()
     )
 
     const currentColors = derived((reader) => {
@@ -95,7 +95,7 @@ export class OverviewRulerFeature extends Disposable {
       },
     }).root
     this._register(
-      appendRemoveOnDispose(diffOverviewRoot, viewportDomElement.domNode),
+      appendRemoveOnDispose(diffOverviewRoot, viewportDomElement.domNode)
     )
     this._register(
       addStandardDisposableListener(
@@ -103,8 +103,8 @@ export class OverviewRulerFeature extends Disposable {
         EventType.POINTER_DOWN,
         (e) => {
           this._editors.modified.delegateVerticalScrollbarPointerDown(e)
-        },
-      ),
+        }
+      )
     )
     this._register(
       addDisposableListener(
@@ -113,8 +113,8 @@ export class OverviewRulerFeature extends Disposable {
         (e: IMouseWheelEvent) => {
           this._editors.modified.delegateScrollFromMouseWheelEvent(e)
         },
-        { passive: false },
-      ),
+        { passive: false }
+      )
     )
     this._register(appendRemoveOnDispose(this._rootElement, diffOverviewRoot))
 
@@ -125,29 +125,29 @@ export class OverviewRulerFeature extends Disposable {
 
         const originalOverviewRuler =
           this._editors.original.createOverviewRuler(
-            "original diffOverviewRuler",
+            "original diffOverviewRuler"
           )
         if (originalOverviewRuler) {
           store.add(originalOverviewRuler)
           store.add(
             appendRemoveOnDispose(
               diffOverviewRoot,
-              originalOverviewRuler.getDomNode(),
-            ),
+              originalOverviewRuler.getDomNode()
+            )
           )
         }
 
         const modifiedOverviewRuler =
           this._editors.modified.createOverviewRuler(
-            "modified diffOverviewRuler",
+            "modified diffOverviewRuler"
           )
         if (modifiedOverviewRuler) {
           store.add(modifiedOverviewRuler)
           store.add(
             appendRemoveOnDispose(
               diffOverviewRoot,
-              modifiedOverviewRuler.getDomNode(),
-            ),
+              modifiedOverviewRuler.getDomNode()
+            )
           )
         }
 
@@ -158,19 +158,19 @@ export class OverviewRulerFeature extends Disposable {
 
         const origViewZonesChanged = observableSignalFromEvent(
           "viewZoneChanged",
-          this._editors.original.onDidChangeViewZones,
+          this._editors.original.onDidChangeViewZones
         )
         const modViewZonesChanged = observableSignalFromEvent(
           "viewZoneChanged",
-          this._editors.modified.onDidChangeViewZones,
+          this._editors.modified.onDidChangeViewZones
         )
         const origHiddenRangesChanged = observableSignalFromEvent(
           "hiddenRangesChanged",
-          this._editors.original.onDidChangeHiddenAreas,
+          this._editors.original.onDidChangeHiddenAreas
         )
         const modHiddenRangesChanged = observableSignalFromEvent(
           "hiddenRangesChanged",
-          this._editors.modified.onDidChangeHiddenAreas,
+          this._editors.modified.onDidChangeHiddenAreas
         )
 
         store.add(
@@ -187,7 +187,7 @@ export class OverviewRulerFeature extends Disposable {
             function createZones(
               ranges: LineRange[],
               color: Color,
-              editor: CodeEditorWidget,
+              editor: CodeEditorWidget
             ) {
               const vm = editor._getViewModel()
               if (!vm) {
@@ -198,11 +198,11 @@ export class OverviewRulerFeature extends Disposable {
                 .map((r) => {
                   const start =
                     vm.coordinatesConverter.convertModelPositionToViewPosition(
-                      new Position(r.startLineNumber, 1),
+                      new Position(r.startLineNumber, 1)
                     )
                   const end =
                     vm.coordinatesConverter.convertModelPositionToViewPosition(
-                      new Position(r.endLineNumberExclusive, 1),
+                      new Position(r.endLineNumberExclusive, 1)
                     )
                   // By computing the lineCount, we won't ask the view model later for the bottom vertical position.
                   // (The view model will take into account the alignment viewzones, which will give
@@ -212,7 +212,7 @@ export class OverviewRulerFeature extends Disposable {
                     start.lineNumber,
                     end.lineNumber,
                     lineCount,
-                    color.toString(),
+                    color.toString()
                   )
                 })
             }
@@ -220,16 +220,16 @@ export class OverviewRulerFeature extends Disposable {
             const originalZones = createZones(
               (diff || []).map((d) => d.lineRangeMapping.original),
               colors.removeColor,
-              this._editors.original,
+              this._editors.original
             )
             const modifiedZones = createZones(
               (diff || []).map((d) => d.lineRangeMapping.modified),
               colors.insertColor,
-              this._editors.modified,
+              this._editors.modified
             )
             originalOverviewRuler?.setZones(originalZones)
             modifiedOverviewRuler?.setZones(modifiedZones)
-          }),
+          })
         )
 
         store.add(
@@ -259,7 +259,7 @@ export class OverviewRulerFeature extends Disposable {
                 this._editors.modifiedScrollHeight.read(reader)
 
               const scrollBarOptions = this._editors.modified.getOption(
-                EditorOption.scrollbar,
+                EditorOption.scrollbar
               )
               const state = new ScrollbarState(
                 scrollBarOptions.verticalHasArrows
@@ -269,7 +269,7 @@ export class OverviewRulerFeature extends Disposable {
                 0,
                 layoutInfo.height,
                 scrollHeight,
-                scrollTop,
+                scrollTop
               )
 
               viewportDomElement.setTop(state.getSliderPosition())
@@ -283,11 +283,11 @@ export class OverviewRulerFeature extends Disposable {
             diffOverviewRoot.style.left =
               width - OverviewRulerFeature.ENTIRE_DIFF_OVERVIEW_WIDTH + "px"
             viewportDomElement.setWidth(
-              OverviewRulerFeature.ENTIRE_DIFF_OVERVIEW_WIDTH,
+              OverviewRulerFeature.ENTIRE_DIFF_OVERVIEW_WIDTH
             )
-          }),
+          })
         )
-      }),
+      })
     )
   }
 }

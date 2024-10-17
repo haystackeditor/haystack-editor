@@ -9,318 +9,259 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { basename, extUri } from "vs/base/common/resources"
-import { URI } from "vs/base/common/uri"
-import { Range, IRange } from "vs/editor/common/core/range"
-import {
-  IMarker,
-  MarkerSeverity,
-  IRelatedInformation,
-  IMarkerData,
-} from "vs/platform/markers/common/markers"
-import { isNonEmptyArray } from "vs/base/common/arrays"
-import { ResourceMap } from "vs/base/common/map"
-import { Emitter, Event } from "vs/base/common/event"
-import { Hasher } from "vs/base/common/hash"
-import { splitLines } from "vs/base/common/strings"
-import { IMatch } from "vs/base/common/filters"
-import { unsupportedSchemas } from "vs/platform/markers/common/markerService"
+import { basename, extUri } from 'vs/base/common/resources';
+import { URI } from 'vs/base/common/uri';
+import { Range, IRange } from 'vs/editor/common/core/range';
+import { IMarker, MarkerSeverity, IRelatedInformation, IMarkerData } from 'vs/platform/markers/common/markers';
+import { isNonEmptyArray } from 'vs/base/common/arrays';
+import { ResourceMap } from 'vs/base/common/map';
+import { Emitter, Event } from 'vs/base/common/event';
+import { Hasher } from 'vs/base/common/hash';
+import { splitLines } from 'vs/base/common/strings';
+import { IMatch } from 'vs/base/common/filters';
+import { unsupportedSchemas } from 'vs/platform/markers/common/markerService';
 
-export type MarkerElement = ResourceMarkers | Marker | RelatedInformation
+export type MarkerElement = ResourceMarkers | Marker | RelatedInformation;
 
 export function compareMarkersByUri(a: IMarker, b: IMarker) {
-  return extUri.compare(a.resource, b.resource)
+	return extUri.compare(a.resource, b.resource);
 }
 
-function compareResourceMarkers(
-  a: ResourceMarkers,
-  b: ResourceMarkers,
-): number {
-  const [firstMarkerOfA] = a.markers
-  const [firstMarkerOfB] = b.markers
-  let res = 0
-  if (firstMarkerOfA && firstMarkerOfB) {
-    res = MarkerSeverity.compare(
-      firstMarkerOfA.marker.severity,
-      firstMarkerOfB.marker.severity,
-    )
-  }
-  if (res === 0) {
-    res = a.path.localeCompare(b.path) || a.name.localeCompare(b.name)
-  }
-  return res
+function compareResourceMarkers(a: ResourceMarkers, b: ResourceMarkers): number {
+	const [firstMarkerOfA] = a.markers;
+	const [firstMarkerOfB] = b.markers;
+	let res = 0;
+	if (firstMarkerOfA && firstMarkerOfB) {
+		res = MarkerSeverity.compare(firstMarkerOfA.marker.severity, firstMarkerOfB.marker.severity);
+	}
+	if (res === 0) {
+		res = a.path.localeCompare(b.path) || a.name.localeCompare(b.name);
+	}
+	return res;
 }
+
 
 export class ResourceMarkers {
-  readonly path: string
 
-  readonly name: string
+	readonly path: string;
 
-  private _markersMap = new ResourceMap<Marker[]>()
-  private _cachedMarkers: Marker[] | undefined
-  private _total: number = 0
+	readonly name: string;
 
-  constructor(
-    readonly id: string,
-    readonly resource: URI,
-  ) {
-    this.path = this.resource.fsPath
-    this.name = basename(this.resource)
-  }
+	private _markersMap = new ResourceMap<Marker[]>();
+	private _cachedMarkers: Marker[] | undefined;
+	private _total: number = 0;
 
-  get markers(): readonly Marker[] {
-    if (!this._cachedMarkers) {
-      this._cachedMarkers = [...this._markersMap.values()]
-        .flat()
-        .sort(ResourceMarkers._compareMarkers)
-    }
-    return this._cachedMarkers
-  }
+	constructor(readonly id: string, readonly resource: URI) {
+		this.path = this.resource.fsPath;
+		this.name = basename(this.resource);
+	}
 
-  has(uri: URI) {
-    return this._markersMap.has(uri)
-  }
+	get markers(): readonly Marker[] {
+		if (!this._cachedMarkers) {
+			this._cachedMarkers = [...this._markersMap.values()].flat().sort(ResourceMarkers._compareMarkers);
+		}
+		return this._cachedMarkers;
+	}
 
-  set(uri: URI, marker: Marker[]) {
-    this.delete(uri)
-    if (isNonEmptyArray(marker)) {
-      this._markersMap.set(uri, marker)
-      this._total += marker.length
-      this._cachedMarkers = undefined
-    }
-  }
+	has(uri: URI) {
+		return this._markersMap.has(uri);
+	}
 
-  delete(uri: URI) {
-    const array = this._markersMap.get(uri)
-    if (array) {
-      this._total -= array.length
-      this._cachedMarkers = undefined
-      this._markersMap.delete(uri)
-    }
-  }
+	set(uri: URI, marker: Marker[]) {
+		this.delete(uri);
+		if (isNonEmptyArray(marker)) {
+			this._markersMap.set(uri, marker);
+			this._total += marker.length;
+			this._cachedMarkers = undefined;
+		}
+	}
 
-  get total() {
-    return this._total
-  }
+	delete(uri: URI) {
+		const array = this._markersMap.get(uri);
+		if (array) {
+			this._total -= array.length;
+			this._cachedMarkers = undefined;
+			this._markersMap.delete(uri);
+		}
+	}
 
-  private static _compareMarkers(a: Marker, b: Marker): number {
-    return (
-      MarkerSeverity.compare(a.marker.severity, b.marker.severity) ||
-      extUri.compare(a.resource, b.resource) ||
-      Range.compareRangesUsingStarts(a.marker, b.marker)
-    )
-  }
+	get total() {
+		return this._total;
+	}
+
+	private static _compareMarkers(a: Marker, b: Marker): number {
+		return MarkerSeverity.compare(a.marker.severity, b.marker.severity)
+			|| extUri.compare(a.resource, b.resource)
+			|| Range.compareRangesUsingStarts(a.marker, b.marker);
+	}
 }
 
 export class Marker {
-  get resource(): URI {
-    return this.marker.resource
-  }
-  get range(): IRange {
-    return this.marker
-  }
 
-  private _lines: string[] | undefined
-  get lines(): string[] {
-    if (!this._lines) {
-      this._lines = splitLines(this.marker.message)
-    }
-    return this._lines
-  }
+	get resource(): URI { return this.marker.resource; }
+	get range(): IRange { return this.marker; }
 
-  constructor(
-    readonly id: string,
-    readonly marker: IMarker,
-    readonly relatedInformation: RelatedInformation[] = [],
-  ) {}
+	private _lines: string[] | undefined;
+	get lines(): string[] {
+		if (!this._lines) {
+			this._lines = splitLines(this.marker.message);
+		}
+		return this._lines;
+	}
 
-  toString(): string {
-    return JSON.stringify(
-      {
-        ...this.marker,
-        resource: this.marker.resource.path,
-        relatedInformation: this.relatedInformation.length
-          ? this.relatedInformation.map((r) => ({
-              ...r.raw,
-              resource: r.raw.resource.path,
-            }))
-          : undefined,
-      },
-      null,
-      "\t",
-    )
-  }
+	constructor(
+		readonly id: string,
+		readonly marker: IMarker,
+		readonly relatedInformation: RelatedInformation[] = []
+	) { }
+
+	toString(): string {
+		return JSON.stringify({
+			...this.marker,
+			resource: this.marker.resource.path,
+			relatedInformation: this.relatedInformation.length ? this.relatedInformation.map(r => ({ ...r.raw, resource: r.raw.resource.path })) : undefined
+		}, null, '\t');
+	}
 }
 
 export class MarkerTableItem extends Marker {
-  constructor(
-    marker: Marker,
-    readonly sourceMatches?: IMatch[],
-    readonly codeMatches?: IMatch[],
-    readonly messageMatches?: IMatch[],
-    readonly fileMatches?: IMatch[],
-    readonly ownerMatches?: IMatch[],
-  ) {
-    super(marker.id, marker.marker, marker.relatedInformation)
-  }
+	constructor(
+		marker: Marker,
+		readonly sourceMatches?: IMatch[],
+		readonly codeMatches?: IMatch[],
+		readonly messageMatches?: IMatch[],
+		readonly fileMatches?: IMatch[],
+		readonly ownerMatches?: IMatch[],
+	) {
+		super(marker.id, marker.marker, marker.relatedInformation);
+	}
 }
 
 export class RelatedInformation {
-  constructor(
-    readonly id: string,
-    readonly marker: IMarker,
-    readonly raw: IRelatedInformation,
-  ) {}
+
+	constructor(
+		readonly id: string,
+		readonly marker: IMarker,
+		readonly raw: IRelatedInformation
+	) { }
 }
 
 export interface MarkerChangesEvent {
-  readonly added: Set<ResourceMarkers>
-  readonly removed: Set<ResourceMarkers>
-  readonly updated: Set<ResourceMarkers>
+	readonly added: Set<ResourceMarkers>;
+	readonly removed: Set<ResourceMarkers>;
+	readonly updated: Set<ResourceMarkers>;
 }
 
 export class MarkersModel {
-  private cachedSortedResources: ResourceMarkers[] | undefined = undefined
 
-  private readonly _onDidChange = new Emitter<MarkerChangesEvent>()
-  readonly onDidChange: Event<MarkerChangesEvent> = this._onDidChange.event
+	private cachedSortedResources: ResourceMarkers[] | undefined = undefined;
 
-  get resourceMarkers(): ResourceMarkers[] {
-    if (!this.cachedSortedResources) {
-      this.cachedSortedResources = [...this.resourcesByUri.values()].sort(
-        compareResourceMarkers,
-      )
-    }
-    return this.cachedSortedResources
-  }
+	private readonly _onDidChange = new Emitter<MarkerChangesEvent>();
+	readonly onDidChange: Event<MarkerChangesEvent> = this._onDidChange.event;
 
-  private resourcesByUri: Map<string, ResourceMarkers>
+	get resourceMarkers(): ResourceMarkers[] {
+		if (!this.cachedSortedResources) {
+			this.cachedSortedResources = [...this.resourcesByUri.values()].sort(compareResourceMarkers);
+		}
+		return this.cachedSortedResources;
+	}
 
-  constructor() {
-    this.resourcesByUri = new Map<string, ResourceMarkers>()
-  }
+	private resourcesByUri: Map<string, ResourceMarkers>;
 
-  reset(): void {
-    const removed = new Set<ResourceMarkers>()
-    for (const resourceMarker of this.resourcesByUri.values()) {
-      removed.add(resourceMarker)
-    }
-    this.resourcesByUri.clear()
-    this._total = 0
-    this._onDidChange.fire({
-      removed,
-      added: new Set<ResourceMarkers>(),
-      updated: new Set<ResourceMarkers>(),
-    })
-  }
+	constructor() {
+		this.resourcesByUri = new Map<string, ResourceMarkers>();
+	}
 
-  private _total: number = 0
-  get total(): number {
-    return this._total
-  }
+	reset(): void {
+		const removed = new Set<ResourceMarkers>();
+		for (const resourceMarker of this.resourcesByUri.values()) {
+			removed.add(resourceMarker);
+		}
+		this.resourcesByUri.clear();
+		this._total = 0;
+		this._onDidChange.fire({ removed, added: new Set<ResourceMarkers>(), updated: new Set<ResourceMarkers>() });
+	}
 
-  getResourceMarkers(resource: URI): ResourceMarkers | null {
-    return (
-      this.resourcesByUri.get(extUri.getComparisonKey(resource, true)) ?? null
-    )
-  }
+	private _total: number = 0;
+	get total(): number {
+		return this._total;
+	}
 
-  setResourceMarkers(resourcesMarkers: [URI, IMarker[]][]): void {
-    const change: MarkerChangesEvent = {
-      added: new Set(),
-      removed: new Set(),
-      updated: new Set(),
-    }
-    for (const [resource, rawMarkers] of resourcesMarkers) {
-      if (unsupportedSchemas.has(resource.scheme)) {
-        continue
-      }
+	getResourceMarkers(resource: URI): ResourceMarkers | null {
+		return this.resourcesByUri.get(extUri.getComparisonKey(resource, true)) ?? null;
+	}
 
-      const key = extUri.getComparisonKey(resource, true)
-      let resourceMarkers = this.resourcesByUri.get(key)
+	setResourceMarkers(resourcesMarkers: [URI, IMarker[]][]): void {
+		const change: MarkerChangesEvent = { added: new Set(), removed: new Set(), updated: new Set() };
+		for (const [resource, rawMarkers] of resourcesMarkers) {
 
-      if (isNonEmptyArray(rawMarkers)) {
-        // update, add
-        if (!resourceMarkers) {
-          const resourceMarkersId = this.id(resource.toString())
-          resourceMarkers = new ResourceMarkers(
-            resourceMarkersId,
-            resource.with({ fragment: null }),
-          )
-          this.resourcesByUri.set(key, resourceMarkers)
-          change.added.add(resourceMarkers)
-        } else {
-          change.updated.add(resourceMarkers)
-        }
-        const markersCountByKey = new Map<string, number>()
-        const markers = rawMarkers.map((rawMarker) => {
-          const key = IMarkerData.makeKey(rawMarker)
-          const index = markersCountByKey.get(key) || 0
-          markersCountByKey.set(key, index + 1)
+			if (unsupportedSchemas.has(resource.scheme)) {
+				continue;
+			}
 
-          const markerId = this.id(
-            resourceMarkers!.id,
-            key,
-            index,
-            rawMarker.resource.toString(),
-          )
+			const key = extUri.getComparisonKey(resource, true);
+			let resourceMarkers = this.resourcesByUri.get(key);
 
-          let relatedInformation: RelatedInformation[] | undefined = undefined
-          if (rawMarker.relatedInformation) {
-            relatedInformation = rawMarker.relatedInformation.map(
-              (r, index) =>
-                new RelatedInformation(
-                  this.id(
-                    markerId,
-                    r.resource.toString(),
-                    r.startLineNumber,
-                    r.startColumn,
-                    r.endLineNumber,
-                    r.endColumn,
-                    index,
-                  ),
-                  rawMarker,
-                  r,
-                ),
-            )
-          }
+			if (isNonEmptyArray(rawMarkers)) {
+				// update, add
+				if (!resourceMarkers) {
+					const resourceMarkersId = this.id(resource.toString());
+					resourceMarkers = new ResourceMarkers(resourceMarkersId, resource.with({ fragment: null }));
+					this.resourcesByUri.set(key, resourceMarkers);
+					change.added.add(resourceMarkers);
+				} else {
+					change.updated.add(resourceMarkers);
+				}
+				const markersCountByKey = new Map<string, number>();
+				const markers = rawMarkers.map((rawMarker) => {
+					const key = IMarkerData.makeKey(rawMarker);
+					const index = markersCountByKey.get(key) || 0;
+					markersCountByKey.set(key, index + 1);
 
-          return new Marker(markerId, rawMarker, relatedInformation)
-        })
+					const markerId = this.id(resourceMarkers!.id, key, index, rawMarker.resource.toString());
 
-        this._total -= resourceMarkers.total
-        resourceMarkers.set(resource, markers)
-        this._total += resourceMarkers.total
-      } else if (resourceMarkers) {
-        // clear
-        this._total -= resourceMarkers.total
-        resourceMarkers.delete(resource)
-        this._total += resourceMarkers.total
-        if (resourceMarkers.total === 0) {
-          this.resourcesByUri.delete(key)
-          change.removed.add(resourceMarkers)
-        } else {
-          change.updated.add(resourceMarkers)
-        }
-      }
-    }
+					let relatedInformation: RelatedInformation[] | undefined = undefined;
+					if (rawMarker.relatedInformation) {
+						relatedInformation = rawMarker.relatedInformation.map((r, index) => new RelatedInformation(this.id(markerId, r.resource.toString(), r.startLineNumber, r.startColumn, r.endLineNumber, r.endColumn, index), rawMarker, r));
+					}
 
-    this.cachedSortedResources = undefined
-    if (change.added.size || change.removed.size || change.updated.size) {
-      this._onDidChange.fire(change)
-    }
-  }
+					return new Marker(markerId, rawMarker, relatedInformation);
+				});
 
-  private id(...values: (string | number)[]): string {
-    const hasher = new Hasher()
-    for (const value of values) {
-      hasher.hash(value)
-    }
-    return `${hasher.value}`
-  }
+				this._total -= resourceMarkers.total;
+				resourceMarkers.set(resource, markers);
+				this._total += resourceMarkers.total;
 
-  dispose(): void {
-    this._onDidChange.dispose()
-    this.resourcesByUri.clear()
-  }
+			} else if (resourceMarkers) {
+				// clear
+				this._total -= resourceMarkers.total;
+				resourceMarkers.delete(resource);
+				this._total += resourceMarkers.total;
+				if (resourceMarkers.total === 0) {
+					this.resourcesByUri.delete(key);
+					change.removed.add(resourceMarkers);
+				} else {
+					change.updated.add(resourceMarkers);
+				}
+			}
+		}
+
+		this.cachedSortedResources = undefined;
+		if (change.added.size || change.removed.size || change.updated.size) {
+			this._onDidChange.fire(change);
+		}
+	}
+
+	private id(...values: (string | number)[]): string {
+		const hasher = new Hasher();
+		for (const value of values) {
+			hasher.hash(value);
+		}
+		return `${hasher.value}`;
+	}
+
+	dispose(): void {
+		this._onDidChange.dispose();
+		this.resourcesByUri.clear();
+	}
 }

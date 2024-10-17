@@ -33,14 +33,14 @@ const issPath = path.join(__dirname, "win32", "haystack.iss")
 const innoSetupPath = path.join(
   path.dirname(path.dirname(require.resolve("innosetup"))),
   "bin",
-  "ISCC.exe",
+  "ISCC.exe"
 )
 const signWin32Path = path.join(
   repoPath,
   "build",
   "azure-pipelines",
   "common",
-  "sign-win32",
+  "sign-win32"
 )
 
 function packageInnoSetup(iss, options, cb) {
@@ -61,8 +61,8 @@ function packageInnoSetup(iss, options, cb) {
   keys.forEach((key) =>
     assert(
       typeof definitions[key] === "string",
-      `Missing value for '${key}' in Inno Setup package step`,
-    ),
+      `Missing value for '${key}' in Inno Setup package step`
+    )
   )
 
   const defs = keys.map((key) => `/d${key}=${definitions[key]}`)
@@ -102,16 +102,16 @@ function buildWin32Setup(arch, target) {
 
     const originalProductJsonPath = path.join(
       sourcePath,
-      "resources/app/product.json",
+      "resources/app/product.json"
     )
     const productJsonPath = path.join(outputPath, "product.json")
     const productJson = JSON.parse(
-      fs.readFileSync(originalProductJsonPath, "utf8"),
+      fs.readFileSync(originalProductJsonPath, "utf8")
     )
     productJson["target"] = target
     fs.writeFileSync(
       productJsonPath,
-      JSON.stringify(productJson, undefined, "\t"),
+      JSON.stringify(productJson, undefined, "\t")
     )
 
     const quality = product.quality || "dev"
@@ -150,8 +150,9 @@ function buildWin32Setup(arch, target) {
 
     if (quality === "insider") {
       definitions["AppxPackage"] = `code_insiders_explorer_${arch}.appx`
-      definitions["AppxPackageFullname"] =
-        `Microsoft.${product.win32RegValueName}_1.0.0.0_neutral__8wekyb3d8bbwe`
+      definitions[
+        "AppxPackageFullname"
+      ] = `Microsoft.${product.win32RegValueName}_1.0.0.0_neutral__8wekyb3d8bbwe`
     }
 
     packageInnoSetup(issPath, { definitions }, cb)
@@ -167,8 +168,8 @@ function defineWin32SetupTasks(arch, target) {
   gulp.task(
     task.define(
       `vscode-win32-${arch}-${target}-setup`,
-      task.series(cleanTask, buildWin32Setup(arch, target)),
-    ),
+      task.series(cleanTask, buildWin32Setup(arch, target))
+    )
   )
 }
 
@@ -205,16 +206,16 @@ gulp.task(
     "vscode-win32-x64-inno-updater",
     task.series(
       copyInnoUpdater("x64"),
-      updateIcon(path.join(buildPath("x64"), "tools", "inno_updater.exe")),
-    ),
-  ),
+      updateIcon(path.join(buildPath("x64"), "tools", "inno_updater.exe"))
+    )
+  )
 )
 gulp.task(
   task.define(
     "vscode-win32-arm64-inno-updater",
     task.series(
       copyInnoUpdater("arm64"),
-      updateIcon(path.join(buildPath("arm64"), "tools", "inno_updater.exe")),
-    ),
-  ),
+      updateIcon(path.join(buildPath("arm64"), "tools", "inno_updater.exe"))
+    )
+  )
 )

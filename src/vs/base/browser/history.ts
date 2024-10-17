@@ -9,16 +9,18 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Event } from "vs/base/common/event"
+import { Event } from 'vs/base/common/event';
 
 export interface IHistoryNavigationWidget {
-  readonly element: HTMLElement
 
-  showPreviousValue(): void
+	readonly element: HTMLElement;
 
-  showNextValue(): void
+	showPreviousValue(): void;
 
-  onDidFocus: Event<void>
+	showNextValue(): void;
 
-  onDidBlur: Event<void>
+	onDidFocus: Event<void>;
+
+	onDidBlur: Event<void>;
+
 }

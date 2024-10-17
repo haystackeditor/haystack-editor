@@ -197,7 +197,7 @@ export class Extension implements IExtension {
     @ITelemetryService private readonly telemetryService: ITelemetryService,
     @ILogService private readonly logService: ILogService,
     @IFileService private readonly fileService: IFileService,
-    @IProductService private readonly productService: IProductService,
+    @IProductService private readonly productService: IProductService
   ) {
     this.resourceExtension = resourceExtensionInfo?.resourceExtension
   }
@@ -277,7 +277,7 @@ export class Extension implements IExtension {
 
     return resources.joinPath(
       URI.parse(this.productService.extensionsGallery.publisherUrl),
-      this.publisher,
+      this.publisher
     )
   }
 
@@ -302,13 +302,13 @@ export class Extension implements IExtension {
   get latestVersion(): string {
     return this.gallery
       ? this.gallery.version
-      : (this.getManifestFromLocalOrResource()?.version ?? "")
+      : this.getManifestFromLocalOrResource()?.version ?? ""
   }
 
   get description(): string {
     return this.gallery
       ? this.gallery.description
-      : (this.getManifestFromLocalOrResource()?.description ?? "")
+      : this.getManifestFromLocalOrResource()?.description ?? ""
   }
 
   get url(): string | undefined {
@@ -340,7 +340,7 @@ export class Extension implements IExtension {
   private get localIconUrl(): string | null {
     if (this.local && this.local.manifest.icon) {
       return FileAccess.uriToBrowserUri(
-        resources.joinPath(this.local.location, this.local.manifest.icon),
+        resources.joinPath(this.local.location, this.local.manifest.icon)
       ).toString(true)
     }
     return null
@@ -351,8 +351,8 @@ export class Extension implements IExtension {
       return FileAccess.uriToBrowserUri(
         resources.joinPath(
           this.resourceExtension.location,
-          this.resourceExtension.manifest.icon,
-        ),
+          this.resourceExtension.manifest.icon
+        )
       ).toString(true)
     }
     return null
@@ -376,7 +376,7 @@ export class Extension implements IExtension {
           this.local.manifest.contributes.themes.length
         ) {
           return FileAccess.asBrowserUri(
-            "vs/workbench/contrib/extensions/browser/media/theme-icon.png",
+            "vs/workbench/contrib/extensions/browser/media/theme-icon.png"
           ).toString(true)
         }
         if (
@@ -384,7 +384,7 @@ export class Extension implements IExtension {
           this.local.manifest.contributes.grammars.length
         ) {
           return FileAccess.asBrowserUri(
-            "vs/workbench/contrib/extensions/browser/media/language-icon.svg",
+            "vs/workbench/contrib/extensions/browser/media/language-icon.svg"
           ).toString(true)
         }
       }
@@ -464,7 +464,7 @@ export class Extension implements IExtension {
       !!this.local &&
       !!this.gallery &&
       ![TargetPlatform.UNDEFINED, TargetPlatform.WEB].includes(
-        this.local.targetPlatform,
+        this.local.targetPlatform
       ) &&
       this.gallery.properties.targetPlatform !== TargetPlatform.WEB &&
       this.local.targetPlatform !== this.gallery.properties.targetPlatform &&
@@ -518,7 +518,7 @@ export class Extension implements IExtension {
   }
 
   async getManifest(
-    token: CancellationToken,
+    token: CancellationToken
   ): Promise<IExtensionManifest | null> {
     const local = this.getLocal()
     if (local) {
@@ -531,7 +531,7 @@ export class Extension implements IExtension {
       }
       this.logService.error(
         nls.localize("Manifest is not found", "Manifest is not found"),
-        this.identifier.id,
+        this.identifier.id
       )
       return null
     }
@@ -572,7 +572,7 @@ export class Extension implements IExtension {
       }
       this.telemetryService.publicLog(
         "extensions:NotFoundReadMe",
-        this.telemetryData,
+        this.telemetryData
       )
     }
 
@@ -586,7 +586,7 @@ ${this.description}
 
     if (this.resourceExtension?.readmeUri) {
       const content = await this.fileService.readFile(
-        this.resourceExtension?.readmeUri,
+        this.resourceExtension?.readmeUri
       )
       return content.value.toString()
     }
@@ -619,7 +619,7 @@ ${this.description}
 
     if (this.type === ExtensionType.System) {
       return Promise.resolve(
-        `Please check the [VS Code Release Notes](command:${ShowCurrentReleaseNotesActionId}) for changes to the built-in extensions.`,
+        `Please check the [VS Code Release Notes](command:${ShowCurrentReleaseNotesActionId}) for changes to the built-in extensions.`
       )
     }
 
@@ -692,10 +692,10 @@ const EXTENSIONS_AUTO_UPDATE_KEY = "extensions.autoUpdate"
 class Extensions extends Disposable {
   static updateExtensionFromControlManifest(
     extension: Extension,
-    extensionsControlManifest: IExtensionsControlManifest,
+    extensionsControlManifest: IExtensionsControlManifest
   ): void {
     extension.isMalicious = extensionsControlManifest.malicious.some(
-      (identifier) => areSameExtensions(extension.identifier, identifier),
+      (identifier) => areSameExtensions(extension.identifier, identifier)
     )
     extension.deprecationInfo = extensionsControlManifest.deprecated
       ? extensionsControlManifest.deprecated[
@@ -707,7 +707,7 @@ class Extensions extends Disposable {
   private readonly _onChange = this._register(
     new Emitter<
       { extension: Extension; operation?: InstallOperation } | undefined
-    >(),
+    >()
   )
   get onChange() {
     return this._onChange.event
@@ -737,44 +737,44 @@ class Extensions extends Disposable {
     private readonly workbenchExtensionManagementService: IWorkbenchExtensionManagementService,
     @ITelemetryService private readonly telemetryService: ITelemetryService,
     @IInstantiationService
-    private readonly instantiationService: IInstantiationService,
+    private readonly instantiationService: IInstantiationService
   ) {
     super()
     this._register(
       server.extensionManagementService.onInstallExtension((e) =>
-        this.onInstallExtension(e),
-      ),
+        this.onInstallExtension(e)
+      )
     )
     this._register(
       server.extensionManagementService.onDidInstallExtensions((e) =>
-        this.onDidInstallExtensions(e),
-      ),
+        this.onDidInstallExtensions(e)
+      )
     )
     this._register(
       server.extensionManagementService.onUninstallExtension((e) =>
-        this.onUninstallExtension(e.identifier),
-      ),
+        this.onUninstallExtension(e.identifier)
+      )
     )
     this._register(
       server.extensionManagementService.onDidUninstallExtension((e) =>
-        this.onDidUninstallExtension(e),
-      ),
+        this.onDidUninstallExtension(e)
+      )
     )
     this._register(
       server.extensionManagementService.onDidUpdateExtensionMetadata((e) =>
-        this.onDidUpdateExtensionMetadata(e),
-      ),
+        this.onDidUpdateExtensionMetadata(e)
+      )
     )
     this._register(
-      server.extensionManagementService.onDidChangeProfile(() => this.reset()),
+      server.extensionManagementService.onDidChangeProfile(() => this.reset())
     )
     this._register(
       extensionEnablementService.onEnablementChanged((e) =>
-        this.onEnablementChanged(e),
-      ),
+        this.onEnablementChanged(e)
+      )
     )
     this._register(
-      Event.any(this.onChange, this.onReset)(() => (this._local = undefined)),
+      Event.any(this.onChange, this.onReset)(() => (this._local = undefined))
     )
     if (this.isWorkspaceServer) {
       this._register(
@@ -782,7 +782,7 @@ class Extensions extends Disposable {
           if (e.workspaceScoped) {
             this.onInstallExtension(e)
           }
-        }),
+        })
       )
       this._register(
         this.workbenchExtensionManagementService.onDidInstallExtensions((e) => {
@@ -790,14 +790,14 @@ class Extensions extends Disposable {
           if (result.length) {
             this.onDidInstallExtensions(result)
           }
-        }),
+        })
       )
       this._register(
         this.workbenchExtensionManagementService.onUninstallExtension((e) => {
           if (e.workspaceScoped) {
             this.onUninstallExtension(e.identifier)
           }
-        }),
+        })
       )
       this._register(
         this.workbenchExtensionManagementService.onDidUninstallExtension(
@@ -805,8 +805,8 @@ class Extensions extends Disposable {
             if (e.workspaceScoped) {
               this.onDidUninstallExtension(e)
             }
-          },
-        ),
+          }
+        )
       )
     }
   }
@@ -821,7 +821,7 @@ class Extensions extends Disposable {
       for (const extension of this.installing) {
         if (
           !this.installed.some((installed) =>
-            areSameExtensions(installed.identifier, extension.identifier),
+            areSameExtensions(installed.identifier, extension.identifier)
           )
         ) {
           this._local.push(extension)
@@ -839,12 +839,12 @@ class Extensions extends Disposable {
 
   async syncInstalledExtensionsWithGallery(
     galleryExtensions: IGalleryExtension[],
-    productVersion: IProductVersion,
+    productVersion: IProductVersion
   ): Promise<void> {
     const extensions =
       await this.mapInstalledExtensionWithCompatibleGalleryExtension(
         galleryExtensions,
-        productVersion,
+        productVersion
       )
     for (const [extension, gallery] of extensions) {
       // update metadata of the extension if it does not exist
@@ -865,7 +865,7 @@ class Extensions extends Disposable {
 
   private async mapInstalledExtensionWithCompatibleGalleryExtension(
     galleryExtensions: IGalleryExtension[],
-    productVersion: IProductVersion,
+    productVersion: IProductVersion
   ): Promise<[Extension, IGalleryExtension][]> {
     const mappedExtensions =
       this.mapInstalledExtensionWithGalleryExtension(galleryExtensions)
@@ -881,7 +881,7 @@ class Extensions extends Disposable {
               gallery,
               extension.local.preRelease,
               targetPlatform,
-              productVersion,
+              productVersion
             )
           ) {
             compatibleGalleryExtensions.push(gallery)
@@ -892,7 +892,7 @@ class Extensions extends Disposable {
             })
           }
         }
-      }),
+      })
     )
     if (compatibleGalleryExtensionsToFetch.length) {
       const result = await this.galleryService.getExtensions(
@@ -903,17 +903,17 @@ class Extensions extends Disposable {
           queryAllVersions: true,
           productVersion,
         },
-        CancellationToken.None,
+        CancellationToken.None
       )
       compatibleGalleryExtensions.push(...result)
     }
     return this.mapInstalledExtensionWithGalleryExtension(
-      compatibleGalleryExtensions,
+      compatibleGalleryExtensions
     )
   }
 
   private mapInstalledExtensionWithGalleryExtension(
-    galleryExtensions: IGalleryExtension[],
+    galleryExtensions: IGalleryExtension[]
   ): [Extension, IGalleryExtension][] {
     const mappedExtensions: [Extension, IGalleryExtension][] = []
     const byUUID = new Map<string, IGalleryExtension>(),
@@ -942,7 +942,7 @@ class Extensions extends Disposable {
 
   private async updateMetadata(
     localExtension: ILocalExtension,
-    gallery: IGalleryExtension,
+    gallery: IGalleryExtension
   ): Promise<ILocalExtension> {
     let isPreReleaseVersion = false
     if (localExtension.manifest.version !== gallery.version) {
@@ -962,7 +962,7 @@ class Extensions extends Disposable {
               version: localExtension.manifest.version,
             },
           ],
-          CancellationToken.None,
+          CancellationToken.None
         )
       )[0]
       isPreReleaseVersion =
@@ -975,7 +975,7 @@ class Extensions extends Disposable {
         publisherDisplayName: gallery.publisherDisplayName,
         publisherId: gallery.publisherId,
         isPreReleaseVersion,
-      },
+      }
     )
   }
 
@@ -988,7 +988,7 @@ class Extensions extends Disposable {
     if (source && !URI.isUri(source)) {
       const extension =
         this.installed.find((e) =>
-          areSameExtensions(e.identifier, source.identifier),
+          areSameExtensions(e.identifier, source.identifier)
         ) ??
         this.instantiationService.createInstance(
           Extension,
@@ -997,7 +997,7 @@ class Extensions extends Disposable {
           this.server,
           undefined,
           source,
-          undefined,
+          undefined
         )
       this.installing.push(extension)
       this._onChange.fire({ extension })
@@ -1005,20 +1005,20 @@ class Extensions extends Disposable {
   }
 
   private async fetchInstalledExtensions(
-    productVersion?: IProductVersion,
+    productVersion?: IProductVersion
   ): Promise<void> {
     const extensionsControlManifest =
       await this.server.extensionManagementService.getExtensionsControlManifest()
     const all = await this.server.extensionManagementService.getInstalled(
       undefined,
       undefined,
-      productVersion,
+      productVersion
     )
     if (this.isWorkspaceServer) {
       all.push(
         ...(await this.workbenchExtensionManagementService.getInstalledWorkspaceExtensions(
-          true,
-        )),
+          true
+        ))
       )
     }
 
@@ -1048,11 +1048,11 @@ class Extensions extends Disposable {
         }
         return result
       },
-      [],
+      []
     )
 
     const byId = index(this.installed, (e) =>
-      e.local ? e.local.identifier.id : e.identifier.id,
+      e.local ? e.local.identifier.id : e.identifier.id
     )
     this.installed = installed.map((local) => {
       const extension =
@@ -1064,14 +1064,14 @@ class Extensions extends Disposable {
           this.server,
           local,
           undefined,
-          undefined,
+          undefined
         )
       extension.local = local
       extension.enablementState =
         this.extensionEnablementService.getEnablementState(local)
       Extensions.updateExtensionFromControlManifest(
         extension,
-        extensionsControlManifest,
+        extensionsControlManifest
       )
       return extension
     })
@@ -1086,7 +1086,7 @@ class Extensions extends Disposable {
   }
 
   private async onDidInstallExtensions(
-    results: readonly InstallExtensionResult[],
+    results: readonly InstallExtensionResult[]
   ): Promise<void> {
     for (const event of results) {
       const { local, source } = event
@@ -1094,7 +1094,7 @@ class Extensions extends Disposable {
       const location = source && URI.isUri(source) ? source : undefined
       const installingExtension = gallery
         ? this.installing.filter((e) =>
-            areSameExtensions(e.identifier, gallery.identifier),
+            areSameExtensions(e.identifier, gallery.identifier)
           )[0]
         : null
       this.installing = installingExtension
@@ -1104,20 +1104,20 @@ class Extensions extends Disposable {
       let extension: Extension | undefined = installingExtension
         ? installingExtension
         : location || local
-          ? this.instantiationService.createInstance(
-              Extension,
-              this.stateProvider,
-              this.runtimeStateProvider,
-              this.server,
-              local,
-              undefined,
-              undefined,
-            )
-          : undefined
+        ? this.instantiationService.createInstance(
+            Extension,
+            this.stateProvider,
+            this.runtimeStateProvider,
+            this.server,
+            local,
+            undefined,
+            undefined
+          )
+        : undefined
       if (extension) {
         if (local) {
           const installed = this.installed.filter((e) =>
-            areSameExtensions(e.identifier, extension!.identifier),
+            areSameExtensions(e.identifier, extension!.identifier)
           )[0]
           if (installed) {
             extension = installed
@@ -1130,7 +1130,7 @@ class Extensions extends Disposable {
           }
           Extensions.updateExtensionFromControlManifest(
             extension,
-            await this.server.extensionManagementService.getExtensionsControlManifest(),
+            await this.server.extensionManagementService.getExtensionsControlManifest()
           )
           extension.enablementState =
             this.extensionEnablementService.getEnablementState(local)
@@ -1139,7 +1139,7 @@ class Extensions extends Disposable {
       this._onChange.fire(
         !local || !extension
           ? undefined
-          : { extension, operation: event.operation },
+          : { extension, operation: event.operation }
       )
       if (
         extension &&
@@ -1153,10 +1153,10 @@ class Extensions extends Disposable {
   }
 
   private async onDidUpdateExtensionMetadata(
-    local: ILocalExtension,
+    local: ILocalExtension
   ): Promise<void> {
     const extension = this.installed.find((e) =>
-      areSameExtensions(e.identifier, local.identifier),
+      areSameExtensions(e.identifier, local.identifier)
     )
     if (extension?.local) {
       const hasChanged =
@@ -1170,7 +1170,7 @@ class Extensions extends Disposable {
   }
 
   private async syncInstalledExtensionWithGallery(
-    extension: Extension,
+    extension: Extension
   ): Promise<void> {
     if (!this.galleryService.isEnabled()) {
       return
@@ -1190,7 +1190,7 @@ class Extensions extends Disposable {
         targetPlatform:
           await this.server.extensionManagementService.getTargetPlatform(),
       },
-      CancellationToken.None,
+      CancellationToken.None
     )
     if (compatible) {
       extension.gallery = compatible
@@ -1200,21 +1200,21 @@ class Extensions extends Disposable {
 
   private onUninstallExtension(identifier: IExtensionIdentifier): void {
     const extension = this.installed.filter((e) =>
-      areSameExtensions(e.identifier, identifier),
+      areSameExtensions(e.identifier, identifier)
     )[0]
     if (extension) {
       const uninstalling =
         this.uninstalling.filter((e) =>
-          areSameExtensions(e.identifier, identifier),
+          areSameExtensions(e.identifier, identifier)
         )[0] || extension
       this.uninstalling = [
         uninstalling,
         ...this.uninstalling.filter(
-          (e) => !areSameExtensions(e.identifier, identifier),
+          (e) => !areSameExtensions(e.identifier, identifier)
         ),
       ]
       this._onChange.fire(
-        uninstalling ? { extension: uninstalling } : undefined,
+        uninstalling ? { extension: uninstalling } : undefined
       )
     }
   }
@@ -1225,15 +1225,15 @@ class Extensions extends Disposable {
   }: DidUninstallExtensionEvent): void {
     const uninstalled =
       this.uninstalling.find((e) =>
-        areSameExtensions(e.identifier, identifier),
+        areSameExtensions(e.identifier, identifier)
       ) ||
       this.installed.find((e) => areSameExtensions(e.identifier, identifier))
     this.uninstalling = this.uninstalling.filter(
-      (e) => !areSameExtensions(e.identifier, identifier),
+      (e) => !areSameExtensions(e.identifier, identifier)
     )
     if (!error) {
       this.installed = this.installed.filter(
-        (e) => !areSameExtensions(e.identifier, identifier),
+        (e) => !areSameExtensions(e.identifier, identifier)
       )
     }
     if (uninstalled) {
@@ -1242,12 +1242,12 @@ class Extensions extends Disposable {
   }
 
   private onEnablementChanged(
-    platformExtensions: readonly IPlatformExtension[],
+    platformExtensions: readonly IPlatformExtension[]
   ) {
     const extensions = this.local.filter((e) =>
       platformExtensions.some((p) =>
-        areSameExtensions(e.identifier, p.identifier),
-      ),
+        areSameExtensions(e.identifier, p.identifier)
+      )
     )
     for (const extension of extensions) {
       if (extension.local) {
@@ -1267,17 +1267,14 @@ class Extensions extends Disposable {
       this.installing.some(
         (e) =>
           !!e.gallery &&
-          areSameExtensions(
-            e.gallery.identifier,
-            extension.gallery!.identifier,
-          ),
+          areSameExtensions(e.gallery.identifier, extension.gallery!.identifier)
       )
     ) {
       return ExtensionState.Installing
     }
     if (
       this.uninstalling.some((e) =>
-        areSameExtensions(e.identifier, extension.identifier),
+        areSameExtensions(e.identifier, extension.identifier)
       )
     ) {
       return ExtensionState.Uninstalling
@@ -1287,10 +1284,7 @@ class Extensions extends Disposable {
         e === extension ||
         (e.gallery &&
           extension.gallery &&
-          areSameExtensions(
-            e.gallery.identifier,
-            extension.gallery.identifier,
-          )),
+          areSameExtensions(e.gallery.identifier, extension.gallery.identifier))
     )[0]
     return local ? ExtensionState.Installed : ExtensionState.Uninstalled
   }
@@ -1376,11 +1370,11 @@ export class ExtensionsWorkbenchService
     @IUriIdentityService
     private readonly uriIdentityService: IUriIdentityService,
     @IWorkspaceContextService
-    private readonly workspaceContextService: IWorkspaceContextService,
+    private readonly workspaceContextService: IWorkspaceContextService
   ) {
     super()
     const preferPreReleasesValue = configurationService.getValue(
-      "_extensions.preferPreReleases",
+      "_extensions.preferPreReleases"
     )
     if (!isUndefined(preferPreReleasesValue)) {
       this.preferPreReleases = !!preferPreReleasesValue
@@ -1394,13 +1388,13 @@ export class ExtensionsWorkbenchService
           extensionManagementServerService.localExtensionManagementServer,
           (ext) => this.getExtensionState(ext),
           (ext) => this.getRuntimeState(ext),
-          !extensionManagementServerService.remoteExtensionManagementServer,
-        ),
+          !extensionManagementServerService.remoteExtensionManagementServer
+        )
       )
       this._register(
         this.localExtensions.onChange((e) =>
-          this.onDidChangeExtensions(e?.extension),
-        ),
+          this.onDidChangeExtensions(e?.extension)
+        )
       )
       this._register(this.localExtensions.onReset((e) => this.reset()))
       this.extensionsServers.push(this.localExtensions)
@@ -1412,13 +1406,13 @@ export class ExtensionsWorkbenchService
           extensionManagementServerService.remoteExtensionManagementServer,
           (ext) => this.getExtensionState(ext),
           (ext) => this.getRuntimeState(ext),
-          true,
-        ),
+          true
+        )
       )
       this._register(
         this.remoteExtensions.onChange((e) =>
-          this.onDidChangeExtensions(e?.extension),
-        ),
+          this.onDidChangeExtensions(e?.extension)
+        )
       )
       this._register(this.remoteExtensions.onReset((e) => this.reset()))
       this.extensionsServers.push(this.remoteExtensions)
@@ -1433,27 +1427,27 @@ export class ExtensionsWorkbenchService
           !(
             extensionManagementServerService.remoteExtensionManagementServer ||
             extensionManagementServerService.localExtensionManagementServer
-          ),
-        ),
+          )
+        )
       )
       this._register(
         this.webExtensions.onChange((e) =>
-          this.onDidChangeExtensions(e?.extension),
-        ),
+          this.onDidChangeExtensions(e?.extension)
+        )
       )
       this._register(this.webExtensions.onReset((e) => this.reset()))
       this.extensionsServers.push(this.webExtensions)
     }
 
     this.updatesCheckDelayer = new ThrottledDelayer<void>(
-      ExtensionsWorkbenchService.UpdatesCheckInterval,
+      ExtensionsWorkbenchService.UpdatesCheckInterval
     )
     this.autoUpdateDelayer = new ThrottledDelayer<void>(1000)
     this._register(
       toDisposable(() => {
         this.updatesCheckDelayer.cancel()
         this.autoUpdateDelayer.cancel()
-      }),
+      })
     )
 
     urlService.registerHandler(this)
@@ -1473,8 +1467,8 @@ export class ExtensionsWorkbenchService
     this.onDidChangeRunningExtensions(this.extensionService.extensions, [])
     this._register(
       this.extensionService.onDidChangeExtensions(({ added, removed }) =>
-        this.onDidChangeRunningExtensions(added, removed),
-      ),
+        this.onDidChangeRunningExtensions(added, removed)
+      )
     )
 
     await this.lifecycleService.when(LifecyclePhase.Eventually)
@@ -1487,15 +1481,15 @@ export class ExtensionsWorkbenchService
       Event.debounce(
         this.onChange,
         () => undefined,
-        100,
-      )(() => this.reportProgressFromOtherSources()),
+        100
+      )(() => this.reportProgressFromOtherSources())
     )
     this._register(
       this.storageService.onDidChangeValue(
         StorageScope.APPLICATION,
         EXTENSIONS_AUTO_UPDATE_KEY,
-        this._store,
-      )((e) => this.onDidSelectedExtensionToAutoUpdateValueChange(false)),
+        this._store
+      )((e) => this.onDidSelectedExtensionToAutoUpdateValueChange(false))
     )
   }
 
@@ -1511,7 +1505,7 @@ export class ExtensionsWorkbenchService
             this.checkForUpdates()
           }
         }
-      }),
+      })
     )
     this._register(
       this.extensionEnablementService.onEnablementChanged(
@@ -1519,22 +1513,22 @@ export class ExtensionsWorkbenchService
           if (
             this.getAutoUpdateValue() === "onlyEnabledExtensions" &&
             platformExtensions.some((e) =>
-              this.extensionEnablementService.isEnabled(e),
+              this.extensionEnablementService.isEnabled(e)
             )
           ) {
             this.checkForUpdates()
           }
-        },
-      ),
+        }
+      )
     )
     this._register(
       Event.debounce(
         this.onChange,
         () => undefined,
-        100,
+        100
       )(() =>
-        this.hasOutdatedExtensionsContextKey.set(this.outdated.length > 0),
-      ),
+        this.hasOutdatedExtensionsContextKey.set(this.outdated.length > 0)
+      )
     )
     this._register(
       this.updateService.onStateChange((e) => {
@@ -1548,7 +1542,7 @@ export class ExtensionsWorkbenchService
         ) {
           this.eventuallyCheckForUpdates(true)
         }
-      }),
+      })
     )
 
     // Update AutoUpdate Contexts
@@ -1572,7 +1566,7 @@ export class ExtensionsWorkbenchService
         (extension) =>
           !extension.isBuiltin &&
           (extension.enablementState === EnablementState.EnabledWorkspace ||
-            extension.enablementState === EnablementState.EnabledGlobally),
+            extension.enablementState === EnablementState.EnabledGlobally)
       )
       .map((extension) => ExtensionIdentifier.toKey(extension.identifier.id))
     this.telemetryService.publicLog2<
@@ -1586,7 +1580,7 @@ export class ExtensionsWorkbenchService
 
   private async onDidChangeRunningExtensions(
     added: ReadonlyArray<IExtensionDescription>,
-    removed: ReadonlyArray<IExtensionDescription>,
+    removed: ReadonlyArray<IExtensionDescription>
   ): Promise<void> {
     const changedExtensions: IExtension[] = []
     const extensionsToFetch: IExtensionDescription[] = []
@@ -1594,8 +1588,8 @@ export class ExtensionsWorkbenchService
       const extension = this.installed.find((e) =>
         areSameExtensions(
           { id: desc.identifier.value, uuid: desc.uuid },
-          e.identifier,
-        ),
+          e.identifier
+        )
       )
       if (extension) {
         changedExtensions.push(extension)
@@ -1619,14 +1613,14 @@ export class ExtensionsWorkbenchService
           id: e.identifier.value,
           uuid: e.uuid,
         })),
-        CancellationToken.None,
+        CancellationToken.None
       )
       changedExtensions.push(...extensions)
     }
     if (workspaceExtensions.length) {
       const extensions = await this.getResourceExtensions(
         workspaceExtensions.map((e) => e.extensionLocation),
-        true,
+        true
       )
       changedExtensions.push(...extensions)
     }
@@ -1682,7 +1676,7 @@ export class ExtensionsWorkbenchService
 
   get outdated(): IExtension[] {
     return this.installed.filter(
-      (e) => e.outdated && e.local && e.state === ExtensionState.Installed,
+      (e) => e.outdated && e.local && e.state === ExtensionState.Installed
     )
   }
 
@@ -1738,7 +1732,7 @@ export class ExtensionsWorkbenchService
   queryGallery(token: CancellationToken): Promise<IPager<IExtension>>
   queryGallery(
     options: IQueryOptions,
-    token: CancellationToken,
+    token: CancellationToken
   ): Promise<IPager<IExtension>>
   async queryGallery(arg1: any, arg2?: any): Promise<IPager<IExtension>> {
     if (!this.galleryService.isEnabled()) {
@@ -1764,7 +1758,7 @@ export class ExtensionsWorkbenchService
     this.syncInstalledExtensionsWithGallery(pager.firstPage)
     return {
       firstPage: pager.firstPage.map((gallery) =>
-        this.fromGallery(gallery, extensionsControlManifest),
+        this.fromGallery(gallery, extensionsControlManifest)
       ),
       total: pager.total,
       pageSize: pager.pageSize,
@@ -1772,7 +1766,7 @@ export class ExtensionsWorkbenchService
         const page = await pager.getPage(pageIndex, token)
         this.syncInstalledExtensionsWithGallery(page)
         return page.map((gallery) =>
-          this.fromGallery(gallery, extensionsControlManifest),
+          this.fromGallery(gallery, extensionsControlManifest)
         )
       },
     }
@@ -1780,48 +1774,48 @@ export class ExtensionsWorkbenchService
 
   getExtensions(
     extensionInfos: IExtensionInfo[],
-    token: CancellationToken,
+    token: CancellationToken
   ): Promise<IExtension[]>
   getExtensions(
     extensionInfos: IExtensionInfo[],
     options: IExtensionQueryOptions,
-    token: CancellationToken,
+    token: CancellationToken
   ): Promise<IExtension[]>
   async getExtensions(
     extensionInfos: IExtensionInfo[],
     arg1: any,
-    arg2?: any,
+    arg2?: any
   ): Promise<IExtension[]> {
     if (!this.galleryService.isEnabled()) {
       return []
     }
 
     extensionInfos.forEach(
-      (e) => (e.preRelease = e.preRelease ?? this.preferPreReleases),
+      (e) => (e.preRelease = e.preRelease ?? this.preferPreReleases)
     )
     const extensionsControlManifest =
       await this.extensionManagementService.getExtensionsControlManifest()
     const galleryExtensions = await this.galleryService.getExtensions(
       extensionInfos,
       arg1,
-      arg2,
+      arg2
     )
     this.syncInstalledExtensionsWithGallery(galleryExtensions)
     return galleryExtensions.map((gallery) =>
-      this.fromGallery(gallery, extensionsControlManifest),
+      this.fromGallery(gallery, extensionsControlManifest)
     )
   }
 
   async getResourceExtensions(
     locations: URI[],
-    isWorkspaceScoped: boolean,
+    isWorkspaceScoped: boolean
   ): Promise<IExtension[]> {
     const resourceExtensions =
       await this.extensionManagementService.getExtensions(locations)
     return resourceExtensions.map(
       (resourceExtension) =>
         this.getInstalledExtensionMatchingLocation(
-          resourceExtension.location,
+          resourceExtension.location
         ) ??
         this.instantiationService.createInstance(
           Extension,
@@ -1830,8 +1824,8 @@ export class ExtensionsWorkbenchService
           undefined,
           undefined,
           undefined,
-          { resourceExtension, isWorkspaceScoped },
-        ),
+          { resourceExtension, isWorkspaceScoped }
+        )
     )
   }
 
@@ -1848,7 +1842,7 @@ export class ExtensionsWorkbenchService
         // Get mode name
         const languageId =
           this.languageService.guessLanguageIdByFilepathOrFirstLine(
-            URI.file(`.${ext}`),
+            URI.file(`.${ext}`)
           )
         const languageName =
           languageId && this.languageService.getLanguageName(languageId)
@@ -1865,7 +1859,7 @@ export class ExtensionsWorkbenchService
 
   private fromGallery(
     gallery: IGalleryExtension,
-    extensionsControlManifest: IExtensionsControlManifest,
+    extensionsControlManifest: IExtensionsControlManifest
   ): IExtension {
     let extension = this.getInstalledExtensionMatchingGallery(gallery)
     if (!extension) {
@@ -1876,18 +1870,18 @@ export class ExtensionsWorkbenchService
         undefined,
         undefined,
         gallery,
-        undefined,
+        undefined
       )
       Extensions.updateExtensionFromControlManifest(
         <Extension>extension,
-        extensionsControlManifest,
+        extensionsControlManifest
       )
     }
     return extension
   }
 
   private getInstalledExtensionMatchingGallery(
-    gallery: IGalleryExtension,
+    gallery: IGalleryExtension
   ): IExtension | null {
     for (const installed of this.local) {
       if (installed.identifier.uuid) {
@@ -1906,7 +1900,7 @@ export class ExtensionsWorkbenchService
   }
 
   private getInstalledExtensionMatchingLocation(
-    location: URI,
+    location: URI
   ): IExtension | null {
     return (
       this.local.find(
@@ -1914,15 +1908,15 @@ export class ExtensionsWorkbenchService
           e.local &&
           this.uriIdentityService.extUri.isEqualOrParent(
             location,
-            e.local?.location,
-          ),
+            e.local?.location
+          )
       ) ?? null
     )
   }
 
   async open(
     extension: IExtension | string,
-    options?: IExtensionEditorOptions,
+    options?: IExtensionEditorOptions
   ): Promise<void> {
     if (typeof extension === "string") {
       const id = extension
@@ -1936,7 +1930,7 @@ export class ExtensionsWorkbenchService
       throw new Error(`Extension not found. ${extension}`)
     }
     await this.haystackService.createModalEditor(
-      this.instantiationService.createInstance(ExtensionsInput, extension),
+      this.instantiationService.createInstance(ExtensionsInput, extension)
     )
   }
 
@@ -1971,14 +1965,14 @@ export class ExtensionsWorkbenchService
         continue
       }
       const isEnabled = this.extensionEnablementService.isEnabled(
-        extension.local,
+        extension.local
       )
       if (isEnabled) {
         const runningExtension = this.extensionService.extensions.find((e) =>
           areSameExtensions(
             { id: e.identifier.value, uuid: e.uuid },
-            extension.identifier,
-          ),
+            extension.identifier
+          )
         )
         if (runningExtension) {
           toRemove.push(runningExtension.identifier.value)
@@ -1997,8 +1991,8 @@ export class ExtensionsWorkbenchService
         extensionsToCheck.some((e) =>
           areSameExtensions(
             { id: extension.identifier.value, uuid: extension.uuid },
-            e.identifier,
-          ),
+            e.identifier
+          )
         )
       ) {
         continue
@@ -2010,7 +2004,7 @@ export class ExtensionsWorkbenchService
     if (toAdd.length || toRemove.length) {
       if (
         await this.extensionService.stopExtensionHosts(
-          nls.localize("restart", "Enable or Disable extensions"),
+          nls.localize("restart", "Enable or Disable extensions")
         )
       ) {
         await this.extensionService.startExtensionHosts({ toAdd, toRemove })
@@ -2019,11 +2013,11 @@ export class ExtensionsWorkbenchService
   }
 
   private getRuntimeState(
-    extension: IExtension,
+    extension: IExtension
   ): ExtensionRuntimeState | undefined {
     const isUninstalled = extension.state === ExtensionState.Uninstalled
     const runningExtension = this.extensionService.extensions.find((e) =>
-      areSameExtensions({ id: e.identifier.value }, extension.identifier),
+      areSameExtensions({ id: e.identifier.value }, extension.identifier)
     )
     const reloadAction = this.extensionManagementServerService
       .remoteExtensionManagementServer
@@ -2043,12 +2037,12 @@ export class ExtensionsWorkbenchService
         (!extension.server ||
           extension.server ===
             this.extensionManagementServerService.getExtensionManagementServer(
-              toExtension(runningExtension),
+              toExtension(runningExtension)
             )) &&
         (!extension.resourceExtension ||
           this.uriIdentityService.extUri.isEqual(
             extension.resourceExtension.location,
-            runningExtension.extensionLocation,
+            runningExtension.extensionLocation
           ))
       if (
         !canRemoveRunningExtension &&
@@ -2060,7 +2054,7 @@ export class ExtensionsWorkbenchService
           reason: nls.localize(
             "postUninstallTooltip",
             "Please {0} to complete the uninstallation of this extension.",
-            reloadActionLabel,
+            reloadActionLabel
           ),
         }
       }
@@ -2071,10 +2065,10 @@ export class ExtensionsWorkbenchService
         runningExtension &&
         extension.server ===
           this.extensionManagementServerService.getExtensionManagementServer(
-            toExtension(runningExtension),
+            toExtension(runningExtension)
           )
       const isEnabled = this.extensionEnablementService.isEnabled(
-        extension.local,
+        extension.local
       )
 
       // Extension is running
@@ -2083,14 +2077,14 @@ export class ExtensionsWorkbenchService
           // No Reload is required if extension can run without reload
           if (
             this.extensionService.canAddExtension(
-              toExtensionDescription(extension.local),
+              toExtensionDescription(extension.local)
             )
           ) {
             return undefined
           }
           const runningExtensionServer =
             this.extensionManagementServerService.getExtensionManagementServer(
-              toExtension(runningExtension),
+              toExtension(runningExtension)
             )
 
           if (isSameExtensionRunning) {
@@ -2108,12 +2102,12 @@ export class ExtensionsWorkbenchService
                 !isEngineValid(
                   extension.local.manifest.engines.vscode,
                   productCurrentVersion.version,
-                  productCurrentVersion.date,
+                  productCurrentVersion.date
                 ) &&
                 isEngineValid(
                   extension.local.manifest.engines.vscode,
                   productUpdateVersion.version,
-                  productUpdateVersion.date,
+                  productUpdateVersion.date
                 )
               ) {
                 const state = this.updateService.state
@@ -2123,7 +2117,7 @@ export class ExtensionsWorkbenchService
                     reason: nls.localize(
                       "postUpdateDownloadTooltip",
                       "Please update {0} to enable the updated extension.",
-                      this.productService.nameLong,
+                      this.productService.nameLong
                     ),
                   }
                 }
@@ -2133,7 +2127,7 @@ export class ExtensionsWorkbenchService
                     reason: nls.localize(
                       "postUpdateUpdateTooltip",
                       "Please update {0} to enable the updated extension.",
-                      this.productService.nameLong,
+                      this.productService.nameLong
                     ),
                   }
                 }
@@ -2143,7 +2137,7 @@ export class ExtensionsWorkbenchService
                     reason: nls.localize(
                       "postUpdateRestartTooltip",
                       "Please restart {0} to enable the updated extension.",
-                      this.productService.nameLong,
+                      this.productService.nameLong
                     ),
                   }
                 }
@@ -2154,7 +2148,7 @@ export class ExtensionsWorkbenchService
                 reason: nls.localize(
                   "postUpdateTooltip",
                   "Please {0} to enable the updated extension.",
-                  reloadActionLabel,
+                  reloadActionLabel
                 ),
               }
             }
@@ -2163,7 +2157,7 @@ export class ExtensionsWorkbenchService
               const extensionInOtherServer = this.installed.filter(
                 (e) =>
                   areSameExtensions(e.identifier, extension.identifier) &&
-                  e.server !== extension.server,
+                  e.server !== extension.server
               )[0]
               if (extensionInOtherServer) {
                 // This extension prefers to run on UI/Local side but is running in remote
@@ -2172,7 +2166,7 @@ export class ExtensionsWorkbenchService
                     this.extensionManagementServerService
                       .remoteExtensionManagementServer &&
                   this.extensionManifestPropertiesService.prefersExecuteOnUI(
-                    extension.local.manifest,
+                    extension.local.manifest
                   ) &&
                   extensionInOtherServer.server ===
                     this.extensionManagementServerService
@@ -2183,7 +2177,7 @@ export class ExtensionsWorkbenchService
                     reason: nls.localize(
                       "enable locally",
                       "Please {0} to enable this extension locally.",
-                      reloadActionLabel,
+                      reloadActionLabel
                     ),
                   }
                 }
@@ -2194,7 +2188,7 @@ export class ExtensionsWorkbenchService
                     this.extensionManagementServerService
                       .localExtensionManagementServer &&
                   this.extensionManifestPropertiesService.prefersExecuteOnWorkspace(
-                    extension.local.manifest,
+                    extension.local.manifest
                   ) &&
                   extensionInOtherServer.server ===
                     this.extensionManagementServerService
@@ -2207,7 +2201,7 @@ export class ExtensionsWorkbenchService
                       "Please {0} to enable this extension in {1}.",
                       reloadActionLabel,
                       this.extensionManagementServerService
-                        .remoteExtensionManagementServer?.label,
+                        .remoteExtensionManagementServer?.label
                     ),
                   }
                 }
@@ -2225,7 +2219,7 @@ export class ExtensionsWorkbenchService
               // This extension prefers to run on UI/Local side but is running in remote
               if (
                 this.extensionManifestPropertiesService.prefersExecuteOnUI(
-                  extension.local.manifest,
+                  extension.local.manifest
                 )
               ) {
                 return {
@@ -2233,7 +2227,7 @@ export class ExtensionsWorkbenchService
                   reason: nls.localize(
                     "postEnableTooltip",
                     "Please {0} to enable this extension.",
-                    reloadActionLabel,
+                    reloadActionLabel
                   ),
                 }
               }
@@ -2249,7 +2243,7 @@ export class ExtensionsWorkbenchService
               // This extension prefers to run on Workspace/Remote side but is running in local
               if (
                 this.extensionManifestPropertiesService.prefersExecuteOnWorkspace(
-                  extension.local.manifest,
+                  extension.local.manifest
                 )
               ) {
                 return {
@@ -2257,7 +2251,7 @@ export class ExtensionsWorkbenchService
                   reason: nls.localize(
                     "postEnableTooltip",
                     "Please {0} to enable this extension.",
-                    reloadActionLabel,
+                    reloadActionLabel
                   ),
                 }
               }
@@ -2271,7 +2265,7 @@ export class ExtensionsWorkbenchService
               reason: nls.localize(
                 "postDisableTooltip",
                 "Please {0} to disable this extension.",
-                reloadActionLabel,
+                reloadActionLabel
               ),
             }
           }
@@ -2284,7 +2278,7 @@ export class ExtensionsWorkbenchService
         if (
           isEnabled &&
           !this.extensionService.canAddExtension(
-            toExtensionDescription(extension.local),
+            toExtensionDescription(extension.local)
           )
         ) {
           return {
@@ -2292,7 +2286,7 @@ export class ExtensionsWorkbenchService
             reason: nls.localize(
               "postEnableTooltip",
               "Please {0} to enable this extension.",
-              reloadActionLabel,
+              reloadActionLabel
             ),
           }
         }
@@ -2312,14 +2306,14 @@ export class ExtensionsWorkbenchService
           const extensionInOtherServer = this.local.filter(
             (e) =>
               areSameExtensions(e.identifier, extension.identifier) &&
-              e.server === otherServer,
+              e.server === otherServer
           )[0]
           // Same extension in other server exists and
           if (
             extensionInOtherServer &&
             extensionInOtherServer.local &&
             this.extensionEnablementService.isEnabled(
-              extensionInOtherServer.local,
+              extensionInOtherServer.local
             )
           ) {
             return {
@@ -2327,7 +2321,7 @@ export class ExtensionsWorkbenchService
               reason: nls.localize(
                 "postEnableTooltip",
                 "Please {0} to enable this extension.",
-                reloadActionLabel,
+                reloadActionLabel
               ),
             }
           }
@@ -2343,7 +2337,7 @@ export class ExtensionsWorkbenchService
     }
 
     const enabledExtensions = extensions.filter(
-      (e) => e.local && this.extensionEnablementService.isEnabled(e.local),
+      (e) => e.local && this.extensionEnablementService.isEnabled(e.local)
     )
     if (enabledExtensions.length === 1) {
       return enabledExtensions[0]
@@ -2488,7 +2482,7 @@ export class ExtensionsWorkbenchService
       this.installing.some(
         (i) =>
           areSameExtensions(i.identifier, extension.identifier) &&
-          (!extension.server || i.server === extension.server),
+          (!extension.server || i.server === extension.server)
       )
     ) {
       return ExtensionState.Installing
@@ -2588,7 +2582,7 @@ export class ExtensionsWorkbenchService
           compatible: true,
           productVersion: this.getProductVersion(),
         },
-        CancellationToken.None,
+        CancellationToken.None
       )
       if (galleryExtensions.length) {
         await this.syncInstalledExtensionsWithGallery(galleryExtensions)
@@ -2615,7 +2609,7 @@ export class ExtensionsWorkbenchService
   }
 
   private async syncInstalledExtensionsWithGallery(
-    gallery: IGalleryExtension[],
+    gallery: IGalleryExtension[]
   ): Promise<void> {
     const extensions: Extensions[] = []
     if (this.localExtensions) {
@@ -2634,9 +2628,9 @@ export class ExtensionsWorkbenchService
       extensions.map((extensions) =>
         extensions.syncInstalledExtensionsWithGallery(
           gallery,
-          this.getProductVersion(),
-        ),
-      ),
+          this.getProductVersion()
+        )
+      )
     )
     if (this.isAutoUpdateEnabled()) {
       this.eventuallyAutoUpdateExtensions()
@@ -2646,7 +2640,7 @@ export class ExtensionsWorkbenchService
   getAutoUpdateValue(): AutoUpdateConfigurationValue {
     const autoUpdate =
       this.configurationService.getValue<AutoUpdateConfigurationValue>(
-        AutoUpdateConfigurationKey,
+        AutoUpdateConfigurationKey
       )
     return isBoolean(autoUpdate) ||
       autoUpdate === "onlyEnabledExtensions" ||
@@ -2673,7 +2667,7 @@ export class ExtensionsWorkbenchService
           }
           this.eventuallyCheckForUpdates()
         },
-        immediate ? 0 : this.getUpdatesCheckInterval(),
+        immediate ? 0 : this.getUpdatesCheckInterval()
       )
       .then(undefined, (err) => null)
   }
@@ -2701,9 +2695,9 @@ export class ExtensionsWorkbenchService
       toUpdate.map((e) =>
         this.install(
           e,
-          e.local?.preRelease ? { installPreReleaseVersion: true } : undefined,
-        ),
-      ),
+          e.local?.preRelease ? { installPreReleaseVersion: true } : undefined
+        )
+      )
     )
   }
 
@@ -2721,7 +2715,7 @@ export class ExtensionsWorkbenchService
     if (infos.length) {
       const galleryExtensions = await this.galleryService.getExtensions(
         infos,
-        CancellationToken.None,
+        CancellationToken.None
       )
       if (galleryExtensions.length) {
         await this.syncInstalledExtensionsWithGallery(galleryExtensions)
@@ -2735,7 +2729,7 @@ export class ExtensionsWorkbenchService
     }
 
     const toUpdate = this.outdated.filter(
-      (e) => !e.local?.pinned && this.shouldAutoUpdateExtension(e),
+      (e) => !e.local?.pinned && this.shouldAutoUpdateExtension(e)
     )
     if (!toUpdate.length) {
       return
@@ -2748,9 +2742,9 @@ export class ExtensionsWorkbenchService
           e,
           e.local?.preRelease
             ? { installPreReleaseVersion: true, productVersion }
-            : { productVersion },
-        ),
-      ),
+            : { productVersion }
+        )
+      )
     )
   }
 
@@ -2777,7 +2771,7 @@ export class ExtensionsWorkbenchService
             version,
             date: this.updateService.state.update.timestamp
               ? new Date(
-                  this.updateService.state.update.timestamp,
+                  this.updateService.state.update.timestamp
                 ).toISOString()
               : undefined,
           }
@@ -2799,7 +2793,7 @@ export class ExtensionsWorkbenchService
             pinned: shouldBePinned,
           })
         }
-      }),
+      })
     )
   }
 
@@ -2811,7 +2805,7 @@ export class ExtensionsWorkbenchService
 
     if (autoUpdate === "onlyEnabledExtensions") {
       return this.extensionEnablementService.isEnabledEnablementState(
-        extension.enablementState,
+        extension.enablementState
       )
     }
 
@@ -2851,7 +2845,7 @@ export class ExtensionsWorkbenchService
 
   async updateAutoUpdateEnablementFor(
     extensionOrPublisher: IExtension | string,
-    enable: boolean,
+    enable: boolean
   ): Promise<void> {
     const autoUpdateValue = this.getAutoUpdateValue()
 
@@ -2867,7 +2861,7 @@ export class ExtensionsWorkbenchService
       }
       await this.extensionManagementService.updateMetadata(
         extensionOrPublisher.local,
-        { pinned: !enable },
+        { pinned: !enable }
       )
       if (enable) {
         this.eventuallyAutoUpdateExtensions()
@@ -2878,7 +2872,7 @@ export class ExtensionsWorkbenchService
     if (autoUpdateValue === false && enable) {
       await this.configurationService.updateValue(
         AutoUpdateConfigurationKey,
-        "onlySelectedExtensions",
+        "onlySelectedExtensions"
       )
     }
 
@@ -2897,7 +2891,7 @@ export class ExtensionsWorkbenchService
           if (autoUpdateExtensions.includes(extensionOrPublisher)) {
             autoUpdateExtensions.splice(
               autoUpdateExtensions.indexOf(extensionOrPublisher),
-              1,
+              1
             )
           }
         }
@@ -2905,19 +2899,19 @@ export class ExtensionsWorkbenchService
     } else {
       const extensionId = extensionOrPublisher.identifier.id.toLowerCase()
       const enableAutoUpdatesForPublisher = this.isAutoUpdateEnabledFor(
-        extensionOrPublisher.publisher.toLowerCase(),
+        extensionOrPublisher.publisher.toLowerCase()
       )
       const enableAutoUpdatesForExtension =
         autoUpdateExtensions.includes(extensionId)
       const disableAutoUpdatesForExtension = autoUpdateExtensions.includes(
-        `-${extensionId}`,
+        `-${extensionId}`
       )
 
       if (enable) {
         if (disableAutoUpdatesForExtension) {
           autoUpdateExtensions.splice(
             autoUpdateExtensions.indexOf(`-${extensionId}`),
-            1,
+            1
           )
           update = true
         }
@@ -2925,7 +2919,7 @@ export class ExtensionsWorkbenchService
           if (enableAutoUpdatesForExtension) {
             autoUpdateExtensions.splice(
               autoUpdateExtensions.indexOf(extensionId),
-              1,
+              1
             )
             update = true
           }
@@ -2938,7 +2932,7 @@ export class ExtensionsWorkbenchService
         if (extensionOrPublisher.local?.pinned) {
           await this.extensionManagementService.updateMetadata(
             extensionOrPublisher.local,
-            { pinned: false },
+            { pinned: false }
           )
         }
       }
@@ -2947,7 +2941,7 @@ export class ExtensionsWorkbenchService
         if (enableAutoUpdatesForExtension) {
           autoUpdateExtensions.splice(
             autoUpdateExtensions.indexOf(extensionId),
-            1,
+            1
           )
           update = true
         }
@@ -2960,7 +2954,7 @@ export class ExtensionsWorkbenchService
           if (disableAutoUpdatesForExtension) {
             autoUpdateExtensions.splice(
               autoUpdateExtensions.indexOf(`-${extensionId}`),
-              1,
+              1
             )
             update = true
           }
@@ -2976,14 +2970,14 @@ export class ExtensionsWorkbenchService
       ) {
         await this.configurationService.updateValue(
           AutoUpdateConfigurationKey,
-          false,
+          false
         )
       }
     }
   }
 
   private async onDidSelectedExtensionToAutoUpdateValueChange(
-    forceUpdate: boolean,
+    forceUpdate: boolean
   ): Promise<void> {
     if (
       forceUpdate ||
@@ -3035,7 +3029,7 @@ export class ExtensionsWorkbenchService
     if (
       extension.resourceExtension &&
       (await this.extensionManagementService.canInstall(
-        extension.resourceExtension,
+        extension.resourceExtension
       ))
     ) {
       return true
@@ -3047,7 +3041,7 @@ export class ExtensionsWorkbenchService
   async install(
     arg: string | URI | IExtension,
     installOptions: InstallExtensionOptions = {},
-    progressLocation?: ProgressLocation,
+    progressLocation?: ProgressLocation
   ): Promise<IExtension> {
     let installable: URI | IGalleryExtension | IResourceExtension | undefined
     let extension: IExtension | undefined
@@ -3059,7 +3053,7 @@ export class ExtensionsWorkbenchService
       let gallery: IGalleryExtension | undefined
       if (isString(arg)) {
         extension = this.local.find((e) =>
-          areSameExtensions(e.identifier, { id: arg }),
+          areSameExtensions(e.identifier, { id: arg })
         )
         if (!extension?.isBuiltin) {
           installableInfo = {
@@ -3093,8 +3087,8 @@ export class ExtensionsWorkbenchService
           await this.galleryService.getExtensions(
             [installableInfo],
             { targetPlatform },
-            CancellationToken.None,
-          ),
+            CancellationToken.None
+          )
         )
       }
       if (!extension && gallery) {
@@ -3105,19 +3099,19 @@ export class ExtensionsWorkbenchService
           undefined,
           undefined,
           gallery,
-          undefined,
+          undefined
         )
         Extensions.updateExtensionFromControlManifest(
           extension as Extension,
-          await this.extensionManagementService.getExtensionsControlManifest(),
+          await this.extensionManagementService.getExtensionsControlManifest()
         )
       }
       if (extension?.isMalicious) {
         throw new Error(
           nls.localize(
             "malicious",
-            "This extension is reported to be problematic.",
-          ),
+            "This extension is reported to be problematic."
+          )
         )
       }
       // Do not install if requested to enable and extension is already installed
@@ -3131,16 +3125,16 @@ export class ExtensionsWorkbenchService
                   "not found version",
                   "Unable to install extension '{0}' because the requested version '{1}' is not found.",
                   id,
-                  installOptions.version,
-                ),
+                  installOptions.version
+                )
               )
             } else {
               throw new Error(
                 nls.localize(
                   "not found",
                   "Unable to install extension '{0}' because it is not found.",
-                  id,
-                ),
+                  id
+                )
               )
             }
           }
@@ -3161,7 +3155,7 @@ export class ExtensionsWorkbenchService
           isUndefined(installOptions.isMachineScoped) &&
           this.userDataSyncEnablementService.isEnabled() &&
           this.userDataSyncEnablementService.isResourceEnabled(
-            SyncResource.Extensions,
+            SyncResource.Extensions
           )
         const buttons: IPromptButton<boolean>[] = []
         buttons.push({
@@ -3173,7 +3167,7 @@ export class ExtensionsWorkbenchService
                     key: "installButtonLabel",
                     comment: ["&& denotes a mnemonic"],
                   },
-                  "&&Install Extension",
+                  "&&Install Extension"
                 )
               : nls.localize(
                   {
@@ -3181,7 +3175,7 @@ export class ExtensionsWorkbenchService
                     comment: ["&& denotes a mnemonic"],
                   },
                   "&&Install Extension and {0}",
-                  installOptions.justification.action,
+                  installOptions.justification.action
                 ),
           run: () => true,
         })
@@ -3201,11 +3195,11 @@ export class ExtensionsWorkbenchService
                 "installExtensionMessage",
                 "Would you like to install '{0}' extension from '{1}'?",
                 extension.displayName,
-                extension.publisherDisplayName,
+                extension.publisherDisplayName
               )
             : nls.localize(
                 "installVSIXMessage",
-                "Would you like to install the extension?",
+                "Would you like to install the extension?"
               ),
           detail: isString(installOptions.justification)
             ? installOptions.justification
@@ -3230,7 +3224,7 @@ export class ExtensionsWorkbenchService
         extension = await this.doInstall(
           undefined,
           () => this.installFromVSIX(installable, installOptions),
-          progressLocation,
+          progressLocation
         )
       } else if (extension) {
         if (extension.resourceExtension) {
@@ -3239,9 +3233,9 @@ export class ExtensionsWorkbenchService
             () =>
               this.extensionManagementService.installResourceExtension(
                 installable as IResourceExtension,
-                installOptions,
+                installOptions
               ),
-            progressLocation,
+            progressLocation
           )
         } else {
           extension = await this.doInstall(
@@ -3250,9 +3244,9 @@ export class ExtensionsWorkbenchService
               this.installFromGallery(
                 extension!,
                 installable as IGalleryExtension,
-                installOptions,
+                installOptions
               ),
-            progressLocation,
+            progressLocation
           )
         }
       }
@@ -3277,7 +3271,7 @@ export class ExtensionsWorkbenchService
             message: nls.localize(
               "enableExtensionMessage",
               "Would you like to enable '{0}' extension?",
-              extension.displayName,
+              extension.displayName
             ),
             detail: isString(installOptions.justification)
               ? installOptions.justification
@@ -3288,7 +3282,7 @@ export class ExtensionsWorkbenchService
                     key: "enableButtonLabel",
                     comment: ["&& denotes a mnemonic"],
                   },
-                  "&&Enable Extension",
+                  "&&Enable Extension"
                 )
               : nls.localize(
                   {
@@ -3296,7 +3290,7 @@ export class ExtensionsWorkbenchService
                     comment: ["&& denotes a mnemonic"],
                   },
                   "&&Enable Extension and {0}",
-                  installOptions.justification.action,
+                  installOptions.justification.action
                 ),
           })
           if (!result.confirmed) {
@@ -3307,7 +3301,7 @@ export class ExtensionsWorkbenchService
           extension,
           extension.enablementState === EnablementState.DisabledWorkspace
             ? EnablementState.EnabledWorkspace
-            : EnablementState.EnabledGlobally,
+            : EnablementState.EnabledGlobally
         )
       }
       await this.waitUntilExtensionIsEnabled(extension)
@@ -3318,7 +3312,7 @@ export class ExtensionsWorkbenchService
 
   async installInServer(
     extension: IExtension,
-    server: IExtensionManagementServer,
+    server: IExtensionManagementServer
   ): Promise<void> {
     await this.doInstall(extension, async () => {
       const local = extension.local
@@ -3330,14 +3324,14 @@ export class ExtensionsWorkbenchService
           (
             await this.getExtensions(
               [{ ...extension.identifier, preRelease: local.preRelease }],
-              CancellationToken.None,
+              CancellationToken.None
             )
           )[0] ?? extension
       }
       if (extension.gallery) {
         return server.extensionManagementService.installFromGallery(
           extension.gallery,
-          { installPreReleaseVersion: local.preRelease },
+          { installPreReleaseVersion: local.preRelease }
         )
       }
 
@@ -3347,15 +3341,15 @@ export class ExtensionsWorkbenchService
         !isTargetPlatformCompatible(
           local.targetPlatform,
           [local.targetPlatform],
-          targetPlatform,
+          targetPlatform
         )
       ) {
         throw new Error(
           nls.localize(
             "incompatible",
             "Can't install '{0}' extension because it is not compatible.",
-            extension.identifier.id,
-          ),
+            extension.identifier.id
+          )
         )
       }
 
@@ -3409,7 +3403,7 @@ export class ExtensionsWorkbenchService
 
   setEnablement(
     extensions: IExtension | IExtension[],
-    enablementState: EnablementState,
+    enablementState: EnablementState
   ): Promise<void> {
     extensions = Array.isArray(extensions) ? extensions : [extensions]
     return this.promptAndSetEnablement(extensions, enablementState)
@@ -3419,7 +3413,7 @@ export class ExtensionsWorkbenchService
     const ext = extension.local
       ? extension
       : this.local.filter((e) =>
-          areSameExtensions(e.identifier, extension.identifier),
+          areSameExtensions(e.identifier, extension.identifier)
         )[0]
     const toUninstall: ILocalExtension | null =
       ext && ext.local ? ext.local : null
@@ -3432,14 +3426,14 @@ export class ExtensionsWorkbenchService
         location: ProgressLocation.Extensions,
         title: nls.localize(
           "uninstallingExtension",
-          "Uninstalling extension....",
+          "Uninstalling extension...."
         ),
         source: `${toUninstall.identifier.id}`,
       },
       () =>
         this.extensionManagementService
           .uninstall(toUninstall)
-          .then(() => undefined),
+          .then(() => undefined)
     )
   }
 
@@ -3448,7 +3442,7 @@ export class ExtensionsWorkbenchService
       const ext = extension.local
         ? extension
         : this.local.filter((e) =>
-            areSameExtensions(e.identifier, extension.identifier),
+            areSameExtensions(e.identifier, extension.identifier)
           )[0]
       const toReinstall: ILocalExtension | null =
         ext && ext.local ? ext.local : null
@@ -3463,7 +3457,7 @@ export class ExtensionsWorkbenchService
     return extension.local
       ? !this.isInstalledExtensionSynced(extension.local)
       : this.extensionsSyncManagementService.hasToNeverSyncExtension(
-          extension.identifier.id,
+          extension.identifier.id
         )
   }
 
@@ -3492,18 +3486,18 @@ export class ExtensionsWorkbenchService
     } else {
       this.extensionsSyncManagementService.updateIgnoredExtensions(
         extension.identifier.id,
-        !isIgnored,
+        !isIgnored
       )
     }
     await this.userDataAutoSyncService.triggerSync(
       ["IgnoredExtensionsUpdated"],
       false,
-      false,
+      false
     )
   }
 
   async toggleApplyExtensionToAllProfiles(
-    extension: IExtension,
+    extension: IExtension
   ): Promise<void> {
     if (
       !extension.local ||
@@ -3516,15 +3510,15 @@ export class ExtensionsWorkbenchService
     await Promise.all(
       this.getAllExtensions().map(async (extensions) => {
         const local = extensions.local.find((e) =>
-          areSameExtensions(e.identifier, extension.identifier),
+          areSameExtensions(e.identifier, extension.identifier)
         )?.local
         if (local && local.isApplicationScoped === isApplicationScoped) {
           await this.extensionManagementService.toggleAppliationScope(
             local,
-            this.userDataProfileService.currentProfile.extensionsResource,
+            this.userDataProfileService.currentProfile.extensionsResource
           )
         }
-      }),
+      })
     )
   }
 
@@ -3548,31 +3542,31 @@ export class ExtensionsWorkbenchService
     }
     if (
       this.extensionsSyncManagementService.hasToAlwaysSyncExtension(
-        extension.identifier.id,
+        extension.identifier.id
       )
     ) {
       return true
     }
     return !this.extensionsSyncManagementService.hasToNeverSyncExtension(
-      extension.identifier.id,
+      extension.identifier.id
     )
   }
 
   async updateSynchronizingInstalledExtension(
     extension: ILocalExtension,
-    sync: boolean,
+    sync: boolean
   ): Promise<ILocalExtension> {
     const isMachineScoped = !sync
     if (extension.isMachineScoped !== isMachineScoped) {
       extension = await this.extensionManagementService.updateMetadata(
         extension,
-        { isMachineScoped },
+        { isMachineScoped }
       )
     }
     if (sync) {
       this.extensionsSyncManagementService.updateIgnoredExtensions(
         extension.identifier.id,
-        false,
+        false
       )
     }
     return extension
@@ -3581,13 +3575,13 @@ export class ExtensionsWorkbenchService
   private doInstall(
     extension: IExtension | undefined,
     installTask: () => Promise<ILocalExtension>,
-    progressLocation?: ProgressLocation,
+    progressLocation?: ProgressLocation
   ): Promise<IExtension> {
     const title = extension
       ? nls.localize(
           "installing named extension",
           "Installing '{0}' extension....",
-          extension.displayName,
+          extension.displayName
         )
       : nls.localize("installing extension", "Installing extension....")
     return this.withProgress(
@@ -3610,19 +3604,19 @@ export class ExtensionsWorkbenchService
             this._onChange.fire(undefined)
           }
         }
-      },
+      }
     )
   }
 
   private async installFromVSIX(
     vsix: URI,
-    installOptions: InstallOptions,
+    installOptions: InstallOptions
   ): Promise<ILocalExtension> {
     const manifest = await this.extensionManagementService.getManifest(vsix)
     const existingExtension = this.local.find((local) =>
       areSameExtensions(local.identifier, {
         id: getGalleryExtensionId(manifest.publisher, manifest.name),
-      }),
+      })
     )
     if (existingExtension) {
       installOptions = installOptions || {}
@@ -3637,14 +3631,14 @@ export class ExtensionsWorkbenchService
     return this.extensionManagementService.installVSIX(
       vsix,
       manifest,
-      installOptions,
+      installOptions
     )
   }
 
   private installFromGallery(
     extension: IExtension,
     gallery: IGalleryExtension,
-    installOptions?: InstallOptions,
+    installOptions?: InstallOptions
   ): Promise<ILocalExtension> {
     installOptions = installOptions ?? {}
     installOptions.pinned =
@@ -3654,21 +3648,21 @@ export class ExtensionsWorkbenchService
       return this.extensionManagementService.updateFromGallery(
         gallery,
         extension.local,
-        installOptions,
+        installOptions
       )
     } else {
       return this.extensionManagementService.installFromGallery(
         gallery,
-        installOptions,
+        installOptions
       )
     }
   }
 
   private async waitAndGetInstalledExtension(
-    identifier: IExtensionIdentifier,
+    identifier: IExtensionIdentifier
   ): Promise<IExtension> {
     let installedExtension = this.local.find((local) =>
-      areSameExtensions(local.identifier, identifier),
+      areSameExtensions(local.identifier, identifier)
     )
     if (!installedExtension) {
       await Event.toPromise(
@@ -3677,13 +3671,13 @@ export class ExtensionsWorkbenchService
           (e) =>
             !!e &&
             this.local.some((local) =>
-              areSameExtensions(local.identifier, identifier),
-            ),
-        ),
+              areSameExtensions(local.identifier, identifier)
+            )
+        )
       )
     }
     installedExtension = this.local.find((local) =>
-      areSameExtensions(local.identifier, identifier),
+      areSameExtensions(local.identifier, identifier)
     )
     if (!installedExtension) {
       // This should not happen
@@ -3693,11 +3687,11 @@ export class ExtensionsWorkbenchService
   }
 
   private async waitUntilExtensionIsEnabled(
-    extension: IExtension,
+    extension: IExtension
   ): Promise<void> {
     if (
       this.extensionService.extensions.find((e) =>
-        ExtensionIdentifier.equals(e.identifier, extension.identifier.id),
+        ExtensionIdentifier.equals(e.identifier, extension.identifier.id)
       )
     ) {
       return
@@ -3705,7 +3699,7 @@ export class ExtensionsWorkbenchService
     if (
       !extension.local ||
       !this.extensionService.canAddExtension(
-        toExtensionDescription(extension.local),
+        toExtensionDescription(extension.local)
       )
     ) {
       return
@@ -3715,7 +3709,7 @@ export class ExtensionsWorkbenchService
         try {
           if (
             this.extensionService.extensions.find((e) =>
-              ExtensionIdentifier.equals(e.identifier, extension.identifier.id),
+              ExtensionIdentifier.equals(e.identifier, extension.identifier.id)
             )
           ) {
             disposable.dispose()
@@ -3730,7 +3724,7 @@ export class ExtensionsWorkbenchService
 
   private promptAndSetEnablement(
     extensions: IExtension[],
-    enablementState: EnablementState,
+    enablementState: EnablementState
   ): Promise<any> {
     const enable =
       enablementState === EnablementState.EnabledGlobally ||
@@ -3740,25 +3734,25 @@ export class ExtensionsWorkbenchService
         extensions,
         this.local,
         enablementState,
-        { dependencies: true, pack: true },
+        { dependencies: true, pack: true }
       )
       return this.checkAndSetEnablement(
         extensions,
         allDependenciesAndPackedExtensions,
-        enablementState,
+        enablementState
       )
     } else {
       const packedExtensions = this.getExtensionsRecursively(
         extensions,
         this.local,
         enablementState,
-        { dependencies: false, pack: true },
+        { dependencies: false, pack: true }
       )
       if (packedExtensions.length) {
         return this.checkAndSetEnablement(
           extensions,
           packedExtensions,
-          enablementState,
+          enablementState
         )
       }
       return this.checkAndSetEnablement(extensions, [], enablementState)
@@ -3768,7 +3762,7 @@ export class ExtensionsWorkbenchService
   private checkAndSetEnablement(
     extensions: IExtension[],
     otherExtensions: IExtension[],
-    enablementState: EnablementState,
+    enablementState: EnablementState
   ): Promise<any> {
     const allExtensions = [...extensions, ...otherExtensions]
     const enable =
@@ -3779,7 +3773,7 @@ export class ExtensionsWorkbenchService
         const dependents = this.getDependentsAfterDisablement(
           extension,
           allExtensions,
-          this.local,
+          this.local
         )
         if (dependents.length) {
           return new Promise<void>((resolve, reject) => {
@@ -3788,7 +3782,7 @@ export class ExtensionsWorkbenchService
               this.getDependentsErrorMessage(
                 extension,
                 allExtensions,
-                dependents,
+                dependents
               ),
               [
                 {
@@ -3798,7 +3792,7 @@ export class ExtensionsWorkbenchService
                       await this.checkAndSetEnablement(
                         dependents,
                         [extension],
-                        enablementState,
+                        enablementState
                       )
                       resolve()
                     } catch (error) {
@@ -3809,7 +3803,7 @@ export class ExtensionsWorkbenchService
               ],
               {
                 onCancel: () => reject(new CancellationError()),
-              },
+              }
             )
           })
         }
@@ -3823,7 +3817,7 @@ export class ExtensionsWorkbenchService
     installed: IExtension[],
     enablementState: EnablementState,
     options: { dependencies: boolean; pack: boolean },
-    checked: IExtension[] = [],
+    checked: IExtension[] = []
   ): IExtension[] {
     const toCheck = extensions.filter((e) => checked.indexOf(e) === -1)
     if (toCheck.length) {
@@ -3850,12 +3844,12 @@ export class ExtensionsWorkbenchService
             (extension) =>
               (options.dependencies &&
                 extension.dependencies.some((id) =>
-                  areSameExtensions({ id }, i.identifier),
+                  areSameExtensions({ id }, i.identifier)
                 )) ||
               (options.pack &&
                 extension.extensionPack.some((id) =>
-                  areSameExtensions({ id }, i.identifier),
-                )),
+                  areSameExtensions({ id }, i.identifier)
+                ))
           )
         )
       })
@@ -3866,8 +3860,8 @@ export class ExtensionsWorkbenchService
             installed,
             enablementState,
             options,
-            checked,
-          ),
+            checked
+          )
         )
       }
       return extensionsToEanbleOrDisable
@@ -3878,7 +3872,7 @@ export class ExtensionsWorkbenchService
   private getDependentsAfterDisablement(
     extension: IExtension,
     extensionsToDisable: IExtension[],
-    installed: IExtension[],
+    installed: IExtension[]
   ): IExtension[] {
     return installed.filter((i) => {
       if (i.dependencies.length === 0) {
@@ -3889,7 +3883,7 @@ export class ExtensionsWorkbenchService
       }
       if (
         !this.extensionEnablementService.isEnabledEnablementState(
-          i.enablementState,
+          i.enablementState
         )
       ) {
         return false
@@ -3899,8 +3893,8 @@ export class ExtensionsWorkbenchService
       }
       return i.dependencies.some((dep) =>
         [extension, ...extensionsToDisable].some((d) =>
-          areSameExtensions(d.identifier, { id: dep }),
-        ),
+          areSameExtensions(d.identifier, { id: dep })
+        )
       )
     })
   }
@@ -3908,16 +3902,16 @@ export class ExtensionsWorkbenchService
   private getDependentsErrorMessage(
     extension: IExtension,
     allDisabledExtensions: IExtension[],
-    dependents: IExtension[],
+    dependents: IExtension[]
   ): string {
     for (const e of [extension, ...allDisabledExtensions]) {
       const dependentsOfTheExtension = dependents.filter((d) =>
-        d.dependencies.some((id) => areSameExtensions({ id }, e.identifier)),
+        d.dependencies.some((id) => areSameExtensions({ id }, e.identifier))
       )
       if (dependentsOfTheExtension.length) {
         return this.getErrorMessageForDisablingAnExtensionWithDependents(
           e,
-          dependentsOfTheExtension,
+          dependentsOfTheExtension
         )
       }
     }
@@ -3926,14 +3920,14 @@ export class ExtensionsWorkbenchService
 
   private getErrorMessageForDisablingAnExtensionWithDependents(
     extension: IExtension,
-    dependents: IExtension[],
+    dependents: IExtension[]
   ): string {
     if (dependents.length === 1) {
       return nls.localize(
         "singleDependentError",
         "Cannot disable '{0}' extension alone. '{1}' extension depends on this. Do you want to disable all these extensions?",
         extension.displayName,
-        dependents[0].displayName,
+        dependents[0].displayName
       )
     }
     if (dependents.length === 2) {
@@ -3942,7 +3936,7 @@ export class ExtensionsWorkbenchService
         "Cannot disable '{0}' extension alone. '{1}' and '{2}' extensions depend on this. Do you want to disable all these extensions?",
         extension.displayName,
         dependents[0].displayName,
-        dependents[1].displayName,
+        dependents[1].displayName
       )
     }
     return nls.localize(
@@ -3950,17 +3944,17 @@ export class ExtensionsWorkbenchService
       "Cannot disable '{0}' extension alone. '{1}', '{2}' and other extensions depend on this. Do you want to disable all these extensions?",
       extension.displayName,
       dependents[0].displayName,
-      dependents[1].displayName,
+      dependents[1].displayName
     )
   }
 
   private async doSetEnablement(
     extensions: IExtension[],
-    enablementState: EnablementState,
+    enablementState: EnablementState
   ): Promise<boolean[]> {
     const changed = await this.extensionEnablementService.setEnablement(
       extensions.map((e) => e.local!),
-      enablementState,
+      enablementState
     )
     for (let i = 0; i < changed.length; i++) {
       if (changed[i]) {
@@ -3985,7 +3979,7 @@ export class ExtensionsWorkbenchService
             enablementState === EnablementState.EnabledWorkspace
             ? "extension:enable"
             : "extension:disable",
-          extensions[i].telemetryData,
+          extensions[i].telemetryData
         )
       }
     }
@@ -4001,13 +3995,13 @@ export class ExtensionsWorkbenchService
       this.installed.some(
         (e) =>
           e.state === ExtensionState.Installing ||
-          e.state === ExtensionState.Uninstalling,
+          e.state === ExtensionState.Uninstalling
       )
     ) {
       if (!this._activityCallBack) {
         this.withProgress(
           { location: ProgressLocation.Extensions },
-          () => new Promise((resolve) => (this._activityCallBack = resolve)),
+          () => new Promise((resolve) => (this._activityCallBack = resolve))
         )
       }
     } else {
@@ -4018,7 +4012,7 @@ export class ExtensionsWorkbenchService
 
   private withProgress<T>(
     options: IProgressOptions,
-    task: () => Promise<T>,
+    task: () => Promise<T>
   ): Promise<T> {
     return this.progressService.withProgress(options, async () => {
       const cancelableTask = createCancelablePromise(() => task())
@@ -4043,7 +4037,7 @@ export class ExtensionsWorkbenchService
 
     if (
       /getaddrinfo ENOTFOUND|getaddrinfo ENOENT|connect EACCES|connect ECONNREFUSED/.test(
-        message,
+        message
       )
     ) {
       return
@@ -4073,13 +4067,13 @@ export class ExtensionsWorkbenchService
     this.queryLocal()
       .then(async (local) => {
         let extension = local.find((local) =>
-          areSameExtensions(local.identifier, { id: extensionId }),
+          areSameExtensions(local.identifier, { id: extensionId })
         )
         if (!extension) {
           ;[extension] = await this.getExtensions(
             [{ id: extensionId }],
             { source: "uri" },
-            CancellationToken.None,
+            CancellationToken.None
           )
         }
         if (extension) {
@@ -4092,7 +4086,7 @@ export class ExtensionsWorkbenchService
 
   private getPublishersToAutoUpdate(): string[] {
     return this.getSelectedExtensionsToAutoUpdate().filter(
-      (id) => !EXTENSION_IDENTIFIER_REGEX.test(id),
+      (id) => !EXTENSION_IDENTIFIER_REGEX.test(id)
     )
   }
 
@@ -4109,10 +4103,10 @@ export class ExtensionsWorkbenchService
   }
 
   private setSelectedExtensionsToAutoUpdate(
-    selectedExtensionsToAutoUpdate: string[],
+    selectedExtensionsToAutoUpdate: string[]
   ): void {
     this.selectedExtensionsToAutoUpdateValue = JSON.stringify(
-      selectedExtensionsToAutoUpdate,
+      selectedExtensionsToAutoUpdate
     )
   }
 
@@ -4127,7 +4121,7 @@ export class ExtensionsWorkbenchService
   }
 
   private set selectedExtensionsToAutoUpdateValue(
-    placeholderViewContainesValue: string,
+    placeholderViewContainesValue: string
   ) {
     if (
       this.selectedExtensionsToAutoUpdateValue !== placeholderViewContainesValue
@@ -4141,7 +4135,7 @@ export class ExtensionsWorkbenchService
     return this.storageService.get(
       EXTENSIONS_AUTO_UPDATE_KEY,
       StorageScope.APPLICATION,
-      "[]",
+      "[]"
     )
   }
 
@@ -4150,7 +4144,7 @@ export class ExtensionsWorkbenchService
       EXTENSIONS_AUTO_UPDATE_KEY,
       value,
       StorageScope.APPLICATION,
-      StorageTarget.USER,
+      StorageTarget.USER
     )
   }
 }

@@ -10,33 +10,36 @@
  *--------------------------------------------------------------------------------------------*/
 
 export class Cache<T> {
-  private static readonly enableDebugLogging = false
 
-  private readonly _data = new Map<number, readonly T[]>()
-  private _idPool = 1
+	private static readonly enableDebugLogging = false;
 
-  constructor(private readonly id: string) {}
+	private readonly _data = new Map<number, readonly T[]>();
+	private _idPool = 1;
 
-  add(item: readonly T[]): number {
-    const id = this._idPool++
-    this._data.set(id, item)
-    this.logDebugInfo()
-    return id
-  }
+	constructor(
+		private readonly id: string
+	) { }
 
-  get(pid: number, id: number): T | undefined {
-    return this._data.has(pid) ? this._data.get(pid)![id] : undefined
-  }
+	add(item: readonly T[]): number {
+		const id = this._idPool++;
+		this._data.set(id, item);
+		this.logDebugInfo();
+		return id;
+	}
 
-  delete(id: number) {
-    this._data.delete(id)
-    this.logDebugInfo()
-  }
+	get(pid: number, id: number): T | undefined {
+		return this._data.has(pid) ? this._data.get(pid)![id] : undefined;
+	}
 
-  private logDebugInfo() {
-    if (!Cache.enableDebugLogging) {
-      return
-    }
-    console.log(`${this.id} cache size - ${this._data.size}`)
-  }
+	delete(id: number) {
+		this._data.delete(id);
+		this.logDebugInfo();
+	}
+
+	private logDebugInfo() {
+		if (!Cache.enableDebugLogging) {
+			return;
+		}
+		console.log(`${this.id} cache size - ${this._data.size}`);
+	}
 }

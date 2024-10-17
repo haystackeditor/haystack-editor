@@ -141,11 +141,11 @@ export class ViewModel extends Disposable implements IViewModel {
     private readonly domLineBreaksComputerFactory: ILineBreaksComputerFactory,
     private readonly monospaceLineBreaksComputerFactory: ILineBreaksComputerFactory,
     private readonly scheduleAtNextAnimationFrame: (
-      callback: () => void,
+      callback: () => void
     ) => IDisposable,
     private readonly languageConfigurationService: ILanguageConfigurationService,
     private readonly _themeService: IThemeService,
-    private readonly _attachedView: IAttachedView,
+    private readonly _attachedView: IAttachedView
   ) {
     super()
 
@@ -158,13 +158,10 @@ export class ViewModel extends Disposable implements IViewModel {
       this.model.getLanguageId(),
       this.model.getOptions(),
       this._configuration,
-      this.languageConfigurationService,
+      this.languageConfigurationService
     )
     this._updateConfigurationViewLineCount = this._register(
-      new RunOnceScheduler(
-        () => this._updateConfigurationViewLineCountNow(),
-        0,
-      ),
+      new RunOnceScheduler(() => this._updateConfigurationViewLineCountNow(), 0)
     )
     this._hasFocus = false
     this._viewportStart = ViewportStart.create(this.model, this._editRange)
@@ -194,7 +191,7 @@ export class ViewModel extends Disposable implements IViewModel {
         wrappingStrategy,
         wrappingInfo.wrappingColumn,
         wrappingIndent,
-        wordBreak,
+        wordBreak
       )
     }
 
@@ -206,16 +203,16 @@ export class ViewModel extends Disposable implements IViewModel {
         this._editRange,
         this,
         this.coordinatesConverter,
-        this.cursorConfig,
-      ),
+        this.cursorConfig
+      )
     )
 
     this.viewLayout = this._register(
       new ViewLayout(
         this._configuration,
         this.getLineCount(),
-        scheduleAtNextAnimationFrame,
-      ),
+        scheduleAtNextAnimationFrame
+      )
     )
 
     this._register(
@@ -227,7 +224,7 @@ export class ViewModel extends Disposable implements IViewModel {
           this._viewportStart.invalidate()
         }
         this._eventDispatcher.emitSingleViewEvent(
-          new viewEvents.ViewScrollChangedEvent(e),
+          new viewEvents.ViewScrollChangedEvent(e)
         )
         this._eventDispatcher.emitOutgoingEvent(
           new ScrollChangedEvent(
@@ -238,16 +235,16 @@ export class ViewModel extends Disposable implements IViewModel {
             e.scrollWidth,
             e.scrollLeft,
             e.scrollHeight,
-            e.scrollTop,
-          ),
+            e.scrollTop
+          )
         )
-      }),
+      })
     )
 
     this._register(
       this.viewLayout.onDidContentSizeChange((e) => {
         this._eventDispatcher.emitOutgoingEvent(e)
-      }),
+      })
     )
 
     this._decorations = new ViewModelDecorations(
@@ -256,7 +253,7 @@ export class ViewModel extends Disposable implements IViewModel {
       this._editRange,
       this._configuration,
       this._lines,
-      this.coordinatesConverter,
+      this.coordinatesConverter
     )
 
     this._registerModelEvents()
@@ -269,24 +266,24 @@ export class ViewModel extends Disposable implements IViewModel {
         } finally {
           this._eventDispatcher.endEmitViewEvents()
         }
-      }),
+      })
     )
 
     this._register(
       MinimapTokensColorTracker.getInstance().onDidChange(() => {
         this._eventDispatcher.emitSingleViewEvent(
-          new viewEvents.ViewTokensColorsChangedEvent(),
+          new viewEvents.ViewTokensColorsChangedEvent()
         )
-      }),
+      })
     )
 
     this._register(
       this._themeService.onDidColorThemeChange((theme) => {
         this._invalidateDecorationsColorCache()
         this._eventDispatcher.emitSingleViewEvent(
-          new viewEvents.ViewThemeChangedEvent(theme),
+          new viewEvents.ViewThemeChangedEvent(theme)
         )
-      }),
+      })
     )
 
     this._updateConfigurationViewLineCountNow()
@@ -324,7 +321,7 @@ export class ViewModel extends Disposable implements IViewModel {
       linesViewportData.startLineNumber,
       this.getLineMinColumn(linesViewportData.startLineNumber),
       linesViewportData.endLineNumber,
-      this.getLineMaxColumn(linesViewportData.endLineNumber),
+      this.getLineMaxColumn(linesViewportData.endLineNumber)
     )
     const modelVisibleRanges = this._toModelVisibleRanges(viewVisibleRange)
     return modelVisibleRanges
@@ -344,22 +341,22 @@ export class ViewModel extends Disposable implements IViewModel {
     this._hasFocus = hasFocus
     this._cursor.setHasFocus(hasFocus)
     this._eventDispatcher.emitSingleViewEvent(
-      new viewEvents.ViewFocusChangedEvent(hasFocus),
+      new viewEvents.ViewFocusChangedEvent(hasFocus)
     )
     this._eventDispatcher.emitOutgoingEvent(
-      new FocusChangedEvent(!hasFocus, hasFocus),
+      new FocusChangedEvent(!hasFocus, hasFocus)
     )
   }
 
   public onCompositionStart(): void {
     this._eventDispatcher.emitSingleViewEvent(
-      new viewEvents.ViewCompositionStartEvent(),
+      new viewEvents.ViewCompositionStartEvent()
     )
   }
 
   public onCompositionEnd(): void {
     this._eventDispatcher.emitSingleViewEvent(
-      new viewEvents.ViewCompositionEndEvent(),
+      new viewEvents.ViewCompositionEndEvent()
     )
   }
 
@@ -372,15 +369,15 @@ export class ViewModel extends Disposable implements IViewModel {
     ) {
       const previousViewportStartViewPosition = new Position(
         this._viewportStart.viewLineNumber,
-        this.getLineMinColumn(this._viewportStart.viewLineNumber),
+        this.getLineMinColumn(this._viewportStart.viewLineNumber)
       )
       const previousViewportStartModelPosition =
         this.coordinatesConverter.convertViewPositionToModelPosition(
-          previousViewportStartViewPosition,
+          previousViewportStartViewPosition
         )
       return new StableViewport(
         previousViewportStartModelPosition,
-        this._viewportStart.startLineDelta,
+        this._viewportStart.startLineDelta
       )
     }
     return new StableViewport(null, 0)
@@ -388,7 +385,7 @@ export class ViewModel extends Disposable implements IViewModel {
 
   private _onConfigurationChanged(
     eventsCollector: ViewModelEventsCollector,
-    e: ConfigurationChangedEvent,
+    e: ConfigurationChangedEvent
   ): void {
     const stableViewport = this._captureStableViewport()
     const options = this._configuration.options
@@ -404,15 +401,15 @@ export class ViewModel extends Disposable implements IViewModel {
         wrappingStrategy,
         wrappingInfo.wrappingColumn,
         wrappingIndent,
-        wordBreak,
+        wordBreak
       )
     ) {
       eventsCollector.emitViewEvent(new viewEvents.ViewFlushedEvent())
       eventsCollector.emitViewEvent(
-        new viewEvents.ViewLineMappingChangedEvent(),
+        new viewEvents.ViewLineMappingChangedEvent()
       )
       eventsCollector.emitViewEvent(
-        new viewEvents.ViewDecorationsChangedEvent(null),
+        new viewEvents.ViewDecorationsChangedEvent(null)
       )
       this._cursor.onLineMappingChanged(eventsCollector)
       this._decorations.onLineMappingChanged()
@@ -425,25 +422,25 @@ export class ViewModel extends Disposable implements IViewModel {
       // Must read again all decorations due to readOnly filtering
       this._decorations.reset()
       eventsCollector.emitViewEvent(
-        new viewEvents.ViewDecorationsChangedEvent(null),
+        new viewEvents.ViewDecorationsChangedEvent(null)
       )
     }
 
     if (e.hasChanged(EditorOption.renderValidationDecorations)) {
       this._decorations.reset()
       eventsCollector.emitViewEvent(
-        new viewEvents.ViewDecorationsChangedEvent(null),
+        new viewEvents.ViewDecorationsChangedEvent(null)
       )
     }
 
     eventsCollector.emitViewEvent(
-      new viewEvents.ViewConfigurationChangedEvent(e),
+      new viewEvents.ViewConfigurationChangedEvent(e)
     )
     this.viewLayout.onConfigurationChanged(e)
 
     stableViewport.recoverViewportStart(
       this.coordinatesConverter,
-      this.viewLayout,
+      this.viewLayout
     )
 
     if (CursorConfiguration.shouldRecreate(e)) {
@@ -451,7 +448,7 @@ export class ViewModel extends Disposable implements IViewModel {
         this.model.getLanguageId(),
         this.model.getOptions(),
         this._configuration,
-        this.languageConfigurationService,
+        this.languageConfigurationService
       )
       this._cursor.updateConfiguration(this.cursorConfig)
     }
@@ -490,7 +487,7 @@ export class ViewModel extends Disposable implements IViewModel {
                   if (injectedText) {
                     injectedText = injectedText.filter(
                       (element) =>
-                        !element.ownerId || element.ownerId === this._editorId,
+                        !element.ownerId || element.ownerId === this._editorId
                     )
                   }
                   lineBreaksComputer.addRequest(line, injectedText, null)
@@ -503,7 +500,7 @@ export class ViewModel extends Disposable implements IViewModel {
                 if (change.injectedText) {
                   injectedText = change.injectedText.filter(
                     (element) =>
-                      !element.ownerId || element.ownerId === this._editorId,
+                      !element.ownerId || element.ownerId === this._editorId
                   )
                 }
                 lineBreaksComputer.addRequest(change.detail, injectedText, null)
@@ -552,14 +549,14 @@ export class ViewModel extends Disposable implements IViewModel {
                       changedToLineNumber,
                       this._editRange.endLineNumber -
                         this._editRange.startLineNumber +
-                        1,
-                    ),
+                        1
+                    )
                   )
                 } else if (this._editRange == null) {
                   linesDeletedEvent = this._lines.onModelLinesDeleted(
                     versionId,
                     changedFromLineNumber,
-                    changedToLineNumber,
+                    changedToLineNumber
                   )
                 }
 
@@ -581,11 +578,11 @@ export class ViewModel extends Disposable implements IViewModel {
 
                   const adjustedMinLineNumber = Math.min(
                     adjustedChangedFromLineNumber,
-                    adjustedChangedToLineNumber,
+                    adjustedChangedToLineNumber
                   )
                   const adjustedMaxLineNumber = Math.max(
                     adjustedChangedFromLineNumber,
-                    adjustedChangedToLineNumber,
+                    adjustedChangedToLineNumber
                   )
 
                   // We deleted lines before the edit range, move the edit range up.
@@ -593,7 +590,7 @@ export class ViewModel extends Disposable implements IViewModel {
                     beforeDelta =
                       Math.min(
                         this._editRange.startLineNumber,
-                        adjustedMaxLineNumber,
+                        adjustedMaxLineNumber
                       ) -
                       adjustedMinLineNumber +
                       1
@@ -601,11 +598,11 @@ export class ViewModel extends Disposable implements IViewModel {
 
                   const minLineNumber = Math.min(
                     change.fromLineNumber,
-                    change.toLineNumber,
+                    change.toLineNumber
                   )
                   const maxLineNumber = Math.max(
                     change.fromLineNumber,
-                    change.toLineNumber,
+                    change.toLineNumber
                   )
                   // We deleted lines in the edit range, shrink the range.
                   if (
@@ -628,12 +625,12 @@ export class ViewModel extends Disposable implements IViewModel {
                   eventsCollector.emitViewEvent(linesDeletedEvent)
                   this.viewLayout.onLinesDeleted(
                     linesDeletedEvent.fromLineNumber,
-                    linesDeletedEvent.toLineNumber,
+                    linesDeletedEvent.toLineNumber
                   )
                 } else if (editRangeChanged || true) {
                   // Repaint line numbers.
                   eventsCollector.emitViewEvent(
-                    new viewEvents.ViewFlushedEvent(),
+                    new viewEvents.ViewFlushedEvent()
                   )
                 }
                 hadOtherModelChange = true
@@ -641,7 +638,7 @@ export class ViewModel extends Disposable implements IViewModel {
               }
               case textModelEvents.RawContentChangedType.LinesInserted: {
                 const insertedLineBreaks = lineBreakQueue.takeCount(
-                  change.detail.length,
+                  change.detail.length
                 )
                 // Note that we don't subtract 1 for the edit range because the line insertion index is actually shifted up by one.
                 const changedFromLineNumber =
@@ -663,14 +660,14 @@ export class ViewModel extends Disposable implements IViewModel {
                     versionId,
                     changedFromLineNumber,
                     changedToLineNumber,
-                    insertedLineBreaks,
+                    insertedLineBreaks
                   )
                 } else if (this._editRange == null) {
                   linesInsertedEvent = this._lines.onModelLinesInserted(
                     versionId,
                     changedFromLineNumber,
                     changedToLineNumber,
-                    insertedLineBreaks,
+                    insertedLineBreaks
                   )
                 }
 
@@ -682,11 +679,11 @@ export class ViewModel extends Disposable implements IViewModel {
 
                   const minLineNumber = Math.min(
                     change.fromLineNumber,
-                    change.toLineNumber,
+                    change.toLineNumber
                   )
                   const maxLineNumber = Math.max(
                     change.fromLineNumber,
-                    change.toLineNumber,
+                    change.toLineNumber
                   )
 
                   // We added lines before the edit range, move the edit range down.
@@ -715,12 +712,12 @@ export class ViewModel extends Disposable implements IViewModel {
                   eventsCollector.emitViewEvent(linesInsertedEvent)
                   this.viewLayout.onLinesInserted(
                     linesInsertedEvent.fromLineNumber,
-                    linesInsertedEvent.toLineNumber,
+                    linesInsertedEvent.toLineNumber
                   )
                 } else if (editRangeChanged || true) {
                   // Repaint line numbers.
                   eventsCollector.emitViewEvent(
-                    new viewEvents.ViewFlushedEvent(),
+                    new viewEvents.ViewFlushedEvent()
                   )
                 }
                 hadOtherModelChange = true
@@ -739,7 +736,7 @@ export class ViewModel extends Disposable implements IViewModel {
                 ] = this._lines.onModelLineChanged(
                   versionId,
                   changedLineNumber,
-                  changedLineBreakData,
+                  changedLineBreakData
                 )
                 hadModelLineChangeThatChangedLineMapping = lineMappingChanged
                 if (linesChangedEvent) {
@@ -749,14 +746,14 @@ export class ViewModel extends Disposable implements IViewModel {
                   eventsCollector.emitViewEvent(linesInsertedEvent)
                   this.viewLayout.onLinesInserted(
                     linesInsertedEvent.fromLineNumber,
-                    linesInsertedEvent.toLineNumber,
+                    linesInsertedEvent.toLineNumber
                   )
                 }
                 if (linesDeletedEvent) {
                   eventsCollector.emitViewEvent(linesDeletedEvent)
                   this.viewLayout.onLinesDeleted(
                     linesDeletedEvent.fromLineNumber,
-                    linesDeletedEvent.toLineNumber,
+                    linesDeletedEvent.toLineNumber
                   )
                 }
                 break
@@ -778,10 +775,10 @@ export class ViewModel extends Disposable implements IViewModel {
             hadModelLineChangeThatChangedLineMapping
           ) {
             eventsCollector.emitViewEvent(
-              new viewEvents.ViewLineMappingChangedEvent(),
+              new viewEvents.ViewLineMappingChangedEvent()
             )
             eventsCollector.emitViewEvent(
-              new viewEvents.ViewDecorationsChangedEvent(null),
+              new viewEvents.ViewDecorationsChangedEvent(null)
             )
             this._cursor.onLineMappingChanged(eventsCollector)
             this._decorations.onLineMappingChanged()
@@ -796,7 +793,7 @@ export class ViewModel extends Disposable implements IViewModel {
         this._configuration.setModelLineCount(
           this._editRange
             ? this._editRange.endLineNumber
-            : this.model.getLineCount(),
+            : this.model.getLineCount()
         )
         this._updateConfigurationViewLineCountNow()
 
@@ -807,22 +804,22 @@ export class ViewModel extends Disposable implements IViewModel {
           viewportStartWasValid
         ) {
           const modelRange = this.model._getTrackedRange(
-            this._viewportStart.modelTrackedRange,
+            this._viewportStart.modelTrackedRange
           )
           if (modelRange) {
             const viewPosition =
               this.coordinatesConverter.convertModelPositionToViewPosition(
-                modelRange.getStartPosition(),
+                modelRange.getStartPosition()
               )
             const viewPositionTop =
               this.viewLayout.getVerticalOffsetForLineNumber(
-                viewPosition.lineNumber,
+                viewPosition.lineNumber
               )
             this.viewLayout.setScrollPosition(
               {
                 scrollTop: viewPositionTop + this._viewportStart.startLineDelta,
               },
-              ScrollType.Immediate,
+              ScrollType.Immediate
             )
           }
         }
@@ -831,7 +828,7 @@ export class ViewModel extends Disposable implements IViewModel {
           const eventsCollector = this._eventDispatcher.beginEmitViewEvents()
           if (e instanceof textModelEvents.InternalModelContentChangeEvent) {
             eventsCollector.emitOutgoingEvent(
-              new ModelContentChangedEvent(e.contentChangedEvent),
+              new ModelContentChangedEvent(e.contentChangedEvent)
             )
           }
           this._cursor.onModelContentChanged(eventsCollector, e)
@@ -840,7 +837,7 @@ export class ViewModel extends Disposable implements IViewModel {
         }
 
         this._handleVisibleLinesChanged()
-      }),
+      })
     )
 
     this._register(
@@ -866,14 +863,14 @@ export class ViewModel extends Disposable implements IViewModel {
             (this._editRange ? this._editRange.startLineNumber - 1 : 0)
           const viewStartLineNumber =
             this.coordinatesConverter.convertModelPositionToViewPosition(
-              new Position(fromLineNumber, 1),
+              new Position(fromLineNumber, 1)
             ).lineNumber
           const viewEndLineNumber =
             this.coordinatesConverter.convertModelPositionToViewPosition(
               new Position(
                 toLineNumber,
-                this.model.getLineMaxColumn(toLineNumber),
-              ),
+                this.model.getLineMaxColumn(toLineNumber)
+              )
             ).lineNumber
           viewRanges[j] = {
             fromLineNumber: viewStartLineNumber,
@@ -881,28 +878,28 @@ export class ViewModel extends Disposable implements IViewModel {
           }
         }
         this._eventDispatcher.emitSingleViewEvent(
-          new viewEvents.ViewTokensChangedEvent(viewRanges),
+          new viewEvents.ViewTokensChangedEvent(viewRanges)
         )
         this._eventDispatcher.emitOutgoingEvent(new ModelTokensChangedEvent(e))
-      }),
+      })
     )
 
     this._register(
       this.model.onDidChangeLanguageConfiguration((e) => {
         this._eventDispatcher.emitSingleViewEvent(
-          new viewEvents.ViewLanguageConfigurationEvent(),
+          new viewEvents.ViewLanguageConfigurationEvent()
         )
         this.cursorConfig = new CursorConfiguration(
           this.model.getLanguageId(),
           this.model.getOptions(),
           this._configuration,
-          this.languageConfigurationService,
+          this.languageConfigurationService
         )
         this._cursor.updateConfiguration(this.cursorConfig)
         this._eventDispatcher.emitOutgoingEvent(
-          new ModelLanguageConfigurationChangedEvent(e),
+          new ModelLanguageConfigurationChangedEvent(e)
         )
-      }),
+      })
     )
 
     this._register(
@@ -911,13 +908,13 @@ export class ViewModel extends Disposable implements IViewModel {
           this.model.getLanguageId(),
           this.model.getOptions(),
           this._configuration,
-          this.languageConfigurationService,
+          this.languageConfigurationService
         )
         this._cursor.updateConfiguration(this.cursorConfig)
         this._eventDispatcher.emitOutgoingEvent(
-          new ModelLanguageChangedEvent(e),
+          new ModelLanguageChangedEvent(e)
         )
-      }),
+      })
     )
 
     this._register(
@@ -928,10 +925,10 @@ export class ViewModel extends Disposable implements IViewModel {
             const eventsCollector = this._eventDispatcher.beginEmitViewEvents()
             eventsCollector.emitViewEvent(new viewEvents.ViewFlushedEvent())
             eventsCollector.emitViewEvent(
-              new viewEvents.ViewLineMappingChangedEvent(),
+              new viewEvents.ViewLineMappingChangedEvent()
             )
             eventsCollector.emitViewEvent(
-              new viewEvents.ViewDecorationsChangedEvent(null),
+              new viewEvents.ViewDecorationsChangedEvent(null)
             )
             this._cursor.onLineMappingChanged(eventsCollector)
             this._decorations.onLineMappingChanged()
@@ -946,24 +943,24 @@ export class ViewModel extends Disposable implements IViewModel {
           this.model.getLanguageId(),
           this.model.getOptions(),
           this._configuration,
-          this.languageConfigurationService,
+          this.languageConfigurationService
         )
         this._cursor.updateConfiguration(this.cursorConfig)
 
         this._eventDispatcher.emitOutgoingEvent(new ModelOptionsChangedEvent(e))
-      }),
+      })
     )
 
     this._register(
       this.model.onDidChangeDecorations((e) => {
         this._decorations.onModelDecorationsChanged()
         this._eventDispatcher.emitSingleViewEvent(
-          new viewEvents.ViewDecorationsChangedEvent(e),
+          new viewEvents.ViewDecorationsChangedEvent(e)
         )
         this._eventDispatcher.emitOutgoingEvent(
-          new ModelDecorationsChangedEvent(e),
+          new ModelDecorationsChangedEvent(e)
         )
-      }),
+      })
     )
   }
 
@@ -988,10 +985,10 @@ export class ViewModel extends Disposable implements IViewModel {
       if (lineMappingChanged) {
         eventsCollector.emitViewEvent(new viewEvents.ViewFlushedEvent())
         eventsCollector.emitViewEvent(
-          new viewEvents.ViewLineMappingChangedEvent(),
+          new viewEvents.ViewLineMappingChangedEvent()
         )
         eventsCollector.emitViewEvent(
-          new viewEvents.ViewDecorationsChangedEvent(null),
+          new viewEvents.ViewDecorationsChangedEvent(null)
         )
         this._cursor.onLineMappingChanged(eventsCollector)
         this._decorations.onLineMappingChanged()
@@ -1006,12 +1003,12 @@ export class ViewModel extends Disposable implements IViewModel {
         mergedRanges.some(
           (range) =>
             range.startLineNumber <= firstModelLineInViewPort &&
-            firstModelLineInViewPort <= range.endLineNumber,
+            firstModelLineInViewPort <= range.endLineNumber
         )
       if (!firstModelLineIsHidden) {
         stableViewport.recoverViewportStart(
           this.coordinatesConverter,
-          this.viewLayout,
+          this.viewLayout
         )
       }
     } finally {
@@ -1031,11 +1028,11 @@ export class ViewModel extends Disposable implements IViewModel {
     const partialData = this.viewLayout.getLinesViewportData()
     const startViewLineNumber = Math.max(
       1,
-      partialData.completelyVisibleStartLineNumber - linesAround,
+      partialData.completelyVisibleStartLineNumber - linesAround
     )
     const endViewLineNumber = Math.min(
       this.getLineCount(),
-      partialData.completelyVisibleEndLineNumber + linesAround,
+      partialData.completelyVisibleEndLineNumber + linesAround
     )
 
     return this._toModelVisibleRanges(
@@ -1043,8 +1040,8 @@ export class ViewModel extends Disposable implements IViewModel {
         startViewLineNumber,
         this.getLineMinColumn(startViewLineNumber),
         endViewLineNumber,
-        this.getLineMaxColumn(endViewLineNumber),
-      ),
+        this.getLineMaxColumn(endViewLineNumber)
+      )
     )
   }
 
@@ -1092,7 +1089,7 @@ export class ViewModel extends Disposable implements IViewModel {
           startLineNumber,
           startColumn,
           hiddenStartLineNumber - 1,
-          this.model.getLineMaxColumn(hiddenStartLineNumber - 1),
+          this.model.getLineMaxColumn(hiddenStartLineNumber - 1)
         )
       }
       startLineNumber = hiddenEndLineNumber + 1
@@ -1107,7 +1104,7 @@ export class ViewModel extends Disposable implements IViewModel {
         startLineNumber,
         startColumn,
         endLineNumber,
-        endColumn,
+        endColumn
       )
     }
 
@@ -1132,7 +1129,7 @@ export class ViewModel extends Disposable implements IViewModel {
       startViewLineNumber,
       this.getLineMinColumn(startViewLineNumber),
       endViewLineNumber,
-      this.getLineMaxColumn(endViewLineNumber),
+      this.getLineMaxColumn(endViewLineNumber)
     )
   }
 
@@ -1146,7 +1143,7 @@ export class ViewModel extends Disposable implements IViewModel {
       startViewLineNumber,
       this.getLineMinColumn(startViewLineNumber),
       endViewLineNumber,
-      this.getLineMaxColumn(endViewLineNumber),
+      this.getLineMaxColumn(endViewLineNumber)
     )
   }
 
@@ -1160,8 +1157,8 @@ export class ViewModel extends Disposable implements IViewModel {
       this.coordinatesConverter.convertViewPositionToModelPosition(
         new Position(
           firstViewLineNumber,
-          this.getLineMinColumn(firstViewLineNumber),
-        ),
+          this.getLineMinColumn(firstViewLineNumber)
+        )
       )
     const firstPositionDeltaTop =
       this.viewLayout.getVerticalOffsetForLineNumber(firstViewLineNumber) -
@@ -1186,7 +1183,7 @@ export class ViewModel extends Disposable implements IViewModel {
     const modelPosition = this.model.validatePosition(state.firstPosition)
     const viewPosition =
       this.coordinatesConverter.convertModelPositionToViewPosition(
-        modelPosition,
+        modelPosition
       )
     const scrollTop =
       this.viewLayout.getVerticalOffsetForLineNumber(viewPosition.lineNumber) -
@@ -1221,7 +1218,7 @@ export class ViewModel extends Disposable implements IViewModel {
   public setViewport(
     startLineNumber: number,
     endLineNumber: number,
-    centeredLineNumber: number,
+    centeredLineNumber: number
   ): void {
     this._viewportStart.update(this, startLineNumber)
   }
@@ -1229,18 +1226,18 @@ export class ViewModel extends Disposable implements IViewModel {
   public getActiveIndentGuide(
     lineNumber: number,
     minLineNumber: number,
-    maxLineNumber: number,
+    maxLineNumber: number
   ): IActiveIndentGuideInfo {
     return this._lines.getActiveIndentGuide(
       lineNumber,
       minLineNumber,
-      maxLineNumber,
+      maxLineNumber
     )
   }
 
   public getLinesIndentGuides(
     startLineNumber: number,
-    endLineNumber: number,
+    endLineNumber: number
   ): number[] {
     return this._lines.getViewLinesIndentGuides(startLineNumber, endLineNumber)
   }
@@ -1249,13 +1246,13 @@ export class ViewModel extends Disposable implements IViewModel {
     startLineNumber: number,
     endLineNumber: number,
     activePosition: IPosition | null,
-    options: BracketGuideOptions,
+    options: BracketGuideOptions
   ): IndentGuide[][] {
     return this._lines.getViewLinesBracketGuides(
       startLineNumber,
       endLineNumber,
       activePosition,
-      options,
+      options
     )
   }
 
@@ -1277,7 +1274,7 @@ export class ViewModel extends Disposable implements IViewModel {
 
   public getLineFirstNonWhitespaceColumn(lineNumber: number): number {
     const result = strings.firstNonWhitespaceIndex(
-      this.getLineContent(lineNumber),
+      this.getLineContent(lineNumber)
     )
     if (result === -1) {
       return 0
@@ -1287,7 +1284,7 @@ export class ViewModel extends Disposable implements IViewModel {
 
   public getLineLastNonWhitespaceColumn(lineNumber: number): number {
     const result = strings.lastNonWhitespaceIndex(
-      this.getLineContent(lineNumber),
+      this.getLineContent(lineNumber)
     )
     if (result === -1) {
       return 0
@@ -1310,11 +1307,11 @@ export class ViewModel extends Disposable implements IViewModel {
 
   public getViewportViewLineRenderingData(
     visibleRange: Range,
-    lineNumber: number,
+    lineNumber: number
   ): ViewLineRenderingData {
     const allInlineDecorations =
       this._decorations.getDecorationsViewportData(
-        visibleRange,
+        visibleRange
       ).inlineDecorations
     const inlineDecorations =
       allInlineDecorations[lineNumber - visibleRange.startLineNumber]
@@ -1329,7 +1326,7 @@ export class ViewModel extends Disposable implements IViewModel {
 
   private _getViewLineRenderingData(
     lineNumber: number,
-    inlineDecorations: InlineDecoration[],
+    inlineDecorations: InlineDecoration[]
   ): ViewLineRenderingData {
     const mightContainRTL = this.model.mightContainRTL()
     const mightContainNonBasicASCII = this.model.mightContainNonBasicASCII()
@@ -1340,7 +1337,7 @@ export class ViewModel extends Disposable implements IViewModel {
       inlineDecorations = [
         ...inlineDecorations,
         ...lineData.inlineDecorations.map((d) =>
-          d.toInlineDecoration(lineNumber),
+          d.toInlineDecoration(lineNumber)
         ),
       ]
     }
@@ -1355,7 +1352,7 @@ export class ViewModel extends Disposable implements IViewModel {
       lineData.tokens,
       inlineDecorations,
       tabSize,
-      lineData.startVisibleColumn,
+      lineData.startVisibleColumn
     )
   }
 
@@ -1366,22 +1363,22 @@ export class ViewModel extends Disposable implements IViewModel {
   public getMinimapLinesRenderingData(
     startLineNumber: number,
     endLineNumber: number,
-    needed: boolean[],
+    needed: boolean[]
   ): MinimapLinesRenderingData {
     const result = this._lines.getViewLinesData(
       startLineNumber,
       endLineNumber,
-      needed,
+      needed
     )
     return new MinimapLinesRenderingData(this.getTabSize(), result)
   }
 
   public getAllOverviewRulerDecorations(
-    theme: EditorTheme,
+    theme: EditorTheme
   ): OverviewRulerDecorationsGroup[] {
     const decorations = this.model.getOverviewRulerDecorations(
       this._editorId,
-      filterValidationDecorations(this._configuration.options),
+      filterValidationDecorations(this._configuration.options)
     )
     const result = new OverviewRulerDecorations()
     for (const decoration of decorations) {
@@ -1408,7 +1405,7 @@ export class ViewModel extends Disposable implements IViewModel {
             decoration.range.startLineNumber -
               this._editRange.startLineNumber +
               1,
-            1,
+            1
           )
         : decoration.range.startLineNumber
       const decorationEndLineNumber = this._editRange
@@ -1416,19 +1413,19 @@ export class ViewModel extends Disposable implements IViewModel {
             decoration.range.endLineNumber -
               this._editRange.startLineNumber +
               1,
-            this._editRange.endLineNumber - this._editRange.startLineNumber + 1,
+            this._editRange.endLineNumber - this._editRange.startLineNumber + 1
           )
         : decoration.range.endLineNumber
 
       const viewStartLineNumber =
         this.coordinatesConverter.getViewLineNumberOfModelPosition(
           decorationStartLineNumber,
-          decoration.range.startColumn,
+          decoration.range.startColumn
         )
       const viewEndLineNumber =
         this.coordinatesConverter.getViewLineNumberOfModelPosition(
           decorationEndLineNumber,
-          decoration.range.endColumn,
+          decoration.range.endColumn
         )
 
       result.accept(
@@ -1436,7 +1433,7 @@ export class ViewModel extends Disposable implements IViewModel {
         decorationOptions.zIndex,
         viewStartLineNumber,
         viewEndLineNumber,
-        lane,
+        lane
       )
     }
     return result.asArray
@@ -1471,18 +1468,18 @@ export class ViewModel extends Disposable implements IViewModel {
       this.coordinatesConverter.convertViewPositionToModelPosition(position)
     const resultModelPosition = this.model.modifyPosition(modelPosition, offset)
     return this.coordinatesConverter.convertModelPositionToViewPosition(
-      resultModelPosition,
+      resultModelPosition
     )
   }
 
   public deduceModelPositionRelativeToViewPosition(
     viewAnchorPosition: Position,
     deltaOffset: number,
-    lineFeedCnt: number,
+    lineFeedCnt: number
   ): Position {
     const modelAnchor =
       this.coordinatesConverter.convertViewPositionToModelPosition(
-        viewAnchorPosition,
+        viewAnchorPosition
       )
     if (this.model.getEOL().length === 2) {
       // This model uses CRLF, so the delta must take that into account
@@ -1501,7 +1498,7 @@ export class ViewModel extends Disposable implements IViewModel {
   public getPlainTextToCopy(
     modelRanges: Range[],
     emptySelectionClipboard: boolean,
-    forceCRLF: boolean,
+    forceCRLF: boolean
   ): string | string[] {
     const newLineCharacter = forceCRLF ? "\r\n" : this.model.getEOL()
 
@@ -1553,8 +1550,8 @@ export class ViewModel extends Disposable implements IViewModel {
               modelRange,
               forceCRLF
                 ? EndOfLinePreference.CRLF
-                : EndOfLinePreference.TextDefined,
-            ),
+                : EndOfLinePreference.TextDefined
+            )
           )
         }
         prevModelLineNumber = modelLineNumber
@@ -1570,8 +1567,8 @@ export class ViewModel extends Disposable implements IViewModel {
             modelRange,
             forceCRLF
               ? EndOfLinePreference.CRLF
-              : EndOfLinePreference.TextDefined,
-          ),
+              : EndOfLinePreference.TextDefined
+          )
         )
       }
     }
@@ -1580,7 +1577,7 @@ export class ViewModel extends Disposable implements IViewModel {
 
   public getRichTextToCopy(
     modelRanges: Range[],
-    emptySelectionClipboard: boolean,
+    emptySelectionClipboard: boolean
   ): { html: string; mode: string } | null {
     const languageId = this.model.getLanguageId()
     if (languageId === PLAINTEXT_LANGUAGE_ID) {
@@ -1603,7 +1600,7 @@ export class ViewModel extends Disposable implements IViewModel {
         lineNumber,
         this.model.getLineMinColumn(lineNumber),
         lineNumber,
-        this.model.getLineMaxColumn(lineNumber),
+        this.model.getLineMaxColumn(lineNumber)
       )
     }
 
@@ -1676,7 +1673,7 @@ export class ViewModel extends Disposable implements IViewModel {
           startOffset,
           endOffset,
           tabSize,
-          platform.isWindows,
+          platform.isWindows
         )
       }
     }
@@ -1715,10 +1712,10 @@ export class ViewModel extends Disposable implements IViewModel {
   public setCursorStates(
     source: string | null | undefined,
     reason: CursorChangeReason,
-    states: PartialCursorState[] | null,
+    states: PartialCursorState[] | null
   ): boolean {
     return this._withViewEventsCollector((eventsCollector) =>
-      this._cursor.setStates(eventsCollector, source, reason, states),
+      this._cursor.setStates(eventsCollector, source, reason, states)
     )
   }
   public getCursorColumnSelectData(): IColumnSelectData {
@@ -1748,7 +1745,7 @@ export class ViewModel extends Disposable implements IViewModel {
   public setSelections(
     source: string | null | undefined,
     selections: readonly ISelection[],
-    reason = CursorChangeReason.NotSet,
+    reason = CursorChangeReason.NotSet
   ): void {
     if (this._editRange) {
       const adjustedSelections: ISelection[] = []
@@ -1758,16 +1755,16 @@ export class ViewModel extends Disposable implements IViewModel {
             this._editRange.endLineNumber,
             Math.max(
               selection.selectionStartLineNumber,
-              this._editRange.startLineNumber,
-            ),
+              this._editRange.startLineNumber
+            )
           ),
           selectionStartColumn: selection.selectionStartColumn,
           positionLineNumber: Math.min(
             this._editRange.endLineNumber,
             Math.max(
               selection.positionLineNumber,
-              this._editRange.startLineNumber,
-            ),
+              this._editRange.startLineNumber
+            )
           ),
           positionColumn: selection.positionColumn,
         })
@@ -1777,12 +1774,12 @@ export class ViewModel extends Disposable implements IViewModel {
           eventsCollector,
           source,
           adjustedSelections,
-          reason,
-        ),
+          reason
+        )
       )
     } else {
       this._withViewEventsCollector((eventsCollector) =>
-        this._cursor.setSelections(eventsCollector, source, selections, reason),
+        this._cursor.setSelections(eventsCollector, source, selections, reason)
       )
     }
   }
@@ -1791,12 +1788,12 @@ export class ViewModel extends Disposable implements IViewModel {
   }
   public restoreCursorState(states: ICursorState[]): void {
     this._withViewEventsCollector((eventsCollector) =>
-      this._cursor.restoreState(eventsCollector, states),
+      this._cursor.restoreState(eventsCollector, states)
     )
   }
 
   private _executeCursorEdit(
-    callback: (eventsCollector: ViewModelEventsCollector) => void,
+    callback: (eventsCollector: ViewModelEventsCollector) => void
   ): void {
     if (this._cursor.context.cursorConfig.readOnly) {
       // we cannot edit when read only...
@@ -1808,30 +1805,30 @@ export class ViewModel extends Disposable implements IViewModel {
   public executeEdits(
     source: string | null | undefined,
     edits: IIdentifiedSingleEditOperation[],
-    cursorStateComputer: ICursorStateComputer,
+    cursorStateComputer: ICursorStateComputer
   ): void {
     this._executeCursorEdit((eventsCollector) =>
       this._cursor.executeEdits(
         eventsCollector,
         source,
         edits,
-        cursorStateComputer,
-      ),
+        cursorStateComputer
+      )
     )
   }
   public startComposition(): void {
     this._executeCursorEdit((eventsCollector) =>
-      this._cursor.startComposition(eventsCollector),
+      this._cursor.startComposition(eventsCollector)
     )
   }
   public endComposition(source?: string | null | undefined): void {
     this._executeCursorEdit((eventsCollector) =>
-      this._cursor.endComposition(eventsCollector, source),
+      this._cursor.endComposition(eventsCollector, source)
     )
   }
   public type(text: string, source?: string | null | undefined): void {
     this._executeCursorEdit((eventsCollector) =>
-      this._cursor.type(eventsCollector, text, source),
+      this._cursor.type(eventsCollector, text, source)
     )
   }
   public compositionType(
@@ -1839,7 +1836,7 @@ export class ViewModel extends Disposable implements IViewModel {
     replacePrevCharCnt: number,
     replaceNextCharCnt: number,
     positionDelta: number,
-    source?: string | null | undefined,
+    source?: string | null | undefined
   ): void {
     this._executeCursorEdit((eventsCollector) =>
       this._cursor.compositionType(
@@ -1848,15 +1845,15 @@ export class ViewModel extends Disposable implements IViewModel {
         replacePrevCharCnt,
         replaceNextCharCnt,
         positionDelta,
-        source,
-      ),
+        source
+      )
     )
   }
   public paste(
     text: string,
     pasteOnNewLine: boolean,
     multicursorText?: string[] | null | undefined,
-    source?: string | null | undefined,
+    source?: string | null | undefined
   ): void {
     this._executeCursorEdit((eventsCollector) =>
       this._cursor.paste(
@@ -1864,35 +1861,35 @@ export class ViewModel extends Disposable implements IViewModel {
         text,
         pasteOnNewLine,
         multicursorText,
-        source,
-      ),
+        source
+      )
     )
   }
   public cut(source?: string | null | undefined): void {
     this._executeCursorEdit((eventsCollector) =>
-      this._cursor.cut(eventsCollector, source),
+      this._cursor.cut(eventsCollector, source)
     )
   }
   public executeCommand(
     command: ICommand,
-    source?: string | null | undefined,
+    source?: string | null | undefined
   ): void {
     this._executeCursorEdit((eventsCollector) =>
-      this._cursor.executeCommand(eventsCollector, command, source),
+      this._cursor.executeCommand(eventsCollector, command, source)
     )
   }
   public executeCommands(
     commands: ICommand[],
-    source?: string | null | undefined,
+    source?: string | null | undefined
   ): void {
     this._executeCursorEdit((eventsCollector) =>
-      this._cursor.executeCommands(eventsCollector, commands, source),
+      this._cursor.executeCommands(eventsCollector, commands, source)
     )
   }
   public revealAllCursors(
     source: string | null | undefined,
     revealHorizontal: boolean,
-    minimalReveal: boolean = false,
+    minimalReveal: boolean = false
   ): void {
     this._withViewEventsCollector((eventsCollector) =>
       this._cursor.revealAll(
@@ -1901,14 +1898,14 @@ export class ViewModel extends Disposable implements IViewModel {
         minimalReveal,
         viewEvents.VerticalRevealType.Simple,
         revealHorizontal,
-        ScrollType.Smooth,
-      ),
+        ScrollType.Smooth
+      )
     )
   }
   public revealPrimaryCursor(
     source: string | null | undefined,
     revealHorizontal: boolean,
-    minimalReveal: boolean = false,
+    minimalReveal: boolean = false
   ): void {
     this._withViewEventsCollector((eventsCollector) =>
       this._cursor.revealPrimary(
@@ -1917,8 +1914,8 @@ export class ViewModel extends Disposable implements IViewModel {
         minimalReveal,
         viewEvents.VerticalRevealType.Simple,
         revealHorizontal,
-        ScrollType.Smooth,
-      ),
+        ScrollType.Smooth
+      )
     )
   }
   public revealTopMostCursor(source: string | null | undefined): void {
@@ -1927,7 +1924,7 @@ export class ViewModel extends Disposable implements IViewModel {
       viewPosition.lineNumber,
       viewPosition.column,
       viewPosition.lineNumber,
-      viewPosition.column,
+      viewPosition.column
     )
     this._withViewEventsCollector((eventsCollector) =>
       eventsCollector.emitViewEvent(
@@ -1938,9 +1935,9 @@ export class ViewModel extends Disposable implements IViewModel {
           null,
           viewEvents.VerticalRevealType.Simple,
           true,
-          ScrollType.Smooth,
-        ),
-      ),
+          ScrollType.Smooth
+        )
+      )
     )
   }
   public revealBottomMostCursor(source: string | null | undefined): void {
@@ -1949,7 +1946,7 @@ export class ViewModel extends Disposable implements IViewModel {
       viewPosition.lineNumber,
       viewPosition.column,
       viewPosition.lineNumber,
-      viewPosition.column,
+      viewPosition.column
     )
     this._withViewEventsCollector((eventsCollector) =>
       eventsCollector.emitViewEvent(
@@ -1960,9 +1957,9 @@ export class ViewModel extends Disposable implements IViewModel {
           null,
           viewEvents.VerticalRevealType.Simple,
           true,
-          ScrollType.Smooth,
-        ),
-      ),
+          ScrollType.Smooth
+        )
+      )
     )
   }
   public revealRange(
@@ -1970,7 +1967,7 @@ export class ViewModel extends Disposable implements IViewModel {
     revealHorizontal: boolean,
     viewRange: Range,
     verticalType: viewEvents.VerticalRevealType,
-    scrollType: ScrollType,
+    scrollType: ScrollType
   ): void {
     this._configuration.onResize().p.then(() => {
       this._withViewEventsCollector((eventsCollector) =>
@@ -1982,9 +1979,9 @@ export class ViewModel extends Disposable implements IViewModel {
             null,
             verticalType,
             revealHorizontal,
-            scrollType,
-          ),
-        ),
+            scrollType
+          )
+        )
       )
     })
   }
@@ -1993,12 +1990,12 @@ export class ViewModel extends Disposable implements IViewModel {
 
   //#region viewLayout
   public changeWhitespace(
-    callback: (accessor: IWhitespaceChangeAccessor) => void,
+    callback: (accessor: IWhitespaceChangeAccessor) => void
   ): void {
     const hadAChange = this.viewLayout.changeWhitespace(callback)
     if (hadAChange) {
       this._eventDispatcher.emitSingleViewEvent(
-        new viewEvents.ViewZonesChangedEvent(),
+        new viewEvents.ViewZonesChangedEvent()
       )
       this._eventDispatcher.emitOutgoingEvent(new ViewZonesChangedEvent())
     }
@@ -2006,7 +2003,7 @@ export class ViewModel extends Disposable implements IViewModel {
   //#endregion
 
   private _withViewEventsCollector<T>(
-    callback: (eventsCollector: ViewModelEventsCollector) => T,
+    callback: (eventsCollector: ViewModelEventsCollector) => T
   ): T {
     try {
       const eventsCollector = this._eventDispatcher.beginEmitViewEvents()
@@ -2063,7 +2060,7 @@ export class ViewModel extends Disposable implements IViewModel {
         wrappingStrategy,
         wrappingInfo.wrappingColumn,
         wrappingIndent,
-        wordBreak,
+        wordBreak
       )
     }
 
@@ -2075,16 +2072,16 @@ export class ViewModel extends Disposable implements IViewModel {
         this._editRange,
         this,
         this.coordinatesConverter,
-        this.cursorConfig,
-      ),
+        this.cursorConfig
+      )
     )
 
     this.viewLayout = this._register(
       new ViewLayout(
         this._configuration,
         this.getLineCount(),
-        this.scheduleAtNextAnimationFrame,
-      ),
+        this.scheduleAtNextAnimationFrame
+      )
     )
 
     this._decorations = new ViewModelDecorations(
@@ -2093,7 +2090,7 @@ export class ViewModel extends Disposable implements IViewModel {
       this._editRange,
       this._configuration,
       this._lines,
-      this.coordinatesConverter,
+      this.coordinatesConverter
     )
 
     this._register(
@@ -2105,7 +2102,7 @@ export class ViewModel extends Disposable implements IViewModel {
           this._viewportStart.invalidate()
         }
         this._eventDispatcher.emitSingleViewEvent(
-          new viewEvents.ViewScrollChangedEvent(e),
+          new viewEvents.ViewScrollChangedEvent(e)
         )
         this._eventDispatcher.emitOutgoingEvent(
           new ScrollChangedEvent(
@@ -2116,16 +2113,16 @@ export class ViewModel extends Disposable implements IViewModel {
             e.scrollWidth,
             e.scrollLeft,
             e.scrollHeight,
-            e.scrollTop,
-          ),
+            e.scrollTop
+          )
         )
-      }),
+      })
     )
 
     this._register(
       this.viewLayout.onDidContentSizeChange((e) => {
         this._eventDispatcher.emitOutgoingEvent(e)
-      }),
+      })
     )
 
     this._updateConfigurationViewLineCountNow()
@@ -2137,14 +2134,14 @@ class ViewportStart implements IDisposable {
     const viewportStartLineTrackedRange = model._setTrackedRange(
       null,
       new Range(1, 1, 1, 1),
-      TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+      TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges
     )
     return new ViewportStart(
       model,
       1,
       false,
       viewportStartLineTrackedRange,
-      editRange ? editRange.startLineNumber : 0,
+      editRange ? editRange.startLineNumber : 0
     )
   }
 
@@ -2169,14 +2166,14 @@ class ViewportStart implements IDisposable {
     private _viewLineNumber: number,
     private _isValid: boolean,
     private _modelTrackedRange: string,
-    private _startLineDelta: number,
+    private _startLineDelta: number
   ) {}
 
   public dispose(): void {
     this._model._setTrackedRange(
       this._modelTrackedRange,
       null,
-      TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+      TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges
     )
   }
 
@@ -2185,8 +2182,8 @@ class ViewportStart implements IDisposable {
       viewModel.coordinatesConverter.convertViewPositionToModelPosition(
         new Position(
           startLineNumber,
-          viewModel.getLineMinColumn(startLineNumber),
-        ),
+          viewModel.getLineMinColumn(startLineNumber)
+        )
       )
     const viewportStartLineTrackedRange = viewModel.model._setTrackedRange(
       this._modelTrackedRange,
@@ -2194,9 +2191,9 @@ class ViewportStart implements IDisposable {
         position.lineNumber,
         position.column,
         position.lineNumber,
-        position.column,
+        position.column
       ),
-      TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+      TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges
     )
     const viewportStartLineTop =
       viewModel.viewLayout.getVerticalOffsetForLineNumber(startLineNumber)
@@ -2223,7 +2220,7 @@ class OverviewRulerDecorations {
     zIndex: number,
     startLineNumber: number,
     endLineNumber: number,
-    lane: number,
+    lane: number
   ): void {
     const prevGroup = this._asMap[color]
 
@@ -2277,7 +2274,7 @@ class HiddenAreasModel {
     this.shouldRecompute = false
     const newRanges = Array.from(this.hiddenAreas.values()).reduce(
       (r, hiddenAreas) => mergeLineRangeArray(r, hiddenAreas),
-      [],
+      []
     )
     if (rangeArraysEqual(this.ranges, newRanges)) {
       return this.ranges
@@ -2302,7 +2299,7 @@ function mergeLineRangeArray(arr1: Range[], arr2: Range[]): Range[] {
     } else {
       const startLineNumber = Math.min(
         item1.startLineNumber,
-        item2.startLineNumber,
+        item2.startLineNumber
       )
       const endLineNumber = Math.max(item1.endLineNumber, item2.endLineNumber)
       result.push(new Range(startLineNumber, 1, endLineNumber, 1))
@@ -2337,26 +2334,26 @@ function rangeArraysEqual(arr1: Range[], arr2: Range[]): boolean {
 class StableViewport {
   constructor(
     public readonly viewportStartModelPosition: Position | null,
-    public readonly startLineDelta: number,
+    public readonly startLineDelta: number
   ) {}
 
   public recoverViewportStart(
     coordinatesConverter: ICoordinatesConverter,
-    viewLayout: ViewLayout,
+    viewLayout: ViewLayout
   ): void {
     if (!this.viewportStartModelPosition) {
       return
     }
     const viewPosition =
       coordinatesConverter.convertModelPositionToViewPosition(
-        this.viewportStartModelPosition,
+        this.viewportStartModelPosition
       )
     const viewPositionTop = viewLayout.getVerticalOffsetForLineNumber(
-      viewPosition.lineNumber,
+      viewPosition.lineNumber
     )
     viewLayout.setScrollPosition(
       { scrollTop: viewPositionTop + this.startLineDelta },
-      ScrollType.Immediate,
+      ScrollType.Immediate
     )
   }
 }

@@ -40,7 +40,7 @@ export class CanvasWorkspaceMiddleware implements Middleware {
 
         if (canvasWorkspaceGroupIdSet.length !== groupIdSet.size) {
           WorkspaceStoreWrapper.getWorkspaceState().setCanvasWorkspaceDirty(
-            true,
+            true
           )
           return
         }
@@ -48,7 +48,7 @@ export class CanvasWorkspaceMiddleware implements Middleware {
         for (const groupId of canvasWorkspaceGroupIdSet) {
           if (!groupIdSet.has(groupId)) {
             WorkspaceStoreWrapper.getWorkspaceState().setCanvasWorkspaceDirty(
-              true,
+              true
             )
             return
           }

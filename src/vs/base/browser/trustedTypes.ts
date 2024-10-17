@@ -12,10 +12,10 @@
 import { onUnexpectedError } from "vs/base/common/errors"
 
 export function createTrustedTypesPolicy<
-  Options extends TrustedTypePolicyOptions,
+  Options extends TrustedTypePolicyOptions
 >(
   policyName: string,
-  policyOptions?: Options,
+  policyOptions?: Options
 ):
   | undefined
   | Pick<
@@ -25,7 +25,7 @@ export function createTrustedTypesPolicy<
   interface IMonacoEnvironment {
     createTrustedTypesPolicy<Options extends TrustedTypePolicyOptions>(
       policyName: string,
-      policyOptions?: Options,
+      policyOptions?: Options
     ):
       | undefined
       | Pick<
@@ -40,7 +40,7 @@ export function createTrustedTypesPolicy<
     try {
       return monacoEnvironment.createTrustedTypesPolicy(
         policyName,
-        policyOptions,
+        policyOptions
       )
     } catch (err) {
       onUnexpectedError(err)

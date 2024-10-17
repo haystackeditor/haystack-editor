@@ -9,156 +9,93 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Emitter, Event } from "vs/base/common/event"
-import { Disposable, DisposableStore } from "vs/base/common/lifecycle"
-import { isWeb } from "vs/base/common/platform"
-import { IEnvironmentService } from "vs/platform/environment/common/environment"
-import {
-  IApplicationStorageValueChangeEvent,
-  IStorageService,
-  StorageScope,
-  StorageTarget,
-} from "vs/platform/storage/common/storage"
-import { ITelemetryService } from "vs/platform/telemetry/common/telemetry"
-import {
-  ALL_SYNC_RESOURCES,
-  getEnablementKey,
-  IUserDataSyncEnablementService,
-  IUserDataSyncStoreManagementService,
-  SyncResource,
-} from "vs/platform/userDataSync/common/userDataSync"
+import { Emitter, Event } from 'vs/base/common/event';
+import { Disposable, DisposableStore } from 'vs/base/common/lifecycle';
+import { isWeb } from 'vs/base/common/platform';
+import { IEnvironmentService } from 'vs/platform/environment/common/environment';
+import { IApplicationStorageValueChangeEvent, IStorageService, StorageScope, StorageTarget } from 'vs/platform/storage/common/storage';
+import { ITelemetryService } from 'vs/platform/telemetry/common/telemetry';
+import { ALL_SYNC_RESOURCES, getEnablementKey, IUserDataSyncEnablementService, IUserDataSyncStoreManagementService, SyncResource } from 'vs/platform/userDataSync/common/userDataSync';
 
 type SyncEnablementClassification = {
-  owner: "sandy081"
-  comment: "Reporting when Settings Sync is turned on or off"
-  enabled?: {
-    classification: "SystemMetaData"
-    purpose: "FeatureInsight"
-    comment: "Flag indicating if settings sync is enabled or not"
-  }
-}
+	owner: 'sandy081';
+	comment: 'Reporting when Settings Sync is turned on or off';
+	enabled?: { classification: 'SystemMetaData'; purpose: 'FeatureInsight'; comment: 'Flag indicating if settings sync is enabled or not' };
+};
 
-const enablementKey = "sync.enable"
+const enablementKey = 'sync.enable';
 
-export class UserDataSyncEnablementService
-  extends Disposable
-  implements IUserDataSyncEnablementService
-{
-  _serviceBrand: any
+export class UserDataSyncEnablementService extends Disposable implements IUserDataSyncEnablementService {
 
-  private _onDidChangeEnablement = new Emitter<boolean>()
-  readonly onDidChangeEnablement: Event<boolean> =
-    this._onDidChangeEnablement.event
+	_serviceBrand: any;
 
-  private _onDidChangeResourceEnablement = new Emitter<
-    [SyncResource, boolean]
-  >()
-  readonly onDidChangeResourceEnablement: Event<[SyncResource, boolean]> =
-    this._onDidChangeResourceEnablement.event
+	private _onDidChangeEnablement = new Emitter<boolean>();
+	readonly onDidChangeEnablement: Event<boolean> = this._onDidChangeEnablement.event;
 
-  constructor(
-    @IStorageService private readonly storageService: IStorageService,
-    @ITelemetryService private readonly telemetryService: ITelemetryService,
-    @IEnvironmentService
-    protected readonly environmentService: IEnvironmentService,
-    @IUserDataSyncStoreManagementService
-    private readonly userDataSyncStoreManagementService: IUserDataSyncStoreManagementService,
-  ) {
-    super()
-    this._register(
-      storageService.onDidChangeValue(
-        StorageScope.APPLICATION,
-        undefined,
-        this._register(new DisposableStore()),
-      )((e) => this.onDidStorageChange(e)),
-    )
-  }
+	private _onDidChangeResourceEnablement = new Emitter<[SyncResource, boolean]>();
+	readonly onDidChangeResourceEnablement: Event<[SyncResource, boolean]> = this._onDidChangeResourceEnablement.event;
 
-  isEnabled(): boolean {
-    switch (this.environmentService.sync) {
-      case "on":
-        return true
-      case "off":
-        return false
-    }
-    return this.storageService.getBoolean(
-      enablementKey,
-      StorageScope.APPLICATION,
-      false,
-    )
-  }
+	constructor(
+		@IStorageService private readonly storageService: IStorageService,
+		@ITelemetryService private readonly telemetryService: ITelemetryService,
+		@IEnvironmentService protected readonly environmentService: IEnvironmentService,
+		@IUserDataSyncStoreManagementService private readonly userDataSyncStoreManagementService: IUserDataSyncStoreManagementService,
+	) {
+		super();
+		this._register(storageService.onDidChangeValue(StorageScope.APPLICATION, undefined, this._register(new DisposableStore()))(e => this.onDidStorageChange(e)));
+	}
 
-  canToggleEnablement(): boolean {
-    return (
-      this.userDataSyncStoreManagementService.userDataSyncStore !== undefined &&
-      this.environmentService.sync === undefined
-    )
-  }
+	isEnabled(): boolean {
+		switch (this.environmentService.sync) {
+			case 'on':
+				return true;
+			case 'off':
+				return false;
+		}
+		return this.storageService.getBoolean(enablementKey, StorageScope.APPLICATION, false);
+	}
 
-  setEnablement(enabled: boolean): void {
-    if (enabled && !this.canToggleEnablement()) {
-      return
-    }
-    this.telemetryService.publicLog2<
-      { enabled: boolean },
-      SyncEnablementClassification
-    >(enablementKey, { enabled })
-    this.storageService.store(
-      enablementKey,
-      enabled,
-      StorageScope.APPLICATION,
-      StorageTarget.MACHINE,
-    )
-  }
+	canToggleEnablement(): boolean {
+		return this.userDataSyncStoreManagementService.userDataSyncStore !== undefined && this.environmentService.sync === undefined;
+	}
 
-  isResourceEnabled(resource: SyncResource): boolean {
-    return this.storageService.getBoolean(
-      getEnablementKey(resource),
-      StorageScope.APPLICATION,
-      true,
-    )
-  }
+	setEnablement(enabled: boolean): void {
+		if (enabled && !this.canToggleEnablement()) {
+			return;
+		}
+		this.telemetryService.publicLog2<{ enabled: boolean }, SyncEnablementClassification>(enablementKey, { enabled });
+		this.storageService.store(enablementKey, enabled, StorageScope.APPLICATION, StorageTarget.MACHINE);
+	}
 
-  setResourceEnablement(resource: SyncResource, enabled: boolean): void {
-    if (this.isResourceEnabled(resource) !== enabled) {
-      const resourceEnablementKey = getEnablementKey(resource)
-      this.storeResourceEnablement(resourceEnablementKey, enabled)
-    }
-  }
+	isResourceEnabled(resource: SyncResource): boolean {
+		return this.storageService.getBoolean(getEnablementKey(resource), StorageScope.APPLICATION, true);
+	}
 
-  getResourceSyncStateVersion(resource: SyncResource): string | undefined {
-    return undefined
-  }
+	setResourceEnablement(resource: SyncResource, enabled: boolean): void {
+		if (this.isResourceEnabled(resource) !== enabled) {
+			const resourceEnablementKey = getEnablementKey(resource);
+			this.storeResourceEnablement(resourceEnablementKey, enabled);
+		}
+	}
 
-  private storeResourceEnablement(
-    resourceEnablementKey: string,
-    enabled: boolean,
-  ): void {
-    this.storageService.store(
-      resourceEnablementKey,
-      enabled,
-      StorageScope.APPLICATION,
-      isWeb ? StorageTarget.USER /* sync in web */ : StorageTarget.MACHINE,
-    )
-  }
+	getResourceSyncStateVersion(resource: SyncResource): string | undefined {
+		return undefined;
+	}
 
-  private onDidStorageChange(
-    storageChangeEvent: IApplicationStorageValueChangeEvent,
-  ): void {
-    if (enablementKey === storageChangeEvent.key) {
-      this._onDidChangeEnablement.fire(this.isEnabled())
-      return
-    }
+	private storeResourceEnablement(resourceEnablementKey: string, enabled: boolean): void {
+		this.storageService.store(resourceEnablementKey, enabled, StorageScope.APPLICATION, isWeb ? StorageTarget.USER /* sync in web */ : StorageTarget.MACHINE);
+	}
 
-    const resourceKey = ALL_SYNC_RESOURCES.filter(
-      (resourceKey) => getEnablementKey(resourceKey) === storageChangeEvent.key,
-    )[0]
-    if (resourceKey) {
-      this._onDidChangeResourceEnablement.fire([
-        resourceKey,
-        this.isResourceEnabled(resourceKey),
-      ])
-      return
-    }
-  }
+	private onDidStorageChange(storageChangeEvent: IApplicationStorageValueChangeEvent): void {
+		if (enablementKey === storageChangeEvent.key) {
+			this._onDidChangeEnablement.fire(this.isEnabled());
+			return;
+		}
+
+		const resourceKey = ALL_SYNC_RESOURCES.filter(resourceKey => getEnablementKey(resourceKey) === storageChangeEvent.key)[0];
+		if (resourceKey) {
+			this._onDidChangeResourceEnablement.fire([resourceKey, this.isResourceEnabled(resourceKey)]);
+			return;
+		}
+	}
 }

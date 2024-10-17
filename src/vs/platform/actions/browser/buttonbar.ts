@@ -9,213 +9,172 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ButtonBar, IButton } from "vs/base/browser/ui/button/button"
-import { createInstantHoverDelegate } from "vs/base/browser/ui/hover/hoverDelegateFactory"
-import {
-  ActionRunner,
-  IAction,
-  IActionRunner,
-  SubmenuAction,
-  WorkbenchActionExecutedClassification,
-  WorkbenchActionExecutedEvent,
-} from "vs/base/common/actions"
-import { Emitter, Event } from "vs/base/common/event"
-import { DisposableStore } from "vs/base/common/lifecycle"
-import { ThemeIcon } from "vs/base/common/themables"
-import { localize } from "vs/nls"
-import {
-  MenuId,
-  IMenuService,
-  MenuItemAction,
-} from "vs/platform/actions/common/actions"
-import { IContextKeyService } from "vs/platform/contextkey/common/contextkey"
-import { IContextMenuService } from "vs/platform/contextview/browser/contextView"
-import { IHoverService } from "vs/platform/hover/browser/hover"
-import { IKeybindingService } from "vs/platform/keybinding/common/keybinding"
-import { ITelemetryService } from "vs/platform/telemetry/common/telemetry"
+import { ButtonBar, IButton } from 'vs/base/browser/ui/button/button';
+import { createInstantHoverDelegate } from 'vs/base/browser/ui/hover/hoverDelegateFactory';
+import { ActionRunner, IAction, IActionRunner, SubmenuAction, WorkbenchActionExecutedClassification, WorkbenchActionExecutedEvent } from 'vs/base/common/actions';
+import { Emitter, Event } from 'vs/base/common/event';
+import { DisposableStore } from 'vs/base/common/lifecycle';
+import { ThemeIcon } from 'vs/base/common/themables';
+import { localize } from 'vs/nls';
+import { MenuId, IMenuService, MenuItemAction } from 'vs/platform/actions/common/actions';
+import { IContextKeyService } from 'vs/platform/contextkey/common/contextkey';
+import { IContextMenuService } from 'vs/platform/contextview/browser/contextView';
+import { IHoverService } from 'vs/platform/hover/browser/hover';
+import { IKeybindingService } from 'vs/platform/keybinding/common/keybinding';
+import { ITelemetryService } from 'vs/platform/telemetry/common/telemetry';
 
-export type IButtonConfigProvider = (action: IAction) =>
-  | {
-      showIcon?: boolean
-      showLabel?: boolean
-      isSecondary?: boolean
-    }
-  | undefined
+export type IButtonConfigProvider = (action: IAction) => {
+	showIcon?: boolean;
+	showLabel?: boolean;
+	isSecondary?: boolean;
+} | undefined;
 
 export interface IWorkbenchButtonBarOptions {
-  telemetrySource?: string
-  buttonConfigProvider?: IButtonConfigProvider
+	telemetrySource?: string;
+	buttonConfigProvider?: IButtonConfigProvider;
 }
 
 export class WorkbenchButtonBar extends ButtonBar {
-  protected readonly _store = new DisposableStore()
-  protected readonly _updateStore = new DisposableStore()
 
-  private readonly _actionRunner: IActionRunner
-  private readonly _onDidChange = new Emitter<this>()
-  readonly onDidChange: Event<this> = this._onDidChange.event
+	protected readonly _store = new DisposableStore();
+	protected readonly _updateStore = new DisposableStore();
 
-  constructor(
-    container: HTMLElement,
-    private readonly _options: IWorkbenchButtonBarOptions | undefined,
-    @IContextMenuService
-    private readonly _contextMenuService: IContextMenuService,
-    @IKeybindingService private readonly _keybindingService: IKeybindingService,
-    @ITelemetryService telemetryService: ITelemetryService,
-    @IHoverService private readonly _hoverService: IHoverService,
-  ) {
-    super(container)
+	private readonly _actionRunner: IActionRunner;
+	private readonly _onDidChange = new Emitter<this>();
+	readonly onDidChange: Event<this> = this._onDidChange.event;
 
-    this._actionRunner = this._store.add(new ActionRunner())
-    if (_options?.telemetrySource) {
-      this._actionRunner.onDidRun(
-        (e) => {
-          telemetryService.publicLog2<
-            WorkbenchActionExecutedEvent,
-            WorkbenchActionExecutedClassification
-          >("workbenchActionExecuted", {
-            id: e.action.id,
-            from: _options.telemetrySource!,
-          })
-        },
-        undefined,
-        this._store,
-      )
-    }
-  }
 
-  override dispose() {
-    this._onDidChange.dispose()
-    this._updateStore.dispose()
-    this._store.dispose()
-    super.dispose()
-  }
+	constructor(
+		container: HTMLElement,
+		private readonly _options: IWorkbenchButtonBarOptions | undefined,
+		@IContextMenuService private readonly _contextMenuService: IContextMenuService,
+		@IKeybindingService private readonly _keybindingService: IKeybindingService,
+		@ITelemetryService telemetryService: ITelemetryService,
+		@IHoverService private readonly _hoverService: IHoverService,
+	) {
+		super(container);
 
-  update(actions: IAction[]): void {
-    const conifgProvider: IButtonConfigProvider =
-      this._options?.buttonConfigProvider ?? (() => ({ showLabel: true }))
+		this._actionRunner = this._store.add(new ActionRunner());
+		if (_options?.telemetrySource) {
+			this._actionRunner.onDidRun(e => {
+				telemetryService.publicLog2<WorkbenchActionExecutedEvent, WorkbenchActionExecutedClassification>(
+					'workbenchActionExecuted',
+					{ id: e.action.id, from: _options.telemetrySource! }
+				);
+			}, undefined, this._store);
+		}
+	}
 
-    this._updateStore.clear()
-    this.clear()
+	override dispose() {
+		this._onDidChange.dispose();
+		this._updateStore.dispose();
+		this._store.dispose();
+		super.dispose();
+	}
 
-    // Support instamt hover between buttons
-    const hoverDelegate = this._updateStore.add(createInstantHoverDelegate())
+	update(actions: IAction[]): void {
 
-    for (let i = 0; i < actions.length; i++) {
-      const secondary = i > 0
-      const actionOrSubmenu = actions[i]
-      let action: IAction
-      let btn: IButton
+		const conifgProvider: IButtonConfigProvider = this._options?.buttonConfigProvider ?? (() => ({ showLabel: true }));
 
-      if (
-        actionOrSubmenu instanceof SubmenuAction &&
-        actionOrSubmenu.actions.length > 0
-      ) {
-        const [first, ...rest] = actionOrSubmenu.actions
-        action = <MenuItemAction>first
-        btn = this.addButtonWithDropdown({
-          secondary: conifgProvider(action)?.isSecondary ?? secondary,
-          actionRunner: this._actionRunner,
-          actions: rest,
-          contextMenuProvider: this._contextMenuService,
-          ariaLabel: action.label,
-        })
-      } else {
-        action = actionOrSubmenu
-        btn = this.addButton({
-          secondary: conifgProvider(action)?.isSecondary ?? secondary,
-          ariaLabel: action.label,
-        })
-      }
+		this._updateStore.clear();
+		this.clear();
 
-      btn.enabled = action.enabled
-      btn.element.classList.add("default-colors")
-      if (conifgProvider(action)?.showLabel ?? true) {
-        btn.label = action.label
-      } else {
-        btn.element.classList.add("monaco-text-button")
-      }
-      if (conifgProvider(action)?.showIcon) {
-        if (
-          action instanceof MenuItemAction &&
-          ThemeIcon.isThemeIcon(action.item.icon)
-        ) {
-          btn.icon = action.item.icon
-        } else if (action.class) {
-          btn.element.classList.add(...action.class.split(" "))
-        }
-      }
-      const kb = this._keybindingService.lookupKeybinding(action.id)
-      let tooltip: string
-      if (kb) {
-        tooltip = localize(
-          "labelWithKeybinding",
-          "{0} ({1})",
-          action.label,
-          kb.getLabel(),
-        )
-      } else {
-        tooltip = action.label
-      }
-      this._updateStore.add(
-        this._hoverService.setupUpdatableHover(
-          hoverDelegate,
-          btn.element,
-          tooltip,
-        ),
-      )
-      this._updateStore.add(
-        btn.onDidClick(async () => {
-          this._actionRunner.run(action)
-        }),
-      )
-    }
-    this._onDidChange.fire(this)
-  }
+		// Support instamt hover between buttons
+		const hoverDelegate = this._updateStore.add(createInstantHoverDelegate());
+
+		for (let i = 0; i < actions.length; i++) {
+
+			const secondary = i > 0;
+			const actionOrSubmenu = actions[i];
+			let action: IAction;
+			let btn: IButton;
+
+			if (actionOrSubmenu instanceof SubmenuAction && actionOrSubmenu.actions.length > 0) {
+				const [first, ...rest] = actionOrSubmenu.actions;
+				action = <MenuItemAction>first;
+				btn = this.addButtonWithDropdown({
+					secondary: conifgProvider(action)?.isSecondary ?? secondary,
+					actionRunner: this._actionRunner,
+					actions: rest,
+					contextMenuProvider: this._contextMenuService,
+					ariaLabel: action.label
+				});
+			} else {
+				action = actionOrSubmenu;
+				btn = this.addButton({
+					secondary: conifgProvider(action)?.isSecondary ?? secondary,
+					ariaLabel: action.label
+				});
+			}
+
+			btn.enabled = action.enabled;
+			btn.element.classList.add('default-colors');
+			if (conifgProvider(action)?.showLabel ?? true) {
+				btn.label = action.label;
+			} else {
+				btn.element.classList.add('monaco-text-button');
+			}
+			if (conifgProvider(action)?.showIcon) {
+				if (action instanceof MenuItemAction && ThemeIcon.isThemeIcon(action.item.icon)) {
+					btn.icon = action.item.icon;
+				} else if (action.class) {
+					btn.element.classList.add(...action.class.split(' '));
+				}
+			}
+			const kb = this._keybindingService.lookupKeybinding(action.id);
+			let tooltip: string;
+			if (kb) {
+				tooltip = localize('labelWithKeybinding', "{0} ({1})", action.label, kb.getLabel());
+			} else {
+				tooltip = action.label;
+			}
+			this._updateStore.add(this._hoverService.setupUpdatableHover(hoverDelegate, btn.element, tooltip));
+			this._updateStore.add(btn.onDidClick(async () => {
+				this._actionRunner.run(action);
+			}));
+		}
+		this._onDidChange.fire(this);
+	}
 }
 
 export class MenuWorkbenchButtonBar extends WorkbenchButtonBar {
-  constructor(
-    container: HTMLElement,
-    menuId: MenuId,
-    options: IWorkbenchButtonBarOptions | undefined,
-    @IMenuService menuService: IMenuService,
-    @IContextKeyService contextKeyService: IContextKeyService,
-    @IContextMenuService contextMenuService: IContextMenuService,
-    @IKeybindingService keybindingService: IKeybindingService,
-    @ITelemetryService telemetryService: ITelemetryService,
-    @IHoverService hoverService: IHoverService,
-  ) {
-    super(
-      container,
-      options,
-      contextMenuService,
-      keybindingService,
-      telemetryService,
-      hoverService,
-    )
 
-    const menu = menuService.createMenu(menuId, contextKeyService)
-    this._store.add(menu)
+	constructor(
+		container: HTMLElement,
+		menuId: MenuId,
+		options: IWorkbenchButtonBarOptions | undefined,
+		@IMenuService menuService: IMenuService,
+		@IContextKeyService contextKeyService: IContextKeyService,
+		@IContextMenuService contextMenuService: IContextMenuService,
+		@IKeybindingService keybindingService: IKeybindingService,
+		@ITelemetryService telemetryService: ITelemetryService,
+		@IHoverService hoverService: IHoverService,
+	) {
+		super(container, options, contextMenuService, keybindingService, telemetryService, hoverService);
 
-    const update = () => {
-      this.clear()
+		const menu = menuService.createMenu(menuId, contextKeyService);
+		this._store.add(menu);
 
-      const actions = menu
-        .getActions({ renderShortTitle: true })
-        .flatMap((entry) => entry[1])
+		const update = () => {
 
-      super.update(actions)
-    }
-    this._store.add(menu.onDidChange(update))
-    update()
-  }
+			this.clear();
 
-  override dispose() {
-    super.dispose()
-  }
+			const actions = menu
+				.getActions({ renderShortTitle: true })
+				.flatMap(entry => entry[1]);
 
-  override update(_actions: IAction[]): void {
-    throw new Error("Use Menu or WorkbenchButtonBar")
-  }
+			super.update(actions);
+
+		};
+		this._store.add(menu.onDidChange(update));
+		update();
+	}
+
+	override dispose() {
+		super.dispose();
+	}
+
+	override update(_actions: IAction[]): void {
+		throw new Error('Use Menu or WorkbenchButtonBar');
+	}
 }

@@ -9,183 +9,140 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CancellationTokenSource } from "vs/base/common/cancellation"
-import {
-  DisposableStore,
-  IDisposable,
-  toDisposable,
-} from "vs/base/common/lifecycle"
-import {
-  ExtHostSpeechShape,
-  IMainContext,
-  MainContext,
-  MainThreadSpeechShape,
-} from "vs/workbench/api/common/extHost.protocol"
-import type * as vscode from "vscode"
-import { ExtensionIdentifier } from "vs/platform/extensions/common/extensions"
+import { CancellationTokenSource } from 'vs/base/common/cancellation';
+import { DisposableStore, IDisposable, toDisposable } from 'vs/base/common/lifecycle';
+import { ExtHostSpeechShape, IMainContext, MainContext, MainThreadSpeechShape } from 'vs/workbench/api/common/extHost.protocol';
+import type * as vscode from 'vscode';
+import { ExtensionIdentifier } from 'vs/platform/extensions/common/extensions';
 
 export class ExtHostSpeech implements ExtHostSpeechShape {
-  private static ID_POOL = 1
 
-  private readonly proxy: MainThreadSpeechShape
+	private static ID_POOL = 1;
 
-  private readonly providers = new Map<number, vscode.SpeechProvider>()
-  private readonly sessions = new Map<number, CancellationTokenSource>()
-  private readonly synthesizers = new Map<number, vscode.TextToSpeechSession>()
+	private readonly proxy: MainThreadSpeechShape;
 
-  constructor(mainContext: IMainContext) {
-    this.proxy = mainContext.getProxy(MainContext.MainThreadSpeech)
-  }
+	private readonly providers = new Map<number, vscode.SpeechProvider>();
+	private readonly sessions = new Map<number, CancellationTokenSource>();
+	private readonly synthesizers = new Map<number, vscode.TextToSpeechSession>();
 
-  async $createSpeechToTextSession(
-    handle: number,
-    session: number,
-    language?: string,
-  ): Promise<void> {
-    const provider = this.providers.get(handle)
-    if (!provider) {
-      return
-    }
+	constructor(
+		mainContext: IMainContext
+	) {
+		this.proxy = mainContext.getProxy(MainContext.MainThreadSpeech);
+	}
 
-    const disposables = new DisposableStore()
+	async $createSpeechToTextSession(handle: number, session: number, language?: string): Promise<void> {
+		const provider = this.providers.get(handle);
+		if (!provider) {
+			return;
+		}
 
-    const cts = new CancellationTokenSource()
-    this.sessions.set(session, cts)
+		const disposables = new DisposableStore();
 
-    const speechToTextSession = await provider.provideSpeechToTextSession(
-      cts.token,
-      language ? { language } : undefined,
-    )
-    if (!speechToTextSession) {
-      return
-    }
+		const cts = new CancellationTokenSource();
+		this.sessions.set(session, cts);
 
-    disposables.add(
-      speechToTextSession.onDidChange((e) => {
-        if (cts.token.isCancellationRequested) {
-          return
-        }
+		const speechToTextSession = await provider.provideSpeechToTextSession(cts.token, language ? { language } : undefined);
+		if (!speechToTextSession) {
+			return;
+		}
 
-        this.proxy.$emitSpeechToTextEvent(session, e)
-      }),
-    )
+		disposables.add(speechToTextSession.onDidChange(e => {
+			if (cts.token.isCancellationRequested) {
+				return;
+			}
 
-    disposables.add(
-      cts.token.onCancellationRequested(() => disposables.dispose()),
-    )
-  }
+			this.proxy.$emitSpeechToTextEvent(session, e);
+		}));
 
-  async $cancelSpeechToTextSession(session: number): Promise<void> {
-    this.sessions.get(session)?.dispose(true)
-    this.sessions.delete(session)
-  }
+		disposables.add(cts.token.onCancellationRequested(() => disposables.dispose()));
+	}
 
-  async $createTextToSpeechSession(
-    handle: number,
-    session: number,
-    language?: string,
-  ): Promise<void> {
-    const provider = this.providers.get(handle)
-    if (!provider) {
-      return
-    }
+	async $cancelSpeechToTextSession(session: number): Promise<void> {
+		this.sessions.get(session)?.dispose(true);
+		this.sessions.delete(session);
+	}
 
-    const disposables = new DisposableStore()
+	async $createTextToSpeechSession(handle: number, session: number, language?: string): Promise<void> {
+		const provider = this.providers.get(handle);
+		if (!provider) {
+			return;
+		}
 
-    const cts = new CancellationTokenSource()
-    this.sessions.set(session, cts)
+		const disposables = new DisposableStore();
 
-    const textToSpeech = await provider.provideTextToSpeechSession(
-      cts.token,
-      language ? { language } : undefined,
-    )
-    if (!textToSpeech) {
-      return
-    }
+		const cts = new CancellationTokenSource();
+		this.sessions.set(session, cts);
 
-    this.synthesizers.set(session, textToSpeech)
+		const textToSpeech = await provider.provideTextToSpeechSession(cts.token, language ? { language } : undefined);
+		if (!textToSpeech) {
+			return;
+		}
 
-    disposables.add(
-      textToSpeech.onDidChange((e) => {
-        if (cts.token.isCancellationRequested) {
-          return
-        }
+		this.synthesizers.set(session, textToSpeech);
 
-        this.proxy.$emitTextToSpeechEvent(session, e)
-      }),
-    )
+		disposables.add(textToSpeech.onDidChange(e => {
+			if (cts.token.isCancellationRequested) {
+				return;
+			}
 
-    disposables.add(
-      cts.token.onCancellationRequested(() => disposables.dispose()),
-    )
-  }
+			this.proxy.$emitTextToSpeechEvent(session, e);
+		}));
 
-  async $synthesizeSpeech(session: number, text: string): Promise<void> {
-    this.synthesizers.get(session)?.synthesize(text)
-  }
+		disposables.add(cts.token.onCancellationRequested(() => disposables.dispose()));
+	}
 
-  async $cancelTextToSpeechSession(session: number): Promise<void> {
-    this.sessions.get(session)?.dispose(true)
-    this.sessions.delete(session)
-    this.synthesizers.delete(session)
-  }
+	async $synthesizeSpeech(session: number, text: string): Promise<void> {
+		this.synthesizers.get(session)?.synthesize(text);
+	}
 
-  async $createKeywordRecognitionSession(
-    handle: number,
-    session: number,
-  ): Promise<void> {
-    const provider = this.providers.get(handle)
-    if (!provider) {
-      return
-    }
+	async $cancelTextToSpeechSession(session: number): Promise<void> {
+		this.sessions.get(session)?.dispose(true);
+		this.sessions.delete(session);
+		this.synthesizers.delete(session);
+	}
 
-    const disposables = new DisposableStore()
+	async $createKeywordRecognitionSession(handle: number, session: number): Promise<void> {
+		const provider = this.providers.get(handle);
+		if (!provider) {
+			return;
+		}
 
-    const cts = new CancellationTokenSource()
-    this.sessions.set(session, cts)
+		const disposables = new DisposableStore();
 
-    const keywordRecognitionSession =
-      await provider.provideKeywordRecognitionSession(cts.token)
-    if (!keywordRecognitionSession) {
-      return
-    }
+		const cts = new CancellationTokenSource();
+		this.sessions.set(session, cts);
 
-    disposables.add(
-      keywordRecognitionSession.onDidChange((e) => {
-        if (cts.token.isCancellationRequested) {
-          return
-        }
+		const keywordRecognitionSession = await provider.provideKeywordRecognitionSession(cts.token);
+		if (!keywordRecognitionSession) {
+			return;
+		}
 
-        this.proxy.$emitKeywordRecognitionEvent(session, e)
-      }),
-    )
+		disposables.add(keywordRecognitionSession.onDidChange(e => {
+			if (cts.token.isCancellationRequested) {
+				return;
+			}
 
-    disposables.add(
-      cts.token.onCancellationRequested(() => disposables.dispose()),
-    )
-  }
+			this.proxy.$emitKeywordRecognitionEvent(session, e);
+		}));
 
-  async $cancelKeywordRecognitionSession(session: number): Promise<void> {
-    this.sessions.get(session)?.dispose(true)
-    this.sessions.delete(session)
-  }
+		disposables.add(cts.token.onCancellationRequested(() => disposables.dispose()));
+	}
 
-  registerProvider(
-    extension: ExtensionIdentifier,
-    identifier: string,
-    provider: vscode.SpeechProvider,
-  ): IDisposable {
-    const handle = ExtHostSpeech.ID_POOL++
+	async $cancelKeywordRecognitionSession(session: number): Promise<void> {
+		this.sessions.get(session)?.dispose(true);
+		this.sessions.delete(session);
+	}
 
-    this.providers.set(handle, provider)
-    this.proxy.$registerProvider(handle, identifier, {
-      extension,
-      displayName: extension.value,
-    })
+	registerProvider(extension: ExtensionIdentifier, identifier: string, provider: vscode.SpeechProvider): IDisposable {
+		const handle = ExtHostSpeech.ID_POOL++;
 
-    return toDisposable(() => {
-      this.proxy.$unregisterProvider(handle)
-      this.providers.delete(handle)
-    })
-  }
+		this.providers.set(handle, provider);
+		this.proxy.$registerProvider(handle, identifier, { extension, displayName: extension.value });
+
+		return toDisposable(() => {
+			this.proxy.$unregisterProvider(handle);
+			this.providers.delete(handle);
+		});
+	}
 }

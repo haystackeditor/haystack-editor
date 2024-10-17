@@ -196,11 +196,11 @@ import { nativeHoverDelegate } from "vs/platform/hover/browser/hover"
 
 export class NativeWindow extends BaseWindow {
   private readonly customTitleContextMenuDisposable = this._register(
-    new DisposableStore(),
+    new DisposableStore()
   )
 
   private readonly addFoldersScheduler = this._register(
-    new RunOnceScheduler(() => this.doAddFolders(), 100),
+    new RunOnceScheduler(() => this.doAddFolders(), 100)
   )
   private pendingFoldersToAdd: URI[] = []
 
@@ -261,7 +261,7 @@ export class NativeWindow extends BaseWindow {
     private readonly preferencesService: IPreferencesService,
     @IUtilityProcessWorkerWorkbenchService
     private readonly utilityProcessWorkerWorkbenchService: IUtilityProcessWorkerWorkbenchService,
-    @IHostService hostService: IHostService,
+    @IHostService hostService: IHostService
   ) {
     super(mainWindow, undefined, hostService, nativeEnvironmentService)
 
@@ -275,15 +275,15 @@ export class NativeWindow extends BaseWindow {
     // Layout
     this._register(
       addDisposableListener(mainWindow, EventType.RESIZE, () =>
-        this.layoutService.layout(),
-      ),
+        this.layoutService.layout()
+      )
     )
 
     // React to editor input changes
     this._register(
       this.editorService.onDidActiveEditorChange(() =>
-        this.updateTouchbarMenu(),
-      ),
+        this.updateTouchbarMenu()
+      )
     )
 
     // Prevent opening a real URL inside the window
@@ -294,8 +294,8 @@ export class NativeWindow extends BaseWindow {
           event,
           (e: DragEvent) => {
             EventHelper.stop(e)
-          },
-        ),
+          }
+        )
       )
     }
 
@@ -312,7 +312,7 @@ export class NativeWindow extends BaseWindow {
           if (activeEditor) {
             const resource = EditorResourceAccessor.getOriginalUri(
               activeEditor,
-              { supportSideBySide: SideBySideEditor.PRIMARY },
+              { supportSideBySide: SideBySideEditor.PRIMARY }
             )
             if (resource) {
               args.push(resource)
@@ -332,7 +332,7 @@ export class NativeWindow extends BaseWindow {
         } catch (error) {
           this.notificationService.error(error)
         }
-      },
+      }
     )
 
     // Support runKeybinding event
@@ -343,10 +343,10 @@ export class NativeWindow extends BaseWindow {
         if (activeElement) {
           this.keybindingService.dispatchByUserSettingsLabel(
             request.userSettingsLabel,
-            activeElement,
+            activeElement
           )
         }
-      },
+      }
     )
 
     // Error reporting from main
@@ -364,16 +364,16 @@ export class NativeWindow extends BaseWindow {
           Severity.Error,
           localize(
             "sharedProcessCrash",
-            "A shared background process terminated unexpectedly. Please restart the application to recover.",
+            "A shared background process terminated unexpectedly. Please restart the application to recover."
           ),
           [
             {
               label: localize("restart", "Restart"),
               run: () => this.nativeHostService.relaunch(),
             },
-          ],
+          ]
         )
-      },
+      }
     )
 
     // Support openFiles event for existing and new files
@@ -381,7 +381,7 @@ export class NativeWindow extends BaseWindow {
       "vscode:openFiles",
       (event: unknown, request: IOpenFileRequest) => {
         this.onOpenFiles(request)
-      },
+      }
     )
 
     // Support addFolders event if we have a workspace opened
@@ -389,7 +389,7 @@ export class NativeWindow extends BaseWindow {
       "vscode:addFolders",
       (event: unknown, request: IAddFoldersRequest) => {
         this.onAddFoldersRequest(request)
-      },
+      }
     )
 
     // Message support
@@ -397,7 +397,7 @@ export class NativeWindow extends BaseWindow {
       "vscode:showInfoMessage",
       (event: unknown, message: string) => {
         this.notificationService.info(message)
-      },
+      }
     )
 
     // Shell Environment Issue Notifications
@@ -420,11 +420,11 @@ export class NativeWindow extends BaseWindow {
             label: localize("learnMore", "Learn More"),
             run: () =>
               this.openerService.open(
-                "https://go.microsoft.com/fwlink/?linkid=2149667",
+                "https://go.microsoft.com/fwlink/?linkid=2149667"
               ),
           },
         ])
-      },
+      }
     )
 
     ipcRenderer.on(
@@ -435,19 +435,19 @@ export class NativeWindow extends BaseWindow {
           localize(
             "keychainWriteError",
             "Writing login information to the keychain failed with error '{0}'.",
-            message,
+            message
           ),
           [
             {
               label: localize("troubleshooting", "Troubleshooting Guide"),
               run: () =>
                 this.openerService.open(
-                  "https://go.microsoft.com/fwlink/?linkid=2190713",
+                  "https://go.microsoft.com/fwlink/?linkid=2190713"
                 ),
             },
-          ],
+          ]
         )
-      },
+      }
     )
 
     ipcRenderer.on(
@@ -458,7 +458,7 @@ export class NativeWindow extends BaseWindow {
           localize(
             "runningTranslated",
             "You are running an emulated version of {0}. For better performance download the native arm64 version of {0} build for your machine.",
-            this.productService.nameLong,
+            this.productService.nameLong
           ),
           [
             {
@@ -469,21 +469,21 @@ export class NativeWindow extends BaseWindow {
                 const insidersURL =
                   "https://code.visualstudio.com/docs/?dv=osx&build=insiders"
                 this.openerService.open(
-                  quality === "stable" ? stableURL : insidersURL,
+                  quality === "stable" ? stableURL : insidersURL
                 )
               },
             },
-          ],
+          ]
         )
-      },
+      }
     )
 
     // Fullscreen Events
     ipcRenderer.on("vscode:enterFullScreen", () =>
-      setFullscreen(true, mainWindow),
+      setFullscreen(true, mainWindow)
     )
     ipcRenderer.on("vscode:leaveFullScreen", () =>
-      setFullscreen(false, mainWindow),
+      setFullscreen(false, mainWindow)
     )
 
     // Proxy Login Dialog
@@ -496,22 +496,22 @@ export class NativeWindow extends BaseWindow {
           username?: string
           password?: string
           replyChannel: string
-        },
+        }
       ) => {
         const rememberCredentialsKey = "window.rememberProxyCredentials"
         const rememberCredentials = this.storageService.getBoolean(
           rememberCredentialsKey,
-          StorageScope.APPLICATION,
+          StorageScope.APPLICATION
         )
         const result = await this.dialogService.input({
           type: "warning",
           message: localize(
             "proxyAuthRequired",
-            "Proxy Authentication Required",
+            "Proxy Authentication Required"
           ),
           primaryButton: localize(
             { key: "loginButton", comment: ["&& denotes a mnemonic"] },
-            "&&Log In",
+            "&&Log In"
           ),
           inputs: [
             {
@@ -527,7 +527,7 @@ export class NativeWindow extends BaseWindow {
           detail: localize(
             "proxyDetail",
             "The proxy {0} requires a username and password.",
-            `${payload.authInfo.host}:${payload.authInfo.port}`,
+            `${payload.authInfo.host}:${payload.authInfo.port}`
           ),
           checkbox: {
             label: localize("rememberCredentials", "Remember my credentials"),
@@ -549,12 +549,12 @@ export class NativeWindow extends BaseWindow {
               rememberCredentialsKey,
               true,
               StorageScope.APPLICATION,
-              StorageTarget.MACHINE,
+              StorageTarget.MACHINE
             )
           } else {
             this.storageService.remove(
               rememberCredentialsKey,
-              StorageScope.APPLICATION,
+              StorageScope.APPLICATION
             )
           }
 
@@ -566,7 +566,7 @@ export class NativeWindow extends BaseWindow {
             remember: !!result.checkboxChecked,
           })
         }
-      },
+      }
     )
 
     // Accessibility support changed event
@@ -576,9 +576,9 @@ export class NativeWindow extends BaseWindow {
         this.accessibilityService.setAccessibilitySupport(
           accessibilitySupportEnabled
             ? AccessibilitySupport.Enabled
-            : AccessibilitySupport.Disabled,
+            : AccessibilitySupport.Disabled
         )
-      },
+      }
     )
 
     // Allow to update security settings around allowed UNC Host
@@ -593,7 +593,7 @@ export class NativeWindow extends BaseWindow {
 
         const configuredAllowedUncHosts =
           this.configurationService.getValue<string[] | undefined>(
-            "security.allowedUNCHosts",
+            "security.allowedUNCHosts"
           ) ?? []
         if (Array.isArray(configuredAllowedUncHosts)) {
           for (const configuredAllowedUncHost of configuredAllowedUncHosts) {
@@ -607,15 +607,15 @@ export class NativeWindow extends BaseWindow {
           allowedUncHosts.add(host)
 
           await getWorkbenchContribution<DynamicWorkbenchSecurityConfiguration>(
-            DynamicWorkbenchSecurityConfiguration.ID,
+            DynamicWorkbenchSecurityConfiguration.ID
           ).ready // ensure this setting is registered
           this.configurationService.updateValue(
             "security.allowedUNCHosts",
             [...allowedUncHosts.values()],
-            ConfigurationTarget.USER,
+            ConfigurationTarget.USER
           )
         }
-      },
+      }
     )
 
     // Allow to update security settings around protocol handlers
@@ -627,7 +627,7 @@ export class NativeWindow extends BaseWindow {
             ? "security.promptForLocalFileProtocolHandling"
             : "security.promptForRemoteFileProtocolHandling"
         this.configurationService.updateValue(setting, false)
-      },
+      }
     )
 
     // Window Zoom
@@ -646,13 +646,13 @@ export class NativeWindow extends BaseWindow {
         ) {
           this.updateTouchbarMenu()
         }
-      }),
+      })
     )
 
     this._register(
       onDidChangeZoomLevel((targetWindowId) =>
-        this.handleOnDidChangeZoomLevel(targetWindowId),
-      ),
+        this.handleOnDidChangeZoomLevel(targetWindowId)
+      )
     )
 
     this._register(
@@ -661,10 +661,10 @@ export class NativeWindow extends BaseWindow {
           this.createWindowZoomStatusEntry(
             instantiationService,
             part.windowId,
-            disposables,
+            disposables
           )
-        },
-      ),
+        }
+      )
     )
 
     // Listen to visible editor changes (debounced in case a new editor opens immediately after)
@@ -676,8 +676,8 @@ export class NativeWindow extends BaseWindow {
         undefined,
         undefined,
         undefined,
-        this._store,
-      )(() => this.maybeCloseWindow()),
+        this._store
+      )(() => this.maybeCloseWindow())
     )
 
     // Listen to editor closing (if we run with --wait)
@@ -685,7 +685,7 @@ export class NativeWindow extends BaseWindow {
     if (filesToWait) {
       this.trackClosedWaitFiles(
         filesToWait.waitMarkerFileUri,
-        coalesce(filesToWait.paths.map((path) => path.fileUri)),
+        coalesce(filesToWait.paths.map((path) => path.fileUri))
       )
     }
 
@@ -693,14 +693,14 @@ export class NativeWindow extends BaseWindow {
     if (isMacintosh) {
       const updateRepresentedFilename = (
         editorService: IEditorService,
-        targetWindowId: number | undefined,
+        targetWindowId: number | undefined
       ) => {
         const file = EditorResourceAccessor.getOriginalUri(
           editorService.activeEditor,
           {
             supportSideBySide: SideBySideEditor.PRIMARY,
             filterByScheme: Schemas.file,
-          },
+          }
         )
 
         // Represented Filename
@@ -716,8 +716,8 @@ export class NativeWindow extends BaseWindow {
 
       this._register(
         this.mainPartEditorService.onDidActiveEditorChange(() =>
-          updateRepresentedFilename(this.mainPartEditorService, undefined),
-        ),
+          updateRepresentedFilename(this.mainPartEditorService, undefined)
+        )
       )
 
       this._register(
@@ -725,18 +725,15 @@ export class NativeWindow extends BaseWindow {
           ({ part, disposables }) => {
             const auxiliaryEditorService = this.editorService.createScoped(
               part,
-              disposables,
+              disposables
             )
             disposables.add(
               auxiliaryEditorService.onDidActiveEditorChange(() =>
-                updateRepresentedFilename(
-                  auxiliaryEditorService,
-                  part.windowId,
-                ),
-              ),
+                updateRepresentedFilename(auxiliaryEditorService, part.windowId)
+              )
             )
-          },
-        ),
+          }
+        )
       )
     }
 
@@ -749,10 +746,7 @@ export class NativeWindow extends BaseWindow {
             const targetWindow = getWindow(container)
             const targetWindowId = targetWindow.vscodeWindowId
             const titlePart = assertIsDefined(
-              this.layoutService.getContainer(
-                targetWindow,
-                Parts.TITLEBAR_PART,
-              ),
+              this.layoutService.getContainer(targetWindow, Parts.TITLEBAR_PART)
             )
 
             disposables.add(
@@ -762,14 +756,14 @@ export class NativeWindow extends BaseWindow {
                 this.nativeHostService.handleTitleDoubleClick({
                   targetWindowId,
                 })
-              }),
+              })
             )
           },
           {
             container: this.layoutService.mainContainer,
             disposables: this._store,
-          },
-        ),
+          }
+        )
       )
     }
 
@@ -781,14 +775,14 @@ export class NativeWindow extends BaseWindow {
           gotDirty &&
           !(workingCopy.capabilities & WorkingCopyCapabilities.Untitled) &&
           this.filesConfigurationService.hasShortAutoSaveDelay(
-            workingCopy.resource,
+            workingCopy.resource
           )
         ) {
           return // do not indicate dirty of working copies that are auto saved after short delay
         }
 
         this.updateDocumentEdited(gotDirty ? true : undefined)
-      }),
+      })
     )
 
     this.updateDocumentEdited(undefined)
@@ -799,48 +793,48 @@ export class NativeWindow extends BaseWindow {
         Event.map(
           Event.filter(
             this.nativeHostService.onDidMaximizeWindow,
-            (windowId) => !!hasWindow(windowId),
+            (windowId) => !!hasWindow(windowId)
           ),
-          (windowId) => ({ maximized: true, windowId }),
+          (windowId) => ({ maximized: true, windowId })
         ),
         Event.map(
           Event.filter(
             this.nativeHostService.onDidUnmaximizeWindow,
-            (windowId) => !!hasWindow(windowId),
+            (windowId) => !!hasWindow(windowId)
           ),
-          (windowId) => ({ maximized: false, windowId }),
-        ),
+          (windowId) => ({ maximized: false, windowId })
+        )
       )((e) =>
         this.layoutService.updateWindowMaximizedState(
           getWindowById(e.windowId)!.window,
-          e.maximized,
-        ),
-      ),
+          e.maximized
+        )
+      )
     )
     this.layoutService.updateWindowMaximizedState(
       mainWindow,
-      this.nativeEnvironmentService.window.maximized ?? false,
+      this.nativeEnvironmentService.window.maximized ?? false
     )
 
     // Detect panel position to determine minimum width
     this._register(
       this.layoutService.onDidChangePanelPosition((pos) =>
-        this.onDidChangePanelPosition(positionFromString(pos)),
-      ),
+        this.onDidChangePanelPosition(positionFromString(pos))
+      )
     )
     this.onDidChangePanelPosition(this.layoutService.getPanelPosition())
 
     // Lifecycle
     this._register(
-      this.lifecycleService.onBeforeShutdown((e) => this.onBeforeShutdown(e)),
+      this.lifecycleService.onBeforeShutdown((e) => this.onBeforeShutdown(e))
     )
     this._register(
       this.lifecycleService.onBeforeShutdownError((e) =>
-        this.onBeforeShutdownError(e),
-      ),
+        this.onBeforeShutdownError(e)
+      )
     )
     this._register(
-      this.lifecycleService.onWillShutdown((e) => this.onWillShutdown(e)),
+      this.lifecycleService.onWillShutdown((e) => this.onWillShutdown(e))
     )
   }
 
@@ -875,7 +869,7 @@ export class NativeWindow extends BaseWindow {
             if (confirmBeforeClose) {
               confirmed = await this.instantiationService.invokeFunction(
                 (accessor) =>
-                  NativeWindow.confirmOnShutdown(accessor, actualReason),
+                  NativeWindow.confirmOnShutdown(accessor, actualReason)
               )
             }
 
@@ -886,7 +880,7 @@ export class NativeWindow extends BaseWindow {
 
             return !confirmed
           })(),
-          "veto.confirmBeforeClose",
+          "veto.confirmBeforeClose"
         )
       }
     }
@@ -907,10 +901,10 @@ export class NativeWindow extends BaseWindow {
           Event.any(
             this.lifecycleService.onWillShutdown, // dismiss this dialog when we shutdown
             this.lifecycleService.onShutdownVeto, // or when shutdown was vetoed
-            this.dialogService.onWillShowDialog, // or when a dialog asks for input
-          ),
+            this.dialogService.onWillShowDialog // or when a dialog asks for input
+          )
         )
-      },
+      }
     )
   }
 
@@ -920,7 +914,7 @@ export class NativeWindow extends BaseWindow {
   }: BeforeShutdownErrorEvent): void {
     this.dialogService.error(
       this.toShutdownLabel(reason, true),
-      localize("shutdownErrorDetail", "Error: {0}", toErrorMessage(error)),
+      localize("shutdownErrorDetail", "Error: {0}", toErrorMessage(error))
     )
   }
 
@@ -941,9 +935,7 @@ export class NativeWindow extends BaseWindow {
               ? localize(
                   "willShutdownDetail",
                   "The following operations are still running: \n{0}",
-                  pendingJoiners
-                    .map((joiner) => `- ${joiner.label}`)
-                    .join("\n"),
+                  pendingJoiners.map((joiner) => `- ${joiner.label}`).join("\n")
                 )
               : undefined,
         },
@@ -952,14 +944,14 @@ export class NativeWindow extends BaseWindow {
         },
         () => {
           force()
-        },
+        }
       )
     }, 1200)
     shutdownDialogScheduler.schedule()
 
     // Dispose scheduler when we actually shutdown
     Event.once(this.lifecycleService.onDidShutdown)(() =>
-      shutdownDialogScheduler.dispose(),
+      shutdownDialogScheduler.dispose()
     )
   }
 
@@ -969,22 +961,22 @@ export class NativeWindow extends BaseWindow {
         case ShutdownReason.CLOSE:
           return localize(
             "shutdownErrorClose",
-            "An unexpected error prevented the window to close",
+            "An unexpected error prevented the window to close"
           )
         case ShutdownReason.QUIT:
           return localize(
             "shutdownErrorQuit",
-            "An unexpected error prevented the application to quit",
+            "An unexpected error prevented the application to quit"
           )
         case ShutdownReason.RELOAD:
           return localize(
             "shutdownErrorReload",
-            "An unexpected error prevented the window to reload",
+            "An unexpected error prevented the window to reload"
           )
         case ShutdownReason.LOAD:
           return localize(
             "shutdownErrorLoad",
-            "An unexpected error prevented to change the workspace",
+            "An unexpected error prevented to change the workspace"
           )
       }
     }
@@ -993,22 +985,22 @@ export class NativeWindow extends BaseWindow {
       case ShutdownReason.CLOSE:
         return localize(
           "shutdownTitleClose",
-          "Closing the window is taking a bit longer...",
+          "Closing the window is taking a bit longer..."
         )
       case ShutdownReason.QUIT:
         return localize(
           "shutdownTitleQuit",
-          "Quitting the application is taking a bit longer...",
+          "Quitting the application is taking a bit longer..."
         )
       case ShutdownReason.RELOAD:
         return localize(
           "shutdownTitleReload",
-          "Reloading the window is taking a bit longer...",
+          "Reloading the window is taking a bit longer..."
         )
       case ShutdownReason.LOAD:
         return localize(
           "shutdownTitleLoad",
-          "Changing the workspace is taking a bit longer...",
+          "Changing the workspace is taking a bit longer..."
         )
     }
   }
@@ -1047,7 +1039,7 @@ export class NativeWindow extends BaseWindow {
   }
 
   private getWindowMinimumWidth(
-    panelPosition: Position = this.layoutService.getPanelPosition(),
+    panelPosition: Position = this.layoutService.getPanelPosition()
   ): number {
     // if panel is on the side, then return the larger minwidth
     const panelOnSide =
@@ -1127,15 +1119,15 @@ export class NativeWindow extends BaseWindow {
       const commandId = `workbench.action.revealPathInFinder${i}`
       this.customTitleContextMenuDisposable.add(
         CommandsRegistry.registerCommand(commandId, () =>
-          this.nativeHostService.showItemInFolder(path.fsPath),
-        ),
+          this.nativeHostService.showItemInFolder(path.fsPath)
+        )
       )
       this.customTitleContextMenuDisposable.add(
         MenuRegistry.appendMenuItem(MenuId.TitleBarTitleContext, {
           command: { id: commandId, title: label || posix.sep },
           order: -i,
           group: "1_file",
-        }),
+        })
       )
     }
   }
@@ -1164,7 +1156,7 @@ export class NativeWindow extends BaseWindow {
       this.createWindowZoomStatusEntry(
         this.instantiationService,
         window.vscodeWindowId,
-        disposables,
+        disposables
       )
     }
 
@@ -1182,15 +1174,15 @@ export class NativeWindow extends BaseWindow {
     ) {
       if (isCI) {
         this.logService.error(
-          "Error: There is a dependency cycle in the AMD modules that needs to be resolved!",
+          "Error: There is a dependency cycle in the AMD modules that needs to be resolved!"
         )
         this.nativeHostService.exit(37) // running on a build machine, just exit without showing a dialog
       } else {
         this.dialogService.error(
           localize(
             "loaderCycle",
-            "There is a dependency cycle in the AMD modules that needs to be resolved!",
-          ),
+            "There is a dependency cycle in the AMD modules that needs to be resolved!"
+          )
         )
         this.nativeHostService.openDevTools()
       }
@@ -1213,8 +1205,8 @@ export class NativeWindow extends BaseWindow {
           localize(
             "runningAsRoot",
             "It is not recommended to run {0} as root user.",
-            this.productService.nameShort,
-          ),
+            this.productService.nameShort
+          )
         )
       }
     })()
@@ -1225,13 +1217,13 @@ export class NativeWindow extends BaseWindow {
       if (isMacintosh) {
         // appRoot = /Applications/Visual Studio Code - Insiders.app/Contents/Resources/app
         installLocationUri = dirname(
-          dirname(dirname(URI.file(this.nativeEnvironmentService.appRoot))),
+          dirname(dirname(URI.file(this.nativeEnvironmentService.appRoot)))
         )
       } else {
         // appRoot = C:\Users\<name>\AppData\Local\Programs\Microsoft VS Code Insiders\resources\app
         // appRoot = /usr/share/code-insiders/resources/app
         installLocationUri = dirname(
-          dirname(URI.file(this.nativeEnvironmentService.appRoot)),
+          dirname(URI.file(this.nativeEnvironmentService.appRoot))
         )
       }
 
@@ -1239,7 +1231,7 @@ export class NativeWindow extends BaseWindow {
         if (
           this.uriIdentityService.extUri.isEqualOrParent(
             folder.uri,
-            installLocationUri,
+            installLocationUri
           )
         ) {
           this.bannerService.show({
@@ -1247,7 +1239,7 @@ export class NativeWindow extends BaseWindow {
             message: localize(
               "appRootWarning.banner",
               "Files you store within the installation folder ('{0}') may be OVERWRITTEN or DELETED IRREVERSIBLY without warning at update time.",
-              this.labelService.getUriLabel(installLocationUri),
+              this.labelService.getUriLabel(installLocationUri)
             ),
             icon: Codicon.warning,
           })
@@ -1271,7 +1263,7 @@ export class NativeWindow extends BaseWindow {
           "macoseolmessage",
           "{0} on {1} will soon stop receiving updates. Consider upgrading your macOS version.",
           this.productService.nameLong,
-          eolReleases.get(majorVersion),
+          eolReleases.get(majorVersion)
         )
 
         this.notificationService.prompt(
@@ -1282,7 +1274,7 @@ export class NativeWindow extends BaseWindow {
               label: localize("learnMore", "Learn More"),
               run: () =>
                 this.openerService.open(
-                  URI.parse("https://aka.ms/vscode-faq-old-macOS"),
+                  URI.parse("https://aka.ms/vscode-faq-old-macOS")
                 ),
             },
           ],
@@ -1294,7 +1286,7 @@ export class NativeWindow extends BaseWindow {
             },
             priority: NotificationPriority.URGENT,
             sticky: true,
-          },
+          }
         )
       }
     }
@@ -1305,7 +1297,7 @@ export class NativeWindow extends BaseWindow {
       {
         title: localize(
           "resolveShellEnvironment",
-          "Resolving shell environment...",
+          "Resolving shell environment..."
         ),
         location: ProgressLocation.Window,
         delay: 1600,
@@ -1314,8 +1306,8 @@ export class NativeWindow extends BaseWindow {
       () => shellEnv,
       () =>
         this.openerService.open(
-          "https://go.microsoft.com/fwlink/?linkid=2149667",
-        ),
+          "https://go.microsoft.com/fwlink/?linkid=2149667"
+        )
     )
   }
 
@@ -1327,7 +1319,7 @@ export class NativeWindow extends BaseWindow {
       async exitApplication(): Promise<void> {
         if (pendingQuit) {
           that.logService.info(
-            "[driver] not handling exitApplication() due to pending quit() call",
+            "[driver] not handling exitApplication() due to pending quit() call"
           )
           return
         }
@@ -1342,7 +1334,7 @@ export class NativeWindow extends BaseWindow {
 
   private async openTunnel(
     address: string,
-    port: number,
+    port: number
   ): Promise<RemoteTunnel | string | undefined> {
     const remoteAuthority = this.environmentService.remoteAuthority
     const addressProvider: IAddressProvider | undefined = remoteAuthority
@@ -1350,7 +1342,7 @@ export class NativeWindow extends BaseWindow {
           getAddress: async (): Promise<IAddress> => {
             return (
               await this.remoteAuthorityResolverService.resolveAuthority(
-                remoteAuthority,
+                remoteAuthority
               )
             ).authority
           },
@@ -1365,7 +1357,7 @@ export class NativeWindow extends BaseWindow {
 
   async resolveExternalUri(
     uri: URI,
-    options?: OpenOptions,
+    options?: OpenOptions
   ): Promise<IResolvedExternalUri | undefined> {
     let queryTunnel: RemoteTunnel | string | undefined
     if (options?.allowTunneling) {
@@ -1375,7 +1367,7 @@ export class NativeWindow extends BaseWindow {
       if (queryPortMapping) {
         queryTunnel = await this.openTunnel(
           queryPortMapping.address,
-          queryPortMapping.port,
+          queryPortMapping.port
         )
         if (queryTunnel && typeof queryTunnel !== "string") {
           // If the tunnel was mapped to a different port, dispose it, because some services
@@ -1397,7 +1389,7 @@ export class NativeWindow extends BaseWindow {
       if (portMappingRequest) {
         const tunnel = await this.openTunnel(
           portMappingRequest.address,
-          portMappingRequest.port,
+          portMappingRequest.port
         )
         if (tunnel && typeof tunnel !== "string") {
           const addressAsUri = URI.parse(tunnel.localAddress)
@@ -1476,7 +1468,7 @@ export class NativeWindow extends BaseWindow {
 
     // Create new (delayed)
     const scheduler: RunOnceScheduler = this.touchBarDisposables.add(
-      new RunOnceScheduler(() => this.doUpdateTouchbarMenu(scheduler), 300),
+      new RunOnceScheduler(() => this.doUpdateTouchbarMenu(scheduler), 300)
     )
     scheduler.schedule()
   }
@@ -1488,11 +1480,11 @@ export class NativeWindow extends BaseWindow {
         this.editorGroupService.activeGroup.scopedContextKeyService
       this.touchBarMenu = this.menuService.createMenu(
         MenuId.TouchBarContext,
-        scopedContextKeyService,
+        scopedContextKeyService
       )
       this.touchBarDisposables.add(this.touchBarMenu)
       this.touchBarDisposables.add(
-        this.touchBarMenu.onDidChange(() => scheduler.schedule()),
+        this.touchBarMenu.onDidChange(() => scheduler.schedule())
       )
     }
 
@@ -1501,7 +1493,7 @@ export class NativeWindow extends BaseWindow {
     const disabled =
       this.configurationService.getValue("keyboard.touchbar.enabled") === false
     const touchbarIgnored = this.configurationService.getValue(
-      "keyboard.touchbar.ignored",
+      "keyboard.touchbar.ignored"
     )
     const ignoredItems = Array.isArray(touchbarIgnored) ? touchbarIgnored : []
 
@@ -1549,7 +1541,7 @@ export class NativeWindow extends BaseWindow {
   private onAddFoldersRequest(request: IAddFoldersRequest): void {
     // Buffer all pending requests
     this.pendingFoldersToAdd.push(
-      ...request.foldersToAdd.map((folder) => URI.revive(folder)),
+      ...request.foldersToAdd.map((folder) => URI.revive(folder))
     )
 
     // Delay the adding of folders a bit to buffer in case more requests are coming
@@ -1581,17 +1573,17 @@ export class NativeWindow extends BaseWindow {
         mergeMode
           ? request.filesToMerge
           : diffMode
-            ? request.filesToDiff
-            : request.filesToOpenOrCreate,
+          ? request.filesToDiff
+          : request.filesToOpenOrCreate,
         this.fileService,
-        this.logService,
-      ),
+        this.logService
+      )
     )
     if (inputs.length) {
       const openedEditorPanes = await this.openResources(
         inputs,
         diffMode,
-        mergeMode,
+        mergeMode
       )
 
       if (request.filesToWait) {
@@ -1606,12 +1598,12 @@ export class NativeWindow extends BaseWindow {
           return this.trackClosedWaitFiles(
             URI.revive(request.filesToWait.waitMarkerFileUri),
             coalesce(
-              request.filesToWait.paths.map((path) => URI.revive(path.fileUri)),
-            ),
+              request.filesToWait.paths.map((path) => URI.revive(path.fileUri))
+            )
           )
         } else {
           return this.fileService.del(
-            URI.revive(request.filesToWait.waitMarkerFileUri),
+            URI.revive(request.filesToWait.waitMarkerFileUri)
           )
         }
       }
@@ -1620,11 +1612,11 @@ export class NativeWindow extends BaseWindow {
 
   private async trackClosedWaitFiles(
     waitMarkerFile: URI,
-    resourcesToWaitFor: URI[],
+    resourcesToWaitFor: URI[]
   ): Promise<void> {
     // Wait for the resources to be closed in the text editor...
     await this.instantiationService.invokeFunction((accessor) =>
-      whenEditorClosed(accessor, resourcesToWaitFor),
+      whenEditorClosed(accessor, resourcesToWaitFor)
     )
 
     // ...before deleting the wait marker file
@@ -1634,7 +1626,7 @@ export class NativeWindow extends BaseWindow {
   private async openResources(
     resources: Array<IResourceEditorInput | IUntitledTextResourceEditorInput>,
     diffMode: boolean,
-    mergeMode: boolean,
+    mergeMode: boolean
   ): Promise<readonly IEditorPane[]> {
     const editors: IUntypedEditorInput[] = []
 
@@ -1709,16 +1701,16 @@ export class NativeWindow extends BaseWindow {
   private createWindowZoomStatusEntry(
     instantiationService: IInstantiationService,
     targetWindowId: number,
-    disposables: DisposableStore,
+    disposables: DisposableStore
   ): void {
     this.mapWindowIdToZoomStatusEntry.set(
       targetWindowId,
-      disposables.add(instantiationService.createInstance(ZoomStatusEntry)),
+      disposables.add(instantiationService.createInstance(ZoomStatusEntry))
     )
     disposables.add(
       toDisposable(() =>
-        this.mapWindowIdToZoomStatusEntry.delete(targetWindowId),
-      ),
+        this.mapWindowIdToZoomStatusEntry.delete(targetWindowId)
+      )
     )
 
     this.updateWindowZoomStatusEntry(targetWindowId)
@@ -1774,7 +1766,7 @@ export class NativeWindow extends BaseWindow {
 
 class ZoomStatusEntry extends Disposable {
   private readonly disposable = this._register(
-    new MutableDisposable<DisposableStore>(),
+    new MutableDisposable<DisposableStore>()
   )
 
   private zoomLevelLabel: Action | undefined = undefined
@@ -1782,7 +1774,7 @@ class ZoomStatusEntry extends Disposable {
   constructor(
     @IStatusbarService private readonly statusbarService: IStatusbarService,
     @ICommandService private readonly commandService: ICommandService,
-    @IKeybindingService private readonly keybindingService: IKeybindingService,
+    @IKeybindingService private readonly keybindingService: IKeybindingService
   ) {
     super()
   }
@@ -1816,8 +1808,8 @@ class ZoomStatusEntry extends Disposable {
         localize("zoomOut", "Zoom Out"),
         ThemeIcon.asClassName(Codicon.remove),
         true,
-        () => this.commandService.executeCommand(zoomOutAction.id),
-      ),
+        () => this.commandService.executeCommand(zoomOutAction.id)
+      )
     )
     const zoomInAction: Action = disposables.add(
       new Action(
@@ -1825,8 +1817,8 @@ class ZoomStatusEntry extends Disposable {
         localize("zoomIn", "Zoom In"),
         ThemeIcon.asClassName(Codicon.plus),
         true,
-        () => this.commandService.executeCommand(zoomInAction.id),
-      ),
+        () => this.commandService.executeCommand(zoomInAction.id)
+      )
     )
     const zoomResetAction: Action = disposables.add(
       new Action(
@@ -1834,14 +1826,14 @@ class ZoomStatusEntry extends Disposable {
         localize("zoomReset", "Reset"),
         undefined,
         true,
-        () => this.commandService.executeCommand(zoomResetAction.id),
-      ),
+        () => this.commandService.executeCommand(zoomResetAction.id)
+      )
     )
     zoomResetAction.tooltip = localize(
       "zoomResetLabel",
       "{0} ({1})",
       zoomResetAction.label,
-      this.keybindingService.lookupKeybinding(zoomResetAction.id)?.getLabel(),
+      this.keybindingService.lookupKeybinding(zoomResetAction.id)?.getLabel()
     )
     const zoomSettingsAction: Action = disposables.add(
       new Action(
@@ -1852,19 +1844,19 @@ class ZoomStatusEntry extends Disposable {
         () =>
           this.commandService.executeCommand(
             zoomSettingsAction.id,
-            "window.zoom",
-          ),
-      ),
+            "window.zoom"
+          )
+      )
     )
     const zoomLevelLabel = disposables.add(
-      new Action("zoomLabel", undefined, undefined, false),
+      new Action("zoomLabel", undefined, undefined, false)
     )
 
     this.zoomLevelLabel = zoomLevelLabel
     disposables.add(toDisposable(() => (this.zoomLevelLabel = undefined)))
 
     const actionBarLeft = disposables.add(
-      new ActionBar(left, { hoverDelegate: nativeHoverDelegate }),
+      new ActionBar(left, { hoverDelegate: nativeHoverDelegate })
     )
     actionBarLeft.push(zoomOutAction, {
       icon: true,
@@ -1887,7 +1879,7 @@ class ZoomStatusEntry extends Disposable {
     container.appendChild(right)
 
     const actionBarRight = disposables.add(
-      new ActionBar(right, { hoverDelegate: nativeHoverDelegate }),
+      new ActionBar(right, { hoverDelegate: nativeHoverDelegate })
     )
 
     actionBarRight.push(zoomResetAction, { icon: false, label: true })
@@ -1912,8 +1904,8 @@ class ZoomStatusEntry extends Disposable {
         },
         "status.windowZoom",
         StatusbarAlignment.RIGHT,
-        102,
-      ),
+        102
+      )
     )
   }
 
@@ -1928,7 +1920,7 @@ class ZoomStatusEntry extends Disposable {
         "zoomNumber",
         "Zoom Level: {0} ({1}%)",
         zoomLevel,
-        zoomFactor,
+        zoomFactor
       )
     }
   }

@@ -9,106 +9,93 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IURLService } from "vs/platform/url/common/url"
-import { URI, UriComponents } from "vs/base/common/uri"
-import {
-  InstantiationType,
-  registerSingleton,
-} from "vs/platform/instantiation/common/extensions"
-import { AbstractURLService } from "vs/platform/url/common/urlService"
-import { Event } from "vs/base/common/event"
-import { IBrowserWorkbenchEnvironmentService } from "vs/workbench/services/environment/browser/environmentService"
-import {
-  IOpenerService,
-  IOpener,
-  OpenExternalOptions,
-  OpenInternalOptions,
-} from "vs/platform/opener/common/opener"
-import { matchesScheme } from "vs/base/common/network"
-import { IProductService } from "vs/platform/product/common/productService"
+import { IURLService } from 'vs/platform/url/common/url';
+import { URI, UriComponents } from 'vs/base/common/uri';
+import { InstantiationType, registerSingleton } from 'vs/platform/instantiation/common/extensions';
+import { AbstractURLService } from 'vs/platform/url/common/urlService';
+import { Event } from 'vs/base/common/event';
+import { IBrowserWorkbenchEnvironmentService } from 'vs/workbench/services/environment/browser/environmentService';
+import { IOpenerService, IOpener, OpenExternalOptions, OpenInternalOptions } from 'vs/platform/opener/common/opener';
+import { matchesScheme } from 'vs/base/common/network';
+import { IProductService } from 'vs/platform/product/common/productService';
 
 export interface IURLCallbackProvider {
-  /**
-   * Indicates that a Uri has been opened outside of VSCode. The Uri
-   * will be forwarded to all installed Uri handlers in the system.
-   */
-  readonly onCallback: Event<URI>
 
-  /**
-   * Creates a Uri that - if opened in a browser - must result in
-   * the `onCallback` to fire.
-   *
-   * The optional `Partial<UriComponents>` must be properly restored for
-   * the Uri passed to the `onCallback` handler.
-   *
-   * For example: if a Uri is to be created with `scheme:"vscode"`,
-   * `authority:"foo"` and `path:"bar"` the `onCallback` should fire
-   * with a Uri `vscode://foo/bar`.
-   *
-   * If there are additional `query` values in the Uri, they should
-   * be added to the list of provided `query` arguments from the
-   * `Partial<UriComponents>`.
-   */
-  create(options?: Partial<UriComponents>): URI
+	/**
+	 * Indicates that a Uri has been opened outside of VSCode. The Uri
+	 * will be forwarded to all installed Uri handlers in the system.
+	 */
+	readonly onCallback: Event<URI>;
+
+	/**
+	 * Creates a Uri that - if opened in a browser - must result in
+	 * the `onCallback` to fire.
+	 *
+	 * The optional `Partial<UriComponents>` must be properly restored for
+	 * the Uri passed to the `onCallback` handler.
+	 *
+	 * For example: if a Uri is to be created with `scheme:"vscode"`,
+	 * `authority:"foo"` and `path:"bar"` the `onCallback` should fire
+	 * with a Uri `vscode://foo/bar`.
+	 *
+	 * If there are additional `query` values in the Uri, they should
+	 * be added to the list of provided `query` arguments from the
+	 * `Partial<UriComponents>`.
+	 */
+	create(options?: Partial<UriComponents>): URI;
 }
 
 class BrowserURLOpener implements IOpener {
-  constructor(
-    private urlService: IURLService,
-    private productService: IProductService,
-  ) {}
 
-  async open(
-    resource: string | URI,
-    options?: OpenInternalOptions | OpenExternalOptions,
-  ): Promise<boolean> {
-    if ((options as OpenExternalOptions | undefined)?.openExternal) {
-      return false
-    }
+	constructor(
+		private urlService: IURLService,
+		private productService: IProductService
+	) { }
 
-    if (!matchesScheme(resource, this.productService.urlProtocol)) {
-      return false
-    }
+	async open(resource: string | URI, options?: OpenInternalOptions | OpenExternalOptions): Promise<boolean> {
+		if ((options as OpenExternalOptions | undefined)?.openExternal) {
+			return false;
+		}
 
-    if (typeof resource === "string") {
-      resource = URI.parse(resource)
-    }
+		if (!matchesScheme(resource, this.productService.urlProtocol)) {
+			return false;
+		}
 
-    return this.urlService.open(resource, { trusted: true })
-  }
+		if (typeof resource === 'string') {
+			resource = URI.parse(resource);
+		}
+
+		return this.urlService.open(resource, { trusted: true });
+	}
 }
 
 export class BrowserURLService extends AbstractURLService {
-  private provider: IURLCallbackProvider | undefined
 
-  constructor(
-    @IBrowserWorkbenchEnvironmentService
-    environmentService: IBrowserWorkbenchEnvironmentService,
-    @IOpenerService openerService: IOpenerService,
-    @IProductService productService: IProductService,
-  ) {
-    super()
+	private provider: IURLCallbackProvider | undefined;
 
-    this.provider = environmentService.options?.urlCallbackProvider
+	constructor(
+		@IBrowserWorkbenchEnvironmentService environmentService: IBrowserWorkbenchEnvironmentService,
+		@IOpenerService openerService: IOpenerService,
+		@IProductService productService: IProductService
+	) {
+		super();
 
-    if (this.provider) {
-      this._register(
-        this.provider.onCallback((uri) => this.open(uri, { trusted: true })),
-      )
-    }
+		this.provider = environmentService.options?.urlCallbackProvider;
 
-    this._register(
-      openerService.registerOpener(new BrowserURLOpener(this, productService)),
-    )
-  }
+		if (this.provider) {
+			this._register(this.provider.onCallback(uri => this.open(uri, { trusted: true })));
+		}
 
-  create(options?: Partial<UriComponents>): URI {
-    if (this.provider) {
-      return this.provider.create(options)
-    }
+		this._register(openerService.registerOpener(new BrowserURLOpener(this, productService)));
+	}
 
-    return URI.parse("unsupported://")
-  }
+	create(options?: Partial<UriComponents>): URI {
+		if (this.provider) {
+			return this.provider.create(options);
+		}
+
+		return URI.parse('unsupported://');
+	}
 }
 
-registerSingleton(IURLService, BrowserURLService, InstantiationType.Delayed)
+registerSingleton(IURLService, BrowserURLService, InstantiationType.Delayed);

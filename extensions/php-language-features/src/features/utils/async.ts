@@ -10,7 +10,7 @@
  *--------------------------------------------------------------------------------------------*/
 
 export interface ITask<T> {
-  (): T
+	(): T;
 }
 
 /**
@@ -34,55 +34,53 @@ export interface ITask<T> {
  * 		}
  */
 export class Throttler<T> {
-  private activePromise: Promise<T> | null
-  private queuedPromise: Promise<T> | null
-  private queuedPromiseFactory: ITask<Promise<T>> | null
 
-  constructor() {
-    this.activePromise = null
-    this.queuedPromise = null
-    this.queuedPromiseFactory = null
-  }
+	private activePromise: Promise<T> | null;
+	private queuedPromise: Promise<T> | null;
+	private queuedPromiseFactory: ITask<Promise<T>> | null;
 
-  public queue(promiseFactory: ITask<Promise<T>>): Promise<T> {
-    if (this.activePromise) {
-      this.queuedPromiseFactory = promiseFactory
+	constructor() {
+		this.activePromise = null;
+		this.queuedPromise = null;
+		this.queuedPromiseFactory = null;
+	}
 
-      if (!this.queuedPromise) {
-        const onComplete = () => {
-          this.queuedPromise = null
+	public queue(promiseFactory: ITask<Promise<T>>): Promise<T> {
+		if (this.activePromise) {
+			this.queuedPromiseFactory = promiseFactory;
 
-          const result = this.queue(this.queuedPromiseFactory!)
-          this.queuedPromiseFactory = null
+			if (!this.queuedPromise) {
+				const onComplete = () => {
+					this.queuedPromise = null;
 
-          return result
-        }
+					const result = this.queue(this.queuedPromiseFactory!);
+					this.queuedPromiseFactory = null;
 
-        this.queuedPromise = new Promise<T>((resolve) => {
-          this.activePromise!.then(onComplete, onComplete).then(resolve)
-        })
-      }
+					return result;
+				};
 
-      return new Promise<T>((resolve, reject) => {
-        this.queuedPromise!.then(resolve, reject)
-      })
-    }
+				this.queuedPromise = new Promise<T>((resolve) => {
+					this.activePromise!.then(onComplete, onComplete).then(resolve);
+				});
+			}
 
-    this.activePromise = promiseFactory()
+			return new Promise<T>((resolve, reject) => {
+				this.queuedPromise!.then(resolve, reject);
+			});
+		}
 
-    return new Promise<T>((resolve, reject) => {
-      this.activePromise!.then(
-        (result: T) => {
-          this.activePromise = null
-          resolve(result)
-        },
-        (err: any) => {
-          this.activePromise = null
-          reject(err)
-        },
-      )
-    })
-  }
+		this.activePromise = promiseFactory();
+
+		return new Promise<T>((resolve, reject) => {
+			this.activePromise!.then((result: T) => {
+				this.activePromise = null;
+				resolve(result);
+			}, (err: any) => {
+				this.activePromise = null;
+				reject(err);
+			});
+		});
+	}
 }
 
 /**
@@ -109,67 +107,65 @@ export class Throttler<T> {
  * 		}
  */
 export class Delayer<T> {
-  public defaultDelay: number
-  private timeout: NodeJS.Timer | null
-  private completionPromise: Promise<T> | null
-  private onResolve: ((value: T | PromiseLike<T> | undefined) => void) | null
-  private task: ITask<T> | null
 
-  constructor(defaultDelay: number) {
-    this.defaultDelay = defaultDelay
-    this.timeout = null
-    this.completionPromise = null
-    this.onResolve = null
-    this.task = null
-  }
+	public defaultDelay: number;
+	private timeout: NodeJS.Timer | null;
+	private completionPromise: Promise<T> | null;
+	private onResolve: ((value: T | PromiseLike<T> | undefined) => void) | null;
+	private task: ITask<T> | null;
 
-  public trigger(
-    task: ITask<T>,
-    delay: number = this.defaultDelay,
-  ): Promise<T> {
-    this.task = task
-    this.cancelTimeout()
+	constructor(defaultDelay: number) {
+		this.defaultDelay = defaultDelay;
+		this.timeout = null;
+		this.completionPromise = null;
+		this.onResolve = null;
+		this.task = null;
+	}
 
-    if (!this.completionPromise) {
-      this.completionPromise = new Promise<T | undefined>((resolve) => {
-        this.onResolve = resolve
-      }).then(() => {
-        this.completionPromise = null
-        this.onResolve = null
+	public trigger(task: ITask<T>, delay: number = this.defaultDelay): Promise<T> {
+		this.task = task;
+		this.cancelTimeout();
 
-        const result = this.task!()
-        this.task = null
+		if (!this.completionPromise) {
+			this.completionPromise = new Promise<T | undefined>((resolve) => {
+				this.onResolve = resolve;
+			}).then(() => {
+				this.completionPromise = null;
+				this.onResolve = null;
 
-        return result
-      })
-    }
+				const result = this.task!();
+				this.task = null;
 
-    this.timeout = setTimeout(() => {
-      this.timeout = null
-      this.onResolve!(undefined)
-    }, delay)
+				return result;
+			});
+		}
 
-    return this.completionPromise
-  }
+		this.timeout = setTimeout(() => {
+			this.timeout = null;
+			this.onResolve!(undefined);
+		}, delay);
 
-  public isTriggered(): boolean {
-    return this.timeout !== null
-  }
+		return this.completionPromise;
+	}
 
-  public cancel(): void {
-    this.cancelTimeout()
+	public isTriggered(): boolean {
+		return this.timeout !== null;
+	}
 
-    if (this.completionPromise) {
-      this.completionPromise = null
-    }
-  }
+	public cancel(): void {
+		this.cancelTimeout();
 
-  private cancelTimeout(): void {
-    if (this.timeout !== null) {
-      clearTimeout(this.timeout)
-      this.timeout = null
-    }
-  }
+		if (this.completionPromise) {
+			this.completionPromise = null;
+		}
+	}
+
+	private cancelTimeout(): void {
+		if (this.timeout !== null) {
+			clearTimeout(this.timeout);
+			this.timeout = null;
+		}
+	}
 }
 
 /**
@@ -180,18 +176,16 @@ export class Delayer<T> {
  * helpers, for an analogy.
  */
 export class ThrottledDelayer<T> extends Delayer<Promise<T>> {
-  private throttler: Throttler<T>
 
-  constructor(defaultDelay: number) {
-    super(defaultDelay)
+	private throttler: Throttler<T>;
 
-    this.throttler = new Throttler<T>()
-  }
+	constructor(defaultDelay: number) {
+		super(defaultDelay);
 
-  public override trigger(
-    promiseFactory: ITask<Promise<T>>,
-    delay?: number,
-  ): Promise<Promise<T>> {
-    return super.trigger(() => this.throttler.queue(promiseFactory), delay)
-  }
+		this.throttler = new Throttler<T>();
+	}
+
+	public override trigger(promiseFactory: ITask<Promise<T>>, delay?: number): Promise<Promise<T>> {
+		return super.trigger(() => this.throttler.queue(promiseFactory), delay);
+	}
 }

@@ -9,239 +9,168 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CancellationToken } from "vs/base/common/cancellation"
-import {
-  Disposable,
-  DisposableStore,
-  IDisposable,
-  toDisposable,
-} from "vs/base/common/lifecycle"
-import { getCodeEditor } from "vs/editor/browser/editorBrowser"
-import {
-  EditorOption,
-  RenderLineNumbersType,
-} from "vs/editor/common/config/editorOptions"
-import { IPosition } from "vs/editor/common/core/position"
-import { IRange } from "vs/editor/common/core/range"
-import { IEditor, ScrollType } from "vs/editor/common/editorCommon"
-import {
-  AbstractEditorNavigationQuickAccessProvider,
-  IQuickAccessTextEditorContext,
-} from "vs/editor/contrib/quickAccess/browser/editorNavigationQuickAccess"
-import { localize } from "vs/nls"
-import {
-  IQuickPick,
-  IQuickPickItem,
-} from "vs/platform/quickinput/common/quickInput"
+import { CancellationToken } from 'vs/base/common/cancellation';
+import { Disposable, DisposableStore, IDisposable, toDisposable } from 'vs/base/common/lifecycle';
+import { getCodeEditor } from 'vs/editor/browser/editorBrowser';
+import { EditorOption, RenderLineNumbersType } from 'vs/editor/common/config/editorOptions';
+import { IPosition } from 'vs/editor/common/core/position';
+import { IRange } from 'vs/editor/common/core/range';
+import { IEditor, ScrollType } from 'vs/editor/common/editorCommon';
+import { AbstractEditorNavigationQuickAccessProvider, IQuickAccessTextEditorContext } from 'vs/editor/contrib/quickAccess/browser/editorNavigationQuickAccess';
+import { localize } from 'vs/nls';
+import { IQuickPick, IQuickPickItem } from 'vs/platform/quickinput/common/quickInput';
 
-interface IGotoLineQuickPickItem extends IQuickPickItem, Partial<IPosition> {}
+interface IGotoLineQuickPickItem extends IQuickPickItem, Partial<IPosition> { }
 
 export abstract class AbstractGotoLineQuickAccessProvider extends AbstractEditorNavigationQuickAccessProvider {
-  static PREFIX = ":"
 
-  constructor() {
-    super({ canAcceptInBackground: true })
-  }
+	static PREFIX = ':';
 
-  protected provideWithoutTextEditor(
-    picker: IQuickPick<IGotoLineQuickPickItem>,
-  ): IDisposable {
-    const label = localize(
-      "cannotRunGotoLine",
-      "Open a text editor first to go to a line.",
-    )
+	constructor() {
+		super({ canAcceptInBackground: true });
+	}
 
-    picker.items = [{ label }]
-    picker.ariaLabel = label
+	protected provideWithoutTextEditor(picker: IQuickPick<IGotoLineQuickPickItem>): IDisposable {
+		const label = localize('cannotRunGotoLine', "Open a text editor first to go to a line.");
 
-    return Disposable.None
-  }
+		picker.items = [{ label }];
+		picker.ariaLabel = label;
 
-  protected provideWithTextEditor(
-    context: IQuickAccessTextEditorContext,
-    picker: IQuickPick<IGotoLineQuickPickItem>,
-    token: CancellationToken,
-  ): IDisposable {
-    const editor = context.editor
-    const disposables = new DisposableStore()
+		return Disposable.None;
+	}
 
-    // Goto line once picked
-    disposables.add(
-      picker.onDidAccept((event) => {
-        const [item] = picker.selectedItems
-        if (item) {
-          if (!this.isValidLineNumber(editor, item.lineNumber)) {
-            return
-          }
+	protected provideWithTextEditor(context: IQuickAccessTextEditorContext, picker: IQuickPick<IGotoLineQuickPickItem>, token: CancellationToken): IDisposable {
+		const editor = context.editor;
+		const disposables = new DisposableStore();
 
-          this.gotoLocation(context, {
-            range: this.toRange(item.lineNumber, item.column),
-            keyMods: picker.keyMods,
-            preserveFocus: event.inBackground,
-          })
+		// Goto line once picked
+		disposables.add(picker.onDidAccept(event => {
+			const [item] = picker.selectedItems;
+			if (item) {
+				if (!this.isValidLineNumber(editor, item.lineNumber)) {
+					return;
+				}
 
-          if (!event.inBackground) {
-            picker.hide()
-          }
-        }
-      }),
-    )
+				this.gotoLocation(context, { range: this.toRange(item.lineNumber, item.column), keyMods: picker.keyMods, preserveFocus: event.inBackground });
 
-    // React to picker changes
-    const updatePickerAndEditor = () => {
-      const position = this.parsePosition(
-        editor,
-        picker.value
-          .trim()
-          .substr(AbstractGotoLineQuickAccessProvider.PREFIX.length),
-      )
-      const label = this.getPickLabel(
-        editor,
-        position.lineNumber,
-        position.column,
-      )
+				if (!event.inBackground) {
+					picker.hide();
+				}
+			}
+		}));
 
-      // Picker
-      picker.items = [
-        {
-          lineNumber: position.lineNumber,
-          column: position.column,
-          label,
-        },
-      ]
+		// React to picker changes
+		const updatePickerAndEditor = () => {
+			const position = this.parsePosition(editor, picker.value.trim().substr(AbstractGotoLineQuickAccessProvider.PREFIX.length));
+			const label = this.getPickLabel(editor, position.lineNumber, position.column);
 
-      // ARIA Label
-      picker.ariaLabel = label
+			// Picker
+			picker.items = [{
+				lineNumber: position.lineNumber,
+				column: position.column,
+				label
+			}];
 
-      // Clear decorations for invalid range
-      if (!this.isValidLineNumber(editor, position.lineNumber)) {
-        this.clearDecorations(editor)
-        return
-      }
+			// ARIA Label
+			picker.ariaLabel = label;
 
-      // Reveal
-      const range = this.toRange(position.lineNumber, position.column)
-      editor.revealRangeInCenter(range, ScrollType.Smooth)
+			// Clear decorations for invalid range
+			if (!this.isValidLineNumber(editor, position.lineNumber)) {
+				this.clearDecorations(editor);
+				return;
+			}
 
-      // Decorate
-      this.addDecorations(editor, range)
-    }
-    updatePickerAndEditor()
-    disposables.add(picker.onDidChangeValue(() => updatePickerAndEditor()))
+			// Reveal
+			const range = this.toRange(position.lineNumber, position.column);
+			editor.revealRangeInCenter(range, ScrollType.Smooth);
 
-    // Adjust line number visibility as needed
-    const codeEditor = getCodeEditor(editor)
-    if (codeEditor) {
-      const options = codeEditor.getOptions()
-      const lineNumbers = options.get(EditorOption.lineNumbers)
-      if (lineNumbers.renderType === RenderLineNumbersType.Relative) {
-        codeEditor.updateOptions({ lineNumbers: "on" })
+			// Decorate
+			this.addDecorations(editor, range);
+		};
+		updatePickerAndEditor();
+		disposables.add(picker.onDidChangeValue(() => updatePickerAndEditor()));
 
-        disposables.add(
-          toDisposable(() =>
-            codeEditor.updateOptions({ lineNumbers: "relative" }),
-          ),
-        )
-      }
-    }
+		// Adjust line number visibility as needed
+		const codeEditor = getCodeEditor(editor);
+		if (codeEditor) {
+			const options = codeEditor.getOptions();
+			const lineNumbers = options.get(EditorOption.lineNumbers);
+			if (lineNumbers.renderType === RenderLineNumbersType.Relative) {
+				codeEditor.updateOptions({ lineNumbers: 'on' });
 
-    return disposables
-  }
+				disposables.add(toDisposable(() => codeEditor.updateOptions({ lineNumbers: 'relative' })));
+			}
+		}
 
-  private toRange(lineNumber = 1, column = 1): IRange {
-    return {
-      startLineNumber: lineNumber,
-      startColumn: column,
-      endLineNumber: lineNumber,
-      endColumn: column,
-    }
-  }
+		return disposables;
+	}
 
-  private parsePosition(editor: IEditor, value: string): IPosition {
-    // Support line-col formats of `line,col`, `line:col`, `line#col`
-    const numbers = value
-      .split(/,|:|#/)
-      .map((part) => parseInt(part, 10))
-      .filter((part) => !isNaN(part))
-    const endLine = this.lineCount(editor) + 1
+	private toRange(lineNumber = 1, column = 1): IRange {
+		return {
+			startLineNumber: lineNumber,
+			startColumn: column,
+			endLineNumber: lineNumber,
+			endColumn: column
+		};
+	}
 
-    return {
-      lineNumber: numbers[0] > 0 ? numbers[0] : endLine + numbers[0],
-      column: numbers[1],
-    }
-  }
+	private parsePosition(editor: IEditor, value: string): IPosition {
 
-  private getPickLabel(
-    editor: IEditor,
-    lineNumber: number,
-    column: number | undefined,
-  ): string {
-    // Location valid: indicate this as picker label
-    if (this.isValidLineNumber(editor, lineNumber)) {
-      if (this.isValidColumn(editor, lineNumber, column)) {
-        return localize(
-          "gotoLineColumnLabel",
-          "Go to line {0} and character {1}.",
-          lineNumber,
-          column,
-        )
-      }
+		// Support line-col formats of `line,col`, `line:col`, `line#col`
+		const numbers = value.split(/,|:|#/).map(part => parseInt(part, 10)).filter(part => !isNaN(part));
+		const endLine = this.lineCount(editor) + 1;
 
-      return localize("gotoLineLabel", "Go to line {0}.", lineNumber)
-    }
+		return {
+			lineNumber: numbers[0] > 0 ? numbers[0] : endLine + numbers[0],
+			column: numbers[1]
+		};
+	}
 
-    // Location invalid: show generic label
-    const position = editor.getPosition() || { lineNumber: 1, column: 1 }
-    const lineCount = this.lineCount(editor)
-    if (lineCount > 1) {
-      return localize(
-        "gotoLineLabelEmptyWithLimit",
-        "Current Line: {0}, Character: {1}. Type a line number between 1 and {2} to navigate to.",
-        position.lineNumber,
-        position.column,
-        lineCount,
-      )
-    }
+	private getPickLabel(editor: IEditor, lineNumber: number, column: number | undefined): string {
 
-    return localize(
-      "gotoLineLabelEmpty",
-      "Current Line: {0}, Character: {1}. Type a line number to navigate to.",
-      position.lineNumber,
-      position.column,
-    )
-  }
+		// Location valid: indicate this as picker label
+		if (this.isValidLineNumber(editor, lineNumber)) {
+			if (this.isValidColumn(editor, lineNumber, column)) {
+				return localize('gotoLineColumnLabel', "Go to line {0} and character {1}.", lineNumber, column);
+			}
 
-  private isValidLineNumber(
-    editor: IEditor,
-    lineNumber: number | undefined,
-  ): boolean {
-    if (!lineNumber || typeof lineNumber !== "number") {
-      return false
-    }
+			return localize('gotoLineLabel', "Go to line {0}.", lineNumber);
+		}
 
-    return lineNumber > 0 && lineNumber <= this.lineCount(editor)
-  }
+		// Location invalid: show generic label
+		const position = editor.getPosition() || { lineNumber: 1, column: 1 };
+		const lineCount = this.lineCount(editor);
+		if (lineCount > 1) {
+			return localize('gotoLineLabelEmptyWithLimit', "Current Line: {0}, Character: {1}. Type a line number between 1 and {2} to navigate to.", position.lineNumber, position.column, lineCount);
+		}
 
-  private isValidColumn(
-    editor: IEditor,
-    lineNumber: number,
-    column: number | undefined,
-  ): boolean {
-    if (!column || typeof column !== "number") {
-      return false
-    }
+		return localize('gotoLineLabelEmpty', "Current Line: {0}, Character: {1}. Type a line number to navigate to.", position.lineNumber, position.column);
+	}
 
-    const model = this.getModel(editor)
-    if (!model) {
-      return false
-    }
+	private isValidLineNumber(editor: IEditor, lineNumber: number | undefined): boolean {
+		if (!lineNumber || typeof lineNumber !== 'number') {
+			return false;
+		}
 
-    const positionCandidate = { lineNumber, column }
+		return lineNumber > 0 && lineNumber <= this.lineCount(editor);
+	}
 
-    return model.validatePosition(positionCandidate).equals(positionCandidate)
-  }
+	private isValidColumn(editor: IEditor, lineNumber: number, column: number | undefined): boolean {
+		if (!column || typeof column !== 'number') {
+			return false;
+		}
 
-  private lineCount(editor: IEditor): number {
-    return this.getModel(editor)?.getLineCount() ?? 0
-  }
+		const model = this.getModel(editor);
+		if (!model) {
+			return false;
+		}
+
+		const positionCandidate = { lineNumber, column };
+
+		return model.validatePosition(positionCandidate).equals(positionCandidate);
+	}
+
+	private lineCount(editor: IEditor): number {
+		return this.getModel(editor)?.getLineCount() ?? 0;
+	}
 }

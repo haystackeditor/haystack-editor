@@ -337,7 +337,7 @@ export class ResizeHandler implements PointerEventHandler {
   public addRequest(
     id: string,
     element: HTMLElement,
-    options: ResizableOptions,
+    options: ResizableOptions
   ) {
     this.requests.push({ id, element, options })
   }

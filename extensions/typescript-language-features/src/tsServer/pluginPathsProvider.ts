@@ -8,41 +8,41 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-import * as path from "path"
-import * as vscode from "vscode"
-import { RelativeWorkspacePathResolver } from "../utils/relativePathResolver"
-import { TypeScriptServiceConfiguration } from "../configuration/configuration"
+import * as path from 'path';
+import * as vscode from 'vscode';
+import { RelativeWorkspacePathResolver } from '../utils/relativePathResolver';
+import { TypeScriptServiceConfiguration } from '../configuration/configuration';
+
 
 export class TypeScriptPluginPathsProvider {
-  public constructor(private configuration: TypeScriptServiceConfiguration) {}
 
-  public updateConfiguration(
-    configuration: TypeScriptServiceConfiguration,
-  ): void {
-    this.configuration = configuration
-  }
+	public constructor(
+		private configuration: TypeScriptServiceConfiguration
+	) { }
 
-  public getPluginPaths(): string[] {
-    const pluginPaths = []
-    for (const pluginPath of this.configuration.tsServerPluginPaths) {
-      pluginPaths.push(...this.resolvePluginPath(pluginPath))
-    }
-    return pluginPaths
-  }
+	public updateConfiguration(configuration: TypeScriptServiceConfiguration): void {
+		this.configuration = configuration;
+	}
 
-  private resolvePluginPath(pluginPath: string): string[] {
-    if (path.isAbsolute(pluginPath)) {
-      return [pluginPath]
-    }
+	public getPluginPaths(): string[] {
+		const pluginPaths = [];
+		for (const pluginPath of this.configuration.tsServerPluginPaths) {
+			pluginPaths.push(...this.resolvePluginPath(pluginPath));
+		}
+		return pluginPaths;
+	}
 
-    const workspacePath =
-      RelativeWorkspacePathResolver.asAbsoluteWorkspacePath(pluginPath)
-    if (workspacePath !== undefined) {
-      return [workspacePath]
-    }
+	private resolvePluginPath(pluginPath: string): string[] {
+		if (path.isAbsolute(pluginPath)) {
+			return [pluginPath];
+		}
 
-    return (vscode.workspace.workspaceFolders || []).map((workspaceFolder) =>
-      path.join(workspaceFolder.uri.fsPath, pluginPath),
-    )
-  }
+		const workspacePath = RelativeWorkspacePathResolver.asAbsoluteWorkspacePath(pluginPath);
+		if (workspacePath !== undefined) {
+			return [workspacePath];
+		}
+
+		return (vscode.workspace.workspaceFolders || [])
+			.map(workspaceFolder => path.join(workspaceFolder.uri.fsPath, pluginPath));
+	}
 }

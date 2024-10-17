@@ -31,18 +31,18 @@ export function navigateToPosition(
   canvasPosition: Vector,
   size: Vector,
   navigationType: NavigationType,
-  unconditionally?: boolean,
+  unconditionally?: boolean
 ): void {
   unconditionally
     ? RendererManager.getInstance().navigateToPositionUnconditionally(
         canvasPosition,
         size,
-        navigationType,
+        navigationType
       )
     : RendererManager.getInstance().navigateToPosition(
         canvasPosition,
         size,
-        navigationType,
+        navigationType
       )
 }
 
@@ -52,7 +52,7 @@ export function getViewportDimensionsWithPadding(): Vector {
 
 export function transformFromViewportToCanvas(
   position: Vector,
-  canvasScale: number,
+  canvasScale: number
 ): Vector {
   const rendererManager = RendererManager.getInstance()
   const canvasPosition = rendererManager.canvasPosition()
@@ -61,7 +61,7 @@ export function transformFromViewportToCanvas(
 
 export function setDependencyArrows(
   dependencyArrows: DependencyArrow[],
-  scale: number,
+  scale: number
 ) {
   for (const arrow of dependencyArrows) {
     arrow.from = transformFromViewportToCanvas(arrow.from, scale)

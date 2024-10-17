@@ -9,330 +9,270 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { DisposableStore, dispose, IDisposable } from "vs/base/common/lifecycle"
-import { URI } from "vs/base/common/uri"
-import {
-  IUntitledFileWorkingCopy,
-  IUntitledFileWorkingCopyInitialContents,
-  IUntitledFileWorkingCopyModel,
-  IUntitledFileWorkingCopyModelFactory,
-  IUntitledFileWorkingCopySaveDelegate,
-  UntitledFileWorkingCopy,
-} from "vs/workbench/services/workingCopy/common/untitledFileWorkingCopy"
-import { Event, Emitter } from "vs/base/common/event"
-import { Schemas } from "vs/base/common/network"
-import { IWorkingCopyService } from "vs/workbench/services/workingCopy/common/workingCopyService"
-import { ILabelService } from "vs/platform/label/common/label"
-import { ILogService } from "vs/platform/log/common/log"
-import { IWorkingCopyBackupService } from "vs/workbench/services/workingCopy/common/workingCopyBackup"
-import { IFileService } from "vs/platform/files/common/files"
-import {
-  BaseFileWorkingCopyManager,
-  IBaseFileWorkingCopyManager,
-} from "vs/workbench/services/workingCopy/common/abstractFileWorkingCopyManager"
-import { ResourceMap } from "vs/base/common/map"
+import { DisposableStore, dispose, IDisposable } from 'vs/base/common/lifecycle';
+import { URI } from 'vs/base/common/uri';
+import { IUntitledFileWorkingCopy, IUntitledFileWorkingCopyInitialContents, IUntitledFileWorkingCopyModel, IUntitledFileWorkingCopyModelFactory, IUntitledFileWorkingCopySaveDelegate, UntitledFileWorkingCopy } from 'vs/workbench/services/workingCopy/common/untitledFileWorkingCopy';
+import { Event, Emitter } from 'vs/base/common/event';
+import { Schemas } from 'vs/base/common/network';
+import { IWorkingCopyService } from 'vs/workbench/services/workingCopy/common/workingCopyService';
+import { ILabelService } from 'vs/platform/label/common/label';
+import { ILogService } from 'vs/platform/log/common/log';
+import { IWorkingCopyBackupService } from 'vs/workbench/services/workingCopy/common/workingCopyBackup';
+import { IFileService } from 'vs/platform/files/common/files';
+import { BaseFileWorkingCopyManager, IBaseFileWorkingCopyManager } from 'vs/workbench/services/workingCopy/common/abstractFileWorkingCopyManager';
+import { ResourceMap } from 'vs/base/common/map';
 
 /**
  * The only one that should be dealing with `IUntitledFileWorkingCopy` and
  * handle all operations that are working copy related, such as save/revert,
  * backup and resolving.
  */
-export interface IUntitledFileWorkingCopyManager<
-  M extends IUntitledFileWorkingCopyModel,
-> extends IBaseFileWorkingCopyManager<M, IUntitledFileWorkingCopy<M>> {
-  /**
-   * An event for when a untitled file working copy changed it's dirty state.
-   */
-  readonly onDidChangeDirty: Event<IUntitledFileWorkingCopy<M>>
+export interface IUntitledFileWorkingCopyManager<M extends IUntitledFileWorkingCopyModel> extends IBaseFileWorkingCopyManager<M, IUntitledFileWorkingCopy<M>> {
 
-  /**
-   * An event for when a untitled file working copy is about to be disposed.
-   */
-  readonly onWillDispose: Event<IUntitledFileWorkingCopy<M>>
+	/**
+	 * An event for when a untitled file working copy changed it's dirty state.
+	 */
+	readonly onDidChangeDirty: Event<IUntitledFileWorkingCopy<M>>;
 
-  /**
-   * Create a new untitled file working copy with optional initial contents.
-   *
-   * Note: Callers must `dispose` the working copy when no longer needed.
-   */
-  resolve(
-    options?: INewUntitledFileWorkingCopyOptions,
-  ): Promise<IUntitledFileWorkingCopy<M>>
+	/**
+	 * An event for when a untitled file working copy is about to be disposed.
+	 */
+	readonly onWillDispose: Event<IUntitledFileWorkingCopy<M>>;
 
-  /**
-   * Create a new untitled file working copy with optional initial contents
-   * and associated resource. The associated resource will be used when
-   * saving and will not require to ask the user for a file path.
-   *
-   * Note: Callers must `dispose` the working copy when no longer needed.
-   */
-  resolve(
-    options?: INewUntitledFileWorkingCopyWithAssociatedResourceOptions,
-  ): Promise<IUntitledFileWorkingCopy<M>>
+	/**
+	 * Create a new untitled file working copy with optional initial contents.
+	 *
+	 * Note: Callers must `dispose` the working copy when no longer needed.
+	 */
+	resolve(options?: INewUntitledFileWorkingCopyOptions): Promise<IUntitledFileWorkingCopy<M>>;
 
-  /**
-   * Creates a new untitled file working copy with optional initial contents
-   * with the provided resource or return an existing untitled file working
-   * copy otherwise.
-   *
-   * Note: Callers must `dispose` the working copy when no longer needed.
-   */
-  resolve(
-    options?: INewOrExistingUntitledFileWorkingCopyOptions,
-  ): Promise<IUntitledFileWorkingCopy<M>>
+	/**
+	 * Create a new untitled file working copy with optional initial contents
+	 * and associated resource. The associated resource will be used when
+	 * saving and will not require to ask the user for a file path.
+	 *
+	 * Note: Callers must `dispose` the working copy when no longer needed.
+	 */
+	resolve(options?: INewUntitledFileWorkingCopyWithAssociatedResourceOptions): Promise<IUntitledFileWorkingCopy<M>>;
+
+	/**
+	 * Creates a new untitled file working copy with optional initial contents
+	 * with the provided resource or return an existing untitled file working
+	 * copy otherwise.
+	 *
+	 * Note: Callers must `dispose` the working copy when no longer needed.
+	 */
+	resolve(options?: INewOrExistingUntitledFileWorkingCopyOptions): Promise<IUntitledFileWorkingCopy<M>>;
 }
 
 export interface INewUntitledFileWorkingCopyOptions {
-  /**
-   * Initial value of the untitled file working copy
-   * with support to indicate whether this should turn
-   * the working copy dirty or not.
-   */
-  contents?: IUntitledFileWorkingCopyInitialContents
+
+	/**
+	 * Initial value of the untitled file working copy
+	 * with support to indicate whether this should turn
+	 * the working copy dirty or not.
+	 */
+	contents?: IUntitledFileWorkingCopyInitialContents;
 }
 
-export interface INewUntitledFileWorkingCopyWithAssociatedResourceOptions
-  extends INewUntitledFileWorkingCopyOptions {
-  /**
-   * Resource components to associate with the untitled file working copy.
-   * When saving, the associated components will be used and the user
-   * is not being asked to provide a file path.
-   *
-   * Note: currently it is not possible to specify the `scheme` to use. The
-   * untitled file working copy will saved to the default local or remote resource.
-   */
-  associatedResource: {
-    authority?: string
-    path?: string
-    query?: string
-    fragment?: string
-  }
+export interface INewUntitledFileWorkingCopyWithAssociatedResourceOptions extends INewUntitledFileWorkingCopyOptions {
+
+	/**
+	 * Resource components to associate with the untitled file working copy.
+	 * When saving, the associated components will be used and the user
+	 * is not being asked to provide a file path.
+	 *
+	 * Note: currently it is not possible to specify the `scheme` to use. The
+	 * untitled file working copy will saved to the default local or remote resource.
+	 */
+	associatedResource: { authority?: string; path?: string; query?: string; fragment?: string };
 }
 
-export interface INewOrExistingUntitledFileWorkingCopyOptions
-  extends INewUntitledFileWorkingCopyOptions {
-  /**
-   * A resource to identify the untitled file working copy
-   * to create or return if already existing.
-   *
-   * Note: the resource will not be used unless the scheme is `untitled`.
-   */
-  untitledResource: URI
+export interface INewOrExistingUntitledFileWorkingCopyOptions extends INewUntitledFileWorkingCopyOptions {
 
-  /**
-   * A flag that will prevent the working copy from appearing dirty in the UI
-   * and not show a confirmation dialog when closed with unsaved content.
-   */
-  isScratchpad?: boolean
+	/**
+	 * A resource to identify the untitled file working copy
+	 * to create or return if already existing.
+	 *
+	 * Note: the resource will not be used unless the scheme is `untitled`.
+	 */
+	untitledResource: URI;
+
+	/**
+	 * A flag that will prevent the working copy from appearing dirty in the UI
+	 * and not show a confirmation dialog when closed with unsaved content.
+	 */
+	isScratchpad?: boolean;
 }
 
-type IInternalUntitledFileWorkingCopyOptions =
-  INewUntitledFileWorkingCopyOptions &
-    INewUntitledFileWorkingCopyWithAssociatedResourceOptions &
-    INewOrExistingUntitledFileWorkingCopyOptions
+type IInternalUntitledFileWorkingCopyOptions = INewUntitledFileWorkingCopyOptions & INewUntitledFileWorkingCopyWithAssociatedResourceOptions & INewOrExistingUntitledFileWorkingCopyOptions;
 
-export class UntitledFileWorkingCopyManager<
-    M extends IUntitledFileWorkingCopyModel,
-  >
-  extends BaseFileWorkingCopyManager<M, IUntitledFileWorkingCopy<M>>
-  implements IUntitledFileWorkingCopyManager<M>
-{
-  //#region Events
+export class UntitledFileWorkingCopyManager<M extends IUntitledFileWorkingCopyModel> extends BaseFileWorkingCopyManager<M, IUntitledFileWorkingCopy<M>> implements IUntitledFileWorkingCopyManager<M> {
 
-  private readonly _onDidChangeDirty = this._register(
-    new Emitter<IUntitledFileWorkingCopy<M>>(),
-  )
-  readonly onDidChangeDirty = this._onDidChangeDirty.event
+	//#region Events
 
-  private readonly _onWillDispose = this._register(
-    new Emitter<IUntitledFileWorkingCopy<M>>(),
-  )
-  readonly onWillDispose = this._onWillDispose.event
+	private readonly _onDidChangeDirty = this._register(new Emitter<IUntitledFileWorkingCopy<M>>());
+	readonly onDidChangeDirty = this._onDidChangeDirty.event;
 
-  //#endregion
+	private readonly _onWillDispose = this._register(new Emitter<IUntitledFileWorkingCopy<M>>());
+	readonly onWillDispose = this._onWillDispose.event;
 
-  private readonly mapResourceToWorkingCopyListeners =
-    new ResourceMap<IDisposable>()
+	//#endregion
 
-  constructor(
-    private readonly workingCopyTypeId: string,
-    private readonly modelFactory: IUntitledFileWorkingCopyModelFactory<M>,
-    private readonly saveDelegate: IUntitledFileWorkingCopySaveDelegate<M>,
-    @IFileService fileService: IFileService,
-    @ILabelService private readonly labelService: ILabelService,
-    @ILogService logService: ILogService,
-    @IWorkingCopyBackupService
-    workingCopyBackupService: IWorkingCopyBackupService,
-    @IWorkingCopyService
-    private readonly workingCopyService: IWorkingCopyService,
-  ) {
-    super(fileService, logService, workingCopyBackupService)
-  }
+	private readonly mapResourceToWorkingCopyListeners = new ResourceMap<IDisposable>();
 
-  //#region Resolve
+	constructor(
+		private readonly workingCopyTypeId: string,
+		private readonly modelFactory: IUntitledFileWorkingCopyModelFactory<M>,
+		private readonly saveDelegate: IUntitledFileWorkingCopySaveDelegate<M>,
+		@IFileService fileService: IFileService,
+		@ILabelService private readonly labelService: ILabelService,
+		@ILogService logService: ILogService,
+		@IWorkingCopyBackupService workingCopyBackupService: IWorkingCopyBackupService,
+		@IWorkingCopyService private readonly workingCopyService: IWorkingCopyService
+	) {
+		super(fileService, logService, workingCopyBackupService);
+	}
 
-  resolve(
-    options?: INewUntitledFileWorkingCopyOptions,
-  ): Promise<IUntitledFileWorkingCopy<M>>
-  resolve(
-    options?: INewUntitledFileWorkingCopyWithAssociatedResourceOptions,
-  ): Promise<IUntitledFileWorkingCopy<M>>
-  resolve(
-    options?: INewOrExistingUntitledFileWorkingCopyOptions,
-  ): Promise<IUntitledFileWorkingCopy<M>>
-  async resolve(
-    options?: IInternalUntitledFileWorkingCopyOptions,
-  ): Promise<IUntitledFileWorkingCopy<M>> {
-    const workingCopy = this.doCreateOrGet(options)
-    await workingCopy.resolve()
+	//#region Resolve
 
-    return workingCopy
-  }
+	resolve(options?: INewUntitledFileWorkingCopyOptions): Promise<IUntitledFileWorkingCopy<M>>;
+	resolve(options?: INewUntitledFileWorkingCopyWithAssociatedResourceOptions): Promise<IUntitledFileWorkingCopy<M>>;
+	resolve(options?: INewOrExistingUntitledFileWorkingCopyOptions): Promise<IUntitledFileWorkingCopy<M>>;
+	async resolve(options?: IInternalUntitledFileWorkingCopyOptions): Promise<IUntitledFileWorkingCopy<M>> {
+		const workingCopy = this.doCreateOrGet(options);
+		await workingCopy.resolve();
 
-  private doCreateOrGet(
-    options: IInternalUntitledFileWorkingCopyOptions = Object.create(null),
-  ): IUntitledFileWorkingCopy<M> {
-    const massagedOptions = this.massageOptions(options)
+		return workingCopy;
+	}
 
-    // Return existing instance if asked for it
-    if (massagedOptions.untitledResource) {
-      const existingWorkingCopy = this.get(massagedOptions.untitledResource)
-      if (existingWorkingCopy) {
-        return existingWorkingCopy
-      }
-    }
+	private doCreateOrGet(options: IInternalUntitledFileWorkingCopyOptions = Object.create(null)): IUntitledFileWorkingCopy<M> {
+		const massagedOptions = this.massageOptions(options);
 
-    // Create new instance otherwise
-    return this.doCreate(massagedOptions)
-  }
+		// Return existing instance if asked for it
+		if (massagedOptions.untitledResource) {
+			const existingWorkingCopy = this.get(massagedOptions.untitledResource);
+			if (existingWorkingCopy) {
+				return existingWorkingCopy;
+			}
+		}
 
-  private massageOptions(
-    options: IInternalUntitledFileWorkingCopyOptions,
-  ): IInternalUntitledFileWorkingCopyOptions {
-    const massagedOptions: IInternalUntitledFileWorkingCopyOptions =
-      Object.create(null)
+		// Create new instance otherwise
+		return this.doCreate(massagedOptions);
+	}
 
-    // Handle associated resource
-    if (options.associatedResource) {
-      massagedOptions.untitledResource = URI.from({
-        scheme: Schemas.untitled,
-        authority: options.associatedResource.authority,
-        fragment: options.associatedResource.fragment,
-        path: options.associatedResource.path,
-        query: options.associatedResource.query,
-      })
-      massagedOptions.associatedResource = options.associatedResource
-    }
+	private massageOptions(options: IInternalUntitledFileWorkingCopyOptions): IInternalUntitledFileWorkingCopyOptions {
+		const massagedOptions: IInternalUntitledFileWorkingCopyOptions = Object.create(null);
 
-    // Handle untitled resource
-    else {
-      if (options.untitledResource?.scheme === Schemas.untitled) {
-        massagedOptions.untitledResource = options.untitledResource
-      }
-      massagedOptions.isScratchpad = options.isScratchpad
-    }
+		// Handle associated resource
+		if (options.associatedResource) {
+			massagedOptions.untitledResource = URI.from({
+				scheme: Schemas.untitled,
+				authority: options.associatedResource.authority,
+				fragment: options.associatedResource.fragment,
+				path: options.associatedResource.path,
+				query: options.associatedResource.query
+			});
+			massagedOptions.associatedResource = options.associatedResource;
+		}
 
-    // Take over initial value
-    massagedOptions.contents = options.contents
+		// Handle untitled resource
+		else {
+			if (options.untitledResource?.scheme === Schemas.untitled) {
+				massagedOptions.untitledResource = options.untitledResource;
+			}
+			massagedOptions.isScratchpad = options.isScratchpad;
+		}
 
-    return massagedOptions
-  }
+		// Take over initial value
+		massagedOptions.contents = options.contents;
 
-  private doCreate(
-    options: IInternalUntitledFileWorkingCopyOptions,
-  ): IUntitledFileWorkingCopy<M> {
-    // Create a new untitled resource if none is provided
-    let untitledResource = options.untitledResource
-    if (!untitledResource) {
-      let counter = 1
-      do {
-        untitledResource = URI.from({
-          scheme: Schemas.untitled,
-          path: options.isScratchpad
-            ? `Scratchpad-${counter}`
-            : `Untitled-${counter}`,
-          query: this.workingCopyTypeId
-            ? `typeId=${this.workingCopyTypeId}` // distinguish untitled resources among others by encoding the `typeId` as query param
-            : undefined, // keep untitled resources for text files as they are (when `typeId === ''`)
-        })
-        counter++
-      } while (this.has(untitledResource))
-    }
+		return massagedOptions;
+	}
 
-    // Create new working copy with provided options
-    const workingCopy = new UntitledFileWorkingCopy(
-      this.workingCopyTypeId,
-      untitledResource,
-      this.labelService.getUriBasenameLabel(untitledResource),
-      !!options.associatedResource,
-      !!options.isScratchpad,
-      options.contents,
-      this.modelFactory,
-      this.saveDelegate,
-      this.workingCopyService,
-      this.workingCopyBackupService,
-      this.logService,
-    )
+	private doCreate(options: IInternalUntitledFileWorkingCopyOptions): IUntitledFileWorkingCopy<M> {
 
-    // Register
-    this.registerWorkingCopy(workingCopy)
+		// Create a new untitled resource if none is provided
+		let untitledResource = options.untitledResource;
+		if (!untitledResource) {
+			let counter = 1;
+			do {
+				untitledResource = URI.from({
+					scheme: Schemas.untitled,
+					path: options.isScratchpad ? `Scratchpad-${counter}` : `Untitled-${counter}`,
+					query: this.workingCopyTypeId ?
+						`typeId=${this.workingCopyTypeId}` : // distinguish untitled resources among others by encoding the `typeId` as query param
+						undefined							 // keep untitled resources for text files as they are (when `typeId === ''`)
+				});
+				counter++;
+			} while (this.has(untitledResource));
+		}
 
-    return workingCopy
-  }
+		// Create new working copy with provided options
+		const workingCopy = new UntitledFileWorkingCopy(
+			this.workingCopyTypeId,
+			untitledResource,
+			this.labelService.getUriBasenameLabel(untitledResource),
+			!!options.associatedResource,
+			!!options.isScratchpad,
+			options.contents,
+			this.modelFactory,
+			this.saveDelegate,
+			this.workingCopyService,
+			this.workingCopyBackupService,
+			this.logService
+		);
 
-  private registerWorkingCopy(workingCopy: IUntitledFileWorkingCopy<M>): void {
-    // Install working copy listeners
-    const workingCopyListeners = new DisposableStore()
-    workingCopyListeners.add(
-      workingCopy.onDidChangeDirty(() =>
-        this._onDidChangeDirty.fire(workingCopy),
-      ),
-    )
-    workingCopyListeners.add(
-      workingCopy.onWillDispose(() => this._onWillDispose.fire(workingCopy)),
-    )
+		// Register
+		this.registerWorkingCopy(workingCopy);
 
-    // Keep for disposal
-    this.mapResourceToWorkingCopyListeners.set(
-      workingCopy.resource,
-      workingCopyListeners,
-    )
+		return workingCopy;
+	}
 
-    // Add to cache
-    this.add(workingCopy.resource, workingCopy)
+	private registerWorkingCopy(workingCopy: IUntitledFileWorkingCopy<M>): void {
 
-    // If the working copy is dirty right from the beginning,
-    // make sure to emit this as an event
-    if (workingCopy.isDirty()) {
-      this._onDidChangeDirty.fire(workingCopy)
-    }
-  }
+		// Install working copy listeners
+		const workingCopyListeners = new DisposableStore();
+		workingCopyListeners.add(workingCopy.onDidChangeDirty(() => this._onDidChangeDirty.fire(workingCopy)));
+		workingCopyListeners.add(workingCopy.onWillDispose(() => this._onWillDispose.fire(workingCopy)));
 
-  protected override remove(resource: URI): boolean {
-    const removed = super.remove(resource)
+		// Keep for disposal
+		this.mapResourceToWorkingCopyListeners.set(workingCopy.resource, workingCopyListeners);
 
-    // Dispose any existing working copy listeners
-    const workingCopyListener =
-      this.mapResourceToWorkingCopyListeners.get(resource)
-    if (workingCopyListener) {
-      dispose(workingCopyListener)
-      this.mapResourceToWorkingCopyListeners.delete(resource)
-    }
+		// Add to cache
+		this.add(workingCopy.resource, workingCopy);
 
-    return removed
-  }
+		// If the working copy is dirty right from the beginning,
+		// make sure to emit this as an event
+		if (workingCopy.isDirty()) {
+			this._onDidChangeDirty.fire(workingCopy);
+		}
+	}
 
-  //#endregion
+	protected override remove(resource: URI): boolean {
+		const removed = super.remove(resource);
 
-  //#region Lifecycle
+		// Dispose any existing working copy listeners
+		const workingCopyListener = this.mapResourceToWorkingCopyListeners.get(resource);
+		if (workingCopyListener) {
+			dispose(workingCopyListener);
+			this.mapResourceToWorkingCopyListeners.delete(resource);
+		}
 
-  override dispose(): void {
-    super.dispose()
+		return removed;
+	}
 
-    // Dispose the working copy change listeners
-    dispose(this.mapResourceToWorkingCopyListeners.values())
-    this.mapResourceToWorkingCopyListeners.clear()
-  }
+	//#endregion
 
-  //#endregion
+	//#region Lifecycle
+
+	override dispose(): void {
+		super.dispose();
+
+		// Dispose the working copy change listeners
+		dispose(this.mapResourceToWorkingCopyListeners.values());
+		this.mapResourceToWorkingCopyListeners.clear();
+	}
+
+	//#endregion
 }

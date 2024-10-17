@@ -9,40 +9,36 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as eslint from "eslint"
-import { Node } from "estree"
+import * as eslint from 'eslint';
+import { Node } from 'estree';
 
-export = new (class EnsureNoDisposablesAreLeakedInTestSuite
-  implements eslint.Rule.RuleModule
-{
-  readonly meta: eslint.Rule.RuleMetaData = {
-    type: "problem",
-    messages: {
-      ensure:
-        "Suites should include a call to `ensureNoDisposablesAreLeakedInTestSuite()` to ensure no disposables are leaked in tests.",
-    },
-  }
+export = new class EnsureNoDisposablesAreLeakedInTestSuite implements eslint.Rule.RuleModule {
 
-  create(context: eslint.Rule.RuleContext): eslint.Rule.RuleListener {
-    const config = <{ exclude: string[] }>context.options[0]
+	readonly meta: eslint.Rule.RuleMetaData = {
+		type: 'problem',
+		messages: {
+			ensure: 'Suites should include a call to `ensureNoDisposablesAreLeakedInTestSuite()` to ensure no disposables are leaked in tests.'
+		}
+	};
 
-    const needle = context.getFilename().replace(/\\/g, "/")
-    if (config.exclude.some((e) => needle.endsWith(e))) {
-      return {}
-    }
+	create(context: eslint.Rule.RuleContext): eslint.Rule.RuleListener {
+		const config = <{ exclude: string[] }>context.options[0];
 
-    return {
-      [`Program > ExpressionStatement > CallExpression[callee.name='suite']`]: (
-        node: Node,
-      ) => {
-        const src = context.getSourceCode().getText(node)
-        if (!src.includes("ensureNoDisposablesAreLeakedInTestSuite(")) {
-          context.report({
-            node,
-            messageId: "ensure",
-          })
-        }
-      },
-    }
-  }
-})()
+		const needle = context.getFilename().replace(/\\/g, '/');
+		if (config.exclude.some((e) => needle.endsWith(e))) {
+			return {};
+		}
+
+		return {
+			[`Program > ExpressionStatement > CallExpression[callee.name='suite']`]: (node: Node) => {
+				const src = context.getSourceCode().getText(node)
+				if (!src.includes('ensureNoDisposablesAreLeakedInTestSuite(')) {
+					context.report({
+						node,
+						messageId: 'ensure',
+					});
+				}
+			},
+		};
+	}
+};

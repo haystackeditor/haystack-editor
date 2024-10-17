@@ -121,7 +121,7 @@ export class NativeTitlebarPart extends BrowserTitlebarPart {
     @IEditorGroupsService editorGroupService: IEditorGroupsService,
     @IEditorService editorService: IEditorService,
     @IMenuService menuService: IMenuService,
-    @IKeybindingService keybindingService: IKeybindingService,
+    @IKeybindingService keybindingService: IKeybindingService
   ) {
     super(
       id,
@@ -139,7 +139,7 @@ export class NativeTitlebarPart extends BrowserTitlebarPart {
       editorGroupService,
       editorService,
       menuService,
-      keybindingService,
+      keybindingService
     )
 
     this.bigSurOrNewer = isBigSurOrNewer(environmentService.os.release)
@@ -163,7 +163,7 @@ export class NativeTitlebarPart extends BrowserTitlebarPart {
   }
 
   protected override onConfigurationChanged(
-    event: IConfigurationChangeEvent,
+    event: IConfigurationChangeEvent
   ): void {
     super.onConfigurationChanged(event)
 
@@ -176,7 +176,7 @@ export class NativeTitlebarPart extends BrowserTitlebarPart {
 
   private onUpdateAppIconDragBehavior(): void {
     const setting = this.configurationService.getValue(
-      "window.doubleClickIconToClose",
+      "window.doubleClickIconToClose"
     )
     if (setting && this.appIcon) {
       ;(this.appIcon.style as any)["-webkit-app-region"] = "no-drag"
@@ -195,8 +195,8 @@ export class NativeTitlebarPart extends BrowserTitlebarPart {
     if (this.customMenubar) {
       this._register(
         this.customMenubar.onFocusStateChange((e) =>
-          this.onMenubarFocusChanged(e),
-        ),
+          this.onMenubarFocusChanged(e)
+        )
       )
     }
   }
@@ -223,7 +223,7 @@ export class NativeTitlebarPart extends BrowserTitlebarPart {
     // Native menu controller
     if (isMacintosh || hasNativeTitlebar(this.configurationService)) {
       this._register(
-        this.instantiationService.createInstance(NativeMenubarControl),
+        this.instantiationService.createInstance(NativeMenubarControl)
       )
     }
 
@@ -234,7 +234,7 @@ export class NativeTitlebarPart extends BrowserTitlebarPart {
       this._register(
         addDisposableListener(this.appIcon, EventType.DBLCLICK, () => {
           this.nativeHostService.closeWindow({ targetWindowId })
-        }),
+        })
       )
     }
 
@@ -250,19 +250,19 @@ export class NativeTitlebarPart extends BrowserTitlebarPart {
         this.primaryWindowControls,
         $(
           "div.window-icon.window-minimize" +
-            ThemeIcon.asCSSSelector(Codicon.chromeMinimize),
-        ),
+            ThemeIcon.asCSSSelector(Codicon.chromeMinimize)
+        )
       )
       this._register(
         addDisposableListener(minimizeIcon, EventType.CLICK, () => {
           this.nativeHostService.minimizeWindow({ targetWindowId })
-        }),
+        })
       )
 
       // Restore
       this.maxRestoreControl = append(
         this.primaryWindowControls,
-        $("div.window-icon.window-max-restore"),
+        $("div.window-icon.window-max-restore")
       )
       this._register(
         addDisposableListener(
@@ -277,8 +277,8 @@ export class NativeTitlebarPart extends BrowserTitlebarPart {
             }
 
             return this.nativeHostService.maximizeWindow({ targetWindowId })
-          },
-        ),
+          }
+        )
       )
 
       // Close
@@ -286,13 +286,13 @@ export class NativeTitlebarPart extends BrowserTitlebarPart {
         this.primaryWindowControls,
         $(
           "div.window-icon.window-close" +
-            ThemeIcon.asCSSSelector(Codicon.chromeClose),
-        ),
+            ThemeIcon.asCSSSelector(Codicon.chromeClose)
+        )
       )
       this._register(
         addDisposableListener(closeIcon, EventType.CLICK, () => {
           this.nativeHostService.closeWindow({ targetWindowId })
-        }),
+        })
       )
 
       // Resizer
@@ -308,8 +308,8 @@ export class NativeTitlebarPart extends BrowserTitlebarPart {
           {
             windowId: targetWindowId,
             maximized: this.layoutService.isWindowMaximized(targetWindow),
-          },
-        ),
+          }
+        )
       )
     }
 
@@ -329,10 +329,10 @@ export class NativeTitlebarPart extends BrowserTitlebarPart {
                 clientX: x / zoomFactor,
                 clientY: y / zoomFactor,
               }),
-              MenuId.TitleBarContext,
+              MenuId.TitleBarContext
             )
-          },
-        ),
+          }
+        )
       )
     }
 
@@ -343,17 +343,17 @@ export class NativeTitlebarPart extends BrowserTitlebarPart {
     if (this.maxRestoreControl) {
       if (maximized) {
         this.maxRestoreControl.classList.remove(
-          ...ThemeIcon.asClassNameArray(Codicon.chromeMaximize),
+          ...ThemeIcon.asClassNameArray(Codicon.chromeMaximize)
         )
         this.maxRestoreControl.classList.add(
-          ...ThemeIcon.asClassNameArray(Codicon.chromeRestore),
+          ...ThemeIcon.asClassNameArray(Codicon.chromeRestore)
         )
       } else {
         this.maxRestoreControl.classList.remove(
-          ...ThemeIcon.asClassNameArray(Codicon.chromeRestore),
+          ...ThemeIcon.asClassNameArray(Codicon.chromeRestore)
         )
         this.maxRestoreControl.classList.add(
-          ...ThemeIcon.asClassNameArray(Codicon.chromeMaximize),
+          ...ThemeIcon.asClassNameArray(Codicon.chromeMaximize)
         )
       }
     }
@@ -434,7 +434,7 @@ export class MainNativeTitlebarPart extends NativeTitlebarPart {
     @IEditorGroupsService editorGroupService: IEditorGroupsService,
     @IEditorService editorService: IEditorService,
     @IMenuService menuService: IMenuService,
-    @IKeybindingService keybindingService: IKeybindingService,
+    @IKeybindingService keybindingService: IKeybindingService
   ) {
     super(
       Parts.TITLEBAR_PART,
@@ -453,7 +453,7 @@ export class MainNativeTitlebarPart extends NativeTitlebarPart {
       editorGroupService,
       editorService,
       menuService,
-      keybindingService,
+      keybindingService
     )
   }
 }
@@ -486,7 +486,7 @@ export class AuxiliaryNativeTitlebarPart
     @IEditorGroupsService editorGroupService: IEditorGroupsService,
     @IEditorService editorService: IEditorService,
     @IMenuService menuService: IMenuService,
-    @IKeybindingService keybindingService: IKeybindingService,
+    @IKeybindingService keybindingService: IKeybindingService
   ) {
     const id = AuxiliaryNativeTitlebarPart.COUNTER++
     super(
@@ -506,7 +506,7 @@ export class AuxiliaryNativeTitlebarPart
       editorGroupService,
       editorService,
       menuService,
-      keybindingService,
+      keybindingService
     )
   }
 
@@ -531,13 +531,13 @@ export class NativeTitleService extends BrowserTitleService {
 
   protected override doCreateAuxiliaryTitlebarPart(
     container: HTMLElement,
-    editorGroupsContainer: IEditorGroupsContainer,
+    editorGroupsContainer: IEditorGroupsContainer
   ): AuxiliaryNativeTitlebarPart {
     return this.instantiationService.createInstance(
       AuxiliaryNativeTitlebarPart,
       container,
       editorGroupsContainer,
-      this.mainPart,
+      this.mainPart
     )
   }
 }

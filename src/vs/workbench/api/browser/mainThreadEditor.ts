@@ -53,39 +53,39 @@ export class MainThreadTextEditorProperties {
   public static readFromEditor(
     previousProperties: MainThreadTextEditorProperties | null,
     model: ITextModel,
-    codeEditor: ICodeEditor | null,
+    codeEditor: ICodeEditor | null
   ): MainThreadTextEditorProperties {
     const selections =
       MainThreadTextEditorProperties._readSelectionsFromCodeEditor(
         previousProperties,
-        codeEditor,
+        codeEditor
       )
     const options = MainThreadTextEditorProperties._readOptionsFromCodeEditor(
       previousProperties,
       model,
-      codeEditor,
+      codeEditor
     )
     const visibleRanges =
       MainThreadTextEditorProperties._readVisibleRangesFromCodeEditor(
         previousProperties,
-        codeEditor,
+        codeEditor
       )
     const editRange =
       MainThreadTextEditorProperties._readEditRangeFromCodeEditor(
         previousProperties,
-        codeEditor,
+        codeEditor
       )
     return new MainThreadTextEditorProperties(
       selections,
       options,
       visibleRanges,
-      editRange,
+      editRange
     )
   }
 
   private static _readSelectionsFromCodeEditor(
     previousProperties: MainThreadTextEditorProperties | null,
-    codeEditor: ICodeEditor | null,
+    codeEditor: ICodeEditor | null
   ): Selection[] {
     let result: Selection[] | null = null
     if (codeEditor) {
@@ -103,7 +103,7 @@ export class MainThreadTextEditorProperties {
   private static _readOptionsFromCodeEditor(
     previousProperties: MainThreadTextEditorProperties | null,
     model: ITextModel,
-    codeEditor: ICodeEditor | null,
+    codeEditor: ICodeEditor | null
   ): IResolvedTextEditorConfiguration {
     if (model.isDisposed()) {
       if (previousProperties) {
@@ -142,7 +142,7 @@ export class MainThreadTextEditorProperties {
 
   private static _readVisibleRangesFromCodeEditor(
     previousProperties: MainThreadTextEditorProperties | null,
-    codeEditor: ICodeEditor | null,
+    codeEditor: ICodeEditor | null
   ): Range[] {
     if (codeEditor) {
       return codeEditor.getVisibleRanges()
@@ -152,7 +152,7 @@ export class MainThreadTextEditorProperties {
 
   private static _readEditRangeFromCodeEditor(
     previousProperties: MainThreadTextEditorProperties | null,
-    codeEditor: ICodeEditor | null,
+    codeEditor: ICodeEditor | null
   ): Range | undefined {
     if (codeEditor) {
       const editRange = codeEditor.getEditRange()
@@ -162,7 +162,7 @@ export class MainThreadTextEditorProperties {
         editRange.startLineNumber,
         editRange.startColumn,
         editRange.endLineNumber,
-        editRange.endLineNumber,
+        editRange.endLineNumber
       )
     }
     return undefined
@@ -172,13 +172,13 @@ export class MainThreadTextEditorProperties {
     public readonly selections: Selection[],
     public readonly options: IResolvedTextEditorConfiguration,
     public readonly visibleRanges: Range[],
-    public readonly editRange: Range | undefined,
+    public readonly editRange: Range | undefined
   ) {}
 
   public generateDelta(
     oldProps: MainThreadTextEditorProperties | null,
     newProps: MainThreadTextEditorProperties,
-    selectionChangeSource: string | null,
+    selectionChangeSource: string | null
   ): IEditorPropertiesChangeData | null {
     const delta: IEditorPropertiesChangeData = {
       options: null,
@@ -191,7 +191,7 @@ export class MainThreadTextEditorProperties {
       !oldProps ||
       !MainThreadTextEditorProperties._selectionsEqual(
         oldProps.selections,
-        this.selections,
+        this.selections
       )
     ) {
       delta.selections = {
@@ -204,7 +204,7 @@ export class MainThreadTextEditorProperties {
       !oldProps ||
       !MainThreadTextEditorProperties._optionsEqual(
         oldProps.options,
-        this.options,
+        this.options
       )
     ) {
       delta.options = this.options
@@ -214,7 +214,7 @@ export class MainThreadTextEditorProperties {
       !oldProps ||
       !MainThreadTextEditorProperties._rangesEqual(
         oldProps.visibleRanges,
-        this.visibleRanges,
+        this.visibleRanges
       )
     ) {
       delta.visibleRanges = this.visibleRanges
@@ -224,7 +224,7 @@ export class MainThreadTextEditorProperties {
       !oldProps ||
       !MainThreadTextEditorProperties._editRangesEqual(
         oldProps.editRange,
-        this.editRange,
+        this.editRange
       )
     ) {
       delta.editRange = this.editRange
@@ -246,21 +246,21 @@ export class MainThreadTextEditorProperties {
 
   private static _selectionsEqual(
     a: readonly Selection[],
-    b: readonly Selection[],
+    b: readonly Selection[]
   ): boolean {
     return equals(a, b, (aValue, bValue) => aValue.equalsSelection(bValue))
   }
 
   private static _rangesEqual(
     a: readonly Range[],
-    b: readonly Range[],
+    b: readonly Range[]
   ): boolean {
     return equals(a, b, (aValue, bValue) => aValue.equalsRange(bValue))
   }
 
   private static _editRangesEqual(
     a: Range | undefined,
-    b: Range | undefined,
+    b: Range | undefined
   ): boolean {
     if (a == null || b == null) {
       return a == b
@@ -270,7 +270,7 @@ export class MainThreadTextEditorProperties {
 
   private static _optionsEqual(
     a: IResolvedTextEditorConfiguration,
-    b: IResolvedTextEditorConfiguration,
+    b: IResolvedTextEditorConfiguration
   ): boolean {
     if ((a && !b) || (!a && b)) {
       return false
@@ -313,7 +313,7 @@ export class MainThreadTextEditor {
     focusTracker: IFocusTracker,
     mainThreadDocuments: MainThreadDocuments,
     modelService: IModelService,
-    clipboardService: IClipboardService,
+    clipboardService: IClipboardService
   ) {
     this._id = id
     this._model = model
@@ -329,7 +329,7 @@ export class MainThreadTextEditor {
     this._modelListeners.add(
       this._model.onDidChangeOptions((e) => {
         this._updatePropertiesNow(null)
-      }),
+      })
     )
 
     this.setCodeEditor(codeEditor)
@@ -347,20 +347,20 @@ export class MainThreadTextEditor {
       MainThreadTextEditorProperties.readFromEditor(
         this._properties,
         this._model,
-        this._codeEditor,
+        this._codeEditor
       ),
-      selectionChangeSource,
+      selectionChangeSource
     )
   }
 
   private _setProperties(
     newProperties: MainThreadTextEditorProperties,
-    selectionChangeSource: string | null,
+    selectionChangeSource: string | null
   ): void {
     const delta = newProperties.generateDelta(
       this._properties,
       newProperties,
-      selectionChangeSource,
+      selectionChangeSource
     )
     this._properties = newProperties
     if (delta) {
@@ -397,18 +397,18 @@ export class MainThreadTextEditor {
       this._codeEditorListeners.add(
         this._codeEditor.onDidChangeModel(() => {
           this.setCodeEditor(null)
-        }),
+        })
       )
 
       this._codeEditorListeners.add(
         this._codeEditor.onDidFocusEditorWidget(() => {
           this._focusTracker.onGainedFocus()
-        }),
+        })
       )
       this._codeEditorListeners.add(
         this._codeEditor.onDidBlurEditorWidget(() => {
           this._focusTracker.onLostFocus()
-        }),
+        })
       )
 
       let nextSelectionChangeSource: string | null = null
@@ -419,7 +419,7 @@ export class MainThreadTextEditor {
             nextSelectionChangeSource = null
             this._updatePropertiesNow(selectionChangeSource)
           }
-        }),
+        })
       )
 
       const isValidCodeEditor = () => {
@@ -439,7 +439,7 @@ export class MainThreadTextEditor {
         // content change instead.
         if (
           this._mainThreadDocuments.isCaughtUpWithContentChanges(
-            this._model.uri,
+            this._model.uri
           )
         ) {
           nextSelectionChangeSource = null
@@ -457,7 +457,7 @@ export class MainThreadTextEditor {
             return
           }
           updateProperties(e.source)
-        }),
+        })
       )
       this._codeEditorListeners.add(
         this._codeEditor.onDidChangeConfiguration((e) => {
@@ -466,7 +466,7 @@ export class MainThreadTextEditor {
             return
           }
           updateProperties(null)
-        }),
+        })
       )
       this._codeEditorListeners.add(
         this._codeEditor.onDidLayoutChange(() => {
@@ -475,7 +475,7 @@ export class MainThreadTextEditor {
             return
           }
           updateProperties(null)
-        }),
+        })
       )
       this._codeEditorListeners.add(
         this._codeEditor.onDidScrollChange(() => {
@@ -484,7 +484,7 @@ export class MainThreadTextEditor {
             return
           }
           updateProperties(null)
-        }),
+        })
       )
       this._updatePropertiesNow(null)
     }
@@ -510,7 +510,7 @@ export class MainThreadTextEditor {
             this._codeEditor.getEditRange()!.startLineNumber,
             this._codeEditor.getEditRange()!.startColumn,
             this._codeEditor.getEditRange()!.endLineNumber,
-            this._codeEditor.getEditRange()!.endColumn,
+            this._codeEditor.getEditRange()!.endColumn
           )
         : undefined
 
@@ -519,9 +519,9 @@ export class MainThreadTextEditor {
           this._codeEditor.getSelections()!,
           this._properties!.options,
           this._properties!.visibleRanges,
-          editRange,
+          editRange
         ),
-        "api",
+        "api"
       )
       return
     }
@@ -532,19 +532,19 @@ export class MainThreadTextEditor {
         newSelections,
         this._properties!.options,
         this._properties!.visibleRanges,
-        undefined,
+        undefined
       ),
-      null,
+      null
     )
   }
 
   private _setIndentConfiguration(
-    newConfiguration: ITextEditorConfigurationUpdate,
+    newConfiguration: ITextEditorConfigurationUpdate
   ): void {
     const creationOpts = this._modelService.getCreationOptions(
       this._model.getLanguageId(),
       this._model.uri,
-      this._model.isForSimpleWidget,
+      this._model.isForSimpleWidget
     )
 
     if (
@@ -587,7 +587,7 @@ export class MainThreadTextEditor {
   }
 
   public setConfiguration(
-    newConfiguration: ITextEditorConfigurationUpdate,
+    newConfiguration: ITextEditorConfigurationUpdate
   ): void {
     this._setIndentConfiguration(newConfiguration)
 
@@ -640,7 +640,7 @@ export class MainThreadTextEditor {
         _ranges[4 * i],
         _ranges[4 * i + 1],
         _ranges[4 * i + 2],
-        _ranges[4 * i + 3],
+        _ranges[4 * i + 3]
       )
     }
     this._codeEditor.setDecorationsByTypeFast(key, ranges)
@@ -660,7 +660,7 @@ export class MainThreadTextEditor {
       case TextEditorRevealType.InCenterIfOutsideViewport:
         this._codeEditor.revealRangeInCenterIfOutsideViewport(
           range,
-          ScrollType.Smooth,
+          ScrollType.Smooth
         )
         break
       case TextEditorRevealType.AtTop:
@@ -689,7 +689,7 @@ export class MainThreadTextEditor {
   public applyEdits(
     versionIdCheck: number,
     edits: ISingleEditOperation[],
-    opts: IApplyEditsOptions,
+    opts: IApplyEditsOptions
   ): boolean {
     if (this._model.getVersionId() !== versionIdCheck) {
       // throw new Error('Model has changed in the meantime!');
@@ -728,7 +728,7 @@ export class MainThreadTextEditor {
     modelVersionId: number,
     template: string,
     ranges: readonly IRange[],
-    opts: IUndoStopOptions,
+    opts: IUndoStopOptions
   ) {
     if (!this._codeEditor || !this._codeEditor.hasModel()) {
       return false
@@ -740,7 +740,7 @@ export class MainThreadTextEditor {
     if (needsTemplate) {
       const state = new EditorState(
         this._codeEditor,
-        CodeEditorStateFlag.Value | CodeEditorStateFlag.Position,
+        CodeEditorStateFlag.Value | CodeEditorStateFlag.Position
       )
       clipboardText = await this._clipboardService.readText()
       if (!state.validate(this._codeEditor)) {

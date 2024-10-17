@@ -9,33 +9,27 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { createDecorator } from "vs/platform/instantiation/common/instantiation"
+import { createDecorator } from 'vs/platform/instantiation/common/instantiation';
 
-export const IStateReadService =
-  createDecorator<IStateReadService>("stateReadService")
+export const IStateReadService = createDecorator<IStateReadService>('stateReadService');
 export interface IStateReadService {
-  readonly _serviceBrand: undefined
 
-  getItem<T>(key: string, defaultValue: T): T
-  getItem<T>(key: string, defaultValue?: T): T | undefined
+	readonly _serviceBrand: undefined;
+
+	getItem<T>(key: string, defaultValue: T): T;
+	getItem<T>(key: string, defaultValue?: T): T | undefined;
+
 }
 
-export const IStateService = createDecorator<IStateService>("stateService")
+export const IStateService = createDecorator<IStateService>('stateService');
 export interface IStateService extends IStateReadService {
-  readonly _serviceBrand: undefined
 
-  setItem(
-    key: string,
-    data?: object | string | number | boolean | undefined | null,
-  ): void
-  setItems(
-    items: readonly {
-      key: string
-      data?: object | string | number | boolean | undefined | null
-    }[],
-  ): void
+	readonly _serviceBrand: undefined;
 
-  removeItem(key: string): void
+	setItem(key: string, data?: object | string | number | boolean | undefined | null): void;
+	setItems(items: readonly { key: string; data?: object | string | number | boolean | undefined | null }[]): void;
 
-  close(): Promise<void>
+	removeItem(key: string): void;
+
+	close(): Promise<void>;
 }

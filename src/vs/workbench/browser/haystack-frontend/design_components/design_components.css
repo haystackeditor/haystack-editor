@@ -15,10 +15,10 @@
 
 .tooltip {
   max-width: 200px;
-  background: var(--vscode-editorHoverWidget-background);
-  border: 1px solid var(--vscode-editorHoverWidget-border);
-  border-radius: 3px;
-  color: var(--vscode-editorHoverWidget-foreground);
+	background: var(--vscode-editorHoverWidget-background);
+	border: 1px solid var(--vscode-editorHoverWidget-border);
+	border-radius: 3px;
+	color: var(--vscode-editorHoverWidget-foreground);
   position: fixed;
   z-index: 100;
   font-size: 12px;
@@ -27,10 +27,10 @@
 
 .uiTooltip {
   max-width: 200px;
-  background: var(--vscode-editorHoverWidget-background);
-  border: 1px solid var(--vscode-editorHoverWidget-border);
-  border-radius: 3px;
-  color: var(--vscode-editorHoverWidget-foreground);
+	background: var(--vscode-editorHoverWidget-background);
+	border: 1px solid var(--vscode-editorHoverWidget-border);
+	border-radius: 3px;
+	color: var(--vscode-editorHoverWidget-foreground);
   box-shadow: 0 2px 8px var(--vscode-widget-shadow);
   position: fixed;
   z-index: 100;

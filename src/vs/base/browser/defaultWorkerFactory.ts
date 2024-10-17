@@ -26,7 +26,7 @@ const ttPolicy = createTrustedTypesPolicy("defaultWorkerFactory", {
 
 export function createBlobWorker(
   blobUrl: string,
-  options?: WorkerOptions,
+  options?: WorkerOptions
 ): Worker {
   if (!blobUrl.startsWith("blob:")) {
     throw new URIError("Not a blob-url: " + blobUrl)
@@ -35,7 +35,7 @@ export function createBlobWorker(
     ttPolicy
       ? (ttPolicy.createScriptURL(blobUrl) as unknown as string)
       : blobUrl,
-    options,
+    options
   )
 }
 
@@ -57,7 +57,7 @@ function getWorker(label: string): Worker | Promise<Worker> {
         ttPolicy
           ? (ttPolicy.createScriptURL(workerUrl) as unknown as string)
           : workerUrl,
-        { name: label },
+        { name: label }
       )
     }
   }
@@ -70,19 +70,19 @@ function getWorker(label: string): Worker | Promise<Worker> {
       ttPolicy
         ? (ttPolicy.createScriptURL(workerUrl) as unknown as string)
         : workerUrl,
-      { name: label },
+      { name: label }
     )
   }
   // ESM-comment-end
   throw new Error(
-    `You must define a function MonacoEnvironment.getWorkerUrl or MonacoEnvironment.getWorker`,
+    `You must define a function MonacoEnvironment.getWorkerUrl or MonacoEnvironment.getWorker`
   )
 }
 
 // ESM-comment-begin
 export function getWorkerBootstrapUrl(
   scriptPath: string,
-  label: string,
+  label: string
 ): string {
   if (
     /^((http:)|(https:)|(file:))/.test(scriptPath) &&
@@ -102,7 +102,7 @@ export function getWorkerBootstrapUrl(
   const params =
     start > 0
       ? new URLSearchParams(
-          scriptPath.substring(start + 1, ~end ? end : undefined),
+          scriptPath.substring(start + 1, ~end ? end : undefined)
         )
       : new URLSearchParams()
 
@@ -138,7 +138,7 @@ class WebWorker extends Disposable implements IWorker {
     id: number,
     label: string,
     onMessageCallback: IWorkerCallback,
-    onErrorCallback: (err: any) => void,
+    onErrorCallback: (err: any) => void
   ) {
     super()
     this.id = id
@@ -168,7 +168,7 @@ class WebWorker extends Disposable implements IWorker {
           w.terminate()
         })
         this.worker = null
-      }),
+      })
     )
   }
 
@@ -185,7 +185,7 @@ class WebWorker extends Disposable implements IWorker {
         onUnexpectedError(
           new Error(`FAILED to post message to '${this.label}'-worker`, {
             cause: err,
-          }),
+          })
         )
       }
     })
@@ -206,7 +206,7 @@ export class DefaultWorkerFactory implements IWorkerFactory {
   public create(
     moduleId: string,
     onMessageCallback: IWorkerCallback,
-    onErrorCallback: (err: any) => void,
+    onErrorCallback: (err: any) => void
   ): IWorker {
     const workerId = ++DefaultWorkerFactory.LAST_WORKER_ID
 
@@ -223,7 +223,7 @@ export class DefaultWorkerFactory implements IWorkerFactory {
         logOnceWebWorkerWarning(err)
         this._webWorkerFailedBeforeError = err
         onErrorCallback(err)
-      },
+      }
     )
   }
 }

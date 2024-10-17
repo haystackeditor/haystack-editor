@@ -146,7 +146,7 @@ export class View extends ViewEventHandler {
     userInputEvents: ViewUserInputEvents,
     overflowWidgetsDomNode: HTMLElement | undefined,
     @IInstantiationService
-    private readonly _instantiationService: IInstantiationService,
+    private readonly _instantiationService: IInstantiationService
   ) {
     super()
     this._selections = [new Selection(1, 1, 1, 1)]
@@ -156,7 +156,7 @@ export class View extends ViewEventHandler {
       configuration,
       model,
       userInputEvents,
-      commandDelegate,
+      commandDelegate
     )
 
     // The view context is passed on to most classes (basically to reduce param. counts in ctors)
@@ -172,14 +172,14 @@ export class View extends ViewEventHandler {
       TextAreaHandler,
       this._context,
       viewController,
-      this._createTextAreaHandlerHelper(),
+      this._createTextAreaHandlerHelper()
     )
     this._viewParts.push(this._textAreaHandler)
 
     // These two dom nodes must be constructed up front, since references are needed in the layout provider (scrolling & co.)
     this._linesContent = createFastDomNode(document.createElement("div"))
     this._linesContent.setClassName(
-      "lines-content" + " monaco-editor-background",
+      "lines-content" + " monaco-editor-background"
     )
     this._linesContent.setPosition("absolute")
 
@@ -189,11 +189,11 @@ export class View extends ViewEventHandler {
     this.domNode.setAttribute("role", "code")
 
     this._overflowGuardContainer = createFastDomNode(
-      document.createElement("div"),
+      document.createElement("div")
     )
     PartFingerprints.write(
       this._overflowGuardContainer,
-      PartFingerprint.OverflowGuard,
+      PartFingerprint.OverflowGuard
     )
     this._overflowGuardContainer.setClassName("overflow-guard")
 
@@ -201,7 +201,7 @@ export class View extends ViewEventHandler {
       this._context,
       this._linesContent,
       this.domNode,
-      this._overflowGuardContainer,
+      this._overflowGuardContainer
     )
     this._viewParts.push(this._scrollbar)
 
@@ -209,7 +209,7 @@ export class View extends ViewEventHandler {
     this._viewLines = new ViewLines(
       this._context,
       this._linesContent,
-      model.getEditRange(),
+      model.getEditRange()
     )
 
     // View Zones
@@ -226,11 +226,11 @@ export class View extends ViewEventHandler {
     const contentViewOverlays = new ContentViewOverlays(this._context)
     this._viewParts.push(contentViewOverlays)
     contentViewOverlays.addDynamicOverlay(
-      new CurrentLineHighlightOverlay(this._context),
+      new CurrentLineHighlightOverlay(this._context)
     )
     contentViewOverlays.addDynamicOverlay(new SelectionsOverlay(this._context))
     contentViewOverlays.addDynamicOverlay(
-      new IndentGuidesOverlay(this._context),
+      new IndentGuidesOverlay(this._context)
     )
     contentViewOverlays.addDynamicOverlay(new DecorationsOverlay(this._context))
     contentViewOverlays.addDynamicOverlay(new WhitespaceOverlay(this._context))
@@ -238,13 +238,13 @@ export class View extends ViewEventHandler {
     const marginViewOverlays = new MarginViewOverlays(this._context)
     this._viewParts.push(marginViewOverlays)
     marginViewOverlays.addDynamicOverlay(
-      new CurrentLineMarginHighlightOverlay(this._context),
+      new CurrentLineMarginHighlightOverlay(this._context)
     )
     marginViewOverlays.addDynamicOverlay(
-      new MarginViewLineDecorationsOverlay(this._context),
+      new MarginViewLineDecorationsOverlay(this._context)
     )
     marginViewOverlays.addDynamicOverlay(
-      new LinesDecorationsOverlay(this._context),
+      new LinesDecorationsOverlay(this._context)
     )
     marginViewOverlays.addDynamicOverlay(new LineNumbersOverlay(this._context))
 
@@ -284,7 +284,7 @@ export class View extends ViewEventHandler {
       const overviewRulerData = this._scrollbar.getOverviewRulerLayoutInfo()
       overviewRulerData.parent.insertBefore(
         decorationsOverviewRuler.getDomNode(),
-        overviewRulerData.insertBefore,
+        overviewRulerData.insertBefore
       )
     }
 
@@ -299,7 +299,7 @@ export class View extends ViewEventHandler {
     this._overflowGuardContainer.appendChild(scrollDecoration.getDomNode())
     this._overflowGuardContainer.appendChild(this._textAreaHandler.textArea)
     this._overflowGuardContainer.appendChild(
-      this._textAreaHandler.textAreaCover,
+      this._textAreaHandler.textAreaCover
     )
     this._overflowGuardContainer.appendChild(this._overlayWidgets.getDomNode())
     this._overflowGuardContainer.appendChild(minimap.getDomNode())
@@ -308,17 +308,17 @@ export class View extends ViewEventHandler {
 
     if (overflowWidgetsDomNode) {
       overflowWidgetsDomNode.appendChild(
-        this._contentWidgets.overflowingContentWidgetsDomNode.domNode,
+        this._contentWidgets.overflowingContentWidgetsDomNode.domNode
       )
       overflowWidgetsDomNode.appendChild(
-        this._overlayWidgets.overflowingOverlayWidgetsDomNode.domNode,
+        this._overlayWidgets.overflowingOverlayWidgetsDomNode.domNode
       )
     } else {
       this.domNode.appendChild(
-        this._contentWidgets.overflowingContentWidgetsDomNode,
+        this._contentWidgets.overflowingContentWidgetsDomNode
       )
       this.domNode.appendChild(
-        this._overlayWidgets.overflowingOverlayWidgetsDomNode,
+        this._overlayWidgets.overflowingOverlayWidgetsDomNode
       )
     }
 
@@ -329,8 +329,8 @@ export class View extends ViewEventHandler {
       new PointerHandler(
         this._context,
         viewController,
-        this._createPointerHandlerHelper(),
-      ),
+        this._createPointerHandlerHelper()
+      )
     )
   }
 
@@ -352,7 +352,7 @@ export class View extends ViewEventHandler {
           lane,
           persist: decoration.options.glyphMargin?.persistLane,
         }
-      }),
+      })
     )
 
     // Add all glyph margin widgets
@@ -361,7 +361,7 @@ export class View extends ViewEventHandler {
         const range = model.validateRange(widget.preference.range)
         maxLineNumber = Math.max(maxLineNumber, range.endLineNumber)
         return { range, lane: widget.preference.lane }
-      }),
+      })
     )
 
     // Sorted by their start position
@@ -395,7 +395,7 @@ export class View extends ViewEventHandler {
         const lastTextareaPosition = this._textAreaHandler.getLastRenderData()
         return new PointerHandlerLastRenderData(
           lastViewCursorsRenderData,
-          lastTextareaPosition,
+          lastTextareaPosition
         )
       },
       renderNow: (): void => {
@@ -415,7 +415,7 @@ export class View extends ViewEventHandler {
       visibleRangeForPosition: (lineNumber: number, column: number) => {
         this._flushAccumulatedAndRenderNow()
         return this._viewLines.visibleRangeForPosition(
-          new Position(lineNumber, column),
+          new Position(lineNumber, column)
         )
       },
 
@@ -466,20 +466,20 @@ export class View extends ViewEventHandler {
     this._scheduleRender()
   }
   public override onConfigurationChanged(
-    e: viewEvents.ViewConfigurationChangedEvent,
+    e: viewEvents.ViewConfigurationChangedEvent
   ): boolean {
     this.domNode.setClassName(this._getEditorClassName())
     this._applyLayout()
     return false
   }
   public override onCursorStateChanged(
-    e: viewEvents.ViewCursorStateChangedEvent,
+    e: viewEvents.ViewCursorStateChangedEvent
   ): boolean {
     this._selections = e.selections
     return false
   }
   public override onDecorationsChanged(
-    e: viewEvents.ViewDecorationsChangedEvent,
+    e: viewEvents.ViewDecorationsChangedEvent
   ): boolean {
     if (e.affectsGlyphMargin) {
       this._shouldRecomputeGlyphMarginLanes = true
@@ -588,7 +588,7 @@ export class View extends ViewEventHandler {
           this._shouldRecomputeGlyphMarginLanes = false
           const model = this._computeGlyphMarginLanes()
           this._context.configuration.setGlyphMarginDecorationLaneCount(
-            model.requiredLanes,
+            model.requiredLanes
           )
         }
         inputLatency.onRenderStart()
@@ -607,14 +607,14 @@ export class View extends ViewEventHandler {
         this._context.viewModel.setViewport(
           partialViewportData.startLineNumber,
           partialViewportData.endLineNumber,
-          partialViewportData.centeredLineNumber,
+          partialViewportData.centeredLineNumber
         )
 
         const viewportData = new ViewportData(
           this._selections,
           partialViewportData,
           this._context.viewLayout.getWhitespaceViewportData(),
-          this._context.viewModel,
+          this._context.viewModel
         )
 
         if (this._contentWidgets.shouldRender()) {
@@ -635,7 +635,7 @@ export class View extends ViewEventHandler {
           new RenderingContext(
             this._context.viewLayout,
             viewportData,
-            this._viewLines,
+            this._viewLines
           ),
         ]
       },
@@ -646,7 +646,7 @@ export class View extends ViewEventHandler {
       },
       render: (
         viewPartsToRender: ViewPart[],
-        ctx: RestrictedRenderingContext,
+        ctx: RestrictedRenderingContext
       ) => {
         for (const viewPart of viewPartsToRender) {
           viewPart.render(ctx)
@@ -659,7 +659,7 @@ export class View extends ViewEventHandler {
   // --- BEGIN CodeEditor helpers
 
   public delegateVerticalScrollbarPointerDown(
-    browserEvent: PointerEvent,
+    browserEvent: PointerEvent
   ): void {
     this._scrollbar.delegateVerticalScrollbarPointerDown(browserEvent)
   }
@@ -677,14 +677,14 @@ export class View extends ViewEventHandler {
         scrollTop: scrollPosition.scrollTop,
         scrollLeft: scrollPosition.scrollLeft,
       },
-      ScrollType.Immediate,
+      ScrollType.Immediate
     )
     this._context.viewModel.visibleLinesStabilized()
   }
 
   public getOffsetForColumn(
     modelLineNumber: number,
-    modelColumn: number,
+    modelColumn: number
   ): number {
     const modelPosition = this._context.viewModel.model.validatePosition({
       lineNumber: modelLineNumber,
@@ -692,11 +692,11 @@ export class View extends ViewEventHandler {
     })
     const viewPosition =
       this._context.viewModel.coordinatesConverter.convertModelPositionToViewPosition(
-        modelPosition,
+        modelPosition
       )
     this._flushAccumulatedAndRenderNow()
     const visibleRange = this._viewLines.visibleRangeForPosition(
-      new Position(viewPosition.lineNumber, viewPosition.column),
+      new Position(viewPosition.lineNumber, viewPosition.column)
     )
     if (!visibleRange) {
       return -1
@@ -706,18 +706,18 @@ export class View extends ViewEventHandler {
 
   public getTargetAtClientPoint(
     clientX: number,
-    clientY: number,
+    clientY: number
   ): IMouseTarget | null {
     const mouseTarget = this._pointerHandler.getTargetAtClientPoint(
       clientX,
-      clientY,
+      clientY
     )
     if (!mouseTarget) {
       return null
     }
     return ViewUserInputEvents.convertViewToModelMouseTarget(
       mouseTarget,
-      this._context.viewModel.coordinatesConverter,
+      this._context.viewModel.coordinatesConverter
     )
   }
 
@@ -726,7 +726,7 @@ export class View extends ViewEventHandler {
   }
 
   public change(
-    callback: (changeAccessor: IViewZoneChangeAccessor) => any,
+    callback: (changeAccessor: IViewZoneChangeAccessor) => any
   ): void {
     this._viewZones.changeViewZones(callback)
     this._scheduleRender()
@@ -779,7 +779,7 @@ export class View extends ViewEventHandler {
       widgetData.position?.position ?? null,
       widgetData.position?.secondaryPosition ?? null,
       widgetData.position?.preference ?? null,
-      widgetData.position?.positionAffinity ?? null,
+      widgetData.position?.positionAffinity ?? null
     )
     this._scheduleRender()
   }
@@ -798,7 +798,7 @@ export class View extends ViewEventHandler {
   public layoutOverlayWidget(widgetData: IOverlayWidgetData): void {
     const shouldRender = this._overlayWidgets.setWidgetPosition(
       widgetData.widget,
-      widgetData.position,
+      widgetData.position
     )
     if (shouldRender) {
       this._scheduleRender()
@@ -820,7 +820,7 @@ export class View extends ViewEventHandler {
     const newPreference = widgetData.position
     const shouldRender = this._glyphMarginWidgets.setWidgetPosition(
       widgetData.widget,
-      newPreference,
+      newPreference
     )
     if (shouldRender) {
       this._shouldRecomputeGlyphMarginLanes = true
@@ -892,7 +892,7 @@ class EditorRenderingCoordinator {
       }
       this._animationFrameRunners.set(
         window,
-        dom.runAtThisOrScheduleAtNextAnimationFrame(window, runner, 100),
+        dom.runAtThisOrScheduleAtNextAnimationFrame(window, runner, 100)
       )
     }
   }

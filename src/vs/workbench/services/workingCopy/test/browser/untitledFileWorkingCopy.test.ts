@@ -9,417 +9,334 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as assert from "assert"
-import {
-  VSBufferReadableStream,
-  newWriteableBufferStream,
-  VSBuffer,
-  streamToBuffer,
-  bufferToStream,
-  readableToBuffer,
-  VSBufferReadable,
-} from "vs/base/common/buffer"
-import { CancellationToken } from "vs/base/common/cancellation"
-import { Emitter } from "vs/base/common/event"
-import { Disposable, DisposableStore } from "vs/base/common/lifecycle"
-import { Schemas } from "vs/base/common/network"
-import { basename } from "vs/base/common/resources"
-import {
-  consumeReadable,
-  consumeStream,
-  isReadable,
-  isReadableStream,
-} from "vs/base/common/stream"
-import { URI } from "vs/base/common/uri"
-import { ensureNoDisposablesAreLeakedInTestSuite } from "vs/base/test/common/utils"
-import { IInstantiationService } from "vs/platform/instantiation/common/instantiation"
-import { SnapshotContext } from "vs/workbench/services/workingCopy/common/fileWorkingCopy"
-import {
-  IUntitledFileWorkingCopyModel,
-  IUntitledFileWorkingCopyModelContentChangedEvent,
-  IUntitledFileWorkingCopyModelFactory,
-  UntitledFileWorkingCopy,
-} from "vs/workbench/services/workingCopy/common/untitledFileWorkingCopy"
-import {
-  TestServiceAccessor,
-  workbenchInstantiationService,
-} from "vs/workbench/test/browser/workbenchTestServices"
+import * as assert from 'assert';
+import { VSBufferReadableStream, newWriteableBufferStream, VSBuffer, streamToBuffer, bufferToStream, readableToBuffer, VSBufferReadable } from 'vs/base/common/buffer';
+import { CancellationToken } from 'vs/base/common/cancellation';
+import { Emitter } from 'vs/base/common/event';
+import { Disposable, DisposableStore } from 'vs/base/common/lifecycle';
+import { Schemas } from 'vs/base/common/network';
+import { basename } from 'vs/base/common/resources';
+import { consumeReadable, consumeStream, isReadable, isReadableStream } from 'vs/base/common/stream';
+import { URI } from 'vs/base/common/uri';
+import { ensureNoDisposablesAreLeakedInTestSuite } from 'vs/base/test/common/utils';
+import { IInstantiationService } from 'vs/platform/instantiation/common/instantiation';
+import { SnapshotContext } from 'vs/workbench/services/workingCopy/common/fileWorkingCopy';
+import { IUntitledFileWorkingCopyModel, IUntitledFileWorkingCopyModelContentChangedEvent, IUntitledFileWorkingCopyModelFactory, UntitledFileWorkingCopy } from 'vs/workbench/services/workingCopy/common/untitledFileWorkingCopy';
+import { TestServiceAccessor, workbenchInstantiationService } from 'vs/workbench/test/browser/workbenchTestServices';
 
-export class TestUntitledFileWorkingCopyModel
-  extends Disposable
-  implements IUntitledFileWorkingCopyModel
-{
-  private readonly _onDidChangeContent = this._register(
-    new Emitter<IUntitledFileWorkingCopyModelContentChangedEvent>(),
-  )
-  readonly onDidChangeContent = this._onDidChangeContent.event
+export class TestUntitledFileWorkingCopyModel extends Disposable implements IUntitledFileWorkingCopyModel {
 
-  private readonly _onWillDispose = this._register(new Emitter<void>())
-  readonly onWillDispose = this._onWillDispose.event
+	private readonly _onDidChangeContent = this._register(new Emitter<IUntitledFileWorkingCopyModelContentChangedEvent>());
+	readonly onDidChangeContent = this._onDidChangeContent.event;
 
-  constructor(
-    readonly resource: URI,
-    public contents: string,
-  ) {
-    super()
-  }
+	private readonly _onWillDispose = this._register(new Emitter<void>());
+	readonly onWillDispose = this._onWillDispose.event;
 
-  fireContentChangeEvent(
-    event: IUntitledFileWorkingCopyModelContentChangedEvent,
-  ): void {
-    this._onDidChangeContent.fire(event)
-  }
+	constructor(readonly resource: URI, public contents: string) {
+		super();
+	}
 
-  updateContents(newContents: string): void {
-    this.doUpdate(newContents)
-  }
+	fireContentChangeEvent(event: IUntitledFileWorkingCopyModelContentChangedEvent): void {
+		this._onDidChangeContent.fire(event);
+	}
 
-  private throwOnSnapshot = false
-  setThrowOnSnapshot(): void {
-    this.throwOnSnapshot = true
-  }
+	updateContents(newContents: string): void {
+		this.doUpdate(newContents);
+	}
 
-  async snapshot(
-    context: SnapshotContext,
-    token: CancellationToken,
-  ): Promise<VSBufferReadableStream> {
-    if (this.throwOnSnapshot) {
-      throw new Error("Fail")
-    }
+	private throwOnSnapshot = false;
+	setThrowOnSnapshot(): void {
+		this.throwOnSnapshot = true;
+	}
 
-    const stream = newWriteableBufferStream()
-    stream.end(VSBuffer.fromString(this.contents))
+	async snapshot(context: SnapshotContext, token: CancellationToken): Promise<VSBufferReadableStream> {
+		if (this.throwOnSnapshot) {
+			throw new Error('Fail');
+		}
 
-    return stream
-  }
+		const stream = newWriteableBufferStream();
+		stream.end(VSBuffer.fromString(this.contents));
 
-  async update(
-    contents: VSBufferReadableStream,
-    token: CancellationToken,
-  ): Promise<void> {
-    this.doUpdate((await streamToBuffer(contents)).toString())
-  }
+		return stream;
+	}
 
-  private doUpdate(newContents: string): void {
-    this.contents = newContents
+	async update(contents: VSBufferReadableStream, token: CancellationToken): Promise<void> {
+		this.doUpdate((await streamToBuffer(contents)).toString());
+	}
 
-    this.versionId++
+	private doUpdate(newContents: string): void {
+		this.contents = newContents;
 
-    this._onDidChangeContent.fire({ isInitial: newContents.length === 0 })
-  }
+		this.versionId++;
 
-  versionId = 0
+		this._onDidChangeContent.fire({ isInitial: newContents.length === 0 });
+	}
 
-  pushedStackElement = false
+	versionId = 0;
 
-  pushStackElement(): void {
-    this.pushedStackElement = true
-  }
+	pushedStackElement = false;
 
-  override dispose(): void {
-    this._onWillDispose.fire()
+	pushStackElement(): void {
+		this.pushedStackElement = true;
+	}
 
-    super.dispose()
-  }
+	override dispose(): void {
+		this._onWillDispose.fire();
+
+		super.dispose();
+	}
 }
 
-export class TestUntitledFileWorkingCopyModelFactory
-  implements
-    IUntitledFileWorkingCopyModelFactory<TestUntitledFileWorkingCopyModel>
-{
-  async createModel(
-    resource: URI,
-    contents: VSBufferReadableStream,
-    token: CancellationToken,
-  ): Promise<TestUntitledFileWorkingCopyModel> {
-    return new TestUntitledFileWorkingCopyModel(
-      resource,
-      (await streamToBuffer(contents)).toString(),
-    )
-  }
+export class TestUntitledFileWorkingCopyModelFactory implements IUntitledFileWorkingCopyModelFactory<TestUntitledFileWorkingCopyModel> {
+
+	async createModel(resource: URI, contents: VSBufferReadableStream, token: CancellationToken): Promise<TestUntitledFileWorkingCopyModel> {
+		return new TestUntitledFileWorkingCopyModel(resource, (await streamToBuffer(contents)).toString());
+	}
 }
 
-suite("UntitledFileWorkingCopy", () => {
-  const factory = new TestUntitledFileWorkingCopyModelFactory()
-
-  const disposables = new DisposableStore()
-  const resource = URI.from({ scheme: Schemas.untitled, path: "Untitled-1" })
-  let instantiationService: IInstantiationService
-  let accessor: TestServiceAccessor
-  let workingCopy: UntitledFileWorkingCopy<TestUntitledFileWorkingCopyModel>
-
-  function createWorkingCopy(
-    uri: URI = resource,
-    hasAssociatedFilePath = false,
-    initialValue = "",
-  ) {
-    return disposables.add(
-      new UntitledFileWorkingCopy<TestUntitledFileWorkingCopyModel>(
-        "testUntitledWorkingCopyType",
-        uri,
-        basename(uri),
-        hasAssociatedFilePath,
-        false,
-        initialValue.length > 0
-          ? { value: bufferToStream(VSBuffer.fromString(initialValue)) }
-          : undefined,
-        factory,
-        async (workingCopy) => {
-          await workingCopy.revert()
-          return true
-        },
-        accessor.workingCopyService,
-        accessor.workingCopyBackupService,
-        accessor.logService,
-      ),
-    )
-  }
-
-  setup(() => {
-    instantiationService = workbenchInstantiationService(undefined, disposables)
-    accessor = instantiationService.createInstance(TestServiceAccessor)
-
-    workingCopy = disposables.add(createWorkingCopy())
-  })
-
-  teardown(() => {
-    disposables.clear()
-  })
-
-  test("registers with working copy service", async () => {
-    assert.strictEqual(accessor.workingCopyService.workingCopies.length, 1)
-
-    workingCopy.dispose()
-
-    assert.strictEqual(accessor.workingCopyService.workingCopies.length, 0)
-  })
-
-  test("dirty", async () => {
-    assert.strictEqual(workingCopy.isDirty(), false)
-
-    let changeDirtyCounter = 0
-    disposables.add(
-      workingCopy.onDidChangeDirty(() => {
-        changeDirtyCounter++
-      }),
-    )
-
-    let contentChangeCounter = 0
-    disposables.add(
-      workingCopy.onDidChangeContent(() => {
-        contentChangeCounter++
-      }),
-    )
-
-    await workingCopy.resolve()
-    assert.strictEqual(workingCopy.isResolved(), true)
-
-    // Dirty from: Model content change
-    workingCopy.model?.updateContents("hello dirty")
-    assert.strictEqual(contentChangeCounter, 1)
-
-    assert.strictEqual(workingCopy.isDirty(), true)
-    assert.strictEqual(changeDirtyCounter, 1)
-
-    await workingCopy.save()
-
-    assert.strictEqual(workingCopy.isDirty(), false)
-    assert.strictEqual(changeDirtyCounter, 2)
-  })
-
-  test("dirty - cleared when content event signals isEmpty", async () => {
-    assert.strictEqual(workingCopy.isDirty(), false)
-
-    await workingCopy.resolve()
-
-    workingCopy.model?.updateContents("hello dirty")
-    assert.strictEqual(workingCopy.isDirty(), true)
-
-    workingCopy.model?.fireContentChangeEvent({ isInitial: true })
-
-    assert.strictEqual(workingCopy.isDirty(), false)
-  })
-
-  test("dirty - not cleared when content event signals isEmpty when associated resource", async () => {
-    workingCopy.dispose()
-    workingCopy = createWorkingCopy(resource, true)
+suite('UntitledFileWorkingCopy', () => {
 
-    await workingCopy.resolve()
+	const factory = new TestUntitledFileWorkingCopyModelFactory();
 
-    workingCopy.model?.updateContents("hello dirty")
-    assert.strictEqual(workingCopy.isDirty(), true)
+	const disposables = new DisposableStore();
+	const resource = URI.from({ scheme: Schemas.untitled, path: 'Untitled-1' });
+	let instantiationService: IInstantiationService;
+	let accessor: TestServiceAccessor;
+	let workingCopy: UntitledFileWorkingCopy<TestUntitledFileWorkingCopyModel>;
 
-    workingCopy.model?.fireContentChangeEvent({ isInitial: true })
+	function createWorkingCopy(uri: URI = resource, hasAssociatedFilePath = false, initialValue = '') {
+		return disposables.add(new UntitledFileWorkingCopy<TestUntitledFileWorkingCopyModel>(
+			'testUntitledWorkingCopyType',
+			uri,
+			basename(uri),
+			hasAssociatedFilePath,
+			false,
+			initialValue.length > 0 ? { value: bufferToStream(VSBuffer.fromString(initialValue)) } : undefined,
+			factory,
+			async workingCopy => { await workingCopy.revert(); return true; },
+			accessor.workingCopyService,
+			accessor.workingCopyBackupService,
+			accessor.logService
+		));
+	}
 
-    assert.strictEqual(workingCopy.isDirty(), true)
-  })
+	setup(() => {
+		instantiationService = workbenchInstantiationService(undefined, disposables);
+		accessor = instantiationService.createInstance(TestServiceAccessor);
 
-  test("revert", async () => {
-    let revertCounter = 0
-    disposables.add(
-      workingCopy.onDidRevert(() => {
-        revertCounter++
-      }),
-    )
+		workingCopy = disposables.add(createWorkingCopy());
+	});
 
-    let disposeCounter = 0
-    disposables.add(
-      workingCopy.onWillDispose(() => {
-        disposeCounter++
-      }),
-    )
+	teardown(() => {
+		disposables.clear();
+	});
 
-    await workingCopy.resolve()
+	test('registers with working copy service', async () => {
+		assert.strictEqual(accessor.workingCopyService.workingCopies.length, 1);
 
-    workingCopy.model?.updateContents("hello dirty")
-    assert.strictEqual(workingCopy.isDirty(), true)
+		workingCopy.dispose();
 
-    await workingCopy.revert()
+		assert.strictEqual(accessor.workingCopyService.workingCopies.length, 0);
+	});
 
-    assert.strictEqual(revertCounter, 1)
-    assert.strictEqual(disposeCounter, 1)
-    assert.strictEqual(workingCopy.isDirty(), false)
-  })
+	test('dirty', async () => {
+		assert.strictEqual(workingCopy.isDirty(), false);
 
-  test("dispose", async () => {
-    let disposeCounter = 0
-    disposables.add(
-      workingCopy.onWillDispose(() => {
-        disposeCounter++
-      }),
-    )
+		let changeDirtyCounter = 0;
+		disposables.add(workingCopy.onDidChangeDirty(() => {
+			changeDirtyCounter++;
+		}));
 
-    await workingCopy.resolve()
-    workingCopy.dispose()
+		let contentChangeCounter = 0;
+		disposables.add(workingCopy.onDidChangeContent(() => {
+			contentChangeCounter++;
+		}));
 
-    assert.strictEqual(disposeCounter, 1)
-  })
+		await workingCopy.resolve();
+		assert.strictEqual(workingCopy.isResolved(), true);
 
-  test("backup", async () => {
-    assert.strictEqual(
-      (await workingCopy.backup(CancellationToken.None)).content,
-      undefined,
-    )
-
-    await workingCopy.resolve()
-
-    workingCopy.model?.updateContents("Hello Backup")
-    const backup = await workingCopy.backup(CancellationToken.None)
+		// Dirty from: Model content change
+		workingCopy.model?.updateContents('hello dirty');
+		assert.strictEqual(contentChangeCounter, 1);
 
-    let backupContents: string | undefined = undefined
-    if (isReadableStream(backup.content)) {
-      backupContents = (
-        await consumeStream(backup.content, (chunks) => VSBuffer.concat(chunks))
-      ).toString()
-    } else if (backup.content) {
-      backupContents = consumeReadable(backup.content, (chunks) =>
-        VSBuffer.concat(chunks),
-      ).toString()
-    }
+		assert.strictEqual(workingCopy.isDirty(), true);
+		assert.strictEqual(changeDirtyCounter, 1);
 
-    assert.strictEqual(backupContents, "Hello Backup")
-  })
+		await workingCopy.save();
 
-  test("resolve - without contents", async () => {
-    assert.strictEqual(workingCopy.isResolved(), false)
-    assert.strictEqual(workingCopy.hasAssociatedFilePath, false)
-    assert.strictEqual(workingCopy.model, undefined)
+		assert.strictEqual(workingCopy.isDirty(), false);
+		assert.strictEqual(changeDirtyCounter, 2);
+	});
 
-    await workingCopy.resolve()
+	test('dirty - cleared when content event signals isEmpty', async () => {
+		assert.strictEqual(workingCopy.isDirty(), false);
 
-    assert.strictEqual(workingCopy.isResolved(), true)
-    assert.ok(workingCopy.model)
-  })
+		await workingCopy.resolve();
 
-  test("resolve - with initial contents", async () => {
-    workingCopy.dispose()
+		workingCopy.model?.updateContents('hello dirty');
+		assert.strictEqual(workingCopy.isDirty(), true);
 
-    workingCopy = createWorkingCopy(resource, false, "Hello Initial")
+		workingCopy.model?.fireContentChangeEvent({ isInitial: true });
 
-    let contentChangeCounter = 0
-    disposables.add(
-      workingCopy.onDidChangeContent(() => {
-        contentChangeCounter++
-      }),
-    )
+		assert.strictEqual(workingCopy.isDirty(), false);
+	});
 
-    assert.strictEqual(workingCopy.isDirty(), true)
+	test('dirty - not cleared when content event signals isEmpty when associated resource', async () => {
+		workingCopy.dispose();
+		workingCopy = createWorkingCopy(resource, true);
 
-    await workingCopy.resolve()
+		await workingCopy.resolve();
 
-    assert.strictEqual(workingCopy.isDirty(), true)
-    assert.strictEqual(workingCopy.model?.contents, "Hello Initial")
-    assert.strictEqual(contentChangeCounter, 1)
+		workingCopy.model?.updateContents('hello dirty');
+		assert.strictEqual(workingCopy.isDirty(), true);
 
-    workingCopy.model.updateContents("Changed contents")
+		workingCopy.model?.fireContentChangeEvent({ isInitial: true });
 
-    await workingCopy.resolve() // second resolve should be ignored
-    assert.strictEqual(workingCopy.model?.contents, "Changed contents")
-  })
+		assert.strictEqual(workingCopy.isDirty(), true);
+	});
 
-  test("backup - with initial contents uses those even if unresolved", async () => {
-    workingCopy.dispose()
+	test('revert', async () => {
+		let revertCounter = 0;
+		disposables.add(workingCopy.onDidRevert(() => {
+			revertCounter++;
+		}));
 
-    workingCopy = createWorkingCopy(resource, false, "Hello Initial")
+		let disposeCounter = 0;
+		disposables.add(workingCopy.onWillDispose(() => {
+			disposeCounter++;
+		}));
 
-    assert.strictEqual(workingCopy.isDirty(), true)
+		await workingCopy.resolve();
 
-    const backup = (await workingCopy.backup(CancellationToken.None)).content
-    if (isReadableStream(backup)) {
-      const value = await streamToBuffer(backup as VSBufferReadableStream)
-      assert.strictEqual(value.toString(), "Hello Initial")
-    } else if (isReadable(backup)) {
-      const value = readableToBuffer(backup as VSBufferReadable)
-      assert.strictEqual(value.toString(), "Hello Initial")
-    } else {
-      assert.fail("Missing untitled backup")
-    }
-  })
+		workingCopy.model?.updateContents('hello dirty');
+		assert.strictEqual(workingCopy.isDirty(), true);
 
-  test("resolve - with associated resource", async () => {
-    workingCopy.dispose()
-    workingCopy = createWorkingCopy(resource, true)
+		await workingCopy.revert();
 
-    await workingCopy.resolve()
+		assert.strictEqual(revertCounter, 1);
+		assert.strictEqual(disposeCounter, 1);
+		assert.strictEqual(workingCopy.isDirty(), false);
+	});
 
-    assert.strictEqual(workingCopy.isDirty(), true)
-    assert.strictEqual(workingCopy.hasAssociatedFilePath, true)
-  })
+	test('dispose', async () => {
+		let disposeCounter = 0;
+		disposables.add(workingCopy.onWillDispose(() => {
+			disposeCounter++;
+		}));
 
-  test("resolve - with backup", async () => {
-    await workingCopy.resolve()
-    workingCopy.model?.updateContents("Hello Backup")
+		await workingCopy.resolve();
+		workingCopy.dispose();
 
-    const backup = await workingCopy.backup(CancellationToken.None)
-    await accessor.workingCopyBackupService.backup(
-      workingCopy,
-      backup.content,
-      undefined,
-      backup.meta,
-    )
+		assert.strictEqual(disposeCounter, 1);
+	});
 
-    assert.strictEqual(
-      accessor.workingCopyBackupService.hasBackupSync(workingCopy),
-      true,
-    )
+	test('backup', async () => {
+		assert.strictEqual((await workingCopy.backup(CancellationToken.None)).content, undefined);
 
-    workingCopy.dispose()
+		await workingCopy.resolve();
 
-    workingCopy = createWorkingCopy()
+		workingCopy.model?.updateContents('Hello Backup');
+		const backup = await workingCopy.backup(CancellationToken.None);
 
-    let contentChangeCounter = 0
-    disposables.add(
-      workingCopy.onDidChangeContent(() => {
-        contentChangeCounter++
-      }),
-    )
+		let backupContents: string | undefined = undefined;
+		if (isReadableStream(backup.content)) {
+			backupContents = (await consumeStream(backup.content, chunks => VSBuffer.concat(chunks))).toString();
+		} else if (backup.content) {
+			backupContents = consumeReadable(backup.content, chunks => VSBuffer.concat(chunks)).toString();
+		}
 
-    await workingCopy.resolve()
+		assert.strictEqual(backupContents, 'Hello Backup');
+	});
 
-    assert.strictEqual(workingCopy.isDirty(), true)
-    assert.strictEqual(workingCopy.model?.contents, "Hello Backup")
-    assert.strictEqual(contentChangeCounter, 1)
-  })
+	test('resolve - without contents', async () => {
+		assert.strictEqual(workingCopy.isResolved(), false);
+		assert.strictEqual(workingCopy.hasAssociatedFilePath, false);
+		assert.strictEqual(workingCopy.model, undefined);
 
-  ensureNoDisposablesAreLeakedInTestSuite()
-})
+		await workingCopy.resolve();
+
+		assert.strictEqual(workingCopy.isResolved(), true);
+		assert.ok(workingCopy.model);
+	});
+
+	test('resolve - with initial contents', async () => {
+		workingCopy.dispose();
+
+		workingCopy = createWorkingCopy(resource, false, 'Hello Initial');
+
+		let contentChangeCounter = 0;
+		disposables.add(workingCopy.onDidChangeContent(() => {
+			contentChangeCounter++;
+		}));
+
+		assert.strictEqual(workingCopy.isDirty(), true);
+
+		await workingCopy.resolve();
+
+		assert.strictEqual(workingCopy.isDirty(), true);
+		assert.strictEqual(workingCopy.model?.contents, 'Hello Initial');
+		assert.strictEqual(contentChangeCounter, 1);
+
+		workingCopy.model.updateContents('Changed contents');
+
+		await workingCopy.resolve(); // second resolve should be ignored
+		assert.strictEqual(workingCopy.model?.contents, 'Changed contents');
+	});
+
+	test('backup - with initial contents uses those even if unresolved', async () => {
+		workingCopy.dispose();
+
+		workingCopy = createWorkingCopy(resource, false, 'Hello Initial');
+
+		assert.strictEqual(workingCopy.isDirty(), true);
+
+		const backup = (await workingCopy.backup(CancellationToken.None)).content;
+		if (isReadableStream(backup)) {
+			const value = await streamToBuffer(backup as VSBufferReadableStream);
+			assert.strictEqual(value.toString(), 'Hello Initial');
+		} else if (isReadable(backup)) {
+			const value = readableToBuffer(backup as VSBufferReadable);
+			assert.strictEqual(value.toString(), 'Hello Initial');
+		} else {
+			assert.fail('Missing untitled backup');
+		}
+	});
+
+
+	test('resolve - with associated resource', async () => {
+		workingCopy.dispose();
+		workingCopy = createWorkingCopy(resource, true);
+
+		await workingCopy.resolve();
+
+		assert.strictEqual(workingCopy.isDirty(), true);
+		assert.strictEqual(workingCopy.hasAssociatedFilePath, true);
+	});
+
+	test('resolve - with backup', async () => {
+		await workingCopy.resolve();
+		workingCopy.model?.updateContents('Hello Backup');
+
+		const backup = await workingCopy.backup(CancellationToken.None);
+		await accessor.workingCopyBackupService.backup(workingCopy, backup.content, undefined, backup.meta);
+
+		assert.strictEqual(accessor.workingCopyBackupService.hasBackupSync(workingCopy), true);
+
+		workingCopy.dispose();
+
+		workingCopy = createWorkingCopy();
+
+		let contentChangeCounter = 0;
+		disposables.add(workingCopy.onDidChangeContent(() => {
+			contentChangeCounter++;
+		}));
+
+		await workingCopy.resolve();
+
+		assert.strictEqual(workingCopy.isDirty(), true);
+		assert.strictEqual(workingCopy.model?.contents, 'Hello Backup');
+		assert.strictEqual(contentChangeCounter, 1);
+	});
+
+	ensureNoDisposablesAreLeakedInTestSuite();
+});

@@ -9,156 +9,115 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Emitter, Event } from "vs/base/common/event"
-import { Disposable } from "vs/base/common/lifecycle"
-import { URI } from "vs/base/common/uri"
-import { IChannel, IServerChannel } from "vs/base/parts/ipc/common/ipc"
-import { IConfigurationService } from "vs/platform/configuration/common/configuration"
-import { IProductService } from "vs/platform/product/common/productService"
-import { IStorageService } from "vs/platform/storage/common/storage"
-import {
-  IUserDataSyncStore,
-  IUserDataSyncStoreManagementService,
-  UserDataSyncStoreType,
-} from "vs/platform/userDataSync/common/userDataSync"
-import {
-  IUserDataSyncAccount,
-  IUserDataSyncAccountService,
-} from "vs/platform/userDataSync/common/userDataSyncAccount"
-import { AbstractUserDataSyncStoreManagementService } from "vs/platform/userDataSync/common/userDataSyncStoreService"
+import { Emitter, Event } from 'vs/base/common/event';
+import { Disposable } from 'vs/base/common/lifecycle';
+import { URI } from 'vs/base/common/uri';
+import { IChannel, IServerChannel } from 'vs/base/parts/ipc/common/ipc';
+import { IConfigurationService } from 'vs/platform/configuration/common/configuration';
+import { IProductService } from 'vs/platform/product/common/productService';
+import { IStorageService } from 'vs/platform/storage/common/storage';
+import { IUserDataSyncStore, IUserDataSyncStoreManagementService, UserDataSyncStoreType } from 'vs/platform/userDataSync/common/userDataSync';
+import { IUserDataSyncAccount, IUserDataSyncAccountService } from 'vs/platform/userDataSync/common/userDataSyncAccount';
+import { AbstractUserDataSyncStoreManagementService } from 'vs/platform/userDataSync/common/userDataSyncStoreService';
 
 export class UserDataSyncAccountServiceChannel implements IServerChannel {
-  constructor(private readonly service: IUserDataSyncAccountService) {}
+	constructor(private readonly service: IUserDataSyncAccountService) { }
 
-  listen(_: unknown, event: string): Event<any> {
-    switch (event) {
-      case "onDidChangeAccount":
-        return this.service.onDidChangeAccount
-      case "onTokenFailed":
-        return this.service.onTokenFailed
-    }
-    throw new Error(
-      `[UserDataSyncAccountServiceChannel] Event not found: ${event}`,
-    )
-  }
+	listen(_: unknown, event: string): Event<any> {
+		switch (event) {
+			case 'onDidChangeAccount': return this.service.onDidChangeAccount;
+			case 'onTokenFailed': return this.service.onTokenFailed;
+		}
+		throw new Error(`[UserDataSyncAccountServiceChannel] Event not found: ${event}`);
+	}
 
-  call(context: any, command: string, args?: any): Promise<any> {
-    switch (command) {
-      case "_getInitialData":
-        return Promise.resolve(this.service.account)
-      case "updateAccount":
-        return this.service.updateAccount(args)
-    }
-    throw new Error("Invalid call")
-  }
+	call(context: any, command: string, args?: any): Promise<any> {
+		switch (command) {
+			case '_getInitialData': return Promise.resolve(this.service.account);
+			case 'updateAccount': return this.service.updateAccount(args);
+		}
+		throw new Error('Invalid call');
+	}
 }
 
-export class UserDataSyncAccountServiceChannelClient
-  extends Disposable
-  implements IUserDataSyncAccountService
-{
-  declare readonly _serviceBrand: undefined
+export class UserDataSyncAccountServiceChannelClient extends Disposable implements IUserDataSyncAccountService {
 
-  private _account: IUserDataSyncAccount | undefined
-  get account(): IUserDataSyncAccount | undefined {
-    return this._account
-  }
+	declare readonly _serviceBrand: undefined;
 
-  get onTokenFailed(): Event<boolean> {
-    return this.channel.listen<boolean>("onTokenFailed")
-  }
+	private _account: IUserDataSyncAccount | undefined;
+	get account(): IUserDataSyncAccount | undefined { return this._account; }
 
-  private _onDidChangeAccount = this._register(
-    new Emitter<IUserDataSyncAccount | undefined>(),
-  )
-  readonly onDidChangeAccount = this._onDidChangeAccount.event
+	get onTokenFailed(): Event<boolean> { return this.channel.listen<boolean>('onTokenFailed'); }
 
-  constructor(private readonly channel: IChannel) {
-    super()
-    this.channel
-      .call<IUserDataSyncAccount | undefined>("_getInitialData")
-      .then((account) => {
-        this._account = account
-        this._register(
-          this.channel.listen<IUserDataSyncAccount | undefined>(
-            "onDidChangeAccount",
-          )((account) => {
-            this._account = account
-            this._onDidChangeAccount.fire(account)
-          }),
-        )
-      })
-  }
+	private _onDidChangeAccount = this._register(new Emitter<IUserDataSyncAccount | undefined>());
+	readonly onDidChangeAccount = this._onDidChangeAccount.event;
 
-  updateAccount(account: IUserDataSyncAccount | undefined): Promise<undefined> {
-    return this.channel.call("updateAccount", account)
-  }
+	constructor(private readonly channel: IChannel) {
+		super();
+		this.channel.call<IUserDataSyncAccount | undefined>('_getInitialData').then(account => {
+			this._account = account;
+			this._register(this.channel.listen<IUserDataSyncAccount | undefined>('onDidChangeAccount')(account => {
+				this._account = account;
+				this._onDidChangeAccount.fire(account);
+			}));
+		});
+	}
+
+	updateAccount(account: IUserDataSyncAccount | undefined): Promise<undefined> {
+		return this.channel.call('updateAccount', account);
+	}
+
 }
 
-export class UserDataSyncStoreManagementServiceChannel
-  implements IServerChannel
-{
-  constructor(private readonly service: IUserDataSyncStoreManagementService) {}
+export class UserDataSyncStoreManagementServiceChannel implements IServerChannel {
+	constructor(private readonly service: IUserDataSyncStoreManagementService) { }
 
-  listen(_: unknown, event: string): Event<any> {
-    switch (event) {
-      case "onDidChangeUserDataSyncStore":
-        return this.service.onDidChangeUserDataSyncStore
-    }
-    throw new Error(
-      `[UserDataSyncStoreManagementServiceChannel] Event not found: ${event}`,
-    )
-  }
+	listen(_: unknown, event: string): Event<any> {
+		switch (event) {
+			case 'onDidChangeUserDataSyncStore': return this.service.onDidChangeUserDataSyncStore;
+		}
+		throw new Error(`[UserDataSyncStoreManagementServiceChannel] Event not found: ${event}`);
+	}
 
-  call(context: any, command: string, args?: any): Promise<any> {
-    switch (command) {
-      case "switch":
-        return this.service.switch(args[0])
-      case "getPreviousUserDataSyncStore":
-        return this.service.getPreviousUserDataSyncStore()
-    }
-    throw new Error("Invalid call")
-  }
+	call(context: any, command: string, args?: any): Promise<any> {
+		switch (command) {
+			case 'switch': return this.service.switch(args[0]);
+			case 'getPreviousUserDataSyncStore': return this.service.getPreviousUserDataSyncStore();
+		}
+		throw new Error('Invalid call');
+	}
 }
 
-export class UserDataSyncStoreManagementServiceChannelClient
-  extends AbstractUserDataSyncStoreManagementService
-  implements IUserDataSyncStoreManagementService
-{
-  constructor(
-    private readonly channel: IChannel,
-    @IProductService productService: IProductService,
-    @IConfigurationService configurationService: IConfigurationService,
-    @IStorageService storageService: IStorageService,
-  ) {
-    super(productService, configurationService, storageService)
-    this._register(
-      this.channel.listen<void>("onDidChangeUserDataSyncStore")(() =>
-        this.updateUserDataSyncStore(),
-      ),
-    )
-  }
+export class UserDataSyncStoreManagementServiceChannelClient extends AbstractUserDataSyncStoreManagementService implements IUserDataSyncStoreManagementService {
 
-  async switch(type: UserDataSyncStoreType): Promise<void> {
-    return this.channel.call("switch", [type])
-  }
+	constructor(
+		private readonly channel: IChannel,
+		@IProductService productService: IProductService,
+		@IConfigurationService configurationService: IConfigurationService,
+		@IStorageService storageService: IStorageService,
+	) {
+		super(productService, configurationService, storageService);
+		this._register(this.channel.listen<void>('onDidChangeUserDataSyncStore')(() => this.updateUserDataSyncStore()));
+	}
 
-  async getPreviousUserDataSyncStore(): Promise<IUserDataSyncStore> {
-    const userDataSyncStore = await this.channel.call<IUserDataSyncStore>(
-      "getPreviousUserDataSyncStore",
-    )
-    return this.revive(userDataSyncStore)
-  }
+	async switch(type: UserDataSyncStoreType): Promise<void> {
+		return this.channel.call('switch', [type]);
+	}
 
-  private revive(userDataSyncStore: IUserDataSyncStore): IUserDataSyncStore {
-    return {
-      url: URI.revive(userDataSyncStore.url),
-      type: userDataSyncStore.type,
-      defaultUrl: URI.revive(userDataSyncStore.defaultUrl),
-      insidersUrl: URI.revive(userDataSyncStore.insidersUrl),
-      stableUrl: URI.revive(userDataSyncStore.stableUrl),
-      canSwitch: userDataSyncStore.canSwitch,
-      authenticationProviders: userDataSyncStore.authenticationProviders,
-    }
-  }
+	async getPreviousUserDataSyncStore(): Promise<IUserDataSyncStore> {
+		const userDataSyncStore = await this.channel.call<IUserDataSyncStore>('getPreviousUserDataSyncStore');
+		return this.revive(userDataSyncStore);
+	}
+
+	private revive(userDataSyncStore: IUserDataSyncStore): IUserDataSyncStore {
+		return {
+			url: URI.revive(userDataSyncStore.url),
+			type: userDataSyncStore.type,
+			defaultUrl: URI.revive(userDataSyncStore.defaultUrl),
+			insidersUrl: URI.revive(userDataSyncStore.insidersUrl),
+			stableUrl: URI.revive(userDataSyncStore.stableUrl),
+			canSwitch: userDataSyncStore.canSwitch,
+			authenticationProviders: userDataSyncStore.authenticationProviders,
+		};
+	}
 }

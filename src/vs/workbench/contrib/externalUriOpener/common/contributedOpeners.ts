@@ -9,135 +9,111 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Disposable } from "vs/base/common/lifecycle"
-import {
-  IStorageService,
-  StorageScope,
-  StorageTarget,
-} from "vs/platform/storage/common/storage"
-import { Memento } from "vs/workbench/common/memento"
-import { updateContributedOpeners } from "vs/workbench/contrib/externalUriOpener/common/configuration"
-import { IExtensionService } from "vs/workbench/services/extensions/common/extensions"
+import { Disposable } from 'vs/base/common/lifecycle';
+import { IStorageService, StorageScope, StorageTarget } from 'vs/platform/storage/common/storage';
+import { Memento } from 'vs/workbench/common/memento';
+import { updateContributedOpeners } from 'vs/workbench/contrib/externalUriOpener/common/configuration';
+import { IExtensionService } from 'vs/workbench/services/extensions/common/extensions';
 
 interface RegisteredExternalOpener {
-  readonly extensionId: string
+	readonly extensionId: string;
 
-  isCurrentlyRegistered: boolean
+	isCurrentlyRegistered: boolean;
 }
 
 interface OpenersMemento {
-  [id: string]: RegisteredExternalOpener
+	[id: string]: RegisteredExternalOpener;
 }
 
 export class ContributedExternalUriOpenersStore extends Disposable {
-  private static readonly STORAGE_ID = "externalUriOpeners"
 
-  private readonly _openers = new Map<string, RegisteredExternalOpener>()
-  private readonly _memento: Memento
-  private _mementoObject: OpenersMemento
+	private static readonly STORAGE_ID = 'externalUriOpeners';
 
-  constructor(
-    @IStorageService storageService: IStorageService,
-    @IExtensionService private readonly _extensionService: IExtensionService,
-  ) {
-    super()
+	private readonly _openers = new Map<string, RegisteredExternalOpener>();
+	private readonly _memento: Memento;
+	private _mementoObject: OpenersMemento;
 
-    this._memento = new Memento(
-      ContributedExternalUriOpenersStore.STORAGE_ID,
-      storageService,
-    )
-    this._mementoObject = this._memento.getMemento(
-      StorageScope.PROFILE,
-      StorageTarget.MACHINE,
-    )
-    for (const [id, value] of Object.entries(this._mementoObject || {})) {
-      this.add(id, value.extensionId, { isCurrentlyRegistered: false })
-    }
+	constructor(
+		@IStorageService storageService: IStorageService,
+		@IExtensionService private readonly _extensionService: IExtensionService
+	) {
+		super();
 
-    this.invalidateOpenersOnExtensionsChanged()
+		this._memento = new Memento(ContributedExternalUriOpenersStore.STORAGE_ID, storageService);
+		this._mementoObject = this._memento.getMemento(StorageScope.PROFILE, StorageTarget.MACHINE);
+		for (const [id, value] of Object.entries(this._mementoObject || {})) {
+			this.add(id, value.extensionId, { isCurrentlyRegistered: false });
+		}
 
-    this._register(
-      this._extensionService.onDidChangeExtensions(() =>
-        this.invalidateOpenersOnExtensionsChanged(),
-      ),
-    )
-    this._register(
-      this._extensionService.onDidChangeExtensionsStatus(() =>
-        this.invalidateOpenersOnExtensionsChanged(),
-      ),
-    )
-  }
+		this.invalidateOpenersOnExtensionsChanged();
 
-  public didRegisterOpener(id: string, extensionId: string): void {
-    this.add(id, extensionId, {
-      isCurrentlyRegistered: true,
-    })
-  }
+		this._register(this._extensionService.onDidChangeExtensions(() => this.invalidateOpenersOnExtensionsChanged()));
+		this._register(this._extensionService.onDidChangeExtensionsStatus(() => this.invalidateOpenersOnExtensionsChanged()));
+	}
 
-  private add(
-    id: string,
-    extensionId: string,
-    options: { isCurrentlyRegistered: boolean },
-  ): void {
-    const existing = this._openers.get(id)
-    if (existing) {
-      existing.isCurrentlyRegistered =
-        existing.isCurrentlyRegistered || options.isCurrentlyRegistered
-      return
-    }
+	public didRegisterOpener(id: string, extensionId: string): void {
+		this.add(id, extensionId, {
+			isCurrentlyRegistered: true
+		});
+	}
 
-    const entry = {
-      extensionId,
-      isCurrentlyRegistered: options.isCurrentlyRegistered,
-    }
-    this._openers.set(id, entry)
+	private add(id: string, extensionId: string, options: { isCurrentlyRegistered: boolean }): void {
+		const existing = this._openers.get(id);
+		if (existing) {
+			existing.isCurrentlyRegistered = existing.isCurrentlyRegistered || options.isCurrentlyRegistered;
+			return;
+		}
 
-    this._mementoObject[id] = entry
-    this._memento.saveMemento()
+		const entry = {
+			extensionId,
+			isCurrentlyRegistered: options.isCurrentlyRegistered
+		};
+		this._openers.set(id, entry);
 
-    this.updateSchema()
-  }
+		this._mementoObject[id] = entry;
+		this._memento.saveMemento();
 
-  public delete(id: string): void {
-    this._openers.delete(id)
+		this.updateSchema();
+	}
 
-    delete this._mementoObject[id]
-    this._memento.saveMemento()
+	public delete(id: string): void {
+		this._openers.delete(id);
 
-    this.updateSchema()
-  }
+		delete this._mementoObject[id];
+		this._memento.saveMemento();
 
-  private async invalidateOpenersOnExtensionsChanged() {
-    await this._extensionService.whenInstalledExtensionsRegistered()
-    const registeredExtensions = this._extensionService.extensions
+		this.updateSchema();
+	}
 
-    for (const [id, entry] of this._openers) {
-      const extension = registeredExtensions.find(
-        (r) => r.identifier.value === entry.extensionId,
-      )
-      if (extension) {
-        if (!this._extensionService.canRemoveExtension(extension)) {
-          // The extension is running. We should have registered openers at this point
-          if (!entry.isCurrentlyRegistered) {
-            this.delete(id)
-          }
-        }
-      } else {
-        // The opener came from an extension that is no longer enabled/installed
-        this.delete(id)
-      }
-    }
-  }
+	private async invalidateOpenersOnExtensionsChanged() {
+		await this._extensionService.whenInstalledExtensionsRegistered();
+		const registeredExtensions = this._extensionService.extensions;
 
-  private updateSchema() {
-    const ids: string[] = []
-    const descriptions: string[] = []
+		for (const [id, entry] of this._openers) {
+			const extension = registeredExtensions.find(r => r.identifier.value === entry.extensionId);
+			if (extension) {
+				if (!this._extensionService.canRemoveExtension(extension)) {
+					// The extension is running. We should have registered openers at this point
+					if (!entry.isCurrentlyRegistered) {
+						this.delete(id);
+					}
+				}
+			} else {
+				// The opener came from an extension that is no longer enabled/installed
+				this.delete(id);
+			}
+		}
+	}
 
-    for (const [id, entry] of this._openers) {
-      ids.push(id)
-      descriptions.push(entry.extensionId)
-    }
+	private updateSchema() {
+		const ids: string[] = [];
+		const descriptions: string[] = [];
 
-    updateContributedOpeners(ids, descriptions)
-  }
+		for (const [id, entry] of this._openers) {
+			ids.push(id);
+			descriptions.push(entry.extensionId);
+		}
+
+		updateContributedOpeners(ids, descriptions);
+	}
 }

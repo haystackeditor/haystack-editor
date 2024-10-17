@@ -9,14 +9,12 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { createDecorator } from "vs/platform/instantiation/common/instantiation"
+import { createDecorator } from 'vs/platform/instantiation/common/instantiation';
 
-export const INotebookLoggingService = createDecorator<INotebookLoggingService>(
-  "INotebookLoggingService",
-)
+export const INotebookLoggingService = createDecorator<INotebookLoggingService>('INotebookLoggingService');
 
 export interface INotebookLoggingService {
-  readonly _serviceBrand: undefined
-  info(category: string, output: string): void
-  debug(category: string, output: string): void
+	readonly _serviceBrand: undefined;
+	info(category: string, output: string): void;
+	debug(category: string, output: string): void;
 }

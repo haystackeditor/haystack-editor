@@ -81,11 +81,11 @@ suite("Files - TextFileEditorTracker", () => {
   })
 
   async function createTracker(
-    autoSaveEnabled = false,
+    autoSaveEnabled = false
   ): Promise<{ accessor: TestServiceAccessor; cleanup: () => Promise<void> }> {
     const instantiationService = workbenchInstantiationService(
       undefined,
-      disposables,
+      disposables
     )
 
     const configurationService = new TestConfigurationService()
@@ -118,16 +118,16 @@ suite("Files - TextFileEditorTracker", () => {
           disposables.add(new UriIdentityService(fileService)),
           fileService,
           new TestMarkerService(),
-          new TestTextResourceConfigurationService(configurationService),
-        ),
-      ),
+          new TestTextResourceConfigurationService(configurationService)
+        )
+      )
     )
 
     const part = await createEditorPart(instantiationService, disposables)
     instantiationService.stub(IEditorGroupsService, part)
 
     const editorService: EditorService = disposables.add(
-      instantiationService.createInstance(EditorService, undefined),
+      instantiationService.createInstance(EditorService, undefined)
     )
     disposables.add(editorService)
     instantiationService.stub(IEditorService, editorService)
@@ -136,7 +136,7 @@ suite("Files - TextFileEditorTracker", () => {
     disposables.add(<TextFileEditorModelManager>accessor.textFileService.files)
 
     disposables.add(
-      instantiationService.createInstance(TestTextFileEditorTracker),
+      instantiationService.createInstance(TestTextFileEditorTracker)
     )
 
     const cleanup = async () => {
@@ -153,7 +153,7 @@ suite("Files - TextFileEditorTracker", () => {
     const resource = toResource.call(this, "/path/index.txt")
 
     const model = (await accessor.textFileService.files.resolve(
-      resource,
+      resource
     )) as IResolvedTextFileEditorModel
     disposables.add(model)
 
@@ -164,7 +164,7 @@ suite("Files - TextFileEditorTracker", () => {
 
     // change event (watcher)
     accessor.fileService.fireFileChanges(
-      new FileChangesEvent([{ resource, type: FileChangeType.UPDATED }], false),
+      new FileChangesEvent([{ resource, type: FileChangeType.UPDATED }], false)
     )
 
     await timeout(0) // due to event updating model async
@@ -180,7 +180,7 @@ suite("Files - TextFileEditorTracker", () => {
     await testDirtyTextFileModelOpensEditorDependingOnAutoSaveSetting(
       resource,
       false,
-      false,
+      false
     )
   })
 
@@ -190,7 +190,7 @@ suite("Files - TextFileEditorTracker", () => {
     await testDirtyTextFileModelOpensEditorDependingOnAutoSaveSetting(
       resource,
       true,
-      false,
+      false
     )
   })
 
@@ -200,7 +200,7 @@ suite("Files - TextFileEditorTracker", () => {
     await testDirtyTextFileModelOpensEditorDependingOnAutoSaveSetting(
       resource,
       false,
-      true,
+      true
     )
   })
 
@@ -210,14 +210,14 @@ suite("Files - TextFileEditorTracker", () => {
     await testDirtyTextFileModelOpensEditorDependingOnAutoSaveSetting(
       resource,
       true,
-      true,
+      true
     )
   })
 
   async function testDirtyTextFileModelOpensEditorDependingOnAutoSaveSetting(
     resource: URI,
     autoSave: boolean,
-    error: boolean,
+    error: boolean
   ): Promise<void> {
     const { accessor, cleanup } = await createTracker(autoSave)
 
@@ -226,20 +226,20 @@ suite("Files - TextFileEditorTracker", () => {
         resource,
         typeId: FILE_EDITOR_INPUT_ID,
         editorId: DEFAULT_EDITOR_ASSOCIATION.id,
-      }),
+      })
     )
 
     if (error) {
       accessor.textFileService.setWriteErrorOnce(
         new FileOperationError(
           "fail to write",
-          FileOperationResult.FILE_OTHER_ERROR,
-        ),
+          FileOperationResult.FILE_OTHER_ERROR
+        )
       )
     }
 
     const model = (await accessor.textFileService.files.resolve(
-      resource,
+      resource
     )) as IResolvedTextFileEditorModel
     disposables.add(model)
 
@@ -254,7 +254,7 @@ suite("Files - TextFileEditorTracker", () => {
             resource,
             typeId: FILE_EDITOR_INPUT_ID,
             editorId: DEFAULT_EDITOR_ASSOCIATION.id,
-          }),
+          })
         )
       } else {
         assert.ok(
@@ -262,7 +262,7 @@ suite("Files - TextFileEditorTracker", () => {
             resource,
             typeId: FILE_EDITOR_INPUT_ID,
             editorId: DEFAULT_EDITOR_ASSOCIATION.id,
-          }),
+          })
         )
       }
     } else {
@@ -272,7 +272,7 @@ suite("Files - TextFileEditorTracker", () => {
           resource,
           typeId: FILE_EDITOR_INPUT_ID,
           editorId: DEFAULT_EDITOR_ASSOCIATION.id,
-        }),
+        })
       )
     }
 
@@ -320,7 +320,7 @@ suite("Files - TextFileEditorTracker", () => {
       await accessor.textEditorService.resolveTextEditor({
         resource,
         options: { override: DEFAULT_EDITOR_ASSOCIATION.id },
-      }),
+      })
     )
 
     accessor.hostService.setFocus(false)
@@ -333,7 +333,7 @@ suite("Files - TextFileEditorTracker", () => {
 
   function awaitModelResolveEvent(
     textFileService: ITextFileService,
-    resource: URI,
+    resource: URI
   ): Promise<void> {
     return new Promise((resolve) => {
       const listener = textFileService.files.onDidResolve((e) => {

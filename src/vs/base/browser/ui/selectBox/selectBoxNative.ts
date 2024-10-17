@@ -9,226 +9,188 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as dom from "vs/base/browser/dom"
-import { EventType, Gesture } from "vs/base/browser/touch"
-import {
-  ISelectBoxDelegate,
-  ISelectBoxOptions,
-  ISelectBoxStyles,
-  ISelectData,
-  ISelectOptionItem,
-} from "vs/base/browser/ui/selectBox/selectBox"
-import * as arrays from "vs/base/common/arrays"
-import { Emitter, Event } from "vs/base/common/event"
-import { KeyCode } from "vs/base/common/keyCodes"
-import { Disposable } from "vs/base/common/lifecycle"
-import { isMacintosh } from "vs/base/common/platform"
+import * as dom from 'vs/base/browser/dom';
+import { EventType, Gesture } from 'vs/base/browser/touch';
+import { ISelectBoxDelegate, ISelectBoxOptions, ISelectBoxStyles, ISelectData, ISelectOptionItem } from 'vs/base/browser/ui/selectBox/selectBox';
+import * as arrays from 'vs/base/common/arrays';
+import { Emitter, Event } from 'vs/base/common/event';
+import { KeyCode } from 'vs/base/common/keyCodes';
+import { Disposable } from 'vs/base/common/lifecycle';
+import { isMacintosh } from 'vs/base/common/platform';
 
 export class SelectBoxNative extends Disposable implements ISelectBoxDelegate {
-  private selectElement: HTMLSelectElement
-  private selectBoxOptions: ISelectBoxOptions
-  private options: ISelectOptionItem[]
-  private selected = 0
-  private readonly _onDidSelect: Emitter<ISelectData>
-  private styles: ISelectBoxStyles
 
-  constructor(
-    options: ISelectOptionItem[],
-    selected: number,
-    styles: ISelectBoxStyles,
-    selectBoxOptions?: ISelectBoxOptions,
-  ) {
-    super()
-    this.selectBoxOptions = selectBoxOptions || Object.create(null)
+	private selectElement: HTMLSelectElement;
+	private selectBoxOptions: ISelectBoxOptions;
+	private options: ISelectOptionItem[];
+	private selected = 0;
+	private readonly _onDidSelect: Emitter<ISelectData>;
+	private styles: ISelectBoxStyles;
 
-    this.options = []
+	constructor(options: ISelectOptionItem[], selected: number, styles: ISelectBoxStyles, selectBoxOptions?: ISelectBoxOptions) {
+		super();
+		this.selectBoxOptions = selectBoxOptions || Object.create(null);
 
-    this.selectElement = document.createElement("select")
+		this.options = [];
 
-    this.selectElement.className = "monaco-select-box"
+		this.selectElement = document.createElement('select');
 
-    if (typeof this.selectBoxOptions.ariaLabel === "string") {
-      this.selectElement.setAttribute(
-        "aria-label",
-        this.selectBoxOptions.ariaLabel,
-      )
-    }
+		this.selectElement.className = 'monaco-select-box';
 
-    if (typeof this.selectBoxOptions.ariaDescription === "string") {
-      this.selectElement.setAttribute(
-        "aria-description",
-        this.selectBoxOptions.ariaDescription,
-      )
-    }
+		if (typeof this.selectBoxOptions.ariaLabel === 'string') {
+			this.selectElement.setAttribute('aria-label', this.selectBoxOptions.ariaLabel);
+		}
 
-    this._onDidSelect = this._register(new Emitter<ISelectData>())
+		if (typeof this.selectBoxOptions.ariaDescription === 'string') {
+			this.selectElement.setAttribute('aria-description', this.selectBoxOptions.ariaDescription);
+		}
 
-    this.styles = styles
+		this._onDidSelect = this._register(new Emitter<ISelectData>());
 
-    this.registerListeners()
-    this.setOptions(options, selected)
-  }
+		this.styles = styles;
 
-  private registerListeners() {
-    this._register(Gesture.addTarget(this.selectElement))
-    ;[EventType.Tap].forEach((eventType) => {
-      this._register(
-        dom.addDisposableListener(this.selectElement, eventType, (e) => {
-          this.selectElement.focus()
-        }),
-      )
-    })
+		this.registerListeners();
+		this.setOptions(options, selected);
+	}
 
-    this._register(
-      dom.addStandardDisposableListener(this.selectElement, "click", (e) => {
-        dom.EventHelper.stop(e, true)
-      }),
-    )
+	private registerListeners() {
+		this._register(Gesture.addTarget(this.selectElement));
+		[EventType.Tap].forEach(eventType => {
+			this._register(dom.addDisposableListener(this.selectElement, eventType, (e) => {
+				this.selectElement.focus();
+			}));
+		});
 
-    this._register(
-      dom.addStandardDisposableListener(this.selectElement, "change", (e) => {
-        this.selectElement.title = e.target.value
-        this._onDidSelect.fire({
-          index: e.target.selectedIndex,
-          selected: e.target.value,
-        })
-      }),
-    )
+		this._register(dom.addStandardDisposableListener(this.selectElement, 'click', (e) => {
+			dom.EventHelper.stop(e, true);
+		}));
 
-    this._register(
-      dom.addStandardDisposableListener(this.selectElement, "keydown", (e) => {
-        let showSelect = false
+		this._register(dom.addStandardDisposableListener(this.selectElement, 'change', (e) => {
+			this.selectElement.title = e.target.value;
+			this._onDidSelect.fire({
+				index: e.target.selectedIndex,
+				selected: e.target.value
+			});
+		}));
 
-        if (isMacintosh) {
-          if (
-            e.keyCode === KeyCode.DownArrow ||
-            e.keyCode === KeyCode.UpArrow ||
-            e.keyCode === KeyCode.Space
-          ) {
-            showSelect = true
-          }
-        } else {
-          if (
-            (e.keyCode === KeyCode.DownArrow && e.altKey) ||
-            e.keyCode === KeyCode.Space ||
-            e.keyCode === KeyCode.Enter
-          ) {
-            showSelect = true
-          }
-        }
+		this._register(dom.addStandardDisposableListener(this.selectElement, 'keydown', (e) => {
+			let showSelect = false;
 
-        if (showSelect) {
-          // Space, Enter, is used to expand select box, do not propagate it (prevent action bar action run)
-          e.stopPropagation()
-        }
-      }),
-    )
-  }
+			if (isMacintosh) {
+				if (e.keyCode === KeyCode.DownArrow || e.keyCode === KeyCode.UpArrow || e.keyCode === KeyCode.Space) {
+					showSelect = true;
+				}
+			} else {
+				if (e.keyCode === KeyCode.DownArrow && e.altKey || e.keyCode === KeyCode.Space || e.keyCode === KeyCode.Enter) {
+					showSelect = true;
+				}
+			}
 
-  public get onDidSelect(): Event<ISelectData> {
-    return this._onDidSelect.event
-  }
+			if (showSelect) {
+				// Space, Enter, is used to expand select box, do not propagate it (prevent action bar action run)
+				e.stopPropagation();
+			}
+		}));
+	}
 
-  public setOptions(options: ISelectOptionItem[], selected?: number): void {
-    if (!this.options || !arrays.equals(this.options, options)) {
-      this.options = options
-      this.selectElement.options.length = 0
+	public get onDidSelect(): Event<ISelectData> {
+		return this._onDidSelect.event;
+	}
 
-      this.options.forEach((option, index) => {
-        this.selectElement.add(
-          this.createOption(option.text, index, option.isDisabled),
-        )
-      })
-    }
+	public setOptions(options: ISelectOptionItem[], selected?: number): void {
 
-    if (selected !== undefined) {
-      this.select(selected)
-    }
-  }
+		if (!this.options || !arrays.equals(this.options, options)) {
+			this.options = options;
+			this.selectElement.options.length = 0;
 
-  public select(index: number): void {
-    if (this.options.length === 0) {
-      this.selected = 0
-    } else if (index >= 0 && index < this.options.length) {
-      this.selected = index
-    } else if (index > this.options.length - 1) {
-      // Adjust index to end of list
-      // This could make client out of sync with the select
-      this.select(this.options.length - 1)
-    } else if (this.selected < 0) {
-      this.selected = 0
-    }
+			this.options.forEach((option, index) => {
+				this.selectElement.add(this.createOption(option.text, index, option.isDisabled));
+			});
 
-    this.selectElement.selectedIndex = this.selected
-    if (
-      this.selected < this.options.length &&
-      typeof this.options[this.selected].text === "string"
-    ) {
-      this.selectElement.title = this.options[this.selected].text
-    } else {
-      this.selectElement.title = ""
-    }
-  }
+		}
 
-  public setAriaLabel(label: string): void {
-    this.selectBoxOptions.ariaLabel = label
-    this.selectElement.setAttribute("aria-label", label)
-  }
+		if (selected !== undefined) {
+			this.select(selected);
+		}
+	}
 
-  public focus(): void {
-    if (this.selectElement) {
-      this.selectElement.tabIndex = 0
-      this.selectElement.focus()
-    }
-  }
+	public select(index: number): void {
+		if (this.options.length === 0) {
+			this.selected = 0;
+		} else if (index >= 0 && index < this.options.length) {
+			this.selected = index;
+		} else if (index > this.options.length - 1) {
+			// Adjust index to end of list
+			// This could make client out of sync with the select
+			this.select(this.options.length - 1);
+		} else if (this.selected < 0) {
+			this.selected = 0;
+		}
 
-  public blur(): void {
-    if (this.selectElement) {
-      this.selectElement.tabIndex = -1
-      this.selectElement.blur()
-    }
-  }
+		this.selectElement.selectedIndex = this.selected;
+		if ((this.selected < this.options.length) && typeof this.options[this.selected].text === 'string') {
+			this.selectElement.title = this.options[this.selected].text;
+		} else {
+			this.selectElement.title = '';
+		}
+	}
 
-  public setEnabled(enable: boolean): void {
-    this.selectElement.disabled = !enable
-  }
+	public setAriaLabel(label: string): void {
+		this.selectBoxOptions.ariaLabel = label;
+		this.selectElement.setAttribute('aria-label', label);
+	}
 
-  public setFocusable(focusable: boolean): void {
-    this.selectElement.tabIndex = focusable ? 0 : -1
-  }
+	public focus(): void {
+		if (this.selectElement) {
+			this.selectElement.tabIndex = 0;
+			this.selectElement.focus();
+		}
+	}
 
-  public render(container: HTMLElement): void {
-    container.classList.add("select-container")
-    container.appendChild(this.selectElement)
-    this.setOptions(this.options, this.selected)
-    this.applyStyles()
-  }
+	public blur(): void {
+		if (this.selectElement) {
+			this.selectElement.tabIndex = -1;
+			this.selectElement.blur();
+		}
+	}
 
-  public style(styles: ISelectBoxStyles): void {
-    this.styles = styles
-    this.applyStyles()
-  }
+	public setEnabled(enable: boolean): void {
+		this.selectElement.disabled = !enable;
+	}
 
-  public applyStyles(): void {
-    // Style native select
-    if (this.selectElement) {
-      this.selectElement.style.backgroundColor =
-        this.styles.selectBackground ?? ""
-      this.selectElement.style.color = this.styles.selectForeground ?? ""
-      this.selectElement.style.borderColor = this.styles.selectBorder ?? ""
-    }
-  }
+	public setFocusable(focusable: boolean): void {
+		this.selectElement.tabIndex = focusable ? 0 : -1;
+	}
 
-  private createOption(
-    value: string,
-    index: number,
-    disabled?: boolean,
-  ): HTMLOptionElement {
-    const option = document.createElement("option")
-    option.value = value
-    option.text = value
-    option.disabled = !!disabled
+	public render(container: HTMLElement): void {
+		container.classList.add('select-container');
+		container.appendChild(this.selectElement);
+		this.setOptions(this.options, this.selected);
+		this.applyStyles();
+	}
 
-    return option
-  }
+	public style(styles: ISelectBoxStyles): void {
+		this.styles = styles;
+		this.applyStyles();
+	}
+
+	public applyStyles(): void {
+
+		// Style native select
+		if (this.selectElement) {
+			this.selectElement.style.backgroundColor = this.styles.selectBackground ?? '';
+			this.selectElement.style.color = this.styles.selectForeground ?? '';
+			this.selectElement.style.borderColor = this.styles.selectBorder ?? '';
+		}
+
+	}
+
+	private createOption(value: string, index: number, disabled?: boolean): HTMLOptionElement {
+		const option = document.createElement('option');
+		option.value = value;
+		option.text = value;
+		option.disabled = !!disabled;
+
+		return option;
+	}
 }

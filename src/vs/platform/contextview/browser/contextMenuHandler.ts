@@ -54,7 +54,7 @@ export class ContextMenuHandler {
     private contextViewService: IContextViewService,
     private telemetryService: ITelemetryService,
     private notificationService: INotificationService,
-    private keybindingService: IKeybindingService,
+    private keybindingService: IKeybindingService
   ) {}
 
   configure(options: IContextMenuHandlerOptions): void {
@@ -106,7 +106,7 @@ export class ContextMenuHandler {
             this.blockDisposable = addDisposableListener(
               this.block,
               EventType.MOUSE_DOWN,
-              (e) => e.stopPropagation(),
+              (e) => e.stopPropagation()
             )
           }
 
@@ -116,7 +116,7 @@ export class ContextMenuHandler {
           actionRunner.onWillRun(
             (evt) => this.onActionRun(evt, !delegate.skipTelemetry),
             this,
-            menuDisposables,
+            menuDisposables
           )
           actionRunner.onDidRun(this.onDidActionRun, this, menuDisposables)
           menu = new Menu(
@@ -133,24 +133,24 @@ export class ContextMenuHandler {
                 : (action) =>
                     this.keybindingService.lookupKeybinding(action.id),
             },
-            defaultMenuStyles,
+            defaultMenuStyles
           )
 
           menu.onDidCancel(
             () => this.contextViewService.hideContextView(true),
             null,
-            menuDisposables,
+            menuDisposables
           )
           menu.onDidBlur(
             () => this.contextViewService.hideContextView(true),
             null,
-            menuDisposables,
+            menuDisposables
           )
           const targetWindow = getWindow(container)
           menuDisposables.add(
             addDisposableListener(targetWindow, EventType.BLUR, () =>
-              this.contextViewService.hideContextView(true),
-            ),
+              this.contextViewService.hideContextView(true)
+            )
           )
           menuDisposables.add(
             addDisposableListener(
@@ -178,8 +178,8 @@ export class ContextMenuHandler {
                 }
 
                 this.contextViewService.hideContextView(true)
-              },
-            ),
+              }
+            )
           )
 
           return combinedDisposable(menuDisposables, menu)
@@ -212,7 +212,7 @@ export class ContextMenuHandler {
         },
       },
       shadowRootElement,
-      !!shadowRootElement,
+      !!shadowRootElement
     )
   }
 

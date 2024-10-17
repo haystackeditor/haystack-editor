@@ -9,157 +9,113 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as assert from "assert"
-import { Event } from "vs/base/common/event"
-import {
-  ensureNoDisposablesAreLeakedInTestSuite,
-  toResource,
-} from "vs/base/test/common/utils"
-import { IEditorService } from "vs/workbench/services/editor/common/editorService"
-import {
-  TestFilesConfigurationService,
-  workbenchInstantiationService,
-  TestServiceAccessor,
-  registerTestFileEditor,
-  createEditorPart,
-  TestEnvironmentService,
-  TestFileService,
-  TestTextResourceConfigurationService,
-} from "vs/workbench/test/browser/workbenchTestServices"
-import { ITextFileEditorModel } from "vs/workbench/services/textfile/common/textfiles"
-import { IEditorGroupsService } from "vs/workbench/services/editor/common/editorGroupsService"
-import { DisposableStore } from "vs/base/common/lifecycle"
-import { TextFileEditorModelManager } from "vs/workbench/services/textfile/common/textFileEditorModelManager"
-import { EditorService } from "vs/workbench/services/editor/browser/editorService"
-import { EditorAutoSave } from "vs/workbench/browser/parts/editor/editorAutoSave"
-import { IConfigurationService } from "vs/platform/configuration/common/configuration"
-import { TestConfigurationService } from "vs/platform/configuration/test/common/testConfigurationService"
-import { IFilesConfigurationService } from "vs/workbench/services/filesConfiguration/common/filesConfigurationService"
-import { IContextKeyService } from "vs/platform/contextkey/common/contextkey"
-import { MockContextKeyService } from "vs/platform/keybinding/test/common/mockKeybindingService"
-import { DEFAULT_EDITOR_ASSOCIATION } from "vs/workbench/common/editor"
-import { TestWorkspace } from "vs/platform/workspace/test/common/testWorkspace"
-import {
-  TestContextService,
-  TestMarkerService,
-} from "vs/workbench/test/common/workbenchTestServices"
-import { UriIdentityService } from "vs/platform/uriIdentity/common/uriIdentityService"
-import { IAccessibilitySignalService } from "vs/platform/accessibilitySignal/browser/accessibilitySignalService"
+import * as assert from 'assert';
+import { Event } from 'vs/base/common/event';
+import { ensureNoDisposablesAreLeakedInTestSuite, toResource } from 'vs/base/test/common/utils';
+import { IEditorService } from 'vs/workbench/services/editor/common/editorService';
+import { TestFilesConfigurationService, workbenchInstantiationService, TestServiceAccessor, registerTestFileEditor, createEditorPart, TestEnvironmentService, TestFileService, TestTextResourceConfigurationService } from 'vs/workbench/test/browser/workbenchTestServices';
+import { ITextFileEditorModel } from 'vs/workbench/services/textfile/common/textfiles';
+import { IEditorGroupsService } from 'vs/workbench/services/editor/common/editorGroupsService';
+import { DisposableStore } from 'vs/base/common/lifecycle';
+import { TextFileEditorModelManager } from 'vs/workbench/services/textfile/common/textFileEditorModelManager';
+import { EditorService } from 'vs/workbench/services/editor/browser/editorService';
+import { EditorAutoSave } from 'vs/workbench/browser/parts/editor/editorAutoSave';
+import { IConfigurationService } from 'vs/platform/configuration/common/configuration';
+import { TestConfigurationService } from 'vs/platform/configuration/test/common/testConfigurationService';
+import { IFilesConfigurationService } from 'vs/workbench/services/filesConfiguration/common/filesConfigurationService';
+import { IContextKeyService } from 'vs/platform/contextkey/common/contextkey';
+import { MockContextKeyService } from 'vs/platform/keybinding/test/common/mockKeybindingService';
+import { DEFAULT_EDITOR_ASSOCIATION } from 'vs/workbench/common/editor';
+import { TestWorkspace } from 'vs/platform/workspace/test/common/testWorkspace';
+import { TestContextService, TestMarkerService } from 'vs/workbench/test/common/workbenchTestServices';
+import { UriIdentityService } from 'vs/platform/uriIdentity/common/uriIdentityService';
+import { IAccessibilitySignalService } from 'vs/platform/accessibilitySignal/browser/accessibilitySignalService';
 
-suite("EditorAutoSave", () => {
-  const disposables = new DisposableStore()
+suite('EditorAutoSave', () => {
 
-  setup(() => {
-    disposables.add(registerTestFileEditor())
-  })
+	const disposables = new DisposableStore();
 
-  teardown(() => {
-    disposables.clear()
-  })
+	setup(() => {
+		disposables.add(registerTestFileEditor());
+	});
 
-  async function createEditorAutoSave(
-    autoSaveConfig: object,
-  ): Promise<TestServiceAccessor> {
-    const instantiationService = workbenchInstantiationService(
-      undefined,
-      disposables,
-    )
+	teardown(() => {
+		disposables.clear();
+	});
 
-    const configurationService = new TestConfigurationService()
-    configurationService.setUserConfiguration("files", autoSaveConfig)
-    instantiationService.stub(IConfigurationService, configurationService)
-    instantiationService.stub(IAccessibilitySignalService, {
-      playSignal: async () => {},
-      isSoundEnabled(signal: unknown) {
-        return false
-      },
-    } as any)
-    instantiationService.stub(
-      IFilesConfigurationService,
-      disposables.add(
-        new TestFilesConfigurationService(
-          <IContextKeyService>(
-            instantiationService.createInstance(MockContextKeyService)
-          ),
-          configurationService,
-          new TestContextService(TestWorkspace),
-          TestEnvironmentService,
-          disposables.add(
-            new UriIdentityService(disposables.add(new TestFileService())),
-          ),
-          disposables.add(new TestFileService()),
-          new TestMarkerService(),
-          new TestTextResourceConfigurationService(configurationService),
-        ),
-      ),
-    )
+	async function createEditorAutoSave(autoSaveConfig: object): Promise<TestServiceAccessor> {
+		const instantiationService = workbenchInstantiationService(undefined, disposables);
 
-    const part = await createEditorPart(instantiationService, disposables)
-    instantiationService.stub(IEditorGroupsService, part)
+		const configurationService = new TestConfigurationService();
+		configurationService.setUserConfiguration('files', autoSaveConfig);
+		instantiationService.stub(IConfigurationService, configurationService);
+		instantiationService.stub(IAccessibilitySignalService, {
+			playSignal: async () => { },
+			isSoundEnabled(signal: unknown) { return false; },
+		} as any);
+		instantiationService.stub(IFilesConfigurationService, disposables.add(new TestFilesConfigurationService(
+			<IContextKeyService>instantiationService.createInstance(MockContextKeyService),
+			configurationService,
+			new TestContextService(TestWorkspace),
+			TestEnvironmentService,
+			disposables.add(new UriIdentityService(disposables.add(new TestFileService()))),
+			disposables.add(new TestFileService()),
+			new TestMarkerService(),
+			new TestTextResourceConfigurationService(configurationService)
+		)));
 
-    const editorService: EditorService = disposables.add(
-      instantiationService.createInstance(EditorService, undefined),
-    )
-    instantiationService.stub(IEditorService, editorService)
+		const part = await createEditorPart(instantiationService, disposables);
+		instantiationService.stub(IEditorGroupsService, part);
 
-    const accessor = instantiationService.createInstance(TestServiceAccessor)
-    disposables.add(<TextFileEditorModelManager>accessor.textFileService.files)
+		const editorService: EditorService = disposables.add(instantiationService.createInstance(EditorService, undefined));
+		instantiationService.stub(IEditorService, editorService);
 
-    disposables.add(instantiationService.createInstance(EditorAutoSave))
+		const accessor = instantiationService.createInstance(TestServiceAccessor);
+		disposables.add((<TextFileEditorModelManager>accessor.textFileService.files));
 
-    return accessor
-  }
+		disposables.add(instantiationService.createInstance(EditorAutoSave));
 
-  test("editor auto saves after short delay if configured", async function () {
-    const accessor = await createEditorAutoSave({
-      autoSave: "afterDelay",
-      autoSaveDelay: 1,
-    })
+		return accessor;
+	}
 
-    const resource = toResource.call(this, "/path/index.txt")
+	test('editor auto saves after short delay if configured', async function () {
+		const accessor = await createEditorAutoSave({ autoSave: 'afterDelay', autoSaveDelay: 1 });
 
-    const model: ITextFileEditorModel = disposables.add(
-      await accessor.textFileService.files.resolve(resource),
-    )
-    model.textEditorModel?.setValue("Super Good")
+		const resource = toResource.call(this, '/path/index.txt');
 
-    assert.ok(model.isDirty())
+		const model: ITextFileEditorModel = disposables.add(await accessor.textFileService.files.resolve(resource));
+		model.textEditorModel?.setValue('Super Good');
 
-    await awaitModelSaved(model)
+		assert.ok(model.isDirty());
 
-    assert.strictEqual(model.isDirty(), false)
-  })
+		await awaitModelSaved(model);
 
-  test("editor auto saves on focus change if configured", async function () {
-    const accessor = await createEditorAutoSave({ autoSave: "onFocusChange" })
+		assert.strictEqual(model.isDirty(), false);
+	});
 
-    const resource = toResource.call(this, "/path/index.txt")
-    await accessor.editorService.openEditor({
-      resource,
-      options: { override: DEFAULT_EDITOR_ASSOCIATION.id },
-    })
+	test('editor auto saves on focus change if configured', async function () {
+		const accessor = await createEditorAutoSave({ autoSave: 'onFocusChange' });
 
-    const model: ITextFileEditorModel = disposables.add(
-      await accessor.textFileService.files.resolve(resource),
-    )
-    model.textEditorModel?.setValue("Super Good")
+		const resource = toResource.call(this, '/path/index.txt');
+		await accessor.editorService.openEditor({ resource, options: { override: DEFAULT_EDITOR_ASSOCIATION.id } });
 
-    assert.ok(model.isDirty())
+		const model: ITextFileEditorModel = disposables.add(await accessor.textFileService.files.resolve(resource));
+		model.textEditorModel?.setValue('Super Good');
 
-    const editorPane = await accessor.editorService.openEditor({
-      resource: toResource.call(this, "/path/index_other.txt"),
-    })
+		assert.ok(model.isDirty());
 
-    await awaitModelSaved(model)
+		const editorPane = await accessor.editorService.openEditor({ resource: toResource.call(this, '/path/index_other.txt') });
 
-    assert.strictEqual(model.isDirty(), false)
+		await awaitModelSaved(model);
 
-    await editorPane?.group.closeAllEditors()
-  })
+		assert.strictEqual(model.isDirty(), false);
 
-  function awaitModelSaved(model: ITextFileEditorModel): Promise<void> {
-    return Event.toPromise(Event.once(model.onDidChangeDirty))
-  }
+		await editorPane?.group.closeAllEditors();
+	});
 
-  ensureNoDisposablesAreLeakedInTestSuite()
-})
+	function awaitModelSaved(model: ITextFileEditorModel): Promise<void> {
+		return Event.toPromise(Event.once(model.onDidChangeDirty));
+	}
+
+	ensureNoDisposablesAreLeakedInTestSuite();
+});

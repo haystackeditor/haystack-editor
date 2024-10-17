@@ -9,18 +9,16 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { URI } from "vs/base/common/uri"
-import {
-  isURLDomainTrusted,
-  ITrustedDomainService,
-} from "vs/workbench/contrib/url/browser/trustedDomainService"
+import { URI } from 'vs/base/common/uri';
+import { isURLDomainTrusted, ITrustedDomainService } from 'vs/workbench/contrib/url/browser/trustedDomainService';
 
 export class MockTrustedDomainService implements ITrustedDomainService {
-  _serviceBrand: undefined
+	_serviceBrand: undefined;
 
-  constructor(private readonly _trustedDomains: string[] = []) {}
+	constructor(private readonly _trustedDomains: string[] = []) {
+	}
 
-  isValid(resource: URI): boolean {
-    return isURLDomainTrusted(resource, this._trustedDomains)
-  }
+	isValid(resource: URI): boolean {
+		return isURLDomainTrusted(resource, this._trustedDomains);
+	}
 }

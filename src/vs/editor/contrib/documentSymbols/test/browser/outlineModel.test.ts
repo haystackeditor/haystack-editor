@@ -57,14 +57,14 @@ suite("OutlineModel", function () {
     const service = new OutlineModelService(
       languageFeaturesService,
       new LanguageFeatureDebounceService(new NullLogService(), envService),
-      modelService,
+      modelService
     )
 
     const model = createTextModel(
       "foo",
       undefined,
       undefined,
-      URI.file("/fome/path.foo"),
+      URI.file("/fome/path.foo")
     )
     let count = 0
     const reg = languageFeaturesService.documentSymbolProvider.register(
@@ -78,7 +78,7 @@ suite("OutlineModel", function () {
           count += 1
           return []
         },
-      },
+      }
     )
 
     await service.getOrCreate(model, CancellationToken.None)
@@ -108,13 +108,13 @@ suite("OutlineModel", function () {
     const service = new OutlineModelService(
       languageFeaturesService,
       new LanguageFeatureDebounceService(new NullLogService(), envService),
-      modelService,
+      modelService
     )
     const model = createTextModel(
       "foo",
       undefined,
       undefined,
-      URI.file("/fome/path.foo"),
+      URI.file("/fome/path.foo")
     )
     let isCancelled = false
 
@@ -139,7 +139,7 @@ suite("OutlineModel", function () {
             })
           })
         },
-      },
+      }
     )
 
     assert.strictEqual(isCancelled, false)
@@ -161,7 +161,7 @@ suite("OutlineModel", function () {
 
   function fakeSymbolInformation(
     range: Range,
-    name: string = "foo",
+    name: string = "foo"
   ): DocumentSymbol {
     return {
       name,
@@ -187,17 +187,17 @@ suite("OutlineModel", function () {
     const e0 = new OutlineElement(
       "foo1",
       null!,
-      fakeSymbolInformation(new Range(1, 1, 1, 10)),
+      fakeSymbolInformation(new Range(1, 1, 1, 10))
     )
     const e1 = new OutlineElement(
       "foo2",
       null!,
-      fakeSymbolInformation(new Range(2, 1, 5, 1)),
+      fakeSymbolInformation(new Range(2, 1, 5, 1))
     )
     const e2 = new OutlineElement(
       "foo3",
       null!,
-      fakeSymbolInformation(new Range(6, 1, 10, 10)),
+      fakeSymbolInformation(new Range(6, 1, 10, 10))
     )
 
     const group = new OutlineGroup("group", null!, null!, 1)
@@ -228,17 +228,17 @@ suite("OutlineModel", function () {
     const p = new OutlineElement(
       "A",
       null!,
-      fakeSymbolInformation(new Range(1, 1, 11, 1)),
+      fakeSymbolInformation(new Range(1, 1, 11, 1))
     )
     const c1 = new OutlineElement(
       "A/B",
       null!,
-      fakeSymbolInformation(new Range(2, 4, 5, 4)),
+      fakeSymbolInformation(new Range(2, 4, 5, 4))
     )
     const c2 = new OutlineElement(
       "A/C",
       null!,
-      fakeSymbolInformation(new Range(6, 4, 9, 4)),
+      fakeSymbolInformation(new Range(6, 4, 9, 4))
     )
 
     const group = new OutlineGroup("group", null!, null!, 1)
@@ -290,8 +290,8 @@ suite("OutlineModel", function () {
         new OutlineElement(
           "c1",
           model.children.get("g1")!,
-          fakeSymbolInformation(new Range(1, 1, 11, 1)),
-        ),
+          fakeSymbolInformation(new Range(1, 1, 11, 1))
+        )
       )
 
     model.children.set("g2", new OutlineGroup("g2", model, null!, 1))
@@ -302,8 +302,8 @@ suite("OutlineModel", function () {
         new OutlineElement(
           "c2",
           model.children.get("g2")!,
-          fakeSymbolInformation(new Range(1, 1, 7, 1)),
-        ),
+          fakeSymbolInformation(new Range(1, 1, 7, 1))
+        )
       )
     model.children
       .get("g2")!
@@ -313,8 +313,8 @@ suite("OutlineModel", function () {
         new OutlineElement(
           "c2.1",
           model.children.get("g2")!.children.get("c2")!,
-          fakeSymbolInformation(new Range(1, 3, 2, 19)),
-        ),
+          fakeSymbolInformation(new Range(1, 3, 2, 19))
+        )
       )
     model.children
       .get("g2")!
@@ -324,8 +324,8 @@ suite("OutlineModel", function () {
         new OutlineElement(
           "c2.2",
           model.children.get("g2")!.children.get("c2")!,
-          fakeSymbolInformation(new Range(4, 1, 6, 10)),
-        ),
+          fakeSymbolInformation(new Range(4, 1, 6, 10))
+        )
       )
 
     model.readyForTesting()
@@ -339,17 +339,17 @@ suite("OutlineModel", function () {
 
     assert.strictEqual(
       model.children.get("g1")!.children.get("c1")!.marker!.count,
-      2,
+      2
     )
     assert.strictEqual(
       model.children.get("g2")!.children.get("c2")!.children.get("c2.1")!
         .marker!.count,
-      1,
+      1
     )
     assert.strictEqual(
       model.children.get("g2")!.children.get("c2")!.children.get("c2.2")!
         .marker!.count,
-      1,
+      1
     )
   })
 })

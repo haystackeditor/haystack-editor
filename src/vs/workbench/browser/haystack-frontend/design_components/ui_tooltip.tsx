@@ -28,7 +28,7 @@ export function UiTooltip({
   forceHide,
 }: UiTooltipProps) {
   const getParentContainerForElement = WorkspaceStoreWrapper.useWorkspaceState(
-    (state) => state.getParentContainerForElement,
+    (state) => state.getParentContainerForElement
   )
   const [tooltipContainer, setToolTipContainer] =
     React.useState<HTMLElement | null>(null)
@@ -122,7 +122,7 @@ function UiTooltipImpl({
     React.useState<HTMLDivElement | null>(null)
   const tooltipRef = React.useCallback(
     (tooltipElement: HTMLDivElement) => setTooltipStateRef(tooltipElement),
-    [],
+    []
   )
 
   if (!show || forceHide || parentElement == null) {
@@ -132,7 +132,7 @@ function UiTooltipImpl({
   const { x, y } = getPosition(
     parentElement.getBoundingClientRect(),
     orientation,
-    tooltipStateRef,
+    tooltipStateRef
   )
 
   return createPortal(
@@ -146,14 +146,14 @@ function UiTooltipImpl({
       {text}
       {shortcut && <span className="shortcut">{shortcut}</span>}
     </div>,
-    containerElement,
+    containerElement
   )
 }
 
 function getPosition(
   rect: DOMRect,
   orientation: Orientation,
-  tooltipElement: HTMLDivElement | null,
+  tooltipElement: HTMLDivElement | null
 ): { x: number; y: number } {
   let x = rect.left
   let y = rect.top

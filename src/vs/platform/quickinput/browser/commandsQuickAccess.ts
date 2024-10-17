@@ -85,11 +85,11 @@ export abstract class AbstractCommandsQuickAccessProvider
   private static WORD_FILTER = or(
     matchesPrefix,
     matchesWords,
-    matchesContiguousSubString,
+    matchesContiguousSubString
   )
 
   private readonly commandsHistory = this._register(
-    this.instantiationService.createInstance(CommandsHistory),
+    this.instantiationService.createInstance(CommandsHistory)
   )
 
   protected override readonly options: ICommandsQuickAccessOptions
@@ -102,7 +102,7 @@ export abstract class AbstractCommandsQuickAccessProvider
     protected readonly keybindingService: IKeybindingService,
     @ICommandService private readonly commandService: ICommandService,
     @ITelemetryService private readonly telemetryService: ITelemetryService,
-    @IDialogService private readonly dialogService: IDialogService,
+    @IDialogService private readonly dialogService: IDialogService
   ) {
     super(AbstractCommandsQuickAccessProvider.PREFIX, options)
 
@@ -113,7 +113,7 @@ export abstract class AbstractCommandsQuickAccessProvider
     filter: string,
     _disposables: DisposableStore,
     token: CancellationToken,
-    runOptions?: IQuickAccessProviderRunOptions,
+    runOptions?: IQuickAccessProviderRunOptions
   ): Promise<Picks<ICommandQuickPick> | FastAndSlowPicks<ICommandQuickPick>> {
     // Ask subclass for all command picks
     const allCommandPicks = await this.getCommandPicks(token)
@@ -128,14 +128,14 @@ export abstract class AbstractCommandsQuickAccessProvider
         allCommandPicks.map((commandPick) => ({
           key: commandPick.commandId,
           textChunks: [this.getTfIdfChunk(commandPick)],
-        })),
+        }))
       )
       const result = tfidf.calculateScores(filter, token)
 
       return normalizeTfIdfScores(result)
         .filter(
           (score) =>
-            score.score > AbstractCommandsQuickAccessProvider.TFIDF_THRESHOLD,
+            score.score > AbstractCommandsQuickAccessProvider.TFIDF_THRESHOLD
         )
         .slice(0, AbstractCommandsQuickAccessProvider.TFIDF_MAX_RESULTS)
     })
@@ -146,13 +146,13 @@ export abstract class AbstractCommandsQuickAccessProvider
       const labelHighlights =
         AbstractCommandsQuickAccessProvider.WORD_FILTER(
           filter,
-          commandPick.label,
+          commandPick.label
         ) ?? undefined
       const aliasHighlights = commandPick.commandAlias
-        ? (AbstractCommandsQuickAccessProvider.WORD_FILTER(
+        ? AbstractCommandsQuickAccessProvider.WORD_FILTER(
             filter,
-            commandPick.commandAlias,
-          ) ?? undefined)
+            commandPick.commandAlias
+          ) ?? undefined
         : undefined
 
       // Add if matching in label or alias
@@ -179,7 +179,7 @@ export abstract class AbstractCommandsQuickAccessProvider
 
         // Add if we have a tf-idf score
         const tfidfScore = tfidf.find(
-          (score) => score.key === commandPick.commandId,
+          (score) => score.key === commandPick.commandId
         )
         if (tfidfScore) {
           commandPick.tfIdfScore = tfidfScore.score
@@ -231,10 +231,10 @@ export abstract class AbstractCommandsQuickAccessProvider
 
       if (this.options.suggestedCommandIds) {
         const commandASuggestion = this.options.suggestedCommandIds.has(
-          commandPickA.commandId,
+          commandPickA.commandId
         )
         const commandBSuggestion = this.options.suggestedCommandIds.has(
-          commandPickB.commandId,
+          commandPickB.commandId
         )
         if (commandASuggestion && commandBSuggestion) {
           return 0 // honor the order of the array
@@ -322,7 +322,7 @@ export abstract class AbstractCommandsQuickAccessProvider
           allCommandPicks,
           filteredCommandPicks,
           filter,
-          token,
+          token
         )
         if (token.isCancellationRequested) {
           return []
@@ -330,7 +330,7 @@ export abstract class AbstractCommandsQuickAccessProvider
 
         const commandPicks: Array<ICommandQuickPick | IQuickPickSeparator> =
           additionalCommandPicks.map((commandPick) =>
-            this.toCommandPick(commandPick, runOptions),
+            this.toCommandPick(commandPick, runOptions)
           )
         // Basically, if we haven't already added a separator, we add one before the additional picks so long
         // as one hasn't been added to the start of the array.
@@ -347,21 +347,21 @@ export abstract class AbstractCommandsQuickAccessProvider
 
   private toCommandPick(
     commandPick: ICommandQuickPick | IQuickPickSeparator,
-    runOptions?: IQuickAccessProviderRunOptions,
+    runOptions?: IQuickAccessProviderRunOptions
   ): ICommandQuickPick | IQuickPickSeparator {
     if (commandPick.type === "separator") {
       return commandPick
     }
 
     const keybinding = this.keybindingService.lookupKeybinding(
-      commandPick.commandId,
+      commandPick.commandId
     )
     const ariaLabel = keybinding
       ? localize(
           "commandPickAriaLabelWithKeybinding",
           "{0}, {1}",
           commandPick.label,
-          keybinding.getAriaLabel(),
+          keybinding.getAriaLabel()
         )
       : commandPick.label
 
@@ -391,7 +391,7 @@ export abstract class AbstractCommandsQuickAccessProvider
           commandPick.args?.length
             ? await this.commandService.executeCommand(
                 commandPick.commandId,
-                ...commandPick.args,
+                ...commandPick.args
               )
             : await this.commandService.executeCommand(commandPick.commandId)
         } catch (error) {
@@ -400,9 +400,9 @@ export abstract class AbstractCommandsQuickAccessProvider
               localize(
                 "canNotRun",
                 "Command '{0}' resulted in an error",
-                commandPick.label,
+                commandPick.label
               ),
-              toErrorMessage(error),
+              toErrorMessage(error)
             )
           }
         }
@@ -432,18 +432,18 @@ export abstract class AbstractCommandsQuickAccessProvider
   }
 
   protected abstract getCommandPicks(
-    token: CancellationToken,
+    token: CancellationToken
   ): Promise<Array<ICommandQuickPick>>
 
   protected abstract hasAdditionalCommandPicks(
     filter: string,
-    token: CancellationToken,
+    token: CancellationToken
   ): boolean
   protected abstract getAdditionalCommandPicks(
     allPicks: ICommandQuickPick[],
     picksSoFar: ICommandQuickPick[],
     filter: string,
-    token: CancellationToken,
+    token: CancellationToken
   ): Promise<Array<ICommandQuickPick | IQuickPickSeparator>>
 }
 
@@ -477,7 +477,7 @@ export class CommandsHistory extends Disposable {
     @IStorageService private readonly storageService: IStorageService,
     @IConfigurationService
     private readonly configurationService: IConfigurationService,
-    @ILogService private readonly logService: ILogService,
+    @ILogService private readonly logService: ILogService
   ) {
     super()
 
@@ -490,8 +490,8 @@ export class CommandsHistory extends Disposable {
   private registerListeners(): void {
     this._register(
       this.configurationService.onDidChangeConfiguration((e) =>
-        this.updateConfiguration(e),
-      ),
+        this.updateConfiguration(e)
+      )
     )
     this._register(
       this.storageService.onWillSaveState((e) => {
@@ -501,7 +501,7 @@ export class CommandsHistory extends Disposable {
           // the overhead of syncing this data across machines.
           this.saveState()
         }
-      }),
+      })
     )
   }
 
@@ -512,7 +512,7 @@ export class CommandsHistory extends Disposable {
 
     this.configuredCommandsHistoryLength =
       CommandsHistory.getConfiguredCommandHistoryLength(
-        this.configurationService,
+        this.configurationService
       )
 
     if (
@@ -527,7 +527,7 @@ export class CommandsHistory extends Disposable {
   private load(): void {
     const raw = this.storageService.get(
       CommandsHistory.PREF_KEY_CACHE,
-      StorageScope.PROFILE,
+      StorageScope.PROFILE
     )
     let serializedCache: ISerializedCommandHistory | undefined
     if (raw) {
@@ -540,7 +540,7 @@ export class CommandsHistory extends Disposable {
 
     const cache = (CommandsHistory.cache = new LRUCache<string, number>(
       this.configuredCommandsHistoryLength,
-      1,
+      1
     ))
     if (serializedCache) {
       let entries: { key: string; value: number }[]
@@ -555,7 +555,7 @@ export class CommandsHistory extends Disposable {
     CommandsHistory.counter = this.storageService.getNumber(
       CommandsHistory.PREF_KEY_COUNTER,
       StorageScope.PROFILE,
-      CommandsHistory.counter,
+      CommandsHistory.counter
     )
   }
 
@@ -586,26 +586,26 @@ export class CommandsHistory extends Disposable {
       entries: [],
     }
     CommandsHistory.cache.forEach((value, key) =>
-      serializedCache.entries.push({ key, value }),
+      serializedCache.entries.push({ key, value })
     )
 
     this.storageService.store(
       CommandsHistory.PREF_KEY_CACHE,
       JSON.stringify(serializedCache),
       StorageScope.PROFILE,
-      StorageTarget.USER,
+      StorageTarget.USER
     )
     this.storageService.store(
       CommandsHistory.PREF_KEY_COUNTER,
       CommandsHistory.counter,
       StorageScope.PROFILE,
-      StorageTarget.USER,
+      StorageTarget.USER
     )
     CommandsHistory.hasChanges = false
   }
 
   static getConfiguredCommandHistoryLength(
-    configurationService: IConfigurationService,
+    configurationService: IConfigurationService
   ): number {
     const config = <ICommandsQuickAccessConfiguration>(
       configurationService.getValue()
@@ -622,7 +622,7 @@ export class CommandsHistory extends Disposable {
 
   static clearHistory(
     configurationService: IConfigurationService,
-    storageService: IStorageService,
+    storageService: IStorageService
   ): void {
     const commandHistoryLength =
       CommandsHistory.getConfiguredCommandHistoryLength(configurationService)

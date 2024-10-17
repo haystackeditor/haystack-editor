@@ -9,229 +9,172 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { raceCancellation } from "vs/base/common/async"
-import { Emitter, Event } from "vs/base/common/event"
-import { DisposableStore, IDisposable } from "vs/base/common/lifecycle"
-import { ILogService } from "vs/platform/log/common/log"
-import {
-  ExtHostContext,
-  ExtHostSpeechShape,
-  MainContext,
-  MainThreadSpeechShape,
-} from "vs/workbench/api/common/extHost.protocol"
-import {
-  IKeywordRecognitionEvent,
-  ISpeechProviderMetadata,
-  ISpeechService,
-  ISpeechToTextEvent,
-  ITextToSpeechEvent,
-  TextToSpeechStatus,
-} from "vs/workbench/contrib/speech/common/speechService"
-import {
-  IExtHostContext,
-  extHostNamedCustomer,
-} from "vs/workbench/services/extensions/common/extHostCustomers"
+import { raceCancellation } from 'vs/base/common/async';
+import { Emitter, Event } from 'vs/base/common/event';
+import { DisposableStore, IDisposable } from 'vs/base/common/lifecycle';
+import { ILogService } from 'vs/platform/log/common/log';
+import { ExtHostContext, ExtHostSpeechShape, MainContext, MainThreadSpeechShape } from 'vs/workbench/api/common/extHost.protocol';
+import { IKeywordRecognitionEvent, ISpeechProviderMetadata, ISpeechService, ISpeechToTextEvent, ITextToSpeechEvent, TextToSpeechStatus } from 'vs/workbench/contrib/speech/common/speechService';
+import { IExtHostContext, extHostNamedCustomer } from 'vs/workbench/services/extensions/common/extHostCustomers';
 
 type SpeechToTextSession = {
-  readonly onDidChange: Emitter<ISpeechToTextEvent>
-}
+	readonly onDidChange: Emitter<ISpeechToTextEvent>;
+};
 
 type TextToSpeechSession = {
-  readonly onDidChange: Emitter<ITextToSpeechEvent>
-}
+	readonly onDidChange: Emitter<ITextToSpeechEvent>;
+};
 
 type KeywordRecognitionSession = {
-  readonly onDidChange: Emitter<IKeywordRecognitionEvent>
-}
+	readonly onDidChange: Emitter<IKeywordRecognitionEvent>;
+};
 
 @extHostNamedCustomer(MainContext.MainThreadSpeech)
 export class MainThreadSpeech implements MainThreadSpeechShape {
-  private readonly proxy: ExtHostSpeechShape
 
-  private readonly providerRegistrations = new Map<number, IDisposable>()
+	private readonly proxy: ExtHostSpeechShape;
 
-  private readonly speechToTextSessions = new Map<number, SpeechToTextSession>()
-  private readonly textToSpeechSessions = new Map<number, TextToSpeechSession>()
-  private readonly keywordRecognitionSessions = new Map<
-    number,
-    KeywordRecognitionSession
-  >()
+	private readonly providerRegistrations = new Map<number, IDisposable>();
 
-  constructor(
-    extHostContext: IExtHostContext,
-    @ISpeechService private readonly speechService: ISpeechService,
-    @ILogService private readonly logService: ILogService,
-  ) {
-    this.proxy = extHostContext.getProxy(ExtHostContext.ExtHostSpeech)
-  }
+	private readonly speechToTextSessions = new Map<number, SpeechToTextSession>();
+	private readonly textToSpeechSessions = new Map<number, TextToSpeechSession>();
+	private readonly keywordRecognitionSessions = new Map<number, KeywordRecognitionSession>();
 
-  $registerProvider(
-    handle: number,
-    identifier: string,
-    metadata: ISpeechProviderMetadata,
-  ): void {
-    this.logService.trace(
-      "[Speech] extension registered provider",
-      metadata.extension.value,
-    )
+	constructor(
+		extHostContext: IExtHostContext,
+		@ISpeechService private readonly speechService: ISpeechService,
+		@ILogService private readonly logService: ILogService
+	) {
+		this.proxy = extHostContext.getProxy(ExtHostContext.ExtHostSpeech);
+	}
 
-    const registration = this.speechService.registerSpeechProvider(identifier, {
-      metadata,
-      createSpeechToTextSession: (token, options) => {
-        if (token.isCancellationRequested) {
-          return {
-            onDidChange: Event.None,
-          }
-        }
+	$registerProvider(handle: number, identifier: string, metadata: ISpeechProviderMetadata): void {
+		this.logService.trace('[Speech] extension registered provider', metadata.extension.value);
 
-        const disposables = new DisposableStore()
-        const session = Math.random()
+		const registration = this.speechService.registerSpeechProvider(identifier, {
+			metadata,
+			createSpeechToTextSession: (token, options) => {
+				if (token.isCancellationRequested) {
+					return {
+						onDidChange: Event.None
+					};
+				}
 
-        this.proxy.$createSpeechToTextSession(
-          handle,
-          session,
-          options?.language,
-        )
+				const disposables = new DisposableStore();
+				const session = Math.random();
 
-        const onDidChange = disposables.add(new Emitter<ISpeechToTextEvent>())
-        this.speechToTextSessions.set(session, { onDidChange })
+				this.proxy.$createSpeechToTextSession(handle, session, options?.language);
 
-        disposables.add(
-          token.onCancellationRequested(() => {
-            this.proxy.$cancelSpeechToTextSession(session)
-            this.speechToTextSessions.delete(session)
-            disposables.dispose()
-          }),
-        )
+				const onDidChange = disposables.add(new Emitter<ISpeechToTextEvent>());
+				this.speechToTextSessions.set(session, { onDidChange });
 
-        return {
-          onDidChange: onDidChange.event,
-        }
-      },
-      createTextToSpeechSession: (token, options) => {
-        if (token.isCancellationRequested) {
-          return {
-            onDidChange: Event.None,
-            synthesize: async () => {},
-          }
-        }
+				disposables.add(token.onCancellationRequested(() => {
+					this.proxy.$cancelSpeechToTextSession(session);
+					this.speechToTextSessions.delete(session);
+					disposables.dispose();
+				}));
 
-        const disposables = new DisposableStore()
-        const session = Math.random()
+				return {
+					onDidChange: onDidChange.event
+				};
+			},
+			createTextToSpeechSession: (token, options) => {
+				if (token.isCancellationRequested) {
+					return {
+						onDidChange: Event.None,
+						synthesize: async () => { }
+					};
+				}
 
-        this.proxy.$createTextToSpeechSession(
-          handle,
-          session,
-          options?.language,
-        )
+				const disposables = new DisposableStore();
+				const session = Math.random();
 
-        const onDidChange = disposables.add(new Emitter<ITextToSpeechEvent>())
-        this.textToSpeechSessions.set(session, { onDidChange })
+				this.proxy.$createTextToSpeechSession(handle, session, options?.language);
 
-        disposables.add(
-          token.onCancellationRequested(() => {
-            this.proxy.$cancelTextToSpeechSession(session)
-            this.textToSpeechSessions.delete(session)
-            disposables.dispose()
-          }),
-        )
+				const onDidChange = disposables.add(new Emitter<ITextToSpeechEvent>());
+				this.textToSpeechSessions.set(session, { onDidChange });
 
-        return {
-          onDidChange: onDidChange.event,
-          synthesize: async (text) => {
-            await this.proxy.$synthesizeSpeech(session, text)
-            await raceCancellation(
-              Event.toPromise(
-                Event.filter(
-                  onDidChange.event,
-                  (e) => e.status === TextToSpeechStatus.Stopped,
-                ),
-              ),
-              token,
-            )
-          },
-        }
-      },
-      createKeywordRecognitionSession: (token) => {
-        if (token.isCancellationRequested) {
-          return {
-            onDidChange: Event.None,
-          }
-        }
+				disposables.add(token.onCancellationRequested(() => {
+					this.proxy.$cancelTextToSpeechSession(session);
+					this.textToSpeechSessions.delete(session);
+					disposables.dispose();
+				}));
 
-        const disposables = new DisposableStore()
-        const session = Math.random()
+				return {
+					onDidChange: onDidChange.event,
+					synthesize: async text => {
+						await this.proxy.$synthesizeSpeech(session, text);
+						await raceCancellation(Event.toPromise(Event.filter(onDidChange.event, e => e.status === TextToSpeechStatus.Stopped)), token);
+					}
+				};
+			},
+			createKeywordRecognitionSession: token => {
+				if (token.isCancellationRequested) {
+					return {
+						onDidChange: Event.None
+					};
+				}
 
-        this.proxy.$createKeywordRecognitionSession(handle, session)
+				const disposables = new DisposableStore();
+				const session = Math.random();
 
-        const onDidChange = disposables.add(
-          new Emitter<IKeywordRecognitionEvent>(),
-        )
-        this.keywordRecognitionSessions.set(session, { onDidChange })
+				this.proxy.$createKeywordRecognitionSession(handle, session);
 
-        disposables.add(
-          token.onCancellationRequested(() => {
-            this.proxy.$cancelKeywordRecognitionSession(session)
-            this.keywordRecognitionSessions.delete(session)
-            disposables.dispose()
-          }),
-        )
+				const onDidChange = disposables.add(new Emitter<IKeywordRecognitionEvent>());
+				this.keywordRecognitionSessions.set(session, { onDidChange });
 
-        return {
-          onDidChange: onDidChange.event,
-        }
-      },
-    })
-    this.providerRegistrations.set(handle, {
-      dispose: () => {
-        registration.dispose()
-      },
-    })
-  }
+				disposables.add(token.onCancellationRequested(() => {
+					this.proxy.$cancelKeywordRecognitionSession(session);
+					this.keywordRecognitionSessions.delete(session);
+					disposables.dispose();
+				}));
 
-  $unregisterProvider(handle: number): void {
-    const registration = this.providerRegistrations.get(handle)
-    if (registration) {
-      registration.dispose()
-      this.providerRegistrations.delete(handle)
-    }
-  }
+				return {
+					onDidChange: onDidChange.event
+				};
+			}
+		});
+		this.providerRegistrations.set(handle, {
+			dispose: () => {
+				registration.dispose();
+			}
+		});
+	}
 
-  $emitSpeechToTextEvent(session: number, event: ISpeechToTextEvent): void {
-    const providerSession = this.speechToTextSessions.get(session)
-    providerSession?.onDidChange.fire(event)
-  }
+	$unregisterProvider(handle: number): void {
+		const registration = this.providerRegistrations.get(handle);
+		if (registration) {
+			registration.dispose();
+			this.providerRegistrations.delete(handle);
+		}
+	}
 
-  $emitTextToSpeechEvent(session: number, event: ITextToSpeechEvent): void {
-    const providerSession = this.textToSpeechSessions.get(session)
-    providerSession?.onDidChange.fire(event)
-  }
+	$emitSpeechToTextEvent(session: number, event: ISpeechToTextEvent): void {
+		const providerSession = this.speechToTextSessions.get(session);
+		providerSession?.onDidChange.fire(event);
+	}
 
-  $emitKeywordRecognitionEvent(
-    session: number,
-    event: IKeywordRecognitionEvent,
-  ): void {
-    const providerSession = this.keywordRecognitionSessions.get(session)
-    providerSession?.onDidChange.fire(event)
-  }
+	$emitTextToSpeechEvent(session: number, event: ITextToSpeechEvent): void {
+		const providerSession = this.textToSpeechSessions.get(session);
+		providerSession?.onDidChange.fire(event);
+	}
 
-  dispose(): void {
-    this.providerRegistrations.forEach((disposable) => disposable.dispose())
-    this.providerRegistrations.clear()
+	$emitKeywordRecognitionEvent(session: number, event: IKeywordRecognitionEvent): void {
+		const providerSession = this.keywordRecognitionSessions.get(session);
+		providerSession?.onDidChange.fire(event);
+	}
 
-    this.speechToTextSessions.forEach((session) =>
-      session.onDidChange.dispose(),
-    )
-    this.speechToTextSessions.clear()
+	dispose(): void {
+		this.providerRegistrations.forEach(disposable => disposable.dispose());
+		this.providerRegistrations.clear();
 
-    this.textToSpeechSessions.forEach((session) =>
-      session.onDidChange.dispose(),
-    )
-    this.textToSpeechSessions.clear()
+		this.speechToTextSessions.forEach(session => session.onDidChange.dispose());
+		this.speechToTextSessions.clear();
 
-    this.keywordRecognitionSessions.forEach((session) =>
-      session.onDidChange.dispose(),
-    )
-    this.keywordRecognitionSessions.clear()
-  }
+		this.textToSpeechSessions.forEach(session => session.onDidChange.dispose());
+		this.textToSpeechSessions.clear();
+
+		this.keywordRecognitionSessions.forEach(session => session.onDidChange.dispose());
+		this.keywordRecognitionSessions.clear();
+	}
 }

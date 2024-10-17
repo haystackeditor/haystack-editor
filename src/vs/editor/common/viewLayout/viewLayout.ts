@@ -50,7 +50,7 @@ class EditorScrollDimensions {
     width: number,
     contentWidth: number,
     height: number,
-    contentHeight: number,
+    contentHeight: number
   ) {
     width = width | 0
     contentWidth = contentWidth | 0
@@ -97,14 +97,14 @@ class EditorScrollable extends Disposable {
   public readonly onDidScroll: Event<ScrollEvent>
 
   private readonly _onDidContentSizeChange = this._register(
-    new Emitter<ContentSizeChangedEvent>(),
+    new Emitter<ContentSizeChangedEvent>()
   )
   public readonly onDidContentSizeChange: Event<ContentSizeChangedEvent> =
     this._onDidContentSizeChange.event
 
   constructor(
     smoothScrollDuration: number,
-    scheduleAtNextAnimationFrame: (callback: () => void) => IDisposable,
+    scheduleAtNextAnimationFrame: (callback: () => void) => IDisposable
   ) {
     super()
     this._dimensions = new EditorScrollDimensions(0, 0, 0, 0)
@@ -113,7 +113,7 @@ class EditorScrollable extends Disposable {
         forceIntegerValues: true,
         smoothScrollDuration,
         scheduleAtNextAnimationFrame,
-      }),
+      })
     )
     this.onDidScroll = this._scrollable.onScroll
   }
@@ -127,7 +127,7 @@ class EditorScrollable extends Disposable {
   }
 
   public validateScrollPosition(
-    scrollPosition: INewScrollPosition,
+    scrollPosition: INewScrollPosition
   ): IScrollPosition {
     return this._scrollable.validateScrollPosition(scrollPosition)
   }
@@ -151,7 +151,7 @@ class EditorScrollable extends Disposable {
         height: dimensions.height,
         scrollHeight: dimensions.scrollHeight,
       },
-      true,
+      true
     )
 
     const contentWidthChanged =
@@ -164,8 +164,8 @@ class EditorScrollable extends Disposable {
           oldDimensions.contentWidth,
           oldDimensions.contentHeight,
           dimensions.contentWidth,
-          dimensions.contentHeight,
-        ),
+          dimensions.contentHeight
+        )
       )
     }
   }
@@ -208,7 +208,7 @@ export class ViewLayout extends Disposable implements IViewLayout {
   constructor(
     configuration: IEditorConfiguration,
     lineCount: number,
-    scheduleAtNextAnimationFrame: (callback: () => void) => IDisposable,
+    scheduleAtNextAnimationFrame: (callback: () => void) => IDisposable
   ) {
     super()
 
@@ -221,13 +221,13 @@ export class ViewLayout extends Disposable implements IViewLayout {
       lineCount,
       options.get(EditorOption.lineHeight),
       padding.top,
-      padding.bottom,
+      padding.bottom
     )
     this._maxLineWidth = 0
     this._overlayWidgetsMinWidth = 0
 
     this._scrollable = this._register(
-      new EditorScrollable(0, scheduleAtNextAnimationFrame),
+      new EditorScrollable(0, scheduleAtNextAnimationFrame)
     )
     this._configureSmoothScrollDuration()
 
@@ -236,8 +236,8 @@ export class ViewLayout extends Disposable implements IViewLayout {
         layoutInfo.contentWidth,
         0,
         layoutInfo.height,
-        0,
-      ),
+        0
+      )
     )
     this.onDidScroll = this._scrollable.onDidScroll
     this.onDidContentSizeChange = this._scrollable.onDidContentSizeChange
@@ -261,7 +261,7 @@ export class ViewLayout extends Disposable implements IViewLayout {
     this._scrollable.setSmoothScrollDuration(
       this._configuration.options.get(EditorOption.smoothScrolling)
         ? SMOOTH_SCROLLING_TIME
-        : 0,
+        : 0
     )
   }
 
@@ -287,8 +287,8 @@ export class ViewLayout extends Disposable implements IViewLayout {
           width,
           scrollDimensions.contentWidth,
           height,
-          this._getContentHeight(width, height, contentWidth),
-        ),
+          this._getContentHeight(width, height, contentWidth)
+        )
       )
     } else {
       this._updateHeight()
@@ -311,7 +311,7 @@ export class ViewLayout extends Disposable implements IViewLayout {
 
   private _getHorizontalScrollbarHeight(
     width: number,
-    scrollWidth: number,
+    scrollWidth: number
   ): number {
     const options = this._configuration.options
     const scrollbar = options.get(EditorOption.scrollbar)
@@ -329,7 +329,7 @@ export class ViewLayout extends Disposable implements IViewLayout {
   private _getContentHeight(
     width: number,
     height: number,
-    contentWidth: number,
+    contentWidth: number
   ): number {
     const options = this._configuration.options
 
@@ -339,7 +339,7 @@ export class ViewLayout extends Disposable implements IViewLayout {
         0,
         height -
           options.get(EditorOption.lineHeight) -
-          options.get(EditorOption.padding).bottom,
+          options.get(EditorOption.padding).bottom
       )
     } else if (
       !options.get(EditorOption.scrollbar)
@@ -361,8 +361,8 @@ export class ViewLayout extends Disposable implements IViewLayout {
         width,
         scrollDimensions.contentWidth,
         height,
-        this._getContentHeight(width, height, contentWidth),
-      ),
+        this._getContentHeight(width, height, contentWidth)
+      )
     )
   }
 
@@ -375,7 +375,7 @@ export class ViewLayout extends Disposable implements IViewLayout {
       currentScrollPosition.scrollTop,
       currentScrollPosition.scrollLeft,
       scrollDimensions.width,
-      scrollDimensions.height,
+      scrollDimensions.height
     )
   }
 
@@ -386,7 +386,7 @@ export class ViewLayout extends Disposable implements IViewLayout {
       currentScrollPosition.scrollTop,
       currentScrollPosition.scrollLeft,
       scrollDimensions.width,
-      scrollDimensions.height,
+      scrollDimensions.height
     )
   }
 
@@ -417,7 +417,7 @@ export class ViewLayout extends Disposable implements IViewLayout {
       return Math.max(
         maxLineWidth + extraHorizontalSpace + layoutInfo.verticalScrollbarWidth,
         whitespaceMinWidth,
-        this._overlayWidgetsMinWidth,
+        this._overlayWidgetsMinWidth
       )
     }
   }
@@ -439,8 +439,8 @@ export class ViewLayout extends Disposable implements IViewLayout {
         scrollDimensions.width,
         this._computeContentWidth(),
         scrollDimensions.height,
-        scrollDimensions.contentHeight,
-      ),
+        scrollDimensions.contentHeight
+      )
     )
 
     // The height might depend on the fact that there is a horizontal scrollbar or not
@@ -460,7 +460,7 @@ export class ViewLayout extends Disposable implements IViewLayout {
       this._linesLayout.getLineNumberAtOrAfterVerticalOffset(scrollTop)
     const whitespaceAboveFirstLine =
       this._linesLayout.getWhitespaceAccumulatedHeightBeforeLineNumber(
-        firstLineNumberInViewport,
+        firstLineNumberInViewport
       )
     return {
       scrollTop: scrollTop,
@@ -471,7 +471,7 @@ export class ViewLayout extends Disposable implements IViewLayout {
 
   // ----
   public changeWhitespace(
-    callback: (accessor: IWhitespaceChangeAccessor) => void,
+    callback: (accessor: IWhitespaceChangeAccessor) => void
   ): boolean {
     const hadAChange = this._linesLayout.changeWhitespace(callback)
     if (hadAChange) {
@@ -481,20 +481,20 @@ export class ViewLayout extends Disposable implements IViewLayout {
   }
   public getVerticalOffsetForLineNumber(
     lineNumber: number,
-    includeViewZones: boolean = false,
+    includeViewZones: boolean = false
   ): number {
     return this._linesLayout.getVerticalOffsetForLineNumber(
       lineNumber,
-      includeViewZones,
+      includeViewZones
     )
   }
   public getVerticalOffsetAfterLineNumber(
     lineNumber: number,
-    includeViewZones: boolean = false,
+    includeViewZones: boolean = false
   ): number {
     return this._linesLayout.getVerticalOffsetAfterLineNumber(
       lineNumber,
-      includeViewZones,
+      includeViewZones
     )
   }
   public isAfterLines(verticalOffset: number): boolean {
@@ -509,12 +509,12 @@ export class ViewLayout extends Disposable implements IViewLayout {
 
   public getLineNumberAtVerticalOffset(verticalOffset: number): number {
     return this._linesLayout.getLineNumberAtOrAfterVerticalOffset(
-      verticalOffset,
+      verticalOffset
     )
   }
 
   public getWhitespaceAtVerticalOffset(
-    verticalOffset: number,
+    verticalOffset: number
   ): IViewWhitespaceViewportData | null {
     return this._linesLayout.getWhitespaceAtVerticalOffset(verticalOffset)
   }
@@ -522,11 +522,11 @@ export class ViewLayout extends Disposable implements IViewLayout {
     const visibleBox = this.getCurrentViewport()
     return this._linesLayout.getLinesViewportData(
       visibleBox.top,
-      visibleBox.top + visibleBox.height,
+      visibleBox.top + visibleBox.height
     )
   }
   public getLinesViewportDataAtScrollTop(
-    scrollTop: number,
+    scrollTop: number
   ): IPartialViewLinesViewportData {
     // do some minimal validations on scrollTop
     const scrollDimensions = this._scrollable.getScrollDimensions()
@@ -538,14 +538,14 @@ export class ViewLayout extends Disposable implements IViewLayout {
     }
     return this._linesLayout.getLinesViewportData(
       scrollTop,
-      scrollTop + scrollDimensions.height,
+      scrollTop + scrollDimensions.height
     )
   }
   public getWhitespaceViewportData(): IViewWhitespaceViewportData[] {
     const visibleBox = this.getCurrentViewport()
     return this._linesLayout.getWhitespaceViewportData(
       visibleBox.top,
-      visibleBox.top + visibleBox.height,
+      visibleBox.top + visibleBox.height
     )
   }
   public getWhitespaces(): IEditorWhitespace[] {
@@ -581,14 +581,14 @@ export class ViewLayout extends Disposable implements IViewLayout {
   }
 
   public validateScrollPosition(
-    scrollPosition: INewScrollPosition,
+    scrollPosition: INewScrollPosition
   ): IScrollPosition {
     return this._scrollable.validateScrollPosition(scrollPosition)
   }
 
   public setScrollPosition(
     position: INewScrollPosition,
-    type: ScrollType,
+    type: ScrollType
   ): void {
     if (type === ScrollType.Immediate) {
       this._scrollable.setScrollPositionNow(position)

@@ -74,15 +74,15 @@ export class ContentHoverController extends Disposable implements IHoverWidget {
     private readonly _editor: ICodeEditor,
     @IInstantiationService
     private readonly _instantiationService: IInstantiationService,
-    @IKeybindingService private readonly _keybindingService: IKeybindingService,
+    @IKeybindingService private readonly _keybindingService: IKeybindingService
   ) {
     super()
 
     this._widget = this._register(
       this._instantiationService.createInstance(
         ContentHoverWidget,
-        this._editor,
-      ),
+        this._editor
+      )
     )
 
     // Instantiate participants and sort them by `hoverOrdinal` which is relevant for rendering order.
@@ -90,7 +90,7 @@ export class ContentHoverController extends Disposable implements IHoverWidget {
     for (const participant of HoverParticipantRegistry.getAll()) {
       const participantInstance = this._instantiationService.createInstance(
         participant,
-        this._editor,
+        this._editor
       )
       if (
         participantInstance instanceof MarkdownHoverParticipant &&
@@ -104,7 +104,7 @@ export class ContentHoverController extends Disposable implements IHoverWidget {
 
     this._computer = new ContentHoverComputer(this._editor, this._participants)
     this._hoverOperation = this._register(
-      new HoverOperation(this._editor, this._computer),
+      new HoverOperation(this._editor, this._computer)
     )
 
     this._register(
@@ -117,9 +117,9 @@ export class ContentHoverController extends Disposable implements IHoverWidget {
           ? this._addLoadingMessage(result.value)
           : result.value
         this._withResult(
-          new HoverResult(this._computer.anchor, messages, result.isComplete),
+          new HoverResult(this._computer.anchor, messages, result.isComplete)
         )
-      }),
+      })
     )
     this._register(
       dom.addStandardDisposableListener(
@@ -129,15 +129,15 @@ export class ContentHoverController extends Disposable implements IHoverWidget {
           if (e.equals(KeyCode.Escape)) {
             this.hide()
           }
-        },
-      ),
+        }
+      )
     )
     this._register(
       TokenizationRegistry.onDidChange(() => {
         if (this._widget.position && this._currentResult) {
           this._setCurrentResult(this._currentResult) // render again
         }
-      }),
+      })
     )
   }
 
@@ -149,7 +149,7 @@ export class ContentHoverController extends Disposable implements IHoverWidget {
     mode: HoverStartMode,
     source: HoverStartSource,
     focus: boolean,
-    mouseEvent: IEditorMouseEvent | null,
+    mouseEvent: IEditorMouseEvent | null
   ): boolean {
     if (!this._widget.position || !this._currentResult) {
       // The hover is not visible
@@ -167,7 +167,7 @@ export class ContentHoverController extends Disposable implements IHoverWidget {
       mouseEvent &&
       this._widget.isMouseGettingCloser(
         mouseEvent.event.posx,
-        mouseEvent.event.posy,
+        mouseEvent.event.posy
       )
 
     if (isGettingCloser) {
@@ -192,7 +192,7 @@ export class ContentHoverController extends Disposable implements IHoverWidget {
     if (
       !anchor.canAdoptVisibleHover(
         this._currentResult.anchor,
-        this._widget.position,
+        this._widget.position
       )
     ) {
       // The new anchor is not compatible with the previous anchor
@@ -213,7 +213,7 @@ export class ContentHoverController extends Disposable implements IHoverWidget {
     mode: HoverStartMode,
     source: HoverStartSource,
     focus: boolean,
-    insistOnKeepingHoverVisible: boolean,
+    insistOnKeepingHoverVisible: boolean
   ): void {
     if (this._computer.anchor && this._computer.anchor.equals(anchor)) {
       // We have to start a hover operation at the exact same anchor as before, so no work is needed
@@ -239,7 +239,7 @@ export class ContentHoverController extends Disposable implements IHoverWidget {
     if (this._currentResult) {
       this._renderMessages(
         this._currentResult.anchor,
-        this._currentResult.messages,
+        this._currentResult.messages
       )
     } else {
       this._widget.hide()
@@ -251,7 +251,7 @@ export class ContentHoverController extends Disposable implements IHoverWidget {
       for (const participant of this._participants) {
         if (participant.createLoadingMessage) {
           const loadingMessage = participant.createLoadingMessage(
-            this._computer.anchor,
+            this._computer.anchor
           )
           if (loadingMessage) {
             return result.slice(0).concat([loadingMessage])
@@ -292,12 +292,12 @@ export class ContentHoverController extends Disposable implements IHoverWidget {
       ContentHoverController.computeHoverRanges(
         this._editor,
         anchor.range,
-        messages,
+        messages
       )
 
     const disposables = new DisposableStore()
     const statusBar = disposables.add(
-      new EditorHoverStatusBar(this._keybindingService),
+      new EditorHoverStatusBar(this._keybindingService)
     )
     const fragment = document.createDocumentFragment()
 
@@ -337,7 +337,7 @@ export class ContentHoverController extends Disposable implements IHoverWidget {
         disposables.add(
           toDisposable(() => {
             highlightDecoration.clear()
-          }),
+          })
         )
       }
 
@@ -353,8 +353,8 @@ export class ContentHoverController extends Disposable implements IHoverWidget {
           this._computer.shouldFocus,
           this._computer.source,
           isBeforeContent,
-          disposables,
-        ),
+          disposables
+        )
       )
     } else {
       disposables.dispose()
@@ -370,13 +370,13 @@ export class ContentHoverController extends Disposable implements IHoverWidget {
     {
       description: "content-hover-highlight",
       className: "hoverHighlight",
-    },
+    }
   )
 
   public static computeHoverRanges(
     editor: ICodeEditor,
     anchorRange: Range,
-    messages: IHoverPart[],
+    messages: IHoverPart[]
   ) {
     let startColumnBoundary = 1
     if (editor.hasModel()) {
@@ -387,11 +387,11 @@ export class ContentHoverController extends Disposable implements IHoverWidget {
         coordinatesConverter.convertModelRangeToViewRange(anchorRange)
       const anchorViewRangeStart = new Position(
         anchorViewRange.startLineNumber,
-        viewModel.getLineMinColumn(anchorViewRange.startLineNumber),
+        viewModel.getLineMinColumn(anchorViewRange.startLineNumber)
       )
       startColumnBoundary =
         coordinatesConverter.convertViewPositionToModelPosition(
-          anchorViewRangeStart,
+          anchorViewRangeStart
         ).column
     }
 
@@ -410,7 +410,7 @@ export class ContentHoverController extends Disposable implements IHoverWidget {
         // this message has a range that is completely sitting on the line of the anchor
         renderStartColumn = Math.max(
           Math.min(renderStartColumn, msg.range.startColumn),
-          startColumnBoundary,
+          startColumnBoundary
         )
       }
       if (msg.forceShowAtRange) {
@@ -459,8 +459,8 @@ export class ContentHoverController extends Disposable implements IHoverWidget {
           0,
           targetRange,
           mouseEvent.event.posx,
-          mouseEvent.event.posy,
-        ),
+          mouseEvent.event.posy
+        )
       )
     }
 
@@ -479,8 +479,8 @@ export class ContentHoverController extends Disposable implements IHoverWidget {
             0,
             target.range,
             mouseEvent.event.posx,
-            mouseEvent.event.posy,
-          ),
+            mouseEvent.event.posy
+          )
         )
       }
     }
@@ -491,7 +491,7 @@ export class ContentHoverController extends Disposable implements IHoverWidget {
         HoverStartMode.Delayed,
         HoverStartSource.Mouse,
         false,
-        mouseEvent,
+        mouseEvent
       )
     }
 
@@ -501,7 +501,7 @@ export class ContentHoverController extends Disposable implements IHoverWidget {
       HoverStartMode.Delayed,
       HoverStartSource.Mouse,
       false,
-      mouseEvent,
+      mouseEvent
     )
   }
 
@@ -509,26 +509,26 @@ export class ContentHoverController extends Disposable implements IHoverWidget {
     range: Range,
     mode: HoverStartMode,
     source: HoverStartSource,
-    focus: boolean,
+    focus: boolean
   ): void {
     this._startShowingOrUpdateHover(
       new HoverRangeAnchor(0, range, undefined, undefined),
       mode,
       source,
       focus,
-      null,
+      null
     )
   }
 
   public async updateMarkdownHoverVerbosityLevel(
     action: HoverVerbosityAction,
     index?: number,
-    focus?: boolean,
+    focus?: boolean
   ): Promise<void> {
     this._markdownHoverParticipant?.updateMarkdownHoverVerbosityLevel(
       action,
       index,
-      focus,
+      focus
     )
   }
 
@@ -544,12 +544,12 @@ export class ContentHoverController extends Disposable implements IHoverWidget {
 
   public doesMarkdownHoverAtIndexSupportVerbosityAction(
     index: number,
-    action: HoverVerbosityAction,
+    action: HoverVerbosityAction
   ): boolean {
     return (
       this._markdownHoverParticipant?.doesMarkdownHoverAtIndexSupportVerbosityAction(
         index,
-        action,
+        action
       ) ?? false
     )
   }

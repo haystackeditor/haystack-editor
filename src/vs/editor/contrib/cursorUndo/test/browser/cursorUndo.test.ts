@@ -9,79 +9,60 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as assert from "assert"
-import { ensureNoDisposablesAreLeakedInTestSuite } from "vs/base/test/common/utils"
-import {
-  CoreEditingCommands,
-  CoreNavigationCommands,
-} from "vs/editor/browser/coreCommands"
-import { Selection } from "vs/editor/common/core/selection"
-import { Handler } from "vs/editor/common/editorCommon"
-import {
-  CursorUndo,
-  CursorUndoRedoController,
-} from "vs/editor/contrib/cursorUndo/browser/cursorUndo"
-import { withTestCodeEditor } from "vs/editor/test/browser/testCodeEditor"
+import * as assert from 'assert';
+import { ensureNoDisposablesAreLeakedInTestSuite } from 'vs/base/test/common/utils';
+import { CoreEditingCommands, CoreNavigationCommands } from 'vs/editor/browser/coreCommands';
+import { Selection } from 'vs/editor/common/core/selection';
+import { Handler } from 'vs/editor/common/editorCommon';
+import { CursorUndo, CursorUndoRedoController } from 'vs/editor/contrib/cursorUndo/browser/cursorUndo';
+import { withTestCodeEditor } from 'vs/editor/test/browser/testCodeEditor';
 
-suite("FindController", () => {
-  ensureNoDisposablesAreLeakedInTestSuite()
+suite('FindController', () => {
 
-  const cursorUndoAction = new CursorUndo()
+	ensureNoDisposablesAreLeakedInTestSuite();
 
-  test("issue #82535: Edge case with cursorUndo", () => {
-    withTestCodeEditor("", {}, (editor) => {
-      editor.registerAndInstantiateContribution(
-        CursorUndoRedoController.ID,
-        CursorUndoRedoController,
-      )
+	const cursorUndoAction = new CursorUndo();
 
-      // type hello
-      editor.trigger("test", Handler.Type, { text: "hello" })
+	test('issue #82535: Edge case with cursorUndo', () => {
+		withTestCodeEditor('', {}, (editor) => {
 
-      // press left
-      CoreNavigationCommands.CursorLeft.runEditorCommand(null, editor, {})
+			editor.registerAndInstantiateContribution(CursorUndoRedoController.ID, CursorUndoRedoController);
 
-      // press Delete
-      CoreEditingCommands.DeleteRight.runEditorCommand(null, editor, {})
-      assert.deepStrictEqual(editor.getValue(), "hell")
-      assert.deepStrictEqual(editor.getSelections(), [
-        new Selection(1, 5, 1, 5),
-      ])
+			// type hello
+			editor.trigger('test', Handler.Type, { text: 'hello' });
 
-      // press left
-      CoreNavigationCommands.CursorLeft.runEditorCommand(null, editor, {})
-      assert.deepStrictEqual(editor.getSelections(), [
-        new Selection(1, 4, 1, 4),
-      ])
+			// press left
+			CoreNavigationCommands.CursorLeft.runEditorCommand(null, editor, {});
 
-      // press Ctrl+U
-      cursorUndoAction.run(null!, editor, {})
-      assert.deepStrictEqual(editor.getSelections(), [
-        new Selection(1, 5, 1, 5),
-      ])
-    })
-  })
+			// press Delete
+			CoreEditingCommands.DeleteRight.runEditorCommand(null, editor, {});
+			assert.deepStrictEqual(editor.getValue(), 'hell');
+			assert.deepStrictEqual(editor.getSelections(), [new Selection(1, 5, 1, 5)]);
 
-  test("issue #82535: Edge case with cursorUndo (reverse)", () => {
-    withTestCodeEditor("", {}, (editor) => {
-      editor.registerAndInstantiateContribution(
-        CursorUndoRedoController.ID,
-        CursorUndoRedoController,
-      )
+			// press left
+			CoreNavigationCommands.CursorLeft.runEditorCommand(null, editor, {});
+			assert.deepStrictEqual(editor.getSelections(), [new Selection(1, 4, 1, 4)]);
 
-      // type hello
-      editor.trigger("test", Handler.Type, { text: "hell" })
-      editor.trigger("test", Handler.Type, { text: "o" })
-      assert.deepStrictEqual(editor.getValue(), "hello")
-      assert.deepStrictEqual(editor.getSelections(), [
-        new Selection(1, 6, 1, 6),
-      ])
+			// press Ctrl+U
+			cursorUndoAction.run(null!, editor, {});
+			assert.deepStrictEqual(editor.getSelections(), [new Selection(1, 5, 1, 5)]);
+		});
+	});
 
-      // press Ctrl+U
-      cursorUndoAction.run(null!, editor, {})
-      assert.deepStrictEqual(editor.getSelections(), [
-        new Selection(1, 6, 1, 6),
-      ])
-    })
-  })
-})
+	test('issue #82535: Edge case with cursorUndo (reverse)', () => {
+		withTestCodeEditor('', {}, (editor) => {
+
+			editor.registerAndInstantiateContribution(CursorUndoRedoController.ID, CursorUndoRedoController);
+
+			// type hello
+			editor.trigger('test', Handler.Type, { text: 'hell' });
+			editor.trigger('test', Handler.Type, { text: 'o' });
+			assert.deepStrictEqual(editor.getValue(), 'hello');
+			assert.deepStrictEqual(editor.getSelections(), [new Selection(1, 6, 1, 6)]);
+
+			// press Ctrl+U
+			cursorUndoAction.run(null!, editor, {});
+			assert.deepStrictEqual(editor.getSelections(), [new Selection(1, 6, 1, 6)]);
+		});
+	});
+});

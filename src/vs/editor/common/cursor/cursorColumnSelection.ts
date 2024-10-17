@@ -9,228 +9,124 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import {
-  CursorConfiguration,
-  ICursorSimpleModel,
-  SingleCursorState,
-  IColumnSelectData,
-  SelectionStartKind,
-} from "vs/editor/common/cursorCommon"
-import { Position } from "vs/editor/common/core/position"
-import { Range } from "vs/editor/common/core/range"
+import { CursorConfiguration, ICursorSimpleModel, SingleCursorState, IColumnSelectData, SelectionStartKind } from 'vs/editor/common/cursorCommon';
+import { Position } from 'vs/editor/common/core/position';
+import { Range } from 'vs/editor/common/core/range';
 
 export class ColumnSelection {
-  public static columnSelect(
-    config: CursorConfiguration,
-    model: ICursorSimpleModel,
-    fromLineNumber: number,
-    fromVisibleColumn: number,
-    toLineNumber: number,
-    toVisibleColumn: number,
-  ): IColumnSelectResult {
-    const lineCount = Math.abs(toLineNumber - fromLineNumber) + 1
-    const reversed = fromLineNumber > toLineNumber
-    const isRTL = fromVisibleColumn > toVisibleColumn
-    const isLTR = fromVisibleColumn < toVisibleColumn
 
-    const result: SingleCursorState[] = []
+	public static columnSelect(config: CursorConfiguration, model: ICursorSimpleModel, fromLineNumber: number, fromVisibleColumn: number, toLineNumber: number, toVisibleColumn: number): IColumnSelectResult {
+		const lineCount = Math.abs(toLineNumber - fromLineNumber) + 1;
+		const reversed = (fromLineNumber > toLineNumber);
+		const isRTL = (fromVisibleColumn > toVisibleColumn);
+		const isLTR = (fromVisibleColumn < toVisibleColumn);
 
-    // console.log(`fromVisibleColumn: ${fromVisibleColumn}, toVisibleColumn: ${toVisibleColumn}`);
+		const result: SingleCursorState[] = [];
 
-    for (let i = 0; i < lineCount; i++) {
-      const lineNumber = fromLineNumber + (reversed ? -i : i)
+		// console.log(`fromVisibleColumn: ${fromVisibleColumn}, toVisibleColumn: ${toVisibleColumn}`);
 
-      const startColumn = config.columnFromVisibleColumn(
-        model,
-        lineNumber,
-        fromVisibleColumn,
-      )
-      const endColumn = config.columnFromVisibleColumn(
-        model,
-        lineNumber,
-        toVisibleColumn,
-      )
-      const visibleStartColumn = config.visibleColumnFromColumn(
-        model,
-        new Position(lineNumber, startColumn),
-      )
-      const visibleEndColumn = config.visibleColumnFromColumn(
-        model,
-        new Position(lineNumber, endColumn),
-      )
+		for (let i = 0; i < lineCount; i++) {
+			const lineNumber = fromLineNumber + (reversed ? -i : i);
 
-      // console.log(`lineNumber: ${lineNumber}: visibleStartColumn: ${visibleStartColumn}, visibleEndColumn: ${visibleEndColumn}`);
+			const startColumn = config.columnFromVisibleColumn(model, lineNumber, fromVisibleColumn);
+			const endColumn = config.columnFromVisibleColumn(model, lineNumber, toVisibleColumn);
+			const visibleStartColumn = config.visibleColumnFromColumn(model, new Position(lineNumber, startColumn));
+			const visibleEndColumn = config.visibleColumnFromColumn(model, new Position(lineNumber, endColumn));
 
-      if (isLTR) {
-        if (visibleStartColumn > toVisibleColumn) {
-          continue
-        }
-        if (visibleEndColumn < fromVisibleColumn) {
-          continue
-        }
-      }
+			// console.log(`lineNumber: ${lineNumber}: visibleStartColumn: ${visibleStartColumn}, visibleEndColumn: ${visibleEndColumn}`);
 
-      if (isRTL) {
-        if (visibleEndColumn > fromVisibleColumn) {
-          continue
-        }
-        if (visibleStartColumn < toVisibleColumn) {
-          continue
-        }
-      }
+			if (isLTR) {
+				if (visibleStartColumn > toVisibleColumn) {
+					continue;
+				}
+				if (visibleEndColumn < fromVisibleColumn) {
+					continue;
+				}
+			}
 
-      result.push(
-        new SingleCursorState(
-          new Range(lineNumber, startColumn, lineNumber, startColumn),
-          SelectionStartKind.Simple,
-          0,
-          new Position(lineNumber, endColumn),
-          0,
-        ),
-      )
-    }
+			if (isRTL) {
+				if (visibleEndColumn > fromVisibleColumn) {
+					continue;
+				}
+				if (visibleStartColumn < toVisibleColumn) {
+					continue;
+				}
+			}
 
-    if (result.length === 0) {
-      // We are after all the lines, so add cursor at the end of each line
-      for (let i = 0; i < lineCount; i++) {
-        const lineNumber = fromLineNumber + (reversed ? -i : i)
-        const maxColumn = model.getLineMaxColumn(lineNumber)
+			result.push(new SingleCursorState(
+				new Range(lineNumber, startColumn, lineNumber, startColumn), SelectionStartKind.Simple, 0,
+				new Position(lineNumber, endColumn), 0
+			));
+		}
 
-        result.push(
-          new SingleCursorState(
-            new Range(lineNumber, maxColumn, lineNumber, maxColumn),
-            SelectionStartKind.Simple,
-            0,
-            new Position(lineNumber, maxColumn),
-            0,
-          ),
-        )
-      }
-    }
+		if (result.length === 0) {
+			// We are after all the lines, so add cursor at the end of each line
+			for (let i = 0; i < lineCount; i++) {
+				const lineNumber = fromLineNumber + (reversed ? -i : i);
+				const maxColumn = model.getLineMaxColumn(lineNumber);
 
-    return {
-      viewStates: result,
-      reversed: reversed,
-      fromLineNumber: fromLineNumber,
-      fromVisualColumn: fromVisibleColumn,
-      toLineNumber: toLineNumber,
-      toVisualColumn: toVisibleColumn,
-    }
-  }
+				result.push(new SingleCursorState(
+					new Range(lineNumber, maxColumn, lineNumber, maxColumn), SelectionStartKind.Simple, 0,
+					new Position(lineNumber, maxColumn), 0
+				));
+			}
+		}
 
-  public static columnSelectLeft(
-    config: CursorConfiguration,
-    model: ICursorSimpleModel,
-    prevColumnSelectData: IColumnSelectData,
-  ): IColumnSelectResult {
-    let toViewVisualColumn = prevColumnSelectData.toViewVisualColumn
-    if (toViewVisualColumn > 0) {
-      toViewVisualColumn--
-    }
+		return {
+			viewStates: result,
+			reversed: reversed,
+			fromLineNumber: fromLineNumber,
+			fromVisualColumn: fromVisibleColumn,
+			toLineNumber: toLineNumber,
+			toVisualColumn: toVisibleColumn
+		};
+	}
 
-    return ColumnSelection.columnSelect(
-      config,
-      model,
-      prevColumnSelectData.fromViewLineNumber,
-      prevColumnSelectData.fromViewVisualColumn,
-      prevColumnSelectData.toViewLineNumber,
-      toViewVisualColumn,
-    )
-  }
+	public static columnSelectLeft(config: CursorConfiguration, model: ICursorSimpleModel, prevColumnSelectData: IColumnSelectData): IColumnSelectResult {
+		let toViewVisualColumn = prevColumnSelectData.toViewVisualColumn;
+		if (toViewVisualColumn > 0) {
+			toViewVisualColumn--;
+		}
 
-  public static columnSelectRight(
-    config: CursorConfiguration,
-    model: ICursorSimpleModel,
-    prevColumnSelectData: IColumnSelectData,
-  ): IColumnSelectResult {
-    let maxVisualViewColumn = 0
-    const minViewLineNumber = Math.min(
-      prevColumnSelectData.fromViewLineNumber,
-      prevColumnSelectData.toViewLineNumber,
-    )
-    const maxViewLineNumber = Math.max(
-      prevColumnSelectData.fromViewLineNumber,
-      prevColumnSelectData.toViewLineNumber,
-    )
-    for (
-      let lineNumber = minViewLineNumber;
-      lineNumber <= maxViewLineNumber;
-      lineNumber++
-    ) {
-      const lineMaxViewColumn = model.getLineMaxColumn(lineNumber)
-      const lineMaxVisualViewColumn = config.visibleColumnFromColumn(
-        model,
-        new Position(lineNumber, lineMaxViewColumn),
-      )
-      maxVisualViewColumn = Math.max(
-        maxVisualViewColumn,
-        lineMaxVisualViewColumn,
-      )
-    }
+		return ColumnSelection.columnSelect(config, model, prevColumnSelectData.fromViewLineNumber, prevColumnSelectData.fromViewVisualColumn, prevColumnSelectData.toViewLineNumber, toViewVisualColumn);
+	}
 
-    let toViewVisualColumn = prevColumnSelectData.toViewVisualColumn
-    if (toViewVisualColumn < maxVisualViewColumn) {
-      toViewVisualColumn++
-    }
+	public static columnSelectRight(config: CursorConfiguration, model: ICursorSimpleModel, prevColumnSelectData: IColumnSelectData): IColumnSelectResult {
+		let maxVisualViewColumn = 0;
+		const minViewLineNumber = Math.min(prevColumnSelectData.fromViewLineNumber, prevColumnSelectData.toViewLineNumber);
+		const maxViewLineNumber = Math.max(prevColumnSelectData.fromViewLineNumber, prevColumnSelectData.toViewLineNumber);
+		for (let lineNumber = minViewLineNumber; lineNumber <= maxViewLineNumber; lineNumber++) {
+			const lineMaxViewColumn = model.getLineMaxColumn(lineNumber);
+			const lineMaxVisualViewColumn = config.visibleColumnFromColumn(model, new Position(lineNumber, lineMaxViewColumn));
+			maxVisualViewColumn = Math.max(maxVisualViewColumn, lineMaxVisualViewColumn);
+		}
 
-    return this.columnSelect(
-      config,
-      model,
-      prevColumnSelectData.fromViewLineNumber,
-      prevColumnSelectData.fromViewVisualColumn,
-      prevColumnSelectData.toViewLineNumber,
-      toViewVisualColumn,
-    )
-  }
+		let toViewVisualColumn = prevColumnSelectData.toViewVisualColumn;
+		if (toViewVisualColumn < maxVisualViewColumn) {
+			toViewVisualColumn++;
+		}
 
-  public static columnSelectUp(
-    config: CursorConfiguration,
-    model: ICursorSimpleModel,
-    prevColumnSelectData: IColumnSelectData,
-    isPaged: boolean,
-  ): IColumnSelectResult {
-    const linesCount = isPaged ? config.pageSize : 1
-    const toViewLineNumber = Math.max(
-      1,
-      prevColumnSelectData.toViewLineNumber - linesCount,
-    )
-    return this.columnSelect(
-      config,
-      model,
-      prevColumnSelectData.fromViewLineNumber,
-      prevColumnSelectData.fromViewVisualColumn,
-      toViewLineNumber,
-      prevColumnSelectData.toViewVisualColumn,
-    )
-  }
+		return this.columnSelect(config, model, prevColumnSelectData.fromViewLineNumber, prevColumnSelectData.fromViewVisualColumn, prevColumnSelectData.toViewLineNumber, toViewVisualColumn);
+	}
 
-  public static columnSelectDown(
-    config: CursorConfiguration,
-    model: ICursorSimpleModel,
-    prevColumnSelectData: IColumnSelectData,
-    isPaged: boolean,
-  ): IColumnSelectResult {
-    const linesCount = isPaged ? config.pageSize : 1
-    const toViewLineNumber = Math.min(
-      model.getLineCount(),
-      prevColumnSelectData.toViewLineNumber + linesCount,
-    )
-    return this.columnSelect(
-      config,
-      model,
-      prevColumnSelectData.fromViewLineNumber,
-      prevColumnSelectData.fromViewVisualColumn,
-      toViewLineNumber,
-      prevColumnSelectData.toViewVisualColumn,
-    )
-  }
+	public static columnSelectUp(config: CursorConfiguration, model: ICursorSimpleModel, prevColumnSelectData: IColumnSelectData, isPaged: boolean): IColumnSelectResult {
+		const linesCount = isPaged ? config.pageSize : 1;
+		const toViewLineNumber = Math.max(1, prevColumnSelectData.toViewLineNumber - linesCount);
+		return this.columnSelect(config, model, prevColumnSelectData.fromViewLineNumber, prevColumnSelectData.fromViewVisualColumn, toViewLineNumber, prevColumnSelectData.toViewVisualColumn);
+	}
+
+	public static columnSelectDown(config: CursorConfiguration, model: ICursorSimpleModel, prevColumnSelectData: IColumnSelectData, isPaged: boolean): IColumnSelectResult {
+		const linesCount = isPaged ? config.pageSize : 1;
+		const toViewLineNumber = Math.min(model.getLineCount(), prevColumnSelectData.toViewLineNumber + linesCount);
+		return this.columnSelect(config, model, prevColumnSelectData.fromViewLineNumber, prevColumnSelectData.fromViewVisualColumn, toViewLineNumber, prevColumnSelectData.toViewVisualColumn);
+	}
 }
 
 export interface IColumnSelectResult {
-  viewStates: SingleCursorState[]
-  reversed: boolean
-  fromLineNumber: number
-  fromVisualColumn: number
-  toLineNumber: number
-  toVisualColumn: number
+	viewStates: SingleCursorState[];
+	reversed: boolean;
+	fromLineNumber: number;
+	fromVisualColumn: number;
+	toLineNumber: number;
+	toVisualColumn: number;
 }

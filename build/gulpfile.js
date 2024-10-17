@@ -44,8 +44,8 @@ const transpileClientSWCTask = task.define(
   task.series(
     util.rimraf("out"),
     util.buildWebNodePaths("out"),
-    transpileTask("src", "out", true),
-  ),
+    transpileTask("src", "out", true)
+  )
 )
 gulp.task(transpileClientSWCTask)
 
@@ -55,8 +55,8 @@ const transpileClientTask = task.define(
   task.series(
     util.rimraf("out"),
     util.buildWebNodePaths("out"),
-    transpileTask("src", "out"),
-  ),
+    transpileTask("src", "out")
+  )
 )
 gulp.task(transpileClientTask)
 
@@ -67,8 +67,8 @@ const compileClientTask = task.define(
     util.rimraf("out"),
     util.buildWebNodePaths("out"),
     compileApiProposalNamesTask,
-    compileTask("src", "out", false),
-  ),
+    compileTask("src", "out", false)
+  )
 )
 gulp.task(compileClientTask)
 
@@ -77,8 +77,8 @@ const watchClientTask = task.define(
   task.series(
     util.rimraf("out"),
     util.buildWebNodePaths("out"),
-    task.parallel(watchTask("out", false), watchApiProposalNamesTask),
-  ),
+    task.parallel(watchTask("out", false), watchApiProposalNamesTask)
+  )
 )
 gulp.task(watchClientTask)
 
@@ -89,8 +89,8 @@ const _compileTask = task.define(
     monacoTypecheckTask,
     compileClientTask,
     compileExtensionsTask,
-    compileExtensionMediaTask,
-  ),
+    compileExtensionMediaTask
+  )
 )
 gulp.task(_compileTask)
 
@@ -99,9 +99,9 @@ gulp.task(
     "watch",
     task.parallel(
       /* monacoTypecheckWatchTask, */ watchClientTask,
-      watchExtensionsTask,
-    ),
-  ),
+      watchExtensionsTask
+    )
+  )
 )
 
 // Default

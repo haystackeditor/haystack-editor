@@ -57,12 +57,12 @@ class TypeScriptWorkspaceSymbolProvider
 {
   public constructor(
     private readonly client: ITypeScriptServiceClient,
-    private readonly modeIds: readonly string[],
+    private readonly modeIds: readonly string[]
   ) {}
 
   public async provideWorkspaceSymbols(
     search: string,
-    token: vscode.CancellationToken,
+    token: vscode.CancellationToken
   ): Promise<vscode.SymbolInformation[]> {
     let file: string | undefined
     if (this.searchAllOpenProjects) {
@@ -118,7 +118,7 @@ class TypeScriptWorkspaceSymbolProvider
   }
 
   private toSymbolInformation(
-    item: Proto.NavtoItem,
+    item: Proto.NavtoItem
   ): vscode.SymbolInformation | undefined {
     if (item.kind === "alias" && !item.containerName) {
       return
@@ -129,7 +129,7 @@ class TypeScriptWorkspaceSymbolProvider
       fileSchemes.isOfScheme(
         uri,
         fileSchemes.chatCodeBlock,
-        fileSchemes.chatBackingCodeBlock,
+        fileSchemes.chatBackingCodeBlock
       )
     ) {
       return
@@ -140,7 +140,7 @@ class TypeScriptWorkspaceSymbolProvider
       label,
       getSymbolKind(item),
       item.containerName || "",
-      typeConverters.Location.fromTextSpan(uri, item),
+      typeConverters.Location.fromTextSpan(uri, item)
     )
     const kindModifiers = item.kindModifiers
       ? parseKindModifier(item.kindModifiers)
@@ -183,9 +183,9 @@ class TypeScriptWorkspaceSymbolProvider
 
 export function register(
   client: ITypeScriptServiceClient,
-  modeIds: readonly string[],
+  modeIds: readonly string[]
 ) {
   return vscode.languages.registerWorkspaceSymbolProvider(
-    new TypeScriptWorkspaceSymbolProvider(client, modeIds),
+    new TypeScriptWorkspaceSymbolProvider(client, modeIds)
   )
 }

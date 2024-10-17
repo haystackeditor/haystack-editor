@@ -9,7 +9,7 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { registerMainProcessRemoteService } from "vs/platform/ipc/electron-sandbox/services"
-import { IEncryptionService } from "vs/platform/encryption/common/encryptionService"
+import { registerMainProcessRemoteService } from 'vs/platform/ipc/electron-sandbox/services';
+import { IEncryptionService } from 'vs/platform/encryption/common/encryptionService';
 
-registerMainProcessRemoteService(IEncryptionService, "encryption")
+registerMainProcessRemoteService(IEncryptionService, 'encryption');

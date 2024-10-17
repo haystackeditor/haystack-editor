@@ -9,50 +9,49 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { CancellationTokenSource } from "vs/base/common/cancellation"
-import { URI } from "vs/base/common/uri"
-import { ILanguageFeaturesService } from "vs/editor/common/services/languageFeatures"
-import { ITextModelService } from "vs/editor/common/services/resolverService"
-import { CommandsRegistry } from "vs/platform/commands/common/commands"
-import { ServicesAccessor } from "vs/platform/instantiation/common/instantiation"
-import * as languages from "vs/editor/common/languages"
+import { CancellationTokenSource } from 'vs/base/common/cancellation';
+import { URI } from 'vs/base/common/uri';
+import { ILanguageFeaturesService } from 'vs/editor/common/services/languageFeatures';
+import { ITextModelService } from 'vs/editor/common/services/resolverService';
+import { CommandsRegistry } from 'vs/platform/commands/common/commands';
+import { ServicesAccessor } from 'vs/platform/instantiation/common/instantiation';
+import * as languages from 'vs/editor/common/languages';
 
 CommandsRegistry.registerCommand(
-  "_executeMappedEditsProvider",
-  async (
-    accessor: ServicesAccessor,
-    documentUri: URI,
-    codeBlocks: string[],
-    context: languages.MappedEditsContext,
-  ): Promise<languages.WorkspaceEdit | null> => {
-    const modelService = accessor.get(ITextModelService)
-    const langFeaturesService = accessor.get(ILanguageFeaturesService)
+	'_executeMappedEditsProvider',
+	async (
+		accessor: ServicesAccessor,
+		documentUri: URI,
+		codeBlocks: string[],
+		context: languages.MappedEditsContext
+	): Promise<languages.WorkspaceEdit | null> => {
 
-    const document = await modelService.createModelReference(documentUri)
+		const modelService = accessor.get(ITextModelService);
+		const langFeaturesService = accessor.get(ILanguageFeaturesService);
 
-    let result: languages.WorkspaceEdit | null = null
+		const document = await modelService.createModelReference(documentUri);
 
-    try {
-      const providers = langFeaturesService.mappedEditsProvider.ordered(
-        document.object.textEditorModel,
-      )
+		let result: languages.WorkspaceEdit | null = null;
 
-      if (providers.length > 0) {
-        const mostRelevantProvider = providers[0]
+		try {
+			const providers = langFeaturesService.mappedEditsProvider.ordered(document.object.textEditorModel);
 
-        const cancellationTokenSource = new CancellationTokenSource()
+			if (providers.length > 0) {
+				const mostRelevantProvider = providers[0];
 
-        result = await mostRelevantProvider.provideMappedEdits(
-          document.object.textEditorModel,
-          codeBlocks,
-          context,
-          cancellationTokenSource.token,
-        )
-      }
-    } finally {
-      document.dispose()
-    }
+				const cancellationTokenSource = new CancellationTokenSource();
 
-    return result
-  },
-)
+				result = await mostRelevantProvider.provideMappedEdits(
+					document.object.textEditorModel,
+					codeBlocks,
+					context,
+					cancellationTokenSource.token
+				);
+			}
+		} finally {
+			document.dispose();
+		}
+
+		return result;
+	}
+);

@@ -69,28 +69,28 @@ export class DiffEditorGutter extends Disposable {
   private readonly _menu = this._register(
     this._menuService.createMenu(
       MenuId.DiffEditorHunkToolbar,
-      this._contextKeyService,
-    ),
+      this._contextKeyService
+    )
   )
   private readonly _actions = observableFromEvent(this._menu.onDidChange, () =>
-    this._menu.getActions(),
+    this._menu.getActions()
   )
   private readonly _hasActions = this._actions.map((a) => a.length > 0)
   private readonly _showSash = derived(
     this,
     (reader) =>
       this._options.renderSideBySide.read(reader) &&
-      this._hasActions.read(reader),
+      this._hasActions.read(reader)
   )
 
   public readonly width = derived(this, (reader) =>
-    this._hasActions.read(reader) ? width : 0,
+    this._hasActions.read(reader) ? width : 0
   )
 
   private readonly elements = h(
     "div.gutter@gutter",
     { style: { position: "absolute", height: "100%", width: width + "px" } },
-    [],
+    []
   )
 
   constructor(
@@ -106,7 +106,7 @@ export class DiffEditorGutter extends Disposable {
     @IInstantiationService
     private readonly _instantiationService: IInstantiationService,
     @IContextKeyService private readonly _contextKeyService: IContextKeyService,
-    @IMenuService private readonly _menuService: IMenuService,
+    @IMenuService private readonly _menuService: IMenuService
   ) {
     super()
 
@@ -115,13 +115,13 @@ export class DiffEditorGutter extends Disposable {
     this._register(
       addDisposableListener(this.elements.root, "click", () => {
         this._editors.modified.focus()
-      }),
+      })
     )
 
     this._register(
       applyStyle(this.elements.root, {
         display: this._hasActions.map((a) => (a ? "block" : "none")),
-      }),
+      })
     )
 
     derivedDisposable(this, (reader) => {
@@ -136,9 +136,9 @@ export class DiffEditorGutter extends Disposable {
             derivedWithSetter(
               this,
               (reader) => this._sashLayout.sashLeft.read(reader) - width,
-              (v, tx) => this._sashLayout.sashLeft.set(v + width, tx),
+              (v, tx) => this._sashLayout.sashLeft.set(v + width, tx)
             ),
-            () => this._sashLayout.resetSash(),
+            () => this._sashLayout.resetSash()
           )
     }).recomputeInitiallyAndOnChange(this._store)
 
@@ -160,7 +160,7 @@ export class DiffEditorGutter extends Disposable {
             const selection = this._selectedDiffs.read(reader)
             if (selection.length > 0) {
               const m = DetailedLineRangeMapping.fromRangeMappings(
-                selection.flatMap((s) => s.rangeMappings),
+                selection.flatMap((s) => s.rangeMappings)
               )
               return [
                 new DiffGutterItem(
@@ -169,7 +169,7 @@ export class DiffEditorGutter extends Disposable {
                   MenuId.DiffEditorSelectionToolbar,
                   undefined,
                   model.model.original.uri,
-                  model.model.modified.uri,
+                  model.model.modified.uri
                 ),
               ]
             }
@@ -184,8 +184,8 @@ export class DiffEditorGutter extends Disposable {
                   MenuId.DiffEditorHunkToolbar,
                   undefined,
                   model.model.original.uri,
-                  model.model.modified.uri,
-                ),
+                  model.model.modified.uri
+                )
             )
           },
           createView: (item, target) => {
@@ -193,11 +193,11 @@ export class DiffEditorGutter extends Disposable {
               DiffToolBar,
               item,
               target,
-              this,
+              this
             )
           },
-        },
-      ),
+        }
+      )
     )
 
     this._register(
@@ -212,8 +212,8 @@ export class DiffEditorGutter extends Disposable {
             this._editors.modified.delegateScrollFromMouseWheelEvent(e)
           }
         },
-        { passive: false },
-      ),
+        { passive: false }
+      )
     )
   }
 
@@ -240,7 +240,7 @@ export class DiffEditorGutter extends Disposable {
     }
 
     return mappings?.find((m) =>
-      m.lineRangeMapping.modified.contains(cursorPosition.lineNumber),
+      m.lineRangeMapping.modified.contains(cursorPosition.lineNumber)
     )
   })
 
@@ -259,18 +259,18 @@ export class DiffEditorGutter extends Disposable {
     }
 
     const selectedLineNumbers = new LineRangeSet(
-      selections.map((s) => LineRange.fromRangeInclusive(s)),
+      selections.map((s) => LineRange.fromRangeInclusive(s))
     )
 
     const selectedMappings = diff.mappings.filter(
       (m) =>
         m.lineRangeMapping.innerChanges &&
-        selectedLineNumbers.intersects(m.lineRangeMapping.modified),
+        selectedLineNumbers.intersects(m.lineRangeMapping.modified)
     )
     const result = selectedMappings.map((mapping) => ({
       mapping,
       rangeMappings: mapping.lineRangeMapping.innerChanges!.filter((c) =>
-        selections.some((s) => Range.areIntersecting(c.modifiedRange, s)),
+        selections.some((s) => Range.areIntersecting(c.modifiedRange, s))
       ),
     }))
     if (
@@ -294,7 +294,7 @@ class DiffGutterItem implements IGutterItemInfo {
     public readonly menuId: MenuId,
     public readonly rangeOverride: LineRange | undefined,
     public readonly originalUri: URI,
-    public readonly modifiedUri: URI,
+    public readonly modifiedUri: URI
   ) {}
   get id(): string {
     return this.mapping.modified.toString()
@@ -308,7 +308,7 @@ class DiffToolBar extends Disposable implements IGutterItemView {
   private readonly _elements = h(
     "div.gutterItem",
     { style: { height: "20px", width: "34px" } },
-    [h("div.background@background", {}, []), h("div.buttons@buttons", {}, [])],
+    [h("div.background@background", {}, []), h("div.buttons@buttons", {}, [])]
   )
 
   private readonly _showAlways = this._item.map(this, (item) => item.showAlways)
@@ -320,7 +320,7 @@ class DiffToolBar extends Disposable implements IGutterItemView {
     private readonly _item: IObservable<DiffGutterItem>,
     target: HTMLElement,
     gutter: DiffEditorGutter,
-    @IInstantiationService instantiationService: IInstantiationService,
+    @IInstantiationService instantiationService: IInstantiationService
   ) {
     super()
 
@@ -329,8 +329,8 @@ class DiffToolBar extends Disposable implements IGutterItemView {
         WorkbenchHoverDelegate,
         "element",
         true,
-        { position: { hoverPosition: HoverPosition.RIGHT } },
-      ),
+        { position: { hoverPosition: HoverPosition.RIGHT } }
+      )
     )
 
     this._register(appendRemoveOnDispose(target, this._elements.root))
@@ -344,7 +344,7 @@ class DiffToolBar extends Disposable implements IGutterItemView {
         setTimeout(() => {
           this._elements.root.classList.toggle("noTransition", false)
         }, 0)
-      }),
+      })
     )
 
     this._register(
@@ -379,17 +379,17 @@ class DiffToolBar extends Disposable implements IGutterItemView {
               menuOptions: {
                 shouldForwardArgs: true,
               },
-            },
-          ),
+            }
+          )
         )
         store.add(
           i.onDidChangeMenuItems(() => {
             if (this._lastItemRange) {
               this.layout(this._lastItemRange, this._lastViewRange!)
             }
-          }),
+          })
         )
-      }),
+      })
     )
   }
 
@@ -404,7 +404,7 @@ class DiffToolBar extends Disposable implements IGutterItemView {
     this._isSmall.set(
       this._item.get().mapping.original.startLineNumber === 1 &&
         itemRange.length < 30,
-      undefined,
+      undefined
     )
     // Item might have changed
     itemHeight = this._elements.buttons.clientHeight
@@ -417,12 +417,12 @@ class DiffToolBar extends Disposable implements IGutterItemView {
 
     const preferredViewPortRange = OffsetRange.tryCreate(
       margin,
-      viewRange.endExclusive - margin - itemHeight,
+      viewRange.endExclusive - margin - itemHeight
     )
 
     const preferredParentRange = OffsetRange.tryCreate(
       itemRange.start + margin,
-      itemRange.endExclusive - itemHeight - margin,
+      itemRange.endExclusive - itemHeight - margin
     )
 
     if (

@@ -51,14 +51,11 @@ Clients may send a `workspace/didChangeConfiguration` notification to notify the
 The server supports the following settings:
 
 - `markdown`
-
   - `suggest`
-
     - `paths`
       - `enabled` — Enable/disable path suggestions.
 
   - `occurrencesHighlight`
-
     - `enabled` — Enable/disable highlighting of link occurrences.
 
   - `validate`

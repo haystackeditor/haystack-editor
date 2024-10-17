@@ -9,31 +9,21 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Event } from "vs/base/common/event"
-import {
-  IAccessibilityService,
-  AccessibilitySupport,
-} from "vs/platform/accessibility/common/accessibility"
+import { Event } from 'vs/base/common/event';
+import { IAccessibilityService, AccessibilitySupport } from 'vs/platform/accessibility/common/accessibility';
 
 export class TestAccessibilityService implements IAccessibilityService {
-  declare readonly _serviceBrand: undefined
 
-  onDidChangeScreenReaderOptimized = Event.None
-  onDidChangeReducedMotion = Event.None
+	declare readonly _serviceBrand: undefined;
 
-  isScreenReaderOptimized(): boolean {
-    return false
-  }
-  isMotionReduced(): boolean {
-    return false
-  }
-  alwaysUnderlineAccessKeys(): Promise<boolean> {
-    return Promise.resolve(false)
-  }
-  setAccessibilitySupport(accessibilitySupport: AccessibilitySupport): void {}
-  getAccessibilitySupport(): AccessibilitySupport {
-    return AccessibilitySupport.Unknown
-  }
-  alert(message: string): void {}
-  status(message: string): void {}
+	onDidChangeScreenReaderOptimized = Event.None;
+	onDidChangeReducedMotion = Event.None;
+
+	isScreenReaderOptimized(): boolean { return false; }
+	isMotionReduced(): boolean { return false; }
+	alwaysUnderlineAccessKeys(): Promise<boolean> { return Promise.resolve(false); }
+	setAccessibilitySupport(accessibilitySupport: AccessibilitySupport): void { }
+	getAccessibilitySupport(): AccessibilitySupport { return AccessibilitySupport.Unknown; }
+	alert(message: string): void { }
+	status(message: string): void { }
 }

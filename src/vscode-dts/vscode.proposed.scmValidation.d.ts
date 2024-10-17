@@ -9,60 +9,58 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-declare module "vscode" {
-  // todo@joaomoreno add issue reference
+declare module 'vscode' {
 
-  /**
-   * Represents the validation type of the Source Control input.
-   */
-  export enum SourceControlInputBoxValidationType {
-    /**
-     * Something not allowed by the rules of a language or other means.
-     */
-    Error = 0,
+	// todo@joaomoreno add issue reference
 
-    /**
-     * Something suspicious but allowed.
-     */
-    Warning = 1,
+	/**
+	 * Represents the validation type of the Source Control input.
+	 */
+	export enum SourceControlInputBoxValidationType {
 
-    /**
-     * Something to inform about but not a problem.
-     */
-    Information = 2,
-  }
+		/**
+		 * Something not allowed by the rules of a language or other means.
+		 */
+		Error = 0,
 
-  export interface SourceControlInputBoxValidation {
-    /**
-     * The validation message to display.
-     */
-    readonly message: string | MarkdownString
+		/**
+		 * Something suspicious but allowed.
+		 */
+		Warning = 1,
 
-    /**
-     * The validation type.
-     */
-    readonly type: SourceControlInputBoxValidationType
-  }
+		/**
+		 * Something to inform about but not a problem.
+		 */
+		Information = 2
+	}
 
-  /**
-   * Represents the input box in the Source Control viewlet.
-   */
-  export interface SourceControlInputBox {
-    /**
-     * Shows a transient contextual message on the input.
-     */
-    showValidationMessage(
-      message: string | MarkdownString,
-      type: SourceControlInputBoxValidationType,
-    ): void
+	export interface SourceControlInputBoxValidation {
 
-    /**
-     * A validation function for the input box. It's possible to change
-     * the validation provider simply by setting this property to a different function.
-     */
-    validateInput?(
-      value: string,
-      cursorPosition: number,
-    ): ProviderResult<SourceControlInputBoxValidation>
-  }
+		/**
+		 * The validation message to display.
+		 */
+		readonly message: string | MarkdownString;
+
+		/**
+		 * The validation type.
+		 */
+		readonly type: SourceControlInputBoxValidationType;
+	}
+
+	/**
+	 * Represents the input box in the Source Control viewlet.
+	 */
+	export interface SourceControlInputBox {
+
+		/**
+		 * Shows a transient contextual message on the input.
+		 */
+		showValidationMessage(message: string | MarkdownString, type: SourceControlInputBoxValidationType): void;
+
+		/**
+		 * A validation function for the input box. It's possible to change
+		 * the validation provider simply by setting this property to a different function.
+		 */
+		validateInput?(value: string, cursorPosition: number): ProviderResult<SourceControlInputBoxValidation>;
+	}
 }

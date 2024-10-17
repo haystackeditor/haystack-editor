@@ -11,18 +11,18 @@
 
 //@ts-check
 
-"use strict"
+'use strict';
 
-const withBrowserDefaults = require("../shared.webpack.config").browser
+const withBrowserDefaults = require('../shared.webpack.config').browser;
 
 const config = withBrowserDefaults({
-  context: __dirname,
-  entry: {
-    extension: "./src/ipynbMain.ts",
-  },
-  output: {
-    filename: "ipynbMain.js",
-  },
-})
+	context: __dirname,
+	entry: {
+		extension: './src/ipynbMain.ts'
+	},
+	output: {
+		filename: 'ipynbMain.js'
+	}
+});
 
-module.exports = config
+module.exports = config;

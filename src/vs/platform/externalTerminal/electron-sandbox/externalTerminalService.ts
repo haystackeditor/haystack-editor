@@ -9,16 +9,14 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IExternalTerminalService as ICommonExternalTerminalService } from "vs/platform/externalTerminal/common/externalTerminal"
-import { createDecorator } from "vs/platform/instantiation/common/instantiation"
-import { registerMainProcessRemoteService } from "vs/platform/ipc/electron-sandbox/services"
+import { IExternalTerminalService as ICommonExternalTerminalService } from 'vs/platform/externalTerminal/common/externalTerminal';
+import { createDecorator } from 'vs/platform/instantiation/common/instantiation';
+import { registerMainProcessRemoteService } from 'vs/platform/ipc/electron-sandbox/services';
 
-export const IExternalTerminalService =
-  createDecorator<IExternalTerminalService>("externalTerminal")
+export const IExternalTerminalService = createDecorator<IExternalTerminalService>('externalTerminal');
 
-export interface IExternalTerminalService
-  extends ICommonExternalTerminalService {
-  readonly _serviceBrand: undefined
+export interface IExternalTerminalService extends ICommonExternalTerminalService {
+	readonly _serviceBrand: undefined;
 }
 
-registerMainProcessRemoteService(IExternalTerminalService, "externalTerminal")
+registerMainProcessRemoteService(IExternalTerminalService, 'externalTerminal');

@@ -64,7 +64,7 @@ export class NullEndpointTelemetryService
   async publicLog(
     _endpoint: ITelemetryEndpoint,
     _eventName: string,
-    _data?: ITelemetryData,
+    _data?: ITelemetryData
   ): Promise<void> {
     // noop
   }
@@ -72,7 +72,7 @@ export class NullEndpointTelemetryService
   async publicLogError(
     _endpoint: ITelemetryEndpoint,
     _errorEventName: string,
-    _data?: ITelemetryData,
+    _data?: ITelemetryData
   ): Promise<void> {
     // noop
   }
@@ -118,7 +118,7 @@ export interface URIDescriptor {
  */
 export function supportsTelemetry(
   productService: IProductService,
-  environmentService: IEnvironmentService,
+  environmentService: IEnvironmentService
 ): boolean {
   // If it's OSS and telemetry isn't disabled via the CLI we will allow it for logging only purposes
   if (!environmentService.isBuilt && !environmentService.disableTelemetry) {
@@ -138,7 +138,7 @@ export function supportsTelemetry(
  */
 export function isLoggingOnly(
   productService: IProductService,
-  environmentService: IEnvironmentService,
+  environmentService: IEnvironmentService
 ): boolean {
   // If we're testing an extension, log telemetry for debug purposes
   if (environmentService.extensionTestsLocationURI) {
@@ -167,13 +167,13 @@ export function isLoggingOnly(
  * @returns OFF, ERROR, ON
  */
 export function getTelemetryLevel(
-  configurationService: IConfigurationService,
+  configurationService: IConfigurationService
 ): TelemetryLevel {
   const crashReporterConfig = configurationService.getValue<
     boolean | undefined
   >(TELEMETRY_CRASH_REPORTER_SETTING_ID)
   const oldConfig = configurationService.getValue<boolean | undefined>(
-    TELEMETRY_OLD_SETTING_ID,
+    TELEMETRY_OLD_SETTING_ID
   )
 
   // If `telemetry.enableCrashReporter` is false or `telemetry.enableTelemetry' is false, disable telemetry
@@ -214,7 +214,7 @@ export function validateTelemetryData(data?: any): {
     } else if (typeof value === "string") {
       if (value.length > 8192) {
         console.warn(
-          `Telemetry property: ${prop} has been trimmed to 8192, the original length is ${value.length}`,
+          `Telemetry property: ${prop} has been trimmed to 8192, the original length is ${value.length}`
         )
       }
       //enforce property value to be less than 8192 char, take the first 8192 char
@@ -253,7 +253,7 @@ function flatten(
   obj: any,
   result: { [key: string]: any },
   order: number = 0,
-  prefix?: string,
+  prefix?: string
 ): void {
   if (!obj) {
     return
@@ -288,11 +288,11 @@ function flatten(
  */
 export function isInternalTelemetry(
   productService: IProductService,
-  configService: IConfigurationService,
+  configService: IConfigurationService
 ) {
   const msftInternalDomains = productService.msftInternalDomains || []
   const internalTesting = configService.getValue<boolean>(
-    "telemetry.internalTesting",
+    "telemetry.internalTesting"
   )
   return verifyMicrosoftInternalDomain(msftInternalDomains) || internalTesting
 }
@@ -356,7 +356,7 @@ function anonymizeFilePaths(stack: string, cleanupPatterns: RegExp[]): string {
 
     // Check to see if the any cleanupIndexes partially overlap with this match
     const overlappingRange = cleanUpIndexes.some(
-      ([start, end]) => result.index < end && start < fileRegex.lastIndex,
+      ([start, end]) => result.index < end && start < fileRegex.lastIndex
     )
 
     // anoynimize user file paths that do not need to be retained or cleaned up.
@@ -423,7 +423,7 @@ function removePropertiesWithPossibleUserInfo(property: string): string {
  */
 export function cleanData(
   data: Record<string, any>,
-  cleanUpPatterns: RegExp[],
+  cleanUpPatterns: RegExp[]
 ): Record<string, any> {
   return cloneAndChange(data, (value) => {
     // If it's a trusted value it means it's okay to skip cleaning so we don't clean it

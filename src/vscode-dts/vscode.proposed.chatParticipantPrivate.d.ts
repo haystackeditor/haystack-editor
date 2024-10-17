@@ -9,77 +9,74 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-declare module "vscode" {
-  /**
-   * The location at which the chat is happening.
-   */
-  export enum ChatLocation {
-    /**
-     * The chat panel
-     */
-    Panel = 1,
-    /**
-     * Terminal inline chat
-     */
-    Terminal = 2,
-    /**
-     * Notebook inline chat
-     */
-    Notebook = 3,
-    /**
-     * Code editor inline chat
-     */
-    Editor = 4,
-  }
+declare module 'vscode' {
 
-  export interface ChatRequest {
-    /**
-     * The attempt number of the request. The first request has attempt number 0.
-     */
-    readonly attempt: number
+	/**
+	 * The location at which the chat is happening.
+	 */
+	export enum ChatLocation {
+		/**
+		 * The chat panel
+		 */
+		Panel = 1,
+		/**
+		 * Terminal inline chat
+		 */
+		Terminal = 2,
+		/**
+		 * Notebook inline chat
+		 */
+		Notebook = 3,
+		/**
+		 * Code editor inline chat
+		 */
+		Editor = 4
+	}
 
-    /**
-     * If automatic command detection is enabled.
-     */
-    readonly enableCommandDetection: boolean
+	export interface ChatRequest {
+		/**
+		 * The attempt number of the request. The first request has attempt number 0.
+		 */
+		readonly attempt: number;
 
-    /**
-     * The location at which the chat is happening. This will always be one of the supported values
-     */
-    readonly location: ChatLocation
-  }
+		/**
+		 * If automatic command detection is enabled.
+		 */
+		readonly enableCommandDetection: boolean;
 
-  export interface ChatParticipant {
-    supportIssueReporting?: boolean
+		/**
+		 * The location at which the chat is happening. This will always be one of the supported values
+		 */
+		readonly location: ChatLocation;
+	}
 
-    /**
-     * Temp, support references that are slow to resolve and should be tools rather than references.
-     */
-    supportsSlowReferences?: boolean
-  }
+	export interface ChatParticipant {
+		supportIssueReporting?: boolean;
 
-  export interface ChatErrorDetails {
-    /**
-     * If set to true, the message content is completely hidden. Only ChatErrorDetails#message will be shown.
-     */
-    responseIsRedacted?: boolean
-  }
+		/**
+		 * Temp, support references that are slow to resolve and should be tools rather than references.
+		 */
+		supportsSlowReferences?: boolean;
+	}
 
-  export namespace chat {
-    export function createDynamicChatParticipant(
-      id: string,
-      dynamicProps: DynamicChatParticipantProps,
-      handler: ChatExtendedRequestHandler,
-    ): ChatParticipant
-  }
+	export interface ChatErrorDetails {
+		/**
+		 * If set to true, the message content is completely hidden. Only ChatErrorDetails#message will be shown.
+		 */
+		responseIsRedacted?: boolean;
+	}
 
-  /**
-   * These don't get set on the ChatParticipant after creation, like other props, because they are typically defined in package.json and we want them at the time of creation.
-   */
-  export interface DynamicChatParticipantProps {
-    name: string
-    publisherName: string
-    description?: string
-    fullName?: string
-  }
+	export namespace chat {
+		export function createDynamicChatParticipant(id: string, dynamicProps: DynamicChatParticipantProps, handler: ChatExtendedRequestHandler): ChatParticipant;
+	}
+
+	/**
+	 * These don't get set on the ChatParticipant after creation, like other props, because they are typically defined in package.json and we want them at the time of creation.
+	 */
+	export interface DynamicChatParticipantProps {
+		name: string;
+		publisherName: string;
+		description?: string;
+		fullName?: string;
+	}
 }

@@ -9,11 +9,7 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { l10n } from "vscode"
+import { l10n } from 'vscode';
 
-export const implicitActivationEvent = l10n.t(
-  "This activation event cannot be explicitly listed by your extension.",
-)
-export const redundantImplicitActivationEvent = l10n.t(
-  "This activation event can be removed as VS Code generates these automatically from your package.json contribution declarations.",
-)
+export const implicitActivationEvent = l10n.t("This activation event cannot be explicitly listed by your extension.");
+export const redundantImplicitActivationEvent = l10n.t("This activation event can be removed as VS Code generates these automatically from your package.json contribution declarations.");

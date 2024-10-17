@@ -9,102 +9,65 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Disposable } from "vs/base/common/lifecycle"
-import {
-  WorkbenchPhase,
-  registerWorkbenchContribution2,
-} from "vs/workbench/common/contributions"
-import { CellKind } from "vs/workbench/contrib/notebook/common/notebookCommon"
-import { IEditorService } from "vs/workbench/services/editor/common/editorService"
-import {
-  CellEditState,
-  getNotebookEditorFromEditorPane,
-} from "vs/workbench/contrib/notebook/browser/notebookBrowser"
-import { RedoCommand, UndoCommand } from "vs/editor/browser/editorExtensions"
-import { NotebookViewModel } from "vs/workbench/contrib/notebook/browser/viewModel/notebookViewModelImpl"
+import { Disposable } from 'vs/base/common/lifecycle';
+import { WorkbenchPhase, registerWorkbenchContribution2 } from 'vs/workbench/common/contributions';
+import { CellKind } from 'vs/workbench/contrib/notebook/common/notebookCommon';
+import { IEditorService } from 'vs/workbench/services/editor/common/editorService';
+import { CellEditState, getNotebookEditorFromEditorPane } from 'vs/workbench/contrib/notebook/browser/notebookBrowser';
+import { RedoCommand, UndoCommand } from 'vs/editor/browser/editorExtensions';
+import { NotebookViewModel } from 'vs/workbench/contrib/notebook/browser/viewModel/notebookViewModelImpl';
 
 class NotebookUndoRedoContribution extends Disposable {
-  static readonly ID = "workbench.contrib.notebookUndoRedo"
 
-  constructor(@IEditorService private readonly _editorService: IEditorService) {
-    super()
+	static readonly ID = 'workbench.contrib.notebookUndoRedo';
 
-    const PRIORITY = 105
-    this._register(
-      UndoCommand.addImplementation(PRIORITY, "notebook-undo-redo", () => {
-        const editor = getNotebookEditorFromEditorPane(
-          this._editorService.activeEditorPane,
-        )
-        const viewModel = editor?.getViewModel() as
-          | NotebookViewModel
-          | undefined
-        if (editor && editor.hasModel() && viewModel) {
-          return viewModel.undo().then((cellResources) => {
-            if (cellResources?.length) {
-              for (let i = 0; i < editor.getLength(); i++) {
-                const cell = editor.cellAt(i)
-                if (
-                  cell.cellKind === CellKind.Markup &&
-                  cellResources.find(
-                    (resource) => resource.fragment === cell.model.uri.fragment,
-                  )
-                ) {
-                  cell.updateEditState(CellEditState.Editing, "undo")
-                }
-              }
+	constructor(@IEditorService private readonly _editorService: IEditorService) {
+		super();
 
-              editor?.setOptions({
-                cellOptions: { resource: cellResources[0] },
-                preserveFocus: true,
-              })
-            }
-          })
-        }
+		const PRIORITY = 105;
+		this._register(UndoCommand.addImplementation(PRIORITY, 'notebook-undo-redo', () => {
+			const editor = getNotebookEditorFromEditorPane(this._editorService.activeEditorPane);
+			const viewModel = editor?.getViewModel() as NotebookViewModel | undefined;
+			if (editor && editor.hasModel() && viewModel) {
+				return viewModel.undo().then(cellResources => {
+					if (cellResources?.length) {
+						for (let i = 0; i < editor.getLength(); i++) {
+							const cell = editor.cellAt(i);
+							if (cell.cellKind === CellKind.Markup && cellResources.find(resource => resource.fragment === cell.model.uri.fragment)) {
+								cell.updateEditState(CellEditState.Editing, 'undo');
+							}
+						}
 
-        return false
-      }),
-    )
+						editor?.setOptions({ cellOptions: { resource: cellResources[0] }, preserveFocus: true });
+					}
+				});
+			}
 
-    this._register(
-      RedoCommand.addImplementation(PRIORITY, "notebook-undo-redo", () => {
-        const editor = getNotebookEditorFromEditorPane(
-          this._editorService.activeEditorPane,
-        )
-        const viewModel = editor?.getViewModel() as
-          | NotebookViewModel
-          | undefined
+			return false;
+		}));
 
-        if (editor && editor.hasModel() && viewModel) {
-          return viewModel.redo().then((cellResources) => {
-            if (cellResources?.length) {
-              for (let i = 0; i < editor.getLength(); i++) {
-                const cell = editor.cellAt(i)
-                if (
-                  cell.cellKind === CellKind.Markup &&
-                  cellResources.find(
-                    (resource) => resource.fragment === cell.model.uri.fragment,
-                  )
-                ) {
-                  cell.updateEditState(CellEditState.Editing, "redo")
-                }
-              }
+		this._register(RedoCommand.addImplementation(PRIORITY, 'notebook-undo-redo', () => {
+			const editor = getNotebookEditorFromEditorPane(this._editorService.activeEditorPane);
+			const viewModel = editor?.getViewModel() as NotebookViewModel | undefined;
 
-              editor?.setOptions({
-                cellOptions: { resource: cellResources[0] },
-                preserveFocus: true,
-              })
-            }
-          })
-        }
+			if (editor && editor.hasModel() && viewModel) {
+				return viewModel.redo().then(cellResources => {
+					if (cellResources?.length) {
+						for (let i = 0; i < editor.getLength(); i++) {
+							const cell = editor.cellAt(i);
+							if (cell.cellKind === CellKind.Markup && cellResources.find(resource => resource.fragment === cell.model.uri.fragment)) {
+								cell.updateEditState(CellEditState.Editing, 'redo');
+							}
+						}
 
-        return false
-      }),
-    )
-  }
+						editor?.setOptions({ cellOptions: { resource: cellResources[0] }, preserveFocus: true });
+					}
+				});
+			}
+
+			return false;
+		}));
+	}
 }
 
-registerWorkbenchContribution2(
-  NotebookUndoRedoContribution.ID,
-  NotebookUndoRedoContribution,
-  WorkbenchPhase.BlockRestore,
-)
+registerWorkbenchContribution2(NotebookUndoRedoContribution.ID, NotebookUndoRedoContribution, WorkbenchPhase.BlockRestore);

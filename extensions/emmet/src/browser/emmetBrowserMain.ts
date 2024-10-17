@@ -9,9 +9,9 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as vscode from "vscode"
-import { activateEmmetExtension } from "../emmetCommon"
+import * as vscode from 'vscode';
+import { activateEmmetExtension } from '../emmetCommon';
 
 export function activate(context: vscode.ExtensionContext) {
-  activateEmmetExtension(context)
+	activateEmmetExtension(context);
 }

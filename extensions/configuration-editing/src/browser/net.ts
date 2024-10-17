@@ -9,4 +9,4 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-export const agent = undefined
+export const agent = undefined;

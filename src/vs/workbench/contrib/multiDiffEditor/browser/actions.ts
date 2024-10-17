@@ -75,12 +75,12 @@ export class CollapseAllAction extends Action2 {
       icon: Codicon.collapseAll,
       precondition: ContextKeyExpr.and(
         ContextKeyExpr.equals("activeEditor", MultiDiffEditor.ID),
-        ContextKeyExpr.not("multiDiffEditorAllCollapsed"),
+        ContextKeyExpr.not("multiDiffEditorAllCollapsed")
       ),
       menu: {
         when: ContextKeyExpr.and(
           ContextKeyExpr.equals("activeEditor", MultiDiffEditor.ID),
-          ContextKeyExpr.not("multiDiffEditorAllCollapsed"),
+          ContextKeyExpr.not("multiDiffEditorAllCollapsed")
         ),
         id: MenuId.EditorTitle,
         group: "navigation",
@@ -93,11 +93,11 @@ export class CollapseAllAction extends Action2 {
   async run(
     accessor: ServicesAccessor,
     resourceOrContext?: URI | IEditorCommandsContext,
-    context?: IEditorCommandsContext,
+    context?: IEditorCommandsContext
   ): Promise<void> {
     const { editor } = resolveCommandsContext(
       accessor.get(IEditorGroupsService),
-      getCommandsContext(accessor, resourceOrContext, context),
+      getCommandsContext(accessor, resourceOrContext, context)
     )
 
     if (editor instanceof MultiDiffEditorInput) {
@@ -115,12 +115,12 @@ export class ExpandAllAction extends Action2 {
       icon: Codicon.expandAll,
       precondition: ContextKeyExpr.and(
         ContextKeyExpr.equals("activeEditor", MultiDiffEditor.ID),
-        ContextKeyExpr.has("multiDiffEditorAllCollapsed"),
+        ContextKeyExpr.has("multiDiffEditorAllCollapsed")
       ),
       menu: {
         when: ContextKeyExpr.and(
           ContextKeyExpr.equals("activeEditor", MultiDiffEditor.ID),
-          ContextKeyExpr.has("multiDiffEditorAllCollapsed"),
+          ContextKeyExpr.has("multiDiffEditorAllCollapsed")
         ),
         id: MenuId.EditorTitle,
         group: "navigation",
@@ -133,11 +133,11 @@ export class ExpandAllAction extends Action2 {
   async run(
     accessor: ServicesAccessor,
     resourceOrContext?: URI | IEditorCommandsContext,
-    context?: IEditorCommandsContext,
+    context?: IEditorCommandsContext
   ): Promise<void> {
     const { editor } = resolveCommandsContext(
       accessor.get(IEditorGroupsService),
-      getCommandsContext(accessor, resourceOrContext, context),
+      getCommandsContext(accessor, resourceOrContext, context)
     )
 
     if (editor instanceof MultiDiffEditorInput) {

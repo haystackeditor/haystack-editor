@@ -12,258 +12,217 @@
 /// <reference path="../../../../typings/require.d.ts" />
 
 //@ts-check
-;(function () {
-  "use strict"
+(function () {
+	'use strict';
 
-  const bootstrapWindow = bootstrapWindowLib()
+	const bootstrapWindow = bootstrapWindowLib();
 
-  // Add a perf entry right from the top
-  performance.mark("code/didStartRenderer")
+	// Add a perf entry right from the top
+	performance.mark('code/didStartRenderer');
 
-  // Load workbench main JS, CSS and NLS all in parallel. This is an
-  // optimization to prevent a waterfall of loading to happen, because
-  // we know for a fact that workbench.desktop.main will depend on
-  // the related CSS and NLS counterparts.
-  bootstrapWindow.load(
-    [
-      "vs/workbench/workbench.desktop.main",
-      "vs/nls!vs/workbench/workbench.desktop.main",
-      "vs/css!vs/workbench/workbench.desktop.main",
-    ],
-    function (desktopMain, configuration) {
-      // Mark start of workbench
-      performance.mark("code/didLoadWorkbenchMain")
+	// Load workbench main JS, CSS and NLS all in parallel. This is an
+	// optimization to prevent a waterfall of loading to happen, because
+	// we know for a fact that workbench.desktop.main will depend on
+	// the related CSS and NLS counterparts.
+	bootstrapWindow.load([
+		'vs/workbench/workbench.desktop.main',
+		'vs/nls!vs/workbench/workbench.desktop.main',
+		'vs/css!vs/workbench/workbench.desktop.main'
+	],
+		function (desktopMain, configuration) {
 
-      return desktopMain.main(configuration)
-    },
-    {
-      configureDeveloperSettings: function (windowConfig) {
-        return {
-          // disable automated devtools opening on error when running extension tests
-          // as this can lead to nondeterministic test execution (devtools steals focus)
-          forceDisableShowDevtoolsOnError:
-            typeof windowConfig.extensionTestsPath === "string" ||
-            windowConfig["enable-smoke-test-driver"] === true,
-          // enable devtools keybindings in extension development window
-          forceEnableDeveloperKeybindings:
-            Array.isArray(windowConfig.extensionDevelopmentPath) &&
-            windowConfig.extensionDevelopmentPath.length > 0,
-          removeDeveloperKeybindingsAfterLoad: true,
-        }
-      },
-      canModifyDOM: function (windowConfig) {
-        showSplash(windowConfig)
-      },
-      beforeLoaderConfig: function (loaderConfig) {
-        loaderConfig.recordStats = true
-      },
-      beforeRequire: function (windowConfig) {
-        performance.mark("code/willLoadWorkbenchMain")
+			// Mark start of workbench
+			performance.mark('code/didLoadWorkbenchMain');
 
-        // Code windows have a `vscodeWindowId` property to identify them
-        Object.defineProperty(window, "vscodeWindowId", {
-          get: () => windowConfig.windowId,
-        })
+			return desktopMain.main(configuration);
+		},
+		{
+			configureDeveloperSettings: function (windowConfig) {
+				return {
+					// disable automated devtools opening on error when running extension tests
+					// as this can lead to nondeterministic test execution (devtools steals focus)
+					forceDisableShowDevtoolsOnError: typeof windowConfig.extensionTestsPath === 'string' || windowConfig['enable-smoke-test-driver'] === true,
+					// enable devtools keybindings in extension development window
+					forceEnableDeveloperKeybindings: Array.isArray(windowConfig.extensionDevelopmentPath) && windowConfig.extensionDevelopmentPath.length > 0,
+					removeDeveloperKeybindingsAfterLoad: true
+				};
+			},
+			canModifyDOM: function (windowConfig) {
+				showSplash(windowConfig);
+			},
+			beforeLoaderConfig: function (loaderConfig) {
+				loaderConfig.recordStats = true;
+			},
+			beforeRequire: function (windowConfig) {
+				performance.mark('code/willLoadWorkbenchMain');
 
-        // It looks like browsers only lazily enable
-        // the <canvas> element when needed. Since we
-        // leverage canvas elements in our code in many
-        // locations, we try to help the browser to
-        // initialize canvas when it is idle, right
-        // before we wait for the scripts to be loaded.
-        window.requestIdleCallback(
-          () => {
-            const canvas = document.createElement("canvas")
-            const context = canvas.getContext("2d")
-            context?.clearRect(0, 0, canvas.width, canvas.height)
-            canvas.remove()
-          },
-          { timeout: 50 },
-        )
-      },
-    },
-  )
+				// Code windows have a `vscodeWindowId` property to identify them
+				Object.defineProperty(window, 'vscodeWindowId', {
+					get: () => windowConfig.windowId
+				});
 
-  //#region Helpers
+				// It looks like browsers only lazily enable
+				// the <canvas> element when needed. Since we
+				// leverage canvas elements in our code in many
+				// locations, we try to help the browser to
+				// initialize canvas when it is idle, right
+				// before we wait for the scripts to be loaded.
+				window.requestIdleCallback(() => {
+					const canvas = document.createElement('canvas');
+					const context = canvas.getContext('2d');
+					context?.clearRect(0, 0, canvas.width, canvas.height);
+					canvas.remove();
+				}, { timeout: 50 });
+			}
+		}
+	);
 
-  /**
-   * @typedef {import('../../../platform/window/common/window').INativeWindowConfiguration} INativeWindowConfiguration
-   * @typedef {import('../../../platform/environment/common/argv').NativeParsedArgs} NativeParsedArgs
-   * @typedef {import('../../../base/parts/sandbox/common/sandboxTypes').ISandboxConfiguration} ISandboxConfiguration
-   *
-   * @returns {{
-   *   load: (
-   *     modules: string[],
-   *     resultCallback: (result, configuration: INativeWindowConfiguration & NativeParsedArgs) => unknown,
-   *     options?: {
-   *       configureDeveloperSettings?: (config: INativeWindowConfiguration & NativeParsedArgs) => {
-   * 			forceDisableShowDevtoolsOnError?: boolean,
-   * 			forceEnableDeveloperKeybindings?: boolean,
-   * 			disallowReloadKeybinding?: boolean,
-   * 			removeDeveloperKeybindingsAfterLoad?: boolean
-   * 		 },
-   * 	     canModifyDOM?: (config: INativeWindowConfiguration & NativeParsedArgs) => void,
-   * 	     beforeLoaderConfig?: (loaderConfig: object) => void,
-   *       beforeRequire?: (config: ISandboxConfiguration) => void
-   *     }
-   *   ) => Promise<unknown>
-   * }}
-   */
-  function bootstrapWindowLib() {
-    // @ts-ignore (defined in bootstrap-window.js)
-    return window.MonacoBootstrapWindow
-  }
+	//#region Helpers
 
-  /**
-   * @param {INativeWindowConfiguration & NativeParsedArgs} configuration
-   */
-  function showSplash(configuration) {
-    performance.mark("code/willShowPartsSplash")
+	/**
+	 * @typedef {import('../../../platform/window/common/window').INativeWindowConfiguration} INativeWindowConfiguration
+	 * @typedef {import('../../../platform/environment/common/argv').NativeParsedArgs} NativeParsedArgs
+	 * @typedef {import('../../../base/parts/sandbox/common/sandboxTypes').ISandboxConfiguration} ISandboxConfiguration
+	 *
+	 * @returns {{
+	 *   load: (
+	 *     modules: string[],
+	 *     resultCallback: (result, configuration: INativeWindowConfiguration & NativeParsedArgs) => unknown,
+	 *     options?: {
+	 *       configureDeveloperSettings?: (config: INativeWindowConfiguration & NativeParsedArgs) => {
+	 * 			forceDisableShowDevtoolsOnError?: boolean,
+	 * 			forceEnableDeveloperKeybindings?: boolean,
+	 * 			disallowReloadKeybinding?: boolean,
+	 * 			removeDeveloperKeybindingsAfterLoad?: boolean
+	 * 		 },
+	 * 	     canModifyDOM?: (config: INativeWindowConfiguration & NativeParsedArgs) => void,
+	 * 	     beforeLoaderConfig?: (loaderConfig: object) => void,
+	 *       beforeRequire?: (config: ISandboxConfiguration) => void
+	 *     }
+	 *   ) => Promise<unknown>
+	 * }}
+	 */
+	function bootstrapWindowLib() {
+		// @ts-ignore (defined in bootstrap-window.js)
+		return window.MonacoBootstrapWindow;
+	}
 
-    let data = configuration.partsSplash
+	/**
+	 * @param {INativeWindowConfiguration & NativeParsedArgs} configuration
+	 */
+	function showSplash(configuration) {
+		performance.mark('code/willShowPartsSplash');
 
-    if (data) {
-      // high contrast mode has been turned by the OS -> ignore stored colors and layouts
-      if (
-        configuration.autoDetectHighContrast &&
-        configuration.colorScheme.highContrast
-      ) {
-        if (
-          (configuration.colorScheme.dark && data.baseTheme !== "hc-black") ||
-          (!configuration.colorScheme.dark && data.baseTheme !== "hc-light")
-        ) {
-          data = undefined
-        }
-      } else if (configuration.autoDetectColorScheme) {
-        // OS color scheme is tracked and has changed
-        if (
-          (configuration.colorScheme.dark && data.baseTheme !== "vs-dark") ||
-          (!configuration.colorScheme.dark && data.baseTheme !== "vs")
-        ) {
-          data = undefined
-        }
-      }
-    }
+		let data = configuration.partsSplash;
 
-    // developing an extension -> ignore stored layouts
-    if (data && configuration.extensionDevelopmentPath) {
-      data.layoutInfo = undefined
-    }
+		if (data) {
+			// high contrast mode has been turned by the OS -> ignore stored colors and layouts
+			if (configuration.autoDetectHighContrast && configuration.colorScheme.highContrast) {
+				if ((configuration.colorScheme.dark && data.baseTheme !== 'hc-black') || (!configuration.colorScheme.dark && data.baseTheme !== 'hc-light')) {
+					data = undefined;
+				}
+			} else if (configuration.autoDetectColorScheme) {
+				// OS color scheme is tracked and has changed
+				if ((configuration.colorScheme.dark && data.baseTheme !== 'vs-dark') || (!configuration.colorScheme.dark && data.baseTheme !== 'vs')) {
+					data = undefined;
+				}
+			}
+		}
 
-    // minimal color configuration (works with or without persisted data)
-    let baseTheme, shellBackground, shellForeground
-    if (data) {
-      baseTheme = data.baseTheme
-      shellBackground = data.colorInfo.editorBackground
-      shellForeground = data.colorInfo.foreground
-    } else if (
-      configuration.autoDetectHighContrast &&
-      configuration.colorScheme.highContrast
-    ) {
-      if (configuration.colorScheme.dark) {
-        baseTheme = "hc-black"
-        shellBackground = "#000000"
-        shellForeground = "#FFFFFF"
-      } else {
-        baseTheme = "hc-light"
-        shellBackground = "#FFFFFF"
-        shellForeground = "#000000"
-      }
-    } else if (configuration.autoDetectColorScheme) {
-      if (configuration.colorScheme.dark) {
-        baseTheme = "vs-dark"
-        shellBackground = "#1E1E1E"
-        shellForeground = "#CCCCCC"
-      } else {
-        baseTheme = "vs"
-        shellBackground = "#FFFFFF"
-        shellForeground = "#000000"
-      }
-    }
+		// developing an extension -> ignore stored layouts
+		if (data && configuration.extensionDevelopmentPath) {
+			data.layoutInfo = undefined;
+		}
 
-    const style = document.createElement("style")
-    style.className = "initialShellColors"
-    document.head.appendChild(style)
-    style.textContent = `body { background-color: ${shellBackground}; color: ${shellForeground}; margin: 0; padding: 0; }`
+		// minimal color configuration (works with or without persisted data)
+		let baseTheme, shellBackground, shellForeground;
+		if (data) {
+			baseTheme = data.baseTheme;
+			shellBackground = data.colorInfo.editorBackground;
+			shellForeground = data.colorInfo.foreground;
+		} else if (configuration.autoDetectHighContrast && configuration.colorScheme.highContrast) {
+			if (configuration.colorScheme.dark) {
+				baseTheme = 'hc-black';
+				shellBackground = '#000000';
+				shellForeground = '#FFFFFF';
+			} else {
+				baseTheme = 'hc-light';
+				shellBackground = '#FFFFFF';
+				shellForeground = '#000000';
+			}
+		} else if (configuration.autoDetectColorScheme) {
+			if (configuration.colorScheme.dark) {
+				baseTheme = 'vs-dark';
+				shellBackground = '#1E1E1E';
+				shellForeground = '#CCCCCC';
+			} else {
+				baseTheme = 'vs';
+				shellBackground = '#FFFFFF';
+				shellForeground = '#000000';
+			}
+		}
 
-    // set zoom level as soon as possible
-    if (
-      typeof data?.zoomLevel === "number" &&
-      typeof globalThis.vscode?.webFrame?.setZoomLevel === "function"
-    ) {
-      globalThis.vscode.webFrame.setZoomLevel(data.zoomLevel)
-    }
+		const style = document.createElement('style');
+		style.className = 'initialShellColors';
+		document.head.appendChild(style);
+		style.textContent = `body { background-color: ${shellBackground}; color: ${shellForeground}; margin: 0; padding: 0; }`;
 
-    // restore parts if possible (we might not always store layout info)
-    if (data?.layoutInfo) {
-      const { layoutInfo, colorInfo } = data
+		// set zoom level as soon as possible
+		if (typeof data?.zoomLevel === 'number' && typeof globalThis.vscode?.webFrame?.setZoomLevel === 'function') {
+			globalThis.vscode.webFrame.setZoomLevel(data.zoomLevel);
+		}
 
-      const splash = document.createElement("div")
-      splash.id = "monaco-parts-splash"
-      splash.className = baseTheme
+		// restore parts if possible (we might not always store layout info)
+		if (data?.layoutInfo) {
+			const { layoutInfo, colorInfo } = data;
 
-      if (layoutInfo.windowBorder) {
-        splash.style.position = "relative"
-        splash.style.height = "calc(100vh - 2px)"
-        splash.style.width = "calc(100vw - 2px)"
-        splash.style.border = "1px solid var(--window-border-color)"
-        splash.style.setProperty(
-          "--window-border-color",
-          colorInfo.windowBorder,
-        )
+			const splash = document.createElement('div');
+			splash.id = 'monaco-parts-splash';
+			splash.className = baseTheme;
 
-        if (layoutInfo.windowBorderRadius) {
-          splash.style.borderRadius = layoutInfo.windowBorderRadius
-        }
-      }
+			if (layoutInfo.windowBorder) {
+				splash.style.position = 'relative';
+				splash.style.height = 'calc(100vh - 2px)';
+				splash.style.width = 'calc(100vw - 2px)';
+				splash.style.border = '1px solid var(--window-border-color)';
+				splash.style.setProperty('--window-border-color', colorInfo.windowBorder);
 
-      // ensure there is enough space
-      layoutInfo.sideBarWidth = Math.min(
-        layoutInfo.sideBarWidth,
-        window.innerWidth -
-          (layoutInfo.activityBarWidth + layoutInfo.editorPartMinWidth),
-      )
+				if (layoutInfo.windowBorderRadius) {
+					splash.style.borderRadius = layoutInfo.windowBorderRadius;
+				}
+			}
 
-      // part: title
-      const titleDiv = document.createElement("div")
-      titleDiv.setAttribute(
-        "style",
-        `position: absolute; width: 100%; left: 0; top: 0; height: ${layoutInfo.titleBarHeight}px; background-color: ${colorInfo.titleBarBackground}; -webkit-app-region: drag;`,
-      )
-      splash.appendChild(titleDiv)
+			// ensure there is enough space
+			layoutInfo.sideBarWidth = Math.min(layoutInfo.sideBarWidth, window.innerWidth - (layoutInfo.activityBarWidth + layoutInfo.editorPartMinWidth));
 
-      // part: activity bar
-      const activityDiv = document.createElement("div")
-      activityDiv.setAttribute(
-        "style",
-        `position: absolute; height: calc(100% - ${layoutInfo.titleBarHeight}px); top: ${layoutInfo.titleBarHeight}px; ${layoutInfo.sideBarSide}: 0; width: ${layoutInfo.activityBarWidth}px; background-color: ${colorInfo.activityBarBackground};`,
-      )
-      splash.appendChild(activityDiv)
+			// part: title
+			const titleDiv = document.createElement('div');
+			titleDiv.setAttribute('style', `position: absolute; width: 100%; left: 0; top: 0; height: ${layoutInfo.titleBarHeight}px; background-color: ${colorInfo.titleBarBackground}; -webkit-app-region: drag;`);
+			splash.appendChild(titleDiv);
 
-      // part: side bar (only when opening workspace/folder)
-      // folder or workspace -> status bar color, sidebar
-      if (configuration.workspace) {
-        const sideDiv = document.createElement("div")
-        sideDiv.setAttribute(
-          "style",
-          `position: absolute; height: calc(100% - ${layoutInfo.titleBarHeight}px); top: ${layoutInfo.titleBarHeight}px; ${layoutInfo.sideBarSide}: ${layoutInfo.activityBarWidth}px; width: ${layoutInfo.sideBarWidth}px; background-color: ${colorInfo.sideBarBackground};`,
-        )
-        splash.appendChild(sideDiv)
-      }
+			// part: activity bar
+			const activityDiv = document.createElement('div');
+			activityDiv.setAttribute('style', `position: absolute; height: calc(100% - ${layoutInfo.titleBarHeight}px); top: ${layoutInfo.titleBarHeight}px; ${layoutInfo.sideBarSide}: 0; width: ${layoutInfo.activityBarWidth}px; background-color: ${colorInfo.activityBarBackground};`);
+			splash.appendChild(activityDiv);
 
-      // part: statusbar
-      const statusDiv = document.createElement("div")
-      statusDiv.setAttribute(
-        "style",
-        `position: absolute; width: 100%; bottom: 0; left: 0; height: ${layoutInfo.statusBarHeight}px; background-color: ${configuration.workspace ? colorInfo.statusBarBackground : colorInfo.statusBarNoFolderBackground};`,
-      )
-      splash.appendChild(statusDiv)
+			// part: side bar (only when opening workspace/folder)
+			// folder or workspace -> status bar color, sidebar
+			if (configuration.workspace) {
+				const sideDiv = document.createElement('div');
+				sideDiv.setAttribute('style', `position: absolute; height: calc(100% - ${layoutInfo.titleBarHeight}px); top: ${layoutInfo.titleBarHeight}px; ${layoutInfo.sideBarSide}: ${layoutInfo.activityBarWidth}px; width: ${layoutInfo.sideBarWidth}px; background-color: ${colorInfo.sideBarBackground};`);
+				splash.appendChild(sideDiv);
+			}
 
-      document.body.appendChild(splash)
-    }
+			// part: statusbar
+			const statusDiv = document.createElement('div');
+			statusDiv.setAttribute('style', `position: absolute; width: 100%; bottom: 0; left: 0; height: ${layoutInfo.statusBarHeight}px; background-color: ${configuration.workspace ? colorInfo.statusBarBackground : colorInfo.statusBarNoFolderBackground};`);
+			splash.appendChild(statusDiv);
 
-    performance.mark("code/didShowPartsSplash")
-  }
+			document.body.appendChild(splash);
+		}
 
-  //#endregion
-})()
+		performance.mark('code/didShowPartsSplash');
+	}
+
+	//#endregion
+}());

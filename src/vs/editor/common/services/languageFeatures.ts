@@ -9,120 +9,83 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import {
-  LanguageFeatureRegistry,
-  NotebookInfoResolver,
-} from "vs/editor/common/languageFeatureRegistry"
-import {
-  CodeActionProvider,
-  CodeLensProvider,
-  CompletionItemProvider,
-  DeclarationProvider,
-  DefinitionProvider,
-  DocumentColorProvider,
-  DocumentFormattingEditProvider,
-  DocumentHighlightProvider,
-  DocumentDropEditProvider,
-  DocumentPasteEditProvider,
-  DocumentRangeFormattingEditProvider,
-  DocumentRangeSemanticTokensProvider,
-  DocumentSemanticTokensProvider,
-  DocumentSymbolProvider,
-  EvaluatableExpressionProvider,
-  FoldingRangeProvider,
-  HoverProvider,
-  ImplementationProvider,
-  InlayHintsProvider,
-  InlineCompletionsProvider,
-  InlineValuesProvider,
-  LinkedEditingRangeProvider,
-  LinkProvider,
-  MappedEditsProvider,
-  MultiDocumentHighlightProvider,
-  NewSymbolNamesProvider,
-  OnTypeFormattingEditProvider,
-  ReferenceProvider,
-  RenameProvider,
-  SelectionRangeProvider,
-  SignatureHelpProvider,
-  TypeDefinitionProvider,
-  InlineEditProvider,
-} from "vs/editor/common/languages"
-import { createDecorator } from "vs/platform/instantiation/common/instantiation"
+import { LanguageFeatureRegistry, NotebookInfoResolver } from 'vs/editor/common/languageFeatureRegistry';
+import { CodeActionProvider, CodeLensProvider, CompletionItemProvider, DeclarationProvider, DefinitionProvider, DocumentColorProvider, DocumentFormattingEditProvider, DocumentHighlightProvider, DocumentDropEditProvider, DocumentPasteEditProvider, DocumentRangeFormattingEditProvider, DocumentRangeSemanticTokensProvider, DocumentSemanticTokensProvider, DocumentSymbolProvider, EvaluatableExpressionProvider, FoldingRangeProvider, HoverProvider, ImplementationProvider, InlayHintsProvider, InlineCompletionsProvider, InlineValuesProvider, LinkedEditingRangeProvider, LinkProvider, MappedEditsProvider, MultiDocumentHighlightProvider, NewSymbolNamesProvider, OnTypeFormattingEditProvider, ReferenceProvider, RenameProvider, SelectionRangeProvider, SignatureHelpProvider, TypeDefinitionProvider, InlineEditProvider } from 'vs/editor/common/languages';
+import { createDecorator } from 'vs/platform/instantiation/common/instantiation';
 
-export const ILanguageFeaturesService =
-  createDecorator<ILanguageFeaturesService>("ILanguageFeaturesService")
+export const ILanguageFeaturesService = createDecorator<ILanguageFeaturesService>('ILanguageFeaturesService');
 
 export interface ILanguageFeaturesService {
-  readonly _serviceBrand: undefined
 
-  readonly referenceProvider: LanguageFeatureRegistry<ReferenceProvider>
+	readonly _serviceBrand: undefined;
 
-  readonly definitionProvider: LanguageFeatureRegistry<DefinitionProvider>
+	readonly referenceProvider: LanguageFeatureRegistry<ReferenceProvider>;
 
-  readonly typeDefinitionProvider: LanguageFeatureRegistry<TypeDefinitionProvider>
+	readonly definitionProvider: LanguageFeatureRegistry<DefinitionProvider>;
 
-  readonly declarationProvider: LanguageFeatureRegistry<DeclarationProvider>
+	readonly typeDefinitionProvider: LanguageFeatureRegistry<TypeDefinitionProvider>;
 
-  readonly implementationProvider: LanguageFeatureRegistry<ImplementationProvider>
+	readonly declarationProvider: LanguageFeatureRegistry<DeclarationProvider>;
 
-  readonly codeActionProvider: LanguageFeatureRegistry<CodeActionProvider>
+	readonly implementationProvider: LanguageFeatureRegistry<ImplementationProvider>;
 
-  readonly documentPasteEditProvider: LanguageFeatureRegistry<DocumentPasteEditProvider>
+	readonly codeActionProvider: LanguageFeatureRegistry<CodeActionProvider>;
 
-  readonly renameProvider: LanguageFeatureRegistry<RenameProvider>
+	readonly documentPasteEditProvider: LanguageFeatureRegistry<DocumentPasteEditProvider>;
 
-  readonly newSymbolNamesProvider: LanguageFeatureRegistry<NewSymbolNamesProvider>
+	readonly renameProvider: LanguageFeatureRegistry<RenameProvider>;
 
-  readonly documentFormattingEditProvider: LanguageFeatureRegistry<DocumentFormattingEditProvider>
+	readonly newSymbolNamesProvider: LanguageFeatureRegistry<NewSymbolNamesProvider>;
 
-  readonly documentRangeFormattingEditProvider: LanguageFeatureRegistry<DocumentRangeFormattingEditProvider>
+	readonly documentFormattingEditProvider: LanguageFeatureRegistry<DocumentFormattingEditProvider>;
 
-  readonly onTypeFormattingEditProvider: LanguageFeatureRegistry<OnTypeFormattingEditProvider>
+	readonly documentRangeFormattingEditProvider: LanguageFeatureRegistry<DocumentRangeFormattingEditProvider>;
 
-  readonly documentSymbolProvider: LanguageFeatureRegistry<DocumentSymbolProvider>
+	readonly onTypeFormattingEditProvider: LanguageFeatureRegistry<OnTypeFormattingEditProvider>;
 
-  readonly inlayHintsProvider: LanguageFeatureRegistry<InlayHintsProvider>
+	readonly documentSymbolProvider: LanguageFeatureRegistry<DocumentSymbolProvider>;
 
-  readonly colorProvider: LanguageFeatureRegistry<DocumentColorProvider>
+	readonly inlayHintsProvider: LanguageFeatureRegistry<InlayHintsProvider>;
 
-  readonly codeLensProvider: LanguageFeatureRegistry<CodeLensProvider>
+	readonly colorProvider: LanguageFeatureRegistry<DocumentColorProvider>;
 
-  readonly signatureHelpProvider: LanguageFeatureRegistry<SignatureHelpProvider>
+	readonly codeLensProvider: LanguageFeatureRegistry<CodeLensProvider>;
 
-  readonly hoverProvider: LanguageFeatureRegistry<HoverProvider>
+	readonly signatureHelpProvider: LanguageFeatureRegistry<SignatureHelpProvider>;
 
-  readonly documentHighlightProvider: LanguageFeatureRegistry<DocumentHighlightProvider>
+	readonly hoverProvider: LanguageFeatureRegistry<HoverProvider>;
 
-  readonly multiDocumentHighlightProvider: LanguageFeatureRegistry<MultiDocumentHighlightProvider>
+	readonly documentHighlightProvider: LanguageFeatureRegistry<DocumentHighlightProvider>;
 
-  readonly documentRangeSemanticTokensProvider: LanguageFeatureRegistry<DocumentRangeSemanticTokensProvider>
+	readonly multiDocumentHighlightProvider: LanguageFeatureRegistry<MultiDocumentHighlightProvider>;
 
-  readonly documentSemanticTokensProvider: LanguageFeatureRegistry<DocumentSemanticTokensProvider>
+	readonly documentRangeSemanticTokensProvider: LanguageFeatureRegistry<DocumentRangeSemanticTokensProvider>;
 
-  readonly selectionRangeProvider: LanguageFeatureRegistry<SelectionRangeProvider>
+	readonly documentSemanticTokensProvider: LanguageFeatureRegistry<DocumentSemanticTokensProvider>;
 
-  readonly foldingRangeProvider: LanguageFeatureRegistry<FoldingRangeProvider>
+	readonly selectionRangeProvider: LanguageFeatureRegistry<SelectionRangeProvider>;
 
-  readonly linkProvider: LanguageFeatureRegistry<LinkProvider>
+	readonly foldingRangeProvider: LanguageFeatureRegistry<FoldingRangeProvider>;
 
-  readonly inlineCompletionsProvider: LanguageFeatureRegistry<InlineCompletionsProvider>
+	readonly linkProvider: LanguageFeatureRegistry<LinkProvider>;
 
-  readonly inlineEditProvider: LanguageFeatureRegistry<InlineEditProvider>
+	readonly inlineCompletionsProvider: LanguageFeatureRegistry<InlineCompletionsProvider>;
 
-  readonly completionProvider: LanguageFeatureRegistry<CompletionItemProvider>
+	readonly inlineEditProvider: LanguageFeatureRegistry<InlineEditProvider>;
 
-  readonly linkedEditingRangeProvider: LanguageFeatureRegistry<LinkedEditingRangeProvider>
+	readonly completionProvider: LanguageFeatureRegistry<CompletionItemProvider>;
 
-  readonly inlineValuesProvider: LanguageFeatureRegistry<InlineValuesProvider>
+	readonly linkedEditingRangeProvider: LanguageFeatureRegistry<LinkedEditingRangeProvider>;
 
-  readonly evaluatableExpressionProvider: LanguageFeatureRegistry<EvaluatableExpressionProvider>
+	readonly inlineValuesProvider: LanguageFeatureRegistry<InlineValuesProvider>;
 
-  readonly documentDropEditProvider: LanguageFeatureRegistry<DocumentDropEditProvider>
+	readonly evaluatableExpressionProvider: LanguageFeatureRegistry<EvaluatableExpressionProvider>;
 
-  readonly mappedEditsProvider: LanguageFeatureRegistry<MappedEditsProvider>
+	readonly documentDropEditProvider: LanguageFeatureRegistry<DocumentDropEditProvider>;
 
-  // --
+	readonly mappedEditsProvider: LanguageFeatureRegistry<MappedEditsProvider>;
 
-  setNotebookTypeResolver(resolver: NotebookInfoResolver | undefined): void
+	// --
+
+	setNotebookTypeResolver(resolver: NotebookInfoResolver | undefined): void;
 }

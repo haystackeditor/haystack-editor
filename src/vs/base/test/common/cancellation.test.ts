@@ -8,124 +8,126 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-import * as assert from "assert"
-import {
-  CancellationToken,
-  CancellationTokenSource,
-} from "vs/base/common/cancellation"
-import { ensureNoDisposablesAreLeakedInTestSuite } from "vs/base/test/common/utils"
+import * as assert from 'assert';
+import { CancellationToken, CancellationTokenSource } from 'vs/base/common/cancellation';
+import { ensureNoDisposablesAreLeakedInTestSuite } from 'vs/base/test/common/utils';
 
-suite("CancellationToken", function () {
-  const store = ensureNoDisposablesAreLeakedInTestSuite()
+suite('CancellationToken', function () {
 
-  test("None", () => {
-    assert.strictEqual(CancellationToken.None.isCancellationRequested, false)
-    assert.strictEqual(
-      typeof CancellationToken.None.onCancellationRequested,
-      "function",
-    )
-  })
+	const store = ensureNoDisposablesAreLeakedInTestSuite();
 
-  test("cancel before token", function () {
-    const source = new CancellationTokenSource()
-    assert.strictEqual(source.token.isCancellationRequested, false)
-    source.cancel()
+	test('None', () => {
+		assert.strictEqual(CancellationToken.None.isCancellationRequested, false);
+		assert.strictEqual(typeof CancellationToken.None.onCancellationRequested, 'function');
+	});
 
-    assert.strictEqual(source.token.isCancellationRequested, true)
+	test('cancel before token', function () {
 
-    return new Promise<void>((resolve) => {
-      source.token.onCancellationRequested(() => resolve())
-    })
-  })
+		const source = new CancellationTokenSource();
+		assert.strictEqual(source.token.isCancellationRequested, false);
+		source.cancel();
 
-  test("cancel happens only once", function () {
-    const source = new CancellationTokenSource()
-    assert.strictEqual(source.token.isCancellationRequested, false)
+		assert.strictEqual(source.token.isCancellationRequested, true);
 
-    let cancelCount = 0
-    function onCancel() {
-      cancelCount += 1
-    }
+		return new Promise<void>(resolve => {
+			source.token.onCancellationRequested(() => resolve());
+		});
+	});
 
-    store.add(source.token.onCancellationRequested(onCancel))
+	test('cancel happens only once', function () {
 
-    source.cancel()
-    source.cancel()
+		const source = new CancellationTokenSource();
+		assert.strictEqual(source.token.isCancellationRequested, false);
 
-    assert.strictEqual(cancelCount, 1)
-  })
+		let cancelCount = 0;
+		function onCancel() {
+			cancelCount += 1;
+		}
 
-  test("cancel calls all listeners", function () {
-    let count = 0
+		store.add(source.token.onCancellationRequested(onCancel));
 
-    const source = new CancellationTokenSource()
-    store.add(source.token.onCancellationRequested(() => count++))
-    store.add(source.token.onCancellationRequested(() => count++))
-    store.add(source.token.onCancellationRequested(() => count++))
+		source.cancel();
+		source.cancel();
 
-    source.cancel()
-    assert.strictEqual(count, 3)
-  })
+		assert.strictEqual(cancelCount, 1);
+	});
 
-  test("token stays the same", function () {
-    let source = new CancellationTokenSource()
-    let token = source.token
-    assert.ok(token === source.token) // doesn't change on get
+	test('cancel calls all listeners', function () {
 
-    source.cancel()
-    assert.ok(token === source.token) // doesn't change after cancel
+		let count = 0;
 
-    source.cancel()
-    assert.ok(token === source.token) // doesn't change after 2nd cancel
+		const source = new CancellationTokenSource();
+		store.add(source.token.onCancellationRequested(() => count++));
+		store.add(source.token.onCancellationRequested(() => count++));
+		store.add(source.token.onCancellationRequested(() => count++));
 
-    source = new CancellationTokenSource()
-    source.cancel()
-    token = source.token
-    assert.ok(token === source.token) // doesn't change on get
-  })
+		source.cancel();
+		assert.strictEqual(count, 3);
+	});
 
-  test("dispose calls no listeners", function () {
-    let count = 0
+	test('token stays the same', function () {
 
-    const source = new CancellationTokenSource()
-    store.add(source.token.onCancellationRequested(() => count++))
+		let source = new CancellationTokenSource();
+		let token = source.token;
+		assert.ok(token === source.token); // doesn't change on get
 
-    source.dispose()
-    source.cancel()
-    assert.strictEqual(count, 0)
-  })
+		source.cancel();
+		assert.ok(token === source.token); // doesn't change after cancel
 
-  test("dispose calls no listeners (unless told to cancel)", function () {
-    let count = 0
+		source.cancel();
+		assert.ok(token === source.token); // doesn't change after 2nd cancel
 
-    const source = new CancellationTokenSource()
-    store.add(source.token.onCancellationRequested(() => count++))
+		source = new CancellationTokenSource();
+		source.cancel();
+		token = source.token;
+		assert.ok(token === source.token); // doesn't change on get
+	});
 
-    source.dispose(true)
-    // source.cancel();
-    assert.strictEqual(count, 1)
-  })
+	test('dispose calls no listeners', function () {
 
-  test("dispose does not cancel", function () {
-    const source = new CancellationTokenSource()
-    source.dispose()
-    assert.strictEqual(source.token.isCancellationRequested, false)
-  })
+		let count = 0;
 
-  test("parent cancels child", function () {
-    const parent = new CancellationTokenSource()
-    const child = new CancellationTokenSource(parent.token)
+		const source = new CancellationTokenSource();
+		store.add(source.token.onCancellationRequested(() => count++));
 
-    let count = 0
-    store.add(child.token.onCancellationRequested(() => count++))
+		source.dispose();
+		source.cancel();
+		assert.strictEqual(count, 0);
+	});
 
-    parent.cancel()
+	test('dispose calls no listeners (unless told to cancel)', function () {
 
-    assert.strictEqual(count, 1)
-    assert.strictEqual(child.token.isCancellationRequested, true)
-    assert.strictEqual(parent.token.isCancellationRequested, true)
+		let count = 0;
 
-    child.dispose()
-    parent.dispose()
-  })
-})
+		const source = new CancellationTokenSource();
+		store.add(source.token.onCancellationRequested(() => count++));
+
+		source.dispose(true);
+		// source.cancel();
+		assert.strictEqual(count, 1);
+	});
+
+	test('dispose does not cancel', function () {
+		const source = new CancellationTokenSource();
+		source.dispose();
+		assert.strictEqual(source.token.isCancellationRequested, false);
+	});
+
+	test('parent cancels child', function () {
+
+		const parent = new CancellationTokenSource();
+		const child = new CancellationTokenSource(parent.token);
+
+		let count = 0;
+		store.add(child.token.onCancellationRequested(() => count++));
+
+		parent.cancel();
+
+		assert.strictEqual(count, 1);
+		assert.strictEqual(child.token.isCancellationRequested, true);
+		assert.strictEqual(parent.token.isCancellationRequested, true);
+
+		child.dispose();
+		parent.dispose();
+	});
+});

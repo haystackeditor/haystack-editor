@@ -54,7 +54,7 @@ suite("Sticky Scroll Tests", () => {
     [
       ILanguageFeatureDebounceService,
       new SyncDescriptor(LanguageFeatureDebounceService),
-    ],
+    ]
   )
 
   const text = [
@@ -342,22 +342,22 @@ suite("Sticky Scroll Tests", () => {
         },
         async (editor, _viewModel, instantiationService) => {
           const languageService = instantiationService.get(
-            ILanguageFeaturesService,
+            ILanguageFeaturesService
           )
           const languageConfigurationService = instantiationService.get(
-            ILanguageConfigurationService,
+            ILanguageConfigurationService
           )
           disposables.add(
             languageService.documentSymbolProvider.register(
               "*",
-              documentSymbolProviderForTestModel(),
-            ),
+              documentSymbolProviderForTestModel()
+            )
           )
           const provider: StickyLineCandidateProvider =
             new StickyLineCandidateProvider(
               editor,
               languageService,
-              languageConfigurationService,
+              languageConfigurationService
             )
           await provider.update()
           assert.deepStrictEqual(
@@ -365,7 +365,7 @@ suite("Sticky Scroll Tests", () => {
               startLineNumber: 1,
               endLineNumber: 4,
             }),
-            [new StickyLineCandidate(1, 2, 1)],
+            [new StickyLineCandidate(1, 2, 1)]
           )
           assert.deepStrictEqual(
             provider.getCandidateStickyLinesIntersecting({
@@ -376,7 +376,7 @@ suite("Sticky Scroll Tests", () => {
               new StickyLineCandidate(7, 11, 1),
               new StickyLineCandidate(9, 11, 2),
               new StickyLineCandidate(10, 10, 3),
-            ],
+            ]
           )
           assert.deepStrictEqual(
             provider.getCandidateStickyLinesIntersecting({
@@ -387,12 +387,12 @@ suite("Sticky Scroll Tests", () => {
               new StickyLineCandidate(7, 11, 1),
               new StickyLineCandidate(9, 11, 2),
               new StickyLineCandidate(10, 10, 3),
-            ],
+            ]
           )
 
           provider.dispose()
           model.dispose()
-        },
+        }
       )
     })
   })
@@ -417,7 +417,7 @@ suite("Sticky Scroll Tests", () => {
           const stickyScrollController: StickyScrollController =
             editor.registerAndInstantiateContribution(
               StickyScrollController.ID,
-              StickyScrollController,
+              StickyScrollController
             )
           const lineHeight: number = editor.getOption(EditorOption.lineHeight)
           const languageService: ILanguageFeaturesService =
@@ -425,8 +425,8 @@ suite("Sticky Scroll Tests", () => {
           disposables.add(
             languageService.documentSymbolProvider.register(
               "*",
-              documentSymbolProviderForTestModel(),
-            ),
+              documentSymbolProviderForTestModel()
+            )
           )
           await stickyScrollController.stickyScrollCandidateProvider.update()
           let state
@@ -458,7 +458,7 @@ suite("Sticky Scroll Tests", () => {
           stickyScrollController.dispose()
           stickyScrollController.stickyScrollCandidateProvider.dispose()
           model.dispose()
-        },
+        }
       )
     })
   })
@@ -483,18 +483,18 @@ suite("Sticky Scroll Tests", () => {
           const stickyScrollController: StickyScrollController =
             editor.registerAndInstantiateContribution(
               StickyScrollController.ID,
-              StickyScrollController,
+              StickyScrollController
             )
           const lineHeight = editor.getOption(EditorOption.lineHeight)
 
           const languageService = instantiationService.get(
-            ILanguageFeaturesService,
+            ILanguageFeaturesService
           )
           disposables.add(
             languageService.documentSymbolProvider.register(
               "*",
-              documentSymbolProviderForTestModel(),
-            ),
+              documentSymbolProviderForTestModel()
+            )
           )
           await stickyScrollController.stickyScrollCandidateProvider.update()
           editor.setHiddenAreas([
@@ -536,7 +536,7 @@ suite("Sticky Scroll Tests", () => {
           stickyScrollController.dispose()
           stickyScrollController.stickyScrollCandidateProvider.dispose()
           model.dispose()
-        },
+        }
       )
     })
   })
@@ -701,19 +701,19 @@ suite("Sticky Scroll Tests", () => {
           const stickyScrollController: StickyScrollController =
             editor.registerAndInstantiateContribution(
               StickyScrollController.ID,
-              StickyScrollController,
+              StickyScrollController
             )
           await stickyScrollController.stickyScrollCandidateProvider.update()
           const lineHeight = editor.getOption(EditorOption.lineHeight)
 
           const languageService = instantiationService.get(
-            ILanguageFeaturesService,
+            ILanguageFeaturesService
           )
           disposables.add(
             languageService.documentSymbolProvider.register(
               "*",
-              documentSymbolProviderForSecondTestModel(),
-            ),
+              documentSymbolProviderForSecondTestModel()
+            )
           )
           await stickyScrollController.stickyScrollCandidateProvider.update()
           let state
@@ -741,7 +741,7 @@ suite("Sticky Scroll Tests", () => {
           stickyScrollController.dispose()
           stickyScrollController.stickyScrollCandidateProvider.dispose()
           model.dispose()
-        },
+        }
       )
     })
   })

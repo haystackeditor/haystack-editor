@@ -9,12 +9,12 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { VSBuffer } from "vs/base/common/buffer"
-import { Event } from "vs/base/common/event"
-import { IMessagePassingProtocol } from "vs/base/parts/ipc/common/ipc"
+import { VSBuffer } from 'vs/base/common/buffer';
+import { Event } from 'vs/base/common/event';
+import { IMessagePassingProtocol } from 'vs/base/parts/ipc/common/ipc';
 
 export interface Sender {
-  send(channel: string, msg: unknown): void
+	send(channel: string, msg: unknown): void;
 }
 
 /**
@@ -23,20 +23,18 @@ export interface Sender {
  * name for sending data.
  */
 export class Protocol implements IMessagePassingProtocol {
-  constructor(
-    private sender: Sender,
-    readonly onMessage: Event<VSBuffer>,
-  ) {}
 
-  send(message: VSBuffer): void {
-    try {
-      this.sender.send("vscode:message", message.buffer)
-    } catch (e) {
-      // systems are going down
-    }
-  }
+	constructor(private sender: Sender, readonly onMessage: Event<VSBuffer>) { }
 
-  disconnect(): void {
-    this.sender.send("vscode:disconnect", null)
-  }
+	send(message: VSBuffer): void {
+		try {
+			this.sender.send('vscode:message', message.buffer);
+		} catch (e) {
+			// systems are going down
+		}
+	}
+
+	disconnect(): void {
+		this.sender.send('vscode:disconnect', null);
+	}
 }

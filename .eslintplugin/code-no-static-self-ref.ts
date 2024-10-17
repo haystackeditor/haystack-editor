@@ -9,63 +9,54 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as eslint from "eslint"
-import { TSESTree } from "@typescript-eslint/experimental-utils"
+import * as eslint from 'eslint';
+import { TSESTree } from '@typescript-eslint/experimental-utils';
 
 /**
  * WORKAROUND for https://github.com/evanw/esbuild/issues/3823
  */
-export = new (class implements eslint.Rule.RuleModule {
-  create(context: eslint.Rule.RuleContext): eslint.Rule.RuleListener {
-    function checkProperty(inNode: any) {
-      const classDeclaration = context
-        .getAncestors()
-        .find((node) => node.type === "ClassDeclaration")
-      const propertyDefinition = <TSESTree.PropertyDefinition>inNode
+export = new class implements eslint.Rule.RuleModule {
 
-      if (!classDeclaration || !classDeclaration.id?.name) {
-        return
-      }
+	create(context: eslint.Rule.RuleContext): eslint.Rule.RuleListener {
 
-      if (!propertyDefinition.value) {
-        return
-      }
+		function checkProperty(inNode: any) {
 
-      const classCtor = classDeclaration.body.body.find(
-        (node) =>
-          node.type === "MethodDefinition" && node.kind === "constructor",
-      )
+			const classDeclaration = context.getAncestors().find(node => node.type === 'ClassDeclaration');
+			const propertyDefinition = <TSESTree.PropertyDefinition>inNode;
 
-      if (!classCtor) {
-        return
-      }
+			if (!classDeclaration || !classDeclaration.id?.name) {
+				return;
+			}
 
-      const name = classDeclaration.id.name
-      const valueText = context
-        .getSourceCode()
-        .getText(<any>propertyDefinition.value)
+			if (!propertyDefinition.value) {
+				return;
+			}
 
-      if (valueText.includes(name + ".")) {
-        if (
-          classCtor.value?.type === "FunctionExpression" &&
-          !classCtor.value.params.find(
-            (param: any) =>
-              param.type === "TSParameterProperty" &&
-              param.decorators?.length > 0,
-          )
-        ) {
-          return
-        }
+			const classCtor = classDeclaration.body.body.find(node => node.type === 'MethodDefinition' && node.kind === 'constructor')
 
-        context.report({
-          loc: propertyDefinition.value.loc,
-          message: `Static properties in decorated classes should not reference the class they are defined in. Use 'this' instead. This is a workaround for https://github.com/evanw/esbuild/issues/3823.`,
-        })
-      }
-    }
+			if (!classCtor) {
+				return;
+			}
 
-    return {
-      "PropertyDefinition[static=true]": checkProperty,
-    }
-  }
-})()
+			const name = classDeclaration.id.name;
+			const valueText = context.getSourceCode().getText(<any>propertyDefinition.value)
+
+			if (valueText.includes(name + '.')) {
+
+				if (classCtor.value?.type === 'FunctionExpression' && !classCtor.value.params.find((param: any) => param.type === 'TSParameterProperty' && param.decorators?.length > 0)) {
+					return
+				}
+
+				context.report({
+					loc: propertyDefinition.value.loc,
+					message: `Static properties in decorated classes should not reference the class they are defined in. Use 'this' instead. This is a workaround for https://github.com/evanw/esbuild/issues/3823.`
+				});
+			}
+
+		}
+
+		return {
+			'PropertyDefinition[static=true]': checkProperty,
+		};
+	}
+};

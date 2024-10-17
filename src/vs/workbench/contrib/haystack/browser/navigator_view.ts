@@ -30,7 +30,7 @@ export class NavigatorOpenEditorsView extends ViewPane {
   static readonly ID = "workbench.haystack.openEditorsView"
   static readonly NAME: ILocalizedString = nls.localize2(
     { key: "openEditors", comment: ["Open is an adjective"] },
-    "Open Editors",
+    "Open Editors"
   )
 
   constructor(
@@ -44,7 +44,7 @@ export class NavigatorOpenEditorsView extends ViewPane {
     @IThemeService themeService: IWorkbenchThemeService,
     @ITelemetryService telemetryService: ITelemetryService,
     @IHoverService hoverService: IHoverService,
-    @IOpenerService openerService: IOpenerService,
+    @IOpenerService openerService: IOpenerService
   ) {
     super(
       options,
@@ -57,7 +57,7 @@ export class NavigatorOpenEditorsView extends ViewPane {
       openerService,
       themeService,
       telemetryService,
-      hoverService,
+      hoverService
     )
   }
 

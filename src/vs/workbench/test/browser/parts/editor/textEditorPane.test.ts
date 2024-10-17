@@ -51,14 +51,14 @@ suite("TextEditorPane", () => {
   async function createServices(): Promise<TestServiceAccessor> {
     const instantiationService = workbenchInstantiationService(
       undefined,
-      disposables,
+      disposables
     )
 
     const part = await createEditorPart(instantiationService, disposables)
     instantiationService.stub(IEditorGroupsService, part)
 
     const editorService = disposables.add(
-      instantiationService.createInstance(EditorService, undefined),
+      instantiationService.createInstance(EditorService, undefined)
     )
     instantiationService.stub(IEditorService, editorService)
 
@@ -82,7 +82,7 @@ suite("TextEditorPane", () => {
         if (e.reason === EditorPaneSelectionChangeReason.EDIT) {
           onDidFireSelectionEventOfEditType.complete(e)
         }
-      }),
+      })
     )
 
     // Changing model reports selection change
@@ -90,8 +90,8 @@ suite("TextEditorPane", () => {
 
     const model = disposables.add(
       (await accessor.textFileService.files.resolve(
-        resource,
-      )) as IResolvedTextFileEditorModel,
+        resource
+      )) as IResolvedTextFileEditorModel
     )
     model.textEditorModel.setValue("Hello World")
 
@@ -106,7 +106,7 @@ suite("TextEditorPane", () => {
 
     pane.setSelection(
       new Selection(1, 1, 1, 1),
-      EditorPaneSelectionChangeReason.USER,
+      EditorPaneSelectionChangeReason.USER
     )
     const selection = pane.getSelection()
     assert.ok(selection)
@@ -123,7 +123,7 @@ suite("TextEditorPane", () => {
     assert.ok(newSelection)
     assert.strictEqual(
       newSelection.compare(selection),
-      EditorPaneSelectionCompareResult.IDENTICAL,
+      EditorPaneSelectionCompareResult.IDENTICAL
     )
 
     await model.revert()
@@ -143,19 +143,19 @@ suite("TextEditorPane", () => {
 
     assert.strictEqual(
       sel1.compare(sel1),
-      EditorPaneSelectionCompareResult.IDENTICAL,
+      EditorPaneSelectionCompareResult.IDENTICAL
     )
     assert.strictEqual(
       sel1.compare(sel2),
-      EditorPaneSelectionCompareResult.SIMILAR,
+      EditorPaneSelectionCompareResult.SIMILAR
     )
     assert.strictEqual(
       sel1.compare(sel3),
-      EditorPaneSelectionCompareResult.DIFFERENT,
+      EditorPaneSelectionCompareResult.DIFFERENT
     )
     assert.strictEqual(
       sel1.compare(sel4),
-      EditorPaneSelectionCompareResult.DIFFERENT,
+      EditorPaneSelectionCompareResult.DIFFERENT
     )
   })
 

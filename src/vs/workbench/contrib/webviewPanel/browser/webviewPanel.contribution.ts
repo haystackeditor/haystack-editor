@@ -9,133 +9,87 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Disposable } from "vs/base/common/lifecycle"
-import { localize } from "vs/nls"
-import { registerAction2 } from "vs/platform/actions/common/actions"
-import { SyncDescriptor } from "vs/platform/instantiation/common/descriptors"
-import {
-  InstantiationType,
-  registerSingleton,
-} from "vs/platform/instantiation/common/extensions"
-import { Registry } from "vs/platform/registry/common/platform"
-import {
-  EditorPaneDescriptor,
-  IEditorPaneRegistry,
-} from "vs/workbench/browser/editor"
-import {
-  IWorkbenchContribution,
-  WorkbenchPhase,
-  registerWorkbenchContribution2,
-} from "vs/workbench/common/contributions"
-import {
-  EditorExtensions,
-  IEditorFactoryRegistry,
-} from "vs/workbench/common/editor"
-import { EditorInput } from "vs/workbench/common/editor/editorInput"
-import {
-  IEditorGroup,
-  IEditorGroupsService,
-} from "vs/workbench/services/editor/common/editorGroupsService"
-import {
-  HideWebViewEditorFindCommand,
-  ReloadWebviewAction,
-  ShowWebViewEditorFindWidgetAction,
-  WebViewEditorFindNextCommand,
-  WebViewEditorFindPreviousCommand,
-} from "./webviewCommands"
-import { WebviewEditor } from "./webviewEditor"
-import { WebviewInput } from "./webviewEditorInput"
-import { WebviewEditorInputSerializer } from "./webviewEditorInputSerializer"
-import {
-  IWebviewWorkbenchService,
-  WebviewEditorService,
-} from "./webviewWorkbenchService"
-import { IEditorService } from "vs/workbench/services/editor/common/editorService"
+import { Disposable } from 'vs/base/common/lifecycle';
+import { localize } from 'vs/nls';
+import { registerAction2 } from 'vs/platform/actions/common/actions';
+import { SyncDescriptor } from 'vs/platform/instantiation/common/descriptors';
+import { InstantiationType, registerSingleton } from 'vs/platform/instantiation/common/extensions';
+import { Registry } from 'vs/platform/registry/common/platform';
+import { EditorPaneDescriptor, IEditorPaneRegistry } from 'vs/workbench/browser/editor';
+import { IWorkbenchContribution, WorkbenchPhase, registerWorkbenchContribution2 } from 'vs/workbench/common/contributions';
+import { EditorExtensions, IEditorFactoryRegistry } from 'vs/workbench/common/editor';
+import { EditorInput } from 'vs/workbench/common/editor/editorInput';
+import { IEditorGroup, IEditorGroupsService } from 'vs/workbench/services/editor/common/editorGroupsService';
+import { HideWebViewEditorFindCommand, ReloadWebviewAction, ShowWebViewEditorFindWidgetAction, WebViewEditorFindNextCommand, WebViewEditorFindPreviousCommand } from './webviewCommands';
+import { WebviewEditor } from './webviewEditor';
+import { WebviewInput } from './webviewEditorInput';
+import { WebviewEditorInputSerializer } from './webviewEditorInputSerializer';
+import { IWebviewWorkbenchService, WebviewEditorService } from './webviewWorkbenchService';
+import { IEditorService } from 'vs/workbench/services/editor/common/editorService';
 
-Registry.as<IEditorPaneRegistry>(
-  EditorExtensions.EditorPane,
-).registerEditorPane(
-  EditorPaneDescriptor.create(
-    WebviewEditor,
-    WebviewEditor.ID,
-    localize("webview.editor.label", "webview editor"),
-  ),
-  [new SyncDescriptor(WebviewInput)],
-)
+(Registry.as<IEditorPaneRegistry>(EditorExtensions.EditorPane)).registerEditorPane(EditorPaneDescriptor.create(
+	WebviewEditor,
+	WebviewEditor.ID,
+	localize('webview.editor.label', "webview editor")),
+	[new SyncDescriptor(WebviewInput)]);
 
-class WebviewPanelContribution
-  extends Disposable
-  implements IWorkbenchContribution
-{
-  static readonly ID = "workbench.contrib.webviewPanel"
+class WebviewPanelContribution extends Disposable implements IWorkbenchContribution {
 
-  constructor(
-    @IEditorService editorService: IEditorService,
-    @IEditorGroupsService
-    private readonly editorGroupService: IEditorGroupsService,
-  ) {
-    super()
+	static readonly ID = 'workbench.contrib.webviewPanel';
 
-    this._register(
-      editorService.onWillOpenEditor((e) => {
-        const group = editorGroupService.getGroup(e.groupId)
-        if (group) {
-          this.onEditorOpening(e.editor, group)
-        }
-      }),
-    )
-  }
+	constructor(
+		@IEditorService editorService: IEditorService,
+		@IEditorGroupsService private readonly editorGroupService: IEditorGroupsService
+	) {
+		super();
 
-  private onEditorOpening(editor: EditorInput, group: IEditorGroup): void {
-    if (
-      !(editor instanceof WebviewInput) ||
-      editor.typeId !== WebviewInput.typeId
-    ) {
-      return
-    }
+		this._register(editorService.onWillOpenEditor(e => {
+			const group = editorGroupService.getGroup(e.groupId);
+			if (group) {
+				this.onEditorOpening(e.editor, group);
+			}
+		}));
+	}
 
-    if (group.contains(editor)) {
-      return
-    }
+	private onEditorOpening(
+		editor: EditorInput,
+		group: IEditorGroup
+	): void {
+		if (!(editor instanceof WebviewInput) || editor.typeId !== WebviewInput.typeId) {
+			return;
+		}
 
-    let previousGroup: IEditorGroup | undefined
-    const groups = this.editorGroupService.groups
-    for (const group of groups) {
-      if (group.contains(editor)) {
-        previousGroup = group
-        break
-      }
-    }
+		if (group.contains(editor)) {
+			return;
+		}
 
-    if (!previousGroup) {
-      return
-    }
+		let previousGroup: IEditorGroup | undefined;
+		const groups = this.editorGroupService.groups;
+		for (const group of groups) {
+			if (group.contains(editor)) {
+				previousGroup = group;
+				break;
+			}
+		}
 
-    previousGroup.closeEditor(editor)
-  }
+		if (!previousGroup) {
+			return;
+		}
+
+		previousGroup.closeEditor(editor);
+	}
 }
 
-registerWorkbenchContribution2(
-  WebviewPanelContribution.ID,
-  WebviewPanelContribution,
-  WorkbenchPhase.BlockStartup,
-)
+registerWorkbenchContribution2(WebviewPanelContribution.ID, WebviewPanelContribution, WorkbenchPhase.BlockStartup);
 
-Registry.as<IEditorFactoryRegistry>(
-  EditorExtensions.EditorFactory,
-).registerEditorSerializer(
-  WebviewEditorInputSerializer.ID,
-  WebviewEditorInputSerializer,
-)
+Registry.as<IEditorFactoryRegistry>(EditorExtensions.EditorFactory).registerEditorSerializer(
+	WebviewEditorInputSerializer.ID,
+	WebviewEditorInputSerializer);
 
-registerSingleton(
-  IWebviewWorkbenchService,
-  WebviewEditorService,
-  InstantiationType.Delayed,
-)
+registerSingleton(IWebviewWorkbenchService, WebviewEditorService, InstantiationType.Delayed);
 
-registerAction2(ShowWebViewEditorFindWidgetAction)
-registerAction2(HideWebViewEditorFindCommand)
-registerAction2(WebViewEditorFindNextCommand)
-registerAction2(WebViewEditorFindPreviousCommand)
-registerAction2(ReloadWebviewAction)
+registerAction2(ShowWebViewEditorFindWidgetAction);
+registerAction2(HideWebViewEditorFindCommand);
+registerAction2(WebViewEditorFindNextCommand);
+registerAction2(WebViewEditorFindPreviousCommand);
+registerAction2(ReloadWebviewAction);

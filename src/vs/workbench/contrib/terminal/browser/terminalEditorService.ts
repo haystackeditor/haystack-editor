@@ -66,20 +66,20 @@ export class TerminalEditorService
     new Map()
 
   private readonly _onDidDisposeInstance = this._register(
-    new Emitter<ITerminalInstance>(),
+    new Emitter<ITerminalInstance>()
   )
   readonly onDidDisposeInstance = this._onDidDisposeInstance.event
   private readonly _onDidFocusInstance = this._register(
-    new Emitter<ITerminalInstance>(),
+    new Emitter<ITerminalInstance>()
   )
   readonly onDidFocusInstance = this._onDidFocusInstance.event
   private readonly _onDidChangeInstanceCapability = this._register(
-    new Emitter<ITerminalInstance>(),
+    new Emitter<ITerminalInstance>()
   )
   readonly onDidChangeInstanceCapability =
     this._onDidChangeInstanceCapability.event
   private readonly _onDidChangeActiveInstance = this._register(
-    new Emitter<ITerminalInstance | undefined>(),
+    new Emitter<ITerminalInstance | undefined>()
   )
   readonly onDidChangeActiveInstance = this._onDidChangeActiveInstance.event
   private readonly _onDidChangeInstances = this._register(new Emitter<void>())
@@ -95,7 +95,7 @@ export class TerminalEditorService
     @IInstantiationService
     private readonly _instantiationService: IInstantiationService,
     @ILifecycleService lifecycleService: ILifecycleService,
-    @IContextKeyService contextKeyService: IContextKeyService,
+    @IContextKeyService contextKeyService: IContextKeyService
   ) {
     super()
     this._terminalEditorActive =
@@ -105,10 +105,10 @@ export class TerminalEditorService
         for (const d of this._instanceDisposables.values()) {
           dispose(d)
         }
-      }),
+      })
     )
     this._register(
-      lifecycleService.onWillShutdown(() => (this._isShuttingDown = true)),
+      lifecycleService.onWillShutdown(() => (this._isShuttingDown = true))
     )
     this._register(
       this._editorService.onDidActiveEditorChange(() => {
@@ -128,7 +128,7 @@ export class TerminalEditorService
             instance.resetFocusContextKey()
           }
         }
-      }),
+      })
     )
     this._register(
       this._editorService.onDidVisibleEditorsChange(() => {
@@ -151,11 +151,11 @@ export class TerminalEditorService
         ) {
           this._editorInputs.set(
             unknownEditor.terminalInstance.resource.path,
-            unknownEditor,
+            unknownEditor
           )
           this.instances.push(unknownEditor.terminalInstance)
         }
-      }),
+      })
     )
 
     // Remove the terminal from the managed instances when the editor closes. This fires when
@@ -177,13 +177,13 @@ export class TerminalEditorService
             }
           }
         }
-      }),
+      })
     )
   }
 
   private _getActiveTerminalEditors(): EditorInput[] {
     return this._editorService.visibleEditors.filter(
-      (e) => e instanceof TerminalEditorInput && e.terminalInstance?.instanceId,
+      (e) => e instanceof TerminalEditorInput && e.terminalInstance?.instanceId
     )
   }
 
@@ -207,7 +207,7 @@ export class TerminalEditorService
 
   async openEditor(
     instance: ITerminalInstance,
-    editorOptions?: TerminalEditorLocation,
+    editorOptions?: TerminalEditorLocation
   ): Promise<void> {
     const resource = this.resolveResource(instance)
     if (resource) {
@@ -238,7 +238,7 @@ export class TerminalEditorService
     const input = this._instantiationService.createInstance(
       TerminalEditorInput,
       resource,
-      instance,
+      instance
     )
     this._registerInstance(inputKey, input, instance)
     return input.resource
@@ -255,23 +255,23 @@ export class TerminalEditorService
   private _registerInstance(
     inputKey: string,
     input: TerminalEditorInput,
-    instance: ITerminalInstance,
+    instance: ITerminalInstance
   ): void {
     this._editorInputs.set(inputKey, input)
     this._instanceDisposables.set(inputKey, [
       instance.onDidFocus(
         this._onDidFocusInstance.fire,
-        this._onDidFocusInstance,
+        this._onDidFocusInstance
       ),
       instance.onDisposed(
         this._onDidDisposeInstance.fire,
-        this._onDidDisposeInstance,
+        this._onDidDisposeInstance
       ),
       instance.capabilities.onDidAddCapabilityType(() =>
-        this._onDidChangeInstanceCapability.fire(instance),
+        this._onDidChangeInstanceCapability.fire(instance)
       ),
       instance.capabilities.onDidRemoveCapabilityType(() =>
-        this._onDidChangeInstanceCapability.fire(instance),
+        this._onDidChangeInstanceCapability.fire(instance)
       ),
     ])
     this.instances.push(instance)
@@ -299,7 +299,7 @@ export class TerminalEditorService
 
   splitInstance(
     instanceToSplit: ITerminalInstance,
-    shellLaunchConfig: IShellLaunchConfig = {},
+    shellLaunchConfig: IShellLaunchConfig = {}
   ): ITerminalInstance {
     if (instanceToSplit.target === TerminalLocation.Editor) {
       // Make sure the instance to split's group is active
@@ -310,7 +310,7 @@ export class TerminalEditorService
     }
     const instance = this._terminalInstanceService.createInstance(
       shellLaunchConfig,
-      TerminalLocation.Editor,
+      TerminalLocation.Editor
     )
     const resource = this.resolveResource(instance)
     if (resource) {
@@ -323,24 +323,24 @@ export class TerminalEditorService
   }
 
   reviveInput(
-    deserializedInput: IDeserializedTerminalEditorInput,
+    deserializedInput: IDeserializedTerminalEditorInput
   ): EditorInput {
     if ("pid" in deserializedInput) {
       const newDeserializedInput = { ...deserializedInput, findRevivedId: true }
       const instance = this._terminalInstanceService.createInstance(
         { attachPersistentProcess: newDeserializedInput },
-        TerminalLocation.Editor,
+        TerminalLocation.Editor
       )
       const input = this._instantiationService.createInstance(
         TerminalEditorInput,
         instance.resource,
-        instance,
+        instance
       )
       this._registerInstance(instance.resource.path, input, instance)
       return input
     } else {
       throw new Error(
-        `Could not revive terminal editor input, ${deserializedInput}`,
+        `Could not revive terminal editor input, ${deserializedInput}`
       )
     }
   }

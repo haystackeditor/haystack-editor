@@ -9,21 +9,21 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IKeymapInfo } from "vs/workbench/services/keybinding/common/keymapInfo"
+import { IKeymapInfo } from 'vs/workbench/services/keybinding/common/keymapInfo';
 
 export class KeyboardLayoutContribution {
-  public static readonly INSTANCE: KeyboardLayoutContribution =
-    new KeyboardLayoutContribution()
+	public static readonly INSTANCE: KeyboardLayoutContribution = new KeyboardLayoutContribution();
 
-  private _layoutInfos: IKeymapInfo[] = []
+	private _layoutInfos: IKeymapInfo[] = [];
 
-  get layoutInfos() {
-    return this._layoutInfos
-  }
+	get layoutInfos() {
+		return this._layoutInfos;
+	}
 
-  private constructor() {}
+	private constructor() {
+	}
 
-  registerKeyboardLayout(layout: IKeymapInfo) {
-    this._layoutInfos.push(layout)
-  }
+	registerKeyboardLayout(layout: IKeymapInfo) {
+		this._layoutInfos.push(layout);
+	}
 }

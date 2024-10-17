@@ -54,13 +54,13 @@ export interface RendererManagerInterface {
   navigateToPosition(
     canvasPosition: Vector,
     size: Vector,
-    navigationType: NavigationType,
+    navigationType: NavigationType
   ): void
 
   navigateToPositionUnconditionally(
     canvasPosition: Vector,
     size: Vector,
-    navigationType: NavigationType,
+    navigationType: NavigationType
   ): void
 
   setDependencyArrows(dependencyArrows: DependencyArrow[]): void

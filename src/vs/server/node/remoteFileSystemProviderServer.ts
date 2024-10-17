@@ -9,119 +9,93 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Emitter } from "vs/base/common/event"
-import { URI, UriComponents } from "vs/base/common/uri"
-import { IURITransformer } from "vs/base/common/uriIpc"
-import { IFileChange } from "vs/platform/files/common/files"
-import { ILogService } from "vs/platform/log/common/log"
-import { createURITransformer } from "vs/workbench/api/node/uriTransformer"
-import { RemoteAgentConnectionContext } from "vs/platform/remote/common/remoteAgentEnvironment"
-import { DiskFileSystemProvider } from "vs/platform/files/node/diskFileSystemProvider"
-import { posix, delimiter } from "vs/base/common/path"
-import { IServerEnvironmentService } from "vs/server/node/serverEnvironmentService"
-import {
-  AbstractDiskFileSystemProviderChannel,
-  AbstractSessionFileWatcher,
-  ISessionFileWatcher,
-} from "vs/platform/files/node/diskFileSystemProviderServer"
-import { IRecursiveWatcherOptions } from "vs/platform/files/common/watcher"
+import { Emitter } from 'vs/base/common/event';
+import { URI, UriComponents } from 'vs/base/common/uri';
+import { IURITransformer } from 'vs/base/common/uriIpc';
+import { IFileChange } from 'vs/platform/files/common/files';
+import { ILogService } from 'vs/platform/log/common/log';
+import { createURITransformer } from 'vs/workbench/api/node/uriTransformer';
+import { RemoteAgentConnectionContext } from 'vs/platform/remote/common/remoteAgentEnvironment';
+import { DiskFileSystemProvider } from 'vs/platform/files/node/diskFileSystemProvider';
+import { posix, delimiter } from 'vs/base/common/path';
+import { IServerEnvironmentService } from 'vs/server/node/serverEnvironmentService';
+import { AbstractDiskFileSystemProviderChannel, AbstractSessionFileWatcher, ISessionFileWatcher } from 'vs/platform/files/node/diskFileSystemProviderServer';
+import { IRecursiveWatcherOptions } from 'vs/platform/files/common/watcher';
 
 export class RemoteAgentFileSystemProviderChannel extends AbstractDiskFileSystemProviderChannel<RemoteAgentConnectionContext> {
-  private readonly uriTransformerCache = new Map<string, IURITransformer>()
 
-  constructor(
-    logService: ILogService,
-    private readonly environmentService: IServerEnvironmentService,
-  ) {
-    super(new DiskFileSystemProvider(logService), logService)
+	private readonly uriTransformerCache = new Map<string, IURITransformer>();
 
-    this._register(this.provider)
-  }
+	constructor(
+		logService: ILogService,
+		private readonly environmentService: IServerEnvironmentService
+	) {
+		super(new DiskFileSystemProvider(logService), logService);
 
-  protected override getUriTransformer(
-    ctx: RemoteAgentConnectionContext,
-  ): IURITransformer {
-    let transformer = this.uriTransformerCache.get(ctx.remoteAuthority)
-    if (!transformer) {
-      transformer = createURITransformer(ctx.remoteAuthority)
-      this.uriTransformerCache.set(ctx.remoteAuthority, transformer)
-    }
+		this._register(this.provider);
+	}
 
-    return transformer
-  }
+	protected override getUriTransformer(ctx: RemoteAgentConnectionContext): IURITransformer {
+		let transformer = this.uriTransformerCache.get(ctx.remoteAuthority);
+		if (!transformer) {
+			transformer = createURITransformer(ctx.remoteAuthority);
+			this.uriTransformerCache.set(ctx.remoteAuthority, transformer);
+		}
 
-  protected override transformIncoming(
-    uriTransformer: IURITransformer,
-    _resource: UriComponents,
-    supportVSCodeResource = false,
-  ): URI {
-    if (
-      supportVSCodeResource &&
-      _resource.path === "/vscode-resource" &&
-      _resource.query
-    ) {
-      const requestResourcePath = JSON.parse(
-        _resource.query,
-      ).requestResourcePath
+		return transformer;
+	}
 
-      return URI.from({ scheme: "file", path: requestResourcePath })
-    }
+	protected override transformIncoming(uriTransformer: IURITransformer, _resource: UriComponents, supportVSCodeResource = false): URI {
+		if (supportVSCodeResource && _resource.path === '/vscode-resource' && _resource.query) {
+			const requestResourcePath = JSON.parse(_resource.query).requestResourcePath;
 
-    return URI.revive(uriTransformer.transformIncoming(_resource))
-  }
+			return URI.from({ scheme: 'file', path: requestResourcePath });
+		}
 
-  //#region File Watching
+		return URI.revive(uriTransformer.transformIncoming(_resource));
+	}
 
-  protected createSessionFileWatcher(
-    uriTransformer: IURITransformer,
-    emitter: Emitter<IFileChange[] | string>,
-  ): ISessionFileWatcher {
-    return new SessionFileWatcher(
-      uriTransformer,
-      emitter,
-      this.logService,
-      this.environmentService,
-    )
-  }
+	//#region File Watching
 
-  //#endregion
+	protected createSessionFileWatcher(uriTransformer: IURITransformer, emitter: Emitter<IFileChange[] | string>): ISessionFileWatcher {
+		return new SessionFileWatcher(uriTransformer, emitter, this.logService, this.environmentService);
+	}
+
+	//#endregion
 }
 
 class SessionFileWatcher extends AbstractSessionFileWatcher {
-  constructor(
-    uriTransformer: IURITransformer,
-    sessionEmitter: Emitter<IFileChange[] | string>,
-    logService: ILogService,
-    environmentService: IServerEnvironmentService,
-  ) {
-    super(uriTransformer, sessionEmitter, logService, environmentService)
-  }
 
-  protected override getRecursiveWatcherOptions(
-    environmentService: IServerEnvironmentService,
-  ): IRecursiveWatcherOptions | undefined {
-    const fileWatcherPolling = environmentService.args["file-watcher-polling"]
-    if (fileWatcherPolling) {
-      const segments = fileWatcherPolling.split(delimiter)
-      const pollingInterval = Number(segments[0])
-      if (pollingInterval > 0) {
-        const usePolling = segments.length > 1 ? segments.slice(1) : true
-        return { usePolling, pollingInterval }
-      }
-    }
+	constructor(
+		uriTransformer: IURITransformer,
+		sessionEmitter: Emitter<IFileChange[] | string>,
+		logService: ILogService,
+		environmentService: IServerEnvironmentService
+	) {
+		super(uriTransformer, sessionEmitter, logService, environmentService);
+	}
 
-    return undefined
-  }
+	protected override getRecursiveWatcherOptions(environmentService: IServerEnvironmentService): IRecursiveWatcherOptions | undefined {
+		const fileWatcherPolling = environmentService.args['file-watcher-polling'];
+		if (fileWatcherPolling) {
+			const segments = fileWatcherPolling.split(delimiter);
+			const pollingInterval = Number(segments[0]);
+			if (pollingInterval > 0) {
+				const usePolling = segments.length > 1 ? segments.slice(1) : true;
+				return { usePolling, pollingInterval };
+			}
+		}
 
-  protected override getExtraExcludes(
-    environmentService: IServerEnvironmentService,
-  ): string[] | undefined {
-    if (environmentService.extensionsPath) {
-      // when opening the $HOME folder, we end up watching the extension folder
-      // so simply exclude watching the extensions folder
-      return [posix.join(environmentService.extensionsPath, "**")]
-    }
+		return undefined;
+	}
 
-    return undefined
-  }
+	protected override getExtraExcludes(environmentService: IServerEnvironmentService): string[] | undefined {
+		if (environmentService.extensionsPath) {
+			// when opening the $HOME folder, we end up watching the extension folder
+			// so simply exclude watching the extensions folder
+			return [posix.join(environmentService.extensionsPath, '**')];
+		}
+
+		return undefined;
+	}
 }

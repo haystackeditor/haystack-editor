@@ -11,16 +11,16 @@
 
 //@ts-check
 
-"use strict"
+'use strict';
 
-const withBrowserDefaults = require("../shared.webpack.config").browser
+const withBrowserDefaults = require('../shared.webpack.config').browser;
 
 module.exports = withBrowserDefaults({
-  context: __dirname,
-  entry: {
-    extension: "./src/mergeConflictMain.ts",
-  },
-  output: {
-    filename: "mergeConflictMain.js",
-  },
-})
+	context: __dirname,
+	entry: {
+		extension: './src/mergeConflictMain.ts'
+	},
+	output: {
+		filename: 'mergeConflictMain.js'
+	}
+});

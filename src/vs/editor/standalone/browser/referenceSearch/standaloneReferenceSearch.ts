@@ -30,7 +30,7 @@ export class StandaloneReferencesController extends ReferencesController {
     @ILanguageService languageService: ILanguageService,
     @ILanguageFeaturesService languageFeatureService: ILanguageFeaturesService,
     @IInstantiationService instantiationService: IInstantiationService,
-    @IStorageService storageService: IStorageService,
+    @IStorageService storageService: IStorageService
   ) {
     super(
       true,
@@ -40,7 +40,7 @@ export class StandaloneReferencesController extends ReferencesController {
       languageService,
       languageFeatureService,
       instantiationService,
-      storageService,
+      storageService
     )
   }
 }
@@ -48,5 +48,5 @@ export class StandaloneReferencesController extends ReferencesController {
 registerEditorContribution(
   ReferencesController.ID,
   StandaloneReferencesController,
-  EditorContributionInstantiation.Lazy,
+  EditorContributionInstantiation.Lazy
 )

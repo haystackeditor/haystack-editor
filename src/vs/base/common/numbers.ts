@@ -10,66 +10,68 @@
  *--------------------------------------------------------------------------------------------*/
 
 export function clamp(value: number, min: number, max: number): number {
-  return Math.min(Math.max(value, min), max)
+	return Math.min(Math.max(value, min), max);
 }
 
 export function rot(index: number, modulo: number): number {
-  return (modulo + (index % modulo)) % modulo
+	return (modulo + (index % modulo)) % modulo;
 }
 
 export class Counter {
-  private _next = 0
+	private _next = 0;
 
-  getNext(): number {
-    return this._next++
-  }
+	getNext(): number {
+		return this._next++;
+	}
 }
 
 export class MovingAverage {
-  private _n = 1
-  private _val = 0
 
-  update(value: number): number {
-    this._val = this._val + (value - this._val) / this._n
-    this._n += 1
-    return this._val
-  }
+	private _n = 1;
+	private _val = 0;
 
-  get value(): number {
-    return this._val
-  }
+	update(value: number): number {
+		this._val = this._val + (value - this._val) / this._n;
+		this._n += 1;
+		return this._val;
+	}
+
+	get value(): number {
+		return this._val;
+	}
 }
 
 export class SlidingWindowAverage {
-  private _n: number = 0
-  private _val = 0
 
-  private readonly _values: number[] = []
-  private _index: number = 0
-  private _sum = 0
+	private _n: number = 0;
+	private _val = 0;
 
-  constructor(size: number) {
-    this._values = new Array(size)
-    this._values.fill(0, 0, size)
-  }
+	private readonly _values: number[] = [];
+	private _index: number = 0;
+	private _sum = 0;
 
-  update(value: number): number {
-    const oldValue = this._values[this._index]
-    this._values[this._index] = value
-    this._index = (this._index + 1) % this._values.length
+	constructor(size: number) {
+		this._values = new Array(size);
+		this._values.fill(0, 0, size);
+	}
 
-    this._sum -= oldValue
-    this._sum += value
+	update(value: number): number {
+		const oldValue = this._values[this._index];
+		this._values[this._index] = value;
+		this._index = (this._index + 1) % this._values.length;
 
-    if (this._n < this._values.length) {
-      this._n += 1
-    }
+		this._sum -= oldValue;
+		this._sum += value;
 
-    this._val = this._sum / this._n
-    return this._val
-  }
+		if (this._n < this._values.length) {
+			this._n += 1;
+		}
 
-  get value(): number {
-    return this._val
-  }
+		this._val = this._sum / this._n;
+		return this._val;
+	}
+
+	get value(): number {
+		return this._val;
+	}
 }

@@ -135,35 +135,35 @@ export class WorkspaceTrustContextKeys
     @IWorkspaceTrustEnablementService
     workspaceTrustEnablementService: IWorkspaceTrustEnablementService,
     @IWorkspaceTrustManagementService
-    workspaceTrustManagementService: IWorkspaceTrustManagementService,
+    workspaceTrustManagementService: IWorkspaceTrustManagementService
   ) {
     super()
 
     this._ctxWorkspaceTrustEnabled =
       WorkspaceTrustContext.IsEnabled.bindTo(contextKeyService)
     this._ctxWorkspaceTrustEnabled.set(
-      workspaceTrustEnablementService.isWorkspaceTrustEnabled(),
+      workspaceTrustEnablementService.isWorkspaceTrustEnabled()
     )
 
     this._ctxWorkspaceTrustState =
       WorkspaceTrustContext.IsTrusted.bindTo(contextKeyService)
     this._ctxWorkspaceTrustState.set(
-      workspaceTrustManagementService.isWorkspaceTrusted(),
+      workspaceTrustManagementService.isWorkspaceTrusted()
     )
 
     this._register(
       workspaceTrustManagementService.onDidChangeTrust((trusted) =>
-        this._ctxWorkspaceTrustState.set(trusted),
-      ),
+        this._ctxWorkspaceTrustState.set(trusted)
+      )
     )
   }
 }
 
 Registry.as<IWorkbenchContributionsRegistry>(
-  WorkbenchExtensions.Workbench,
+  WorkbenchExtensions.Workbench
 ).registerWorkbenchContribution(
   WorkspaceTrustContextKeys,
-  LifecyclePhase.Restored,
+  LifecyclePhase.Restored
 )
 
 /*
@@ -184,7 +184,7 @@ export class WorkspaceTrustRequestHandler
     @IWorkspaceTrustManagementService
     private readonly workspaceTrustManagementService: IWorkspaceTrustManagementService,
     @IWorkspaceTrustRequestService
-    private readonly workspaceTrustRequestService: IWorkspaceTrustRequestService,
+    private readonly workspaceTrustRequestService: IWorkspaceTrustRequestService
   ) {
     super()
 
@@ -193,7 +193,7 @@ export class WorkspaceTrustRequestHandler
 
   private get useWorkspaceLanguage(): boolean {
     return !isSingleFolderWorkspaceIdentifier(
-      toWorkspaceIdentifier(this.workspaceContextService.getWorkspace()),
+      toWorkspaceIdentifier(this.workspaceContextService.getWorkspace())
     )
   }
 
@@ -210,15 +210,15 @@ export class WorkspaceTrustRequestHandler
             WorkbenchState.EMPTY
               ? localize(
                   "openLooseFileWorkspaceDetails",
-                  "You are trying to open untrusted files in a workspace which is trusted.",
+                  "You are trying to open untrusted files in a workspace which is trusted."
                 )
               : localize(
                   "openLooseFileWindowDetails",
-                  "You are trying to open untrusted files in a window which is trusted.",
+                  "You are trying to open untrusted files in a window which is trusted."
                 ),
             localize(
               "openLooseFileLearnMore",
-              "If you don't want to open untrusted files, we recommend to open them in Restricted Mode in a new window as the files may be malicious. See [our docs](https://aka.ms/vscode-workspace-trust) to learn more.",
+              "If you don't want to open untrusted files, we recommend to open them in Restricted Mode in a new window as the files may be malicious. See [our docs](https://aka.ms/vscode-workspace-trust) to learn more."
             ),
           ]
 
@@ -230,46 +230,46 @@ export class WorkspaceTrustRequestHandler
               WorkbenchState.EMPTY
                 ? localize(
                     "openLooseFileWorkspaceMesssage",
-                    "Do you want to allow untrusted files in this workspace?",
+                    "Do you want to allow untrusted files in this workspace?"
                   )
                 : localize(
                     "openLooseFileWindowMesssage",
-                    "Do you want to allow untrusted files in this window?",
+                    "Do you want to allow untrusted files in this window?"
                   ),
             buttons: [
               {
                 label: localize(
                   { key: "open", comment: ["&& denotes a mnemonic"] },
-                  "&&Open",
+                  "&&Open"
                 ),
                 run: ({ checkboxChecked }) =>
                   this.workspaceTrustRequestService.completeOpenFilesTrustRequest(
                     WorkspaceTrustUriResponse.Open,
-                    !!checkboxChecked,
+                    !!checkboxChecked
                   ),
               },
               {
                 label: localize(
                   { key: "newWindow", comment: ["&& denotes a mnemonic"] },
-                  "Open in &&Restricted Mode",
+                  "Open in &&Restricted Mode"
                 ),
                 run: ({ checkboxChecked }) =>
                   this.workspaceTrustRequestService.completeOpenFilesTrustRequest(
                     WorkspaceTrustUriResponse.OpenInNewWindow,
-                    !!checkboxChecked,
+                    !!checkboxChecked
                   ),
               },
             ],
             cancelButton: {
               run: () =>
                 this.workspaceTrustRequestService.completeOpenFilesTrustRequest(
-                  WorkspaceTrustUriResponse.Cancel,
+                  WorkspaceTrustUriResponse.Cancel
                 ),
             },
             checkbox: {
               label: localize(
                 "openLooseFileWorkspaceCheckbox",
-                "Remember my decision for all workspaces",
+                "Remember my decision for all workspaces"
               ),
               checked: false,
             },
@@ -280,8 +280,8 @@ export class WorkspaceTrustRequestHandler
               }),
             },
           })
-        },
-      ),
+        }
+      )
     )
 
     // Workspace trust request
@@ -294,17 +294,17 @@ export class WorkspaceTrustRequestHandler
           const message = this.useWorkspaceLanguage
             ? localize(
                 "workspaceTrust",
-                "Do you trust the authors of the files in this workspace?",
+                "Do you trust the authors of the files in this workspace?"
               )
             : localize(
                 "folderTrust",
-                "Do you trust the authors of the files in this folder?",
+                "Do you trust the authors of the files in this folder?"
               )
 
           // Message
           const defaultDetails = localize(
             "immediateTrustRequestMessage",
-            "A feature you are trying to use may be a security risk if you do not trust the source of the files or folders you currently have open.",
+            "A feature you are trying to use may be a security risk if you do not trust the source of the files or folders you currently have open."
           )
           const details = requestOptions?.message ?? defaultDetails
 
@@ -317,14 +317,14 @@ export class WorkspaceTrustRequestHandler
                       key: "grantWorkspaceTrustButton",
                       comment: ["&& denotes a mnemonic"],
                     },
-                    "&&Trust Workspace & Continue",
+                    "&&Trust Workspace & Continue"
                   )
                 : localize(
                     {
                       key: "grantFolderTrustButton",
                       comment: ["&& denotes a mnemonic"],
                     },
-                    "&&Trust Folder & Continue",
+                    "&&Trust Folder & Continue"
                   ),
               type: "ContinueWithTrust",
             },
@@ -334,7 +334,7 @@ export class WorkspaceTrustRequestHandler
                   key: "manageWorkspaceTrustButton",
                   comment: ["&& denotes a mnemonic"],
                 },
-                "&&Manage",
+                "&&Manage"
               ),
               type: "Manage",
             },
@@ -360,8 +360,8 @@ export class WorkspaceTrustRequestHandler
                   markdown: new MarkdownString(
                     localize(
                       "immediateTrustRequestLearnMore",
-                      "If you don't trust the authors of these files, we do not recommend continuing as the files may be malicious. See [our docs](https://aka.ms/vscode-workspace-trust) to learn more.",
-                    ),
+                      "If you don't trust the authors of these files, we do not recommend continuing as the files may be malicious. See [our docs](https://aka.ms/vscode-workspace-trust) to learn more."
+                    )
                   ),
                 },
               ],
@@ -391,12 +391,12 @@ export class WorkspaceTrustRequestHandler
           switch (result) {
             case "ContinueWithTrust":
               await this.workspaceTrustRequestService.completeWorkspaceTrustRequest(
-                true,
+                true
               )
               break
             case "ContinueWithoutTrust":
               await this.workspaceTrustRequestService.completeWorkspaceTrustRequest(
-                undefined,
+                undefined
               )
               break
             case "Manage":
@@ -407,8 +407,8 @@ export class WorkspaceTrustRequestHandler
               this.workspaceTrustRequestService.cancelWorkspaceTrustRequest()
               break
           }
-        },
-      ),
+        }
+      )
     )
   }
 }
@@ -446,12 +446,12 @@ export class WorkspaceTrustUXHandler
     private readonly remoteAgentService: IRemoteAgentService,
     @IEnvironmentService
     private readonly environmentService: IEnvironmentService,
-    @IFileService private readonly fileService: IFileService,
+    @IFileService private readonly fileService: IFileService
   ) {
     super()
 
     this.statusbarEntryAccessor = this._register(
-      new MutableDisposable<IStatusbarEntryAccessor>(),
+      new MutableDisposable<IStatusbarEntryAccessor>()
     )
     ;(async () => {
       await this.workspaceTrustManagementService.workspaceTrustInitialized
@@ -459,7 +459,7 @@ export class WorkspaceTrustUXHandler
       if (this.workspaceTrustEnablementService.isWorkspaceTrustEnabled()) {
         this.registerListeners()
         this.updateStatusbarEntry(
-          this.workspaceTrustManagementService.isWorkspaceTrusted(),
+          this.workspaceTrustManagementService.isWorkspaceTrusted()
         )
 
         // Show modal dialog
@@ -472,7 +472,7 @@ export class WorkspaceTrustUXHandler
                 focusDisposable.dispose()
                 this.showModalOnStart()
               }
-            },
+            }
           )
         }
       }
@@ -490,7 +490,7 @@ export class WorkspaceTrustUXHandler
         }
 
         const addWorkspaceFolder = async (
-          e: IWorkspaceFoldersWillChangeEvent,
+          e: IWorkspaceFoldersWillChangeEvent
         ): Promise<void> => {
           const trusted =
             this.workspaceTrustManagementService.isWorkspaceTrusted()
@@ -499,10 +499,8 @@ export class WorkspaceTrustUXHandler
           if (trusted && (e.changes.added.length || e.changes.changed.length)) {
             const addedFoldersTrustInfo = await Promise.all(
               e.changes.added.map((folder) =>
-                this.workspaceTrustManagementService.getUriTrustInfo(
-                  folder.uri,
-                ),
-              ),
+                this.workspaceTrustManagementService.getUriTrustInfo(folder.uri)
+              )
             )
 
             if (
@@ -514,11 +512,11 @@ export class WorkspaceTrustUXHandler
                 type: Severity.Info,
                 message: localize(
                   "addWorkspaceFolderMessage",
-                  "Do you trust the authors of the files in this folder?",
+                  "Do you trust the authors of the files in this folder?"
                 ),
                 detail: localize(
                   "addWorkspaceFolderDetail",
-                  "You are adding files that are not currently trusted to a trusted workspace. Do you trust the authors of these new files?",
+                  "You are adding files that are not currently trusted to a trusted workspace. Do you trust the authors of these new files?"
                 ),
                 cancelButton: localize("no", "No"),
                 custom: { icon: Codicon.shield },
@@ -527,20 +525,20 @@ export class WorkspaceTrustUXHandler
               // Mark added/changed folders as trusted
               await this.workspaceTrustManagementService.setUrisTrust(
                 addedFoldersTrustInfo.map((i) => i.uri),
-                confirmed,
+                confirmed
               )
             }
           }
         }
 
         return e.join(addWorkspaceFolder(e))
-      }),
+      })
     )
 
     this._register(
       this.workspaceTrustManagementService.onDidChangeTrust((trusted) => {
         this.updateWorkbenchIndicators(trusted)
-      }),
+      })
     )
 
     this._register(
@@ -565,7 +563,7 @@ export class WorkspaceTrustUXHandler
               this.productService.aiGeneratedWorkspaceTrust.dontTrustOption
           } else {
             console.warn(
-              "AI generated workspace trust dialog contents not available.",
+              "AI generated workspace trust dialog contents not available."
             )
           }
 
@@ -574,16 +572,16 @@ export class WorkspaceTrustUXHandler
             (this.useWorkspaceLanguage
               ? localize(
                   "workspaceTrust",
-                  "Do you trust the authors of the files in this workspace?",
+                  "Do you trust the authors of the files in this workspace?"
                 )
               : localize(
                   "folderTrust",
-                  "Do you trust the authors of the files in this folder?",
+                  "Do you trust the authors of the files in this folder?"
                 ))
 
           let checkboxText: string | undefined
           const workspaceIdentifier = toWorkspaceIdentifier(
-            this.workspaceContextService.getWorkspace(),
+            this.workspaceContextService.getWorkspace()
           )
           const isSingleFolderWorkspace =
             isSingleFolderWorkspaceIdentifier(workspaceIdentifier)
@@ -594,13 +592,13 @@ export class WorkspaceTrustUXHandler
           ) {
             const name = basename(
               uriDirname(
-                (workspaceIdentifier as ISingleFolderWorkspaceIdentifier).uri,
-              ),
+                (workspaceIdentifier as ISingleFolderWorkspaceIdentifier).uri
+              )
             )
             checkboxText = localize(
               "checkboxString",
               "Trust the authors of all files in the parent folder '{0}'",
-              name,
+              name
             )
           }
 
@@ -612,16 +610,16 @@ export class WorkspaceTrustUXHandler
                 trustOption ??
                 localize(
                   { key: "trustOption", comment: ["&& denotes a mnemonic"] },
-                  "&&Yes, I trust the authors",
+                  "&&Yes, I trust the authors"
                 ),
               sublabel: isSingleFolderWorkspace
                 ? localize(
                     "trustFolderOptionDescription",
-                    "Trust folder and enable all features",
+                    "Trust folder and enable all features"
                   )
                 : localize(
                     "trustWorkspaceOptionDescription",
-                    "Trust workspace and enable all features",
+                    "Trust workspace and enable all features"
                   ),
             },
             {
@@ -632,16 +630,16 @@ export class WorkspaceTrustUXHandler
                     key: "dontTrustOption",
                     comment: ["&& denotes a mnemonic"],
                   },
-                  "&&No, I don't trust the authors",
+                  "&&No, I don't trust the authors"
                 ),
               sublabel: isSingleFolderWorkspace
                 ? localize(
                     "dontTrustFolderOptionDescription",
-                    "Browse folder in restricted mode",
+                    "Browse folder in restricted mode"
                   )
                 : localize(
                     "dontTrustWorkspaceOptionDescription",
-                    "Browse workspace in restricted mode",
+                    "Browse workspace in restricted mode"
                   ),
             },
             [
@@ -649,29 +647,29 @@ export class WorkspaceTrustUXHandler
                 ? localize(
                     "workspaceStartupTrustDetails",
                     "{0} provides features that may automatically execute files in this workspace.",
-                    this.productService.nameShort,
+                    this.productService.nameShort
                   )
                 : localize(
                     "folderStartupTrustDetails",
                     "{0} provides features that may automatically execute files in this folder.",
-                    this.productService.nameShort,
+                    this.productService.nameShort
                   ),
               learnMoreString ??
                 localize(
                   "startupTrustRequestLearnMore",
-                  "If you don't trust the authors of these files, we recommend to continue in restricted mode as the files may be malicious. See [our docs](https://aka.ms/vscode-workspace-trust) to learn more.",
+                  "If you don't trust the authors of these files, we recommend to continue in restricted mode as the files may be malicious. See [our docs](https://aka.ms/vscode-workspace-trust) to learn more."
                 ),
               !isEmptyWindow
                 ? `\`${this.labelService.getWorkspaceLabel(
                     workspaceIdentifier,
-                    { verbose: Verbosity.LONG },
+                    { verbose: Verbosity.LONG }
                   )}\``
                 : "",
             ],
-            checkboxText,
+            checkboxText
           )
-        },
-      ),
+        }
+      )
     )
   }
 
@@ -696,7 +694,7 @@ export class WorkspaceTrustUXHandler
     trustedOption: { label: string; sublabel: string },
     untrustedOption: { label: string; sublabel: string },
     markdownStrings: string[],
-    trustParentString?: string,
+    trustParentString?: string
   ): Promise<void> {
     await this.dialogService.prompt({
       type: Severity.Info,
@@ -712,11 +710,11 @@ export class WorkspaceTrustUXHandler
           run: async ({ checkboxChecked }) => {
             if (checkboxChecked) {
               await this.workspaceTrustManagementService.setParentFolderTrust(
-                true,
+                true
               )
             } else {
               await this.workspaceTrustRequestService.completeWorkspaceTrustRequest(
-                true,
+                true
               )
             }
           },
@@ -743,7 +741,7 @@ export class WorkspaceTrustUXHandler
       STARTUP_PROMPT_SHOWN_KEY,
       true,
       StorageScope.WORKSPACE,
-      StorageTarget.MACHINE,
+      StorageTarget.MACHINE
     )
   }
 
@@ -782,7 +780,7 @@ export class WorkspaceTrustUXHandler
       this.storageService.getBoolean(
         STARTUP_PROMPT_SHOWN_KEY,
         StorageScope.WORKSPACE,
-        false,
+        false
       )
     ) {
       this.updateWorkbenchIndicators(false)
@@ -799,14 +797,14 @@ export class WorkspaceTrustUXHandler
 
   private get useWorkspaceLanguage(): boolean {
     return !isSingleFolderWorkspaceIdentifier(
-      toWorkspaceIdentifier(this.workspaceContextService.getWorkspace()),
+      toWorkspaceIdentifier(this.workspaceContextService.getWorkspace())
     )
   }
 
   private async isAiGeneratedWorkspace(): Promise<boolean> {
     const aiGeneratedWorkspaces = URI.joinPath(
       this.environmentService.workspaceStorageHome,
-      "aiGeneratedWorkspaces.json",
+      "aiGeneratedWorkspaces.json"
     )
     return await this.fileService
       .exists(aiGeneratedWorkspaces)
@@ -814,14 +812,14 @@ export class WorkspaceTrustUXHandler
         if (result) {
           try {
             const content = await this.fileService.readFile(
-              aiGeneratedWorkspaces,
+              aiGeneratedWorkspaces
             )
             const workspaces = JSON.parse(content.value.toString()) as string[]
             if (
               workspaces.indexOf(
                 this.workspaceContextService
                   .getWorkspace()
-                  .folders[0].uri.toString(),
+                  .folders[0].uri.toString()
               ) > -1
             ) {
               return true
@@ -842,7 +840,7 @@ export class WorkspaceTrustUXHandler
     const dismissedRestricted = this.storageService.getBoolean(
       BANNER_RESTRICTED_MODE_DISMISSED_KEY,
       StorageScope.WORKSPACE,
-      false,
+      false
     )
 
     // never show the banner
@@ -878,7 +876,7 @@ export class WorkspaceTrustUXHandler
             BANNER_RESTRICTED_MODE_DISMISSED_KEY,
             true,
             StorageScope.WORKSPACE,
-            StorageTarget.MACHINE,
+            StorageTarget.MACHINE
           )
         }
       },
@@ -890,17 +888,17 @@ export class WorkspaceTrustUXHandler
       case WorkbenchState.EMPTY:
         return localize(
           "restrictedModeBannerAriaLabelWindow",
-          "Restricted Mode is intended for safe code browsing. Trust this window to enable all features. Use navigation keys to access banner actions.",
+          "Restricted Mode is intended for safe code browsing. Trust this window to enable all features. Use navigation keys to access banner actions."
         )
       case WorkbenchState.FOLDER:
         return localize(
           "restrictedModeBannerAriaLabelFolder",
-          "Restricted Mode is intended for safe code browsing. Trust this folder to enable all features. Use navigation keys to access banner actions.",
+          "Restricted Mode is intended for safe code browsing. Trust this folder to enable all features. Use navigation keys to access banner actions."
         )
       case WorkbenchState.WORKSPACE:
         return localize(
           "restrictedModeBannerAriaLabelWorkspace",
-          "Restricted Mode is intended for safe code browsing. Trust this workspace to enable all features. Use navigation keys to access banner actions.",
+          "Restricted Mode is intended for safe code browsing. Trust this workspace to enable all features. Use navigation keys to access banner actions."
         )
     }
   }
@@ -910,17 +908,17 @@ export class WorkspaceTrustUXHandler
       case WorkbenchState.EMPTY:
         return localize(
           "restrictedModeBannerMessageWindow",
-          "Restricted Mode is intended for safe code browsing. Trust this window to enable all features.",
+          "Restricted Mode is intended for safe code browsing. Trust this window to enable all features."
         )
       case WorkbenchState.FOLDER:
         return localize(
           "restrictedModeBannerMessageFolder",
-          "Restricted Mode is intended for safe code browsing. Trust this folder to enable all features.",
+          "Restricted Mode is intended for safe code browsing. Trust this folder to enable all features."
         )
       case WorkbenchState.WORKSPACE:
         return localize(
           "restrictedModeBannerMessageWorkspace",
-          "Restricted Mode is intended for safe code browsing. Trust this workspace to enable all features.",
+          "Restricted Mode is intended for safe code browsing. Trust this workspace to enable all features."
         )
     }
   }
@@ -953,7 +951,7 @@ export class WorkspaceTrustUXHandler
       case WorkbenchState.EMPTY: {
         ariaLabel = localize(
           "status.ariaUntrustedWindow",
-          "Restricted Mode: Some features are disabled because this window is not trusted.",
+          "Restricted Mode: Some features are disabled because this window is not trusted."
         )
         toolTip = {
           value: localize(
@@ -965,7 +963,7 @@ export class WorkspaceTrustUXHandler
             },
             "Running in Restricted Mode\n\nSome [features are disabled]({0}) because this [window is not trusted]({1}).",
             `command:${LIST_WORKSPACE_UNSUPPORTED_EXTENSIONS_COMMAND_ID}`,
-            `command:${MANAGE_TRUST_COMMAND_ID}`,
+            `command:${MANAGE_TRUST_COMMAND_ID}`
           ),
           isTrusted: true,
           supportThemeIcons: true,
@@ -975,7 +973,7 @@ export class WorkspaceTrustUXHandler
       case WorkbenchState.FOLDER: {
         ariaLabel = localize(
           "status.ariaUntrustedFolder",
-          "Restricted Mode: Some features are disabled because this folder is not trusted.",
+          "Restricted Mode: Some features are disabled because this folder is not trusted."
         )
         toolTip = {
           value: localize(
@@ -987,7 +985,7 @@ export class WorkspaceTrustUXHandler
             },
             "Running in Restricted Mode\n\nSome [features are disabled]({0}) because this [folder is not trusted]({1}).",
             `command:${LIST_WORKSPACE_UNSUPPORTED_EXTENSIONS_COMMAND_ID}`,
-            `command:${MANAGE_TRUST_COMMAND_ID}`,
+            `command:${MANAGE_TRUST_COMMAND_ID}`
           ),
           isTrusted: true,
           supportThemeIcons: true,
@@ -997,7 +995,7 @@ export class WorkspaceTrustUXHandler
       case WorkbenchState.WORKSPACE: {
         ariaLabel = localize(
           "status.ariaUntrustedWorkspace",
-          "Restricted Mode: Some features are disabled because this workspace is not trusted.",
+          "Restricted Mode: Some features are disabled because this workspace is not trusted."
         )
         toolTip = {
           value: localize(
@@ -1009,7 +1007,7 @@ export class WorkspaceTrustUXHandler
             },
             "Running in Restricted Mode\n\nSome [features are disabled]({0}) because this [workspace is not trusted]({1}).",
             `command:${LIST_WORKSPACE_UNSUPPORTED_EXTENSIONS_COMMAND_ID}`,
-            `command:${MANAGE_TRUST_COMMAND_ID}`,
+            `command:${MANAGE_TRUST_COMMAND_ID}`
           ),
           isTrusted: true,
           supportThemeIcons: true,
@@ -1040,7 +1038,7 @@ export class WorkspaceTrustUXHandler
         entry,
         this.entryId,
         StatusbarAlignment.LEFT,
-        0.99 * Number.MAX_VALUE /* Right of remote indicator */,
+        0.99 * Number.MAX_VALUE /* Right of remote indicator */
       )
     }
   }
@@ -1051,13 +1049,13 @@ export class WorkspaceTrustUXHandler
 registerWorkbenchContribution2(
   WorkspaceTrustRequestHandler.ID,
   WorkspaceTrustRequestHandler,
-  WorkbenchPhase.BlockRestore,
+  WorkbenchPhase.BlockRestore
 )
 Registry.as<IWorkbenchContributionsRegistry>(
-  WorkbenchExtensions.Workbench,
+  WorkbenchExtensions.Workbench
 ).registerWorkbenchContribution(
   WorkspaceTrustUXHandler,
-  LifecyclePhase.Restored,
+  LifecyclePhase.Restored
 )
 
 /**
@@ -1073,28 +1071,28 @@ class WorkspaceTrustEditorInputSerializer implements IEditorSerializer {
   }
 
   deserialize(
-    instantiationService: IInstantiationService,
+    instantiationService: IInstantiationService
   ): WorkspaceTrustEditorInput {
     return instantiationService.createInstance(WorkspaceTrustEditorInput)
   }
 }
 
 Registry.as<IEditorFactoryRegistry>(
-  EditorExtensions.EditorFactory,
+  EditorExtensions.EditorFactory
 ).registerEditorSerializer(
   WorkspaceTrustEditorInput.ID,
-  WorkspaceTrustEditorInputSerializer,
+  WorkspaceTrustEditorInputSerializer
 )
 
 Registry.as<IEditorPaneRegistry>(
-  EditorExtensions.EditorPane,
+  EditorExtensions.EditorPane
 ).registerEditorPane(
   EditorPaneDescriptor.create(
     WorkspaceTrustEditor,
     WorkspaceTrustEditor.ID,
-    localize("workspaceTrustEditor", "Workspace Trust Editor"),
+    localize("workspaceTrustEditor", "Workspace Trust Editor")
   ),
-  [new SyncDescriptor(WorkspaceTrustEditorInput)],
+  [new SyncDescriptor(WorkspaceTrustEditorInput)]
 )
 
 /*
@@ -1113,11 +1111,11 @@ registerAction2(
         id: CONFIGURE_TRUST_COMMAND_ID,
         title: localize2(
           "configureWorkspaceTrustSettings",
-          "Configure Workspace Trust Settings",
+          "Configure Workspace Trust Settings"
         ),
         precondition: ContextKeyExpr.and(
           WorkspaceTrustContext.IsEnabled,
-          ContextKeyExpr.equals(`config.${WORKSPACE_TRUST_ENABLED}`, true),
+          ContextKeyExpr.equals(`config.${WORKSPACE_TRUST_ENABLED}`, true)
         ),
         category: WORKSPACES_CATEGORY,
         f1: true,
@@ -1130,7 +1128,7 @@ registerAction2(
         query: `@tag:${WORKSPACE_TRUST_SETTING_TAG}`,
       })
     }
-  },
+  }
 )
 
 // Manage Workspace Trust
@@ -1143,7 +1141,7 @@ registerAction2(
         title: localize2("manageWorkspaceTrust", "Manage Workspace Trust"),
         precondition: ContextKeyExpr.and(
           WorkspaceTrustContext.IsEnabled,
-          ContextKeyExpr.equals(`config.${WORKSPACE_TRUST_ENABLED}`, true),
+          ContextKeyExpr.equals(`config.${WORKSPACE_TRUST_ENABLED}`, true)
         ),
         category: WORKSPACES_CATEGORY,
         f1: true,
@@ -1155,21 +1153,21 @@ registerAction2(
       const instantiationService = accessor.get(IInstantiationService)
 
       const input = instantiationService.createInstance(
-        WorkspaceTrustEditorInput,
+        WorkspaceTrustEditorInput
       )
 
       haystackService.createModalEditor(input)
       console.log("MODALITY")
       return
     }
-  },
+  }
 )
 
 /*
  * Configuration
  */
 Registry.as<IConfigurationRegistry>(
-  ConfigurationExtensions.Configuration,
+  ConfigurationExtensions.Configuration
 ).registerConfiguration({
   ...securityConfigurationNodeBase,
   properties: {
@@ -1178,7 +1176,7 @@ Registry.as<IConfigurationRegistry>(
       default: true,
       description: localize(
         "workspace.trust.description",
-        "Controls whether or not Workspace Trust is enabled within VS Code.",
+        "Controls whether or not Workspace Trust is enabled within VS Code."
       ),
       tags: [WORKSPACE_TRUST_SETTING_TAG],
       scope: ConfigurationScope.APPLICATION,
@@ -1188,7 +1186,7 @@ Registry.as<IConfigurationRegistry>(
       default: "once",
       description: localize(
         "workspace.trust.startupPrompt.description",
-        "Controls when the startup prompt to trust a workspace is shown.",
+        "Controls when the startup prompt to trust a workspace is shown."
       ),
       tags: [WORKSPACE_TRUST_SETTING_TAG],
       scope: ConfigurationScope.APPLICATION,
@@ -1196,15 +1194,15 @@ Registry.as<IConfigurationRegistry>(
       enumDescriptions: [
         localize(
           "workspace.trust.startupPrompt.always",
-          "Ask for trust every time an untrusted workspace is opened.",
+          "Ask for trust every time an untrusted workspace is opened."
         ),
         localize(
           "workspace.trust.startupPrompt.once",
-          "Ask for trust the first time an untrusted workspace is opened.",
+          "Ask for trust the first time an untrusted workspace is opened."
         ),
         localize(
           "workspace.trust.startupPrompt.never",
-          "Do not ask for trust when an untrusted workspace is opened.",
+          "Do not ask for trust when an untrusted workspace is opened."
         ),
       ],
     },
@@ -1213,7 +1211,7 @@ Registry.as<IConfigurationRegistry>(
       default: "untilDismissed",
       description: localize(
         "workspace.trust.banner.description",
-        "Controls when the restricted mode banner is shown.",
+        "Controls when the restricted mode banner is shown."
       ),
       tags: [WORKSPACE_TRUST_SETTING_TAG],
       scope: ConfigurationScope.APPLICATION,
@@ -1221,15 +1219,15 @@ Registry.as<IConfigurationRegistry>(
       enumDescriptions: [
         localize(
           "workspace.trust.banner.always",
-          "Show the banner every time an untrusted workspace is open.",
+          "Show the banner every time an untrusted workspace is open."
         ),
         localize(
           "workspace.trust.banner.untilDismissed",
-          "Show the banner when an untrusted workspace is opened until dismissed.",
+          "Show the banner when an untrusted workspace is opened until dismissed."
         ),
         localize(
           "workspace.trust.banner.never",
-          "Do not show the banner when an untrusted workspace is open.",
+          "Do not show the banner when an untrusted workspace is open."
         ),
       ],
     },
@@ -1239,7 +1237,7 @@ Registry.as<IConfigurationRegistry>(
       markdownDescription: localize(
         "workspace.trust.untrustedFiles.description",
         "Controls how to handle opening untrusted files in a trusted workspace. This setting also applies to opening files in an empty window which is trusted via `#{0}#`.",
-        WORKSPACE_TRUST_EMPTY_WINDOW,
+        WORKSPACE_TRUST_EMPTY_WINDOW
       ),
       tags: [WORKSPACE_TRUST_SETTING_TAG],
       scope: ConfigurationScope.APPLICATION,
@@ -1247,15 +1245,15 @@ Registry.as<IConfigurationRegistry>(
       enumDescriptions: [
         localize(
           "workspace.trust.untrustedFiles.prompt",
-          "Ask how to handle untrusted files for each workspace. Once untrusted files are introduced to a trusted workspace, you will not be prompted again.",
+          "Ask how to handle untrusted files for each workspace. Once untrusted files are introduced to a trusted workspace, you will not be prompted again."
         ),
         localize(
           "workspace.trust.untrustedFiles.open",
-          "Always allow untrusted files to be introduced to a trusted workspace without prompting.",
+          "Always allow untrusted files to be introduced to a trusted workspace without prompting."
         ),
         localize(
           "workspace.trust.untrustedFiles.newWindow",
-          "Always open untrusted files in a separate window in restricted mode without prompting.",
+          "Always open untrusted files in a separate window in restricted mode without prompting."
         ),
       ],
     },
@@ -1265,7 +1263,7 @@ Registry.as<IConfigurationRegistry>(
       markdownDescription: localize(
         "workspace.trust.emptyWindow.description",
         "Controls whether or not the empty window is trusted by default within VS Code. When used with `#{0}#`, you can enable the full functionality of VS Code without prompting in an empty window.",
-        WORKSPACE_TRUST_UNTRUSTED_FILES,
+        WORKSPACE_TRUST_UNTRUSTED_FILES
       ),
       tags: [WORKSPACE_TRUST_SETTING_TAG],
       scope: ConfigurationScope.APPLICATION,
@@ -1286,20 +1284,20 @@ class WorkspaceTrustTelemetryContribution
     @IWorkspaceTrustEnablementService
     private readonly workspaceTrustEnablementService: IWorkspaceTrustEnablementService,
     @IWorkspaceTrustManagementService
-    private readonly workspaceTrustManagementService: IWorkspaceTrustManagementService,
+    private readonly workspaceTrustManagementService: IWorkspaceTrustManagementService
   ) {
     super()
 
     this.workspaceTrustManagementService.workspaceTrustInitialized.then(() => {
       this.logInitialWorkspaceTrustInfo()
       this.logWorkspaceTrust(
-        this.workspaceTrustManagementService.isWorkspaceTrusted(),
+        this.workspaceTrustManagementService.isWorkspaceTrusted()
       )
 
       this._register(
         this.workspaceTrustManagementService.onDidChangeTrust((isTrusted) =>
-          this.logWorkspaceTrust(isTrusted),
-        ),
+          this.logWorkspaceTrust(isTrusted)
+        )
       )
     })
   }
@@ -1452,8 +1450,8 @@ class WorkspaceTrustTelemetryContribution
 }
 
 Registry.as<IWorkbenchContributionsRegistry>(
-  WorkbenchExtensions.Workbench,
+  WorkbenchExtensions.Workbench
 ).registerWorkbenchContribution(
   WorkspaceTrustTelemetryContribution,
-  LifecyclePhase.Restored,
+  LifecyclePhase.Restored
 )

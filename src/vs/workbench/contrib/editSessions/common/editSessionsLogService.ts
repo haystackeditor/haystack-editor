@@ -9,63 +9,46 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { joinPath } from "vs/base/common/resources"
-import { localize } from "vs/nls"
-import { IEnvironmentService } from "vs/platform/environment/common/environment"
-import {
-  AbstractLogger,
-  ILogger,
-  ILoggerService,
-} from "vs/platform/log/common/log"
-import {
-  IEditSessionsLogService,
-  editSessionsLogId,
-} from "vs/workbench/contrib/editSessions/common/editSessions"
+import { joinPath } from 'vs/base/common/resources';
+import { localize } from 'vs/nls';
+import { IEnvironmentService } from 'vs/platform/environment/common/environment';
+import { AbstractLogger, ILogger, ILoggerService } from 'vs/platform/log/common/log';
+import { IEditSessionsLogService, editSessionsLogId } from 'vs/workbench/contrib/editSessions/common/editSessions';
 
-export class EditSessionsLogService
-  extends AbstractLogger
-  implements IEditSessionsLogService
-{
-  declare readonly _serviceBrand: undefined
-  private readonly logger: ILogger
+export class EditSessionsLogService extends AbstractLogger implements IEditSessionsLogService {
 
-  constructor(
-    @ILoggerService loggerService: ILoggerService,
-    @IEnvironmentService environmentService: IEnvironmentService,
-  ) {
-    super()
-    this.logger = this._register(
-      loggerService.createLogger(
-        joinPath(environmentService.logsHome, `${editSessionsLogId}.log`),
-        {
-          id: editSessionsLogId,
-          name: localize("cloudChangesLog", "Cloud Changes"),
-        },
-      ),
-    )
-  }
+	declare readonly _serviceBrand: undefined;
+	private readonly logger: ILogger;
 
-  trace(message: string, ...args: any[]): void {
-    this.logger.trace(message, ...args)
-  }
+	constructor(
+		@ILoggerService loggerService: ILoggerService,
+		@IEnvironmentService environmentService: IEnvironmentService
+	) {
+		super();
+		this.logger = this._register(loggerService.createLogger(joinPath(environmentService.logsHome, `${editSessionsLogId}.log`), { id: editSessionsLogId, name: localize('cloudChangesLog', "Cloud Changes") }));
+	}
 
-  debug(message: string, ...args: any[]): void {
-    this.logger.debug(message, ...args)
-  }
+	trace(message: string, ...args: any[]): void {
+		this.logger.trace(message, ...args);
+	}
 
-  info(message: string, ...args: any[]): void {
-    this.logger.info(message, ...args)
-  }
+	debug(message: string, ...args: any[]): void {
+		this.logger.debug(message, ...args);
+	}
 
-  warn(message: string, ...args: any[]): void {
-    this.logger.warn(message, ...args)
-  }
+	info(message: string, ...args: any[]): void {
+		this.logger.info(message, ...args);
+	}
 
-  error(message: string | Error, ...args: any[]): void {
-    this.logger.error(message, ...args)
-  }
+	warn(message: string, ...args: any[]): void {
+		this.logger.warn(message, ...args);
+	}
 
-  flush(): void {
-    this.logger.flush()
-  }
+	error(message: string | Error, ...args: any[]): void {
+		this.logger.error(message, ...args);
+	}
+
+	flush(): void {
+		this.logger.flush();
+	}
 }

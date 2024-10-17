@@ -91,7 +91,7 @@ export class LinkDetector extends Disposable implements IEditorContribution {
     @ILanguageFeaturesService
     private readonly languageFeaturesService: ILanguageFeaturesService,
     @ILanguageFeatureDebounceService
-    languageFeatureDebounceService: ILanguageFeatureDebounceService,
+    languageFeatureDebounceService: ILanguageFeatureDebounceService
   ) {
     super()
 
@@ -99,10 +99,10 @@ export class LinkDetector extends Disposable implements IEditorContribution {
     this.debounceInformation = languageFeatureDebounceService.for(
       this.providers,
       "Links",
-      { min: 1000, max: 4000 },
+      { min: 1000, max: 4000 }
     )
     this.computeLinks = this._register(
-      new RunOnceScheduler(() => this.computeLinksNow(), 1000),
+      new RunOnceScheduler(() => this.computeLinksNow(), 1000)
     )
     this.computePromise = null
     this.activeLinksList = null
@@ -115,18 +115,18 @@ export class LinkDetector extends Disposable implements IEditorContribution {
       clickLinkGesture.onMouseMoveOrRelevantKeyDown(
         ([mouseEvent, keyboardEvent]) => {
           this._onEditorMouseMove(mouseEvent, keyboardEvent)
-        },
-      ),
+        }
+      )
     )
     this._register(
       clickLinkGesture.onExecute((e) => {
         this.onEditorMouseUp(e)
-      }),
+      })
     )
     this._register(
       clickLinkGesture.onCancel((e) => {
         this.cleanUpActiveLinkDecoration()
-      }),
+      })
     )
     this._register(
       editor.onDidChangeConfiguration((e) => {
@@ -141,7 +141,7 @@ export class LinkDetector extends Disposable implements IEditorContribution {
 
         // Start computing (for the getting enabled case)
         this.computeLinks.schedule(0)
-      }),
+      })
     )
     this._register(
       editor.onDidChangeModelContent((e) => {
@@ -149,9 +149,9 @@ export class LinkDetector extends Disposable implements IEditorContribution {
           return
         }
         this.computeLinks.schedule(
-          this.debounceInformation.get(this.editor.getModel()),
+          this.debounceInformation.get(this.editor.getModel())
         )
-      }),
+      })
     )
     this._register(
       editor.onDidChangeModel((e) => {
@@ -159,19 +159,19 @@ export class LinkDetector extends Disposable implements IEditorContribution {
         this.activeLinkDecorationId = null
         this.stop()
         this.computeLinks.schedule(0)
-      }),
+      })
     )
     this._register(
       editor.onDidChangeModelLanguage((e) => {
         this.stop()
         this.computeLinks.schedule(0)
-      }),
+      })
     )
     this._register(
       this.providers.onDidChange((e) => {
         this.stop()
         this.computeLinks.schedule(0)
-      }),
+      })
     )
 
     this.computeLinks.schedule(0)
@@ -198,7 +198,7 @@ export class LinkDetector extends Disposable implements IEditorContribution {
     }
 
     this.computePromise = createCancelablePromise((token) =>
-      getLinks(this.providers, model, token),
+      getLinks(this.providers, model, token)
     )
     try {
       const sw = new StopWatch(false)
@@ -236,7 +236,7 @@ export class LinkDetector extends Disposable implements IEditorContribution {
     this.editor.changeDecorations((changeAccessor) => {
       const decorations = changeAccessor.deltaDecorations(
         oldDecorations,
-        newDecorations,
+        newDecorations
       )
 
       this.currentOccurrences = {}
@@ -250,7 +250,7 @@ export class LinkDetector extends Disposable implements IEditorContribution {
 
   private _onEditorMouseMove(
     mouseEvent: ClickLinkMouseEvent,
-    withKey: ClickLinkKeyboardEvent | null,
+    withKey: ClickLinkKeyboardEvent | null
   ): void {
     const useMetaKey =
       this.editor.getOption(EditorOption.multiCursorModifier) === "altKey"
@@ -294,14 +294,14 @@ export class LinkDetector extends Disposable implements IEditorContribution {
     this.openLinkOccurrence(
       occurrence,
       mouseEvent.hasSideBySideModifier,
-      true /* from user gesture */,
+      true /* from user gesture */
     )
   }
 
   public openLinkOccurrence(
     occurrence: LinkOccurrence,
     openToSide: boolean,
-    fromUserGesture = false,
+    fromUserGesture = false
   ): void {
     if (!this.openerService) {
       return
@@ -378,20 +378,20 @@ export class LinkDetector extends Disposable implements IEditorContribution {
             nls.localize(
               "invalid.url",
               "Failed to open this link because it is not well-formed: {0}",
-              link.url!.toString(),
-            ),
+              link.url!.toString()
+            )
           )
         } else if (messageOrError === "missing") {
           this.notificationService.warn(
             nls.localize(
               "missing.url",
-              "Failed to open this link because its target is missing.",
-            ),
+              "Failed to open this link because its target is missing."
+            )
           )
         } else {
           onUnexpectedError(err)
         }
-      },
+      }
     )
   }
 
@@ -411,7 +411,7 @@ export class LinkDetector extends Disposable implements IEditorContribution {
         endColumn: position.column,
       },
       0,
-      true,
+      true
     )
 
     for (const decoration of decorations) {
@@ -426,12 +426,12 @@ export class LinkDetector extends Disposable implements IEditorContribution {
 
   private isEnabled(
     mouseEvent: ClickLinkMouseEvent,
-    withKey?: ClickLinkKeyboardEvent | null,
+    withKey?: ClickLinkKeyboardEvent | null
   ): boolean {
     return Boolean(
       mouseEvent.target.type === MouseTargetType.CONTENT_TEXT &&
         (mouseEvent.hasTriggerModifier ||
-          (withKey && withKey.keyCodeIsTriggerKey)),
+          (withKey && withKey.keyCodeIsTriggerKey))
     )
   }
 
@@ -471,7 +471,7 @@ const decoration = {
 class LinkOccurrence {
   public static decoration(
     link: Link,
-    useMetaKey: boolean,
+    useMetaKey: boolean
   ): IModelDeltaDecoration {
     return {
       range: link.range,
@@ -482,7 +482,7 @@ class LinkOccurrence {
   private static _getOptions(
     link: Link,
     useMetaKey: boolean,
-    isActive: boolean,
+    isActive: boolean
   ): ModelDecorationOptions {
     const options = { ...(isActive ? decoration.active : decoration.general) }
     options.hoverMessage = getHoverMessage(link, useMetaKey)
@@ -499,21 +499,21 @@ class LinkOccurrence {
 
   public activate(
     changeAccessor: IModelDecorationsChangeAccessor,
-    useMetaKey: boolean,
+    useMetaKey: boolean
   ): void {
     changeAccessor.changeDecorationOptions(
       this.decorationId,
-      LinkOccurrence._getOptions(this.link, useMetaKey, true),
+      LinkOccurrence._getOptions(this.link, useMetaKey, true)
     )
   }
 
   public deactivate(
     changeAccessor: IModelDecorationsChangeAccessor,
-    useMetaKey: boolean,
+    useMetaKey: boolean
   ): void {
     changeAccessor.changeDecorationOptions(
       this.decorationId,
-      LinkOccurrence._getOptions(this.link, useMetaKey, false),
+      LinkOccurrence._getOptions(this.link, useMetaKey, false)
     )
   }
 }
@@ -524,16 +524,16 @@ function getHoverMessage(link: Link, useMetaKey: boolean): MarkdownString {
   const label = link.tooltip
     ? link.tooltip
     : executeCmd
-      ? nls.localize("links.navigate.executeCmd", "Execute command")
-      : nls.localize("links.navigate.follow", "Follow link")
+    ? nls.localize("links.navigate.executeCmd", "Execute command")
+    : nls.localize("links.navigate.follow", "Follow link")
 
   const kb = useMetaKey
     ? platform.isMacintosh
       ? nls.localize("links.navigate.kb.meta.mac", "cmd + click")
       : nls.localize("links.navigate.kb.meta", "ctrl + click")
     : platform.isMacintosh
-      ? nls.localize("links.navigate.kb.alt.mac", "option + click")
-      : nls.localize("links.navigate.kb.alt", "alt + click")
+    ? nls.localize("links.navigate.kb.alt.mac", "option + click")
+    : nls.localize("links.navigate.kb.alt", "alt + click")
 
   if (link.url) {
     let nativeLabel = ""
@@ -545,7 +545,7 @@ function getHoverMessage(link: Link, useMetaKey: boolean): MarkdownString {
         nativeLabel = nls.localize(
           "tooltip.explanation",
           "Execute command {0}",
-          commandId,
+          commandId
         )
       }
     }
@@ -553,7 +553,7 @@ function getHoverMessage(link: Link, useMetaKey: boolean): MarkdownString {
       .appendLink(
         link.url.toString(true).replace(/ /g, "%20"),
         label,
-        nativeLabel,
+        nativeLabel
       )
       .appendMarkdown(` (${kb})`)
     return hoverMessage
@@ -594,6 +594,6 @@ class OpenLinkAction extends EditorAction {
 registerEditorContribution(
   LinkDetector.ID,
   LinkDetector,
-  EditorContributionInstantiation.AfterFirstRender,
+  EditorContributionInstantiation.AfterFirstRender
 )
 registerEditorAction(OpenLinkAction)

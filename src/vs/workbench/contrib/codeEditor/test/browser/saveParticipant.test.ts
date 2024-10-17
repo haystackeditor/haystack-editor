@@ -59,8 +59,8 @@ suite("Save Participants", function () {
         "utf8",
         undefined,
         undefined,
-        undefined,
-      ) as IResolvedTextFileEditorModel,
+        undefined
+      ) as IResolvedTextFileEditorModel
     )
 
     await model.resolve()
@@ -86,7 +86,7 @@ suite("Save Participants", function () {
     await participant.participate(model, { reason: SaveReason.EXPLICIT })
     assert.strictEqual(
       snapshotToString(model.createSnapshot()!),
-      `${lineContent}${model.textEditorModel.getEOL()}`,
+      `${lineContent}${model.textEditorModel.getEOL()}`
     )
 
     // New empty line added (multi line)
@@ -95,7 +95,7 @@ suite("Save Participants", function () {
     await participant.participate(model, { reason: SaveReason.EXPLICIT })
     assert.strictEqual(
       snapshotToString(model.createSnapshot()!),
-      `${lineContent}${model.textEditorModel.getEOL()}`,
+      `${lineContent}${model.textEditorModel.getEOL()}`
     )
   })
 
@@ -107,8 +107,8 @@ suite("Save Participants", function () {
         "utf8",
         undefined,
         undefined,
-        undefined,
-      ) as IResolvedTextFileEditorModel,
+        undefined
+      ) as IResolvedTextFileEditorModel
     )
 
     await model.resolve()
@@ -116,7 +116,7 @@ suite("Save Participants", function () {
     configService.setUserConfiguration("files", { trimFinalNewlines: true })
     const participant = new TrimFinalNewLinesParticipant(
       configService,
-      undefined!,
+      undefined!
     )
     const textContent = "Trim New Line"
     const eol = `${model.textEditorModel.getEOL()}`
@@ -139,7 +139,7 @@ suite("Save Participants", function () {
     await participant.participate(model, { reason: SaveReason.EXPLICIT })
     assert.strictEqual(
       snapshotToString(model.createSnapshot()!),
-      `${textContent}${eol}`,
+      `${textContent}${eol}`
     )
 
     // Remove new lines (multiple lines with multiple new lines)
@@ -148,7 +148,7 @@ suite("Save Participants", function () {
     await participant.participate(model, { reason: SaveReason.EXPLICIT })
     assert.strictEqual(
       snapshotToString(model.createSnapshot()!),
-      `${textContent}${eol}${textContent}${eol}`,
+      `${textContent}${eol}${textContent}${eol}`
     )
   })
 
@@ -160,8 +160,8 @@ suite("Save Participants", function () {
         "utf8",
         undefined,
         undefined,
-        undefined,
-      ) as IResolvedTextFileEditorModel,
+        undefined
+      ) as IResolvedTextFileEditorModel
     )
 
     await model.resolve()
@@ -169,7 +169,7 @@ suite("Save Participants", function () {
     configService.setUserConfiguration("files", { trimFinalNewlines: true })
     const participant = new TrimFinalNewLinesParticipant(
       configService,
-      undefined!,
+      undefined!
     )
     const textContent = "Trim New Line"
 
@@ -186,14 +186,14 @@ suite("Save Participants", function () {
       textEdits,
       () => {
         return [new Selection(1, 15, 1, 15)]
-      },
+      }
     )
 
     // undo
     await model.textEditorModel.undo()
     assert.strictEqual(
       snapshotToString(model.createSnapshot()!),
-      `${textContent}`,
+      `${textContent}`
     )
 
     // trim final new lines should not mess the undo stack
@@ -201,7 +201,7 @@ suite("Save Participants", function () {
     await model.textEditorModel.redo()
     assert.strictEqual(
       snapshotToString(model.createSnapshot()!),
-      `${textContent}.`,
+      `${textContent}.`
     )
   })
 
@@ -213,8 +213,8 @@ suite("Save Participants", function () {
         "utf8",
         undefined,
         undefined,
-        undefined,
-      ) as IResolvedTextFileEditorModel,
+        undefined
+      ) as IResolvedTextFileEditorModel
     )
 
     await model.resolve()
@@ -222,7 +222,7 @@ suite("Save Participants", function () {
     configService.setUserConfiguration("files", { trimFinalNewlines: true })
     const participant = new TrimFinalNewLinesParticipant(
       configService,
-      undefined!,
+      undefined!
     )
     const textContent = "Test"
     const eol = `${model.textEditorModel.getEOL()}`
@@ -237,19 +237,19 @@ suite("Save Participants", function () {
     // confirm trimming
     assert.strictEqual(
       snapshotToString(model.createSnapshot()!),
-      `${textContent}${eol}`,
+      `${textContent}${eol}`
     )
 
     // undo should go back to previous content immediately
     await model.textEditorModel.undo()
     assert.strictEqual(
       snapshotToString(model.createSnapshot()!),
-      `${textContent}${eol}${eol}`,
+      `${textContent}${eol}${eol}`
     )
     await model.textEditorModel.redo()
     assert.strictEqual(
       snapshotToString(model.createSnapshot()!),
-      `${textContent}${eol}`,
+      `${textContent}${eol}`
     )
   })
 
@@ -261,8 +261,8 @@ suite("Save Participants", function () {
         "utf8",
         undefined,
         undefined,
-        undefined,
-      ) as IResolvedTextFileEditorModel,
+        undefined
+      ) as IResolvedTextFileEditorModel
     )
 
     await model.resolve()
@@ -283,7 +283,7 @@ suite("Save Participants", function () {
     // confirm trimming
     assert.strictEqual(
       snapshotToString(model.createSnapshot()!),
-      `${textContent}`,
+      `${textContent}`
     )
   })
 

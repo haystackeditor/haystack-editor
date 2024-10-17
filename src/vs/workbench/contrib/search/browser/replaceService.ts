@@ -80,11 +80,11 @@ export class ReplacePreviewContentProvider
     @IInstantiationService
     private readonly instantiationService: IInstantiationService,
     @ITextModelService
-    private readonly textModelResolverService: ITextModelService,
+    private readonly textModelResolverService: ITextModelService
   ) {
     this.textModelResolverService.registerTextModelContentProvider(
       network.Schemas.internal,
-      this,
+      this
     )
   }
 
@@ -106,7 +106,7 @@ class ReplacePreviewModel extends Disposable {
     private readonly textModelResolverService: ITextModelService,
     @IReplaceService private readonly replaceService: IReplaceService,
     @ISearchViewModelWorkbenchService
-    private readonly searchWorkbenchService: ISearchViewModelWorkbenchService,
+    private readonly searchWorkbenchService: ISearchViewModelWorkbenchService
   ) {
     super()
   }
@@ -117,18 +117,18 @@ class ReplacePreviewModel extends Disposable {
       this.searchWorkbenchService.searchModel.searchResult
         .matches()
         .filter(
-          (match) => match.resource.toString() === fileResource.toString(),
+          (match) => match.resource.toString() === fileResource.toString()
         )[0]
     )
     const ref = this._register(
-      await this.textModelResolverService.createModelReference(fileResource),
+      await this.textModelResolverService.createModelReference(fileResource)
     )
     const sourceModel = ref.object.textEditorModel
     const sourceModelLanguageId = sourceModel.getLanguageId()
     const replacePreviewModel = this.modelService.createModel(
       createTextBufferFactoryFromSnapshot(sourceModel.createSnapshot()),
       this.languageService.createById(sourceModelLanguageId),
-      replacePreviewUri,
+      replacePreviewUri
     )
     this._register(
       fileMatch.onChange(({ forceUpdateModel }) =>
@@ -136,14 +136,14 @@ class ReplacePreviewModel extends Disposable {
           sourceModel,
           replacePreviewModel,
           fileMatch,
-          forceUpdateModel,
-        ),
-      ),
+          forceUpdateModel
+        )
+      )
     )
     this._register(
       this.searchWorkbenchService.searchModel.onReplaceTermChanged(() =>
-        this.update(sourceModel, replacePreviewModel, fileMatch),
-      ),
+        this.update(sourceModel, replacePreviewModel, fileMatch)
+      )
     )
     this._register(fileMatch.onDispose(() => replacePreviewModel.dispose())) // TODO@Sandeep we should not dispose a model directly but rather the reference (depends on https://github.com/microsoft/vscode/issues/17073)
     this._register(replacePreviewModel.onWillDispose(() => this.dispose()))
@@ -155,7 +155,7 @@ class ReplacePreviewModel extends Disposable {
     sourceModel: ITextModel,
     replacePreviewModel: ITextModel,
     fileMatch: FileMatch,
-    override: boolean = false,
+    override: boolean = false
   ): void {
     if (!sourceModel.isDisposed() && !replacePreviewModel.isDisposed()) {
       this.replaceService.updateReplacePreview(fileMatch, override)
@@ -169,7 +169,7 @@ export class ReplaceService implements IReplaceService {
   private static readonly REPLACE_SAVE_SOURCE =
     SaveSourceRegistry.registerSource(
       "searchReplace.source",
-      nls.localize("searchReplace.source", "Search and Replace"),
+      nls.localize("searchReplace.source", "Search and Replace")
     )
 
   constructor(
@@ -179,7 +179,7 @@ export class ReplaceService implements IReplaceService {
     private readonly textModelResolverService: ITextModelService,
     @IBulkEditService private readonly bulkEditorService: IBulkEditService,
     @INotebookEditorModelResolverService
-    private readonly notebookEditorModelResolverService: INotebookEditorModelResolverService,
+    private readonly notebookEditorModelResolverService: INotebookEditorModelResolverService
   ) {}
 
   replace(match: Match): Promise<any>
@@ -187,12 +187,12 @@ export class ReplaceService implements IReplaceService {
   replace(
     match: FileMatchOrMatch,
     progress?: IProgress<IProgressStep>,
-    resource?: URI,
+    resource?: URI
   ): Promise<any>
   async replace(
     arg: any,
     progress: IProgress<IProgressStep> | undefined = undefined,
-    resource: URI | null = null,
+    resource: URI | null = null
   ): Promise<any> {
     const edits = this.createEdits(arg, resource)
     await this.bulkEditorService.apply(edits, { progress })
@@ -203,10 +203,9 @@ export class ReplaceService implements IReplaceService {
         if (notebookResource) {
           let ref: IReference<IResolvedNotebookEditorModel> | undefined
           try {
-            ref =
-              await this.notebookEditorModelResolverService.resolve(
-                notebookResource,
-              )
+            ref = await this.notebookEditorModelResolverService.resolve(
+              notebookResource
+            )
             await ref.object.save({
               source: ReplaceService.REPLACE_SAVE_SOURCE,
             })
@@ -229,13 +228,13 @@ export class ReplaceService implements IReplaceService {
     element: FileMatchOrMatch,
     preserveFocus?: boolean,
     sideBySide?: boolean,
-    pinned?: boolean,
+    pinned?: boolean
   ): Promise<any> {
     const fileMatch = element instanceof Match ? element.parent() : element
 
     const editor = await this.haystackService.createFileDiffEditor(
       fileMatch.resource,
-      toReplaceResource(fileMatch.resource),
+      toReplaceResource(fileMatch.resource)
     )
     const input = editor?.input
     const disposable = fileMatch.onDispose(() => {
@@ -252,7 +251,7 @@ export class ReplaceService implements IReplaceService {
       ) {
         editorControl.revealLineInCenter(
           element.range().startLineNumber,
-          ScrollType.Immediate,
+          ScrollType.Immediate
         )
       }
     }
@@ -260,7 +259,7 @@ export class ReplaceService implements IReplaceService {
 
   async updateReplacePreview(
     fileMatch: FileMatch,
-    override: boolean = false,
+    override: boolean = false
   ): Promise<void> {
     const replacePreviewUri = toReplaceResource(fileMatch.resource)
     const [sourceModelRef, replaceModelRef] = await Promise.all([
@@ -287,7 +286,7 @@ export class ReplaceService implements IReplaceService {
 
   private applyEditsToPreview(
     fileMatch: FileMatch,
-    replaceModel: ITextModel,
+    replaceModel: ITextModel
   ): void {
     const resourceEdits = this.createEdits(fileMatch, replaceModel.uri)
     const modelEdits: ISingleEditOperation[] = []
@@ -295,22 +294,22 @@ export class ReplaceService implements IReplaceService {
       modelEdits.push(
         EditOperation.replaceMove(
           Range.lift(resourceEdit.textEdit.range),
-          resourceEdit.textEdit.text,
-        ),
+          resourceEdit.textEdit.text
+        )
       )
     }
     replaceModel.pushEditOperations(
       [],
       modelEdits.sort((a, b) =>
-        Range.compareRangesUsingStarts(a.range, b.range),
+        Range.compareRangesUsingStarts(a.range, b.range)
       ),
-      () => [],
+      () => []
     )
   }
 
   private createEdits(
     arg: FileMatchOrMatch | FileMatch[],
-    resource: URI | null = null,
+    resource: URI | null = null
   ): ResourceTextEdit[] {
     const edits: ResourceTextEdit[] = []
 
@@ -320,7 +319,7 @@ export class ReplaceService implements IReplaceService {
           // only apply edits if it's not a webview match, since webview matches are read-only
           const match = <MatchInNotebook>arg
           edits.push(
-            this.createEdit(match, match.replaceString, match.cell?.uri),
+            this.createEdit(match, match.replaceString, match.cell?.uri)
           )
         }
       } else {
@@ -340,7 +339,7 @@ export class ReplaceService implements IReplaceService {
           edits.push(
             ...fileMatch
               .matches()
-              .flatMap((match) => this.createEdits(match, resource)),
+              .flatMap((match) => this.createEdits(match, resource))
           )
         }
       })
@@ -351,14 +350,14 @@ export class ReplaceService implements IReplaceService {
   private createEdit(
     match: Match,
     text: string,
-    resource: URI | null = null,
+    resource: URI | null = null
   ): ResourceTextEdit {
     const fileMatch: FileMatch = match.parent()
     return new ResourceTextEdit(
       resource ?? fileMatch.resource,
       { range: match.range(), text },
       undefined,
-      undefined,
+      undefined
     )
   }
 }

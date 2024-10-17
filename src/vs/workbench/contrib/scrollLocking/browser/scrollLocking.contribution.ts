@@ -9,14 +9,11 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import {
-  WorkbenchPhase,
-  registerWorkbenchContribution2,
-} from "vs/workbench/common/contributions"
-import { SyncScroll as ScrollLocking } from "vs/workbench/contrib/scrollLocking/browser/scrollLocking"
+import { WorkbenchPhase, registerWorkbenchContribution2 } from 'vs/workbench/common/contributions';
+import { SyncScroll as ScrollLocking } from 'vs/workbench/contrib/scrollLocking/browser/scrollLocking';
 
 registerWorkbenchContribution2(
-  ScrollLocking.ID,
-  ScrollLocking,
-  WorkbenchPhase.Eventually, // registration only
-)
+	ScrollLocking.ID,
+	ScrollLocking,
+	WorkbenchPhase.Eventually // registration only
+);

@@ -9,49 +9,46 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-declare module "vscode" {
-  // https://github.com/microsoft/vscode/issues/135591 @alexr00
+declare module 'vscode' {
 
-  // export interface FileDecorationProvider {
-  // 	provideFileDecoration(uri: Uri, token: CancellationToken): ProviderResult<FileDecoration | FileDecoration1>;
-  // }
+	// https://github.com/microsoft/vscode/issues/135591 @alexr00
 
-  /**
-   * A file decoration represents metadata that can be rendered with a file.
-   */
-  export class FileDecoration2 {
-    /**
-     * A very short string that represents this decoration.
-     */
-    badge?: string | ThemeIcon
+	// export interface FileDecorationProvider {
+	// 	provideFileDecoration(uri: Uri, token: CancellationToken): ProviderResult<FileDecoration | FileDecoration1>;
+	// }
 
-    /**
-     * A human-readable tooltip for this decoration.
-     */
-    tooltip?: string
+	/**
+	 * A file decoration represents metadata that can be rendered with a file.
+	 */
+	export class FileDecoration2 {
+		/**
+		 * A very short string that represents this decoration.
+		 */
+		badge?: string | ThemeIcon;
 
-    /**
-     * The color of this decoration.
-     */
-    color?: ThemeColor
+		/**
+		 * A human-readable tooltip for this decoration.
+		 */
+		tooltip?: string;
 
-    /**
-     * A flag expressing that this decoration should be
-     * propagated to its parents.
-     */
-    propagate?: boolean
+		/**
+		 * The color of this decoration.
+		 */
+		color?: ThemeColor;
 
-    /**
-     * Creates a new decoration.
-     *
-     * @param badge A letter that represents the decoration.
-     * @param tooltip The tooltip of the decoration.
-     * @param color The color of the decoration.
-     */
-    constructor(
-      badge?: string | ThemeIcon,
-      tooltip?: string,
-      color?: ThemeColor,
-    )
-  }
+		/**
+		 * A flag expressing that this decoration should be
+		 * propagated to its parents.
+		 */
+		propagate?: boolean;
+
+		/**
+		 * Creates a new decoration.
+		 *
+		 * @param badge A letter that represents the decoration.
+		 * @param tooltip The tooltip of the decoration.
+		 * @param color The color of the decoration.
+		 */
+		constructor(badge?: string | ThemeIcon, tooltip?: string, color?: ThemeColor);
+	}
 }

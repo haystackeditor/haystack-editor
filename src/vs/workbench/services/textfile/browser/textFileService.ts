@@ -132,16 +132,16 @@ export abstract class AbstractTextFileService
   private static readonly TEXTFILE_SAVE_CREATE_SOURCE =
     SaveSourceRegistry.registerSource(
       "textFileCreate.source",
-      localize("textFileCreate.source", "File Created"),
+      localize("textFileCreate.source", "File Created")
     )
   private static readonly TEXTFILE_SAVE_REPLACE_SOURCE =
     SaveSourceRegistry.registerSource(
       "textFileOverwrite.source",
-      localize("textFileOverwrite.source", "File Replaced"),
+      localize("textFileOverwrite.source", "File Replaced")
     )
 
   readonly files: ITextFileEditorModelManager = this._register(
-    this.instantiationService.createInstance(TextFileEditorModelManager),
+    this.instantiationService.createInstance(TextFileEditorModelManager)
   )
 
   readonly untitled: IUntitledTextEditorModelManager =
@@ -177,7 +177,7 @@ export abstract class AbstractTextFileService
     @IElevatedFileService
     private readonly elevatedFileService: IElevatedFileService,
     @IDecorationsService
-    private readonly decorationsService: IDecorationsService,
+    private readonly decorationsService: IDecorationsService
   ) {
     super()
 
@@ -192,7 +192,7 @@ export abstract class AbstractTextFileService
       new (class extends Disposable implements IDecorationsProvider {
         readonly label = localize(
           "textFileModelDecorations",
-          "Text File Model Decorations",
+          "Text File Model Decorations"
         )
 
         private readonly _onDidChange = this._register(new Emitter<URI[]>())
@@ -214,7 +214,7 @@ export abstract class AbstractTextFileService
               ) {
                 this._onDidChange.fire([model.resource])
               }
-            }),
+            })
           )
 
           // Removals: once a text file model is no longer
@@ -223,20 +223,20 @@ export abstract class AbstractTextFileService
           // have no way of updating the decoration anymore.
           this._register(
             this.files.onDidRemove((modelUri) =>
-              this._onDidChange.fire([modelUri]),
-            ),
+              this._onDidChange.fire([modelUri])
+            )
           )
 
           // Changes
           this._register(
             this.files.onDidChangeReadonly((model) =>
-              this._onDidChange.fire([model.resource]),
-            ),
+              this._onDidChange.fire([model.resource])
+            )
           )
           this._register(
             this.files.onDidChangeOrphaned((model) =>
-              this._onDidChange.fire([model.resource]),
-            ),
+              this._onDidChange.fire([model.resource])
+            )
           )
         }
 
@@ -278,11 +278,11 @@ export abstract class AbstractTextFileService
 
           return undefined
         }
-      })(this.files),
+      })(this.files)
     )
 
     this._register(
-      this.decorationsService.registerDecorationsProvider(provider),
+      this.decorationsService.registerDecorationsProvider(provider)
     )
   }
 
@@ -295,7 +295,7 @@ export abstract class AbstractTextFileService
   get encoding(): EncodingOracle {
     if (!this._encoding) {
       this._encoding = this._register(
-        this.instantiationService.createInstance(EncodingOracle),
+        this.instantiationService.createInstance(EncodingOracle)
       )
     }
 
@@ -304,7 +304,7 @@ export abstract class AbstractTextFileService
 
   async read(
     resource: URI,
-    options?: IReadTextFileOptions,
+    options?: IReadTextFileOptions
   ): Promise<ITextFileContent> {
     const [bufferStream, decoder] = await this.doRead(resource, {
       ...options,
@@ -325,7 +325,7 @@ export abstract class AbstractTextFileService
 
   async readStream(
     resource: URI,
-    options?: IReadTextFileOptions,
+    options?: IReadTextFileOptions
   ): Promise<ITextFileStreamContent> {
     const [bufferStream, decoder] = await this.doRead(resource, options)
 
@@ -338,7 +338,7 @@ export abstract class AbstractTextFileService
 
   private async doRead(
     resource: URI,
-    options?: IReadTextFileOptions & { preferUnbuffered?: boolean },
+    options?: IReadTextFileOptions & { preferUnbuffered?: boolean }
   ): Promise<[IFileStreamContent, IDecodeStreamResult]> {
     const cts = new CancellationTokenSource()
 
@@ -348,7 +348,7 @@ export abstract class AbstractTextFileService
       const content = await this.fileService.readFile(
         resource,
         options,
-        cts.token,
+        cts.token
       )
       bufferStream = {
         ...content,
@@ -358,7 +358,7 @@ export abstract class AbstractTextFileService
       bufferStream = await this.fileService.readFileStream(
         resource,
         options,
-        cts.token,
+        cts.token
       )
     }
 
@@ -367,7 +367,7 @@ export abstract class AbstractTextFileService
       const decoder = await this.doGetDecodedStream(
         resource,
         bufferStream.value,
-        options,
+        options
       )
 
       return [bufferStream, decoder]
@@ -390,10 +390,10 @@ export abstract class AbstractTextFileService
         throw new TextFileOperationError(
           localize(
             "fileBinaryError",
-            "File seems to be binary and cannot be opened as text",
+            "File seems to be binary and cannot be opened as text"
           ),
           TextFileOperationResult.FILE_IS_BINARY,
-          options,
+          options
         )
       }
 
@@ -410,33 +410,33 @@ export abstract class AbstractTextFileService
       value?: string | ITextSnapshot
       options?: ICreateFileOptions
     }[],
-    undoInfo?: IFileOperationUndoRedoInfo,
+    undoInfo?: IFileOperationUndoRedoInfo
   ): Promise<readonly IFileStatWithMetadata[]> {
     const operationsWithContents: ICreateFileOperation[] = await Promise.all(
       operations.map(async (operation) => {
         const contents = await this.getEncodedReadable(
           operation.resource,
-          operation.value,
+          operation.value
         )
         return {
           resource: operation.resource,
           contents,
           overwrite: operation.options?.overwrite,
         }
-      }),
+      })
     )
 
     return this.workingCopyFileService.create(
       operationsWithContents,
       CancellationToken.None,
-      undoInfo,
+      undoInfo
     )
   }
 
   async write(
     resource: URI,
     value: string | ITextSnapshot,
-    options?: IWriteTextFileOptions,
+    options?: IWriteTextFileOptions
   ): Promise<IFileStatWithMetadata> {
     const readable = await this.getEncodedReadable(resource, value, options)
 
@@ -447,7 +447,7 @@ export abstract class AbstractTextFileService
       return this.elevatedFileService.writeFileElevated(
         resource,
         readable,
-        options,
+        options
       )
     }
 
@@ -456,35 +456,35 @@ export abstract class AbstractTextFileService
 
   async getEncodedReadable(
     resource: URI,
-    value: ITextSnapshot,
+    value: ITextSnapshot
   ): Promise<VSBufferReadable>
   async getEncodedReadable(resource: URI, value: string): Promise<VSBuffer>
   async getEncodedReadable(
     resource: URI,
-    value?: ITextSnapshot,
+    value?: ITextSnapshot
   ): Promise<VSBufferReadable | undefined>
   async getEncodedReadable(
     resource: URI,
-    value?: string,
+    value?: string
   ): Promise<VSBuffer | undefined>
   async getEncodedReadable(
     resource: URI,
-    value?: string | ITextSnapshot,
+    value?: string | ITextSnapshot
   ): Promise<VSBuffer | VSBufferReadable | undefined>
   async getEncodedReadable(
     resource: URI,
     value: string | ITextSnapshot,
-    options?: IWriteTextFileOptions,
+    options?: IWriteTextFileOptions
   ): Promise<VSBuffer | VSBufferReadable>
   async getEncodedReadable(
     resource: URI,
     value?: string | ITextSnapshot,
-    options?: IWriteTextFileOptions,
+    options?: IWriteTextFileOptions
   ): Promise<VSBuffer | VSBufferReadable | undefined> {
     // check for encoding
     const { encoding, addBOM } = await this.encoding.getWriteEncoding(
       resource,
-      options,
+      options
     )
 
     // when encoding is standard skip encoding step
@@ -503,7 +503,7 @@ export abstract class AbstractTextFileService
   async getDecodedStream(
     resource: URI,
     value: VSBufferReadableStream,
-    options?: IReadTextFileEncodingOptions,
+    options?: IReadTextFileEncodingOptions
   ): Promise<ReadableStream<string>> {
     return (await this.doGetDecodedStream(resource, value, options)).stream
   }
@@ -511,7 +511,7 @@ export abstract class AbstractTextFileService
   private doGetDecodedStream(
     resource: URI,
     stream: VSBufferReadableStream,
-    options?: IReadTextFileEncodingOptions,
+    options?: IReadTextFileEncodingOptions
   ): Promise<IDecodeStreamResult> {
     // read through encoding library
     return toDecodeStream(stream, {
@@ -520,13 +520,13 @@ export abstract class AbstractTextFileService
         options?.autoGuessEncoding ||
         this.textResourceConfigurationService.getValue(
           resource,
-          "files.autoGuessEncoding",
+          "files.autoGuessEncoding"
         ),
       overwriteEncoding: async (detectedEncoding) => {
         const { encoding } = await this.encoding.getPreferredReadEncoding(
           resource,
           options,
-          detectedEncoding ?? undefined,
+          detectedEncoding ?? undefined
         )
 
         return encoding
@@ -540,7 +540,7 @@ export abstract class AbstractTextFileService
 
   async save(
     resource: URI,
-    options?: ITextFileSaveOptions,
+    options?: ITextFileSaveOptions
   ): Promise<URI | undefined> {
     // Untitled
     if (resource.scheme === Schemas.untitled) {
@@ -557,7 +557,7 @@ export abstract class AbstractTextFileService
         else {
           targetUri = await this.fileDialogService.pickFileToSave(
             await this.suggestSavePath(resource),
-            options?.availableFileSystems,
+            options?.availableFileSystems
           )
         }
 
@@ -590,13 +590,13 @@ export abstract class AbstractTextFileService
   async saveAs(
     source: URI,
     target?: URI,
-    options?: ITextFileSaveAsOptions,
+    options?: ITextFileSaveAsOptions
   ): Promise<URI | undefined> {
     // Get to target resource
     if (!target) {
       target = await this.fileDialogService.pickFileToSave(
         await this.suggestSavePath(options?.suggestedTarget ?? source),
-        options?.availableFileSystems,
+        options?.availableFileSystems
       )
     }
 
@@ -635,7 +635,7 @@ export abstract class AbstractTextFileService
     ) {
       await this.workingCopyFileService.move(
         [{ file: { source, target } }],
-        CancellationToken.None,
+        CancellationToken.None
       )
 
       // At this point we don't know whether we have a
@@ -656,7 +656,7 @@ export abstract class AbstractTextFileService
   private async doSaveAs(
     source: URI,
     target: URI,
-    options?: ITextFileSaveOptions,
+    options?: ITextFileSaveOptions
   ): Promise<URI | undefined> {
     let success = false
 
@@ -668,7 +668,7 @@ export abstract class AbstractTextFileService
         textFileModel,
         source,
         target,
-        options,
+        options
       )
     }
 
@@ -689,7 +689,7 @@ export abstract class AbstractTextFileService
           textModel,
           source,
           target,
-          options,
+          options
         )
       }
     }
@@ -717,7 +717,7 @@ export abstract class AbstractTextFileService
     sourceModel: IResolvedTextEditorModel | ITextModel,
     source: URI,
     target: URI,
-    options?: ITextFileSaveOptions,
+    options?: ITextFileSaveOptions
   ): Promise<boolean> {
     // Find source encoding if any
     let sourceModelEncoding: string | undefined = undefined
@@ -783,8 +783,8 @@ export abstract class AbstractTextFileService
         toLocalResource(
           sourceModel.resource,
           this.environmentService.remoteAuthority,
-          this.pathService.defaultUriScheme,
-        ),
+          this.pathService.defaultUriScheme
+        )
       )
     ) {
       write = await this.confirmOverwrite(target)
@@ -818,7 +818,7 @@ export abstract class AbstractTextFileService
       // content
       this.modelService.updateModel(
         targetTextModel,
-        createTextBufferFactoryFromSnapshot(sourceTextModel.createSnapshot()),
+        createTextBufferFactoryFromSnapshot(sourceTextModel.createSnapshot())
       )
 
       // language
@@ -839,7 +839,7 @@ export abstract class AbstractTextFileService
           this.codeEditorService.setTransientModelProperty(
             targetTextModel,
             key,
-            value,
+            value
           )
         }
       }
@@ -868,17 +868,17 @@ export abstract class AbstractTextFileService
       message: localize(
         "confirmOverwrite",
         "'{0}' already exists. Do you want to replace it?",
-        basename(resource),
+        basename(resource)
       ),
       detail: localize(
         "overwriteIrreversible",
         "A file or folder with the name '{0}' already exists in the folder '{1}'. Replacing it will overwrite its current contents.",
         basename(resource),
-        basename(dirname(resource)),
+        basename(dirname(resource))
       ),
       primaryButton: localize(
         { key: "replaceButtonLabel", comment: ["&& denotes a mnemonic"] },
-        "&&Replace",
+        "&&Replace"
       ),
     })
 
@@ -891,15 +891,15 @@ export abstract class AbstractTextFileService
       message: localize(
         "confirmMakeWriteable",
         "'{0}' is marked as read-only. Do you want to save anyway?",
-        basename(resource),
+        basename(resource)
       ),
       detail: localize(
         "confirmMakeWriteableDetail",
-        "Paths can be configured as read-only via settings.",
+        "Paths can be configured as read-only via settings."
       ),
       primaryButton: localize(
         { key: "makeWriteableButtonLabel", comment: ["&& denotes a mnemonic"] },
-        "&&Save Anyway",
+        "&&Save Anyway"
       ),
     })
 
@@ -925,7 +925,7 @@ export abstract class AbstractTextFileService
           return toLocalResource(
             resource,
             remoteAuthority,
-            this.pathService.defaultUriScheme,
+            this.pathService.defaultUriScheme
           )
         }
 
@@ -937,7 +937,7 @@ export abstract class AbstractTextFileService
         if (
           await this.pathService.hasValidBasename(
             joinPath(defaultFilePath, model.name),
-            model.name,
+            model.name
           )
         ) {
           nameCandidate = model.name
@@ -982,7 +982,7 @@ export abstract class AbstractTextFileService
       if (untitledExtension) {
         return `${untitledName.substring(
           0,
-          untitledName.indexOf(untitledExtension),
+          untitledName.indexOf(untitledExtension)
         )}${primaryExtension}`
       }
 
@@ -1070,7 +1070,7 @@ export class EncodingOracle extends Disposable implements IResourceEncodings {
     private environmentService: IWorkbenchEnvironmentService,
     @IWorkspaceContextService private contextService: IWorkspaceContextService,
     @IUriIdentityService
-    private readonly uriIdentityService: IUriIdentityService,
+    private readonly uriIdentityService: IUriIdentityService
   ) {
     super()
 
@@ -1083,8 +1083,8 @@ export class EncodingOracle extends Disposable implements IResourceEncodings {
     // Workspace Folder Change
     this._register(
       this.contextService.onDidChangeWorkspaceFolders(
-        () => (this.encodingOverrides = this.getDefaultEncodingOverrides()),
-      ),
+        () => (this.encodingOverrides = this.getDefaultEncodingOverrides())
+      )
     )
   }
 
@@ -1120,11 +1120,11 @@ export class EncodingOracle extends Disposable implements IResourceEncodings {
 
   async getWriteEncoding(
     resource: URI,
-    options?: IWriteTextFileOptions,
+    options?: IWriteTextFileOptions
   ): Promise<{ encoding: string; addBOM: boolean }> {
     const { encoding, hasBOM } = await this.getPreferredWriteEncoding(
       resource,
-      options ? options.encoding : undefined,
+      options ? options.encoding : undefined
     )
 
     return { encoding, addBOM: hasBOM }
@@ -1132,11 +1132,11 @@ export class EncodingOracle extends Disposable implements IResourceEncodings {
 
   async getPreferredWriteEncoding(
     resource: URI,
-    preferredEncoding?: string,
+    preferredEncoding?: string
   ): Promise<IResourceEncoding> {
     const resourceEncoding = await this.getEncodingForResource(
       resource,
-      preferredEncoding,
+      preferredEncoding
     )
 
     return {
@@ -1151,7 +1151,7 @@ export class EncodingOracle extends Disposable implements IResourceEncodings {
   async getPreferredReadEncoding(
     resource: URI,
     options?: IReadTextFileEncodingOptions,
-    detectedEncoding?: string,
+    detectedEncoding?: string
   ): Promise<IResourceEncoding> {
     let preferredEncoding: string | undefined
 
@@ -1173,7 +1173,7 @@ export class EncodingOracle extends Disposable implements IResourceEncodings {
     else if (
       this.textResourceConfigurationService.getValue(
         resource,
-        "files.encoding",
+        "files.encoding"
       ) === UTF8_with_bom
     ) {
       preferredEncoding = UTF8 // if we did not detect UTF 8 BOM before, this can only be UTF 8 then
@@ -1181,7 +1181,7 @@ export class EncodingOracle extends Disposable implements IResourceEncodings {
 
     const encoding = await this.getEncodingForResource(
       resource,
-      preferredEncoding,
+      preferredEncoding
     )
 
     return {
@@ -1195,7 +1195,7 @@ export class EncodingOracle extends Disposable implements IResourceEncodings {
 
   private async getEncodingForResource(
     resource: URI,
-    preferredEncoding?: string,
+    preferredEncoding?: string
   ): Promise<string> {
     let fileEncoding: string
 
@@ -1207,7 +1207,7 @@ export class EncodingOracle extends Disposable implements IResourceEncodings {
     } else {
       fileEncoding = this.textResourceConfigurationService.getValue(
         resource,
-        "files.encoding",
+        "files.encoding"
       ) // and last we check for settings
     }
 
@@ -1228,7 +1228,7 @@ export class EncodingOracle extends Disposable implements IResourceEncodings {
           override.parent &&
           this.uriIdentityService.extUri.isEqualOrParent(
             resource,
-            override.parent,
+            override.parent
           )
         ) {
           return override.encoding

@@ -117,7 +117,7 @@ export class MoveHandler implements PointerEventHandler {
   private dragTelemetry = debounce(
     () =>
       WorkspaceStoreWrapper.getWorkspaceState().sendTelemetry("Editor dragged"),
-    1000,
+    1000
   )
 
   public onPointerDrag(event: PixiPointerEvent): void {
@@ -147,14 +147,14 @@ export class MoveHandler implements PointerEventHandler {
 
     if (Math.abs(this.accumulatedDelta.x) > deltaThreshold) {
       this.activeRequest.options.eventHandler(
-        new Vector(Math.round(this.accumulatedDelta.x), 0),
+        new Vector(Math.round(this.accumulatedDelta.x), 0)
       )
       this.accumulatedDelta.x = 0
     }
 
     if (Math.abs(this.accumulatedDelta.y) > deltaThreshold) {
       this.activeRequest.options.eventHandler(
-        new Vector(0, Math.round(this.accumulatedDelta.y)),
+        new Vector(0, Math.round(this.accumulatedDelta.y))
       )
       this.accumulatedDelta.y = 0
     }

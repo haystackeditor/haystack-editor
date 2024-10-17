@@ -9,103 +9,78 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Promises } from "vs/base/common/async"
-import { Event, Emitter } from "vs/base/common/event"
-import { IAuxiliaryWindow } from "vs/platform/auxiliaryWindow/electron-main/auxiliaryWindow"
-import { NativeParsedArgs } from "vs/platform/environment/common/argv"
-import {
-  ILifecycleMainService,
-  IRelaunchHandler,
-  LifecycleMainPhase,
-  ShutdownEvent,
-  ShutdownReason,
-} from "vs/platform/lifecycle/electron-main/lifecycleMainService"
-import { IStateService } from "vs/platform/state/node/state"
-import {
-  ICodeWindow,
-  UnloadReason,
-} from "vs/platform/window/electron-main/window"
+import { Promises } from 'vs/base/common/async';
+import { Event, Emitter } from 'vs/base/common/event';
+import { IAuxiliaryWindow } from 'vs/platform/auxiliaryWindow/electron-main/auxiliaryWindow';
+import { NativeParsedArgs } from 'vs/platform/environment/common/argv';
+import { ILifecycleMainService, IRelaunchHandler, LifecycleMainPhase, ShutdownEvent, ShutdownReason } from 'vs/platform/lifecycle/electron-main/lifecycleMainService';
+import { IStateService } from 'vs/platform/state/node/state';
+import { ICodeWindow, UnloadReason } from 'vs/platform/window/electron-main/window';
 
 export class TestLifecycleMainService implements ILifecycleMainService {
-  _serviceBrand: undefined
 
-  onBeforeShutdown = Event.None
+	_serviceBrand: undefined;
 
-  private readonly _onWillShutdown = new Emitter<ShutdownEvent>()
-  readonly onWillShutdown = this._onWillShutdown.event
+	onBeforeShutdown = Event.None;
 
-  async fireOnWillShutdown(): Promise<void> {
-    const joiners: Promise<void>[] = []
+	private readonly _onWillShutdown = new Emitter<ShutdownEvent>();
+	readonly onWillShutdown = this._onWillShutdown.event;
 
-    this._onWillShutdown.fire({
-      reason: ShutdownReason.QUIT,
-      join(id, promise) {
-        joiners.push(promise)
-      },
-    })
+	async fireOnWillShutdown(): Promise<void> {
+		const joiners: Promise<void>[] = [];
 
-    await Promises.settled(joiners)
-  }
+		this._onWillShutdown.fire({
+			reason: ShutdownReason.QUIT,
+			join(id, promise) {
+				joiners.push(promise);
+			}
+		});
 
-  onWillLoadWindow = Event.None
-  onBeforeCloseWindow = Event.None
+		await Promises.settled(joiners);
+	}
 
-  wasRestarted = false
-  quitRequested = false
+	onWillLoadWindow = Event.None;
+	onBeforeCloseWindow = Event.None;
 
-  phase = LifecycleMainPhase.Ready
+	wasRestarted = false;
+	quitRequested = false;
 
-  registerWindow(window: ICodeWindow): void {}
-  registerAuxWindow(auxWindow: IAuxiliaryWindow): void {}
-  async reload(window: ICodeWindow, cli?: NativeParsedArgs): Promise<void> {}
-  async unload(window: ICodeWindow, reason: UnloadReason): Promise<boolean> {
-    return true
-  }
-  setRelaunchHandler(handler: IRelaunchHandler): void {}
-  async relaunch(options?: {
-    addArgs?: string[] | undefined
-    removeArgs?: string[] | undefined
-  }): Promise<void> {}
-  async quit(willRestart?: boolean): Promise<boolean> {
-    return true
-  }
-  async kill(code?: number): Promise<void> {}
-  async when(phase: LifecycleMainPhase): Promise<void> {}
+	phase = LifecycleMainPhase.Ready;
+
+	registerWindow(window: ICodeWindow): void { }
+	registerAuxWindow(auxWindow: IAuxiliaryWindow): void { }
+	async reload(window: ICodeWindow, cli?: NativeParsedArgs): Promise<void> { }
+	async unload(window: ICodeWindow, reason: UnloadReason): Promise<boolean> { return true; }
+	setRelaunchHandler(handler: IRelaunchHandler): void { }
+	async relaunch(options?: { addArgs?: string[] | undefined; removeArgs?: string[] | undefined }): Promise<void> { }
+	async quit(willRestart?: boolean): Promise<boolean> { return true; }
+	async kill(code?: number): Promise<void> { }
+	async when(phase: LifecycleMainPhase): Promise<void> { }
 }
 
 export class InMemoryTestStateMainService implements IStateService {
-  _serviceBrand: undefined
 
-  private readonly data = new Map<
-    string,
-    object | string | number | boolean | undefined | null
-  >()
+	_serviceBrand: undefined;
 
-  setItem(
-    key: string,
-    data?: object | string | number | boolean | undefined | null,
-  ): void {
-    this.data.set(key, data)
-  }
+	private readonly data = new Map<string, object | string | number | boolean | undefined | null>();
 
-  setItems(
-    items: readonly {
-      key: string
-      data?: object | string | number | boolean | undefined | null
-    }[],
-  ): void {
-    for (const { key, data } of items) {
-      this.data.set(key, data)
-    }
-  }
+	setItem(key: string, data?: object | string | number | boolean | undefined | null): void {
+		this.data.set(key, data);
+	}
 
-  getItem<T>(key: string): T | undefined {
-    return this.data.get(key) as T | undefined
-  }
+	setItems(items: readonly { key: string; data?: object | string | number | boolean | undefined | null }[]): void {
+		for (const { key, data } of items) {
+			this.data.set(key, data);
+		}
+	}
 
-  removeItem(key: string): void {
-    this.data.delete(key)
-  }
+	getItem<T>(key: string): T | undefined {
+		return this.data.get(key) as T | undefined;
+	}
 
-  async close(): Promise<void> {}
+	removeItem(key: string): void {
+		this.data.delete(key);
+	}
+
+	async close(): Promise<void> { }
 }

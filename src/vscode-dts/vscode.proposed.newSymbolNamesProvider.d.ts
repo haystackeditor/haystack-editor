@@ -11,49 +11,43 @@
 
 // https://github.com/microsoft/vscode/issues/204345 @ulugbekna
 
-declare module "vscode" {
-  export enum NewSymbolNameTag {
-    AIGenerated = 1,
-  }
+declare module 'vscode' {
 
-  export enum NewSymbolNameTriggerKind {
-    Invoke = 0,
-    Automatic = 1,
-  }
+	export enum NewSymbolNameTag {
+		AIGenerated = 1
+	}
 
-  export class NewSymbolName {
-    readonly newSymbolName: string
-    readonly tags?: readonly NewSymbolNameTag[]
+	export enum NewSymbolNameTriggerKind {
+		Invoke = 0,
+		Automatic = 1,
+	}
 
-    constructor(newSymbolName: string, tags?: readonly NewSymbolNameTag[])
-  }
+	export class NewSymbolName {
+		readonly newSymbolName: string;
+		readonly tags?: readonly NewSymbolNameTag[];
 
-  export interface NewSymbolNamesProvider {
-    /**
-     * @default false
-     */
-    readonly supportsAutomaticTriggerKind?: Thenable<boolean>
+		constructor(newSymbolName: string, tags?: readonly NewSymbolNameTag[]);
+	}
 
-    /**
-     * Provide possible new names for the symbol at the given range.
-     *
-     * @param document The document in which the symbol is defined.
-     * @param range The range that spans the symbol being renamed.
-     * @param token A cancellation token.
-     * @return A list of new symbol names.
-     */
-    provideNewSymbolNames(
-      document: TextDocument,
-      range: Range,
-      triggerKind: NewSymbolNameTriggerKind,
-      token: CancellationToken,
-    ): ProviderResult<NewSymbolName[]>
-  }
+	export interface NewSymbolNamesProvider {
 
-  export namespace languages {
-    export function registerNewSymbolNamesProvider(
-      selector: DocumentSelector,
-      provider: NewSymbolNamesProvider,
-    ): Disposable
-  }
+		/**
+		 * @default false
+		 */
+		readonly supportsAutomaticTriggerKind?: Thenable<boolean>;
+
+		/**
+		 * Provide possible new names for the symbol at the given range.
+		 *
+		 * @param document The document in which the symbol is defined.
+		 * @param range The range that spans the symbol being renamed.
+		 * @param token A cancellation token.
+		 * @return A list of new symbol names.
+		 */
+		provideNewSymbolNames(document: TextDocument, range: Range, triggerKind: NewSymbolNameTriggerKind, token: CancellationToken): ProviderResult<NewSymbolName[]>;
+	}
+
+	export namespace languages {
+		export function registerNewSymbolNamesProvider(selector: DocumentSelector, provider: NewSymbolNamesProvider): Disposable;
+	}
 }

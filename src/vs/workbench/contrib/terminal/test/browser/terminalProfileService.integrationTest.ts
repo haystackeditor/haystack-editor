@@ -82,7 +82,7 @@ class MockTerminalProfileService implements Partial<ITerminalProfileService> {
   }
   setProfiles(
     profiles: ITerminalProfile[],
-    contributed: IExtensionTerminalProfile[],
+    contributed: IExtensionTerminalProfile[]
   ): void {
     this.availableProfiles = profiles
     this.contributedProfiles = contributed
@@ -99,26 +99,26 @@ class MockQuickInputService implements Partial<IQuickInputService> {
       | QuickPickInput<IProfileQuickPickItem>[]
       | Promise<QuickPickInput<IProfileQuickPickItem>[]>,
     options?: IPickOptions<IProfileQuickPickItem> & { canPickMany: true },
-    token?: CancellationToken,
+    token?: CancellationToken
   ): Promise<IProfileQuickPickItem[] | undefined>
   pick(
     picks:
       | QuickPickInput<IProfileQuickPickItem>[]
       | Promise<QuickPickInput<IProfileQuickPickItem>[]>,
     options?: IPickOptions<IProfileQuickPickItem> & { canPickMany: false },
-    token?: CancellationToken,
+    token?: CancellationToken
   ): Promise<IProfileQuickPickItem | undefined>
   pick(
     picks:
       | QuickPickInput<IProfileQuickPickItem>[]
       | Promise<QuickPickInput<IProfileQuickPickItem>[]>,
     options?: Omit<IPickOptions<IProfileQuickPickItem>, "canPickMany">,
-    token?: CancellationToken,
+    token?: CancellationToken
   ): Promise<IProfileQuickPickItem | undefined>
   async pick(
     picks: any,
     options?: any,
-    token?: any,
+    token?: any
   ): Promise<IProfileQuickPickItem | IProfileQuickPickItem[] | undefined> {
     Promise.resolve(picks)
     return this._pick
@@ -147,7 +147,7 @@ class TestTerminalInstanceService implements Partial<ITerminalInstanceService> {
   private _profiles: Map<string, ITerminalProfile[]> = new Map()
   private _hasReturnedNone = true
   async getBackend(
-    remoteAuthority: string | undefined,
+    remoteAuthority: string | undefined
   ): Promise<ITerminalBackend> {
     return {
       getProfiles: async () => {
@@ -162,7 +162,7 @@ class TestTerminalInstanceService implements Partial<ITerminalInstanceService> {
   }
   setProfiles(
     remoteAuthority: string | undefined,
-    profiles: ITerminalProfile[],
+    profiles: ITerminalProfile[]
   ) {
     this._profiles.set(remoteAuthority ?? "", profiles)
   }
@@ -229,7 +229,7 @@ suite("TerminalProfileService", () => {
       {
         configurationService: () => configurationService,
       },
-      store,
+      store
     )
     remoteAgentService = new TestRemoteAgentService()
     terminalInstanceService = new TestTerminalInstanceService()
@@ -246,14 +246,14 @@ suite("TerminalProfileService", () => {
     instantiationService.stub(IRemoteAgentService, remoteAgentService)
     instantiationService.stub(
       ITerminalContributionService,
-      terminalContributionService,
+      terminalContributionService
     )
     instantiationService.stub(ITerminalInstanceService, terminalInstanceService)
     instantiationService.stub(IWorkbenchEnvironmentService, environmentService)
     instantiationService.stub(IThemeService, themeService)
 
     terminalProfileService = store.add(
-      instantiationService.createInstance(TestTerminalProfileService),
+      instantiationService.createInstance(TestTerminalProfileService)
     )
 
     //reset as these properties are changed in each test
@@ -366,7 +366,7 @@ suite("TerminalProfileService", () => {
     } satisfies Partial<IWorkbenchEnvironmentService> as any
     instantiationService.stub(IWorkbenchEnvironmentService, environmentService)
     terminalProfileService = store.add(
-      instantiationService.createInstance(TestTerminalProfileService),
+      instantiationService.createInstance(TestTerminalProfileService)
     )
     await terminalProfileService.hasRefreshedProfiles
     deepStrictEqual(terminalProfileService.availableProfiles, [])
@@ -387,7 +387,7 @@ suite("TerminalProfileService", () => {
     powershellProfile.icon = Codicon.lightBulb
     let calls: ITerminalProfile[][] = []
     store.add(
-      terminalProfileService.onDidChangeAvailableProfiles((e) => calls.push(e)),
+      terminalProfileService.onDidChangeAvailableProfiles((e) => calls.push(e))
     )
     await configurationService.setUserConfiguration("terminal", {
       integrated: {
@@ -416,7 +416,7 @@ suite("TerminalProfileService", () => {
     terminalInstanceService.setProfiles(undefined, [powershellProfile])
     const calls: ITerminalProfile[][] = []
     store.add(
-      terminalProfileService.onDidChangeAvailableProfiles((e) => calls.push(e)),
+      terminalProfileService.onDidChangeAvailableProfiles((e) => calls.push(e))
     )
     await terminalProfileService.hasRefreshedProfiles
     deepStrictEqual(calls, [[powershellProfile]])
@@ -432,7 +432,7 @@ suite("TerminalProfileService", () => {
     extensionService._onDidChangeExtensions.fire()
     const calls: ITerminalProfile[][] = []
     store.add(
-      terminalProfileService.onDidChangeAvailableProfiles((e) => calls.push(e)),
+      terminalProfileService.onDidChangeAvailableProfiles((e) => calls.push(e))
     )
     await terminalProfileService.hasRefreshedProfiles
     deepStrictEqual(calls, [[powershellProfile]])
@@ -453,30 +453,32 @@ suite("TerminalProfileService", () => {
       instantiationService.stub(IQuickInputService, quickInputService)
       instantiationService.stub(
         ITerminalProfileService,
-        mockTerminalProfileService,
+        mockTerminalProfileService
       )
       terminalProfileQuickpick = instantiationService.createInstance(
-        TestTerminalProfileQuickpick,
+        TestTerminalProfileQuickpick
       )
     })
     test("setDefault", async () => {
       powershellProfile.isDefault = false
       mockTerminalProfileService.setProfiles(
         [powershellProfile],
-        [jsdebugProfile],
+        [jsdebugProfile]
       )
       mockTerminalProfileService.setDefaultProfileName(jsdebugProfile.title)
-      const result =
-        await terminalProfileQuickpick.showAndGetResult("setDefault")
+      const result = await terminalProfileQuickpick.showAndGetResult(
+        "setDefault"
+      )
       deepStrictEqual(result, powershellProfile.profileName)
     })
     test("setDefault to contributed", async () => {
       mockTerminalProfileService.setDefaultProfileName(
-        powershellProfile.profileName,
+        powershellProfile.profileName
       )
       quickInputService.setPick(jsdebugPick)
-      const result =
-        await terminalProfileQuickpick.showAndGetResult("setDefault")
+      const result = await terminalProfileQuickpick.showAndGetResult(
+        "setDefault"
+      )
       const expected = {
         config: {
           extensionIdentifier: jsdebugProfile.extensionIdentifier,
@@ -491,15 +493,16 @@ suite("TerminalProfileService", () => {
 
     test("createInstance", async () => {
       mockTerminalProfileService.setDefaultProfileName(
-        powershellProfile.profileName,
+        powershellProfile.profileName
       )
       const pick = {
         ...powershellPick,
         keyMods: { alt: true, ctrlCmd: false, shift: false },
       }
       quickInputService.setPick(pick)
-      const result =
-        await terminalProfileQuickpick.showAndGetResult("createInstance")
+      const result = await terminalProfileQuickpick.showAndGetResult(
+        "createInstance"
+      )
       deepStrictEqual(result, {
         config: powershellProfile,
         keyMods: { alt: true, ctrlCmd: false },
@@ -512,8 +515,9 @@ suite("TerminalProfileService", () => {
         keyMods: { alt: true, ctrlCmd: false, shift: false },
       }
       quickInputService.setPick(pick)
-      const result =
-        await terminalProfileQuickpick.showAndGetResult("createInstance")
+      const result = await terminalProfileQuickpick.showAndGetResult(
+        "createInstance"
+      )
       const expected = {
         config: {
           extensionIdentifier: jsdebugProfile.extensionIdentifier,

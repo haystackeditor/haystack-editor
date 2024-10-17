@@ -19,7 +19,7 @@ export function getSymbolIcon(
     width?: number
     height?: number
     darkMode?: boolean
-  },
+  }
 ) {
   switch (type) {
     case SymbolKind.File:

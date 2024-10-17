@@ -9,246 +9,200 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ThrottledDelayer } from "vs/base/common/async"
-import { VSBuffer } from "vs/base/common/buffer"
-import { Disposable } from "vs/base/common/lifecycle"
-import { isUndefined, isUndefinedOrNull } from "vs/base/common/types"
-import { URI } from "vs/base/common/uri"
-import { IEnvironmentService } from "vs/platform/environment/common/environment"
-import {
-  FileOperationError,
-  FileOperationResult,
-  IFileService,
-} from "vs/platform/files/common/files"
-import { ILogService } from "vs/platform/log/common/log"
-import { IStateReadService, IStateService } from "vs/platform/state/node/state"
+import { ThrottledDelayer } from 'vs/base/common/async';
+import { VSBuffer } from 'vs/base/common/buffer';
+import { Disposable } from 'vs/base/common/lifecycle';
+import { isUndefined, isUndefinedOrNull } from 'vs/base/common/types';
+import { URI } from 'vs/base/common/uri';
+import { IEnvironmentService } from 'vs/platform/environment/common/environment';
+import { FileOperationError, FileOperationResult, IFileService } from 'vs/platform/files/common/files';
+import { ILogService } from 'vs/platform/log/common/log';
+import { IStateReadService, IStateService } from 'vs/platform/state/node/state';
 
-type StorageDatabase = { [key: string]: unknown }
+type StorageDatabase = { [key: string]: unknown };
 
 export const enum SaveStrategy {
-  IMMEDIATE,
-  DELAYED,
+	IMMEDIATE,
+	DELAYED
 }
 
 export class FileStorage extends Disposable {
-  private storage: StorageDatabase = Object.create(null)
-  private lastSavedStorageContents = ""
 
-  private readonly flushDelayer = this._register(
-    new ThrottledDelayer<void>(
-      this.saveStrategy === SaveStrategy.IMMEDIATE
-        ? 0
-        : 100 /* buffer saves over a short time */,
-    ),
-  )
+	private storage: StorageDatabase = Object.create(null);
+	private lastSavedStorageContents = '';
 
-  private initializing: Promise<void> | undefined = undefined
-  private closing: Promise<void> | undefined = undefined
+	private readonly flushDelayer = this._register(new ThrottledDelayer<void>(this.saveStrategy === SaveStrategy.IMMEDIATE ? 0 : 100 /* buffer saves over a short time */));
 
-  constructor(
-    private readonly storagePath: URI,
-    private readonly saveStrategy: SaveStrategy,
-    private readonly logService: ILogService,
-    private readonly fileService: IFileService,
-  ) {
-    super()
-  }
+	private initializing: Promise<void> | undefined = undefined;
+	private closing: Promise<void> | undefined = undefined;
 
-  init(): Promise<void> {
-    if (!this.initializing) {
-      this.initializing = this.doInit()
-    }
+	constructor(
+		private readonly storagePath: URI,
+		private readonly saveStrategy: SaveStrategy,
+		private readonly logService: ILogService,
+		private readonly fileService: IFileService,
+	) {
+		super();
+	}
 
-    return this.initializing
-  }
+	init(): Promise<void> {
+		if (!this.initializing) {
+			this.initializing = this.doInit();
+		}
 
-  private async doInit(): Promise<void> {
-    try {
-      this.lastSavedStorageContents = (
-        await this.fileService.readFile(this.storagePath)
-      ).value.toString()
-      this.storage = JSON.parse(this.lastSavedStorageContents)
-    } catch (error) {
-      if (
-        (<FileOperationError>error).fileOperationResult !==
-        FileOperationResult.FILE_NOT_FOUND
-      ) {
-        this.logService.error(error)
-      }
-    }
-  }
+		return this.initializing;
+	}
 
-  getItem<T>(key: string, defaultValue: T): T
-  getItem<T>(key: string, defaultValue?: T): T | undefined
-  getItem<T>(key: string, defaultValue?: T): T | undefined {
-    const res = this.storage[key]
-    if (isUndefinedOrNull(res)) {
-      return defaultValue
-    }
+	private async doInit(): Promise<void> {
+		try {
+			this.lastSavedStorageContents = (await this.fileService.readFile(this.storagePath)).value.toString();
+			this.storage = JSON.parse(this.lastSavedStorageContents);
+		} catch (error) {
+			if ((<FileOperationError>error).fileOperationResult !== FileOperationResult.FILE_NOT_FOUND) {
+				this.logService.error(error);
+			}
+		}
+	}
 
-    return res as T
-  }
+	getItem<T>(key: string, defaultValue: T): T;
+	getItem<T>(key: string, defaultValue?: T): T | undefined;
+	getItem<T>(key: string, defaultValue?: T): T | undefined {
+		const res = this.storage[key];
+		if (isUndefinedOrNull(res)) {
+			return defaultValue;
+		}
 
-  setItem(
-    key: string,
-    data?: object | string | number | boolean | undefined | null,
-  ): void {
-    this.setItems([{ key, data }])
-  }
+		return res as T;
+	}
 
-  setItems(
-    items: readonly {
-      key: string
-      data?: object | string | number | boolean | undefined | null
-    }[],
-  ): void {
-    let save = false
+	setItem(key: string, data?: object | string | number | boolean | undefined | null): void {
+		this.setItems([{ key, data }]);
+	}
 
-    for (const { key, data } of items) {
-      // Shortcut for data that did not change
-      if (this.storage[key] === data) {
-        continue
-      }
+	setItems(items: readonly { key: string; data?: object | string | number | boolean | undefined | null }[]): void {
+		let save = false;
 
-      // Remove items when they are undefined or null
-      if (isUndefinedOrNull(data)) {
-        if (!isUndefined(this.storage[key])) {
-          this.storage[key] = undefined
-          save = true
-        }
-      }
+		for (const { key, data } of items) {
 
-      // Otherwise add an item
-      else {
-        this.storage[key] = data
-        save = true
-      }
-    }
+			// Shortcut for data that did not change
+			if (this.storage[key] === data) {
+				continue;
+			}
 
-    if (save) {
-      this.save()
-    }
-  }
+			// Remove items when they are undefined or null
+			if (isUndefinedOrNull(data)) {
+				if (!isUndefined(this.storage[key])) {
+					this.storage[key] = undefined;
+					save = true;
+				}
+			}
 
-  removeItem(key: string): void {
-    // Only update if the key is actually present (not undefined)
-    if (!isUndefined(this.storage[key])) {
-      this.storage[key] = undefined
-      this.save()
-    }
-  }
+			// Otherwise add an item
+			else {
+				this.storage[key] = data;
+				save = true;
+			}
+		}
 
-  private async save(): Promise<void> {
-    if (this.closing) {
-      return // already about to close
-    }
+		if (save) {
+			this.save();
+		}
+	}
 
-    return this.flushDelayer.trigger(() => this.doSave())
-  }
+	removeItem(key: string): void {
 
-  private async doSave(): Promise<void> {
-    if (!this.initializing) {
-      return // if we never initialized, we should not save our state
-    }
+		// Only update if the key is actually present (not undefined)
+		if (!isUndefined(this.storage[key])) {
+			this.storage[key] = undefined;
+			this.save();
+		}
+	}
 
-    // Make sure to wait for init to finish first
-    await this.initializing
+	private async save(): Promise<void> {
+		if (this.closing) {
+			return; // already about to close
+		}
 
-    // Return early if the database has not changed
-    const serializedDatabase = JSON.stringify(this.storage, null, 4)
-    if (serializedDatabase === this.lastSavedStorageContents) {
-      return
-    }
+		return this.flushDelayer.trigger(() => this.doSave());
+	}
 
-    // Write to disk
-    try {
-      await this.fileService.writeFile(
-        this.storagePath,
-        VSBuffer.fromString(serializedDatabase),
-        { atomic: { postfix: ".vsctmp" } },
-      )
-      this.lastSavedStorageContents = serializedDatabase
-    } catch (error) {
-      this.logService.error(error)
-    }
-  }
+	private async doSave(): Promise<void> {
+		if (!this.initializing) {
+			return; // if we never initialized, we should not save our state
+		}
 
-  async close(): Promise<void> {
-    if (!this.closing) {
-      this.closing = this.flushDelayer.trigger(
-        () => this.doSave(),
-        0 /* as soon as possible */,
-      )
-    }
+		// Make sure to wait for init to finish first
+		await this.initializing;
 
-    return this.closing
-  }
+		// Return early if the database has not changed
+		const serializedDatabase = JSON.stringify(this.storage, null, 4);
+		if (serializedDatabase === this.lastSavedStorageContents) {
+			return;
+		}
+
+		// Write to disk
+		try {
+			await this.fileService.writeFile(this.storagePath, VSBuffer.fromString(serializedDatabase), { atomic: { postfix: '.vsctmp' } });
+			this.lastSavedStorageContents = serializedDatabase;
+		} catch (error) {
+			this.logService.error(error);
+		}
+	}
+
+	async close(): Promise<void> {
+		if (!this.closing) {
+			this.closing = this.flushDelayer.trigger(() => this.doSave(), 0 /* as soon as possible */);
+		}
+
+		return this.closing;
+	}
 }
 
-export class StateReadonlyService
-  extends Disposable
-  implements IStateReadService
-{
-  declare readonly _serviceBrand: undefined
+export class StateReadonlyService extends Disposable implements IStateReadService {
 
-  protected readonly fileStorage: FileStorage
+	declare readonly _serviceBrand: undefined;
 
-  constructor(
-    saveStrategy: SaveStrategy,
-    @IEnvironmentService environmentService: IEnvironmentService,
-    @ILogService logService: ILogService,
-    @IFileService fileService: IFileService,
-  ) {
-    super()
+	protected readonly fileStorage: FileStorage;
 
-    this.fileStorage = this._register(
-      new FileStorage(
-        environmentService.stateResource,
-        saveStrategy,
-        logService,
-        fileService,
-      ),
-    )
-  }
+	constructor(
+		saveStrategy: SaveStrategy,
+		@IEnvironmentService environmentService: IEnvironmentService,
+		@ILogService logService: ILogService,
+		@IFileService fileService: IFileService
+	) {
+		super();
 
-  async init(): Promise<void> {
-    await this.fileStorage.init()
-  }
+		this.fileStorage = this._register(new FileStorage(environmentService.stateResource, saveStrategy, logService, fileService));
+	}
 
-  getItem<T>(key: string, defaultValue: T): T
-  getItem<T>(key: string, defaultValue?: T): T | undefined
-  getItem<T>(key: string, defaultValue?: T): T | undefined {
-    return this.fileStorage.getItem(key, defaultValue)
-  }
+	async init(): Promise<void> {
+		await this.fileStorage.init();
+	}
+
+	getItem<T>(key: string, defaultValue: T): T;
+	getItem<T>(key: string, defaultValue?: T): T | undefined;
+	getItem<T>(key: string, defaultValue?: T): T | undefined {
+		return this.fileStorage.getItem(key, defaultValue);
+	}
 }
 
-export class StateService
-  extends StateReadonlyService
-  implements IStateService
-{
-  declare readonly _serviceBrand: undefined
+export class StateService extends StateReadonlyService implements IStateService {
 
-  setItem(
-    key: string,
-    data?: object | string | number | boolean | undefined | null,
-  ): void {
-    this.fileStorage.setItem(key, data)
-  }
+	declare readonly _serviceBrand: undefined;
 
-  setItems(
-    items: readonly {
-      key: string
-      data?: object | string | number | boolean | undefined | null
-    }[],
-  ): void {
-    this.fileStorage.setItems(items)
-  }
+	setItem(key: string, data?: object | string | number | boolean | undefined | null): void {
+		this.fileStorage.setItem(key, data);
+	}
 
-  removeItem(key: string): void {
-    this.fileStorage.removeItem(key)
-  }
+	setItems(items: readonly { key: string; data?: object | string | number | boolean | undefined | null }[]): void {
+		this.fileStorage.setItems(items);
+	}
 
-  close(): Promise<void> {
-    return this.fileStorage.close()
-  }
+	removeItem(key: string): void {
+		this.fileStorage.removeItem(key);
+	}
+
+	close(): Promise<void> {
+		return this.fileStorage.close();
+	}
 }

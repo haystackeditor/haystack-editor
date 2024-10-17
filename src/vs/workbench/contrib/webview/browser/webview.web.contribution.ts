@@ -9,11 +9,8 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import {
-  InstantiationType,
-  registerSingleton,
-} from "vs/platform/instantiation/common/extensions"
-import { IWebviewService } from "vs/workbench/contrib/webview/browser/webview"
-import { WebviewService } from "./webviewService"
+import { InstantiationType, registerSingleton } from 'vs/platform/instantiation/common/extensions';
+import { IWebviewService } from 'vs/workbench/contrib/webview/browser/webview';
+import { WebviewService } from './webviewService';
 
-registerSingleton(IWebviewService, WebviewService, InstantiationType.Delayed)
+registerSingleton(IWebviewService, WebviewService, InstantiationType.Delayed);

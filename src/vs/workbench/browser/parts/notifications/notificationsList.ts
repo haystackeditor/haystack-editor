@@ -9,366 +9,270 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import "vs/css!./media/notificationsList"
-import { localize } from "vs/nls"
-import {
-  getWindow,
-  isAncestorOfActiveElement,
-  trackFocus,
-} from "vs/base/browser/dom"
-import { WorkbenchList } from "vs/platform/list/browser/listService"
-import { IInstantiationService } from "vs/platform/instantiation/common/instantiation"
-import {
-  IListAccessibilityProvider,
-  IListOptions,
-} from "vs/base/browser/ui/list/listWidget"
-import { NOTIFICATIONS_BACKGROUND } from "vs/workbench/common/theme"
-import { INotificationViewItem } from "vs/workbench/common/notifications"
-import {
-  NotificationsListDelegate,
-  NotificationRenderer,
-} from "vs/workbench/browser/parts/notifications/notificationsViewer"
-import { CopyNotificationMessageAction } from "vs/workbench/browser/parts/notifications/notificationsActions"
-import { IContextMenuService } from "vs/platform/contextview/browser/contextView"
-import { assertAllDefined } from "vs/base/common/types"
-import { NotificationFocusedContext } from "vs/workbench/common/contextkeys"
-import { Disposable } from "vs/base/common/lifecycle"
-import { AriaRole } from "vs/base/browser/ui/aria/aria"
-import { NotificationActionRunner } from "vs/workbench/browser/parts/notifications/notificationsCommands"
-import { IKeybindingService } from "vs/platform/keybinding/common/keybinding"
-import { IConfigurationService } from "vs/platform/configuration/common/configuration"
+import 'vs/css!./media/notificationsList';
+import { localize } from 'vs/nls';
+import { getWindow, isAncestorOfActiveElement, trackFocus } from 'vs/base/browser/dom';
+import { WorkbenchList } from 'vs/platform/list/browser/listService';
+import { IInstantiationService } from 'vs/platform/instantiation/common/instantiation';
+import { IListAccessibilityProvider, IListOptions } from 'vs/base/browser/ui/list/listWidget';
+import { NOTIFICATIONS_BACKGROUND } from 'vs/workbench/common/theme';
+import { INotificationViewItem } from 'vs/workbench/common/notifications';
+import { NotificationsListDelegate, NotificationRenderer } from 'vs/workbench/browser/parts/notifications/notificationsViewer';
+import { CopyNotificationMessageAction } from 'vs/workbench/browser/parts/notifications/notificationsActions';
+import { IContextMenuService } from 'vs/platform/contextview/browser/contextView';
+import { assertAllDefined } from 'vs/base/common/types';
+import { NotificationFocusedContext } from 'vs/workbench/common/contextkeys';
+import { Disposable } from 'vs/base/common/lifecycle';
+import { AriaRole } from 'vs/base/browser/ui/aria/aria';
+import { NotificationActionRunner } from 'vs/workbench/browser/parts/notifications/notificationsCommands';
+import { IKeybindingService } from 'vs/platform/keybinding/common/keybinding';
+import { IConfigurationService } from 'vs/platform/configuration/common/configuration';
 
-export interface INotificationsListOptions
-  extends IListOptions<INotificationViewItem> {
-  readonly widgetAriaLabel?: string
+export interface INotificationsListOptions extends IListOptions<INotificationViewItem> {
+	readonly widgetAriaLabel?: string;
 }
 
 export class NotificationsList extends Disposable {
-  private listContainer: HTMLElement | undefined
-  private list: WorkbenchList<INotificationViewItem> | undefined
-  private listDelegate: NotificationsListDelegate | undefined
-  private viewModel: INotificationViewItem[] = []
-  private isVisible: boolean | undefined
 
-  constructor(
-    private readonly container: HTMLElement,
-    private readonly options: INotificationsListOptions,
-    @IInstantiationService
-    private readonly instantiationService: IInstantiationService,
-    @IContextMenuService
-    private readonly contextMenuService: IContextMenuService,
-  ) {
-    super()
-  }
+	private listContainer: HTMLElement | undefined;
+	private list: WorkbenchList<INotificationViewItem> | undefined;
+	private listDelegate: NotificationsListDelegate | undefined;
+	private viewModel: INotificationViewItem[] = [];
+	private isVisible: boolean | undefined;
 
-  show(): void {
-    if (this.isVisible) {
-      return // already visible
-    }
+	constructor(
+		private readonly container: HTMLElement,
+		private readonly options: INotificationsListOptions,
+		@IInstantiationService private readonly instantiationService: IInstantiationService,
+		@IContextMenuService private readonly contextMenuService: IContextMenuService
+	) {
+		super();
+	}
 
-    // Lazily create if showing for the first time
-    if (!this.list) {
-      this.createNotificationsList()
-    }
+	show(): void {
+		if (this.isVisible) {
+			return; // already visible
+		}
 
-    // Make visible
-    this.isVisible = true
-  }
+		// Lazily create if showing for the first time
+		if (!this.list) {
+			this.createNotificationsList();
+		}
 
-  private createNotificationsList(): void {
-    // List Container
-    this.listContainer = document.createElement("div")
-    this.listContainer.classList.add("notifications-list-container")
+		// Make visible
+		this.isVisible = true;
+	}
 
-    const actionRunner = this._register(
-      this.instantiationService.createInstance(NotificationActionRunner),
-    )
+	private createNotificationsList(): void {
 
-    // Notification Renderer
-    const renderer = this.instantiationService.createInstance(
-      NotificationRenderer,
-      actionRunner,
-    )
+		// List Container
+		this.listContainer = document.createElement('div');
+		this.listContainer.classList.add('notifications-list-container');
 
-    // List
-    const listDelegate = (this.listDelegate = new NotificationsListDelegate(
-      this.listContainer,
-    ))
-    const options = this.options
-    const list = (this.list = <WorkbenchList<INotificationViewItem>>(
-      this._register(
-        this.instantiationService.createInstance(
-          WorkbenchList,
-          "NotificationsList",
-          this.listContainer,
-          listDelegate,
-          [renderer],
-          {
-            ...options,
-            setRowLineHeight: false,
-            horizontalScrolling: false,
-            overrideStyles: {
-              listBackground: NOTIFICATIONS_BACKGROUND,
-            },
-            accessibilityProvider: this.instantiationService.createInstance(
-              NotificationAccessibilityProvider,
-              options,
-            ),
-          },
-        ),
-      )
-    ))
+		const actionRunner = this._register(this.instantiationService.createInstance(NotificationActionRunner));
 
-    // Context menu to copy message
-    const copyAction = this._register(
-      this.instantiationService.createInstance(
-        CopyNotificationMessageAction,
-        CopyNotificationMessageAction.ID,
-        CopyNotificationMessageAction.LABEL,
-      ),
-    )
-    this._register(
-      list.onContextMenu((e) => {
-        if (!e.element) {
-          return
-        }
+		// Notification Renderer
+		const renderer = this.instantiationService.createInstance(NotificationRenderer, actionRunner);
 
-        this.contextMenuService.showContextMenu({
-          getAnchor: () => e.anchor,
-          getActions: () => [copyAction],
-          getActionsContext: () => e.element,
-          actionRunner,
-        })
-      }),
-    )
+		// List
+		const listDelegate = this.listDelegate = new NotificationsListDelegate(this.listContainer);
+		const options = this.options;
+		const list = this.list = <WorkbenchList<INotificationViewItem>>this._register(this.instantiationService.createInstance(
+			WorkbenchList,
+			'NotificationsList',
+			this.listContainer,
+			listDelegate,
+			[renderer],
+			{
+				...options,
+				setRowLineHeight: false,
+				horizontalScrolling: false,
+				overrideStyles: {
+					listBackground: NOTIFICATIONS_BACKGROUND
+				},
+				accessibilityProvider: this.instantiationService.createInstance(NotificationAccessibilityProvider, options)
+			}
+		));
 
-    // Toggle on double click
-    this._register(
-      list.onMouseDblClick((event) =>
-        (event.element as INotificationViewItem).toggle(),
-      ),
-    )
+		// Context menu to copy message
+		const copyAction = this._register(this.instantiationService.createInstance(CopyNotificationMessageAction, CopyNotificationMessageAction.ID, CopyNotificationMessageAction.LABEL));
+		this._register((list.onContextMenu(e => {
+			if (!e.element) {
+				return;
+			}
 
-    // Clear focus when DOM focus moves out
-    // Use document.hasFocus() to not clear the focus when the entire window lost focus
-    // This ensures that when the focus comes back, the notification is still focused
-    const listFocusTracker = this._register(trackFocus(list.getHTMLElement()))
-    this._register(
-      listFocusTracker.onDidBlur(() => {
-        if (getWindow(this.listContainer).document.hasFocus()) {
-          list.setFocus([])
-        }
-      }),
-    )
+			this.contextMenuService.showContextMenu({
+				getAnchor: () => e.anchor,
+				getActions: () => [copyAction],
+				getActionsContext: () => e.element,
+				actionRunner
+			});
+		})));
 
-    // Context key
-    NotificationFocusedContext.bindTo(list.contextKeyService)
+		// Toggle on double click
+		this._register((list.onMouseDblClick(event => (event.element as INotificationViewItem).toggle())));
 
-    // Only allow for focus in notifications, as the
-    // selection is too strong over the contents of
-    // the notification
-    this._register(
-      list.onDidChangeSelection((e) => {
-        if (e.indexes.length > 0) {
-          list.setSelection([])
-        }
-      }),
-    )
+		// Clear focus when DOM focus moves out
+		// Use document.hasFocus() to not clear the focus when the entire window lost focus
+		// This ensures that when the focus comes back, the notification is still focused
+		const listFocusTracker = this._register(trackFocus(list.getHTMLElement()));
+		this._register(listFocusTracker.onDidBlur(() => {
+			if (getWindow(this.listContainer).document.hasFocus()) {
+				list.setFocus([]);
+			}
+		}));
 
-    this.container.appendChild(this.listContainer)
-  }
+		// Context key
+		NotificationFocusedContext.bindTo(list.contextKeyService);
 
-  updateNotificationsList(
-    start: number,
-    deleteCount: number,
-    items: INotificationViewItem[] = [],
-  ) {
-    const [list, listContainer] = assertAllDefined(
-      this.list,
-      this.listContainer,
-    )
-    const listHasDOMFocus = isAncestorOfActiveElement(listContainer)
+		// Only allow for focus in notifications, as the
+		// selection is too strong over the contents of
+		// the notification
+		this._register(list.onDidChangeSelection(e => {
+			if (e.indexes.length > 0) {
+				list.setSelection([]);
+			}
+		}));
 
-    // Remember focus and relative top of that item
-    const focusedIndex = list.getFocus()[0]
-    const focusedItem = this.viewModel[focusedIndex]
+		this.container.appendChild(this.listContainer);
+	}
 
-    let focusRelativeTop: number | null = null
-    if (typeof focusedIndex === "number") {
-      focusRelativeTop = list.getRelativeTop(focusedIndex)
-    }
+	updateNotificationsList(start: number, deleteCount: number, items: INotificationViewItem[] = []) {
+		const [list, listContainer] = assertAllDefined(this.list, this.listContainer);
+		const listHasDOMFocus = isAncestorOfActiveElement(listContainer);
 
-    // Update view model
-    this.viewModel.splice(start, deleteCount, ...items)
+		// Remember focus and relative top of that item
+		const focusedIndex = list.getFocus()[0];
+		const focusedItem = this.viewModel[focusedIndex];
 
-    // Update list
-    list.splice(start, deleteCount, items)
-    list.layout()
+		let focusRelativeTop: number | null = null;
+		if (typeof focusedIndex === 'number') {
+			focusRelativeTop = list.getRelativeTop(focusedIndex);
+		}
 
-    // Hide if no more notifications to show
-    if (this.viewModel.length === 0) {
-      this.hide()
-    }
+		// Update view model
+		this.viewModel.splice(start, deleteCount, ...items);
 
-    // Otherwise restore focus if we had
-    else if (typeof focusedIndex === "number") {
-      let indexToFocus = 0
-      if (focusedItem) {
-        let indexToFocusCandidate = this.viewModel.indexOf(focusedItem)
-        if (indexToFocusCandidate === -1) {
-          indexToFocusCandidate = focusedIndex - 1 // item could have been removed
-        }
+		// Update list
+		list.splice(start, deleteCount, items);
+		list.layout();
 
-        if (
-          indexToFocusCandidate < this.viewModel.length &&
-          indexToFocusCandidate >= 0
-        ) {
-          indexToFocus = indexToFocusCandidate
-        }
-      }
+		// Hide if no more notifications to show
+		if (this.viewModel.length === 0) {
+			this.hide();
+		}
 
-      if (typeof focusRelativeTop === "number") {
-        list.reveal(indexToFocus, focusRelativeTop)
-      }
+		// Otherwise restore focus if we had
+		else if (typeof focusedIndex === 'number') {
+			let indexToFocus = 0;
+			if (focusedItem) {
+				let indexToFocusCandidate = this.viewModel.indexOf(focusedItem);
+				if (indexToFocusCandidate === -1) {
+					indexToFocusCandidate = focusedIndex - 1; // item could have been removed
+				}
 
-      list.setFocus([indexToFocus])
-    }
+				if (indexToFocusCandidate < this.viewModel.length && indexToFocusCandidate >= 0) {
+					indexToFocus = indexToFocusCandidate;
+				}
+			}
 
-    // Restore DOM focus if we had focus before
-    if (this.isVisible && listHasDOMFocus) {
-      list.domFocus()
-    }
-  }
+			if (typeof focusRelativeTop === 'number') {
+				list.reveal(indexToFocus, focusRelativeTop);
+			}
 
-  updateNotificationHeight(item: INotificationViewItem): void {
-    const index = this.viewModel.indexOf(item)
-    if (index === -1) {
-      return
-    }
+			list.setFocus([indexToFocus]);
+		}
 
-    const [list, listDelegate] = assertAllDefined(this.list, this.listDelegate)
-    list.updateElementHeight(index, listDelegate.getHeight(item))
-    list.layout()
-  }
+		// Restore DOM focus if we had focus before
+		if (this.isVisible && listHasDOMFocus) {
+			list.domFocus();
+		}
+	}
 
-  hide(): void {
-    if (!this.isVisible || !this.list) {
-      return // already hidden
-    }
+	updateNotificationHeight(item: INotificationViewItem): void {
+		const index = this.viewModel.indexOf(item);
+		if (index === -1) {
+			return;
+		}
 
-    // Hide
-    this.isVisible = false
+		const [list, listDelegate] = assertAllDefined(this.list, this.listDelegate);
+		list.updateElementHeight(index, listDelegate.getHeight(item));
+		list.layout();
+	}
 
-    // Clear list
-    this.list.splice(0, this.viewModel.length)
+	hide(): void {
+		if (!this.isVisible || !this.list) {
+			return; // already hidden
+		}
 
-    // Clear view model
-    this.viewModel = []
-  }
+		// Hide
+		this.isVisible = false;
 
-  focusFirst(): void {
-    if (!this.list) {
-      return // not created yet
-    }
+		// Clear list
+		this.list.splice(0, this.viewModel.length);
 
-    this.list.focusFirst()
-    this.list.domFocus()
-  }
+		// Clear view model
+		this.viewModel = [];
+	}
 
-  hasFocus(): boolean {
-    if (!this.listContainer) {
-      return false // not created yet
-    }
+	focusFirst(): void {
+		if (!this.list) {
+			return; // not created yet
+		}
 
-    return isAncestorOfActiveElement(this.listContainer)
-  }
+		this.list.focusFirst();
+		this.list.domFocus();
+	}
 
-  layout(width: number, maxHeight?: number): void {
-    if (this.listContainer && this.list) {
-      this.listContainer.style.width = `${width}px`
+	hasFocus(): boolean {
+		if (!this.listContainer) {
+			return false; // not created yet
+		}
 
-      if (typeof maxHeight === "number") {
-        this.list.getHTMLElement().style.maxHeight = `${maxHeight}px`
-      }
+		return isAncestorOfActiveElement(this.listContainer);
+	}
 
-      this.list.layout()
-    }
-  }
+	layout(width: number, maxHeight?: number): void {
+		if (this.listContainer && this.list) {
+			this.listContainer.style.width = `${width}px`;
 
-  override dispose(): void {
-    this.hide()
+			if (typeof maxHeight === 'number') {
+				this.list.getHTMLElement().style.maxHeight = `${maxHeight}px`;
+			}
 
-    super.dispose()
-  }
+			this.list.layout();
+		}
+	}
+
+	override dispose(): void {
+		this.hide();
+
+		super.dispose();
+	}
 }
 
-class NotificationAccessibilityProvider
-  implements IListAccessibilityProvider<INotificationViewItem>
-{
-  constructor(
-    private readonly _options: INotificationsListOptions,
-    @IKeybindingService private readonly _keybindingService: IKeybindingService,
-    @IConfigurationService
-    private readonly _configurationService: IConfigurationService,
-  ) {}
-  getAriaLabel(element: INotificationViewItem): string {
-    let accessibleViewHint: string | undefined
-    const keybinding = this._keybindingService
-      .lookupKeybinding("editor.action.accessibleView")
-      ?.getAriaLabel()
-    if (
-      this._configurationService.getValue(
-        "accessibility.verbosity.notification",
-      )
-    ) {
-      accessibleViewHint = keybinding
-        ? localize(
-            "notificationAccessibleViewHint",
-            "Inspect the response in the accessible view with {0}",
-            keybinding,
-          )
-        : localize(
-            "notificationAccessibleViewHintNoKb",
-            "Inspect the response in the accessible view via the command Open Accessible View which is currently not triggerable via keybinding",
-          )
-    }
-    if (!element.source) {
-      return accessibleViewHint
-        ? localize(
-            "notificationAriaLabelHint",
-            "{0}, notification, {1}",
-            element.message.raw,
-            accessibleViewHint,
-          )
-        : localize(
-            "notificationAriaLabel",
-            "{0}, notification",
-            element.message.raw,
-          )
-    }
+class NotificationAccessibilityProvider implements IListAccessibilityProvider<INotificationViewItem> {
+	constructor(
+		private readonly _options: INotificationsListOptions,
+		@IKeybindingService private readonly _keybindingService: IKeybindingService,
+		@IConfigurationService private readonly _configurationService: IConfigurationService
+	) { }
+	getAriaLabel(element: INotificationViewItem): string {
+		let accessibleViewHint: string | undefined;
+		const keybinding = this._keybindingService.lookupKeybinding('editor.action.accessibleView')?.getAriaLabel();
+		if (this._configurationService.getValue('accessibility.verbosity.notification')) {
+			accessibleViewHint = keybinding ? localize('notificationAccessibleViewHint', "Inspect the response in the accessible view with {0}", keybinding) : localize('notificationAccessibleViewHintNoKb', "Inspect the response in the accessible view via the command Open Accessible View which is currently not triggerable via keybinding");
+		}
+		if (!element.source) {
+			return accessibleViewHint ? localize('notificationAriaLabelHint', "{0}, notification, {1}", element.message.raw, accessibleViewHint) : localize('notificationAriaLabel', "{0}, notification", element.message.raw);
+		}
 
-    return accessibleViewHint
-      ? localize(
-          "notificationWithSourceAriaLabelHint",
-          "{0}, source: {1}, notification, {2}",
-          element.message.raw,
-          element.source,
-          accessibleViewHint,
-        )
-      : localize(
-          "notificationWithSourceAriaLabel",
-          "{0}, source: {1}, notification",
-          element.message.raw,
-          element.source,
-        )
-  }
-  getWidgetAriaLabel(): string {
-    return (
-      this._options.widgetAriaLabel ??
-      localize("notificationsList", "Notifications List")
-    )
-  }
-  getRole(): AriaRole {
-    return "dialog" // https://github.com/microsoft/vscode/issues/82728
-  }
+		return accessibleViewHint ? localize('notificationWithSourceAriaLabelHint', "{0}, source: {1}, notification, {2}", element.message.raw, element.source, accessibleViewHint) : localize('notificationWithSourceAriaLabel', "{0}, source: {1}, notification", element.message.raw, element.source);
+	}
+	getWidgetAriaLabel(): string {
+		return this._options.widgetAriaLabel ?? localize('notificationsList', "Notifications List");
+	}
+	getRole(): AriaRole {
+		return 'dialog'; // https://github.com/microsoft/vscode/issues/82728
+	}
 }

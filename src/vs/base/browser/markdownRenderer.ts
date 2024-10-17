@@ -52,11 +52,11 @@ export interface MarkedOptions extends marked.MarkedOptions {
 export interface MarkdownRenderOptions extends FormattedTextRenderOptions {
   readonly codeBlockRenderer?: (
     languageId: string,
-    value: string,
+    value: string
   ) => Promise<HTMLElement>
   readonly codeBlockRendererSync?: (
     languageId: string,
-    value: string,
+    value: string
   ) => HTMLElement
   readonly asyncRenderCallback?: () => void
   readonly fillInIncompleteTokens?: boolean
@@ -133,7 +133,7 @@ const defaultMarkedRenderers = Object.freeze({
 export function renderMarkdown(
   markdown: IMarkdownString,
   options: MarkdownRenderOptions = {},
-  markedOptions: MarkedOptions = {},
+  markedOptions: MarkedOptions = {}
 ): { element: HTMLElement; dispose: () => void } {
   const disposables = new DisposableStore()
   let isDisposed = false
@@ -202,7 +202,7 @@ export function renderMarkdown(
       const id = defaultGenerator.nextId()
       const value = options.codeBlockRendererSync!(
         postProcessCodeBlockLanguageId(lang),
-        code,
+        code
       )
       syncCodeBlocks.push([id, value])
       return `<div class="code" data-code="${id}">${escape(code)}</div>`
@@ -212,7 +212,7 @@ export function renderMarkdown(
       const id = defaultGenerator.nextId()
       const value = options.codeBlockRenderer!(
         postProcessCodeBlockLanguageId(lang),
-        code,
+        code
       )
       codeBlocks.push(value.then((element) => [id, element]))
       return `<div class="code" data-code="${id}">${escape(code)}</div>`
@@ -221,7 +221,7 @@ export function renderMarkdown(
 
   if (options.actionHandler) {
     const _activateLink = function (
-      event: StandardMouseEvent | StandardKeyboardEvent,
+      event: StandardMouseEvent | StandardKeyboardEvent
     ): void {
       let target: HTMLElement | null = event.target
       if (target.tagName !== "A") {
@@ -245,22 +245,22 @@ export function renderMarkdown(
       }
     }
     const onClick = options.actionHandler.disposables.add(
-      new DomEmitter(element, "click"),
+      new DomEmitter(element, "click")
     )
     const onAuxClick = options.actionHandler.disposables.add(
-      new DomEmitter(element, "auxclick"),
+      new DomEmitter(element, "auxclick")
     )
     options.actionHandler.disposables.add(
       Event.any(
         onClick.event,
-        onAuxClick.event,
+        onAuxClick.event
       )((e) => {
         const mouseEvent = new StandardMouseEvent(DOM.getWindow(element), e)
         if (!mouseEvent.leftButton && !mouseEvent.middleButton) {
           return
         }
         _activateLink(mouseEvent)
-      }),
+      })
     )
     options.actionHandler.disposables.add(
       DOM.addDisposableListener(element, "keydown", (e) => {
@@ -272,7 +272,7 @@ export function renderMarkdown(
           return
         }
         _activateLink(keyboardEvent)
-      }),
+      })
     )
   }
 
@@ -336,9 +336,9 @@ export function renderMarkdown(
   const markdownHtmlDoc = htmlParser.parseFromString(
     sanitizeRenderedMarkdown(
       { isTrusted: markdown.isTrusted, ...options.sanitizerOptions },
-      renderedMarkdown,
+      renderedMarkdown
     ) as unknown as string,
-    "text/html",
+    "text/html"
   )
 
   markdownHtmlDoc.body
@@ -391,7 +391,7 @@ export function renderMarkdown(
 
   element.innerHTML = sanitizeRenderedMarkdown(
     { isTrusted: markdown.isTrusted, ...options.sanitizerOptions },
-    markdownHtmlDoc.body.innerHTML,
+    markdownHtmlDoc.body.innerHTML
   ) as unknown as string
 
   if (codeBlocks.length > 0) {
@@ -404,7 +404,7 @@ export function renderMarkdown(
         element.querySelectorAll<HTMLDivElement>(`div[data-code]`)
       for (const placeholderElement of placeholderElements) {
         const renderedElement = renderedElements.get(
-          placeholderElement.dataset["code"] ?? "",
+          placeholderElement.dataset["code"] ?? ""
         )
         if (renderedElement) {
           DOM.reset(placeholderElement, renderedElement)
@@ -418,7 +418,7 @@ export function renderMarkdown(
       element.querySelectorAll<HTMLDivElement>(`div[data-code]`)
     for (const placeholderElement of placeholderElements) {
       const renderedElement = renderedElements.get(
-        placeholderElement.dataset["code"] ?? "",
+        placeholderElement.dataset["code"] ?? ""
       )
       if (renderedElement) {
         DOM.reset(placeholderElement, renderedElement)
@@ -433,7 +433,7 @@ export function renderMarkdown(
         DOM.addDisposableListener(img, "load", () => {
           listener.dispose()
           options.asyncRenderCallback!()
-        }),
+        })
       )
     }
   }
@@ -497,7 +497,7 @@ const selfClosingTags = [
 
 function sanitizeRenderedMarkdown(
   options: IInternalSanitizerOptions,
-  renderedMarkdown: string,
+  renderedMarkdown: string
 ): TrustedHTML {
   const { config, allowedSchemes } = getSanitizerOptions(options)
   const store = new DisposableStore()
@@ -508,13 +508,13 @@ function sanitizeRenderedMarkdown(
           if (e.attrName === "style") {
             e.keepAttr =
               /^(color\:(#[0-9a-fA-F]+|var\(--vscode(-[a-zA-Z]+)+\));)?(background-color\:(#[0-9a-fA-F]+|var\(--vscode(-[a-zA-Z]+)+\));)?$/.test(
-                e.attrValue,
+                e.attrValue
               )
             return
           } else if (e.attrName === "class") {
             e.keepAttr =
               /^codicon codicon-[a-z\-]+( codicon-modifier-[a-z\-]+)?$/.test(
-                e.attrValue,
+                e.attrValue
               )
             return
           }
@@ -535,7 +535,7 @@ function sanitizeRenderedMarkdown(
         }
         e.keepAttr = false
       }
-    }),
+    })
   )
 
   store.add(
@@ -590,7 +590,7 @@ function sanitizeRenderedMarkdown(
           element.parentElement.replaceChild(fragment, element)
         }
       }
-    }),
+    })
   )
 
   store.add(DOM.hookDomPurifyHrefAndSrcSanitizer(allowedSchemes))
@@ -678,7 +678,7 @@ export function renderStringAsPlaintext(string: IMarkdownString | string) {
  */
 export function renderMarkdownAsPlaintext(
   markdown: IMarkdownString,
-  withCodeBlocks?: boolean,
+  withCodeBlocks?: boolean
 ) {
   // values that are too long will freeze the UI
   let value = markdown.value ?? ""
@@ -721,7 +721,7 @@ function createRenderer(): marked.Renderer {
   renderer.heading = (
     text: string,
     _level: 1 | 2 | 3 | 4 | 5 | 6,
-    _raw: string,
+    _raw: string
   ): string => {
     return text + "\n"
   }
@@ -748,7 +748,7 @@ function createRenderer(): marked.Renderer {
     _flags: {
       header: boolean
       align: "center" | "left" | "right" | null
-    },
+    }
   ): string => {
     return content + " "
   }
@@ -779,7 +779,7 @@ function createRenderer(): marked.Renderer {
   return renderer
 }
 const plainTextRenderer = new Lazy<marked.Renderer>(
-  (withCodeBlocks?: boolean) => createRenderer(),
+  (withCodeBlocks?: boolean) => createRenderer()
 )
 const plainTextWithCodeBlocksRenderer = new Lazy<marked.Renderer>(() => {
   const renderer = createRenderer()
@@ -798,7 +798,7 @@ function mergeRawTokenText(tokens: marked.Token[]): string {
 }
 
 function completeSingleLinePattern(
-  token: marked.Tokens.Text | marked.Tokens.Paragraph,
+  token: marked.Tokens.Text | marked.Tokens.Paragraph
 ): marked.Token | undefined {
   if (!token.tokens) {
     return undefined
@@ -866,7 +866,7 @@ function hasStartOfLinkTargetAndNoLinkText(str: string): boolean {
 }
 
 function completeListItemPattern(
-  list: marked.Tokens.List,
+  list: marked.Tokens.List
 ): marked.Tokens.List | undefined {
   // Patch up this one list item
   const lastListItem = list.items[list.items.length - 1]
@@ -931,7 +931,7 @@ function completeListItemPattern(
     newToken.raw
 
   const newList = marked.lexer(
-    previousListItemsText + newListItemText,
+    previousListItemsText + newListItemText
   )[0] as marked.Tokens.List
   if (newList.type !== "list") {
     // Something went wrong
@@ -943,7 +943,7 @@ function completeListItemPattern(
 
 const maxIncompleteTokensFixRounds = 3
 export function fillInIncompleteTokens(
-  tokens: marked.TokensList,
+  tokens: marked.TokensList
 ): marked.TokensList {
   for (let i = 0; i < maxIncompleteTokensFixRounds; i++) {
     const newTokens = fillInIncompleteTokensOnce(tokens)
@@ -958,7 +958,7 @@ export function fillInIncompleteTokens(
 }
 
 function fillInIncompleteTokensOnce(
-  tokens: marked.TokensList,
+  tokens: marked.TokensList
 ): marked.TokensList | null {
   let i: number
   let newTokens: marked.Token[] | undefined
@@ -1009,7 +1009,7 @@ function fillInIncompleteTokensOnce(
 
 function completeCodeBlock(
   tokens: marked.Token[],
-  leader: string,
+  leader: string
 ): marked.Token[] {
   const mergedRawText = mergeRawTokenText(tokens)
   return marked.lexer(mergedRawText + `\n${leader}`)
@@ -1049,10 +1049,10 @@ function completeDoubleUnderscore(tokens: marked.Token): marked.Token {
 
 function completeWithString(
   tokens: marked.Token[] | marked.Token,
-  closingString: string,
+  closingString: string
 ): marked.Token {
   const mergedRawText = mergeRawTokenText(
-    Array.isArray(tokens) ? tokens : [tokens],
+    Array.isArray(tokens) ? tokens : [tokens]
   )
 
   // If it was completed correctly, this should be a single token.
@@ -1110,20 +1110,20 @@ function addDompurifyHook(
   cb: (
     currentNode: Element,
     data: dompurify.SanitizeElementHookEvent,
-    config: dompurify.Config,
-  ) => void,
+    config: dompurify.Config
+  ) => void
 ): IDisposable
 function addDompurifyHook(
   hook: "uponSanitizeAttribute",
   cb: (
     currentNode: Element,
     data: dompurify.SanitizeAttributeHookEvent,
-    config: dompurify.Config,
-  ) => void,
+    config: dompurify.Config
+  ) => void
 ): IDisposable
 function addDompurifyHook(
   hook: "uponSanitizeElement" | "uponSanitizeAttribute",
-  cb: any,
+  cb: any
 ): IDisposable {
   dompurify.addHook(hook, cb)
   return toDisposable(() => dompurify.removeHook(hook))

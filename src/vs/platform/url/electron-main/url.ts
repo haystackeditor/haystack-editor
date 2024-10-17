@@ -9,19 +9,20 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { URI } from "vs/base/common/uri"
-import { IWindowOpenable } from "vs/platform/window/common/window"
+import { URI } from 'vs/base/common/uri';
+import { IWindowOpenable } from 'vs/platform/window/common/window';
 
 export interface IProtocolUrl {
-  /**
-   * The parsed URI from the raw URL.
-   */
-  uri: URI
 
-  /**
-   * The raw URL that was passed in.
-   */
-  originalUrl: string
+	/**
+	 * The parsed URI from the raw URL.
+	 */
+	uri: URI;
+
+	/**
+	 * The raw URL that was passed in.
+	 */
+	originalUrl: string;
 }
 
 /**
@@ -60,20 +61,21 @@ export interface IProtocolUrl {
  * - a URL with any other authority will be added to the `urls` array
  */
 export interface IInitialProtocolUrls {
-  /**
-   * Initial protocol URLs to handle that are not
-   * already converted to `IWindowOpenable` window
-   * instances.
-   *
-   * These URLs will be handled by the URL service
-   * in the active or a new empty window (if `windowId`
-   * is set to `_blank`).
-   */
-  readonly urls: IProtocolUrl[]
 
-  /**
-   * Initial protocol URLs that result in direct
-   * windows to open.
-   */
-  readonly openables: IWindowOpenable[]
+	/**
+	 * Initial protocol URLs to handle that are not
+	 * already converted to `IWindowOpenable` window
+	 * instances.
+	 *
+	 * These URLs will be handled by the URL service
+	 * in the active or a new empty window (if `windowId`
+	 * is set to `_blank`).
+	 */
+	readonly urls: IProtocolUrl[];
+
+	/**
+	 * Initial protocol URLs that result in direct
+	 * windows to open.
+	 */
+	readonly openables: IWindowOpenable[];
 }

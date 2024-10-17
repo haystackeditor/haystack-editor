@@ -55,7 +55,7 @@ export class BrowserDialogHandler extends AbstractDialogHandler {
 
   private readonly markdownRenderer = this.instantiationService.createInstance(
     MarkdownRenderer,
-    {},
+    {}
   )
 
   constructor(
@@ -65,7 +65,7 @@ export class BrowserDialogHandler extends AbstractDialogHandler {
     @IInstantiationService
     private readonly instantiationService: IInstantiationService,
     @IProductService private readonly productService: IProductService,
-    @IClipboardService private readonly clipboardService: IClipboardService,
+    @IClipboardService private readonly clipboardService: IClipboardService
   ) {
     super()
   }
@@ -83,7 +83,7 @@ export class BrowserDialogHandler extends AbstractDialogHandler {
       prompt.cancelButton ? buttons.length - 1 : -1 /* Disabled */,
       prompt.checkbox,
       undefined,
-      typeof prompt?.custom === "object" ? prompt.custom : undefined,
+      typeof prompt?.custom === "object" ? prompt.custom : undefined
     )
 
     return this.getPromptResult(prompt, button, checkboxChecked)
@@ -102,9 +102,7 @@ export class BrowserDialogHandler extends AbstractDialogHandler {
       buttons.length - 1,
       confirmation.checkbox,
       undefined,
-      typeof confirmation?.custom === "object"
-        ? confirmation.custom
-        : undefined,
+      typeof confirmation?.custom === "object" ? confirmation.custom : undefined
     )
 
     return { confirmed: button === 0, checkboxChecked }
@@ -123,7 +121,7 @@ export class BrowserDialogHandler extends AbstractDialogHandler {
       buttons.length - 1,
       input?.checkbox,
       input.inputs,
-      typeof input.custom === "object" ? input.custom : undefined,
+      typeof input.custom === "object" ? input.custom : undefined
     )
 
     return { confirmed: button === 0, checkboxChecked, values }
@@ -135,7 +133,7 @@ export class BrowserDialogHandler extends AbstractDialogHandler {
         "aboutDetail",
         "Version: {0}\nBrowser: {3}",
         this.productService.version || "Unknown",
-        navigator.userAgent,
+        navigator.userAgent
       )
     }
 
@@ -150,7 +148,7 @@ export class BrowserDialogHandler extends AbstractDialogHandler {
         localize("ok", "OK"),
       ],
       detail,
-      1,
+      1
     )
 
     if (button === 0) {
@@ -166,7 +164,7 @@ export class BrowserDialogHandler extends AbstractDialogHandler {
     cancelId?: number,
     checkbox?: ICheckbox,
     inputs?: IInputElement[],
-    customOptions?: ICustomDialogOptions,
+    customOptions?: ICustomDialogOptions
   ): Promise<IDialogResult> {
     const dialogDisposables = new DisposableStore()
 
@@ -193,12 +191,12 @@ export class BrowserDialogHandler extends AbstractDialogHandler {
         keyEventProcessor: (event: StandardKeyboardEvent) => {
           const resolved = this.keybindingService.softDispatch(
             event,
-            this.layoutService.activeContainer,
+            this.layoutService.activeContainer
           )
           if (resolved.kind === ResultKind.KbFound && resolved.commandId) {
             if (
               BrowserDialogHandler.ALLOWABLE_COMMANDS.indexOf(
-                resolved.commandId,
+                resolved.commandId
               ) === -1
             ) {
               EventHelper.stop(event, true)
@@ -216,7 +214,7 @@ export class BrowserDialogHandler extends AbstractDialogHandler {
         checkboxStyles: defaultCheckboxStyles,
         inputBoxStyles: defaultInputBoxStyles,
         dialogStyles: defaultDialogStyles,
-      },
+      }
     )
 
     dialogDisposables.add(dialog)

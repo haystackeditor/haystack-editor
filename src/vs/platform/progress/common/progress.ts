@@ -9,197 +9,179 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IAction } from "vs/base/common/actions"
-import { DeferredPromise } from "vs/base/common/async"
-import {
-  CancellationToken,
-  CancellationTokenSource,
-} from "vs/base/common/cancellation"
-import {
-  Disposable,
-  DisposableStore,
-  toDisposable,
-} from "vs/base/common/lifecycle"
-import { createDecorator } from "vs/platform/instantiation/common/instantiation"
-import {
-  INotificationSource,
-  NotificationPriority,
-} from "vs/platform/notification/common/notification"
+import { IAction } from 'vs/base/common/actions';
+import { DeferredPromise } from 'vs/base/common/async';
+import { CancellationToken, CancellationTokenSource } from 'vs/base/common/cancellation';
+import { Disposable, DisposableStore, toDisposable } from 'vs/base/common/lifecycle';
+import { createDecorator } from 'vs/platform/instantiation/common/instantiation';
+import { INotificationSource, NotificationPriority } from 'vs/platform/notification/common/notification';
 
-export const IProgressService =
-  createDecorator<IProgressService>("progressService")
+export const IProgressService = createDecorator<IProgressService>('progressService');
 
 /**
  * A progress service that can be used to report progress to various locations of the UI.
  */
 export interface IProgressService {
-  readonly _serviceBrand: undefined
 
-  withProgress<R>(
-    options:
-      | IProgressOptions
-      | IProgressDialogOptions
-      | IProgressNotificationOptions
-      | IProgressWindowOptions
-      | IProgressCompositeOptions,
-    task: (progress: IProgress<IProgressStep>) => Promise<R>,
-    onDidCancel?: (choice?: number) => void,
-  ): Promise<R>
+	readonly _serviceBrand: undefined;
+
+	withProgress<R>(
+		options: IProgressOptions | IProgressDialogOptions | IProgressNotificationOptions | IProgressWindowOptions | IProgressCompositeOptions,
+		task: (progress: IProgress<IProgressStep>) => Promise<R>,
+		onDidCancel?: (choice?: number) => void
+	): Promise<R>;
 }
 
 export interface IProgressIndicator {
-  /**
-   * Show progress customized with the provided flags.
-   */
-  show(infinite: true, delay?: number): IProgressRunner
-  show(total: number, delay?: number): IProgressRunner
 
-  /**
-   * Indicate progress for the duration of the provided promise. Progress will stop in
-   * any case of promise completion, error or cancellation.
-   */
-  showWhile(promise: Promise<unknown>, delay?: number): Promise<void>
+	/**
+	 * Show progress customized with the provided flags.
+	 */
+	show(infinite: true, delay?: number): IProgressRunner;
+	show(total: number, delay?: number): IProgressRunner;
+
+	/**
+	 * Indicate progress for the duration of the provided promise. Progress will stop in
+	 * any case of promise completion, error or cancellation.
+	 */
+	showWhile(promise: Promise<unknown>, delay?: number): Promise<void>;
 }
 
 export const enum ProgressLocation {
-  Explorer = 1,
-  Scm = 3,
-  Extensions = 5,
-  Window = 10,
-  Notification = 15,
-  Dialog = 20,
+	Explorer = 1,
+	Scm = 3,
+	Extensions = 5,
+	Window = 10,
+	Notification = 15,
+	Dialog = 20
 }
 
 export interface IProgressOptions {
-  readonly location: ProgressLocation | string
-  readonly title?: string
-  readonly source?: string | INotificationSource
-  readonly total?: number
-  readonly cancellable?: boolean
-  readonly buttons?: string[]
+	readonly location: ProgressLocation | string;
+	readonly title?: string;
+	readonly source?: string | INotificationSource;
+	readonly total?: number;
+	readonly cancellable?: boolean;
+	readonly buttons?: string[];
 }
 
 export interface IProgressNotificationOptions extends IProgressOptions {
-  readonly location: ProgressLocation.Notification
-  readonly primaryActions?: readonly IAction[]
-  readonly secondaryActions?: readonly IAction[]
-  readonly delay?: number
-  readonly priority?: NotificationPriority
-  readonly type?: "syncing" | "loading"
+	readonly location: ProgressLocation.Notification;
+	readonly primaryActions?: readonly IAction[];
+	readonly secondaryActions?: readonly IAction[];
+	readonly delay?: number;
+	readonly priority?: NotificationPriority;
+	readonly type?: 'syncing' | 'loading';
 }
 
 export interface IProgressDialogOptions extends IProgressOptions {
-  readonly delay?: number
-  readonly detail?: string
-  readonly sticky?: boolean
+	readonly delay?: number;
+	readonly detail?: string;
+	readonly sticky?: boolean;
 }
 
 export interface IProgressWindowOptions extends IProgressOptions {
-  readonly location: ProgressLocation.Window
-  readonly command?: string
-  readonly type?: "syncing" | "loading"
+	readonly location: ProgressLocation.Window;
+	readonly command?: string;
+	readonly type?: 'syncing' | 'loading';
 }
 
 export interface IProgressCompositeOptions extends IProgressOptions {
-  readonly location:
-    | ProgressLocation.Explorer
-    | ProgressLocation.Extensions
-    | ProgressLocation.Scm
-    | string
-  readonly delay?: number
+	readonly location: ProgressLocation.Explorer | ProgressLocation.Extensions | ProgressLocation.Scm | string;
+	readonly delay?: number;
 }
 
 export interface IProgressStep {
-  message?: string
-  increment?: number
-  total?: number
+	message?: string;
+	increment?: number;
+	total?: number;
 }
 
 export interface IProgressRunner {
-  total(value: number): void
-  worked(value: number): void
-  done(): void
+	total(value: number): void;
+	worked(value: number): void;
+	done(): void;
 }
 
 export const emptyProgressRunner = Object.freeze<IProgressRunner>({
-  total() {},
-  worked() {},
-  done() {},
-})
+	total() { },
+	worked() { },
+	done() { }
+});
 
 export interface IProgress<T> {
-  report(item: T): void
+	report(item: T): void;
 }
 
 export class Progress<T> implements IProgress<T> {
-  static readonly None = Object.freeze<IProgress<unknown>>({ report() {} })
 
-  private _value?: T
-  get value(): T | undefined {
-    return this._value
-  }
+	static readonly None = Object.freeze<IProgress<unknown>>({ report() { } });
 
-  constructor(private callback: (data: T) => unknown) {}
+	private _value?: T;
+	get value(): T | undefined { return this._value; }
 
-  report(item: T) {
-    this._value = item
-    this.callback(this._value)
-  }
+	constructor(private callback: (data: T) => unknown) {
+	}
+
+	report(item: T) {
+		this._value = item;
+		this.callback(this._value);
+	}
 }
 
 export class AsyncProgress<T> implements IProgress<T> {
-  private _value?: T
-  get value(): T | undefined {
-    return this._value
-  }
 
-  private _asyncQueue?: T[]
-  private _processingAsyncQueue?: boolean
-  private _drainListener: (() => void) | undefined
+	private _value?: T;
+	get value(): T | undefined { return this._value; }
 
-  constructor(private callback: (data: T) => unknown) {}
+	private _asyncQueue?: T[];
+	private _processingAsyncQueue?: boolean;
+	private _drainListener: (() => void) | undefined;
 
-  report(item: T) {
-    if (!this._asyncQueue) {
-      this._asyncQueue = [item]
-    } else {
-      this._asyncQueue.push(item)
-    }
-    this._processAsyncQueue()
-  }
+	constructor(private callback: (data: T) => unknown) { }
 
-  private async _processAsyncQueue() {
-    if (this._processingAsyncQueue) {
-      return
-    }
-    try {
-      this._processingAsyncQueue = true
+	report(item: T) {
+		if (!this._asyncQueue) {
+			this._asyncQueue = [item];
+		} else {
+			this._asyncQueue.push(item);
+		}
+		this._processAsyncQueue();
+	}
 
-      while (this._asyncQueue && this._asyncQueue.length) {
-        const item = this._asyncQueue.shift()!
-        this._value = item
-        await this.callback(this._value)
-      }
-    } finally {
-      this._processingAsyncQueue = false
-      const drainListener = this._drainListener
-      this._drainListener = undefined
-      drainListener?.()
-    }
-  }
+	private async _processAsyncQueue() {
+		if (this._processingAsyncQueue) {
+			return;
+		}
+		try {
+			this._processingAsyncQueue = true;
 
-  drain(): Promise<void> {
-    if (this._processingAsyncQueue) {
-      return new Promise<void>((resolve) => {
-        const prevListener = this._drainListener
-        this._drainListener = () => {
-          prevListener?.()
-          resolve()
-        }
-      })
-    }
-    return Promise.resolve()
-  }
+			while (this._asyncQueue && this._asyncQueue.length) {
+				const item = this._asyncQueue.shift()!;
+				this._value = item;
+				await this.callback(this._value);
+			}
+
+		} finally {
+			this._processingAsyncQueue = false;
+			const drainListener = this._drainListener;
+			this._drainListener = undefined;
+			drainListener?.();
+		}
+	}
+
+	drain(): Promise<void> {
+		if (this._processingAsyncQueue) {
+			return new Promise<void>(resolve => {
+				const prevListener = this._drainListener;
+				this._drainListener = () => {
+					prevListener?.();
+					resolve();
+				};
+			});
+		}
+		return Promise.resolve();
+	}
 }
 
 /**
@@ -207,10 +189,10 @@ export class AsyncProgress<T> implements IProgress<T> {
  * is started multiple times, only the last invocation will drive the progress.
  */
 export interface IOperation {
-  id: number
-  isCurrent: () => boolean
-  token: CancellationToken
-  stop(): void
+	id: number;
+	isCurrent: () => boolean;
+	token: CancellationToken;
+	stop(): void;
 }
 
 /**
@@ -218,106 +200,91 @@ export interface IOperation {
  * once `dispose()` is called.
  */
 export class UnmanagedProgress extends Disposable {
-  private readonly deferred = new DeferredPromise<void>()
-  private reporter?: IProgress<IProgressStep>
-  private lastStep?: IProgressStep
+	private readonly deferred = new DeferredPromise<void>();
+	private reporter?: IProgress<IProgressStep>;
+	private lastStep?: IProgressStep;
 
-  constructor(
-    options:
-      | IProgressOptions
-      | IProgressDialogOptions
-      | IProgressNotificationOptions
-      | IProgressWindowOptions
-      | IProgressCompositeOptions,
-    @IProgressService progressService: IProgressService,
-  ) {
-    super()
-    progressService.withProgress(options, (reporter) => {
-      this.reporter = reporter
-      if (this.lastStep) {
-        reporter.report(this.lastStep)
-      }
+	constructor(
+		options: IProgressOptions | IProgressDialogOptions | IProgressNotificationOptions | IProgressWindowOptions | IProgressCompositeOptions,
+		@IProgressService progressService: IProgressService,
+	) {
+		super();
+		progressService.withProgress(options, reporter => {
+			this.reporter = reporter;
+			if (this.lastStep) {
+				reporter.report(this.lastStep);
+			}
 
-      return this.deferred.p
-    })
+			return this.deferred.p;
+		});
 
-    this._register(toDisposable(() => this.deferred.complete()))
-  }
+		this._register(toDisposable(() => this.deferred.complete()));
+	}
 
-  report(step: IProgressStep) {
-    if (this.reporter) {
-      this.reporter.report(step)
-    } else {
-      this.lastStep = step
-    }
-  }
+	report(step: IProgressStep) {
+		if (this.reporter) {
+			this.reporter.report(step);
+		} else {
+			this.lastStep = step;
+		}
+	}
 }
 
 export class LongRunningOperation extends Disposable {
-  private currentOperationId = 0
-  private readonly currentOperationDisposables = this._register(
-    new DisposableStore(),
-  )
-  private currentProgressRunner: IProgressRunner | undefined
-  private currentProgressTimeout: any
+	private currentOperationId = 0;
+	private readonly currentOperationDisposables = this._register(new DisposableStore());
+	private currentProgressRunner: IProgressRunner | undefined;
+	private currentProgressTimeout: any;
 
-  constructor(private progressIndicator: IProgressIndicator) {
-    super()
-  }
+	constructor(
+		private progressIndicator: IProgressIndicator
+	) {
+		super();
+	}
 
-  start(progressDelay: number): IOperation {
-    // Stop any previous operation
-    this.stop()
+	start(progressDelay: number): IOperation {
 
-    // Start new
-    const newOperationId = ++this.currentOperationId
-    const newOperationToken = new CancellationTokenSource()
-    this.currentProgressTimeout = setTimeout(() => {
-      if (newOperationId === this.currentOperationId) {
-        this.currentProgressRunner = this.progressIndicator.show(true)
-      }
-    }, progressDelay)
+		// Stop any previous operation
+		this.stop();
 
-    this.currentOperationDisposables.add(
-      toDisposable(() => clearTimeout(this.currentProgressTimeout)),
-    )
-    this.currentOperationDisposables.add(
-      toDisposable(() => newOperationToken.cancel()),
-    )
-    this.currentOperationDisposables.add(
-      toDisposable(() =>
-        this.currentProgressRunner
-          ? this.currentProgressRunner.done()
-          : undefined,
-      ),
-    )
+		// Start new
+		const newOperationId = ++this.currentOperationId;
+		const newOperationToken = new CancellationTokenSource();
+		this.currentProgressTimeout = setTimeout(() => {
+			if (newOperationId === this.currentOperationId) {
+				this.currentProgressRunner = this.progressIndicator.show(true);
+			}
+		}, progressDelay);
 
-    return {
-      id: newOperationId,
-      token: newOperationToken.token,
-      stop: () => this.doStop(newOperationId),
-      isCurrent: () => this.currentOperationId === newOperationId,
-    }
-  }
+		this.currentOperationDisposables.add(toDisposable(() => clearTimeout(this.currentProgressTimeout)));
+		this.currentOperationDisposables.add(toDisposable(() => newOperationToken.cancel()));
+		this.currentOperationDisposables.add(toDisposable(() => this.currentProgressRunner ? this.currentProgressRunner.done() : undefined));
 
-  stop(): void {
-    this.doStop(this.currentOperationId)
-  }
+		return {
+			id: newOperationId,
+			token: newOperationToken.token,
+			stop: () => this.doStop(newOperationId),
+			isCurrent: () => this.currentOperationId === newOperationId
+		};
+	}
 
-  private doStop(operationId: number): void {
-    if (this.currentOperationId === operationId) {
-      this.currentOperationDisposables.clear()
-    }
-  }
+	stop(): void {
+		this.doStop(this.currentOperationId);
+	}
+
+	private doStop(operationId: number): void {
+		if (this.currentOperationId === operationId) {
+			this.currentOperationDisposables.clear();
+		}
+	}
 }
 
-export const IEditorProgressService = createDecorator<IEditorProgressService>(
-  "editorProgressService",
-)
+export const IEditorProgressService = createDecorator<IEditorProgressService>('editorProgressService');
 
 /**
  * A progress service that will report progress local to the editor triggered from.
  */
 export interface IEditorProgressService extends IProgressIndicator {
-  readonly _serviceBrand: undefined
+
+	readonly _serviceBrand: undefined;
 }

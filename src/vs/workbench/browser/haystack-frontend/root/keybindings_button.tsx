@@ -27,7 +27,7 @@ export function KeybindingsButton({}: KeybindingsButtonProps) {
         onClick={() => {
           WorkspaceStoreWrapper.getWorkspaceState().insertHaystackKeybindingsEditorAtCenterOfViewport()
           WorkspaceStoreWrapper.getWorkspaceState().sendTelemetry(
-            "Haystack keybindings opened",
+            "Haystack keybindings opened"
           )
         }}
       >

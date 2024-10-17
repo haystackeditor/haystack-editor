@@ -10,45 +10,47 @@
  *--------------------------------------------------------------------------------------------*/
 
 export class DomReadingContext {
-  private _didDomLayout: boolean = false
-  private _clientRectDeltaLeft: number = 0
-  private _clientRectScale: number = 1
-  private _clientRectRead: boolean = false
 
-  public get didDomLayout(): boolean {
-    return this._didDomLayout
-  }
+	private _didDomLayout: boolean = false;
+	private _clientRectDeltaLeft: number = 0;
+	private _clientRectScale: number = 1;
+	private _clientRectRead: boolean = false;
 
-  private readClientRect(): void {
-    if (!this._clientRectRead) {
-      this._clientRectRead = true
-      const rect = this._domNode.getBoundingClientRect()
-      this.markDidDomLayout()
-      this._clientRectDeltaLeft = rect.left
-      this._clientRectScale = rect.width / this._domNode.offsetWidth
-    }
-  }
+	public get didDomLayout(): boolean {
+		return this._didDomLayout;
+	}
 
-  public get clientRectDeltaLeft(): number {
-    if (!this._clientRectRead) {
-      this.readClientRect()
-    }
-    return this._clientRectDeltaLeft
-  }
+	private readClientRect(): void {
+		if (!this._clientRectRead) {
+			this._clientRectRead = true;
+			const rect = this._domNode.getBoundingClientRect();
+			this.markDidDomLayout();
+			this._clientRectDeltaLeft = rect.left;
+			this._clientRectScale = rect.width / this._domNode.offsetWidth;
+		}
+	}
 
-  public get clientRectScale(): number {
-    if (!this._clientRectRead) {
-      this.readClientRect()
-    }
-    return this._clientRectScale
-  }
+	public get clientRectDeltaLeft(): number {
+		if (!this._clientRectRead) {
+			this.readClientRect();
+		}
+		return this._clientRectDeltaLeft;
+	}
 
-  constructor(
-    private readonly _domNode: HTMLElement,
-    public readonly endNode: HTMLElement,
-  ) {}
+	public get clientRectScale(): number {
+		if (!this._clientRectRead) {
+			this.readClientRect();
+		}
+		return this._clientRectScale;
+	}
 
-  public markDidDomLayout(): void {
-    this._didDomLayout = true
-  }
+	constructor(
+		private readonly _domNode: HTMLElement,
+		public readonly endNode: HTMLElement
+	) {
+	}
+
+	public markDidDomLayout(): void {
+		this._didDomLayout = true;
+	}
 }

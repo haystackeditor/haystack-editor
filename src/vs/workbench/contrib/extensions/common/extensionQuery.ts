@@ -9,96 +9,66 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { EXTENSION_CATEGORIES } from "vs/platform/extensions/common/extensions"
+import { EXTENSION_CATEGORIES } from 'vs/platform/extensions/common/extensions';
 
 export class Query {
-  constructor(
-    public value: string,
-    public sortBy: string,
-  ) {
-    this.value = value.trim()
-  }
 
-  static suggestions(query: string): string[] {
-    const commands = [
-      "installed",
-      "updates",
-      "enabled",
-      "disabled",
-      "builtin",
-      "featured",
-      "popular",
-      "recommended",
-      "recentlyPublished",
-      "workspaceUnsupported",
-      "deprecated",
-      "sort",
-      "category",
-      "tag",
-      "ext",
-      "id",
-    ] as const
-    const subcommands = {
-      sort: ["installs", "rating", "name", "publishedDate", "updateDate"],
-      category: EXTENSION_CATEGORIES.map((c) => `"${c.toLowerCase()}"`),
-      tag: [""],
-      ext: [""],
-      id: [""],
-    } as const
+	constructor(public value: string, public sortBy: string) {
+		this.value = value.trim();
+	}
 
-    const queryContains = (substr: string) => query.indexOf(substr) > -1
-    const hasSort = subcommands.sort.some((subcommand) =>
-      queryContains(`@sort:${subcommand}`),
-    )
-    const hasCategory = subcommands.category.some((subcommand) =>
-      queryContains(`@category:${subcommand}`),
-    )
+	static suggestions(query: string): string[] {
+		const commands = ['installed', 'updates', 'enabled', 'disabled', 'builtin', 'featured', 'popular', 'recommended', 'recentlyPublished', 'workspaceUnsupported', 'deprecated', 'sort', 'category', 'tag', 'ext', 'id'] as const;
+		const subcommands = {
+			'sort': ['installs', 'rating', 'name', 'publishedDate', 'updateDate'],
+			'category': EXTENSION_CATEGORIES.map(c => `"${c.toLowerCase()}"`),
+			'tag': [''],
+			'ext': [''],
+			'id': ['']
+		} as const;
 
-    return commands.flatMap((command) => {
-      if (
-        (hasSort && command === "sort") ||
-        (hasCategory && command === "category")
-      ) {
-        return []
-      }
-      if (command in subcommands) {
-        return (subcommands as Record<string, readonly string[]>)[command].map(
-          (subcommand) =>
-            `@${command}:${subcommand}${subcommand === "" ? "" : " "}`,
-        )
-      } else {
-        return queryContains(`@${command}`) ? [] : [`@${command} `]
-      }
-    })
-  }
+		const queryContains = (substr: string) => query.indexOf(substr) > -1;
+		const hasSort = subcommands.sort.some(subcommand => queryContains(`@sort:${subcommand}`));
+		const hasCategory = subcommands.category.some(subcommand => queryContains(`@category:${subcommand}`));
 
-  static parse(value: string): Query {
-    let sortBy = ""
-    value = value.replace(
-      /@sort:(\w+)(-\w*)?/g,
-      (match, by: string, order: string) => {
-        sortBy = by
+		return commands.flatMap(command => {
+			if (hasSort && command === 'sort' || hasCategory && command === 'category') {
+				return [];
+			}
+			if (command in subcommands) {
+				return (subcommands as Record<string, readonly string[]>)[command]
+					.map(subcommand => `@${command}:${subcommand}${subcommand === '' ? '' : ' '}`);
+			}
+			else {
+				return queryContains(`@${command}`) ? [] : [`@${command} `];
+			}
+		});
+	}
 
-        return ""
-      },
-    )
-    return new Query(value, sortBy)
-  }
+	static parse(value: string): Query {
+		let sortBy = '';
+		value = value.replace(/@sort:(\w+)(-\w*)?/g, (match, by: string, order: string) => {
+			sortBy = by;
 
-  toString(): string {
-    let result = this.value
+			return '';
+		});
+		return new Query(value, sortBy);
+	}
 
-    if (this.sortBy) {
-      result = `${result}${result ? " " : ""}@sort:${this.sortBy}`
-    }
-    return result
-  }
+	toString(): string {
+		let result = this.value;
 
-  isValid(): boolean {
-    return !/@outdated/.test(this.value)
-  }
+		if (this.sortBy) {
+			result = `${result}${result ? ' ' : ''}@sort:${this.sortBy}`;
+		}
+		return result;
+	}
 
-  equals(other: Query): boolean {
-    return this.value === other.value && this.sortBy === other.sortBy
-  }
+	isValid(): boolean {
+		return !/@outdated/.test(this.value);
+	}
+
+	equals(other: Query): boolean {
+		return this.value === other.value && this.sortBy === other.sortBy;
+	}
 }

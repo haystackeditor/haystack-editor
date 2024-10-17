@@ -9,796 +9,586 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import {
-  IListVirtualDelegate,
-  IListRenderer,
-} from "vs/base/browser/ui/list/list"
-import {
-  clearNode,
-  addDisposableListener,
-  EventType,
-  EventHelper,
-  $,
-  isEventLike,
-} from "vs/base/browser/dom"
-import { IOpenerService } from "vs/platform/opener/common/opener"
-import { URI } from "vs/base/common/uri"
-import { localize } from "vs/nls"
-import { ButtonBar, IButtonOptions } from "vs/base/browser/ui/button/button"
-import { ActionBar } from "vs/base/browser/ui/actionbar/actionbar"
-import {
-  ActionRunner,
-  IAction,
-  IActionRunner,
-  Separator,
-  toAction,
-} from "vs/base/common/actions"
-import { IInstantiationService } from "vs/platform/instantiation/common/instantiation"
-import { dispose, DisposableStore, Disposable } from "vs/base/common/lifecycle"
-import { IContextMenuService } from "vs/platform/contextview/browser/contextView"
-import {
-  INotificationViewItem,
-  NotificationViewItem,
-  NotificationViewItemContentChangeKind,
-  INotificationMessage,
-  ChoiceAction,
-} from "vs/workbench/common/notifications"
-import {
-  ClearNotificationAction,
-  ExpandNotificationAction,
-  CollapseNotificationAction,
-  ConfigureNotificationAction,
-} from "vs/workbench/browser/parts/notifications/notificationsActions"
-import { IKeybindingService } from "vs/platform/keybinding/common/keybinding"
-import { ProgressBar } from "vs/base/browser/ui/progressbar/progressbar"
-import {
-  INotificationService,
-  NotificationsFilter,
-  Severity,
-  isNotificationSource,
-} from "vs/platform/notification/common/notification"
-import { isNonEmptyArray } from "vs/base/common/arrays"
-import { Codicon } from "vs/base/common/codicons"
-import { ThemeIcon } from "vs/base/common/themables"
-import { DropdownMenuActionViewItem } from "vs/base/browser/ui/dropdown/dropdownActionViewItem"
-import { DomEmitter } from "vs/base/browser/event"
-import { Gesture, EventType as GestureEventType } from "vs/base/browser/touch"
-import { Event } from "vs/base/common/event"
-import {
-  defaultButtonStyles,
-  defaultProgressBarStyles,
-} from "vs/platform/theme/browser/defaultStyles"
-import { KeyCode } from "vs/base/common/keyCodes"
-import { StandardKeyboardEvent } from "vs/base/browser/keyboardEvent"
-import { getDefaultHoverDelegate } from "vs/base/browser/ui/hover/hoverDelegateFactory"
-import type { IUpdatableHover } from "vs/base/browser/ui/hover/hover"
-import { IHoverService } from "vs/platform/hover/browser/hover"
+import { IListVirtualDelegate, IListRenderer } from 'vs/base/browser/ui/list/list';
+import { clearNode, addDisposableListener, EventType, EventHelper, $, isEventLike } from 'vs/base/browser/dom';
+import { IOpenerService } from 'vs/platform/opener/common/opener';
+import { URI } from 'vs/base/common/uri';
+import { localize } from 'vs/nls';
+import { ButtonBar, IButtonOptions } from 'vs/base/browser/ui/button/button';
+import { ActionBar } from 'vs/base/browser/ui/actionbar/actionbar';
+import { ActionRunner, IAction, IActionRunner, Separator, toAction } from 'vs/base/common/actions';
+import { IInstantiationService } from 'vs/platform/instantiation/common/instantiation';
+import { dispose, DisposableStore, Disposable } from 'vs/base/common/lifecycle';
+import { IContextMenuService } from 'vs/platform/contextview/browser/contextView';
+import { INotificationViewItem, NotificationViewItem, NotificationViewItemContentChangeKind, INotificationMessage, ChoiceAction } from 'vs/workbench/common/notifications';
+import { ClearNotificationAction, ExpandNotificationAction, CollapseNotificationAction, ConfigureNotificationAction } from 'vs/workbench/browser/parts/notifications/notificationsActions';
+import { IKeybindingService } from 'vs/platform/keybinding/common/keybinding';
+import { ProgressBar } from 'vs/base/browser/ui/progressbar/progressbar';
+import { INotificationService, NotificationsFilter, Severity, isNotificationSource } from 'vs/platform/notification/common/notification';
+import { isNonEmptyArray } from 'vs/base/common/arrays';
+import { Codicon } from 'vs/base/common/codicons';
+import { ThemeIcon } from 'vs/base/common/themables';
+import { DropdownMenuActionViewItem } from 'vs/base/browser/ui/dropdown/dropdownActionViewItem';
+import { DomEmitter } from 'vs/base/browser/event';
+import { Gesture, EventType as GestureEventType } from 'vs/base/browser/touch';
+import { Event } from 'vs/base/common/event';
+import { defaultButtonStyles, defaultProgressBarStyles } from 'vs/platform/theme/browser/defaultStyles';
+import { KeyCode } from 'vs/base/common/keyCodes';
+import { StandardKeyboardEvent } from 'vs/base/browser/keyboardEvent';
+import { getDefaultHoverDelegate } from 'vs/base/browser/ui/hover/hoverDelegateFactory';
+import type { IUpdatableHover } from 'vs/base/browser/ui/hover/hover';
+import { IHoverService } from 'vs/platform/hover/browser/hover';
 
-export class NotificationsListDelegate
-  implements IListVirtualDelegate<INotificationViewItem>
-{
-  private static readonly ROW_HEIGHT = 42
-  private static readonly LINE_HEIGHT = 22
+export class NotificationsListDelegate implements IListVirtualDelegate<INotificationViewItem> {
 
-  private offsetHelper: HTMLElement
+	private static readonly ROW_HEIGHT = 42;
+	private static readonly LINE_HEIGHT = 22;
 
-  constructor(container: HTMLElement) {
-    this.offsetHelper = this.createOffsetHelper(container)
-  }
+	private offsetHelper: HTMLElement;
 
-  private createOffsetHelper(container: HTMLElement): HTMLElement {
-    const offsetHelper = document.createElement("div")
-    offsetHelper.classList.add("notification-offset-helper")
+	constructor(container: HTMLElement) {
+		this.offsetHelper = this.createOffsetHelper(container);
+	}
 
-    container.appendChild(offsetHelper)
+	private createOffsetHelper(container: HTMLElement): HTMLElement {
+		const offsetHelper = document.createElement('div');
+		offsetHelper.classList.add('notification-offset-helper');
 
-    return offsetHelper
-  }
+		container.appendChild(offsetHelper);
 
-  getHeight(notification: INotificationViewItem): number {
-    if (!notification.expanded) {
-      return NotificationsListDelegate.ROW_HEIGHT // return early if there are no more rows to show
-    }
+		return offsetHelper;
+	}
 
-    // First row: message and actions
-    let expandedHeight = NotificationsListDelegate.ROW_HEIGHT
+	getHeight(notification: INotificationViewItem): number {
+		if (!notification.expanded) {
+			return NotificationsListDelegate.ROW_HEIGHT; // return early if there are no more rows to show
+		}
 
-    // Dynamic height: if message overflows
-    const preferredMessageHeight = this.computePreferredHeight(notification)
-    const messageOverflows =
-      NotificationsListDelegate.LINE_HEIGHT < preferredMessageHeight
-    if (messageOverflows) {
-      const overflow =
-        preferredMessageHeight - NotificationsListDelegate.LINE_HEIGHT
-      expandedHeight += overflow
-    }
+		// First row: message and actions
+		let expandedHeight = NotificationsListDelegate.ROW_HEIGHT;
 
-    // Last row: source and buttons if we have any
-    if (
-      notification.source ||
-      isNonEmptyArray(notification.actions && notification.actions.primary)
-    ) {
-      expandedHeight += NotificationsListDelegate.ROW_HEIGHT
-    }
+		// Dynamic height: if message overflows
+		const preferredMessageHeight = this.computePreferredHeight(notification);
+		const messageOverflows = NotificationsListDelegate.LINE_HEIGHT < preferredMessageHeight;
+		if (messageOverflows) {
+			const overflow = preferredMessageHeight - NotificationsListDelegate.LINE_HEIGHT;
+			expandedHeight += overflow;
+		}
 
-    // If the expanded height is same as collapsed, unset the expanded state
-    // but skip events because there is no change that has visual impact
-    if (expandedHeight === NotificationsListDelegate.ROW_HEIGHT) {
-      notification.collapse(true /* skip events, no change in height */)
-    }
+		// Last row: source and buttons if we have any
+		if (notification.source || isNonEmptyArray(notification.actions && notification.actions.primary)) {
+			expandedHeight += NotificationsListDelegate.ROW_HEIGHT;
+		}
 
-    return expandedHeight
-  }
+		// If the expanded height is same as collapsed, unset the expanded state
+		// but skip events because there is no change that has visual impact
+		if (expandedHeight === NotificationsListDelegate.ROW_HEIGHT) {
+			notification.collapse(true /* skip events, no change in height */);
+		}
 
-  private computePreferredHeight(notification: INotificationViewItem): number {
-    // Prepare offset helper depending on toolbar actions count
-    let actions = 0
-    if (!notification.hasProgress) {
-      actions++ // close
-    }
-    if (notification.canCollapse) {
-      actions++ // expand/collapse
-    }
-    if (
-      isNonEmptyArray(notification.actions && notification.actions.secondary)
-    ) {
-      actions++ // secondary actions
-    }
-    this.offsetHelper.style.width = `${450 /* notifications container width */ - (10 /* padding */ + 30 /* severity icon */ + actions * 30 /* actions */ - Math.max(actions - 1, 0) * 4) /* less padding for actions > 1 */}px`
+		return expandedHeight;
+	}
 
-    // Render message into offset helper
-    const renderedMessage = NotificationMessageRenderer.render(
-      notification.message,
-    )
-    this.offsetHelper.appendChild(renderedMessage)
+	private computePreferredHeight(notification: INotificationViewItem): number {
 
-    // Compute height
-    const preferredHeight = Math.max(
-      this.offsetHelper.offsetHeight,
-      this.offsetHelper.scrollHeight,
-    )
+		// Prepare offset helper depending on toolbar actions count
+		let actions = 0;
+		if (!notification.hasProgress) {
+			actions++; // close
+		}
+		if (notification.canCollapse) {
+			actions++; // expand/collapse
+		}
+		if (isNonEmptyArray(notification.actions && notification.actions.secondary)) {
+			actions++; // secondary actions
+		}
+		this.offsetHelper.style.width = `${450 /* notifications container width */ - (10 /* padding */ + 30 /* severity icon */ + (actions * 30) /* actions */ - (Math.max(actions - 1, 0) * 4) /* less padding for actions > 1 */)}px`;
 
-    // Always clear offset helper after use
-    clearNode(this.offsetHelper)
+		// Render message into offset helper
+		const renderedMessage = NotificationMessageRenderer.render(notification.message);
+		this.offsetHelper.appendChild(renderedMessage);
 
-    return preferredHeight
-  }
+		// Compute height
+		const preferredHeight = Math.max(this.offsetHelper.offsetHeight, this.offsetHelper.scrollHeight);
 
-  getTemplateId(element: INotificationViewItem): string {
-    if (element instanceof NotificationViewItem) {
-      return NotificationRenderer.TEMPLATE_ID
-    }
+		// Always clear offset helper after use
+		clearNode(this.offsetHelper);
 
-    throw new Error("unknown element type: " + element)
-  }
+		return preferredHeight;
+	}
+
+	getTemplateId(element: INotificationViewItem): string {
+		if (element instanceof NotificationViewItem) {
+			return NotificationRenderer.TEMPLATE_ID;
+		}
+
+		throw new Error('unknown element type: ' + element);
+	}
 }
 
 export interface INotificationTemplateData {
-  container: HTMLElement
-  toDispose: DisposableStore
+	container: HTMLElement;
+	toDispose: DisposableStore;
 
-  mainRow: HTMLElement
-  icon: HTMLElement
-  message: HTMLElement
-  toolbar: ActionBar
+	mainRow: HTMLElement;
+	icon: HTMLElement;
+	message: HTMLElement;
+	toolbar: ActionBar;
 
-  detailsRow: HTMLElement
-  source: HTMLElement
-  buttonsContainer: HTMLElement
-  progress: ProgressBar
+	detailsRow: HTMLElement;
+	source: HTMLElement;
+	buttonsContainer: HTMLElement;
+	progress: ProgressBar;
 
-  renderer: NotificationTemplateRenderer
+	renderer: NotificationTemplateRenderer;
 }
 
 interface IMessageActionHandler {
-  readonly toDispose: DisposableStore
+	readonly toDispose: DisposableStore;
 
-  callback: (href: string) => void
+	callback: (href: string) => void;
 }
 
 class NotificationMessageRenderer {
-  static render(
-    message: INotificationMessage,
-    actionHandler?: IMessageActionHandler,
-  ): HTMLElement {
-    const messageContainer = document.createElement("span")
 
-    for (const node of message.linkedText.nodes) {
-      if (typeof node === "string") {
-        messageContainer.appendChild(document.createTextNode(node))
-      } else {
-        let title = node.title
+	static render(message: INotificationMessage, actionHandler?: IMessageActionHandler): HTMLElement {
+		const messageContainer = document.createElement('span');
 
-        if (!title && node.href.startsWith("command:")) {
-          title = localize(
-            "executeCommand",
-            "Click to execute command '{0}'",
-            node.href.substr("command:".length),
-          )
-        } else if (!title) {
-          title = node.href
-        }
+		for (const node of message.linkedText.nodes) {
+			if (typeof node === 'string') {
+				messageContainer.appendChild(document.createTextNode(node));
+			} else {
+				let title = node.title;
 
-        const anchor = $(
-          "a",
-          { href: node.href, title, tabIndex: 0 },
-          node.label,
-        )
+				if (!title && node.href.startsWith('command:')) {
+					title = localize('executeCommand', "Click to execute command '{0}'", node.href.substr('command:'.length));
+				} else if (!title) {
+					title = node.href;
+				}
 
-        if (actionHandler) {
-          const handleOpen = (e: unknown) => {
-            if (isEventLike(e)) {
-              EventHelper.stop(e, true)
-            }
+				const anchor = $('a', { href: node.href, title, tabIndex: 0 }, node.label);
 
-            actionHandler.callback(node.href)
-          }
+				if (actionHandler) {
+					const handleOpen = (e: unknown) => {
+						if (isEventLike(e)) {
+							EventHelper.stop(e, true);
+						}
 
-          const onClick = actionHandler.toDispose.add(
-            new DomEmitter(anchor, EventType.CLICK),
-          ).event
+						actionHandler.callback(node.href);
+					};
 
-          const onKeydown = actionHandler.toDispose.add(
-            new DomEmitter(anchor, EventType.KEY_DOWN),
-          ).event
-          const onSpaceOrEnter = Event.chain(onKeydown, ($) =>
-            $.filter((e) => {
-              const event = new StandardKeyboardEvent(e)
+					const onClick = actionHandler.toDispose.add(new DomEmitter(anchor, EventType.CLICK)).event;
 
-              return event.equals(KeyCode.Space) || event.equals(KeyCode.Enter)
-            }),
-          )
+					const onKeydown = actionHandler.toDispose.add(new DomEmitter(anchor, EventType.KEY_DOWN)).event;
+					const onSpaceOrEnter = Event.chain(onKeydown, $ => $.filter(e => {
+						const event = new StandardKeyboardEvent(e);
 
-          actionHandler.toDispose.add(Gesture.addTarget(anchor))
-          const onTap = actionHandler.toDispose.add(
-            new DomEmitter(anchor, GestureEventType.Tap),
-          ).event
+						return event.equals(KeyCode.Space) || event.equals(KeyCode.Enter);
+					}));
 
-          Event.any(onClick, onTap, onSpaceOrEnter)(
-            handleOpen,
-            null,
-            actionHandler.toDispose,
-          )
-        }
+					actionHandler.toDispose.add(Gesture.addTarget(anchor));
+					const onTap = actionHandler.toDispose.add(new DomEmitter(anchor, GestureEventType.Tap)).event;
 
-        messageContainer.appendChild(anchor)
-      }
-    }
+					Event.any(onClick, onTap, onSpaceOrEnter)(handleOpen, null, actionHandler.toDispose);
+				}
 
-    return messageContainer
-  }
+				messageContainer.appendChild(anchor);
+			}
+		}
+
+		return messageContainer;
+	}
 }
 
-export class NotificationRenderer
-  implements IListRenderer<INotificationViewItem, INotificationTemplateData>
-{
-  static readonly TEMPLATE_ID = "notification"
+export class NotificationRenderer implements IListRenderer<INotificationViewItem, INotificationTemplateData> {
 
-  constructor(
-    private actionRunner: IActionRunner,
-    @IContextMenuService
-    private readonly contextMenuService: IContextMenuService,
-    @IInstantiationService
-    private readonly instantiationService: IInstantiationService,
-    @INotificationService
-    private readonly notificationService: INotificationService,
-  ) {}
+	static readonly TEMPLATE_ID = 'notification';
 
-  get templateId() {
-    return NotificationRenderer.TEMPLATE_ID
-  }
+	constructor(
+		private actionRunner: IActionRunner,
+		@IContextMenuService private readonly contextMenuService: IContextMenuService,
+		@IInstantiationService private readonly instantiationService: IInstantiationService,
+		@INotificationService private readonly notificationService: INotificationService
+	) {
+	}
 
-  renderTemplate(container: HTMLElement): INotificationTemplateData {
-    const data: INotificationTemplateData = Object.create(null)
-    data.toDispose = new DisposableStore()
+	get templateId() {
+		return NotificationRenderer.TEMPLATE_ID;
+	}
 
-    // Container
-    data.container = document.createElement("div")
-    data.container.classList.add("notification-list-item")
+	renderTemplate(container: HTMLElement): INotificationTemplateData {
+		const data: INotificationTemplateData = Object.create(null);
+		data.toDispose = new DisposableStore();
 
-    // Main Row
-    data.mainRow = document.createElement("div")
-    data.mainRow.classList.add("notification-list-item-main-row")
+		// Container
+		data.container = document.createElement('div');
+		data.container.classList.add('notification-list-item');
 
-    // Icon
-    data.icon = document.createElement("div")
-    data.icon.classList.add("notification-list-item-icon", "codicon")
+		// Main Row
+		data.mainRow = document.createElement('div');
+		data.mainRow.classList.add('notification-list-item-main-row');
 
-    // Message
-    data.message = document.createElement("div")
-    data.message.classList.add("notification-list-item-message")
+		// Icon
+		data.icon = document.createElement('div');
+		data.icon.classList.add('notification-list-item-icon', 'codicon');
 
-    // Toolbar
-    const that = this
-    const toolbarContainer = document.createElement("div")
-    toolbarContainer.classList.add("notification-list-item-toolbar-container")
-    data.toolbar = new ActionBar(toolbarContainer, {
-      ariaLabel: localize("notificationActions", "Notification Actions"),
-      actionViewItemProvider: (action, options) => {
-        if (action instanceof ConfigureNotificationAction) {
-          return data.toDispose.add(
-            new DropdownMenuActionViewItem(
-              action,
-              {
-                getActions() {
-                  const actions: IAction[] = []
+		// Message
+		data.message = document.createElement('div');
+		data.message.classList.add('notification-list-item-message');
 
-                  const source = {
-                    id: action.notification.sourceId,
-                    label: action.notification.source,
-                  }
-                  if (isNotificationSource(source)) {
-                    const isSourceFiltered =
-                      that.notificationService.getFilter(source) ===
-                      NotificationsFilter.ERROR
-                    actions.push(
-                      toAction({
-                        id: source.id,
-                        label: isSourceFiltered
-                          ? localize(
-                              "turnOnNotifications",
-                              "Turn On All Notifications from '{0}'",
-                              source.label,
-                            )
-                          : localize(
-                              "turnOffNotifications",
-                              "Turn Off Info and Warning Notifications from '{0}'",
-                              source.label,
-                            ),
-                        run: () =>
-                          that.notificationService.setFilter({
-                            ...source,
-                            filter: isSourceFiltered
-                              ? NotificationsFilter.OFF
-                              : NotificationsFilter.ERROR,
-                          }),
-                      }),
-                    )
+		// Toolbar
+		const that = this;
+		const toolbarContainer = document.createElement('div');
+		toolbarContainer.classList.add('notification-list-item-toolbar-container');
+		data.toolbar = new ActionBar(
+			toolbarContainer,
+			{
+				ariaLabel: localize('notificationActions', "Notification Actions"),
+				actionViewItemProvider: (action, options) => {
+					if (action instanceof ConfigureNotificationAction) {
+						return data.toDispose.add(new DropdownMenuActionViewItem(action, {
+							getActions() {
+								const actions: IAction[] = [];
 
-                    if (action.notification.actions?.secondary?.length) {
-                      actions.push(new Separator())
-                    }
-                  }
+								const source = { id: action.notification.sourceId, label: action.notification.source };
+								if (isNotificationSource(source)) {
+									const isSourceFiltered = that.notificationService.getFilter(source) === NotificationsFilter.ERROR;
+									actions.push(toAction({
+										id: source.id,
+										label: isSourceFiltered ? localize('turnOnNotifications', "Turn On All Notifications from '{0}'", source.label) : localize('turnOffNotifications', "Turn Off Info and Warning Notifications from '{0}'", source.label),
+										run: () => that.notificationService.setFilter({ ...source, filter: isSourceFiltered ? NotificationsFilter.OFF : NotificationsFilter.ERROR })
+									}));
 
-                  if (Array.isArray(action.notification.actions?.secondary)) {
-                    actions.push(...action.notification.actions.secondary)
-                  }
+									if (action.notification.actions?.secondary?.length) {
+										actions.push(new Separator());
+									}
+								}
 
-                  return actions
-                },
-              },
-              this.contextMenuService,
-              {
-                ...options,
-                actionRunner: this.actionRunner,
-                classNames: action.class,
-              },
-            ),
-          )
-        }
+								if (Array.isArray(action.notification.actions?.secondary)) {
+									actions.push(...action.notification.actions.secondary);
+								}
 
-        return undefined
-      },
-      actionRunner: this.actionRunner,
-    })
-    data.toDispose.add(data.toolbar)
+								return actions;
+							},
+						}, this.contextMenuService, {
+							...options,
+							actionRunner: this.actionRunner,
+							classNames: action.class
+						}));
+					}
 
-    // Details Row
-    data.detailsRow = document.createElement("div")
-    data.detailsRow.classList.add("notification-list-item-details-row")
+					return undefined;
+				},
+				actionRunner: this.actionRunner
+			}
+		);
+		data.toDispose.add(data.toolbar);
 
-    // Source
-    data.source = document.createElement("div")
-    data.source.classList.add("notification-list-item-source")
+		// Details Row
+		data.detailsRow = document.createElement('div');
+		data.detailsRow.classList.add('notification-list-item-details-row');
 
-    // Buttons Container
-    data.buttonsContainer = document.createElement("div")
-    data.buttonsContainer.classList.add(
-      "notification-list-item-buttons-container",
-    )
+		// Source
+		data.source = document.createElement('div');
+		data.source.classList.add('notification-list-item-source');
 
-    container.appendChild(data.container)
+		// Buttons Container
+		data.buttonsContainer = document.createElement('div');
+		data.buttonsContainer.classList.add('notification-list-item-buttons-container');
 
-    // the details row appears first in order for better keyboard access to notification buttons
-    data.container.appendChild(data.detailsRow)
-    data.detailsRow.appendChild(data.source)
-    data.detailsRow.appendChild(data.buttonsContainer)
+		container.appendChild(data.container);
 
-    // main row
-    data.container.appendChild(data.mainRow)
-    data.mainRow.appendChild(data.icon)
-    data.mainRow.appendChild(data.message)
-    data.mainRow.appendChild(toolbarContainer)
+		// the details row appears first in order for better keyboard access to notification buttons
+		data.container.appendChild(data.detailsRow);
+		data.detailsRow.appendChild(data.source);
+		data.detailsRow.appendChild(data.buttonsContainer);
 
-    // Progress: below the rows to span the entire width of the item
-    data.progress = new ProgressBar(container, defaultProgressBarStyles)
-    data.toDispose.add(data.progress)
+		// main row
+		data.container.appendChild(data.mainRow);
+		data.mainRow.appendChild(data.icon);
+		data.mainRow.appendChild(data.message);
+		data.mainRow.appendChild(toolbarContainer);
 
-    // Renderer
-    data.renderer = this.instantiationService.createInstance(
-      NotificationTemplateRenderer,
-      data,
-      this.actionRunner,
-    )
-    data.toDispose.add(data.renderer)
+		// Progress: below the rows to span the entire width of the item
+		data.progress = new ProgressBar(container, defaultProgressBarStyles);
+		data.toDispose.add(data.progress);
 
-    return data
-  }
+		// Renderer
+		data.renderer = this.instantiationService.createInstance(NotificationTemplateRenderer, data, this.actionRunner);
+		data.toDispose.add(data.renderer);
 
-  renderElement(
-    notification: INotificationViewItem,
-    index: number,
-    data: INotificationTemplateData,
-  ): void {
-    data.renderer.setInput(notification)
-  }
+		return data;
+	}
 
-  disposeTemplate(templateData: INotificationTemplateData): void {
-    dispose(templateData.toDispose)
-  }
+	renderElement(notification: INotificationViewItem, index: number, data: INotificationTemplateData): void {
+		data.renderer.setInput(notification);
+	}
+
+	disposeTemplate(templateData: INotificationTemplateData): void {
+		dispose(templateData.toDispose);
+	}
 }
 
 export class NotificationTemplateRenderer extends Disposable {
-  private static closeNotificationAction: ClearNotificationAction
-  private static expandNotificationAction: ExpandNotificationAction
-  private static collapseNotificationAction: CollapseNotificationAction
 
-  private static readonly SEVERITIES = [
-    Severity.Info,
-    Severity.Warning,
-    Severity.Error,
-  ]
+	private static closeNotificationAction: ClearNotificationAction;
+	private static expandNotificationAction: ExpandNotificationAction;
+	private static collapseNotificationAction: CollapseNotificationAction;
 
-  private readonly inputDisposables = this._register(new DisposableStore())
+	private static readonly SEVERITIES = [Severity.Info, Severity.Warning, Severity.Error];
 
-  constructor(
-    private template: INotificationTemplateData,
-    private actionRunner: IActionRunner,
-    @IOpenerService private readonly openerService: IOpenerService,
-    @IInstantiationService
-    private readonly instantiationService: IInstantiationService,
-    @IKeybindingService private readonly keybindingService: IKeybindingService,
-    @IContextMenuService
-    private readonly contextMenuService: IContextMenuService,
-    @IHoverService private readonly hoverService: IHoverService,
-  ) {
-    super()
+	private readonly inputDisposables = this._register(new DisposableStore());
 
-    if (!NotificationTemplateRenderer.closeNotificationAction) {
-      NotificationTemplateRenderer.closeNotificationAction =
-        instantiationService.createInstance(
-          ClearNotificationAction,
-          ClearNotificationAction.ID,
-          ClearNotificationAction.LABEL,
-        )
-      NotificationTemplateRenderer.expandNotificationAction =
-        instantiationService.createInstance(
-          ExpandNotificationAction,
-          ExpandNotificationAction.ID,
-          ExpandNotificationAction.LABEL,
-        )
-      NotificationTemplateRenderer.collapseNotificationAction =
-        instantiationService.createInstance(
-          CollapseNotificationAction,
-          CollapseNotificationAction.ID,
-          CollapseNotificationAction.LABEL,
-        )
-    }
-  }
+	constructor(
+		private template: INotificationTemplateData,
+		private actionRunner: IActionRunner,
+		@IOpenerService private readonly openerService: IOpenerService,
+		@IInstantiationService private readonly instantiationService: IInstantiationService,
+		@IKeybindingService private readonly keybindingService: IKeybindingService,
+		@IContextMenuService private readonly contextMenuService: IContextMenuService,
+		@IHoverService private readonly hoverService: IHoverService,
+	) {
+		super();
 
-  setInput(notification: INotificationViewItem): void {
-    this.inputDisposables.clear()
+		if (!NotificationTemplateRenderer.closeNotificationAction) {
+			NotificationTemplateRenderer.closeNotificationAction = instantiationService.createInstance(ClearNotificationAction, ClearNotificationAction.ID, ClearNotificationAction.LABEL);
+			NotificationTemplateRenderer.expandNotificationAction = instantiationService.createInstance(ExpandNotificationAction, ExpandNotificationAction.ID, ExpandNotificationAction.LABEL);
+			NotificationTemplateRenderer.collapseNotificationAction = instantiationService.createInstance(CollapseNotificationAction, CollapseNotificationAction.ID, CollapseNotificationAction.LABEL);
+		}
+	}
 
-    this.render(notification)
-  }
+	setInput(notification: INotificationViewItem): void {
+		this.inputDisposables.clear();
 
-  private render(notification: INotificationViewItem): void {
-    // Container
-    this.template.container.classList.toggle("expanded", notification.expanded)
-    this.inputDisposables.add(
-      addDisposableListener(
-        this.template.container,
-        EventType.MOUSE_UP,
-        (e) => {
-          if (e.button === 1 /* Middle Button */) {
-            // Prevent firing the 'paste' event in the editor textarea - #109322
-            EventHelper.stop(e, true)
-          }
-        },
-      ),
-    )
-    this.inputDisposables.add(
-      addDisposableListener(
-        this.template.container,
-        EventType.AUXCLICK,
-        (e) => {
-          if (!notification.hasProgress && e.button === 1 /* Middle Button */) {
-            EventHelper.stop(e, true)
+		this.render(notification);
+	}
 
-            notification.close()
-          }
-        },
-      ),
-    )
+	private render(notification: INotificationViewItem): void {
 
-    // Severity Icon
-    this.renderSeverity(notification)
+		// Container
+		this.template.container.classList.toggle('expanded', notification.expanded);
+		this.inputDisposables.add(addDisposableListener(this.template.container, EventType.MOUSE_UP, e => {
+			if (e.button === 1 /* Middle Button */) {
+				// Prevent firing the 'paste' event in the editor textarea - #109322
+				EventHelper.stop(e, true);
+			}
+		}));
+		this.inputDisposables.add(addDisposableListener(this.template.container, EventType.AUXCLICK, e => {
+			if (!notification.hasProgress && e.button === 1 /* Middle Button */) {
+				EventHelper.stop(e, true);
 
-    // Message
-    const messageCustomHover = this.inputDisposables.add(
-      this.hoverService.setupUpdatableHover(
-        getDefaultHoverDelegate("mouse"),
-        this.template.message,
-        "",
-      ),
-    )
-    const messageOverflows = this.renderMessage(
-      notification,
-      messageCustomHover,
-    )
+				notification.close();
+			}
+		}));
 
-    // Secondary Actions
-    this.renderSecondaryActions(notification, messageOverflows)
+		// Severity Icon
+		this.renderSeverity(notification);
 
-    // Source
-    const sourceCustomHover = this.inputDisposables.add(
-      this.hoverService.setupUpdatableHover(
-        getDefaultHoverDelegate("mouse"),
-        this.template.source,
-        "",
-      ),
-    )
-    this.renderSource(notification, sourceCustomHover)
+		// Message
+		const messageCustomHover = this.inputDisposables.add(this.hoverService.setupUpdatableHover(getDefaultHoverDelegate('mouse'), this.template.message, ''));
+		const messageOverflows = this.renderMessage(notification, messageCustomHover);
 
-    // Buttons
-    this.renderButtons(notification)
+		// Secondary Actions
+		this.renderSecondaryActions(notification, messageOverflows);
 
-    // Progress
-    this.renderProgress(notification)
+		// Source
+		const sourceCustomHover = this.inputDisposables.add(this.hoverService.setupUpdatableHover(getDefaultHoverDelegate('mouse'), this.template.source, ''));
+		this.renderSource(notification, sourceCustomHover);
 
-    // Label Change Events that we can handle directly
-    // (changes to actions require an entire redraw of
-    // the notification because it has an impact on
-    // epxansion state)
-    this.inputDisposables.add(
-      notification.onDidChangeContent((event) => {
-        switch (event.kind) {
-          case NotificationViewItemContentChangeKind.SEVERITY:
-            this.renderSeverity(notification)
-            break
-          case NotificationViewItemContentChangeKind.PROGRESS:
-            this.renderProgress(notification)
-            break
-          case NotificationViewItemContentChangeKind.MESSAGE:
-            this.renderMessage(notification, messageCustomHover)
-            break
-        }
-      }),
-    )
-  }
+		// Buttons
+		this.renderButtons(notification);
 
-  private renderSeverity(notification: INotificationViewItem): void {
-    // first remove, then set as the codicon class names overlap
-    NotificationTemplateRenderer.SEVERITIES.forEach((severity) => {
-      if (notification.severity !== severity) {
-        this.template.icon.classList.remove(
-          ...ThemeIcon.asClassNameArray(this.toSeverityIcon(severity)),
-        )
-      }
-    })
-    this.template.icon.classList.add(
-      ...ThemeIcon.asClassNameArray(this.toSeverityIcon(notification.severity)),
-    )
-  }
+		// Progress
+		this.renderProgress(notification);
 
-  private renderMessage(
-    notification: INotificationViewItem,
-    customHover: IUpdatableHover,
-  ): boolean {
-    clearNode(this.template.message)
-    this.template.message.appendChild(
-      NotificationMessageRenderer.render(notification.message, {
-        callback: (link) =>
-          this.openerService.open(URI.parse(link), { allowCommands: true }),
-        toDispose: this.inputDisposables,
-      }),
-    )
+		// Label Change Events that we can handle directly
+		// (changes to actions require an entire redraw of
+		// the notification because it has an impact on
+		// epxansion state)
+		this.inputDisposables.add(notification.onDidChangeContent(event => {
+			switch (event.kind) {
+				case NotificationViewItemContentChangeKind.SEVERITY:
+					this.renderSeverity(notification);
+					break;
+				case NotificationViewItemContentChangeKind.PROGRESS:
+					this.renderProgress(notification);
+					break;
+				case NotificationViewItemContentChangeKind.MESSAGE:
+					this.renderMessage(notification, messageCustomHover);
+					break;
+			}
+		}));
+	}
 
-    const messageOverflows =
-      notification.canCollapse &&
-      !notification.expanded &&
-      this.template.message.scrollWidth > this.template.message.clientWidth
+	private renderSeverity(notification: INotificationViewItem): void {
+		// first remove, then set as the codicon class names overlap
+		NotificationTemplateRenderer.SEVERITIES.forEach(severity => {
+			if (notification.severity !== severity) {
+				this.template.icon.classList.remove(...ThemeIcon.asClassNameArray(this.toSeverityIcon(severity)));
+			}
+		});
+		this.template.icon.classList.add(...ThemeIcon.asClassNameArray(this.toSeverityIcon(notification.severity)));
+	}
 
-    customHover.update(
-      messageOverflows ? this.template.message.textContent + "" : "",
-    )
+	private renderMessage(notification: INotificationViewItem, customHover: IUpdatableHover): boolean {
+		clearNode(this.template.message);
+		this.template.message.appendChild(NotificationMessageRenderer.render(notification.message, {
+			callback: link => this.openerService.open(URI.parse(link), { allowCommands: true }),
+			toDispose: this.inputDisposables
+		}));
 
-    return messageOverflows
-  }
+		const messageOverflows = notification.canCollapse && !notification.expanded && this.template.message.scrollWidth > this.template.message.clientWidth;
 
-  private renderSecondaryActions(
-    notification: INotificationViewItem,
-    messageOverflows: boolean,
-  ): void {
-    const actions: IAction[] = []
+		customHover.update(messageOverflows ? this.template.message.textContent + '' : '');
 
-    // Secondary Actions
-    if (isNonEmptyArray(notification.actions?.secondary)) {
-      const configureNotificationAction =
-        this.instantiationService.createInstance(
-          ConfigureNotificationAction,
-          ConfigureNotificationAction.ID,
-          ConfigureNotificationAction.LABEL,
-          notification,
-        )
-      actions.push(configureNotificationAction)
-      this.inputDisposables.add(configureNotificationAction)
-    }
+		return messageOverflows;
+	}
 
-    // Expand / Collapse
-    let showExpandCollapseAction = false
-    if (notification.canCollapse) {
-      if (notification.expanded) {
-        showExpandCollapseAction = true // allow to collapse an expanded message
-      } else if (notification.source) {
-        showExpandCollapseAction = true // allow to expand to details row
-      } else if (messageOverflows) {
-        showExpandCollapseAction = true // allow to expand if message overflows
-      }
-    }
+	private renderSecondaryActions(notification: INotificationViewItem, messageOverflows: boolean): void {
+		const actions: IAction[] = [];
 
-    if (showExpandCollapseAction) {
-      actions.push(
-        notification.expanded
-          ? NotificationTemplateRenderer.collapseNotificationAction
-          : NotificationTemplateRenderer.expandNotificationAction,
-      )
-    }
+		// Secondary Actions
+		if (isNonEmptyArray(notification.actions?.secondary)) {
+			const configureNotificationAction = this.instantiationService.createInstance(ConfigureNotificationAction, ConfigureNotificationAction.ID, ConfigureNotificationAction.LABEL, notification);
+			actions.push(configureNotificationAction);
+			this.inputDisposables.add(configureNotificationAction);
+		}
 
-    // Close (unless progress is showing)
-    if (!notification.hasProgress) {
-      actions.push(NotificationTemplateRenderer.closeNotificationAction)
-    }
+		// Expand / Collapse
+		let showExpandCollapseAction = false;
+		if (notification.canCollapse) {
+			if (notification.expanded) {
+				showExpandCollapseAction = true; // allow to collapse an expanded message
+			} else if (notification.source) {
+				showExpandCollapseAction = true; // allow to expand to details row
+			} else if (messageOverflows) {
+				showExpandCollapseAction = true; // allow to expand if message overflows
+			}
+		}
 
-    this.template.toolbar.clear()
-    this.template.toolbar.context = notification
-    actions.forEach((action) =>
-      this.template.toolbar.push(action, {
-        icon: true,
-        label: false,
-        keybinding: this.getKeybindingLabel(action),
-      }),
-    )
-  }
+		if (showExpandCollapseAction) {
+			actions.push(notification.expanded ? NotificationTemplateRenderer.collapseNotificationAction : NotificationTemplateRenderer.expandNotificationAction);
+		}
 
-  private renderSource(
-    notification: INotificationViewItem,
-    sourceCustomHover: IUpdatableHover,
-  ): void {
-    if (notification.expanded && notification.source) {
-      this.template.source.textContent = localize(
-        "notificationSource",
-        "Source: {0}",
-        notification.source,
-      )
-      sourceCustomHover.update(notification.source)
-    } else {
-      this.template.source.textContent = ""
-      sourceCustomHover.update("")
-    }
-  }
+		// Close (unless progress is showing)
+		if (!notification.hasProgress) {
+			actions.push(NotificationTemplateRenderer.closeNotificationAction);
+		}
 
-  private renderButtons(notification: INotificationViewItem): void {
-    clearNode(this.template.buttonsContainer)
+		this.template.toolbar.clear();
+		this.template.toolbar.context = notification;
+		actions.forEach(action => this.template.toolbar.push(action, { icon: true, label: false, keybinding: this.getKeybindingLabel(action) }));
+	}
 
-    const primaryActions = notification.actions
-      ? notification.actions.primary
-      : undefined
-    if (notification.expanded && isNonEmptyArray(primaryActions)) {
-      const that = this
+	private renderSource(notification: INotificationViewItem, sourceCustomHover: IUpdatableHover): void {
+		if (notification.expanded && notification.source) {
+			this.template.source.textContent = localize('notificationSource', "Source: {0}", notification.source);
+			sourceCustomHover.update(notification.source);
+		} else {
+			this.template.source.textContent = '';
+			sourceCustomHover.update('');
+		}
+	}
 
-      const actionRunner: IActionRunner = new (class extends ActionRunner {
-        protected override async runAction(action: IAction): Promise<void> {
-          // Run action
-          that.actionRunner.run(action, notification)
+	private renderButtons(notification: INotificationViewItem): void {
+		clearNode(this.template.buttonsContainer);
 
-          // Hide notification (unless explicitly prevented)
-          if (!(action instanceof ChoiceAction) || !action.keepOpen) {
-            notification.close()
-          }
-        }
-      })()
+		const primaryActions = notification.actions ? notification.actions.primary : undefined;
+		if (notification.expanded && isNonEmptyArray(primaryActions)) {
+			const that = this;
 
-      const buttonToolbar = this.inputDisposables.add(
-        new ButtonBar(this.template.buttonsContainer),
-      )
-      for (let i = 0; i < primaryActions.length; i++) {
-        const action = primaryActions[i]
+			const actionRunner: IActionRunner = new class extends ActionRunner {
+				protected override async runAction(action: IAction): Promise<void> {
 
-        const options: IButtonOptions = {
-          title: true, // assign titles to buttons in case they overflow
-          secondary: i > 0,
-          ...defaultButtonStyles,
-        }
+					// Run action
+					that.actionRunner.run(action, notification);
 
-        const dropdownActions =
-          action instanceof ChoiceAction ? action.menu : undefined
-        const button = this.inputDisposables.add(
-          dropdownActions
-            ? buttonToolbar.addButtonWithDropdown({
-                ...options,
-                contextMenuProvider: this.contextMenuService,
-                actions: dropdownActions,
-                actionRunner,
-              })
-            : buttonToolbar.addButton(options),
-        )
+					// Hide notification (unless explicitly prevented)
+					if (!(action instanceof ChoiceAction) || !action.keepOpen) {
+						notification.close();
+					}
+				}
+			}();
 
-        button.label = action.label
+			const buttonToolbar = this.inputDisposables.add(new ButtonBar(this.template.buttonsContainer));
+			for (let i = 0; i < primaryActions.length; i++) {
+				const action = primaryActions[i];
 
-        this.inputDisposables.add(
-          button.onDidClick((e) => {
-            if (e) {
-              EventHelper.stop(e, true)
-            }
+				const options: IButtonOptions = {
+					title: true,  // assign titles to buttons in case they overflow
+					secondary: i > 0,
+					...defaultButtonStyles
+				};
 
-            actionRunner.run(action)
-          }),
-        )
-      }
-    }
-  }
+				const dropdownActions = action instanceof ChoiceAction ? action.menu : undefined;
+				const button = this.inputDisposables.add(dropdownActions ?
+					buttonToolbar.addButtonWithDropdown({
+						...options,
+						contextMenuProvider: this.contextMenuService,
+						actions: dropdownActions,
+						actionRunner
+					}) :
+					buttonToolbar.addButton(options)
+				);
 
-  private renderProgress(notification: INotificationViewItem): void {
-    // Return early if the item has no progress
-    if (!notification.hasProgress) {
-      this.template.progress.stop().hide()
+				button.label = action.label;
 
-      return
-    }
+				this.inputDisposables.add(button.onDidClick(e => {
+					if (e) {
+						EventHelper.stop(e, true);
+					}
 
-    // Infinite
-    const state = notification.progress.state
-    if (state.infinite) {
-      this.template.progress.infinite().show()
-    }
+					actionRunner.run(action);
+				}));
+			}
+		}
+	}
 
-    // Total / Worked
-    else if (
-      typeof state.total === "number" ||
-      typeof state.worked === "number"
-    ) {
-      if (
-        typeof state.total === "number" &&
-        !this.template.progress.hasTotal()
-      ) {
-        this.template.progress.total(state.total)
-      }
+	private renderProgress(notification: INotificationViewItem): void {
 
-      if (typeof state.worked === "number") {
-        this.template.progress.setWorked(state.worked).show()
-      }
-    }
+		// Return early if the item has no progress
+		if (!notification.hasProgress) {
+			this.template.progress.stop().hide();
 
-    // Done
-    else {
-      this.template.progress.done().hide()
-    }
-  }
+			return;
+		}
 
-  private toSeverityIcon(severity: Severity): ThemeIcon {
-    switch (severity) {
-      case Severity.Warning:
-        return Codicon.warning
-      case Severity.Error:
-        return Codicon.error
-    }
-    return Codicon.info
-  }
+		// Infinite
+		const state = notification.progress.state;
+		if (state.infinite) {
+			this.template.progress.infinite().show();
+		}
 
-  private getKeybindingLabel(action: IAction): string | null {
-    const keybinding = this.keybindingService.lookupKeybinding(action.id)
+		// Total / Worked
+		else if (typeof state.total === 'number' || typeof state.worked === 'number') {
+			if (typeof state.total === 'number' && !this.template.progress.hasTotal()) {
+				this.template.progress.total(state.total);
+			}
 
-    return keybinding ? keybinding.getLabel() : null
-  }
+			if (typeof state.worked === 'number') {
+				this.template.progress.setWorked(state.worked).show();
+			}
+		}
+
+		// Done
+		else {
+			this.template.progress.done().hide();
+		}
+	}
+
+	private toSeverityIcon(severity: Severity): ThemeIcon {
+		switch (severity) {
+			case Severity.Warning:
+				return Codicon.warning;
+			case Severity.Error:
+				return Codicon.error;
+		}
+		return Codicon.info;
+	}
+
+	private getKeybindingLabel(action: IAction): string | null {
+		const keybinding = this.keybindingService.lookupKeybinding(action.id);
+
+		return keybinding ? keybinding.getLabel() : null;
+	}
 }

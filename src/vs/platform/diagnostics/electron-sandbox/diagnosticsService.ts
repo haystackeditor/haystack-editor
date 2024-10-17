@@ -9,7 +9,7 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IDiagnosticsService } from "vs/platform/diagnostics/common/diagnostics"
-import { registerSharedProcessRemoteService } from "vs/platform/ipc/electron-sandbox/services"
+import { IDiagnosticsService } from 'vs/platform/diagnostics/common/diagnostics';
+import { registerSharedProcessRemoteService } from 'vs/platform/ipc/electron-sandbox/services';
 
-registerSharedProcessRemoteService(IDiagnosticsService, "diagnostics")
+registerSharedProcessRemoteService(IDiagnosticsService, 'diagnostics');

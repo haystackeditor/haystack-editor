@@ -96,10 +96,10 @@ export interface ITestCodeEditor extends IActiveCodeEditor {
   getViewModel(): ViewModel | undefined
   registerAndInstantiateContribution<
     T extends IEditorContribution,
-    Services extends BrandedService[],
+    Services extends BrandedService[]
   >(
     id: string,
-    ctor: new (editor: ICodeEditor, ...services: Services) => T,
+    ctor: new (editor: ICodeEditor, ...services: Services) => T
   ): T
   registerDisposable(disposable: IDisposable): void
 }
@@ -109,7 +109,7 @@ export class TestCodeEditor extends CodeEditorWidget implements ICodeEditor {
   protected override _createConfiguration(
     isSimpleWidget: boolean,
     contextMenuId: MenuId,
-    options: Readonly<TestCodeEditorCreationOptions>,
+    options: Readonly<TestCodeEditorCreationOptions>
   ): EditorConfiguration {
     return new TestConfiguration(options)
   }
@@ -132,7 +132,7 @@ export class TestCodeEditor extends CodeEditorWidget implements ICodeEditor {
   }
   public registerAndInstantiateContribution<T extends IEditorContribution>(
     id: string,
-    ctor: new (editor: ICodeEditor, ...services: BrandedService[]) => T,
+    ctor: new (editor: ICodeEditor, ...services: BrandedService[]) => T
   ): T {
     const r: T = this._instantiationService.createInstance(ctor, this)
     this._contributions.set(id, r)
@@ -195,8 +195,8 @@ export function withTestCodeEditor(
   callback: (
     editor: ITestCodeEditor,
     viewModel: ViewModel,
-    instantiationService: TestInstantiationService,
-  ) => void,
+    instantiationService: TestInstantiationService
+  ) => void
 ): void {
   return _withTestCodeEditor(text, options, callback)
 }
@@ -207,14 +207,14 @@ export async function withAsyncTestCodeEditor(
   callback: (
     editor: ITestCodeEditor,
     viewModel: ViewModel,
-    instantiationService: TestInstantiationService,
-  ) => Promise<void>,
+    instantiationService: TestInstantiationService
+  ) => Promise<void>
 ): Promise<void> {
   return _withTestCodeEditor(text, options, callback)
 }
 
 function isTextModel(
-  arg: ITextModel | string | string[] | ITextBufferFactory,
+  arg: ITextModel | string | string[] | ITextBufferFactory
 ): arg is ITextModel {
   return Boolean(arg && (arg as ITextModel).uri)
 }
@@ -225,8 +225,8 @@ function _withTestCodeEditor(
   callback: (
     editor: ITestCodeEditor,
     viewModel: ViewModel,
-    instantiationService: TestInstantiationService,
-  ) => void,
+    instantiationService: TestInstantiationService
+  ) => void
 ): void
 function _withTestCodeEditor(
   arg: ITextModel | string | string[] | ITextBufferFactory,
@@ -234,8 +234,8 @@ function _withTestCodeEditor(
   callback: (
     editor: ITestCodeEditor,
     viewModel: ViewModel,
-    instantiationService: TestInstantiationService,
-  ) => Promise<void>,
+    instantiationService: TestInstantiationService
+  ) => Promise<void>
 ): Promise<void>
 function _withTestCodeEditor(
   arg: ITextModel | string | string[] | ITextBufferFactory,
@@ -243,13 +243,13 @@ function _withTestCodeEditor(
   callback: (
     editor: ITestCodeEditor,
     viewModel: ViewModel,
-    instantiationService: TestInstantiationService,
-  ) => Promise<void> | void,
+    instantiationService: TestInstantiationService
+  ) => Promise<void> | void
 ): Promise<void> | void {
   const disposables = new DisposableStore()
   const instantiationService = createCodeEditorServices(
     disposables,
-    options.serviceCollection,
+    options.serviceCollection
   )
   delete options.serviceCollection
 
@@ -261,20 +261,20 @@ function _withTestCodeEditor(
     model = disposables.add(
       instantiateTextModel(
         instantiationService,
-        Array.isArray(arg) ? arg.join("\n") : arg,
-      ),
+        Array.isArray(arg) ? arg.join("\n") : arg
+      )
     )
   }
 
   const editor = disposables.add(
-    instantiateTestCodeEditor(instantiationService, model, options),
+    instantiateTestCodeEditor(instantiationService, model, options)
   )
   const viewModel = editor.getViewModel()!
   viewModel.setHasFocus(true)
   const result = callback(
     <ITestCodeEditor>editor,
     editor.getViewModel()!,
-    instantiationService,
+    instantiationService
   )
   if (result) {
     return result.then(() => disposables.dispose())
@@ -285,12 +285,12 @@ function _withTestCodeEditor(
 
 export function createCodeEditorServices(
   disposables: DisposableStore,
-  services: ServiceCollection = new ServiceCollection(),
+  services: ServiceCollection = new ServiceCollection()
 ): TestInstantiationService {
   const serviceIdentifiers: ServiceIdentifier<any>[] = []
   const define = <T>(
     id: ServiceIdentifier<T>,
-    ctor: new (...args: any[]) => T,
+    ctor: new (...args: any[]) => T
   ) => {
     if (!services.has(id)) {
       services.set(id, new SyncDescriptor(ctor))
@@ -329,13 +329,13 @@ export function createCodeEditorServices(
       declare readonly _serviceBrand: undefined
       override isBuilt: boolean = true
       override isExtensionDevelopment: boolean = false
-    },
+    }
   )
   define(ILanguageFeatureDebounceService, LanguageFeatureDebounceService)
   define(ILanguageFeaturesService, LanguageFeaturesService)
 
   const instantiationService = disposables.add(
-    new TestInstantiationService(services, true),
+    new TestInstantiationService(services, true)
   )
   disposables.add(
     toDisposable(() => {
@@ -345,26 +345,26 @@ export function createCodeEditorServices(
           instanceOrDescriptor.dispose()
         }
       }
-    }),
+    })
   )
   return instantiationService
 }
 
 export function createTestCodeEditor(
   model: ITextModel | undefined,
-  options: TestCodeEditorInstantiationOptions = {},
+  options: TestCodeEditorInstantiationOptions = {}
 ): ITestCodeEditor {
   const disposables = new DisposableStore()
   const instantiationService = createCodeEditorServices(
     disposables,
-    options.serviceCollection,
+    options.serviceCollection
   )
   delete options.serviceCollection
 
   const editor = instantiateTestCodeEditor(
     instantiationService,
     model || null,
-    options,
+    options
   )
   editor.registerDisposable(disposables)
   return editor
@@ -373,7 +373,7 @@ export function createTestCodeEditor(
 export function instantiateTestCodeEditor(
   instantiationService: IInstantiationService,
   model: ITextModel | null,
-  options: TestCodeEditorCreationOptions = {},
+  options: TestCodeEditorCreationOptions = {}
 ): ITestCodeEditor {
   const codeEditorWidgetOptions: ICodeEditorWidgetOptions = {
     contributions: [],
@@ -382,7 +382,7 @@ export function instantiateTestCodeEditor(
     TestCodeEditor,
     <HTMLElement>(<any>new TestEditorDomElement()),
     options,
-    codeEditorWidgetOptions,
+    codeEditorWidgetOptions
   )
   if (typeof options.hasTextFocus === "undefined") {
     options.hasTextFocus = true

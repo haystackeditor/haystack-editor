@@ -9,15 +9,16 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-declare module "vscode" {
-  // https://github.com/microsoft/vscode/issues/171166
+declare module 'vscode' {
 
-  export enum CommentState {
-    Published = 0,
-    Draft = 1,
-  }
+	// https://github.com/microsoft/vscode/issues/171166
 
-  export interface Comment {
-    state?: CommentState
-  }
+	export enum CommentState {
+		Published = 0,
+		Draft = 1
+	}
+
+	export interface Comment {
+		state?: CommentState;
+	}
 }

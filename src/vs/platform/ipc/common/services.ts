@@ -9,11 +9,12 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IChannel, IServerChannel } from "vs/base/parts/ipc/common/ipc"
+import { IChannel, IServerChannel } from 'vs/base/parts/ipc/common/ipc';
 
 export interface IRemoteService {
-  readonly _serviceBrand: undefined
 
-  getChannel(channelName: string): IChannel
-  registerChannel(channelName: string, channel: IServerChannel<string>): void
+	readonly _serviceBrand: undefined;
+
+	getChannel(channelName: string): IChannel;
+	registerChannel(channelName: string, channel: IServerChannel<string>): void;
 }

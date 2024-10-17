@@ -9,10 +9,10 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ILogger } from "../logging"
+import { ILogger } from '../logging';
 
-export const nulLogger = new (class implements ILogger {
-  verbose(): void {
-    // noop
-  }
-})()
+export const nulLogger = new class implements ILogger {
+	verbose(): void {
+		// noop
+	}
+};

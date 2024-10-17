@@ -80,7 +80,7 @@ export abstract class Composite extends Component implements IComposite {
         this._hasFocus = true
 
         onDidFocus.fire()
-      }),
+      })
     )
 
     const onDidBlur = (this._onDidBlur = this._register(new Emitter<void>()))
@@ -89,7 +89,7 @@ export abstract class Composite extends Component implements IComposite {
         this._hasFocus = false
 
         onDidBlur.fire()
-      }),
+      })
     )
 
     return { onDidFocus, onDidBlur }
@@ -104,7 +104,7 @@ export abstract class Composite extends Component implements IComposite {
     id: string,
     protected readonly telemetryService: ITelemetryService,
     themeService: IThemeService,
-    storageService: IStorageService,
+    storageService: IStorageService
   ) {
     super(id, themeService, storageService)
   }
@@ -206,7 +206,7 @@ export abstract class Composite extends Component implements IComposite {
    */
   getActionViewItem(
     action: IAction,
-    options: IBaseActionViewItemOptions,
+    options: IBaseActionViewItemOptions
   ): IActionViewItem | undefined {
     return undefined
   }
@@ -265,7 +265,7 @@ export abstract class CompositeDescriptor<T extends Composite> {
     readonly name: string,
     readonly cssClass?: string,
     readonly order?: number,
-    readonly requestedIndex?: number,
+    readonly requestedIndex?: number
   ) {}
 
   instantiate(instantiationService: IInstantiationService): T {
@@ -274,15 +274,15 @@ export abstract class CompositeDescriptor<T extends Composite> {
 }
 
 export abstract class CompositeRegistry<
-  T extends Composite,
+  T extends Composite
 > extends Disposable {
   private readonly _onDidRegister = this._register(
-    new Emitter<CompositeDescriptor<T>>(),
+    new Emitter<CompositeDescriptor<T>>()
   )
   readonly onDidRegister = this._onDidRegister.event
 
   private readonly _onDidDeregister = this._register(
-    new Emitter<CompositeDescriptor<T>>(),
+    new Emitter<CompositeDescriptor<T>>()
   )
   readonly onDidDeregister = this._onDidDeregister.event
 

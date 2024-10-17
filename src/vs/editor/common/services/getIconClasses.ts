@@ -25,7 +25,7 @@ export function getIconClasses(
   languageService: ILanguageService,
   resource: uri | undefined,
   fileKind?: FileKind,
-  icon?: ThemeIcon | URI,
+  icon?: ThemeIcon | URI
 ): string[] {
   if (ThemeIcon.isThemeIcon(icon)) {
     return [`codicon-${icon.id}`, "predefined-file-icon"]
@@ -40,8 +40,8 @@ export function getIconClasses(
     fileKind === FileKind.ROOT_FOLDER
       ? ["rootfolder-icon"]
       : fileKind === FileKind.FOLDER
-        ? ["folder-icon"]
-        : ["file-icon"]
+      ? ["folder-icon"]
+      : ["file-icon"]
   if (resource) {
     // Get the path and name of the resource. For data-URIs, we need to parse specially
     let name: string | undefined
@@ -92,7 +92,7 @@ export function getIconClasses(
       const detectedLanguageId = detectLanguageId(
         modelService,
         languageService,
-        resource,
+        resource
       )
       if (detectedLanguageId) {
         classes.push(`${cssEscape(detectedLanguageId)}-lang-file-icon`)
@@ -109,7 +109,7 @@ export function getIconClassesForLanguageId(languageId: string): string[] {
 function detectLanguageId(
   modelService: IModelService,
   languageService: ILanguageService,
-  resource: uri,
+  resource: uri
 ): string | null {
   if (!resource) {
     return null // we need a resource at least

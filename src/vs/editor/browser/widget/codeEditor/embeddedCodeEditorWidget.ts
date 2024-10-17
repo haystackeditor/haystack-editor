@@ -47,7 +47,7 @@ export class EmbeddedCodeEditorWidget extends CodeEditorWidget {
     @IAccessibilityService accessibilityService: IAccessibilityService,
     @ILanguageConfigurationService
     languageConfigurationService: ILanguageConfigurationService,
-    @ILanguageFeaturesService languageFeaturesService: ILanguageFeaturesService,
+    @ILanguageFeaturesService languageFeaturesService: ILanguageFeaturesService
   ) {
     super(
       domElement,
@@ -64,7 +64,7 @@ export class EmbeddedCodeEditorWidget extends CodeEditorWidget {
       notificationService,
       accessibilityService,
       languageConfigurationService,
-      languageFeaturesService,
+      languageFeaturesService
     )
 
     this._parentEditor = parentEditor
@@ -75,8 +75,8 @@ export class EmbeddedCodeEditorWidget extends CodeEditorWidget {
 
     this._register(
       parentEditor.onDidChangeConfiguration((e: ConfigurationChangedEvent) =>
-        this._onParentConfigurationChanged(e),
-      ),
+        this._onParentConfigurationChanged(e)
+      )
     )
   }
 

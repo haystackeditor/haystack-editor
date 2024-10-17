@@ -28,7 +28,7 @@ export function isImplicitProjectConfigFile(configFileName: string) {
 export function inferredProjectCompilerOptions(
   version: API,
   projectType: ProjectType,
-  serviceConfig: TypeScriptServiceConfiguration,
+  serviceConfig: TypeScriptServiceConfiguration
 ): Proto.ExternalProjectCompilerOptions {
   const projectConfig: Proto.ExternalProjectCompilerOptions = {
     module: (version.gte(API.v540) ? "Preserve" : "ESNext") as Proto.ModuleKind,
@@ -79,15 +79,15 @@ export function inferredProjectCompilerOptions(
 function inferredProjectConfigSnippet(
   version: API,
   projectType: ProjectType,
-  config: TypeScriptServiceConfiguration,
+  config: TypeScriptServiceConfiguration
 ) {
   const baseConfig = inferredProjectCompilerOptions(
     version,
     projectType,
-    config,
+    config
   )
   const compilerOptions = Object.keys(baseConfig).map(
-    (key) => `"${key}": ${JSON.stringify(baseConfig[key])}`,
+    (key) => `"${key}": ${JSON.stringify(baseConfig[key])}`
   )
   return new vscode.SnippetString(`{
 	"compilerOptions": {
@@ -104,11 +104,11 @@ export async function openOrCreateConfig(
   version: API,
   projectType: ProjectType,
   rootPath: vscode.Uri,
-  configuration: TypeScriptServiceConfiguration,
+  configuration: TypeScriptServiceConfiguration
 ): Promise<vscode.TextEditor | null> {
   const configFile = vscode.Uri.joinPath(
     rootPath,
-    projectType === ProjectType.TypeScript ? "tsconfig.json" : "jsconfig.json",
+    projectType === ProjectType.TypeScript ? "tsconfig.json" : "jsconfig.json"
   )
   const col = vscode.window.activeTextEditor?.viewColumn
   try {
@@ -116,12 +116,12 @@ export async function openOrCreateConfig(
     return vscode.window.showTextDocument(doc, col)
   } catch {
     const doc = await vscode.workspace.openTextDocument(
-      configFile.with({ scheme: "untitled" }),
+      configFile.with({ scheme: "untitled" })
     )
     const editor = await vscode.window.showTextDocument(doc, col)
     if (editor.document.getText().length === 0) {
       await editor.insertSnippet(
-        inferredProjectConfigSnippet(version, projectType, configuration),
+        inferredProjectConfigSnippet(version, projectType, configuration)
       )
     }
     return editor
@@ -132,15 +132,15 @@ export async function openProjectConfigOrPromptToCreate(
   projectType: ProjectType,
   client: ITypeScriptServiceClient,
   rootPath: vscode.Uri,
-  configFilePath: string,
+  configFilePath: string
 ): Promise<void> {
   if (!isImplicitProjectConfigFile(configFilePath)) {
     const doc = await vscode.workspace.openTextDocument(
-      client.toResource(configFilePath),
+      client.toResource(configFilePath)
     )
     vscode.window.showTextDocument(
       doc,
-      vscode.window.activeTextEditor?.viewColumn,
+      vscode.window.activeTextEditor?.viewColumn
     )
     return
   }
@@ -156,13 +156,13 @@ export async function openProjectConfigOrPromptToCreate(
     projectType === ProjectType.TypeScript
       ? vscode.l10n.t(
           "File is not part of a TypeScript project. View the [tsconfig.json documentation]({0}) to learn more.",
-          "https://go.microsoft.com/fwlink/?linkid=841896",
+          "https://go.microsoft.com/fwlink/?linkid=841896"
         )
       : vscode.l10n.t(
           "File is not part of a JavaScript project. View the [jsconfig.json documentation]({0}) to learn more.",
-          "https://go.microsoft.com/fwlink/?linkid=759670",
+          "https://go.microsoft.com/fwlink/?linkid=759670"
         ),
-    CreateConfigItem,
+    CreateConfigItem
   )
 
   switch (selected) {
@@ -171,7 +171,7 @@ export async function openProjectConfigOrPromptToCreate(
         client.apiVersion,
         projectType,
         rootPath,
-        client.configuration,
+        client.configuration
       )
       return
   }
@@ -180,14 +180,14 @@ export async function openProjectConfigOrPromptToCreate(
 export async function openProjectConfigForFile(
   projectType: ProjectType,
   client: ITypeScriptServiceClient,
-  resource: vscode.Uri,
+  resource: vscode.Uri
 ): Promise<void> {
   const rootPath = client.getWorkspaceRootForResource(resource)
   if (!rootPath) {
     vscode.window.showInformationMessage(
       vscode.l10n.t(
-        "Please open a folder in VS Code to use a TypeScript or JavaScript project",
-      ),
+        "Please open a folder in VS Code to use a TypeScript or JavaScript project"
+      )
     )
     return
   }
@@ -197,8 +197,8 @@ export async function openProjectConfigForFile(
   if (!file || !client.toTsFilePath(resource)) {
     vscode.window.showWarningMessage(
       vscode.l10n.t(
-        "Could not determine TypeScript or JavaScript project. Unsupported file type",
-      ),
+        "Could not determine TypeScript or JavaScript project. Unsupported file type"
+      )
     )
     return
   }
@@ -208,7 +208,7 @@ export async function openProjectConfigForFile(
     res = await client.execute(
       "projectInfo",
       { file, needFileNameList: false },
-      nulToken,
+      nulToken
     )
   } catch {
     // noop
@@ -216,7 +216,7 @@ export async function openProjectConfigForFile(
 
   if (res?.type !== "response" || !res.body) {
     vscode.window.showWarningMessage(
-      vscode.l10n.t("Could not determine TypeScript or JavaScript project"),
+      vscode.l10n.t("Could not determine TypeScript or JavaScript project")
     )
     return
   }
@@ -224,6 +224,6 @@ export async function openProjectConfigForFile(
     projectType,
     client,
     rootPath,
-    res.body.configFileName,
+    res.body.configFileName
   )
 }

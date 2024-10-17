@@ -9,288 +9,223 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as assert from "assert"
-import { DisposableStore } from "vs/base/common/lifecycle"
-import { ensureNoDisposablesAreLeakedInTestSuite } from "vs/base/test/common/utils"
-import { Range } from "vs/editor/common/core/range"
-import { Selection } from "vs/editor/common/core/selection"
-import { ILanguageService } from "vs/editor/common/languages/language"
-import { ILanguageConfigurationService } from "vs/editor/common/languages/languageConfigurationRegistry"
-import { withTestCodeEditor } from "vs/editor/test/browser/testCodeEditor"
+import * as assert from 'assert';
+import { DisposableStore } from 'vs/base/common/lifecycle';
+import { ensureNoDisposablesAreLeakedInTestSuite } from 'vs/base/test/common/utils';
+import { Range } from 'vs/editor/common/core/range';
+import { Selection } from 'vs/editor/common/core/selection';
+import { ILanguageService } from 'vs/editor/common/languages/language';
+import { ILanguageConfigurationService } from 'vs/editor/common/languages/languageConfigurationRegistry';
+import { withTestCodeEditor } from 'vs/editor/test/browser/testCodeEditor';
 
-suite("CodeEditorWidget", () => {
-  ensureNoDisposablesAreLeakedInTestSuite()
+suite('CodeEditorWidget', () => {
 
-  test("onDidChangeModelDecorations", () => {
-    withTestCodeEditor("", {}, (editor, viewModel) => {
-      const disposables = new DisposableStore()
+	ensureNoDisposablesAreLeakedInTestSuite();
 
-      let invoked = false
-      disposables.add(
-        editor.onDidChangeModelDecorations((e) => {
-          invoked = true
-        }),
-      )
+	test('onDidChangeModelDecorations', () => {
+		withTestCodeEditor('', {}, (editor, viewModel) => {
+			const disposables = new DisposableStore();
 
-      viewModel.model.deltaDecorations(
-        [],
-        [{ range: new Range(1, 1, 1, 1), options: { description: "test" } }],
-      )
+			let invoked = false;
+			disposables.add(editor.onDidChangeModelDecorations((e) => {
+				invoked = true;
+			}));
 
-      assert.deepStrictEqual(invoked, true)
+			viewModel.model.deltaDecorations([], [{ range: new Range(1, 1, 1, 1), options: { description: 'test' } }]);
 
-      disposables.dispose()
-    })
-  })
+			assert.deepStrictEqual(invoked, true);
 
-  test("onDidChangeModelLanguage", () => {
-    withTestCodeEditor("", {}, (editor, viewModel, instantiationService) => {
-      const languageService = instantiationService.get(ILanguageService)
-      const disposables = new DisposableStore()
-      disposables.add(languageService.registerLanguage({ id: "testMode" }))
+			disposables.dispose();
+		});
+	});
 
-      let invoked = false
-      disposables.add(
-        editor.onDidChangeModelLanguage((e) => {
-          invoked = true
-        }),
-      )
+	test('onDidChangeModelLanguage', () => {
+		withTestCodeEditor('', {}, (editor, viewModel, instantiationService) => {
+			const languageService = instantiationService.get(ILanguageService);
+			const disposables = new DisposableStore();
+			disposables.add(languageService.registerLanguage({ id: 'testMode' }));
 
-      viewModel.model.setLanguage("testMode")
+			let invoked = false;
+			disposables.add(editor.onDidChangeModelLanguage((e) => {
+				invoked = true;
+			}));
 
-      assert.deepStrictEqual(invoked, true)
+			viewModel.model.setLanguage('testMode');
 
-      disposables.dispose()
-    })
-  })
+			assert.deepStrictEqual(invoked, true);
 
-  test("onDidChangeModelLanguageConfiguration", () => {
-    withTestCodeEditor("", {}, (editor, viewModel, instantiationService) => {
-      const languageConfigurationService = instantiationService.get(
-        ILanguageConfigurationService,
-      )
-      const languageService = instantiationService.get(ILanguageService)
-      const disposables = new DisposableStore()
-      disposables.add(languageService.registerLanguage({ id: "testMode" }))
-      viewModel.model.setLanguage("testMode")
+			disposables.dispose();
+		});
+	});
 
-      let invoked = false
-      disposables.add(
-        editor.onDidChangeModelLanguageConfiguration((e) => {
-          invoked = true
-        }),
-      )
+	test('onDidChangeModelLanguageConfiguration', () => {
+		withTestCodeEditor('', {}, (editor, viewModel, instantiationService) => {
+			const languageConfigurationService = instantiationService.get(ILanguageConfigurationService);
+			const languageService = instantiationService.get(ILanguageService);
+			const disposables = new DisposableStore();
+			disposables.add(languageService.registerLanguage({ id: 'testMode' }));
+			viewModel.model.setLanguage('testMode');
 
-      disposables.add(
-        languageConfigurationService.register("testMode", {
-          brackets: [["(", ")"]],
-        }),
-      )
+			let invoked = false;
+			disposables.add(editor.onDidChangeModelLanguageConfiguration((e) => {
+				invoked = true;
+			}));
 
-      assert.deepStrictEqual(invoked, true)
+			disposables.add(languageConfigurationService.register('testMode', {
+				brackets: [['(', ')']]
+			}));
 
-      disposables.dispose()
-    })
-  })
+			assert.deepStrictEqual(invoked, true);
 
-  test("onDidChangeModelContent", () => {
-    withTestCodeEditor("", {}, (editor, viewModel) => {
-      const disposables = new DisposableStore()
+			disposables.dispose();
+		});
+	});
 
-      let invoked = false
-      disposables.add(
-        editor.onDidChangeModelContent((e) => {
-          invoked = true
-        }),
-      )
+	test('onDidChangeModelContent', () => {
+		withTestCodeEditor('', {}, (editor, viewModel) => {
+			const disposables = new DisposableStore();
 
-      viewModel.type("hello", "test")
+			let invoked = false;
+			disposables.add(editor.onDidChangeModelContent((e) => {
+				invoked = true;
+			}));
 
-      assert.deepStrictEqual(invoked, true)
+			viewModel.type('hello', 'test');
 
-      disposables.dispose()
-    })
-  })
+			assert.deepStrictEqual(invoked, true);
 
-  test("onDidChangeModelOptions", () => {
-    withTestCodeEditor("", {}, (editor, viewModel) => {
-      const disposables = new DisposableStore()
+			disposables.dispose();
+		});
+	});
 
-      let invoked = false
-      disposables.add(
-        editor.onDidChangeModelOptions((e) => {
-          invoked = true
-        }),
-      )
+	test('onDidChangeModelOptions', () => {
+		withTestCodeEditor('', {}, (editor, viewModel) => {
+			const disposables = new DisposableStore();
 
-      viewModel.model.updateOptions({
-        tabSize: 3,
-      })
+			let invoked = false;
+			disposables.add(editor.onDidChangeModelOptions((e) => {
+				invoked = true;
+			}));
 
-      assert.deepStrictEqual(invoked, true)
+			viewModel.model.updateOptions({
+				tabSize: 3
+			});
 
-      disposables.dispose()
-    })
-  })
+			assert.deepStrictEqual(invoked, true);
 
-  test("issue #145872 - Model change events are emitted before the selection updates", () => {
-    withTestCodeEditor("", {}, (editor, viewModel) => {
-      const disposables = new DisposableStore()
+			disposables.dispose();
+		});
+	});
 
-      let observedSelection: Selection | null = null
-      disposables.add(
-        editor.onDidChangeModelContent((e) => {
-          observedSelection = editor.getSelection()
-        }),
-      )
+	test('issue #145872 - Model change events are emitted before the selection updates', () => {
+		withTestCodeEditor('', {}, (editor, viewModel) => {
+			const disposables = new DisposableStore();
 
-      viewModel.type("hello", "test")
+			let observedSelection: Selection | null = null;
+			disposables.add(editor.onDidChangeModelContent((e) => {
+				observedSelection = editor.getSelection();
+			}));
 
-      assert.deepStrictEqual(observedSelection, new Selection(1, 6, 1, 6))
+			viewModel.type('hello', 'test');
 
-      disposables.dispose()
-    })
-  })
+			assert.deepStrictEqual(observedSelection, new Selection(1, 6, 1, 6));
 
-  test("monaco-editor issue #2774 - Wrong order of events onDidChangeModelContent and onDidChangeCursorSelection on redo", () => {
-    withTestCodeEditor("", {}, (editor, viewModel) => {
-      const disposables = new DisposableStore()
+			disposables.dispose();
+		});
+	});
 
-      const calls: string[] = []
-      disposables.add(
-        editor.onDidChangeModelContent((e) => {
-          calls.push(
-            `contentchange(${e.changes.reduce<any[]>((aggr, c) => [...aggr, c.text, c.rangeOffset, c.rangeLength], []).join(", ")})`,
-          )
-        }),
-      )
-      disposables.add(
-        editor.onDidChangeCursorSelection((e) => {
-          calls.push(
-            `cursorchange(${e.selection.positionLineNumber}, ${e.selection.positionColumn})`,
-          )
-        }),
-      )
+	test('monaco-editor issue #2774 - Wrong order of events onDidChangeModelContent and onDidChangeCursorSelection on redo', () => {
+		withTestCodeEditor('', {}, (editor, viewModel) => {
+			const disposables = new DisposableStore();
 
-      viewModel.type("a", "test")
-      viewModel.model.undo()
-      viewModel.model.redo()
+			const calls: string[] = [];
+			disposables.add(editor.onDidChangeModelContent((e) => {
+				calls.push(`contentchange(${e.changes.reduce<any[]>((aggr, c) => [...aggr, c.text, c.rangeOffset, c.rangeLength], []).join(', ')})`);
+			}));
+			disposables.add(editor.onDidChangeCursorSelection((e) => {
+				calls.push(`cursorchange(${e.selection.positionLineNumber}, ${e.selection.positionColumn})`);
+			}));
 
-      assert.deepStrictEqual(calls, [
-        "contentchange(a, 0, 0)",
-        "cursorchange(1, 2)",
-        "contentchange(, 0, 1)",
-        "cursorchange(1, 1)",
-        "contentchange(a, 0, 0)",
-        "cursorchange(1, 2)",
-      ])
+			viewModel.type('a', 'test');
+			viewModel.model.undo();
+			viewModel.model.redo();
 
-      disposables.dispose()
-    })
-  })
+			assert.deepStrictEqual(calls, [
+				'contentchange(a, 0, 0)',
+				'cursorchange(1, 2)',
+				'contentchange(, 0, 1)',
+				'cursorchange(1, 1)',
+				'contentchange(a, 0, 0)',
+				'cursorchange(1, 2)'
+			]);
 
-  test("issue #146174: Events delivered out of order when adding decorations in content change listener (1 of 2)", () => {
-    withTestCodeEditor("", {}, (editor, viewModel) => {
-      const disposables = new DisposableStore()
+			disposables.dispose();
+		});
+	});
 
-      const calls: string[] = []
-      disposables.add(
-        editor.onDidChangeModelContent((e) => {
-          calls.push(
-            `listener1 - contentchange(${e.changes.reduce<any[]>((aggr, c) => [...aggr, c.text, c.rangeOffset, c.rangeLength], []).join(", ")})`,
-          )
-        }),
-      )
-      disposables.add(
-        editor.onDidChangeCursorSelection((e) => {
-          calls.push(
-            `listener1 - cursorchange(${e.selection.positionLineNumber}, ${e.selection.positionColumn})`,
-          )
-        }),
-      )
-      disposables.add(
-        editor.onDidChangeModelContent((e) => {
-          calls.push(
-            `listener2 - contentchange(${e.changes.reduce<any[]>((aggr, c) => [...aggr, c.text, c.rangeOffset, c.rangeLength], []).join(", ")})`,
-          )
-        }),
-      )
-      disposables.add(
-        editor.onDidChangeCursorSelection((e) => {
-          calls.push(
-            `listener2 - cursorchange(${e.selection.positionLineNumber}, ${e.selection.positionColumn})`,
-          )
-        }),
-      )
+	test('issue #146174: Events delivered out of order when adding decorations in content change listener (1 of 2)', () => {
+		withTestCodeEditor('', {}, (editor, viewModel) => {
+			const disposables = new DisposableStore();
 
-      viewModel.type("a", "test")
+			const calls: string[] = [];
+			disposables.add(editor.onDidChangeModelContent((e) => {
+				calls.push(`listener1 - contentchange(${e.changes.reduce<any[]>((aggr, c) => [...aggr, c.text, c.rangeOffset, c.rangeLength], []).join(', ')})`);
+			}));
+			disposables.add(editor.onDidChangeCursorSelection((e) => {
+				calls.push(`listener1 - cursorchange(${e.selection.positionLineNumber}, ${e.selection.positionColumn})`);
+			}));
+			disposables.add(editor.onDidChangeModelContent((e) => {
+				calls.push(`listener2 - contentchange(${e.changes.reduce<any[]>((aggr, c) => [...aggr, c.text, c.rangeOffset, c.rangeLength], []).join(', ')})`);
+			}));
+			disposables.add(editor.onDidChangeCursorSelection((e) => {
+				calls.push(`listener2 - cursorchange(${e.selection.positionLineNumber}, ${e.selection.positionColumn})`);
+			}));
 
-      assert.deepStrictEqual(calls, [
-        "listener1 - contentchange(a, 0, 0)",
-        "listener2 - contentchange(a, 0, 0)",
-        "listener1 - cursorchange(1, 2)",
-        "listener2 - cursorchange(1, 2)",
-      ])
+			viewModel.type('a', 'test');
 
-      disposables.dispose()
-    })
-  })
+			assert.deepStrictEqual(calls, ([
+				'listener1 - contentchange(a, 0, 0)',
+				'listener2 - contentchange(a, 0, 0)',
+				'listener1 - cursorchange(1, 2)',
+				'listener2 - cursorchange(1, 2)',
+			]));
 
-  test("issue #146174: Events delivered out of order when adding decorations in content change listener (2 of 2)", () => {
-    withTestCodeEditor("", {}, (editor, viewModel) => {
-      const disposables = new DisposableStore()
+			disposables.dispose();
+		});
+	});
 
-      const calls: string[] = []
-      disposables.add(
-        editor.onDidChangeModelContent((e) => {
-          calls.push(
-            `listener1 - contentchange(${e.changes.reduce<any[]>((aggr, c) => [...aggr, c.text, c.rangeOffset, c.rangeLength], []).join(", ")})`,
-          )
-          editor.changeDecorations((changeAccessor) => {
-            changeAccessor.deltaDecorations(
-              [],
-              [
-                {
-                  range: new Range(1, 1, 1, 1),
-                  options: { description: "test" },
-                },
-              ],
-            )
-          })
-        }),
-      )
-      disposables.add(
-        editor.onDidChangeCursorSelection((e) => {
-          calls.push(
-            `listener1 - cursorchange(${e.selection.positionLineNumber}, ${e.selection.positionColumn})`,
-          )
-        }),
-      )
-      disposables.add(
-        editor.onDidChangeModelContent((e) => {
-          calls.push(
-            `listener2 - contentchange(${e.changes.reduce<any[]>((aggr, c) => [...aggr, c.text, c.rangeOffset, c.rangeLength], []).join(", ")})`,
-          )
-        }),
-      )
-      disposables.add(
-        editor.onDidChangeCursorSelection((e) => {
-          calls.push(
-            `listener2 - cursorchange(${e.selection.positionLineNumber}, ${e.selection.positionColumn})`,
-          )
-        }),
-      )
+	test('issue #146174: Events delivered out of order when adding decorations in content change listener (2 of 2)', () => {
+		withTestCodeEditor('', {}, (editor, viewModel) => {
+			const disposables = new DisposableStore();
 
-      viewModel.type("a", "test")
+			const calls: string[] = [];
+			disposables.add(editor.onDidChangeModelContent((e) => {
+				calls.push(`listener1 - contentchange(${e.changes.reduce<any[]>((aggr, c) => [...aggr, c.text, c.rangeOffset, c.rangeLength], []).join(', ')})`);
+				editor.changeDecorations((changeAccessor) => {
+					changeAccessor.deltaDecorations([], [{ range: new Range(1, 1, 1, 1), options: { description: 'test' } }]);
+				});
+			}));
+			disposables.add(editor.onDidChangeCursorSelection((e) => {
+				calls.push(`listener1 - cursorchange(${e.selection.positionLineNumber}, ${e.selection.positionColumn})`);
+			}));
+			disposables.add(editor.onDidChangeModelContent((e) => {
+				calls.push(`listener2 - contentchange(${e.changes.reduce<any[]>((aggr, c) => [...aggr, c.text, c.rangeOffset, c.rangeLength], []).join(', ')})`);
+			}));
+			disposables.add(editor.onDidChangeCursorSelection((e) => {
+				calls.push(`listener2 - cursorchange(${e.selection.positionLineNumber}, ${e.selection.positionColumn})`);
+			}));
 
-      assert.deepStrictEqual(calls, [
-        "listener1 - contentchange(a, 0, 0)",
-        "listener2 - contentchange(a, 0, 0)",
-        "listener1 - cursorchange(1, 2)",
-        "listener2 - cursorchange(1, 2)",
-      ])
+			viewModel.type('a', 'test');
 
-      disposables.dispose()
-    })
-  })
-})
+			assert.deepStrictEqual(calls, ([
+				'listener1 - contentchange(a, 0, 0)',
+				'listener2 - contentchange(a, 0, 0)',
+				'listener1 - cursorchange(1, 2)',
+				'listener2 - cursorchange(1, 2)',
+			]));
+
+			disposables.dispose();
+		});
+	});
+
+});

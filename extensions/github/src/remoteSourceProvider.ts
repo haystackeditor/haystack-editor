@@ -9,162 +9,137 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { Uri, env, l10n, workspace } from "vscode"
-import {
-  RemoteSourceProvider,
-  RemoteSource,
-  RemoteSourceAction,
-} from "./typings/git-base"
-import { getOctokit } from "./auth"
-import { Octokit } from "@octokit/rest"
-import { getRepositoryFromQuery, getRepositoryFromUrl } from "./util"
-import { getBranchLink, getVscodeDevHost } from "./links"
+import { Uri, env, l10n, workspace } from 'vscode';
+import { RemoteSourceProvider, RemoteSource, RemoteSourceAction } from './typings/git-base';
+import { getOctokit } from './auth';
+import { Octokit } from '@octokit/rest';
+import { getRepositoryFromQuery, getRepositoryFromUrl } from './util';
+import { getBranchLink, getVscodeDevHost } from './links';
 
 function asRemoteSource(raw: any): RemoteSource {
-  const protocol = workspace
-    .getConfiguration("github")
-    .get<"https" | "ssh">("gitProtocol")
-  return {
-    name: `$(github) ${raw.full_name}`,
-    description: `${
-      raw.stargazers_count > 0 ? `$(star-full) ${raw.stargazers_count}` : ""
-    }`,
-    detail: raw.description || undefined,
-    url: protocol === "https" ? raw.clone_url : raw.ssh_url,
-  }
+	const protocol = workspace.getConfiguration('github').get<'https' | 'ssh'>('gitProtocol');
+	return {
+		name: `$(github) ${raw.full_name}`,
+		description: `${raw.stargazers_count > 0 ? `$(star-full) ${raw.stargazers_count}` : ''
+			}`,
+		detail: raw.description || undefined,
+		url: protocol === 'https' ? raw.clone_url : raw.ssh_url
+	};
 }
 
 export class GithubRemoteSourceProvider implements RemoteSourceProvider {
-  readonly name = "GitHub"
-  readonly icon = "github"
-  readonly supportsQuery = true
 
-  private userReposCache: RemoteSource[] = []
+	readonly name = 'GitHub';
+	readonly icon = 'github';
+	readonly supportsQuery = true;
 
-  async getRemoteSources(query?: string): Promise<RemoteSource[]> {
-    const octokit = await getOctokit()
+	private userReposCache: RemoteSource[] = [];
 
-    if (query) {
-      const repository = getRepositoryFromUrl(query)
+	async getRemoteSources(query?: string): Promise<RemoteSource[]> {
+		const octokit = await getOctokit();
 
-      if (repository) {
-        const raw = await octokit.repos.get(repository)
-        return [asRemoteSource(raw.data)]
-      }
-    }
+		if (query) {
+			const repository = getRepositoryFromUrl(query);
 
-    const all = await Promise.all([
-      this.getQueryRemoteSources(octokit, query),
-      this.getUserRemoteSources(octokit, query),
-    ])
+			if (repository) {
+				const raw = await octokit.repos.get(repository);
+				return [asRemoteSource(raw.data)];
+			}
+		}
 
-    const map = new Map<string, RemoteSource>()
+		const all = await Promise.all([
+			this.getQueryRemoteSources(octokit, query),
+			this.getUserRemoteSources(octokit, query),
+		]);
 
-    for (const group of all) {
-      for (const remoteSource of group) {
-        map.set(remoteSource.name, remoteSource)
-      }
-    }
+		const map = new Map<string, RemoteSource>();
 
-    return [...map.values()]
-  }
+		for (const group of all) {
+			for (const remoteSource of group) {
+				map.set(remoteSource.name, remoteSource);
+			}
+		}
 
-  private async getUserRemoteSources(
-    octokit: Octokit,
-    query?: string,
-  ): Promise<RemoteSource[]> {
-    if (!query) {
-      const user = await octokit.users.getAuthenticated({})
-      const username = user.data.login
-      const res = await octokit.repos.listForAuthenticatedUser({
-        username,
-        sort: "updated",
-        per_page: 100,
-      })
-      this.userReposCache = res.data.map(asRemoteSource)
-    }
+		return [...map.values()];
+	}
 
-    return this.userReposCache
-  }
+	private async getUserRemoteSources(octokit: Octokit, query?: string): Promise<RemoteSource[]> {
+		if (!query) {
+			const user = await octokit.users.getAuthenticated({});
+			const username = user.data.login;
+			const res = await octokit.repos.listForAuthenticatedUser({ username, sort: 'updated', per_page: 100 });
+			this.userReposCache = res.data.map(asRemoteSource);
+		}
 
-  private async getQueryRemoteSources(
-    octokit: Octokit,
-    query?: string,
-  ): Promise<RemoteSource[]> {
-    if (!query) {
-      return []
-    }
+		return this.userReposCache;
+	}
 
-    const repository = getRepositoryFromQuery(query)
+	private async getQueryRemoteSources(octokit: Octokit, query?: string): Promise<RemoteSource[]> {
+		if (!query) {
+			return [];
+		}
 
-    if (repository) {
-      query = `user:${repository.owner}+${repository.repo}`
-    }
+		const repository = getRepositoryFromQuery(query);
 
-    query += ` fork:true`
+		if (repository) {
+			query = `user:${repository.owner}+${repository.repo}`;
+		}
 
-    const raw = await octokit.search.repos({ q: query, sort: "stars" })
-    return raw.data.items.map(asRemoteSource)
-  }
+		query += ` fork:true`;
 
-  async getBranches(url: string): Promise<string[]> {
-    const repository = getRepositoryFromUrl(url)
+		const raw = await octokit.search.repos({ q: query, sort: 'stars' });
+		return raw.data.items.map(asRemoteSource);
+	}
 
-    if (!repository) {
-      return []
-    }
+	async getBranches(url: string): Promise<string[]> {
+		const repository = getRepositoryFromUrl(url);
 
-    const octokit = await getOctokit()
+		if (!repository) {
+			return [];
+		}
 
-    const branches: string[] = []
-    let page = 1
+		const octokit = await getOctokit();
 
-    while (true) {
-      const res = await octokit.repos.listBranches({
-        ...repository,
-        per_page: 100,
-        page,
-      })
+		const branches: string[] = [];
+		let page = 1;
 
-      if (res.data.length === 0) {
-        break
-      }
+		while (true) {
+			const res = await octokit.repos.listBranches({ ...repository, per_page: 100, page });
 
-      branches.push(...res.data.map((b) => b.name))
-      page++
-    }
+			if (res.data.length === 0) {
+				break;
+			}
 
-    const repo = await octokit.repos.get(repository)
-    const defaultBranch = repo.data.default_branch
+			branches.push(...res.data.map(b => b.name));
+			page++;
+		}
 
-    return branches.sort((a, b) =>
-      a === defaultBranch ? -1 : b === defaultBranch ? 1 : 0,
-    )
-  }
+		const repo = await octokit.repos.get(repository);
+		const defaultBranch = repo.data.default_branch;
 
-  async getRemoteSourceActions(url: string): Promise<RemoteSourceAction[]> {
-    const repository = getRepositoryFromUrl(url)
-    if (!repository) {
-      return []
-    }
+		return branches.sort((a, b) => a === defaultBranch ? -1 : b === defaultBranch ? 1 : 0);
+	}
 
-    return [
-      {
-        label: l10n.t("Open on GitHub"),
-        icon: "github",
-        run(branch: string) {
-          const link = getBranchLink(url, branch)
-          env.openExternal(Uri.parse(link))
-        },
-      },
-      {
-        label: l10n.t("Checkout on vscode.dev"),
-        icon: "globe",
-        run(branch: string) {
-          const link = getBranchLink(url, branch, getVscodeDevHost())
-          env.openExternal(Uri.parse(link))
-        },
-      },
-    ]
-  }
+	async getRemoteSourceActions(url: string): Promise<RemoteSourceAction[]> {
+		const repository = getRepositoryFromUrl(url);
+		if (!repository) {
+			return [];
+		}
+
+		return [{
+			label: l10n.t('Open on GitHub'),
+			icon: 'github',
+			run(branch: string) {
+				const link = getBranchLink(url, branch);
+				env.openExternal(Uri.parse(link));
+			}
+		}, {
+			label: l10n.t('Checkout on vscode.dev'),
+			icon: 'globe',
+			run(branch: string) {
+				const link = getBranchLink(url, branch, getVscodeDevHost());
+				env.openExternal(Uri.parse(link));
+			}
+		}];
+	}
 }

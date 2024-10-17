@@ -27,7 +27,7 @@ export class ElementSizeObserver extends Disposable {
 
   constructor(
     referenceDomElement: HTMLElement | null,
-    dimension: IDimension | undefined,
+    dimension: IDimension | undefined
   ) {
     super()
     this._referenceDomElement = referenceDomElement
@@ -86,7 +86,7 @@ export class ElementSizeObserver extends Disposable {
               () => {
                 alreadyObservedThisAnimationFrame = false
                 update()
-              },
+              }
             )
           }
         }
@@ -123,7 +123,7 @@ export class ElementSizeObserver extends Disposable {
 
   private measureReferenceDomElement(
     emitEvent: boolean,
-    dimension?: IDimension,
+    dimension?: IDimension
   ): void {
     let observedWidth = 0
     let observedHeight = 0

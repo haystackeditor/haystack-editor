@@ -103,35 +103,35 @@ class VisibleTextAreaData {
     public readonly modelLineNumber: number,
     public readonly distanceToModelLineStart: number,
     public readonly widthOfHiddenLineTextBefore: number,
-    public readonly distanceToModelLineEnd: number,
+    public readonly distanceToModelLineEnd: number
   ) {}
 
   prepareRender(visibleRangeProvider: IVisibleRangeProvider): void {
     const startModelPosition = new Position(
       this.modelLineNumber,
-      this.distanceToModelLineStart + 1,
+      this.distanceToModelLineStart + 1
     )
     const endModelPosition = new Position(
       this.modelLineNumber,
       this._context.viewModel.model.getLineMaxColumn(this.modelLineNumber) -
-        this.distanceToModelLineEnd,
+        this.distanceToModelLineEnd
     )
 
     this.startPosition =
       this._context.viewModel.coordinatesConverter.convertModelPositionToViewPosition(
-        startModelPosition,
+        startModelPosition
       )
     this.endPosition =
       this._context.viewModel.coordinatesConverter.convertModelPositionToViewPosition(
-        endModelPosition,
+        endModelPosition
       )
 
     if (this.startPosition.lineNumber === this.endPosition.lineNumber) {
       this.visibleTextareaStart = visibleRangeProvider.visibleRangeForPosition(
-        this.startPosition,
+        this.startPosition
       )
       this.visibleTextareaEnd = visibleRangeProvider.visibleRangeForPosition(
-        this.endPosition,
+        this.endPosition
       )
     } else {
       // TODO: what if the view positions are not on the same line?
@@ -141,7 +141,7 @@ class VisibleTextAreaData {
   }
 
   definePresentation(
-    tokenPresentation: ITokenPresentation | null,
+    tokenPresentation: ITokenPresentation | null
   ): ITokenPresentation {
     if (!this._previousPresentation) {
       // To avoid flickering, once set, always reuse a presentation throughout the entire IME session
@@ -204,7 +204,7 @@ export class TextAreaHandler extends ViewPart {
     visibleRangeProvider: IVisibleRangeProvider,
     @IKeybindingService private readonly _keybindingService: IKeybindingService,
     @IInstantiationService
-    private readonly _instantiationService: IInstantiationService,
+    private readonly _instantiationService: IInstantiationService
   ) {
     super(context)
 
@@ -223,10 +223,10 @@ export class TextAreaHandler extends ViewPart {
     this._fontInfo = options.get(EditorOption.fontInfo)
     this._lineHeight = options.get(EditorOption.lineHeight)
     this._emptySelectionClipboard = options.get(
-      EditorOption.emptySelectionClipboard,
+      EditorOption.emptySelectionClipboard
     )
     this._copyWithSyntaxHighlighting = options.get(
-      EditorOption.copyWithSyntaxHighlighting,
+      EditorOption.copyWithSyntaxHighlighting
     )
 
     this._visibleTextArea = null
@@ -240,7 +240,7 @@ export class TextAreaHandler extends ViewPart {
     this.textArea.setClassName(`inputarea ${MOUSE_CURSOR_TEXT_CSS_CLASS_NAME}`)
     this.textArea.setAttribute(
       "wrap",
-      this._textAreaWrapping && !this._visibleTextArea ? "on" : "off",
+      this._textAreaWrapping && !this._visibleTextArea ? "on" : "off"
     )
     const { tabSize } = this._context.viewModel.model.getOptions()
     this.textArea.domNode.style.tabSize = `${
@@ -253,21 +253,21 @@ export class TextAreaHandler extends ViewPart {
     this.textArea.setAttribute("aria-label", this._getAriaLabel(options))
     this.textArea.setAttribute(
       "aria-required",
-      options.get(EditorOption.ariaRequired) ? "true" : "false",
+      options.get(EditorOption.ariaRequired) ? "true" : "false"
     )
     this.textArea.setAttribute(
       "tabindex",
-      String(options.get(EditorOption.tabIndex)),
+      String(options.get(EditorOption.tabIndex))
     )
     this.textArea.setAttribute("role", "textbox")
     this.textArea.setAttribute(
       "aria-roledescription",
-      nls.localize("editor", "editor"),
+      nls.localize("editor", "editor")
     )
     this.textArea.setAttribute("aria-multiline", "true")
     this.textArea.setAttribute(
       "aria-autocomplete",
-      options.get(EditorOption.readOnly) ? "none" : "both",
+      options.get(EditorOption.readOnly) ? "none" : "both"
     )
 
     this._ensureReadOnlyAttribute()
@@ -287,7 +287,7 @@ export class TextAreaHandler extends ViewPart {
       },
       getValueLengthInRange: (
         range: Range,
-        eol: EndOfLinePreference,
+        eol: EndOfLinePreference
       ): number => {
         return this._context.viewModel.getValueLengthInRange(range, eol)
       },
@@ -301,7 +301,7 @@ export class TextAreaHandler extends ViewPart {
         const rawTextToCopy = this._context.viewModel.getPlainTextToCopy(
           this._modelSelections,
           this._emptySelectionClipboard,
-          platform.isWindows,
+          platform.isWindows
         )
         const newLineCharacter = this._context.viewModel.model.getEOL()
 
@@ -324,7 +324,7 @@ export class TextAreaHandler extends ViewPart {
         ) {
           const richText = this._context.viewModel.getRichTextToCopy(
             this._modelSelections,
-            this._emptySelectionClipboard,
+            this._emptySelectionClipboard
           )
           if (richText) {
             html = richText.html
@@ -359,7 +359,7 @@ export class TextAreaHandler extends ViewPart {
                 textBefore.length,
                 textBefore.length,
                 Range.fromPositions(position),
-                0,
+                0
               )
             }
           }
@@ -373,12 +373,12 @@ export class TextAreaHandler extends ViewPart {
             !selection.isEmpty() &&
             simpleModel.getValueLengthInRange(
               selection,
-              EndOfLinePreference.TextDefined,
+              EndOfLinePreference.TextDefined
             ) < LIMIT_CHARS
           ) {
             const text = simpleModel.getValueInRange(
               selection,
-              EndOfLinePreference.TextDefined,
+              EndOfLinePreference.TextDefined
             )
             return new TextAreaState(text, 0, text.length, selection, 0)
           }
@@ -393,7 +393,7 @@ export class TextAreaHandler extends ViewPart {
               0,
               placeholderText.length,
               null,
-              undefined,
+              undefined
             )
           }
 
@@ -416,7 +416,7 @@ export class TextAreaHandler extends ViewPart {
                 positionOffsetInWord,
                 positionOffsetInWord,
                 Range.fromPositions(position),
-                0,
+                0
               )
             }
           }
@@ -427,25 +427,25 @@ export class TextAreaHandler extends ViewPart {
           simpleModel,
           this._selections[0],
           this._accessibilityPageSize,
-          this._accessibilitySupport === AccessibilitySupport.Unknown,
+          this._accessibilitySupport === AccessibilitySupport.Unknown
         )
       },
 
       deduceModelPosition: (
         viewAnchorPosition: Position,
         deltaOffset: number,
-        lineFeedCnt: number,
+        lineFeedCnt: number
       ): Position => {
         return this._context.viewModel.deduceModelPositionRelativeToViewPosition(
           viewAnchorPosition,
           deltaOffset,
-          lineFeedCnt,
+          lineFeedCnt
         )
       },
     }
 
     const textAreaWrapper = this._register(
-      new TextAreaWrapper(this.textArea.domNode),
+      new TextAreaWrapper(this.textArea.domNode)
     )
     this._textAreaInput = this._register(
       this._instantiationService.createInstance(
@@ -458,20 +458,20 @@ export class TextAreaHandler extends ViewPart {
           isChrome: browser.isChrome,
           isFirefox: browser.isFirefox,
           isSafari: browser.isSafari,
-        },
-      ),
+        }
+      )
     )
 
     this._register(
       this._textAreaInput.onKeyDown((e: IKeyboardEvent) => {
         this._viewController.emitKeyDown(e)
-      }),
+      })
     )
 
     this._register(
       this._textAreaInput.onKeyUp((e: IKeyboardEvent) => {
         this._viewController.emitKeyUp(e)
-      }),
+      })
     )
 
     this._register(
@@ -492,15 +492,15 @@ export class TextAreaHandler extends ViewPart {
           e.text,
           pasteOnNewLine,
           multicursorText,
-          mode,
+          mode
         )
-      }),
+      })
     )
 
     this._register(
       this._textAreaInput.onCut(() => {
         this._viewController.cut()
-      }),
+      })
     )
 
     this._register(
@@ -509,14 +509,14 @@ export class TextAreaHandler extends ViewPart {
           // must be handled through the new command
           if (_debugComposition) {
             console.log(
-              ` => compositionType: <<${e.text}>>, ${e.replacePrevCharCnt}, ${e.replaceNextCharCnt}, ${e.positionDelta}`,
+              ` => compositionType: <<${e.text}>>, ${e.replacePrevCharCnt}, ${e.replaceNextCharCnt}, ${e.positionDelta}`
             )
           }
           this._viewController.compositionType(
             e.text,
             e.replacePrevCharCnt,
             e.replaceNextCharCnt,
-            e.positionDelta,
+            e.positionDelta
           )
         } else {
           if (_debugComposition) {
@@ -524,15 +524,15 @@ export class TextAreaHandler extends ViewPart {
           }
           this._viewController.type(e.text)
         }
-      }),
+      })
     )
 
     this._register(
       this._textAreaInput.onSelectionChangeRequest(
         (modelSelection: Selection) => {
           this._viewController.setSelection(modelSelection)
-        },
-      ),
+        }
+      )
     )
 
     this._register(
@@ -563,11 +563,11 @@ export class TextAreaHandler extends ViewPart {
           // Find the text that is on the current line before the selection
           const textBeforeSelection = ta.value.substring(
             0,
-            Math.min(ta.selectionStart, ta.selectionEnd),
+            Math.min(ta.selectionStart, ta.selectionEnd)
           )
           const lineFeedOffset1 = textBeforeSelection.lastIndexOf("\n")
           const lineTextBeforeSelection = textBeforeSelection.substring(
-            lineFeedOffset1 + 1,
+            lineFeedOffset1 + 1
           )
 
           // We now search to see if we should hide some part of it (if it contains \t)
@@ -577,20 +577,20 @@ export class TextAreaHandler extends ViewPart {
           const startModelPosition = modelSelection.getStartPosition()
           const visibleBeforeCharCount = Math.min(
             startModelPosition.column - 1,
-            desiredVisibleBeforeCharCount,
+            desiredVisibleBeforeCharCount
           )
           const distanceToModelLineStart =
             startModelPosition.column - 1 - visibleBeforeCharCount
           const hiddenLineTextBefore = lineTextBeforeSelection.substring(
             0,
-            lineTextBeforeSelection.length - visibleBeforeCharCount,
+            lineTextBeforeSelection.length - visibleBeforeCharCount
           )
           const { tabSize } = this._context.viewModel.model.getOptions()
           const widthOfHiddenTextBefore = measureText(
             this.textArea.domNode.ownerDocument,
             hiddenLineTextBefore,
             this._fontInfo,
-            tabSize,
+            tabSize
           )
 
           return { distanceToModelLineStart, widthOfHiddenTextBefore }
@@ -599,7 +599,7 @@ export class TextAreaHandler extends ViewPart {
         const { distanceToModelLineEnd } = (() => {
           // Find the text that is on the current line after the selection
           const textAfterSelection = ta.value.substring(
-            Math.max(ta.selectionStart, ta.selectionEnd),
+            Math.max(ta.selectionStart, ta.selectionEnd)
           )
           const lineFeedOffset2 = textAfterSelection.indexOf("\n")
           const lineTextAfterSelection =
@@ -615,13 +615,13 @@ export class TextAreaHandler extends ViewPart {
           const endModelPosition = modelSelection.getEndPosition()
           const visibleAfterCharCount = Math.min(
             this._context.viewModel.model.getLineMaxColumn(
-              endModelPosition.lineNumber,
+              endModelPosition.lineNumber
             ) - endModelPosition.column,
-            desiredVisibleAfterCharCount,
+            desiredVisibleAfterCharCount
           )
           const distanceToModelLineEnd =
             this._context.viewModel.model.getLineMaxColumn(
-              endModelPosition.lineNumber,
+              endModelPosition.lineNumber
             ) -
             endModelPosition.column -
             visibleAfterCharCount
@@ -635,7 +635,7 @@ export class TextAreaHandler extends ViewPart {
           true,
           Range.fromPositions(this._selections[0].getStartPosition()),
           viewEvents.VerticalRevealType.Simple,
-          ScrollType.Immediate,
+          ScrollType.Immediate
         )
 
         this._visibleTextArea = new VisibleTextAreaData(
@@ -643,13 +643,13 @@ export class TextAreaHandler extends ViewPart {
           modelSelection.startLineNumber,
           distanceToModelLineStart,
           widthOfHiddenTextBefore,
-          distanceToModelLineEnd,
+          distanceToModelLineEnd
         )
 
         // We turn off wrapping if the <textarea> becomes visible for composition
         this.textArea.setAttribute(
           "wrap",
-          this._textAreaWrapping && !this._visibleTextArea ? "on" : "off",
+          this._textAreaWrapping && !this._visibleTextArea ? "on" : "off"
         )
 
         this._visibleTextArea.prepareRender(this._visibleRangeProvider)
@@ -657,12 +657,12 @@ export class TextAreaHandler extends ViewPart {
 
         // Show the textarea
         this.textArea.setClassName(
-          `inputarea ${MOUSE_CURSOR_TEXT_CSS_CLASS_NAME} ime-input`,
+          `inputarea ${MOUSE_CURSOR_TEXT_CSS_CLASS_NAME} ime-input`
         )
 
         this._viewController.compositionStart()
         this._context.viewModel.onCompositionStart()
-      }),
+      })
     )
 
     this._register(
@@ -673,7 +673,7 @@ export class TextAreaHandler extends ViewPart {
 
         this._visibleTextArea.prepareRender(this._visibleRangeProvider)
         this._render()
-      }),
+      })
     )
 
     this._register(
@@ -683,35 +683,35 @@ export class TextAreaHandler extends ViewPart {
         // We turn on wrapping as necessary if the <textarea> hides after composition
         this.textArea.setAttribute(
           "wrap",
-          this._textAreaWrapping && !this._visibleTextArea ? "on" : "off",
+          this._textAreaWrapping && !this._visibleTextArea ? "on" : "off"
         )
 
         this._render()
 
         this.textArea.setClassName(
-          `inputarea ${MOUSE_CURSOR_TEXT_CSS_CLASS_NAME}`,
+          `inputarea ${MOUSE_CURSOR_TEXT_CSS_CLASS_NAME}`
         )
         this._viewController.compositionEnd()
         this._context.viewModel.onCompositionEnd()
-      }),
+      })
     )
 
     this._register(
       this._textAreaInput.onFocus(() => {
         this._context.viewModel.setHasFocus(true)
-      }),
+      })
     )
 
     this._register(
       this._textAreaInput.onBlur(() => {
         this._context.viewModel.setHasFocus(false)
-      }),
+      })
     )
 
     this._register(
       IME.onDidChange(() => {
         this._ensureReadOnlyAttribute()
-      }),
+      })
     )
   }
 
@@ -726,7 +726,7 @@ export class TextAreaHandler extends ViewPart {
   private _getAndroidWordAtPosition(position: Position): [string, number] {
     const ANDROID_WORD_SEPARATORS = '`~!@#$%^&*()-=+[{]}\\|;:",.<>/?'
     const lineContent = this._context.viewModel.getLineContent(
-      position.lineNumber,
+      position.lineNumber
     )
     const wordSeparators = getMapForWordSeparators(ANDROID_WORD_SEPARATORS, [])
 
@@ -771,11 +771,11 @@ export class TextAreaHandler extends ViewPart {
 
   private _getWordBeforePosition(position: Position): string {
     const lineContent = this._context.viewModel.getLineContent(
-      position.lineNumber,
+      position.lineNumber
     )
     const wordSeparators = getMapForWordSeparators(
       this._context.configuration.options.get(EditorOption.wordSeparators),
-      [],
+      []
     )
 
     let column = position.column
@@ -795,7 +795,7 @@ export class TextAreaHandler extends ViewPart {
   private _getCharacterBeforePosition(position: Position): string {
     if (position.column > 1) {
       const lineContent = this._context.viewModel.getLineContent(
-        position.lineNumber,
+        position.lineNumber
       )
       const charBefore = lineContent.charAt(position.column - 2)
       if (!strings.isHighSurrogate(charBefore.charCodeAt(0))) {
@@ -819,28 +819,28 @@ export class TextAreaHandler extends ViewPart {
         ?.getAriaLabel()
       const editorNotAccessibleMessage = nls.localize(
         "accessibilityModeOff",
-        "The editor is not accessible at this time.",
+        "The editor is not accessible at this time."
       )
       if (toggleKeybindingLabel) {
         return nls.localize(
           "accessibilityOffAriaLabel",
           "{0} To enable screen reader optimized mode, use {1}",
           editorNotAccessibleMessage,
-          toggleKeybindingLabel,
+          toggleKeybindingLabel
         )
       } else if (runCommandKeybindingLabel) {
         return nls.localize(
           "accessibilityOffAriaLabelNoKb",
           "{0} To enable screen reader optimized mode, open the quick pick with {1} and run the command Toggle Screen Reader Accessibility Mode, which is currently not triggerable via keyboard.",
           editorNotAccessibleMessage,
-          runCommandKeybindingLabel,
+          runCommandKeybindingLabel
         )
       } else if (keybindingEditorKeybindingLabel) {
         return nls.localize(
           "accessibilityOffAriaLabelNoKbs",
           "{0} Please assign a keybinding for the command Toggle Screen Reader Accessibility Mode by accessing the keybindings editor with {1} and run it.",
           editorNotAccessibleMessage,
-          keybindingEditorKeybindingLabel,
+          keybindingEditorKeybindingLabel
         )
       } else {
         // SOS
@@ -853,7 +853,7 @@ export class TextAreaHandler extends ViewPart {
   private _setAccessibilityOptions(options: IComputedEditorOptions): void {
     this._accessibilitySupport = options.get(EditorOption.accessibilitySupport)
     const accessibilityPageSize = options.get(
-      EditorOption.accessibilityPageSize,
+      EditorOption.accessibilityPageSize
     )
     if (
       this._accessibilitySupport === AccessibilitySupport.Enabled &&
@@ -878,7 +878,7 @@ export class TextAreaHandler extends ViewPart {
       const fontInfo = options.get(EditorOption.fontInfo)
       this._textAreaWrapping = true
       this._textAreaWidth = Math.round(
-        wrappingColumn * fontInfo.typicalHalfwidthCharacterWidth,
+        wrappingColumn * fontInfo.typicalHalfwidthCharacterWidth
       )
     } else {
       this._textAreaWrapping = false
@@ -889,7 +889,7 @@ export class TextAreaHandler extends ViewPart {
   // --- begin event handlers
 
   public override onConfigurationChanged(
-    e: viewEvents.ViewConfigurationChangedEvent,
+    e: viewEvents.ViewConfigurationChangedEvent
   ): boolean {
     const options = this._context.configuration.options
     const layoutInfo = options.get(EditorOption.layoutInfo)
@@ -901,14 +901,14 @@ export class TextAreaHandler extends ViewPart {
     this._fontInfo = options.get(EditorOption.fontInfo)
     this._lineHeight = options.get(EditorOption.lineHeight)
     this._emptySelectionClipboard = options.get(
-      EditorOption.emptySelectionClipboard,
+      EditorOption.emptySelectionClipboard
     )
     this._copyWithSyntaxHighlighting = options.get(
-      EditorOption.copyWithSyntaxHighlighting,
+      EditorOption.copyWithSyntaxHighlighting
     )
     this.textArea.setAttribute(
       "wrap",
-      this._textAreaWrapping && !this._visibleTextArea ? "on" : "off",
+      this._textAreaWrapping && !this._visibleTextArea ? "on" : "off"
     )
     const { tabSize } = this._context.viewModel.model.getOptions()
     this.textArea.domNode.style.tabSize = `${
@@ -917,11 +917,11 @@ export class TextAreaHandler extends ViewPart {
     this.textArea.setAttribute("aria-label", this._getAriaLabel(options))
     this.textArea.setAttribute(
       "aria-required",
-      options.get(EditorOption.ariaRequired) ? "true" : "false",
+      options.get(EditorOption.ariaRequired) ? "true" : "false"
     )
     this.textArea.setAttribute(
       "tabindex",
-      String(options.get(EditorOption.tabIndex)),
+      String(options.get(EditorOption.tabIndex))
     )
 
     if (
@@ -938,7 +938,7 @@ export class TextAreaHandler extends ViewPart {
     return true
   }
   public override onCursorStateChanged(
-    e: viewEvents.ViewCursorStateChangedEvent,
+    e: viewEvents.ViewCursorStateChangedEvent
   ): boolean {
     this._selections = e.selections.slice(0)
     this._modelSelections = e.modelSelections.slice(0)
@@ -948,7 +948,7 @@ export class TextAreaHandler extends ViewPart {
     return true
   }
   public override onDecorationsChanged(
-    e: viewEvents.ViewDecorationsChangedEvent,
+    e: viewEvents.ViewDecorationsChangedEvent
   ): boolean {
     // true for inline decorations that can end up relayouting text
     return true
@@ -963,12 +963,12 @@ export class TextAreaHandler extends ViewPart {
     return true
   }
   public override onLinesInserted(
-    e: viewEvents.ViewLinesInsertedEvent,
+    e: viewEvents.ViewLinesInsertedEvent
   ): boolean {
     return true
   }
   public override onScrollChanged(
-    e: viewEvents.ViewScrollChangedEvent,
+    e: viewEvents.ViewScrollChangedEvent
   ): boolean {
     this._scrollLeft = e.scrollLeft
     this._scrollTop = e.scrollTop
@@ -1004,7 +1004,7 @@ export class TextAreaHandler extends ViewPart {
       this.textArea.setAttribute("aria-autocomplete", "list")
       this.textArea.setAttribute(
         "aria-activedescendant",
-        options.activeDescendant,
+        options.activeDescendant
       )
     } else {
       this.textArea.setAttribute("aria-haspopup", "false")
@@ -1039,10 +1039,10 @@ export class TextAreaHandler extends ViewPart {
   public prepareRender(ctx: RenderingContext): void {
     this._primaryCursorPosition = new Position(
       this._selections[0].positionLineNumber,
-      this._selections[0].positionColumn,
+      this._selections[0].positionColumn
     )
     this._primaryCursorVisibleRange = ctx.visibleRangeForPosition(
-      this._primaryCursorPosition,
+      this._primaryCursorPosition
     )
     this._visibleTextArea?.prepareRender(ctx)
   }
@@ -1070,13 +1070,13 @@ export class TextAreaHandler extends ViewPart {
       ) {
         const top =
           this._context.viewLayout.getVerticalOffsetForLineNumber(
-            this._primaryCursorPosition.lineNumber,
+            this._primaryCursorPosition.lineNumber
           ) - this._scrollTop
         const lineCount = this._newlinecount(
           this.textArea.domNode.value.substr(
             0,
-            this.textArea.domNode.selectionStart,
-          ),
+            this.textArea.domNode.selectionStart
+          )
         )
 
         let scrollLeft = this._visibleTextArea.widthOfHiddenLineTextBefore
@@ -1106,19 +1106,19 @@ export class TextAreaHandler extends ViewPart {
 
         // Try to render the textarea with the color/font style to match the text under it
         const viewLineData = this._context.viewModel.getViewLineData(
-          startPosition.lineNumber,
+          startPosition.lineNumber
         )
         const startTokenIndex = viewLineData.tokens.findTokenIndexAtOffset(
-          startPosition.column - 1,
+          startPosition.column - 1
         )
         const endTokenIndex = viewLineData.tokens.findTokenIndexAtOffset(
-          endPosition.column - 1,
+          endPosition.column - 1
         )
         const textareaSpansSingleToken = startTokenIndex === endTokenIndex
         const presentation = this._visibleTextArea.definePresentation(
           textareaSpansSingleToken
             ? viewLineData.tokens.getPresentation(startTokenIndex)
-            : null,
+            : null
         )
 
         this.textArea.domNode.scrollTop = lineCount * this._lineHeight
@@ -1164,7 +1164,7 @@ export class TextAreaHandler extends ViewPart {
 
     const top =
       this._context.viewLayout.getVerticalOffsetForLineNumber(
-        this._selections[0].positionLineNumber,
+        this._selections[0].positionLineNumber
       ) - this._scrollTop
     if (top < 0 || top > this._contentHeight) {
       // cursor is outside the viewport
@@ -1196,8 +1196,8 @@ export class TextAreaHandler extends ViewPart {
         this._newlinecount(
           this.textArea.domNode.value.substr(
             0,
-            this.textArea.domNode.selectionStart,
-          ),
+            this.textArea.domNode.selectionStart
+          )
         )
       this.textArea.domNode.scrollTop = lineCount * this._lineHeight
       return
@@ -1252,7 +1252,7 @@ export class TextAreaHandler extends ViewPart {
     ta.setHeight(renderData.height)
 
     ta.setColor(
-      renderData.color ? Color.Format.CSS.formatHex(renderData.color) : "",
+      renderData.color ? Color.Format.CSS.formatHex(renderData.color) : ""
     )
     ta.setFontStyle(renderData.italic ? "italic" : "")
     if (renderData.bold) {
@@ -1262,7 +1262,7 @@ export class TextAreaHandler extends ViewPart {
     ta.setTextDecoration(
       `${renderData.underline ? " underline" : ""}${
         renderData.strikethrough ? " line-through" : ""
-      }`,
+      }`
     )
 
     tac.setTop(renderData.useCover ? renderData.top : 0)
@@ -1274,7 +1274,7 @@ export class TextAreaHandler extends ViewPart {
 
     if (options.get(EditorOption.glyphMargin)) {
       tac.setClassName(
-        "monaco-editor-background textAreaCover " + Margin.OUTER_CLASS_NAME,
+        "monaco-editor-background textAreaCover " + Margin.OUTER_CLASS_NAME
       )
     } else {
       if (
@@ -1283,7 +1283,7 @@ export class TextAreaHandler extends ViewPart {
       ) {
         tac.setClassName(
           "monaco-editor-background textAreaCover " +
-            LineNumbersOverlay.CLASS_NAME,
+            LineNumbersOverlay.CLASS_NAME
         )
       } else {
         tac.setClassName("monaco-editor-background textAreaCover")
@@ -1311,7 +1311,7 @@ function measureText(
   targetDocument: Document,
   text: string,
   fontInfo: FontInfo,
-  tabSize: number,
+  tabSize: number
 ): number {
   if (text.length === 0) {
     return 0

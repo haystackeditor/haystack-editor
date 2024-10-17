@@ -9,14 +9,11 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-declare module "vscode" {
-  export namespace authentication {
-    /**
-     * @deprecated Use {@link getSession()} {@link AuthenticationGetSessionOptions.silent} instead.
-     */
-    export function hasSession(
-      providerId: string,
-      scopes: readonly string[],
-    ): Thenable<boolean>
-  }
+declare module 'vscode' {
+	export namespace authentication {
+		/**
+		 * @deprecated Use {@link getSession()} {@link AuthenticationGetSessionOptions.silent} instead.
+		 */
+		export function hasSession(providerId: string, scopes: readonly string[]): Thenable<boolean>;
+	}
 }

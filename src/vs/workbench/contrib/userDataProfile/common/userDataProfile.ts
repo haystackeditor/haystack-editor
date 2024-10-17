@@ -9,6 +9,8 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { IEditorPane } from "vs/workbench/common/editor"
+import { IEditorPane } from 'vs/workbench/common/editor';
 
-export interface IUserDataProfilesEditor extends IEditorPane {}
+export interface IUserDataProfilesEditor extends IEditorPane {
+
+}

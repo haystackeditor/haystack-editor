@@ -9,130 +9,118 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { INativeWorkbenchEnvironmentService } from "vs/workbench/services/environment/electron-sandbox/environmentService"
-import { Registry } from "vs/platform/registry/common/platform"
-import {
-  IConfigurationNode,
-  IConfigurationRegistry,
-  Extensions,
-  IConfigurationPropertySchema,
-} from "vs/platform/configuration/common/configurationRegistry"
-import { IExtensionService } from "vs/workbench/services/extensions/common/extensions"
-import { ICommandService } from "vs/platform/commands/common/commands"
-import { IFileService } from "vs/platform/files/common/files"
-import { VSBuffer } from "vs/base/common/buffer"
-import { URI } from "vs/base/common/uri"
-import { IProductService } from "vs/platform/product/common/productService"
+import { INativeWorkbenchEnvironmentService } from 'vs/workbench/services/environment/electron-sandbox/environmentService';
+import { Registry } from 'vs/platform/registry/common/platform';
+import { IConfigurationNode, IConfigurationRegistry, Extensions, IConfigurationPropertySchema } from 'vs/platform/configuration/common/configurationRegistry';
+import { IExtensionService } from 'vs/workbench/services/extensions/common/extensions';
+import { ICommandService } from 'vs/platform/commands/common/commands';
+import { IFileService } from 'vs/platform/files/common/files';
+import { VSBuffer } from 'vs/base/common/buffer';
+import { URI } from 'vs/base/common/uri';
+import { IProductService } from 'vs/platform/product/common/productService';
 
 interface IExportedConfigurationNode {
-  name: string
-  description: string
-  default: any
-  type?: string | string[]
-  enum?: any[]
-  enumDescriptions?: string[]
+	name: string;
+	description: string;
+	default: any;
+	type?: string | string[];
+	enum?: any[];
+	enumDescriptions?: string[];
 }
 
 interface IConfigurationExport {
-  settings: IExportedConfigurationNode[]
-  buildTime: number
-  commit?: string
-  buildNumber?: number
+	settings: IExportedConfigurationNode[];
+	buildTime: number;
+	commit?: string;
+	buildNumber?: number;
 }
 
 export class DefaultConfigurationExportHelper {
-  constructor(
-    @INativeWorkbenchEnvironmentService
-    environmentService: INativeWorkbenchEnvironmentService,
-    @IExtensionService private readonly extensionService: IExtensionService,
-    @ICommandService private readonly commandService: ICommandService,
-    @IFileService private readonly fileService: IFileService,
-    @IProductService private readonly productService: IProductService,
-  ) {
-    const exportDefaultConfigurationPath =
-      environmentService.args["export-default-configuration"]
-    if (exportDefaultConfigurationPath) {
-      this.writeConfigModelAndQuit(URI.file(exportDefaultConfigurationPath))
-    }
-  }
 
-  private async writeConfigModelAndQuit(target: URI): Promise<void> {
-    try {
-      await this.extensionService.whenInstalledExtensionsRegistered()
-      await this.writeConfigModel(target)
-    } finally {
-      this.commandService.executeCommand("workbench.action.quit")
-    }
-  }
+	constructor(
+		@INativeWorkbenchEnvironmentService environmentService: INativeWorkbenchEnvironmentService,
+		@IExtensionService private readonly extensionService: IExtensionService,
+		@ICommandService private readonly commandService: ICommandService,
+		@IFileService private readonly fileService: IFileService,
+		@IProductService private readonly productService: IProductService
+	) {
+		const exportDefaultConfigurationPath = environmentService.args['export-default-configuration'];
+		if (exportDefaultConfigurationPath) {
+			this.writeConfigModelAndQuit(URI.file(exportDefaultConfigurationPath));
+		}
+	}
 
-  private async writeConfigModel(target: URI): Promise<void> {
-    const config = this.getConfigModel()
+	private async writeConfigModelAndQuit(target: URI): Promise<void> {
+		try {
+			await this.extensionService.whenInstalledExtensionsRegistered();
+			await this.writeConfigModel(target);
+		} finally {
+			this.commandService.executeCommand('workbench.action.quit');
+		}
+	}
 
-    const resultString = JSON.stringify(config, undefined, "  ")
-    await this.fileService.writeFile(target, VSBuffer.fromString(resultString))
-  }
+	private async writeConfigModel(target: URI): Promise<void> {
+		const config = this.getConfigModel();
 
-  private getConfigModel(): IConfigurationExport {
-    const configRegistry = Registry.as<IConfigurationRegistry>(
-      Extensions.Configuration,
-    )
-    const configurations = configRegistry.getConfigurations().slice()
-    const settings: IExportedConfigurationNode[] = []
-    const processedNames = new Set<string>()
+		const resultString = JSON.stringify(config, undefined, '  ');
+		await this.fileService.writeFile(target, VSBuffer.fromString(resultString));
+	}
 
-    const processProperty = (
-      name: string,
-      prop: IConfigurationPropertySchema,
-    ) => {
-      if (processedNames.has(name)) {
-        console.warn("Setting is registered twice: " + name)
-        return
-      }
+	private getConfigModel(): IConfigurationExport {
+		const configRegistry = Registry.as<IConfigurationRegistry>(Extensions.Configuration);
+		const configurations = configRegistry.getConfigurations().slice();
+		const settings: IExportedConfigurationNode[] = [];
+		const processedNames = new Set<string>();
 
-      processedNames.add(name)
-      const propDetails: IExportedConfigurationNode = {
-        name,
-        description: prop.description || prop.markdownDescription || "",
-        default: prop.default,
-        type: prop.type,
-      }
+		const processProperty = (name: string, prop: IConfigurationPropertySchema) => {
+			if (processedNames.has(name)) {
+				console.warn('Setting is registered twice: ' + name);
+				return;
+			}
 
-      if (prop.enum) {
-        propDetails.enum = prop.enum
-      }
+			processedNames.add(name);
+			const propDetails: IExportedConfigurationNode = {
+				name,
+				description: prop.description || prop.markdownDescription || '',
+				default: prop.default,
+				type: prop.type
+			};
 
-      if (prop.enumDescriptions || prop.markdownEnumDescriptions) {
-        propDetails.enumDescriptions =
-          prop.enumDescriptions || prop.markdownEnumDescriptions
-      }
+			if (prop.enum) {
+				propDetails.enum = prop.enum;
+			}
 
-      settings.push(propDetails)
-    }
+			if (prop.enumDescriptions || prop.markdownEnumDescriptions) {
+				propDetails.enumDescriptions = prop.enumDescriptions || prop.markdownEnumDescriptions;
+			}
 
-    const processConfig = (config: IConfigurationNode) => {
-      if (config.properties) {
-        for (const name in config.properties) {
-          processProperty(name, config.properties[name])
-        }
-      }
+			settings.push(propDetails);
+		};
 
-      config.allOf?.forEach(processConfig)
-    }
+		const processConfig = (config: IConfigurationNode) => {
+			if (config.properties) {
+				for (const name in config.properties) {
+					processProperty(name, config.properties[name]);
+				}
+			}
 
-    configurations.forEach(processConfig)
+			config.allOf?.forEach(processConfig);
+		};
 
-    const excludedProps = configRegistry.getExcludedConfigurationProperties()
-    for (const name in excludedProps) {
-      processProperty(name, excludedProps[name])
-    }
+		configurations.forEach(processConfig);
 
-    const result: IConfigurationExport = {
-      settings: settings.sort((a, b) => a.name.localeCompare(b.name)),
-      buildTime: Date.now(),
-      commit: this.productService.commit,
-      buildNumber: this.productService.settingsSearchBuildId,
-    }
+		const excludedProps = configRegistry.getExcludedConfigurationProperties();
+		for (const name in excludedProps) {
+			processProperty(name, excludedProps[name]);
+		}
 
-    return result
-  }
+		const result: IConfigurationExport = {
+			settings: settings.sort((a, b) => a.name.localeCompare(b.name)),
+			buildTime: Date.now(),
+			commit: this.productService.commit,
+			buildNumber: this.productService.settingsSearchBuildId
+		};
+
+		return result;
+	}
 }

@@ -9,94 +9,87 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { ServicesAccessor } from "vs/editor/browser/editorExtensions"
-import { localize } from "vs/nls"
-import { Action2, registerAction2 } from "vs/platform/actions/common/actions"
-import { IConfigurationService } from "vs/platform/configuration/common/configuration"
-import { NotebookSetting } from "vs/workbench/contrib/notebook/common/notebookCommon"
+import { ServicesAccessor } from 'vs/editor/browser/editorExtensions';
+import { localize } from 'vs/nls';
+import { Action2, registerAction2 } from 'vs/platform/actions/common/actions';
+import { IConfigurationService } from 'vs/platform/configuration/common/configuration';
+import { NotebookSetting } from 'vs/workbench/contrib/notebook/common/notebookCommon';
 
 export enum NotebookProfileType {
-  default = "default",
-  jupyter = "jupyter",
-  colab = "colab",
+	default = 'default',
+	jupyter = 'jupyter',
+	colab = 'colab'
 }
 
 const profiles = {
-  [NotebookProfileType.default]: {
-    [NotebookSetting.focusIndicator]: "gutter",
-    [NotebookSetting.insertToolbarLocation]: "both",
-    [NotebookSetting.globalToolbar]: true,
-    [NotebookSetting.cellToolbarLocation]: { default: "right" },
-    [NotebookSetting.compactView]: true,
-    [NotebookSetting.showCellStatusBar]: "visible",
-    [NotebookSetting.consolidatedRunButton]: true,
-    [NotebookSetting.undoRedoPerCell]: false,
-  },
-  [NotebookProfileType.jupyter]: {
-    [NotebookSetting.focusIndicator]: "gutter",
-    [NotebookSetting.insertToolbarLocation]: "notebookToolbar",
-    [NotebookSetting.globalToolbar]: true,
-    [NotebookSetting.cellToolbarLocation]: { default: "left" },
-    [NotebookSetting.compactView]: true,
-    [NotebookSetting.showCellStatusBar]: "visible",
-    [NotebookSetting.consolidatedRunButton]: false,
-    [NotebookSetting.undoRedoPerCell]: true,
-  },
-  [NotebookProfileType.colab]: {
-    [NotebookSetting.focusIndicator]: "border",
-    [NotebookSetting.insertToolbarLocation]: "betweenCells",
-    [NotebookSetting.globalToolbar]: false,
-    [NotebookSetting.cellToolbarLocation]: { default: "right" },
-    [NotebookSetting.compactView]: false,
-    [NotebookSetting.showCellStatusBar]: "hidden",
-    [NotebookSetting.consolidatedRunButton]: true,
-    [NotebookSetting.undoRedoPerCell]: false,
-  },
-}
+	[NotebookProfileType.default]: {
+		[NotebookSetting.focusIndicator]: 'gutter',
+		[NotebookSetting.insertToolbarLocation]: 'both',
+		[NotebookSetting.globalToolbar]: true,
+		[NotebookSetting.cellToolbarLocation]: { default: 'right' },
+		[NotebookSetting.compactView]: true,
+		[NotebookSetting.showCellStatusBar]: 'visible',
+		[NotebookSetting.consolidatedRunButton]: true,
+		[NotebookSetting.undoRedoPerCell]: false
+	},
+	[NotebookProfileType.jupyter]: {
+		[NotebookSetting.focusIndicator]: 'gutter',
+		[NotebookSetting.insertToolbarLocation]: 'notebookToolbar',
+		[NotebookSetting.globalToolbar]: true,
+		[NotebookSetting.cellToolbarLocation]: { default: 'left' },
+		[NotebookSetting.compactView]: true,
+		[NotebookSetting.showCellStatusBar]: 'visible',
+		[NotebookSetting.consolidatedRunButton]: false,
+		[NotebookSetting.undoRedoPerCell]: true
+	},
+	[NotebookProfileType.colab]: {
+		[NotebookSetting.focusIndicator]: 'border',
+		[NotebookSetting.insertToolbarLocation]: 'betweenCells',
+		[NotebookSetting.globalToolbar]: false,
+		[NotebookSetting.cellToolbarLocation]: { default: 'right' },
+		[NotebookSetting.compactView]: false,
+		[NotebookSetting.showCellStatusBar]: 'hidden',
+		[NotebookSetting.consolidatedRunButton]: true,
+		[NotebookSetting.undoRedoPerCell]: false
+	}
+};
 
-async function applyProfile(
-  configService: IConfigurationService,
-  profile: Record<string, any>,
-): Promise<void> {
-  const promises = []
-  for (const settingKey in profile) {
-    promises.push(configService.updateValue(settingKey, profile[settingKey]))
-  }
+async function applyProfile(configService: IConfigurationService, profile: Record<string, any>): Promise<void> {
+	const promises = [];
+	for (const settingKey in profile) {
+		promises.push(configService.updateValue(settingKey, profile[settingKey]));
+	}
 
-  await Promise.all(promises)
+	await Promise.all(promises);
 }
 
 export interface ISetProfileArgs {
-  profile: NotebookProfileType
+	profile: NotebookProfileType;
 }
 
-registerAction2(
-  class extends Action2 {
-    constructor() {
-      super({
-        id: "notebook.setProfile",
-        title: localize("setProfileTitle", "Set Profile"),
-      })
-    }
+registerAction2(class extends Action2 {
+	constructor() {
+		super({
+			id: 'notebook.setProfile',
+			title: localize('setProfileTitle', "Set Profile")
+		});
+	}
 
-    async run(accessor: ServicesAccessor, args: unknown): Promise<void> {
-      if (!isSetProfileArgs(args)) {
-        return
-      }
+	async run(accessor: ServicesAccessor, args: unknown): Promise<void> {
+		if (!isSetProfileArgs(args)) {
+			return;
+		}
 
-      const configService = accessor.get(IConfigurationService)
-      return applyProfile(configService, profiles[args.profile])
-    }
-  },
-)
+		const configService = accessor.get(IConfigurationService);
+		return applyProfile(configService, profiles[args.profile]);
+	}
+});
 
 function isSetProfileArgs(args: unknown): args is ISetProfileArgs {
-  const setProfileArgs = args as ISetProfileArgs
-  return (
-    setProfileArgs.profile === NotebookProfileType.colab ||
-    setProfileArgs.profile === NotebookProfileType.default ||
-    setProfileArgs.profile === NotebookProfileType.jupyter
-  )
+	const setProfileArgs = args as ISetProfileArgs;
+	return setProfileArgs.profile === NotebookProfileType.colab ||
+		setProfileArgs.profile === NotebookProfileType.default ||
+		setProfileArgs.profile === NotebookProfileType.jupyter;
 }
 
 // export class NotebookProfileContribution extends Disposable {

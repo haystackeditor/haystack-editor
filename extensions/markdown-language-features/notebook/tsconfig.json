@@ -1,10 +1,14 @@
 {
-  "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    "outDir": "./dist/",
-    "jsx": "react",
-    "allowSyntheticDefaultImports": true,
-    "module": "es2020",
-    "lib": ["es2018", "DOM", "DOM.Iterable"]
-  }
+	"extends": "../../tsconfig.base.json",
+	"compilerOptions": {
+		"outDir": "./dist/",
+		"jsx": "react",
+		"allowSyntheticDefaultImports": true,
+		"module": "es2020",
+		"lib": [
+			"es2018",
+			"DOM",
+			"DOM.Iterable"
+		]
+	}
 }

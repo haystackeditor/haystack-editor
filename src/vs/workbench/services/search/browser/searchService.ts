@@ -64,7 +64,7 @@ export class RemoteSearchService extends SearchService {
     @IFileService fileService: IFileService,
     @IInstantiationService
     private readonly instantiationService: IInstantiationService,
-    @IUriIdentityService uriIdentityService: IUriIdentityService,
+    @IUriIdentityService uriIdentityService: IUriIdentityService
   ) {
     super(
       modelService,
@@ -73,20 +73,20 @@ export class RemoteSearchService extends SearchService {
       logService,
       extensionService,
       fileService,
-      uriIdentityService,
+      uriIdentityService
     )
     const searchProvider = this.instantiationService.createInstance(
-      LocalFileSearchWorkerClient,
+      LocalFileSearchWorkerClient
     )
     this.registerSearchResultProvider(
       Schemas.file,
       SearchProviderType.file,
-      searchProvider,
+      searchProvider
     )
     this.registerSearchResultProvider(
       Schemas.file,
       SearchProviderType.text,
-      searchProvider,
+      searchProvider
     )
   }
 }
@@ -113,7 +113,7 @@ export class LocalFileSearchWorkerClient
 
   constructor(
     @IFileService private fileService: IFileService,
-    @IUriIdentityService private uriIdentityService: IUriIdentityService,
+    @IUriIdentityService private uriIdentityService: IUriIdentityService
   ) {
     super()
     this._worker = null
@@ -137,7 +137,7 @@ export class LocalFileSearchWorkerClient
   async textSearch(
     query: ITextQuery,
     onProgress?: (p: ISearchProgressItem) => void,
-    token?: CancellationToken,
+    token?: CancellationToken
   ): Promise<ISearchComplete> {
     try {
       const queryDisposables = new DisposableStore()
@@ -152,7 +152,7 @@ export class LocalFileSearchWorkerClient
           const queryId = this.queryId++
           queryDisposables.add(
             token?.onCancellationRequested((e) => this.cancelQuery(queryId)) ||
-              Disposable.None,
+              Disposable.None
           )
 
           const handle: FileSystemHandle | undefined =
@@ -168,7 +168,7 @@ export class LocalFileSearchWorkerClient
           // force resource to revive using URI.revive.
           // TODO @andrea see why we can't just use `revive()` below. For some reason, (<MarshalledObject>obj).$mid was undefined for result.resource
           const reviveMatch = (
-            result: IFileMatch<UriComponents>,
+            result: IFileMatch<UriComponents>
           ): IFileMatch => ({
             resource: URI.revive(result.resource),
             results: revive(result.results),
@@ -179,7 +179,7 @@ export class LocalFileSearchWorkerClient
               if (e.queryId === queryId) {
                 onProgress?.(reviveMatch(e.match))
               }
-            }),
+            })
           )
 
           const ignorePathCasing =
@@ -189,7 +189,7 @@ export class LocalFileSearchWorkerClient
             query,
             fq,
             ignorePathCasing,
-            queryId,
+            queryId
           )
           for (const folderResult of folderResults.results) {
             results.push(revive(folderResult))
@@ -198,7 +198,7 @@ export class LocalFileSearchWorkerClient
           if (folderResults.limitHit) {
             limitHit = true
           }
-        }),
+        })
       )
 
       queryDisposables.dispose()
@@ -212,7 +212,7 @@ export class LocalFileSearchWorkerClient
           {
             text: localize(
               "errorSearchText",
-              "Unable to search with Web Worker text searcher",
+              "Unable to search with Web Worker text searcher"
             ),
             type: TextSearchCompleteMessageType.Warning,
           },
@@ -223,7 +223,7 @@ export class LocalFileSearchWorkerClient
 
   async fileSearch(
     query: IFileQuery,
-    token?: CancellationToken,
+    token?: CancellationToken
   ): Promise<ISearchComplete> {
     try {
       const queryDisposables = new DisposableStore()
@@ -236,7 +236,7 @@ export class LocalFileSearchWorkerClient
           const queryId = this.queryId++
           queryDisposables.add(
             token?.onCancellationRequested((e) => this.cancelQuery(queryId)) ||
-              Disposable.None,
+              Disposable.None
           )
 
           const handle: FileSystemHandle | undefined =
@@ -249,14 +249,14 @@ export class LocalFileSearchWorkerClient
             return
           }
           const caseSensitive = this.uriIdentityService.extUri.ignorePathCasing(
-            fq.folder,
+            fq.folder
           )
           const folderResults = await proxy.listDirectory(
             handle,
             query,
             fq,
             caseSensitive,
-            queryId,
+            queryId
           )
           for (const folderResult of folderResults.results) {
             results.push({ resource: URI.joinPath(fq.folder, folderResult) })
@@ -264,7 +264,7 @@ export class LocalFileSearchWorkerClient
           if (folderResults.limitHit) {
             limitHit = true
           }
-        }),
+        })
       )
 
       queryDisposables.dispose()
@@ -279,7 +279,7 @@ export class LocalFileSearchWorkerClient
           {
             text: localize(
               "errorSearchFile",
-              "Unable to search with Web Worker file searcher",
+              "Unable to search with Web Worker file searcher"
             ),
             type: TextSearchCompleteMessageType.Warning,
           },
@@ -304,8 +304,8 @@ export class LocalFileSearchWorkerClient
           >(
             this._workerFactory,
             "vs/workbench/services/search/worker/localFileSearch",
-            this,
-          ),
+            this
+          )
         )
       } catch (err) {
         logOnceWebWorkerWarning(err)
@@ -319,5 +319,5 @@ export class LocalFileSearchWorkerClient
 registerSingleton(
   ISearchService,
   RemoteSearchService,
-  InstantiationType.Delayed,
+  InstantiationType.Delayed
 )

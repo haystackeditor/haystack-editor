@@ -94,7 +94,7 @@ registerSingleton(
       this._widgets.set(editor, { widget, listener: widget.onDidClose(remove) })
     }
   },
-  InstantiationType.Delayed,
+  InstantiationType.Delayed
 )
 
 export namespace PeekContext {
@@ -103,8 +103,8 @@ export namespace PeekContext {
     true,
     nls.localize(
       "inReferenceSearchEditor",
-      "Whether the current code editor is embedded inside peek",
-    ),
+      "Whether the current code editor is embedded inside peek"
+    )
   )
   export const notInPeekEditor = inPeekEditor.toNegated()
 }
@@ -114,7 +114,7 @@ class PeekContextController implements IEditorContribution {
 
   constructor(
     editor: ICodeEditor,
-    @IContextKeyService contextKeyService: IContextKeyService,
+    @IContextKeyService contextKeyService: IContextKeyService
   ) {
     if (editor instanceof EmbeddedCodeEditorWidget) {
       PeekContext.inPeekEditor.bindTo(contextKeyService)
@@ -127,7 +127,7 @@ class PeekContextController implements IEditorContribution {
 registerEditorContribution(
   PeekContextController.ID,
   PeekContextController,
-  EditorContributionInstantiation.Eager,
+  EditorContributionInstantiation.Eager
 ) // eager because it needs to define a context key
 
 export function getOuterEditor(accessor: ServicesAccessor): ICodeEditor | null {
@@ -175,7 +175,7 @@ export abstract class PeekViewWidget extends ZoneWidget {
     editor: ICodeEditor,
     options: IPeekViewOptions,
     @IInstantiationService
-    protected readonly instantiationService: IInstantiationService,
+    protected readonly instantiationService: IInstantiationService
   ) {
     super(editor, options)
     objects.mixin(this.options, defaultOptions, false)
@@ -240,7 +240,7 @@ export abstract class PeekViewWidget extends ZoneWidget {
     if ((this.options as IPeekViewOptions).supportOnTitleClick) {
       this._titleElement.classList.add("clickable")
       dom.addStandardDisposableListener(this._titleElement, "click", (event) =>
-        this._onTitleClick(event),
+        this._onTitleClick(event)
       )
     }
     dom.append(this._headElement!, this._titleElement)
@@ -253,7 +253,7 @@ export abstract class PeekViewWidget extends ZoneWidget {
       this._titleElement,
       this._primaryHeading,
       this._secondaryHeading,
-      this._metaHeading,
+      this._metaHeading
     )
 
     const actionsContainer = dom.$(".peekview-actions")
@@ -273,9 +273,9 @@ export abstract class PeekViewWidget extends ZoneWidget {
           () => {
             this.dispose()
             return Promise.resolve()
-          },
+          }
         ),
-        { label: false, icon: true },
+        { label: false, icon: true }
       )
     }
   }
@@ -286,7 +286,7 @@ export abstract class PeekViewWidget extends ZoneWidget {
     return {
       actionViewItemProvider: createActionViewItem.bind(
         undefined,
-        this.instantiationService,
+        this.instantiationService
       ),
       orientation: ActionsOrientation.HORIZONTAL,
     }
@@ -323,7 +323,7 @@ export abstract class PeekViewWidget extends ZoneWidget {
 
   protected override _doLayout(
     heightInPixel: number,
-    widthInPixel: number,
+    widthInPixel: number
   ): void {
     if (!this._isShowing && heightInPixel < 0) {
       // Looks like the view zone got folded away!
@@ -332,10 +332,10 @@ export abstract class PeekViewWidget extends ZoneWidget {
     }
 
     const headHeight = Math.ceil(
-      this.editor.getOption(EditorOption.lineHeight) * 1.2,
+      this.editor.getOption(EditorOption.lineHeight) * 1.2
     )
     const bodyHeight = Math.round(
-      heightInPixel - (headHeight + 2) /* the border-top/bottom width*/,
+      heightInPixel - (headHeight + 2) /* the border-top/bottom width*/
     )
 
     this._doLayoutHead(headHeight, widthInPixel)
@@ -366,8 +366,8 @@ export const peekViewTitleBackground = registerColor(
   },
   nls.localize(
     "peekViewTitleBackground",
-    "Background color of the peek view title area.",
-  ),
+    "Background color of the peek view title area."
+  )
 )
 export const peekViewTitleForeground = registerColor(
   "peekViewTitleLabel.foreground",
@@ -377,7 +377,7 @@ export const peekViewTitleForeground = registerColor(
     hcDark: Color.white,
     hcLight: editorForeground,
   },
-  nls.localize("peekViewTitleForeground", "Color of the peek view title."),
+  nls.localize("peekViewTitleForeground", "Color of the peek view title.")
 )
 export const peekViewTitleInfoForeground = registerColor(
   "peekViewTitleDescription.foreground",
@@ -389,8 +389,8 @@ export const peekViewTitleInfoForeground = registerColor(
   },
   nls.localize(
     "peekViewTitleInfoForeground",
-    "Color of the peek view title info.",
-  ),
+    "Color of the peek view title info."
+  )
 )
 export const peekViewBorder = registerColor(
   "peekView.border",
@@ -400,7 +400,7 @@ export const peekViewBorder = registerColor(
     hcDark: contrastBorder,
     hcLight: contrastBorder,
   },
-  nls.localize("peekViewBorder", "Color of the peek view borders and arrow."),
+  nls.localize("peekViewBorder", "Color of the peek view borders and arrow.")
 )
 
 export const peekViewResultsBackground = registerColor(
@@ -413,8 +413,8 @@ export const peekViewResultsBackground = registerColor(
   },
   nls.localize(
     "peekViewResultsBackground",
-    "Background color of the peek view result list.",
-  ),
+    "Background color of the peek view result list."
+  )
 )
 export const peekViewResultsMatchForeground = registerColor(
   "peekViewResult.lineForeground",
@@ -426,8 +426,8 @@ export const peekViewResultsMatchForeground = registerColor(
   },
   nls.localize(
     "peekViewResultsMatchForeground",
-    "Foreground color for line nodes in the peek view result list.",
-  ),
+    "Foreground color for line nodes in the peek view result list."
+  )
 )
 export const peekViewResultsFileForeground = registerColor(
   "peekViewResult.fileForeground",
@@ -439,16 +439,16 @@ export const peekViewResultsFileForeground = registerColor(
   },
   nls.localize(
     "peekViewResultsFileForeground",
-    "Foreground color for file nodes in the peek view result list.",
-  ),
+    "Foreground color for file nodes in the peek view result list."
+  )
 )
 export const peekViewResultsSelectionBackground = registerColor(
   "peekViewResult.selectionBackground",
   { dark: "#3399ff33", light: "#3399ff33", hcDark: null, hcLight: null },
   nls.localize(
     "peekViewResultsSelectionBackground",
-    "Background color of the selected entry in the peek view result list.",
-  ),
+    "Background color of the selected entry in the peek view result list."
+  )
 )
 export const peekViewResultsSelectionForeground = registerColor(
   "peekViewResult.selectionForeground",
@@ -460,8 +460,8 @@ export const peekViewResultsSelectionForeground = registerColor(
   },
   nls.localize(
     "peekViewResultsSelectionForeground",
-    "Foreground color of the selected entry in the peek view result list.",
-  ),
+    "Foreground color of the selected entry in the peek view result list."
+  )
 )
 export const peekViewEditorBackground = registerColor(
   "peekViewEditor.background",
@@ -473,8 +473,8 @@ export const peekViewEditorBackground = registerColor(
   },
   nls.localize(
     "peekViewEditorBackground",
-    "Background color of the peek view editor.",
-  ),
+    "Background color of the peek view editor."
+  )
 )
 export const peekViewEditorGutterBackground = registerColor(
   "peekViewEditorGutter.background",
@@ -486,8 +486,8 @@ export const peekViewEditorGutterBackground = registerColor(
   },
   nls.localize(
     "peekViewEditorGutterBackground",
-    "Background color of the gutter in the peek view editor.",
-  ),
+    "Background color of the gutter in the peek view editor."
+  )
 )
 export const peekViewEditorStickyScrollBackground = registerColor(
   "peekViewEditorStickyScroll.background",
@@ -499,8 +499,8 @@ export const peekViewEditorStickyScrollBackground = registerColor(
   },
   nls.localize(
     "peekViewEditorStickScrollBackground",
-    "Background color of sticky scroll in the peek view editor.",
-  ),
+    "Background color of sticky scroll in the peek view editor."
+  )
 )
 
 export const peekViewResultsMatchHighlight = registerColor(
@@ -508,16 +508,16 @@ export const peekViewResultsMatchHighlight = registerColor(
   { dark: "#ea5c004d", light: "#ea5c004d", hcDark: null, hcLight: null },
   nls.localize(
     "peekViewResultsMatchHighlight",
-    "Match highlight color in the peek view result list.",
-  ),
+    "Match highlight color in the peek view result list."
+  )
 )
 export const peekViewEditorMatchHighlight = registerColor(
   "peekViewEditor.matchHighlightBackground",
   { dark: "#ff8f0099", light: "#f5d802de", hcDark: null, hcLight: null },
   nls.localize(
     "peekViewEditorMatchHighlight",
-    "Match highlight color in the peek view editor.",
-  ),
+    "Match highlight color in the peek view editor."
+  )
 )
 export const peekViewEditorMatchHighlightBorder = registerColor(
   "peekViewEditor.matchHighlightBorder",
@@ -529,6 +529,6 @@ export const peekViewEditorMatchHighlightBorder = registerColor(
   },
   nls.localize(
     "peekViewEditorMatchHighlightBorder",
-    "Match highlight border in the peek view editor.",
-  ),
+    "Match highlight border in the peek view editor."
+  )
 )

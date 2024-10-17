@@ -47,7 +47,7 @@ export class ResizableHTMLElement {
   private _minSize = new Dimension(0, 0)
   private _maxSize = new Dimension(
     Number.MAX_SAFE_INTEGER,
-    Number.MAX_SAFE_INTEGER,
+    Number.MAX_SAFE_INTEGER
   )
   private _preferredSize?: Dimension
 
@@ -56,12 +56,12 @@ export class ResizableHTMLElement {
     this._eastSash = new Sash(
       this.domNode,
       { getVerticalSashLeft: () => this._size.width },
-      { orientation: Orientation.VERTICAL },
+      { orientation: Orientation.VERTICAL }
     )
     this._westSash = new Sash(
       this.domNode,
       { getVerticalSashLeft: () => 0 },
-      { orientation: Orientation.VERTICAL },
+      { orientation: Orientation.VERTICAL }
     )
     this._northSash = new Sash(
       this.domNode,
@@ -69,7 +69,7 @@ export class ResizableHTMLElement {
       {
         orientation: Orientation.HORIZONTAL,
         orthogonalEdge: OrthogonalEdge.North,
-      },
+      }
     )
     this._southSash = new Sash(
       this.domNode,
@@ -77,7 +77,7 @@ export class ResizableHTMLElement {
       {
         orientation: Orientation.HORIZONTAL,
         orthogonalEdge: OrthogonalEdge.South,
-      },
+      }
     )
 
     this._northSash.orthogonalStartSash = this._westSash
@@ -94,7 +94,7 @@ export class ResizableHTMLElement {
         this._northSash.onDidStart,
         this._eastSash.onDidStart,
         this._southSash.onDidStart,
-        this._westSash.onDidStart,
+        this._westSash.onDidStart
       )(() => {
         if (currentSize === undefined) {
           this._onDidWillResize.fire()
@@ -102,14 +102,14 @@ export class ResizableHTMLElement {
           deltaY = 0
           deltaX = 0
         }
-      }),
+      })
     )
     this._sashListener.add(
       Event.any(
         this._northSash.onDidEnd,
         this._eastSash.onDidEnd,
         this._southSash.onDidEnd,
-        this._westSash.onDidEnd,
+        this._westSash.onDidEnd
       )(() => {
         if (currentSize !== undefined) {
           currentSize = undefined
@@ -117,7 +117,7 @@ export class ResizableHTMLElement {
           deltaX = 0
           this._onDidResize.fire({ dimension: this._size, done: true })
         }
-      }),
+      })
     )
 
     this._sashListener.add(
@@ -131,7 +131,7 @@ export class ResizableHTMLElement {
             east: true,
           })
         }
-      }),
+      })
     )
     this._sashListener.add(
       this._westSash.onDidChange((e) => {
@@ -144,7 +144,7 @@ export class ResizableHTMLElement {
             west: true,
           })
         }
-      }),
+      })
     )
     this._sashListener.add(
       this._northSash.onDidChange((e) => {
@@ -157,7 +157,7 @@ export class ResizableHTMLElement {
             north: true,
           })
         }
-      }),
+      })
     )
     this._sashListener.add(
       this._southSash.onDidChange((e) => {
@@ -170,30 +170,30 @@ export class ResizableHTMLElement {
             south: true,
           })
         }
-      }),
+      })
     )
 
     this._sashListener.add(
       Event.any(
         this._eastSash.onDidReset,
-        this._westSash.onDidReset,
+        this._westSash.onDidReset
       )((e) => {
         if (this._preferredSize) {
           this.layout(this._size.height, this._preferredSize.width)
           this._onDidResize.fire({ dimension: this._size, done: true })
         }
-      }),
+      })
     )
     this._sashListener.add(
       Event.any(
         this._northSash.onDidReset,
-        this._southSash.onDidReset,
+        this._southSash.onDidReset
       )((e) => {
         if (this._preferredSize) {
           this.layout(this._preferredSize.height, this._size.width)
           this._onDidResize.fire({ dimension: this._size, done: true })
         }
-      }),
+      })
     )
   }
 
@@ -212,7 +212,7 @@ export class ResizableHTMLElement {
     north: boolean,
     east: boolean,
     south: boolean,
-    west: boolean,
+    west: boolean
   ): void {
     this._northSash.state = north ? SashState.Enabled : SashState.Disabled
     this._eastSash.state = east ? SashState.Enabled : SashState.Disabled
@@ -222,7 +222,7 @@ export class ResizableHTMLElement {
 
   layout(
     height: number = this.size.height,
-    width: number = this.size.width,
+    width: number = this.size.width
   ): void {
     const { height: minHeight, width: minWidth } = this._minSize
     const { height: maxHeight, width: maxWidth } = this._maxSize

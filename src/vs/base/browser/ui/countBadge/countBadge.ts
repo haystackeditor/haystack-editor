@@ -9,69 +9,67 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { $, append } from "vs/base/browser/dom"
-import { format } from "vs/base/common/strings"
-import "vs/css!./countBadge"
+import { $, append } from 'vs/base/browser/dom';
+import { format } from 'vs/base/common/strings';
+import 'vs/css!./countBadge';
 
 export interface ICountBadgeOptions {
-  readonly count?: number
-  readonly countFormat?: string
-  readonly titleFormat?: string
+	readonly count?: number;
+	readonly countFormat?: string;
+	readonly titleFormat?: string;
 }
 
 export interface ICountBadgeStyles {
-  readonly badgeBackground: string | undefined
-  readonly badgeForeground: string | undefined
-  readonly badgeBorder: string | undefined
+	readonly badgeBackground: string | undefined;
+	readonly badgeForeground: string | undefined;
+	readonly badgeBorder: string | undefined;
 }
 
 export const unthemedCountStyles: ICountBadgeStyles = {
-  badgeBackground: "#4D4D4D",
-  badgeForeground: "#FFFFFF",
-  badgeBorder: undefined,
-}
+	badgeBackground: '#4D4D4D',
+	badgeForeground: '#FFFFFF',
+	badgeBorder: undefined
+};
 
 export class CountBadge {
-  private element: HTMLElement
-  private count: number = 0
-  private countFormat: string
-  private titleFormat: string
 
-  constructor(
-    container: HTMLElement,
-    private readonly options: ICountBadgeOptions,
-    private readonly styles: ICountBadgeStyles,
-  ) {
-    this.element = append(container, $(".monaco-count-badge"))
-    this.countFormat = this.options.countFormat || "{0}"
-    this.titleFormat = this.options.titleFormat || ""
-    this.setCount(this.options.count || 0)
-  }
+	private element: HTMLElement;
+	private count: number = 0;
+	private countFormat: string;
+	private titleFormat: string;
 
-  setCount(count: number) {
-    this.count = count
-    this.render()
-  }
+	constructor(container: HTMLElement, private readonly options: ICountBadgeOptions, private readonly styles: ICountBadgeStyles) {
 
-  setCountFormat(countFormat: string) {
-    this.countFormat = countFormat
-    this.render()
-  }
+		this.element = append(container, $('.monaco-count-badge'));
+		this.countFormat = this.options.countFormat || '{0}';
+		this.titleFormat = this.options.titleFormat || '';
+		this.setCount(this.options.count || 0);
+	}
 
-  setTitleFormat(titleFormat: string) {
-    this.titleFormat = titleFormat
-    this.render()
-  }
+	setCount(count: number) {
+		this.count = count;
+		this.render();
+	}
 
-  private render() {
-    this.element.textContent = format(this.countFormat, this.count)
-    this.element.title = format(this.titleFormat, this.count)
+	setCountFormat(countFormat: string) {
+		this.countFormat = countFormat;
+		this.render();
+	}
 
-    this.element.style.backgroundColor = this.styles.badgeBackground ?? ""
-    this.element.style.color = this.styles.badgeForeground ?? ""
+	setTitleFormat(titleFormat: string) {
+		this.titleFormat = titleFormat;
+		this.render();
+	}
 
-    if (this.styles.badgeBorder) {
-      this.element.style.border = `1px solid ${this.styles.badgeBorder}`
-    }
-  }
+	private render() {
+		this.element.textContent = format(this.countFormat, this.count);
+		this.element.title = format(this.titleFormat, this.count);
+
+		this.element.style.backgroundColor = this.styles.badgeBackground ?? '';
+		this.element.style.color = this.styles.badgeForeground ?? '';
+
+		if (this.styles.badgeBorder) {
+			this.element.style.border = `1px solid ${this.styles.badgeBorder}`;
+		}
+	}
 }

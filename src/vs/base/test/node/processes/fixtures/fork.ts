@@ -9,12 +9,12 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import * as processes from "vs/base/node/processes"
+import * as processes from 'vs/base/node/processes';
 
-const sender = processes.createQueuedSender(<any>process)
+const sender = processes.createQueuedSender(<any>process);
 
-process.on("message", (msg) => {
-  sender.send(msg)
-})
+process.on('message', msg => {
+	sender.send(msg);
+});
 
-sender.send("ready")
+sender.send('ready');

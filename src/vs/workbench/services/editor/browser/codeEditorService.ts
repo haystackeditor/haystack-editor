@@ -40,17 +40,17 @@ export class CodeEditorService extends AbstractCodeEditorService {
     @IEditorService private readonly editorService: IEditorService,
     @IThemeService themeService: IThemeService,
     @IConfigurationService
-    private readonly configurationService: IConfigurationService,
+    private readonly configurationService: IConfigurationService
   ) {
     super(themeService)
 
     this._register(
-      this.registerCodeEditorOpenHandler(this.doOpenCodeEditor.bind(this)),
+      this.registerCodeEditorOpenHandler(this.doOpenCodeEditor.bind(this))
     )
     this._register(
       this.registerCodeEditorOpenHandler(
-        this.doOpenCodeEditorFromDiff.bind(this),
-      ),
+        this.doOpenCodeEditorFromDiff.bind(this)
+      )
     )
   }
 
@@ -78,7 +78,7 @@ export class CodeEditorService extends AbstractCodeEditorService {
   private async doOpenCodeEditorFromDiff(
     input: IResourceEditorInput,
     source: ICodeEditor | null,
-    sideBySide?: boolean,
+    sideBySide?: boolean
   ): Promise<ICodeEditor | null> {
     // Special case: If the active editor is a diff editor and the request to open originates and
     // targets the modified side of it, we just apply the request there to prevent opening the modified
@@ -107,7 +107,7 @@ export class CodeEditorService extends AbstractCodeEditorService {
   private async doOpenCodeEditor(
     input: IResourceEditorInput,
     source: ICodeEditor | null,
-    sideBySide?: boolean,
+    sideBySide?: boolean
   ): Promise<ICodeEditor | null> {
     // Special case: we want to detect the request to open an editor that
     // is different from the current one to decide whether the current editor
@@ -135,7 +135,7 @@ export class CodeEditorService extends AbstractCodeEditorService {
     // Open as editor
     const editorPane = await this.editorService.openEditor(
       input,
-      sideBySide ? SIDE_GROUP : ACTIVE_GROUP,
+      sideBySide ? SIDE_GROUP : ACTIVE_GROUP
     )
     if (editorPane) {
       const widget = editorPane.getControl()
@@ -155,5 +155,5 @@ export class CodeEditorService extends AbstractCodeEditorService {
 registerSingleton(
   ICodeEditorService,
   CodeEditorService,
-  InstantiationType.Delayed,
+  InstantiationType.Delayed
 )

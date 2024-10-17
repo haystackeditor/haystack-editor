@@ -50,7 +50,7 @@ export class Token {
   constructor(
     public readonly offset: number,
     public readonly type: string,
-    public readonly language: string,
+    public readonly language: string
   ) {}
 
   public toString(): string {
@@ -66,7 +66,7 @@ export class TokenizationResult {
 
   constructor(
     public readonly tokens: Token[],
-    public readonly endState: IState,
+    public readonly endState: IState
   ) {}
 }
 
@@ -84,7 +84,7 @@ export class EncodedTokenizationResult {
      *
      */
     public readonly tokens: Uint32Array,
-    public readonly endState: IState,
+    public readonly endState: IState
   ) {}
 }
 
@@ -105,7 +105,7 @@ export interface ITokenizationSupport {
   tokenizeEncoded(
     line: string,
     hasEOL: boolean,
-    state: IState,
+    state: IState
   ): EncodedTokenizationResult
 
   /**
@@ -113,7 +113,7 @@ export interface ITokenizationSupport {
    */
   createBackgroundTokenizer?(
     textModel: model.ITextModel,
-    store: IBackgroundTokenizationStore,
+    store: IBackgroundTokenizationStore
   ): IBackgroundTokenizer | undefined
 }
 
@@ -211,7 +211,7 @@ export interface HoverProvider<THover = Hover> {
     model: model.ITextModel,
     position: Position,
     token: CancellationToken,
-    context?: HoverContext<THover>,
+    context?: HoverContext<THover>
   ): ProviderResult<THover>
 }
 
@@ -274,7 +274,7 @@ export interface EvaluatableExpressionProvider {
   provideEvaluatableExpression(
     model: model.ITextModel,
     position: Position,
-    token: CancellationToken,
+    token: CancellationToken
   ): ProviderResult<EvaluatableExpression>
 }
 
@@ -349,7 +349,7 @@ export interface InlineValuesProvider {
     model: model.ITextModel,
     viewPort: Range,
     context: InlineValueContext,
-    token: CancellationToken,
+    token: CancellationToken
   ): ProviderResult<InlineValue[]>
 }
 
@@ -472,14 +472,14 @@ export namespace CompletionItemKinds {
    */
   export function fromString(
     value: string,
-    strict: true,
+    strict: true
   ): CompletionItemKind | undefined
   /**
    * @internal
    */
   export function fromString(
     value: string,
-    strict?: boolean,
+    strict?: boolean
   ): CompletionItemKind | undefined {
     let res = data.get(value)
     if (typeof res === "undefined" && !strict) {
@@ -693,7 +693,7 @@ export interface CompletionItemProvider {
     model: model.ITextModel,
     position: Position,
     context: CompletionContext,
-    token: CancellationToken,
+    token: CancellationToken
   ): ProviderResult<CompletionList>
 
   /**
@@ -704,7 +704,7 @@ export interface CompletionItemProvider {
    */
   resolveCompletionItem?(
     item: CompletionItem,
-    token: CancellationToken,
+    token: CancellationToken
   ): ProviderResult<CompletionItem>
 }
 
@@ -738,7 +738,7 @@ export class SelectedSuggestionInfo {
     public readonly range: IRange,
     public readonly text: string,
     public readonly completionKind: CompletionItemKind,
-    public readonly isSnippetText: boolean,
+    public readonly isSnippetText: boolean
   ) {}
 
   public equals(other: SelectedSuggestionInfo) {
@@ -791,7 +791,7 @@ export interface InlineCompletion {
 }
 
 export interface InlineCompletions<
-  TItem extends InlineCompletion = InlineCompletion,
+  TItem extends InlineCompletion = InlineCompletion
 > {
   readonly items: readonly TItem[]
   /**
@@ -810,13 +810,13 @@ export interface InlineCompletions<
 export type InlineCompletionProviderGroupId = string
 
 export interface InlineCompletionsProvider<
-  T extends InlineCompletions = InlineCompletions,
+  T extends InlineCompletions = InlineCompletions
 > {
   provideInlineCompletions(
     model: model.ITextModel,
     position: Position,
     context: InlineCompletionContext,
-    token: CancellationToken,
+    token: CancellationToken
   ): ProviderResult<T>
 
   /**
@@ -826,7 +826,7 @@ export interface InlineCompletionsProvider<
   handleItemDidShow?(
     completions: T,
     item: T["items"][number],
-    updatedInsertText: string,
+    updatedInsertText: string
   ): void
 
   /**
@@ -836,7 +836,7 @@ export interface InlineCompletionsProvider<
     completions: T,
     item: T["items"][number],
     acceptedCharacters: number,
-    info: PartialAcceptInfo,
+    info: PartialAcceptInfo
   ): void
 
   /**
@@ -905,7 +905,7 @@ export interface CodeActionProvider {
     model: model.ITextModel,
     range: Range | Selection,
     context: CodeActionContext,
-    token: CancellationToken,
+    token: CancellationToken
   ): ProviderResult<CodeActionList>
 
   /**
@@ -913,7 +913,7 @@ export interface CodeActionProvider {
    */
   resolveCodeAction?(
     codeAction: CodeAction,
-    token: CancellationToken,
+    token: CancellationToken
   ): ProviderResult<CodeAction>
 
   /**
@@ -931,7 +931,7 @@ export interface CodeActionProvider {
    */
   _getAdditionalMenuItems?(
     context: CodeActionContext,
-    actions: readonly CodeAction[],
+    actions: readonly CodeAction[]
   ): Command[]
 }
 
@@ -984,7 +984,7 @@ export interface DocumentPasteEditProvider {
     model: model.ITextModel,
     ranges: readonly IRange[],
     dataTransfer: IReadonlyVSDataTransfer,
-    token: CancellationToken,
+    token: CancellationToken
   ): Promise<undefined | IReadonlyVSDataTransfer>
 
   provideDocumentPasteEdits?(
@@ -992,12 +992,12 @@ export interface DocumentPasteEditProvider {
     ranges: readonly IRange[],
     dataTransfer: IReadonlyVSDataTransfer,
     context: DocumentPasteContext,
-    token: CancellationToken,
+    token: CancellationToken
   ): Promise<DocumentPasteEditsSession | undefined>
 
   resolveDocumentPasteEdit?(
     edit: DocumentPasteEdit,
-    token: CancellationToken,
+    token: CancellationToken
   ): Promise<DocumentPasteEdit>
 }
 
@@ -1096,7 +1096,7 @@ export interface SignatureHelpProvider {
     model: model.ITextModel,
     position: Position,
     token: CancellationToken,
-    context: SignatureHelpContext,
+    context: SignatureHelpContext
   ): ProviderResult<SignatureHelpResult>
 }
 
@@ -1160,7 +1160,7 @@ export interface DocumentHighlightProvider {
   provideDocumentHighlights(
     model: model.ITextModel,
     position: Position,
-    token: CancellationToken,
+    token: CancellationToken
   ): ProviderResult<DocumentHighlight[]>
 }
 
@@ -1187,7 +1187,7 @@ export interface MultiDocumentHighlightProvider {
     primaryModel: model.ITextModel,
     position: Position,
     otherModels: model.ITextModel[],
-    token: CancellationToken,
+    token: CancellationToken
   ): ProviderResult<Map<URI, DocumentHighlight[]>>
 }
 
@@ -1202,7 +1202,7 @@ export interface LinkedEditingRangeProvider {
   provideLinkedEditingRanges(
     model: model.ITextModel,
     position: Position,
-    token: CancellationToken,
+    token: CancellationToken
   ): ProviderResult<LinkedEditingRanges>
 }
 
@@ -1245,7 +1245,7 @@ export interface ReferenceProvider {
     model: model.ITextModel,
     position: Position,
     context: ReferenceContext,
-    token: CancellationToken,
+    token: CancellationToken
   ): ProviderResult<Location[]>
 }
 
@@ -1314,7 +1314,7 @@ export interface DefinitionProvider {
   provideDefinition(
     model: model.ITextModel,
     position: Position,
-    token: CancellationToken,
+    token: CancellationToken
   ): ProviderResult<Definition | LocationLink[]>
 }
 
@@ -1330,7 +1330,7 @@ export interface DeclarationProvider {
   provideDeclaration(
     model: model.ITextModel,
     position: Position,
-    token: CancellationToken,
+    token: CancellationToken
   ): ProviderResult<Definition | LocationLink[]>
 }
 
@@ -1345,7 +1345,7 @@ export interface ImplementationProvider {
   provideImplementation(
     model: model.ITextModel,
     position: Position,
-    token: CancellationToken,
+    token: CancellationToken
   ): ProviderResult<Definition | LocationLink[]>
 }
 
@@ -1360,7 +1360,7 @@ export interface TypeDefinitionProvider {
   provideTypeDefinition(
     model: model.ITextModel,
     position: Position,
-    token: CancellationToken,
+    token: CancellationToken
   ): ProviderResult<Definition | LocationLink[]>
 }
 
@@ -1433,13 +1433,13 @@ export const symbolKindNames: { [symbol: number]: string } = {
  */
 export function getAriaLabelForSymbol(
   symbolName: string,
-  kind: SymbolKind,
+  kind: SymbolKind
 ): string {
   return localize(
     "symbolAriaLabel",
     "{0} ({1})",
     symbolName,
-    symbolKindNames[kind],
+    symbolKindNames[kind]
   )
 }
 
@@ -1514,7 +1514,7 @@ export interface DocumentSymbolProvider {
    */
   provideDocumentSymbols(
     model: model.ITextModel,
-    token: CancellationToken,
+    token: CancellationToken
   ): ProviderResult<DocumentSymbol[]>
 
   /**
@@ -1522,7 +1522,7 @@ export interface DocumentSymbolProvider {
    */
   provideDocumentSymbolsWithoutModel(
     uri: URI,
-    token: CancellationToken,
+    token: CancellationToken
   ): ProviderResult<DocumentSymbol[]>
 }
 
@@ -1570,7 +1570,7 @@ export interface DocumentFormattingEditProvider {
   provideDocumentFormattingEdits(
     model: model.ITextModel,
     options: FormattingOptions,
-    token: CancellationToken,
+    token: CancellationToken
   ): ProviderResult<TextEdit[]>
 }
 /**
@@ -1596,14 +1596,14 @@ export interface DocumentRangeFormattingEditProvider {
     model: model.ITextModel,
     range: Range,
     options: FormattingOptions,
-    token: CancellationToken,
+    token: CancellationToken
   ): ProviderResult<TextEdit[]>
 
   provideDocumentRangesFormattingEdits?(
     model: model.ITextModel,
     ranges: Range[],
     options: FormattingOptions,
-    token: CancellationToken,
+    token: CancellationToken
   ): ProviderResult<TextEdit[]>
 }
 /**
@@ -1630,7 +1630,7 @@ export interface OnTypeFormattingEditProvider {
     position: Position,
     ch: string,
     options: FormattingOptions,
-    token: CancellationToken,
+    token: CancellationToken
   ): ProviderResult<TextEdit[]>
 }
 
@@ -1661,7 +1661,7 @@ export interface ILinksList {
 export interface LinkProvider {
   provideLinks(
     model: model.ITextModel,
-    token: CancellationToken,
+    token: CancellationToken
   ): ProviderResult<ILinksList>
   resolveLink?: (link: ILink, token: CancellationToken) => ProviderResult<ILink>
 }
@@ -1737,7 +1737,7 @@ export interface DocumentColorProvider {
    */
   provideDocumentColors(
     model: model.ITextModel,
-    token: CancellationToken,
+    token: CancellationToken
   ): ProviderResult<IColorInformation[]>
   /**
    * Provide the string representations for a color.
@@ -1745,7 +1745,7 @@ export interface DocumentColorProvider {
   provideColorPresentations(
     model: model.ITextModel,
     colorInfo: IColorInformation,
-    token: CancellationToken,
+    token: CancellationToken
   ): ProviderResult<IColorPresentation[]>
 }
 
@@ -1760,7 +1760,7 @@ export interface SelectionRangeProvider {
   provideSelectionRanges(
     model: model.ITextModel,
     positions: Position[],
-    token: CancellationToken,
+    token: CancellationToken
   ): ProviderResult<SelectionRange[][]>
 }
 
@@ -1785,7 +1785,7 @@ export interface FoldingRangeProvider {
   provideFoldingRanges(
     model: model.ITextModel,
     context: FoldingContext,
-    token: CancellationToken,
+    token: CancellationToken
   ): ProviderResult<FoldingRange[]>
 }
 
@@ -1905,12 +1905,12 @@ export interface RenameProvider {
     model: model.ITextModel,
     position: Position,
     newName: string,
-    token: CancellationToken,
+    token: CancellationToken
   ): ProviderResult<WorkspaceEdit & Rejection>
   resolveRenameLocation?(
     model: model.ITextModel,
     position: Position,
-    token: CancellationToken,
+    token: CancellationToken
   ): ProviderResult<RenameLocation & Rejection>
 }
 
@@ -1934,7 +1934,7 @@ export interface NewSymbolNamesProvider {
     model: model.ITextModel,
     range: IRange,
     triggerKind: NewSymbolNameTriggerKind,
-    token: CancellationToken,
+    token: CancellationToken
   ): ProviderResult<NewSymbolName[]>
 }
 
@@ -2201,12 +2201,12 @@ export interface CodeLensProvider {
   onDidChange?: Event<this>
   provideCodeLenses(
     model: model.ITextModel,
-    token: CancellationToken,
+    token: CancellationToken
   ): ProviderResult<CodeLensList>
   resolveCodeLens?(
     model: model.ITextModel,
     codeLens: CodeLens,
-    token: CancellationToken,
+    token: CancellationToken
   ): ProviderResult<CodeLens>
 }
 
@@ -2244,11 +2244,11 @@ export interface InlayHintsProvider {
   provideInlayHints(
     model: model.ITextModel,
     range: Range,
-    token: CancellationToken,
+    token: CancellationToken
   ): ProviderResult<InlayHintList>
   resolveInlayHint?(
     hint: InlayHint,
-    token: CancellationToken,
+    token: CancellationToken
   ): ProviderResult<InlayHint>
 }
 
@@ -2279,7 +2279,7 @@ export interface DocumentSemanticTokensProvider {
   provideDocumentSemanticTokens(
     model: model.ITextModel,
     lastResultId: string | null,
-    token: CancellationToken,
+    token: CancellationToken
   ): ProviderResult<SemanticTokens | SemanticTokensEdits>
   releaseDocumentSemanticTokens(resultId: string | undefined): void
 }
@@ -2289,7 +2289,7 @@ export interface DocumentRangeSemanticTokensProvider {
   provideDocumentRangeSemanticTokens(
     model: model.ITextModel,
     range: Range,
-    token: CancellationToken,
+    token: CancellationToken
   ): ProviderResult<SemanticTokens>
 }
 
@@ -2321,7 +2321,7 @@ export class LazyTokenizationSupport
   constructor(
     private readonly createSupport: () => Promise<
       (ITokenizationSupport & IDisposable) | null
-    >,
+    >
   ) {}
 
   dispose(): void {
@@ -2369,7 +2369,7 @@ export interface ITokenizationRegistry {
    */
   registerFactory(
     languageId: string,
-    factory: ILazyTokenizationSupport,
+    factory: ILazyTokenizationSupport
   ): IDisposable
 
   /**
@@ -2445,11 +2445,11 @@ export interface DocumentDropEditProvider {
     model: model.ITextModel,
     position: IPosition,
     dataTransfer: IReadonlyVSDataTransfer,
-    token: CancellationToken,
+    token: CancellationToken
   ): ProviderResult<DocumentDropEdit[]>
   resolveDocumentDropEdit?(
     edit: DocumentDropEdit,
-    token: CancellationToken,
+    token: CancellationToken
   ): Promise<DocumentDropEdit>
 }
 
@@ -2479,7 +2479,7 @@ export interface MappedEditsProvider {
     document: model.ITextModel,
     codeBlocks: string[],
     context: MappedEditsContext,
-    token: CancellationToken,
+    token: CancellationToken
   ): Promise<WorkspaceEdit | null>
 }
 
@@ -2503,7 +2503,7 @@ export interface InlineEditProvider<T extends IInlineEdit = IInlineEdit> {
   provideInlineEdit(
     model: model.ITextModel,
     context: IInlineEditContext,
-    token: CancellationToken,
+    token: CancellationToken
   ): ProviderResult<T>
   freeInlineEdit(edit: T): void
 }

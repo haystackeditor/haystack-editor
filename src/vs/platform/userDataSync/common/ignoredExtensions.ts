@@ -9,149 +9,93 @@
  *  Licensed under the MIT License. See code-license.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 
-import { distinct } from "vs/base/common/arrays"
-import {
-  ConfigurationTarget,
-  IConfigurationService,
-} from "vs/platform/configuration/common/configuration"
-import { ILocalExtension } from "vs/platform/extensionManagement/common/extensionManagement"
-import { createDecorator } from "vs/platform/instantiation/common/instantiation"
+import { distinct } from 'vs/base/common/arrays';
+import { ConfigurationTarget, IConfigurationService } from 'vs/platform/configuration/common/configuration';
+import { ILocalExtension } from 'vs/platform/extensionManagement/common/extensionManagement';
+import { createDecorator } from 'vs/platform/instantiation/common/instantiation';
 
-export const IIgnoredExtensionsManagementService =
-  createDecorator<IIgnoredExtensionsManagementService>(
-    "IIgnoredExtensionsManagementService",
-  )
+export const IIgnoredExtensionsManagementService = createDecorator<IIgnoredExtensionsManagementService>('IIgnoredExtensionsManagementService');
 export interface IIgnoredExtensionsManagementService {
-  readonly _serviceBrand: any
+	readonly _serviceBrand: any;
 
-  getIgnoredExtensions(installed: ILocalExtension[]): string[]
+	getIgnoredExtensions(installed: ILocalExtension[]): string[];
 
-  hasToNeverSyncExtension(extensionId: string): boolean
-  hasToAlwaysSyncExtension(extensionId: string): boolean
-  updateIgnoredExtensions(
-    ignoredExtensionId: string,
-    ignore: boolean,
-  ): Promise<void>
-  updateSynchronizedExtensions(
-    ignoredExtensionId: string,
-    sync: boolean,
-  ): Promise<void>
+	hasToNeverSyncExtension(extensionId: string): boolean;
+	hasToAlwaysSyncExtension(extensionId: string): boolean;
+	updateIgnoredExtensions(ignoredExtensionId: string, ignore: boolean): Promise<void>;
+	updateSynchronizedExtensions(ignoredExtensionId: string, sync: boolean): Promise<void>;
 }
 
-export class IgnoredExtensionsManagementService
-  implements IIgnoredExtensionsManagementService
-{
-  declare readonly _serviceBrand: undefined
+export class IgnoredExtensionsManagementService implements IIgnoredExtensionsManagementService {
 
-  constructor(
-    @IConfigurationService
-    private readonly configurationService: IConfigurationService,
-  ) {}
+	declare readonly _serviceBrand: undefined;
 
-  hasToNeverSyncExtension(extensionId: string): boolean {
-    const configuredIgnoredExtensions = this.getConfiguredIgnoredExtensions()
-    return configuredIgnoredExtensions.includes(extensionId.toLowerCase())
-  }
+	constructor(
+		@IConfigurationService private readonly configurationService: IConfigurationService,
+	) {
+	}
 
-  hasToAlwaysSyncExtension(extensionId: string): boolean {
-    const configuredIgnoredExtensions = this.getConfiguredIgnoredExtensions()
-    return configuredIgnoredExtensions.includes(`-${extensionId.toLowerCase()}`)
-  }
+	hasToNeverSyncExtension(extensionId: string): boolean {
+		const configuredIgnoredExtensions = this.getConfiguredIgnoredExtensions();
+		return configuredIgnoredExtensions.includes(extensionId.toLowerCase());
+	}
 
-  updateIgnoredExtensions(
-    ignoredExtensionId: string,
-    ignore: boolean,
-  ): Promise<void> {
-    // first remove the extension completely from ignored extensions
-    let currentValue = [
-      ...this.configurationService.getValue<string[]>(
-        "settingsSync.ignoredExtensions",
-      ),
-    ].map((id) => id.toLowerCase())
-    currentValue = currentValue.filter(
-      (v) => v !== ignoredExtensionId && v !== `-${ignoredExtensionId}`,
-    )
+	hasToAlwaysSyncExtension(extensionId: string): boolean {
+		const configuredIgnoredExtensions = this.getConfiguredIgnoredExtensions();
+		return configuredIgnoredExtensions.includes(`-${extensionId.toLowerCase()}`);
+	}
 
-    // Add only if ignored
-    if (ignore) {
-      currentValue.push(ignoredExtensionId.toLowerCase())
-    }
+	updateIgnoredExtensions(ignoredExtensionId: string, ignore: boolean): Promise<void> {
+		// first remove the extension completely from ignored extensions
+		let currentValue = [...this.configurationService.getValue<string[]>('settingsSync.ignoredExtensions')].map(id => id.toLowerCase());
+		currentValue = currentValue.filter(v => v !== ignoredExtensionId && v !== `-${ignoredExtensionId}`);
 
-    return this.configurationService.updateValue(
-      "settingsSync.ignoredExtensions",
-      currentValue.length ? currentValue : undefined,
-      ConfigurationTarget.USER,
-    )
-  }
+		// Add only if ignored
+		if (ignore) {
+			currentValue.push(ignoredExtensionId.toLowerCase());
+		}
 
-  updateSynchronizedExtensions(
-    extensionId: string,
-    sync: boolean,
-  ): Promise<void> {
-    // first remove the extension completely from ignored extensions
-    let currentValue = [
-      ...this.configurationService.getValue<string[]>(
-        "settingsSync.ignoredExtensions",
-      ),
-    ].map((id) => id.toLowerCase())
-    currentValue = currentValue.filter(
-      (v) => v !== extensionId && v !== `-${extensionId}`,
-    )
+		return this.configurationService.updateValue('settingsSync.ignoredExtensions', currentValue.length ? currentValue : undefined, ConfigurationTarget.USER);
+	}
 
-    // Add only if synced
-    if (sync) {
-      currentValue.push(`-${extensionId.toLowerCase()}`)
-    }
+	updateSynchronizedExtensions(extensionId: string, sync: boolean): Promise<void> {
+		// first remove the extension completely from ignored extensions
+		let currentValue = [...this.configurationService.getValue<string[]>('settingsSync.ignoredExtensions')].map(id => id.toLowerCase());
+		currentValue = currentValue.filter(v => v !== extensionId && v !== `-${extensionId}`);
 
-    return this.configurationService.updateValue(
-      "settingsSync.ignoredExtensions",
-      currentValue.length ? currentValue : undefined,
-      ConfigurationTarget.USER,
-    )
-  }
+		// Add only if synced
+		if (sync) {
+			currentValue.push(`-${extensionId.toLowerCase()}`);
+		}
 
-  getIgnoredExtensions(installed: ILocalExtension[]): string[] {
-    const defaultIgnoredExtensions = installed
-      .filter((i) => i.isMachineScoped)
-      .map((i) => i.identifier.id.toLowerCase())
-    const value = this.getConfiguredIgnoredExtensions().map((id) =>
-      id.toLowerCase(),
-    )
-    const added: string[] = [],
-      removed: string[] = []
-    if (Array.isArray(value)) {
-      for (const key of value) {
-        if (key.startsWith("-")) {
-          removed.push(key.substring(1))
-        } else {
-          added.push(key)
-        }
-      }
-    }
-    return distinct(
-      [...defaultIgnoredExtensions, ...added].filter(
-        (setting) => !removed.includes(setting),
-      ),
-    )
-  }
+		return this.configurationService.updateValue('settingsSync.ignoredExtensions', currentValue.length ? currentValue : undefined, ConfigurationTarget.USER);
+	}
 
-  private getConfiguredIgnoredExtensions(): ReadonlyArray<string> {
-    let userValue = this.configurationService.inspect<string[]>(
-      "settingsSync.ignoredExtensions",
-    ).userValue
-    if (userValue !== undefined) {
-      return userValue
-    }
-    userValue = this.configurationService.inspect<string[]>(
-      "sync.ignoredExtensions",
-    ).userValue
-    if (userValue !== undefined) {
-      return userValue
-    }
-    return (
-      this.configurationService.getValue<string[]>(
-        "settingsSync.ignoredExtensions",
-      ) || []
-    ).map((id) => id.toLowerCase())
-  }
+	getIgnoredExtensions(installed: ILocalExtension[]): string[] {
+		const defaultIgnoredExtensions = installed.filter(i => i.isMachineScoped).map(i => i.identifier.id.toLowerCase());
+		const value = this.getConfiguredIgnoredExtensions().map(id => id.toLowerCase());
+		const added: string[] = [], removed: string[] = [];
+		if (Array.isArray(value)) {
+			for (const key of value) {
+				if (key.startsWith('-')) {
+					removed.push(key.substring(1));
+				} else {
+					added.push(key);
+				}
+			}
+		}
+		return distinct([...defaultIgnoredExtensions, ...added,].filter(setting => !removed.includes(setting)));
+	}
+
+	private getConfiguredIgnoredExtensions(): ReadonlyArray<string> {
+		let userValue = this.configurationService.inspect<string[]>('settingsSync.ignoredExtensions').userValue;
+		if (userValue !== undefined) {
+			return userValue;
+		}
+		userValue = this.configurationService.inspect<string[]>('sync.ignoredExtensions').userValue;
+		if (userValue !== undefined) {
+			return userValue;
+		}
+		return (this.configurationService.getValue<string[]>('settingsSync.ignoredExtensions') || []).map(id => id.toLowerCase());
+	}
 }
