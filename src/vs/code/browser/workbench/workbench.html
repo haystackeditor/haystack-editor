@@ -94,25 +94,24 @@
       recordStats: true,
       trustedTypesPolicy: window.trustedTypes?.createPolicy("amdLoader", {
         createScriptURL(value) {
-          if (value.startsWith(window.location.origin)) {
+          if (value.startsWith(baseUrl)) {
             return value
           } else if (value === "pixi.js") {
-            // TODO: This hack should not be necessary. Look into why Pixi specifically does not work.
-            const endPosition = window.location.pathname.indexOf("/out/")
-            const outLength = "/out/".length
-            const truncatedPath = window.location.pathname.substring(
-              0,
-              endPosition + outLength,
-            )
-            return `${
-              window.location.origin
-            }${truncatedPath}${baseNodeModulesPath}/pixi.js/dist/pixi${
-              isDev ? "" : ".min"
-            }.js`
+            return `${baseUrl}/remote/web/node_modules/pixi.js/dist/pixi.min.js`
           }
           throw new Error(`Invalid script url: ${value}`)
         },
       }),
+      fallbackScriptPolicy: {
+        createScriptURL(value) {
+          if (value.startsWith(baseUrl)) {
+            return value;
+          } else if (value === "pixi.js") {
+            return `${baseUrl}/libraries/pixi.js/dist/pixi.min.js`;
+          }
+          throw new Error(`Invalid script url: ${value}`);
+        },
+      },
       paths: self.webPackagePaths,
       ...nlsConfig,
     })
